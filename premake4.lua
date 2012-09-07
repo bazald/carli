@@ -11,7 +11,7 @@ solution "carli"
     platforms { "native", "universal" }
   else
     defines { "_LINUX" }
-    platforms { "x32", "x64" }
+    platforms { "native", "x32", "x64" }
   end
 
   configuration "Debug*"
