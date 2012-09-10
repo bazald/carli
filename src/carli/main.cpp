@@ -6,9 +6,11 @@
 #include <iostream>
 #include <list>
 
-#ifdef WIN32
-#include <Windows.h>
-#endif
+template <typename ITERATOR>
+void destroy_list(ITERATOR it, ITERATOR iend) {
+  while(it != iend)
+    delete it++.get();
+}
 
 class Value;
 class Value : public Zeni::Pool_Allocator<Value> {
@@ -17,16 +19,22 @@ public:
   typedef List::iterator iterator;
 
   Value()
-   : list(this)
+   : list(this),
+   q_value(0.0)
   {
   }
 
-  Value(const Value &)
-   : list(this)
+  Value(const Value &rhs)
+   : list(this),
+   q_value(rhs.q_value)
   {
   }
 
-  Value & operator=(const Value &) {
+  Value & operator=(const Value &rhs) {
+    Value temp(rhs);
+
+    std::swap(temp.q_value, q_value);
+
     return *this;
   }
 
@@ -34,21 +42,21 @@ public:
 
   List list;
 
-private:
-  
+  double q_value;
 };
 
 int main(int argc, char **argv) {
   Zeni::register_new_handler();
 
   for(int i = 0; i != 0x10000; ++i) {
-    Value::List * const head(&(new Value)->list);
-    Value::List * tail(head);
-    for(int i = 1; i != 100; ++i, tail = tail->next())
-      (new Value)->list.insert_after(tail);
+    Value::List * head(&(new Value)->list);
+    for(int i = 1; i != 100; ++i) {
+      Value * const new_head = new Value;
+      new_head->list.insert_before(head);
+      head = &new_head->list;
+    }
 
-    for(Value::iterator it = head->begin(), iend = head->end(); it != iend; )
-      delete it++.get();
+    destroy_list(head->begin(), head->end());
   }
 
   return 0;
