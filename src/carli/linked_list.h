@@ -10,6 +10,7 @@ namespace Zeni {
   public:
     typedef TYPE value_type;
     typedef value_type * value_pointer_type;
+    typedef value_type & value_reference_type;
     typedef const Linked_List<value_type> const_list_value_type;
     typedef Linked_List<value_type> list_value_type;
     typedef const_list_value_type * const_list_pointer_type;
@@ -38,7 +39,7 @@ namespace Zeni {
       value_pointer_type get() const {
         return pointer->get();
       }
-      value_type operator*() const {
+      value_reference_type operator*() const {
         return *get();
       }
       value_pointer_type operator->() const {

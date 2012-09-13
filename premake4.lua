@@ -28,4 +28,7 @@ solution "carli"
     buildoptions { "-stdlib=libc++" }
     linkoptions { "-stdlib=libc++" }
 
+  configuration "linux or macosx"
+    buildoptions { "-std=c++0x" }
+
   include "src/carli"
