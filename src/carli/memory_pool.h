@@ -22,6 +22,7 @@ namespace Zeni {
       clear();
     }
 
+    /// free any cached memory blocks; return a count of the number of blocks freed
     size_t clear() throw() {
       size_t count = 0;
       while(available) {
@@ -33,6 +34,7 @@ namespace Zeni {
       return count;
     }
 
+    /// get a cached memory block or allocate one as needed
     void * get() throw() {
       if(available) {
         void * const ptr = available;
@@ -51,19 +53,23 @@ namespace Zeni {
       }
     }
 
+    /// return a memory block to be cached (and eventually freed)
     void give(void * const &ptr_) throw() {
       *reinterpret_cast<void **>(ptr_) = available;
       available = reinterpret_cast<size_t *>(ptr_) - 1;
     }
 
+    /// get the size of a memory block allocated with an instance of Pool
     static size_t size_of(const void * const &ptr_) throw() {
       return reinterpret_cast<const size_t *>(ptr_)[-1];
     }
 
+    /// check if the size of the memory block provided by this Pool is greater than or equal to sz_
     bool size_gte(const size_t &sz_) throw() {
       return size >= sz_;
     }
 
+    /// check if the size of the memory block provided by this Pool is greater than or equal to the size of the memory block pointed to by ptr_
     bool size_gte(const void * const &ptr_) throw() {
       return size >= size_of(ptr_);
     }
@@ -89,6 +95,7 @@ namespace Zeni {
       return pool_map;
     };
 
+    /// free memory blocks from every Pool; return a count of all freed blocks
     size_t clear() throw() {
       size_t count = 0;
       for(std::map<size_t, Pool *>::iterator it = m_pools.begin(), iend = m_pools.end(); it != iend; ++it)
@@ -96,6 +103,7 @@ namespace Zeni {
       return count;
     }
 
+    /// get a memory Pool that allocates memory blocks of a given size
     Pool & get_Pool(const size_t &size_) {
       Pool * &pool = m_pools[size_];
       if(!pool)
@@ -104,6 +112,7 @@ namespace Zeni {
       return *pool;
     }
 
+    /// get a memory Pool that allocates memory blocks the size of the block pointed to by ptr_
     Pool & get_Pool(void * const &ptr_) {
       return get_Pool(Pool::size_of(ptr_));
     }
@@ -117,6 +126,12 @@ namespace Zeni {
   public:
     virtual ~Pool_Allocator() {}
 
+    /**
+     * get the default Pool if sz_ is less than or equal to the size of TYPE, otherwise a non-default pool;
+     * then get a cached or freshly allocated memory block from the Pool;
+     * if this fails, clear every Pool and try again;
+     * if it fails again, throw std::bad_alloc;
+     */
     void * operator new(size_t sz_) {
       Pool &p = pool->size_gte(sz_) ? *pool : pool_map->get_Pool(sz_);
 
@@ -133,6 +148,7 @@ namespace Zeni {
       throw std::bad_alloc();
     }
 
+    /// return a memory block to the appropriate memory Pool
     void operator delete(void * ptr_) throw() {
       Pool &p = pool->size_gte(ptr_) ? *pool : pool_map->get_Pool(ptr_);
 

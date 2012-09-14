@@ -117,13 +117,16 @@ namespace Zeni {
       return m_next;
     }
     
+    /// return an iterator pointing to this list entry; only the beginning if !prev()
     iterator begin() {
       return iterator(this);
     }
+    /// return an iterator pointing to an empty list entry of the appropriate size
     iterator end() {
       return iterator(m_offset);
     }
 
+    /// insert this list entry after ptr; requires this or ptr to have !next()
     void insert_after(const list_pointer_type &ptr) {
       if(ptr) {
         assert(m_offset == ptr->m_offset);
@@ -139,6 +142,7 @@ namespace Zeni {
         m_prev = ptr;
       }
     }
+    /// insert this list entry before ptr; requires this or ptr to have !prev()
     void insert_before(const list_pointer_type &ptr) {
       if(ptr) {
         assert(m_offset == ptr->m_offset);
@@ -155,6 +159,7 @@ namespace Zeni {
       }
     }
 
+    /// erase this entry from this list
     void erase() {
       if(m_prev)
         m_prev->m_next = m_next;
@@ -165,11 +170,33 @@ namespace Zeni {
       m_next = 0;
     }
 
+    /// delete every entry in the list between begin() and end(), inclusive
+    void destroy();
+
   private:
     size_t m_offset;
     list_pointer_type m_prev;
     list_pointer_type m_next;
   };
+
+  /// call a function for every entry in the list between begin() and end(), inclusive; then return the function
+  template <typename ITERATOR, typename OPERATION>
+  OPERATION for_each(ITERATOR it, const ITERATOR &iend, OPERATION op) {
+    while(it != iend) {
+      const auto ptr = it.get();
+      ++it;
+      op(ptr);
+    }
+
+    return op;
+  }
+
+  template<typename TYPE>
+  void Linked_List<TYPE>::destroy() {
+    for_each(begin(), end(), [](const value_pointer_type ptr){
+      delete ptr;
+    });
+  }
 
 }
 
