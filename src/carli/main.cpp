@@ -7,6 +7,7 @@
 #include <iostream>
 #include <list>
 
+#include "blocks_world.h"
 #include "value.h"
 
 class Q_Value;
@@ -58,6 +59,16 @@ int main(int argc, char **argv) {
 
     head->destroy();
   }
+
+  Blocks_World::Environment env;
+
+  std::cout << "Blocks:" << std::endl;
+  env.state()->for_each_stack([](const Blocks_World::Block * const &ptr) {
+    ptr->for_each_block([](const Blocks_World::Block * const &ptr) {
+      std::cout << ' ' << ptr->id;
+    });
+    std::cout << std::endl;
+  });
 
   return 0;
 }

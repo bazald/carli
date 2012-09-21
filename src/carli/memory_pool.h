@@ -14,7 +14,7 @@ namespace Zeni {
   public:
     Pool(const size_t &size_) throw()
       : size(std::max(sizeof(void *), size_)),
-      available(0)
+      available(nullptr)
     {
     }
 
@@ -49,7 +49,7 @@ namespace Zeni {
           return reinterpret_cast<size_t *>(ptr) + 1;
         }
 
-        return 0;
+        return nullptr;
       }
     }
 

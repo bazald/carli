@@ -3,7 +3,7 @@
 namespace Zeni {
 
   static bool g_unregistered = true;
-  static std::new_handler g_old_new_handler = 0;
+  static std::new_handler g_old_new_handler = nullptr;
 
   static void new_handler() {
     if(!Pool_Map::get().clear()) {
