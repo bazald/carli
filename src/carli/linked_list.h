@@ -89,8 +89,8 @@ namespace Zeni {
                pointer != rhs.pointer;
       }
 
-      operator bool () const {
-        return offset != 0 || pointer != nullptr;
+      operator list_pointer_type () const {
+        return pointer;
       }
 
     private:
@@ -187,8 +187,8 @@ namespace Zeni {
                pointer != rhs.pointer;
       }
 
-      operator bool () const {
-        return offset != 0 || pointer != nullptr;
+      operator list_pointer_type () const {
+        return pointer;
       }
 
     private:

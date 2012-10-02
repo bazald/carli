@@ -4,169 +4,129 @@
 #include "environment.h"
 #include "linked_list.h"
 
+#include <algorithm>
+#include <stdexcept>
+
 namespace Blocks_World {
+  
+  typedef int block_id;
 
-  class Block;
-  class Block : public Zeni::Pool_Allocator<Block> {
-    Block(const Block &);
-    Block & operator=(const Block &);
-
-  public:
-    typedef Zeni::Linked_List<Block> List;
+  struct Move;
+  struct Move : public Zeni::Pool_Allocator<Move> {
+    typedef Zeni::Linked_List<Move> List;
     typedef List::iterator iterator;
 
-    template <typename OPERATION>
-    OPERATION for_each_stack(OPERATION op) const {
-      Zeni::for_each(stacks.begin(), stacks.end(), [&op](const Block * const &ptr) {
-        op(ptr);
-      });
-
-      return op;
-    }
-
-    template <typename OPERATION>
-    OPERATION for_each_stack(OPERATION op) {
-      Zeni::for_each(stacks.begin(), stacks.end(), [&op](Block * const &ptr) {
-        op(ptr);
-      });
-
-      return op;
-    }
-
-    template <typename OPERATION>
-    OPERATION for_each_block(OPERATION op) const {
-      Zeni::for_each(blocks.begin(), blocks.end(), [&op](const Block * const &ptr) {
-        op(ptr);
-      });
-
-      return op;
-    }
-
-    template <typename OPERATION>
-    OPERATION for_each_block(OPERATION op) {
-      Zeni::for_each(blocks.begin(), blocks.end(), [&op](Block * const &ptr) {
-        op(ptr);
-      });
-
-      return op;
-    }
-
-    template <typename OPERATION>
-    OPERATION for_each(OPERATION op) const {
-      for_each_stack([&op](const Block * const &stack) {
-        stack->for_each_block(op);
-      });
-
-      return op;
-    }
-
-    template <typename OPERATION>
-    OPERATION for_each(OPERATION op) {
-      for_each_stack([&op](Block * const &stack) {
-        stack->for_each_block(op);
-      });
-
-      return op;
-    }
-
-    Block(const int &id_ = 0)
-    : id(id_),
-    stacks(this),
-    blocks(this)
+    Move()
+     : block(block_id()),
+     dest(block_id()),
+     candidates(this)
     {
     }
 
-    int id;
-    List stacks;
-    List blocks;
+    Move(const block_id &block_, const block_id &dest_)
+     : block(block_),
+     dest(dest_),
+     candidates(this)
+    {
+    }
+
+    block_id block;
+    block_id dest;
+
+    List candidates;
   };
 
-  class Blocks {
-    Blocks(const Blocks &);
-    Blocks operator=(const Blocks &);
-
+  class Environment : public ::Environment<Move> {
   public:
-    Blocks(Block * const &head_ = nullptr)
-     : head(head_)
-    {
+    Environment() {
+      Environment::init_impl();
+      m_candidates = generate_candidates();
     }
 
-    ~Blocks() {
-      if(head) {
-        head->for_each([](Block * const &ptr) {
-          delete ptr;
-        });
-      }
-    }
-
-    Blocks(Blocks &&rhs) {
-      head = rhs.head;
-      rhs.head = 0;
-    }
-
-    Blocks & operator=(Blocks &&rhs) {
-      head = rhs.head;
-      rhs.head = 0;
-      return *this;
-    }
-
-    const Block * get() const {
-      return head;
-    }
-    Block * get() {
-      return head;
-    }
-    const Block & operator*() const {
-      return *head;
-    }
-    Block & operator*() {
-      return *head;
-    }
-    const Block * operator->() const {
-      return head;
-    }
-    Block * operator->() {
-      return head;
+    ~Environment() {
+      destroy_candidates(m_candidates);
     }
 
   private:
-    Block * head;
+    typedef std::list<block_id> Stack;
+    typedef std::list<Stack> Stacks;
+
+    void init_impl() {
+      {
+        m_blocks.push_front(Stack());
+        Stack &stack = *m_blocks.begin();
+        stack.push_front(2);
+      }
+      {
+        m_blocks.push_front(Stack());
+        Stack &stack = *m_blocks.begin();
+        stack.push_front(1);
+        stack.push_front(3);
+      }
+    }
+
+    reward_type transition_impl(const action_type &action) {
+      Stacks::iterator src = std::find_if(m_blocks.begin(), m_blocks.end(), [&action](Stack &stack)->bool {
+        return !stack.empty() && *stack.begin() == action.block;
+      });
+      Stacks::iterator dest = std::find_if(m_blocks.begin(), m_blocks.end(), [&action](Stack &stack)->bool {
+        return !stack.empty() && *stack.begin() == action.dest;
+      });
+
+      if(src == m_blocks.end())
+        throw std::runtime_error("Attempt to move Block from under another Block.");
+      if(dest == m_blocks.end())
+        dest = m_blocks.insert(m_blocks.begin(), Stack());
+
+      src->pop_front();
+      dest->push_front(action.block);
+
+      if(src->empty())
+        m_blocks.erase(src);
+
+      return reward_type(-1);
+    }
+
+    void print_impl(std::ostream &os) const {
+      os << "Blocks World:" << std::endl;
+      for_each(m_blocks.begin(), m_blocks.end(), [&os](const Stack &stack) {
+        for_each(stack.rbegin(), stack.rend(), [&os](const block_id &id) {
+          os << ' ' << id;
+        });
+        os << std::endl;
+      });
+
+      if(m_candidates) {
+        for_each(m_candidates->candidates.begin(), m_candidates->candidates.end(), [&os](const Move * const &move) {
+          os << " (" << move->block << ',' << move->dest << ')';
+        });
+        os << std::endl;
+      }
+    }
+
+    candidate_type generate_candidates() {
+      action_type::iterator candidates;
+      for_each(m_blocks.begin(), m_blocks.end(), [&candidates,this](const Stack &stack_src) {
+        for_each(m_blocks.begin(), m_blocks.end(), [&candidates,&stack_src](const Stack &stack_dest) {
+          if(&stack_src == &stack_dest)
+            return;
+
+          action_type * move = new Move(*stack_src.begin(), *stack_dest.begin());
+          move->candidates.insert_before(candidates);
+          candidates = &move->candidates;
+        });
+      });
+
+      return candidates.get();
+    }
+
+    void destroy_candidates(candidate_type candidates) {
+      if(candidates)
+        candidates->candidates.destroy();
+    }
+
+    Stacks m_blocks;
   };
-
-  struct Move {
-    Block * block;
-    Block * from;
-    Block * to;
-  };
-
-}
-
-template <>
-class Environment_Functions<Blocks_World::Blocks, Blocks_World::Move> : public Environment_Types<Blocks_World::Blocks, Blocks_World::Move> {
-public:
-  state_type initial_state() const {
-    auto a = new Blocks_World::Block(0);
-    auto * const b = new Blocks_World::Block(1);
-    auto * const c = new Blocks_World::Block(2);
-
-    c->blocks.insert_after(&a->blocks);
-    b->stacks.insert_after(&a->stacks);
-
-    return a;
-  }
-
-  result_type transition(const state_type &state, const action_type &action) const {
-    return result_type();
-  }
-
-  meta_state_type meta_state(const state_type &state) const {
-    return NON_TERMINAL;
-  }
-};
-
-namespace Blocks_World {
-
-  typedef ::Environment<Blocks_World::Blocks, Blocks_World::Move> Environment;
 
 }
 

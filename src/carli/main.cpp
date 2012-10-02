@@ -62,13 +62,15 @@ int main(int argc, char **argv) {
 
   Blocks_World::Environment env;
 
-  std::cout << "Blocks:" << std::endl;
-  env.state()->for_each_stack([](const Blocks_World::Block * const &ptr) {
-    ptr->for_each_block([](const Blocks_World::Block * const &ptr) {
-      std::cout << ' ' << ptr->id;
-    });
-    std::cout << std::endl;
-  });
+  std::cout << env;
+  env.transition(Blocks_World::Move(3, 2));
+  std::cout << env;
+  env.transition(Blocks_World::Move(3, 0));
+  std::cout << env;
+  env.transition(Blocks_World::Move(2, 3));
+  std::cout << env;
+//   env.transition(Blocks_World::Move(3, 0));
+//   std::cout << env;
 
   return 0;
 }
