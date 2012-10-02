@@ -16,7 +16,7 @@ namespace Zeni {
     typedef const_list_value_type * const_list_pointer_type;
     typedef list_value_type * list_pointer_type;
 
-    class iterator {
+    class iterator : public std::iterator<std::bidirectional_iterator_tag, value_type> {
     public:
       iterator()
         : offset(0),
@@ -98,7 +98,7 @@ namespace Zeni {
       list_pointer_type pointer;
     };
 
-    class iterator_const {
+    class iterator_const : public std::iterator<std::bidirectional_iterator_tag, value_type> {
     public:
       typedef const value_type * value_pointer_type;
       typedef const value_type & value_reference_type;
@@ -277,32 +277,21 @@ namespace Zeni {
     }
 
     /// delete every entry in the list between begin() and end(), inclusive
-    void destroy();
+    void destroy() {
+      auto it = begin();
+      auto iend = end();
+      while(it != iend) {
+        const auto ptr = it.get();
+        ++it;
+        delete ptr;
+      }
+    }
 
   private:
     size_t m_offset;
     list_pointer_type m_prev;
     list_pointer_type m_next;
   };
-
-  /// call a function for every entry in the list between begin() and end(), inclusive; then return the function
-  template <typename ITERATOR, typename OPERATION>
-  OPERATION for_each(ITERATOR it, const ITERATOR &iend, OPERATION op) {
-    while(it != iend) {
-      const auto ptr = it.get();
-      ++it;
-      op(ptr);
-    }
-
-    return op;
-  }
-
-  template<typename TYPE>
-  void Linked_List<TYPE>::destroy() {
-    for_each(begin(), end(), [](const value_pointer_type ptr){
-      delete ptr;
-    });
-  }
 
 }
 

@@ -44,15 +44,15 @@ int main(int argc, char **argv) {
       head = &new_head->list;
     }
 
-    Zeni::for_each(head->begin(), head->end(), [&mean](Q_Value * const &ptr) {
+    std::for_each(head->begin(), head->end(), [&mean](Q_Value &ptr) {
 //       std::cout << *ptr << ' ';
-      mean.contribute(*ptr);
+      mean.contribute(ptr);
     });
 
 //     std::cout << "= " << mean;
 
-    Zeni::for_each(head->begin(), head->end(), [&mean](Q_Value * const &ptr) {
-      mean.uncontribute(*ptr);
+    std::for_each(head->begin(), head->end(), [&mean](Q_Value &ptr) {
+      mean.uncontribute(ptr);
     });
 
 //     std::cout << " and then " << mean << std::endl;

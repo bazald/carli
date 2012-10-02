@@ -89,16 +89,16 @@ namespace Blocks_World {
 
     void print_impl(std::ostream &os) const {
       os << "Blocks World:" << std::endl;
-      for_each(m_blocks.begin(), m_blocks.end(), [&os](const Stack &stack) {
-        for_each(stack.rbegin(), stack.rend(), [&os](const block_id &id) {
+      std::for_each(m_blocks.begin(), m_blocks.end(), [&os](const Stack &stack) {
+        std::for_each(stack.rbegin(), stack.rend(), [&os](const block_id &id) {
           os << ' ' << id;
         });
         os << std::endl;
       });
 
       if(m_candidates) {
-        for_each(m_candidates->candidates.begin(), m_candidates->candidates.end(), [&os](const Move * const &move) {
-          os << " (" << move->block << ',' << move->dest << ')';
+        std::for_each(m_candidates->candidates.begin(), m_candidates->candidates.end(), [&os](const Move &move) {
+          os << " (" << move.block << ',' << move.dest << ')';
         });
         os << std::endl;
       }
@@ -106,8 +106,8 @@ namespace Blocks_World {
 
     candidate_type generate_candidates() {
       action_type::iterator candidates;
-      for_each(m_blocks.begin(), m_blocks.end(), [&candidates,this](const Stack &stack_src) {
-        for_each(m_blocks.begin(), m_blocks.end(), [&candidates,&stack_src](const Stack &stack_dest) {
+      std::for_each(m_blocks.begin(), m_blocks.end(), [&candidates,this](const Stack &stack_src) {
+        std::for_each(m_blocks.begin(), m_blocks.end(), [&candidates,&stack_src](const Stack &stack_dest) {
           if(&stack_src == &stack_dest)
             return;
 
