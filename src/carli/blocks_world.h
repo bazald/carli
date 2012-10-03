@@ -11,40 +11,81 @@ namespace Blocks_World {
   
   typedef int block_id;
 
-  struct Move;
-  struct Move : public Zeni::Pool_Allocator<Move> {
-    typedef Zeni::Linked_List<Move> List;
-    typedef List::iterator iterator;
+  struct On_Top;
+  typedef Feature<On_Top> feature_type;
 
+  struct In_Place : public feature_type {
+    In_Place()
+     : block(block_id())
+    {
+    }
+
+    In_Place(const block_id &block_)
+     : block(block_)
+    {
+    }
+
+    void print(std::ostream &os) const {
+      os << "in-place(" << block << ')';
+    }
+
+    block_id block;
+  };
+
+  struct On_Top : public feature_type {
+    On_Top()
+     : top(block_id()),
+     bottom(block_id())
+    {
+    }
+
+    On_Top(const block_id &top_, const block_id &bottom_)
+     : top(top_),
+     bottom(bottom_)
+    {
+    }
+
+    void print(std::ostream &os) const {
+      os << "on-top(" << top << ',' << bottom << ')';
+    }
+
+    block_id top;
+    block_id bottom;
+  };
+
+  struct Move;
+  typedef Action<Move> action_type;
+
+  struct Move : public action_type {
     Move()
      : block(block_id()),
-     dest(block_id()),
-     candidates(this)
+     dest(block_id())
     {
     }
 
     Move(const block_id &block_, const block_id &dest_)
      : block(block_),
-     dest(dest_),
-     candidates(this)
+     dest(dest_)
     {
+    }
+
+    void print(std::ostream &os) const {
+      os << "move(" << block << ',' << dest << ')';
     }
 
     block_id block;
     block_id dest;
-
-    List candidates;
   };
 
-  class Environment : public ::Environment<Move> {
+  class Environment : public ::Environment<feature_type, action_type> {
   public:
     Environment() {
       Environment::init_impl();
-      m_candidates = generate_candidates();
+      generate_lists();
     }
 
     ~Environment() {
-      destroy_candidates(m_candidates);
+      destroy_lists();
     }
 
   private:
@@ -67,10 +108,10 @@ namespace Blocks_World {
 
     reward_type transition_impl(const action_type &action) {
       Stacks::iterator src = std::find_if(m_blocks.begin(), m_blocks.end(), [&action](Stack &stack)->bool {
-        return !stack.empty() && *stack.begin() == action.block;
+        return !stack.empty() && *stack.begin() == static_cast<const Move &>(action).block;
       });
       Stacks::iterator dest = std::find_if(m_blocks.begin(), m_blocks.end(), [&action](Stack &stack)->bool {
-        return !stack.empty() && *stack.begin() == action.dest;
+        return !stack.empty() && *stack.begin() == static_cast<const Move &>(action).dest;
       });
 
       if(src == m_blocks.end())
@@ -79,7 +120,7 @@ namespace Blocks_World {
         dest = m_blocks.insert(m_blocks.begin(), Stack());
 
       src->pop_front();
-      dest->push_front(action.block);
+      dest->push_front(static_cast<const Move &>(action).block);
 
       if(src->empty())
         m_blocks.erase(src);
@@ -107,15 +148,62 @@ namespace Blocks_World {
         os << std::endl;
       });
 
+      if(m_features) {
+        std::for_each(m_features->features.begin(), m_features->features.end(), [&os](const feature_type &feature) {
+          os << ' ' << feature;
+        });
+        os << std::endl;
+      }
+
       if(m_candidates) {
-        std::for_each(m_candidates->candidates.begin(), m_candidates->candidates.end(), [&os](const Move &move) {
-          os << " (" << move.block << ',' << move.dest << ')';
+        std::for_each(m_candidates->candidates.begin(), m_candidates->candidates.end(), [&os](const action_type &action) {
+          os << ' ' << action;
         });
         os << std::endl;
       }
     }
 
-    candidate_type generate_candidates() {
+    void generate_lists() {
+      generate_features();
+      generate_candidates();
+    }
+
+    void generate_features() {
+      assert(!m_features);
+
+      feature_type::iterator features;
+      std::for_each(m_blocks.begin(), m_blocks.end(), [&features](const Stack &stack) {
+        auto it = stack.begin();
+        auto itn = ++stack.begin();
+        auto iend = stack.end();
+
+        while(itn != iend) {
+          feature_type * on_top = new On_Top(*it, *itn);
+          on_top->features.insert_before(features);
+          features = &on_top->features;
+
+          it = itn;
+          ++itn;
+        }
+
+        block_id counter = 4;
+        std::for_each(stack.rbegin(), stack.rend(), [&features,&counter](const block_id &id) {
+          if(--counter == id) {
+            feature_type * in_place = new In_Place(id);
+            in_place->features.insert_before(features);
+            features = &in_place->features;
+          }
+          else
+            counter = 0;
+        });
+      });
+
+      m_features = features.get();
+    }
+
+    void generate_candidates() {
+      assert(!m_candidates);
+
       action_type::iterator candidates;
       std::for_each(m_blocks.begin(), m_blocks.end(), [&candidates,this](const Stack &stack_src) {
         if(stack_src.size() != 1) {
@@ -134,12 +222,19 @@ namespace Blocks_World {
         });
       });
 
-      return candidates.get();
+      m_candidates = candidates.get();
     }
 
-    void destroy_candidates(candidate_type candidates) {
-      if(candidates)
-        candidates->candidates.destroy();
+    void destroy_lists() {
+      if(m_features) {
+        m_features->features.destroy();
+        m_features = nullptr;
+      }
+
+      if(m_candidates) {
+        m_candidates->candidates.destroy();
+        m_candidates = nullptr;
+      }
     }
 
     Stacks m_blocks;

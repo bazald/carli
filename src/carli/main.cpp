@@ -34,32 +34,6 @@ int main(int argc, char **argv) {
   srand(time(0));
 
   Zeni::Random random;
-  Mean mean;
-
-  for(int i = 0; i != 1000; ++i) {
-    Q_Value::List * head(&(new Q_Value)->list);
-    for(int i = 1; i != 1000; ++i) {
-      Q_Value * const new_head = new Q_Value(84.0 * random.frand_lte());
-      new_head->list.insert_before(head);
-      head = &new_head->list;
-    }
-
-    std::for_each(head->begin(), head->end(), [&mean](Q_Value &ptr) {
-//       std::cout << *ptr << ' ';
-      mean.contribute(ptr);
-    });
-
-//     std::cout << "= " << mean;
-
-    std::for_each(head->begin(), head->end(), [&mean](Q_Value &ptr) {
-      mean.uncontribute(ptr);
-    });
-
-//     std::cout << " and then " << mean << std::endl;
-
-    head->destroy();
-  }
-
   Blocks_World::Environment env;
 
   std::cout << env;
