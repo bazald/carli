@@ -84,6 +84,17 @@ namespace Blocks_World {
       if(src->empty())
         m_blocks.erase(src);
 
+      if(m_blocks.size() == 1) {
+        m_metastate = SUCCESS;
+        block_id id = 0;
+        std::for_each(m_blocks.begin()->begin(), m_blocks.begin()->end(), [this,&id](const block_id &id_) {
+          if(++id != id_)
+            m_metastate = NON_TERMINAL;
+        });
+      }
+      else
+        m_metastate = NON_TERMINAL;
+
       return reward_type(-1);
     }
 
@@ -107,6 +118,12 @@ namespace Blocks_World {
     candidate_type generate_candidates() {
       action_type::iterator candidates;
       std::for_each(m_blocks.begin(), m_blocks.end(), [&candidates,this](const Stack &stack_src) {
+        if(stack_src.size() != 1) {
+          action_type * move = new Move(*stack_src.begin(), 0);
+          move->candidates.insert_before(candidates);
+          candidates = &move->candidates;
+        }
+
         std::for_each(m_blocks.begin(), m_blocks.end(), [&candidates,&stack_src](const Stack &stack_dest) {
           if(&stack_src == &stack_dest)
             return;

@@ -63,14 +63,24 @@ int main(int argc, char **argv) {
   Blocks_World::Environment env;
 
   std::cout << env;
-  env.transition(Blocks_World::Move(3, 2));
-  std::cout << env;
-  env.transition(Blocks_World::Move(3, 0));
-  std::cout << env;
-  env.transition(Blocks_World::Move(2, 3));
-  std::cout << env;
-//   env.transition(Blocks_World::Move(3, 0));
-//   std::cout << env;
+  do {
+    const Blocks_World::Environment::action_type * actions = env.get_candidates();
+
+    int counter = 0;
+    std::for_each(actions->candidates.begin(), actions->candidates.end(), [&counter](const Blocks_World::Environment::action_type &) {
+      ++counter;
+    });
+
+    counter = random.rand_lt(counter) + 1;
+    std::for_each(actions->candidates.begin(), actions->candidates.end(), [&counter,&env](const Blocks_World::Environment::action_type &action) {
+      if(!--counter)
+        env.transition(action);
+    });
+
+    std::cout << env;
+  } while(env.get_metastate() == Blocks_World::Environment::NON_TERMINAL);
+
+  std::cout << "SUCCESS in " << env.get_step_count() << " moves, yielding " << env.get_total_reward() << " total reward." << std::endl;
 
   return 0;
 }
