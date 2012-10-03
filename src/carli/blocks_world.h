@@ -20,12 +20,13 @@ namespace Blocks_World {
     {
     }
 
-    In_Place(const block_id &block_)
-     : block(block_)
+    In_Place(const block_id &block_, const bool &present_ = true)
+     : feature_type(present_),
+     block(block_)
     {
     }
 
-    void print(std::ostream &os) const {
+    void print_impl(std::ostream &os) const {
       os << "in-place(" << block << ')';
     }
 
@@ -39,13 +40,14 @@ namespace Blocks_World {
     {
     }
 
-    On_Top(const block_id &top_, const block_id &bottom_)
-     : top(top_),
+    On_Top(const block_id &top_, const block_id &bottom_, const bool &present_ = true)
+     : feature_type(present_),
+     top(top_),
      bottom(bottom_)
     {
     }
 
-    void print(std::ostream &os) const {
+    void print_impl(std::ostream &os) const {
       os << "on-top(" << top << ',' << bottom << ')';
     }
 
@@ -69,7 +71,7 @@ namespace Blocks_World {
     {
     }
 
-    void print(std::ostream &os) const {
+    void print_impl(std::ostream &os) const {
       os << "move(" << block << ',' << dest << ')';
     }
 
@@ -172,31 +174,58 @@ namespace Blocks_World {
       assert(!m_features);
 
       feature_type::iterator features;
-      std::for_each(m_blocks.begin(), m_blocks.end(), [&features](const Stack &stack) {
+      block_id place_counter = 3;
+
+      auto not_in_place = [&features,&place_counter]() {
+        while(place_counter) {
+          feature_type * out_place = new In_Place(place_counter, false);
+          out_place->features.insert_before(features);
+          features = &out_place->features;
+          --place_counter;
+        }
+      };
+      auto is_on_top = [&features](const block_id &top, const block_id &bottom, const block_id &num_blocks) {
+        for(block_id non_bottom = 1; non_bottom <= num_blocks; ++non_bottom) {
+          if(top != non_bottom) {
+            feature_type * on_top = new On_Top(top, non_bottom, bottom == non_bottom);
+            on_top->features.insert_before(features);
+            features = &on_top->features;
+          }
+        }
+      };
+
+      std::for_each(m_blocks.begin(), m_blocks.end(), [&features,&not_in_place,&is_on_top,&place_counter](const Stack &stack) {
         auto it = stack.begin();
         auto itn = ++stack.begin();
         auto iend = stack.end();
 
         while(itn != iend) {
-          feature_type * on_top = new On_Top(*it, *itn);
-          on_top->features.insert_before(features);
-          features = &on_top->features;
+          is_on_top(*it, *itn, 3);
 
           it = itn;
           ++itn;
         }
 
-        block_id counter = 4;
-        std::for_each(stack.rbegin(), stack.rend(), [&features,&counter](const block_id &id) {
-          if(--counter == id) {
+        is_on_top(*it, 0, 3);
+
+        if(place_counter == *stack.rbegin()) {
+          std::find_if(stack.rbegin(), stack.rend(), [&features,&place_counter](const block_id &id) {
+            if(place_counter != id)
+              return true;
+
             feature_type * in_place = new In_Place(id);
             in_place->features.insert_before(features);
             features = &in_place->features;
-          }
-          else
-            counter = 0;
-        });
+            --place_counter;
+
+            return false;
+          });
+
+          not_in_place();
+        }
       });
+
+      not_in_place();
 
       m_features = features.get();
     }

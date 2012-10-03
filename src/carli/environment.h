@@ -8,16 +8,25 @@ struct Feature : public Zeni::Pool_Allocator<TYPE> {
   typedef typename Zeni::Linked_List<Feature> List;
   typedef typename List::iterator iterator;
 
-  Feature()
-    : features(this)
+  Feature(const bool &present_ = true)
+    : features(this),
+    present(present_)
   {
   }
 
   virtual ~Feature() {}
 
-  virtual void print(std::ostream &os) const = 0;
+  void print(std::ostream &os) const {
+    if(!present)
+      os << '!';
+    print_impl(os);
+  }
+
+  virtual void print_impl(std::ostream &os) const = 0;
 
   List features;
+
+  bool present;
 };
 
 template <typename TYPE>
@@ -38,7 +47,11 @@ struct Action : public Zeni::Pool_Allocator<TYPE> {
 
   virtual ~Action() {}
 
-  virtual void print(std::ostream &os) const = 0;
+  void print(std::ostream &os) const {
+    print_impl(os);
+  }
+
+  virtual void print_impl(std::ostream &os) const = 0;
 
   List candidates;
 };
