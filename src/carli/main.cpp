@@ -33,28 +33,17 @@ int main(int argc, char **argv) {
 
   srand(time(0));
 
-  Zeni::Random random;
-  Blocks_World::Environment env;
+  auto env = std::make_shared<Blocks_World::Environment>();
+  auto agent = std::make_shared<Blocks_World::Agent>(env);
 
-  std::cout << env;
+  std::cout << *env << *agent;
   do {
-    const Blocks_World::Environment::action_type * actions = env.get_candidates();
+    agent->act();
 
-    int counter = 0;
-    std::for_each(actions->candidates.begin(), actions->candidates.end(), [&counter](const Blocks_World::Environment::action_type &) {
-      ++counter;
-    });
+    std::cout << *env << *agent;
+  } while(env->get_metastate() == Blocks_World::Environment::NON_TERMINAL);
 
-    counter = random.rand_lt(counter) + 1;
-    std::for_each(actions->candidates.begin(), actions->candidates.end(), [&counter,&env](const Blocks_World::Environment::action_type &action) {
-      if(!--counter)
-        env.transition(action);
-    });
-
-    std::cout << env;
-  } while(env.get_metastate() == Blocks_World::Environment::NON_TERMINAL);
-
-  std::cout << "SUCCESS in " << env.get_step_count() << " moves, yielding " << env.get_total_reward() << " total reward." << std::endl;
+  std::cout << "SUCCESS in " << env->get_step_count() << " moves, yielding " << env->get_total_reward() << " total reward." << std::endl;
 
   return 0;
 }

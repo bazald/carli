@@ -1,10 +1,12 @@
 #ifndef BLOCKS_WORLD_H
 #define BLOCKS_WORLD_H
 
+#include "agent.h"
 #include "environment.h"
-#include "linked_list.h"
+#include "random.h"
 
 #include <algorithm>
+#include <list>
 #include <stdexcept>
 
 namespace Blocks_World {
@@ -79,21 +81,20 @@ namespace Blocks_World {
     block_id dest;
   };
 
-  class Environment : public ::Environment<feature_type, action_type> {
+  class Environment : public ::Environment<action_type> {
   public:
     Environment() {
       Environment::init_impl();
-      generate_lists();
     }
 
-    ~Environment() {
-      destroy_lists();
-    }
-
-  private:
     typedef std::list<block_id> Stack;
     typedef std::list<Stack> Stacks;
 
+    const Stacks & get_Blocks() const {
+      return m_blocks;
+    }
+
+  private:
     void init_impl() {
       {
         m_blocks.push_front(Stack());
@@ -149,8 +150,45 @@ namespace Blocks_World {
         });
         os << std::endl;
       });
+    }
 
+    Stacks m_blocks;
+  };
+
+  class Agent : public ::Agent<feature_type, action_type> {
+  public:
+    Agent(const std::shared_ptr<environment_type> &env)
+     : ::Agent<feature_type, action_type>(env)
+    {
+      generate_lists();
+    }
+
+  private:
+    void init_impl() {
+      destroy_lists();
+      generate_lists();
+    }
+
+    reward_type act_impl() {
+      int counter = 0;
+      std::for_each(m_candidates->candidates.begin(), m_candidates->candidates.end(), [&counter](const Blocks_World::Environment::action_type &) {
+        ++counter;
+      });
+
+      counter = random.rand_lt(counter) + 1;
+      const Blocks_World::Environment::action_type * action = nullptr;
+      std::for_each(m_candidates->candidates.begin(), m_candidates->candidates.end(), [&counter,&action](const Blocks_World::Environment::action_type &action_) {
+        if(!--counter)
+          action = &action_;
+      });
+
+      return get_env()->transition(*action);
+    }
+
+    void print_impl(std::ostream &os) const {
+      os << "Blocks World Agent:" << std::endl;
       if(m_features) {
+        os << " Features:";
         std::for_each(m_features->features.begin(), m_features->features.end(), [&os](const feature_type &feature) {
           os << ' ' << feature;
         });
@@ -158,6 +196,7 @@ namespace Blocks_World {
       }
 
       if(m_candidates) {
+        os << " Candidates:";
         std::for_each(m_candidates->candidates.begin(), m_candidates->candidates.end(), [&os](const action_type &action) {
           os << ' ' << action;
         });
@@ -171,6 +210,8 @@ namespace Blocks_World {
     }
 
     void generate_features() {
+      auto env = std::dynamic_pointer_cast<const Environment>(get_env());
+
       assert(!m_features);
 
       feature_type::iterator features;
@@ -194,7 +235,7 @@ namespace Blocks_World {
         }
       };
 
-      std::for_each(m_blocks.begin(), m_blocks.end(), [&features,&not_in_place,&is_on_top,&place_counter](const Stack &stack) {
+      std::for_each(env->get_Blocks().begin(), env->get_Blocks().end(), [&features,&not_in_place,&is_on_top,&place_counter](const Environment::Stack &stack) {
         auto it = stack.begin();
         auto itn = ++stack.begin();
         auto iend = stack.end();
@@ -231,17 +272,19 @@ namespace Blocks_World {
     }
 
     void generate_candidates() {
+      auto env = std::dynamic_pointer_cast<const Environment>(get_env());
+
       assert(!m_candidates);
 
       action_type::iterator candidates;
-      std::for_each(m_blocks.begin(), m_blocks.end(), [&candidates,this](const Stack &stack_src) {
+      std::for_each(env->get_Blocks().begin(), env->get_Blocks().end(), [&candidates,&env](const Environment::Stack &stack_src) {
         if(stack_src.size() != 1) {
           action_type * move = new Move(*stack_src.begin(), 0);
           move->candidates.insert_before(candidates);
           candidates = &move->candidates;
         }
 
-        std::for_each(m_blocks.begin(), m_blocks.end(), [&candidates,&stack_src](const Stack &stack_dest) {
+        std::for_each(env->get_Blocks().begin(), env->get_Blocks().end(), [&candidates,&stack_src](const Environment::Stack &stack_dest) {
           if(&stack_src == &stack_dest)
             return;
 
@@ -255,18 +298,25 @@ namespace Blocks_World {
     }
 
     void destroy_lists() {
+      destroy_features();
+      destroy_candidates();
+    }
+
+    void destroy_features() {
       if(m_features) {
         m_features->features.destroy();
         m_features = nullptr;
       }
+    }
 
+    void destroy_candidates() {
       if(m_candidates) {
         m_candidates->candidates.destroy();
         m_candidates = nullptr;
       }
     }
 
-    Stacks m_blocks;
+    Zeni::Random random;
   };
 
 }
