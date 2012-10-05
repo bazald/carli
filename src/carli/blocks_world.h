@@ -82,7 +82,7 @@ namespace Blocks_World {
       return rhs.gte(*this);
     }
     bool gte(const In_Place &rhs) const {
-      return false;
+      return true;
     }
     bool gte(const On_Top &rhs) const {
       return rhs.top < top || (rhs.top == top &&
@@ -198,6 +198,10 @@ namespace Blocks_World {
     {
       generate_lists();
     }
+    
+    ~Agent() {
+      destroy_lists();
+    }
 
   private:
     void init_impl() {
@@ -256,8 +260,7 @@ namespace Blocks_World {
       auto not_in_place = [&features,&place_counter]() {
         while(place_counter) {
           feature_type * out_place = new In_Place(place_counter, false);
-          out_place->features.insert_before(features);
-          features = &out_place->features;
+          out_place->features.insert_in_order(features);
           --place_counter;
         }
       };
@@ -265,8 +268,7 @@ namespace Blocks_World {
         for(block_id non_bottom = 1; non_bottom <= num_blocks; ++non_bottom) {
           if(top != non_bottom) {
             feature_type * on_top = new On_Top(top, non_bottom, bottom == non_bottom);
-            on_top->features.insert_before(features);
-            features = &on_top->features;
+            on_top->features.insert_in_order(features);
           }
         }
       };
@@ -291,8 +293,7 @@ namespace Blocks_World {
               return true;
 
             feature_type * in_place = new In_Place(id);
-            in_place->features.insert_before(features);
-            features = &in_place->features;
+            in_place->features.insert_in_order(features);
             --place_counter;
 
             return false;
@@ -317,7 +318,6 @@ namespace Blocks_World {
         if(stack_src.size() != 1) {
           action_type * move = new Move(*stack_src.begin(), 0);
           move->candidates.insert_before(candidates);
-          candidates = &move->candidates;
         }
 
         std::for_each(env->get_Blocks().begin(), env->get_Blocks().end(), [&candidates,&stack_src](const Environment::Stack &stack_dest) {
@@ -326,7 +326,6 @@ namespace Blocks_World {
 
           action_type * move = new Move(*stack_src.begin(), *stack_dest.begin());
           move->candidates.insert_before(candidates);
-          candidates = &move->candidates;
         });
       });
 

@@ -92,6 +92,9 @@ namespace Zeni {
       operator list_pointer_type () const {
         return pointer;
       }
+      operator list_pointer_type & () {
+        return pointer;
+      }
 
     private:
       size_t offset;
@@ -190,6 +193,9 @@ namespace Zeni {
       operator list_pointer_type () const {
         return pointer;
       }
+      operator list_pointer_type & () {
+        return pointer;
+      }
 
     private:
       size_t offset;
@@ -261,7 +267,7 @@ namespace Zeni {
       }
     }
     /// insert this list entry before ptr; requires this or ptr to have !prev()
-    void insert_before(const list_pointer_type &ptr) {
+    void insert_before(list_pointer_type &ptr) {
       if(ptr) {
         assert(m_offset == ptr->m_offset);
         assert(!m_next);
@@ -275,26 +281,34 @@ namespace Zeni {
         ptr->m_prev = this;
         m_next = ptr;
       }
+
+      ptr = this;
     }
     /// insert this list entry into the list; requires this to have !prev() && !next()
-    void insert_in_order(list_pointer_type ptr) {
+    void insert_in_order(list_pointer_type &ptr) {
       if(ptr) {
         assert(m_offset == ptr->m_offset);
         assert(!m_prev && !m_next);
 
-        list_pointer_type prev = ptr;
-        while(ptr && **ptr < **this) {
-          prev = ptr;
-          ptr = ptr->m_next;
+        list_pointer_type pptr = nullptr;
+        list_pointer_type pp = ptr;
+        while(pp && **pp < **this) {
+          pptr = pp;
+          pp = pp->m_next;
         }
 
-        if(prev)
-          prev->m_next = this;
-        if(next)
-          next->m_prev = this;
-        m_prev = prev;
-        m_next = ptr;
+        if(pptr)
+          pptr->m_next = this;
+        if(pp)
+          pp->m_prev = this;
+        m_prev = pptr;
+        m_next = pp;
+
+        if(ptr == pp)
+          ptr = this;
       }
+      else
+        ptr = this;
     }
 
     /// erase this entry from this list
