@@ -42,51 +42,25 @@ class Environment : public std::enable_shared_from_this<Environment<ACTION> > {
 public:
   typedef ACTION action_type;
   typedef double reward_type;
-  typedef size_t step_count_type;
-  enum metastate_type {NON_TERMINAL, SUCCESS, FAILURE};
 
-  Environment()
-   : m_metastate(NON_TERMINAL),
-   m_total_reward(reward_type()),
-   m_step_count(step_count_type())
-  {
-  }
-
-  metastate_type get_metastate() const {return m_metastate;}
-  reward_type get_total_reward() const {return m_total_reward;}
-  step_count_type get_step_count() const {return m_step_count;}
+  Environment() {}
 
   void init() {
-    m_metastate = NON_TERMINAL;
-    m_total_reward = reward_type();
-    m_step_count = step_count_type();
-
     init_impl();
   }
 
   reward_type transition(const action_type &action) {
-    const reward_type reward = transition_impl(action);
-
-    m_total_reward += reward;
-    ++m_step_count;
-
-    return reward;
+    return transition_impl(action);
   }
 
   void print(std::ostream &os) const {
     print_impl(os);
   }
 
-protected:
-  metastate_type m_metastate;
-
 private:
   virtual void init_impl() = 0;
   virtual reward_type transition_impl(const action_type &action) = 0;
   virtual void print_impl(std::ostream &os) const = 0;
-
-  reward_type m_total_reward;
-  step_count_type m_step_count;
 };
 
 template <typename ACTION>

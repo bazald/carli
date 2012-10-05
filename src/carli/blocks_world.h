@@ -121,17 +121,26 @@ namespace Blocks_World {
   public:
     Environment() {
       Environment::init_impl();
+
+      {
+        m_goal.push_front(Stack());
+        Stack &stack = *m_goal.begin();
+        stack.push_front(3);
+        stack.push_front(2);
+        stack.push_front(1);
+      }
     }
 
     typedef std::list<block_id> Stack;
     typedef std::list<Stack> Stacks;
 
-    const Stacks & get_Blocks() const {
-      return m_blocks;
-    }
+    const Stacks & get_blocks() const {return m_blocks;}
+    const Stacks & get_goal() const {return m_goal;}
 
   private:
     void init_impl() {
+      m_blocks.clear();
+
       {
         m_blocks.push_front(Stack());
         Stack &stack = *m_blocks.begin();
@@ -164,17 +173,6 @@ namespace Blocks_World {
       if(src->empty())
         m_blocks.erase(src);
 
-      if(m_blocks.size() == 1) {
-        m_metastate = SUCCESS;
-        block_id id = 0;
-        std::for_each(m_blocks.begin()->begin(), m_blocks.begin()->end(), [this,&id](const block_id &id_) {
-          if(++id != id_)
-            m_metastate = NON_TERMINAL;
-        });
-      }
-      else
-        m_metastate = NON_TERMINAL;
-
       return reward_type(-1);
     }
 
@@ -189,6 +187,7 @@ namespace Blocks_World {
     }
 
     Stacks m_blocks;
+    Stacks m_goal;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {
@@ -210,6 +209,8 @@ namespace Blocks_World {
     }
 
     reward_type act_impl() {
+      auto env = std::dynamic_pointer_cast<const Environment>(get_env());
+
       int counter = 0;
       std::for_each(m_candidates->candidates.begin(), m_candidates->candidates.end(), [&counter](const Blocks_World::Environment::action_type &) {
         ++counter;
@@ -222,7 +223,11 @@ namespace Blocks_World {
           action = &action_;
       });
 
-      return get_env()->transition(*action);
+      const reward_type reward =  get_env()->transition(*action);
+
+      m_metastate = env->get_blocks() == env->get_goal() ? SUCCESS : NON_TERMINAL;
+
+      return reward;
     }
 
     void print_impl(std::ostream &os) const {
@@ -273,7 +278,7 @@ namespace Blocks_World {
         }
       };
 
-      std::for_each(env->get_Blocks().begin(), env->get_Blocks().end(), [&features,&not_in_place,&is_on_top,&place_counter](const Environment::Stack &stack) {
+      std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [&features,&not_in_place,&is_on_top,&place_counter](const Environment::Stack &stack) {
         auto it = stack.begin();
         auto itn = ++stack.begin();
         auto iend = stack.end();
@@ -314,13 +319,13 @@ namespace Blocks_World {
       assert(!m_candidates);
 
       action_type::iterator candidates;
-      std::for_each(env->get_Blocks().begin(), env->get_Blocks().end(), [&candidates,&env](const Environment::Stack &stack_src) {
+      std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [&candidates,&env](const Environment::Stack &stack_src) {
         if(stack_src.size() != 1) {
           action_type * move = new Move(*stack_src.begin(), 0);
           move->candidates.insert_before(candidates);
         }
 
-        std::for_each(env->get_Blocks().begin(), env->get_Blocks().end(), [&candidates,&stack_src](const Environment::Stack &stack_dest) {
+        std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [&candidates,&stack_src](const Environment::Stack &stack_dest) {
           if(&stack_src == &stack_dest)
             return;
 

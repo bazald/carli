@@ -58,6 +58,11 @@ public:
   {
   }
 
+  virtual ~Agent() {
+    assert(!m_features);
+    assert(!m_candidates);
+  }
+
   std::shared_ptr<const environment_type> get_env() const {return m_environment.lock();}
   std::shared_ptr<environment_type> get_env() {return m_environment.lock();}
   metastate_type get_metastate() const {return m_metastate;}

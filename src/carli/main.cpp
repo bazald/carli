@@ -41,9 +41,9 @@ int main(int argc, char **argv) {
     agent->act();
 
     std::cout << *env << *agent;
-  } while(env->get_metastate() == Blocks_World::Environment::NON_TERMINAL);
+  } while(agent->get_metastate() == Blocks_World::Agent::NON_TERMINAL);
 
-  std::cout << "SUCCESS in " << env->get_step_count() << " moves, yielding " << env->get_total_reward() << " total reward." << std::endl;
+  std::cout << "SUCCESS in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
 
   return 0;
 }
