@@ -16,6 +16,8 @@ struct Feature : public Zeni::Pool_Allocator<DERIVED2> {
 
   virtual ~Feature() {}
 
+  virtual Feature * clone() const = 0;
+
   void print(std::ostream &os) const {
     if(!present)
       os << '!';
@@ -42,7 +44,9 @@ class Agent : public std::enable_shared_from_this<Agent<FEATURE, ACTION> > {
 
 public:
   typedef FEATURE feature_type;
+  typedef typename FEATURE::List * feature_list;
   typedef ACTION action_type;
+  typedef typename ACTION::List * action_list;
   typedef Environment<action_type> environment_type;
   typedef double reward_type;
   typedef size_t step_count_type;
@@ -97,8 +101,8 @@ public:
 
 protected:
   metastate_type m_metastate;
-  feature_type * m_features;
-  action_type * m_candidates;
+  feature_list m_features;
+  action_list m_candidates;
 
 private:
   virtual void init_impl() = 0;

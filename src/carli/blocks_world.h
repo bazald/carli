@@ -43,6 +43,10 @@ namespace Blocks_World {
     {
     }
 
+    In_Place * clone() const {
+      return new In_Place(block);
+    }
+
     void print_impl(std::ostream &os) const {
       os << "in-place(" << block << ')';
     }
@@ -72,6 +76,10 @@ namespace Blocks_World {
      top(top_),
      bottom(bottom_)
     {
+    }
+
+    On_Top * clone() const {
+      return new On_Top(top, bottom);
     }
 
     void print_impl(std::ostream &os) const {
@@ -212,13 +220,13 @@ namespace Blocks_World {
       auto env = std::dynamic_pointer_cast<const Environment>(get_env());
 
       int counter = 0;
-      std::for_each(m_candidates->candidates.begin(), m_candidates->candidates.end(), [&counter](const Blocks_World::Environment::action_type &) {
+      std::for_each(m_candidates->begin(), m_candidates->end(), [&counter](const Blocks_World::Environment::action_type &) {
         ++counter;
       });
 
       counter = random.rand_lt(counter) + 1;
       const Blocks_World::Environment::action_type * action = nullptr;
-      std::for_each(m_candidates->candidates.begin(), m_candidates->candidates.end(), [&counter,&action](const Blocks_World::Environment::action_type &action_) {
+      std::for_each(m_candidates->begin(), m_candidates->end(), [&counter,&action](const Blocks_World::Environment::action_type &action_) {
         if(!--counter)
           action = &action_;
       });
@@ -234,7 +242,7 @@ namespace Blocks_World {
       os << "Blocks World Agent:" << std::endl;
       if(m_features) {
         os << " Features:";
-        std::for_each(m_features->features.begin(), m_features->features.end(), [&os](const feature_type &feature) {
+        std::for_each(m_features->begin(), m_features->end(), [&os](const feature_type &feature) {
           os << ' ' << feature;
         });
         os << std::endl;
@@ -242,7 +250,7 @@ namespace Blocks_World {
 
       if(m_candidates) {
         os << " Candidates:";
-        std::for_each(m_candidates->candidates.begin(), m_candidates->candidates.end(), [&os](const action_type &action) {
+        std::for_each(m_candidates->begin(), m_candidates->end(), [&os](const action_type &action) {
           os << ' ' << action;
         });
         os << std::endl;
@@ -259,26 +267,25 @@ namespace Blocks_World {
 
       assert(!m_features);
 
-      feature_type::iterator features;
       block_id place_counter = 3;
 
-      auto not_in_place = [&features,&place_counter]() {
+      auto not_in_place = [this,&place_counter]() {
         while(place_counter) {
           feature_type * out_place = new In_Place(place_counter, false);
-          out_place->features.insert_in_order(features);
+          out_place->features.insert_in_order(m_features);
           --place_counter;
         }
       };
-      auto is_on_top = [&features](const block_id &top, const block_id &bottom, const block_id &num_blocks) {
+      auto is_on_top = [this](const block_id &top, const block_id &bottom, const block_id &num_blocks) {
         for(block_id non_bottom = 1; non_bottom <= num_blocks; ++non_bottom) {
           if(top != non_bottom) {
             feature_type * on_top = new On_Top(top, non_bottom, bottom == non_bottom);
-            on_top->features.insert_in_order(features);
+            on_top->features.insert_in_order(m_features);
           }
         }
       };
 
-      std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [&features,&not_in_place,&is_on_top,&place_counter](const Environment::Stack &stack) {
+      std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [this,&not_in_place,&is_on_top,&place_counter](const Environment::Stack &stack) {
         auto it = stack.begin();
         auto itn = ++stack.begin();
         auto iend = stack.end();
@@ -293,12 +300,12 @@ namespace Blocks_World {
         is_on_top(*it, 0, 3);
 
         if(place_counter == *stack.rbegin()) {
-          std::find_if(stack.rbegin(), stack.rend(), [&features,&place_counter](const block_id &id) {
+          std::find_if(stack.rbegin(), stack.rend(), [this,&place_counter](const block_id &id) {
             if(place_counter != id)
               return true;
 
             feature_type * in_place = new In_Place(id);
-            in_place->features.insert_in_order(features);
+            in_place->features.insert_in_order(m_features);
             --place_counter;
 
             return false;
@@ -309,8 +316,6 @@ namespace Blocks_World {
       });
 
       not_in_place();
-
-      m_features = features.get();
     }
 
     void generate_candidates() {
@@ -318,42 +323,27 @@ namespace Blocks_World {
 
       assert(!m_candidates);
 
-      action_type::iterator candidates;
-      std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [&candidates,&env](const Environment::Stack &stack_src) {
+      std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [this,&env](const Environment::Stack &stack_src) {
         if(stack_src.size() != 1) {
           action_type * move = new Move(*stack_src.begin(), 0);
-          move->candidates.insert_before(candidates);
+          move->candidates.insert_before(m_candidates);
         }
 
-        std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [&candidates,&stack_src](const Environment::Stack &stack_dest) {
+        std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [this,&stack_src](const Environment::Stack &stack_dest) {
           if(&stack_src == &stack_dest)
             return;
 
           action_type * move = new Move(*stack_src.begin(), *stack_dest.begin());
-          move->candidates.insert_before(candidates);
+          move->candidates.insert_before(m_candidates);
         });
       });
-
-      m_candidates = candidates.get();
     }
 
     void destroy_lists() {
-      destroy_features();
-      destroy_candidates();
-    }
-
-    void destroy_features() {
-      if(m_features) {
-        m_features->features.destroy();
-        m_features = nullptr;
-      }
-    }
-
-    void destroy_candidates() {
-      if(m_candidates) {
-        m_candidates->candidates.destroy();
-        m_candidates = nullptr;
-      }
+      m_features->destroy();
+      m_features = nullptr;
+      m_candidates->destroy();
+      m_candidates = nullptr;
     }
 
     Zeni::Random random;

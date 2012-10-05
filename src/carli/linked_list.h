@@ -2,6 +2,7 @@
 #define ZENI_LINKED_LIST_H
 
 #include <cassert>
+#include <algorithm>
 
 namespace Zeni {
 
@@ -226,6 +227,9 @@ namespace Zeni {
       return get();
     }
 
+    size_t offset() const {
+      return m_offset;
+    }
     Linked_List * prev() const {
       return m_prev;
     }
@@ -324,13 +328,39 @@ namespace Zeni {
 
     /// delete every entry in the list between begin() and end(), inclusive
     void destroy() {
-      auto it = begin();
-      auto iend = end();
-      while(it != iend) {
-        const auto ptr = it.get();
-        ++it;
-        delete ptr;
+      if(this) {
+        auto it = begin();
+        auto iend = end();
+        while(it != iend) {
+          auto ptr = it.get();
+          ++it;
+          delete ptr;
+        }
       }
+    }
+
+    Linked_List<TYPE> * clone() const {
+      Linked_List<TYPE> * head = nullptr;
+
+      if(this) {
+        auto it = begin();
+        auto iend = end();
+
+        if(it != iend) {
+          head = reinterpret_cast<list_pointer_type>(reinterpret_cast<char *>(it->clone()) + m_offset);
+          auto tail = head;
+          ++it;
+
+          while(it != iend) {
+            auto ptr = reinterpret_cast<list_pointer_type>(reinterpret_cast<char *>(it->clone()) + m_offset);
+            ptr->insert_after(tail);
+            tail = ptr;
+            ++it;
+          }
+        }
+      }
+
+      return head;
     }
 
   private:
