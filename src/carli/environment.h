@@ -8,38 +8,6 @@
 #include "memory_pool.h"
 
 template <typename TYPE>
-struct Feature : public Zeni::Pool_Allocator<TYPE> {
-  typedef typename Zeni::Linked_List<Feature> List;
-  typedef typename List::iterator iterator;
-
-  Feature(const bool &present_ = true)
-    : features(this),
-    present(present_)
-  {
-  }
-
-  virtual ~Feature() {}
-
-  void print(std::ostream &os) const {
-    if(!present)
-      os << '!';
-    print_impl(os);
-  }
-
-  virtual void print_impl(std::ostream &os) const = 0;
-
-  List features;
-
-  bool present;
-};
-
-template <typename TYPE>
-std::ostream & operator << (std::ostream &os, const Feature<TYPE> &feature) {
-  feature.print(os);
-  return os;
-}
-
-template <typename TYPE>
 struct Action : public Zeni::Pool_Allocator<TYPE> {
   typedef typename Zeni::Linked_List<Action> List;
   typedef typename List::iterator iterator;

@@ -207,6 +207,18 @@ namespace Zeni {
     value_pointer_type get() const {
       return reinterpret_cast<value_pointer_type>((reinterpret_cast<char *>(const_cast<Zeni::Linked_List<value_type> *>(this)) - m_offset));
     }
+    const value_reference_type operator*() const {
+      return *get();
+    }
+    value_reference_type operator*() {
+      return *get();
+    }
+    const value_pointer_type operator->() const {
+      return get();
+    }
+    value_pointer_type operator->() {
+      return get();
+    }
 
     Linked_List * prev() const {
       return m_prev;
@@ -261,6 +273,26 @@ namespace Zeni {
         }
 
         ptr->m_prev = this;
+        m_next = ptr;
+      }
+    }
+    /// insert this list entry into the list; requires this to have !prev() && !next()
+    void insert_in_order(list_pointer_type ptr) {
+      if(ptr) {
+        assert(m_offset == ptr->m_offset);
+        assert(!m_prev && !m_next);
+
+        list_pointer_type prev = ptr;
+        while(ptr && **ptr < **this) {
+          prev = ptr;
+          ptr = ptr->m_next;
+        }
+
+        if(prev)
+          prev->m_next = this;
+        if(next)
+          next->m_prev = this;
+        m_prev = prev;
         m_next = ptr;
       }
     }

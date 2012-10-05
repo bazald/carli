@@ -14,7 +14,22 @@ namespace Blocks_World {
   typedef int block_id;
 
   struct On_Top;
-  typedef Feature<On_Top> feature_type;
+  struct In_Place;
+  struct On_Top;
+
+  struct Feature;
+  struct Feature : ::Feature<Feature, On_Top> {
+    Feature(const bool &present_ = true)
+     : ::Feature<Feature, On_Top>(present_)
+    {
+    }
+
+    virtual bool operator< (const Feature &rhs) const = 0;
+    virtual bool gte(const In_Place &rhs) const = 0;
+    virtual bool gte(const On_Top &rhs) const = 0;
+  };
+
+  typedef Feature feature_type;
 
   struct In_Place : public feature_type {
     In_Place()
@@ -30,6 +45,16 @@ namespace Blocks_World {
 
     void print_impl(std::ostream &os) const {
       os << "in-place(" << block << ')';
+    }
+
+    bool operator< (const Feature &rhs) const {
+      return rhs.gte(*this);
+    }
+    bool gte(const In_Place &rhs) const {
+      return rhs.block < block;
+    }
+    bool gte(const On_Top &rhs) const {
+      return false;
     }
 
     block_id block;
@@ -51,6 +76,17 @@ namespace Blocks_World {
 
     void print_impl(std::ostream &os) const {
       os << "on-top(" << top << ',' << bottom << ')';
+    }
+
+    bool operator< (const Feature &rhs) const {
+      return rhs.gte(*this);
+    }
+    bool gte(const In_Place &rhs) const {
+      return false;
+    }
+    bool gte(const On_Top &rhs) const {
+      return rhs.top < top || (rhs.top == top &&
+             rhs.bottom < bottom);
     }
 
     block_id top;
