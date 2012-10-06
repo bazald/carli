@@ -24,9 +24,16 @@ namespace Blocks_World {
     {
     }
 
-    virtual bool operator< (const Feature &rhs) const = 0;
-    virtual bool gte(const In_Place &rhs) const = 0;
-    virtual bool gte(const On_Top &rhs) const = 0;
+    bool operator<(const Feature &rhs) const {return compare(rhs) < 0;}
+    bool operator<=(const Feature &rhs) const {return compare(rhs) <= 0;}
+    bool operator>(const Feature &rhs) const {return compare(rhs) > 0;}
+    bool operator>=(const Feature &rhs) const {return compare(rhs) >= 0;}
+    bool operator==(const Feature &rhs) const {return compare(rhs) == 0;}
+    bool operator!=(const Feature &rhs) const {return compare(rhs) != 0;}
+
+    virtual int compare(const Feature &rhs) const = 0;
+    virtual int compare(const In_Place &rhs) const = 0;
+    virtual int compare(const On_Top &rhs) const = 0;
   };
 
   typedef Feature feature_type;
@@ -51,14 +58,14 @@ namespace Blocks_World {
       os << "in-place(" << block << ')';
     }
 
-    bool operator< (const Feature &rhs) const {
-      return rhs.gte(*this);
+    int compare(const Feature &rhs) const {
+      return -rhs.compare(*this);
     }
-    bool gte(const In_Place &rhs) const {
-      return rhs.block < block;
+    int compare(const In_Place &rhs) const {
+      return block - rhs.block;
     }
-    bool gte(const On_Top &rhs) const {
-      return false;
+    int compare(const On_Top &rhs) const {
+      return -1;
     }
 
     block_id block;
@@ -86,15 +93,14 @@ namespace Blocks_World {
       os << "on-top(" << top << ',' << bottom << ')';
     }
 
-    bool operator< (const Feature &rhs) const {
-      return rhs.gte(*this);
+    int compare(const Feature &rhs) const {
+      return -rhs.compare(*this);
     }
-    bool gte(const In_Place &rhs) const {
-      return true;
+    int compare(const In_Place &rhs) const {
+      return 1;
     }
-    bool gte(const On_Top &rhs) const {
-      return rhs.top < top || (rhs.top == top &&
-             rhs.bottom < bottom);
+    int compare(const On_Top &rhs) const {
+      return top != rhs.top ? top - rhs.top : bottom - rhs.bottom;
     }
 
     block_id top;

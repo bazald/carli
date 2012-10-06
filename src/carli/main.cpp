@@ -11,7 +11,7 @@
 #include "value.h"
 
 class Q_Value;
-class Q_Value : public Value, public Zeni::Pool_Allocator<Q_Value> {
+class Q_Value : public Value, public Zeni::Pool_Allocator<Q_Value>, public Zeni::Cloneable<Q_Value> {
   Q_Value(const Q_Value &);
   Q_Value & operator=(const Q_Value &);
 
@@ -23,6 +23,10 @@ public:
    : Value(q_value_),
    list(this)
   {
+  }
+
+  Q_Value * clone() const {
+    return new Q_Value(double(*this));
   }
 
   List list;

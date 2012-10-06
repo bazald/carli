@@ -363,6 +363,36 @@ namespace Zeni {
       return head;
     }
 
+    bool operator<(const Linked_List<TYPE> &rhs) const {return compare(rhs) < 0;}
+    bool operator<=(const Linked_List<TYPE> &rhs) const {return compare(rhs) <= 0;}
+    bool operator>(const Linked_List<TYPE> &rhs) const {return compare(rhs) > 0;}
+    bool operator>=(const Linked_List<TYPE> &rhs) const {return compare(rhs) >= 0;}
+    bool operator==(const Linked_List<TYPE> &rhs) const {return compare(rhs) == 0;}
+    bool operator!=(const Linked_List<TYPE> &rhs) const {return compare(rhs) != 0;}
+
+    int compare(const Linked_List<TYPE> &rhs) const {
+      auto it = begin();
+      auto iend = end();
+      auto jt = rhs.begin();
+      auto jend = rhs.end();
+
+      while(it != iend) {
+        if(jt != jend) {
+          if(*it < *jt)
+            return -1;
+          else if(*jt < *it)
+            return 1;
+        }
+        else
+          return 1;
+
+        ++it;
+        ++jt;
+      }
+
+      return jt != jend ? -1 : 0;
+    }
+
   private:
     size_t m_offset;
     list_pointer_type m_prev;

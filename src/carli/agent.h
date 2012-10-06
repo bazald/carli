@@ -1,10 +1,11 @@
 #ifndef AGENT_H
 #define AGENT_H
 
+#include "clone.h"
 #include "environment.h"
 
 template <typename DERIVED, typename DERIVED2>
-struct Feature : public Zeni::Pool_Allocator<DERIVED2> {
+struct Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
   typedef typename Zeni::Linked_List<DERIVED> List;
   typedef typename List::iterator iterator;
 
@@ -15,8 +16,6 @@ struct Feature : public Zeni::Pool_Allocator<DERIVED2> {
   }
 
   virtual ~Feature() {}
-
-  virtual Feature * clone() const = 0;
 
   void print(std::ostream &os) const {
     if(!present)
