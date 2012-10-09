@@ -1,5 +1,6 @@
 #include "memory_pool.h"
 #include "linked_list.h"
+#include "set.h"
 #include "random.h"
 
 #include <memory>
@@ -21,7 +22,7 @@ public:
 
   Q_Value(const double &q_value_ = double())
    : Value(q_value_),
-   list(this)
+   set(this)
   {
   }
 
@@ -29,7 +30,7 @@ public:
     return new Q_Value(double(*this));
   }
 
-  List list;
+  Zeni::Set<Q_Value> set;
 };
 
 int main(int argc, char **argv) {
@@ -48,6 +49,23 @@ int main(int argc, char **argv) {
   } while(agent->get_metastate() == Blocks_World::Agent::NON_TERMINAL);
 
   std::cout << "SUCCESS in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
+
+
+  Zeni::Set<Q_Value>::list_pointer_type q_values = nullptr;
+  (new Q_Value(42))->set.insert(q_values);
+  (new Q_Value(43))->set.insert(q_values);
+  (new Q_Value(40))->set.insert(q_values);
+  (new Q_Value(41))->set.insert(q_values);
+  std::for_each(q_values->begin(), q_values->end(), [](const Q_Value &q) {std::cout << q << std::endl;});
+  q_values->destroy();
+
+//   auto map = new Zeni::Map<Q_Value, int>;
+//   (*trie)[*q_values] = 42;
+//   delete map;
+
+//   auto trie = new Zeni::Trie<Q_Value, int>;
+//   (*trie)[q_values] = 42;
+//   delete trie;
 
   return 0;
 }

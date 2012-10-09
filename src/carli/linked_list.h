@@ -288,18 +288,24 @@ namespace Zeni {
 
       ptr = this;
     }
-    /// insert this list entry into the list; requires this to have !prev() && !next()
-    void insert_in_order(list_pointer_type &ptr) {
+    /** insert this list entry into the list; requires this to have !prev() && !next()
+     *  return true if inserted : false if not inserted
+     */ 
+    template <typename COMPARE = std::less<TYPE> >
+    std::pair<list_pointer_type, bool> insert_in_order(list_pointer_type &ptr, const bool &duplicate = true, const COMPARE &compare = COMPARE()) {
       if(ptr) {
         assert(m_offset == ptr->m_offset);
         assert(!m_prev && !m_next);
 
         list_pointer_type pptr = nullptr;
         list_pointer_type pp = ptr;
-        while(pp && **pp < **this) {
+        while(pp && compare(**pp, **this)) {
           pptr = pp;
           pp = pp->m_next;
         }
+
+        if(pp && !compare(**this, **pp))
+          return std::make_pair(this, false);
 
         if(pptr)
           pptr->m_next = this;
@@ -313,6 +319,8 @@ namespace Zeni {
       }
       else
         ptr = this;
+
+      return std::make_pair(this, true);
     }
 
     /// erase this entry from this list
@@ -324,6 +332,32 @@ namespace Zeni {
 
       m_prev = nullptr;
       m_next = nullptr;
+    }
+
+    /// Swap two list nodes
+    void swap(list_value_type &rhs) {
+      splice_prev(rhs);
+      splice_next(rhs);
+    }
+
+    void splice_prev(list_value_type &rhs) {
+      assert(m_offset == rhs.m_offset);
+
+      if(m_prev)
+        m_prev->m_next = &rhs;
+      std::swap(m_prev, rhs.m_prev);
+      if(m_prev)
+        m_prev->m_next = this;
+    }
+
+    void splice_next(list_value_type &rhs) {
+      assert(m_offset == rhs.m_offset);
+
+      if(m_next)
+        m_next->m_prev = &rhs;
+      std::swap(m_next, rhs.m_next);
+      if(m_next)
+        m_next->m_prev = this;
     }
 
     /// delete every entry in the list between begin() and end(), inclusive
