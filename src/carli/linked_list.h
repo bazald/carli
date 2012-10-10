@@ -288,8 +288,33 @@ namespace Zeni {
 
       ptr = this;
     }
+
+    template <typename COMPARE = std::less<TYPE> >
+    list_pointer_type find_gte(const value_type &value, const COMPARE &compare = COMPARE(), list_pointer_type * const &pptr = nullptr) {
+      if(pptr)
+        *pptr = nullptr;
+      list_pointer_type pp = this;
+      while(pp && compare(**pp, value)) {
+        if(pptr)
+          *pptr = pp;
+        pp = pp->m_next;
+      }
+
+      return pp;
+    }
+
+    template <typename COMPARE = std::less<TYPE> >
+    list_pointer_type find(const value_type &value, const COMPARE &compare = COMPARE(), list_pointer_type * const &pptr = nullptr) {
+      const list_pointer_type pp = find_gte(value, compare, pptr);
+
+      if(pp && !compare(value, **pp))
+        return pp;
+
+      return nullptr;
+    }
+
     /** insert this list entry into the list; requires this to have !prev() && !next()
-     *  return true if inserted : false if not inserted
+     *  return pointer to list entry, and true if inserted : false if not inserted
      */ 
     template <typename COMPARE = std::less<TYPE> >
     std::pair<list_pointer_type, bool> insert_in_order(list_pointer_type &ptr, const bool &duplicate = true, const COMPARE &compare = COMPARE()) {
@@ -298,13 +323,9 @@ namespace Zeni {
         assert(!m_prev && !m_next);
 
         list_pointer_type pptr = nullptr;
-        list_pointer_type pp = ptr;
-        while(pp && compare(**pp, **this)) {
-          pptr = pp;
-          pp = pp->m_next;
-        }
+        const list_pointer_type pp = ptr->find_gte(**this, compare, &pptr);
 
-        if(pp && !compare(**this, **pp))
+        if(pp && !duplicate && !compare(**this, **pp))
           return std::make_pair(this, false);
 
         if(pptr)

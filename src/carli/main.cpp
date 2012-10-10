@@ -1,6 +1,7 @@
 #include "memory_pool.h"
 #include "linked_list.h"
 #include "set.h"
+#include "map.h"
 #include "random.h"
 
 #include <memory>
@@ -17,12 +18,12 @@ class Q_Value : public Value, public Zeni::Pool_Allocator<Q_Value>, public Zeni:
   Q_Value & operator=(const Q_Value &);
 
 public:
-  typedef Zeni::Linked_List<Q_Value> List;
+  typedef Zeni::Map<std::string, Q_Value> List;
   typedef List::iterator iterator;
 
-  Q_Value(const double &q_value_ = double())
+  Q_Value(const double &q_value_ = double(), const std::string &key_ = std::string())
    : Value(q_value_),
-   set(this)
+   list(this, key_)
   {
   }
 
@@ -30,7 +31,7 @@ public:
     return new Q_Value(double(*this));
   }
 
-  Zeni::Set<Q_Value> set;
+  List list;
 };
 
 int main(int argc, char **argv) {
@@ -51,12 +52,13 @@ int main(int argc, char **argv) {
   std::cout << "SUCCESS in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
 
 
-  Zeni::Set<Q_Value>::list_pointer_type q_values = nullptr;
-  (new Q_Value(42))->set.insert(q_values);
-  (new Q_Value(43))->set.insert(q_values);
-  (new Q_Value(40))->set.insert(q_values);
-  (new Q_Value(41))->set.insert(q_values);
-  std::for_each(q_values->begin(), q_values->end(), [](const Q_Value &q) {std::cout << q << std::endl;});
+  Q_Value::List * q_values = nullptr;
+  (new Q_Value(42, "42"))->list.insert(q_values);
+  (new Q_Value(43, "haha"))->list.insert(q_values);
+  (new Q_Value(40, "hello"))->list.insert(q_values);
+  (new Q_Value(41, "world"))->list.insert(q_values);
+  q_values->set_key("1337");
+  std::for_each(q_values->begin(), q_values->end(), [](const Q_Value &q) {std::cout << q.list.get_key() << ':' << q << std::endl;});
   q_values->destroy();
 
 //   auto map = new Zeni::Map<Q_Value, int>;
