@@ -10,18 +10,16 @@ namespace Zeni {
   public:
     typedef TYPE value_type;
     typedef value_type * value_pointer_type;
-    typedef Set<TYPE, COMPARE> list_value_type;
-    typedef list_value_type * list_pointer_type;
+    typedef Set<TYPE, COMPARE> set_value_type;
+    typedef set_value_type * set_pointer_type;
 
     Set(value_pointer_type value)
      : Linked_List<TYPE>(value)
     {
     }
 
-    std::pair<list_pointer_type, bool> insert(list_pointer_type &ptr) {
-      auto rv = this->insert_in_order(ptr, false, COMPARE());
-
-      return std::make_pair(reinterpret_cast<list_pointer_type>(rv.first), rv.second);
+    set_pointer_type insert(set_pointer_type &ptr) {
+      return static_cast<set_pointer_type>(this->insert_in_order(ptr, false, COMPARE()));
     }
   };
 

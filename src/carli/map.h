@@ -12,8 +12,8 @@ namespace Zeni {
     typedef KEY key_type;
     typedef TYPE value_type;
     typedef value_type * value_pointer_type;
-    typedef Map<KEY, TYPE, COMPARE> list_value_type;
-    typedef list_value_type * list_pointer_type;
+    typedef Map<KEY, TYPE, COMPARE> map_value_type;
+    typedef map_value_type * map_pointer_type;
 
     Map(value_pointer_type value, const key_type &key_ = key_type())
      : Linked_List<TYPE>(value),
@@ -21,15 +21,14 @@ namespace Zeni {
     {
     }
 
-    std::pair<list_pointer_type, bool> insert(list_pointer_type &ptr) {
-      auto rv = this->insert_in_order(reinterpret_cast<Linked_List<TYPE> * &>(ptr), false, [this](const TYPE &lhs, const TYPE &rhs) {
-        const Map * const lm = reinterpret_cast<const Map<KEY, TYPE, COMPARE> *>(reinterpret_cast<const char *>(&lhs) + this->offset());
-        const Map * const rm = reinterpret_cast<const Map<KEY, TYPE, COMPARE> *>(reinterpret_cast<const char *>(&rhs) + this->offset());
+    map_pointer_type insert(map_pointer_type &ptr) {
+      return static_cast<map_pointer_type>(
+        this->insert_in_order(reinterpret_cast<Linked_List<TYPE> * &>(ptr), false, [this](const TYPE &lhs, const TYPE &rhs) {
+          const Map * const lm = reinterpret_cast<const Map *>(reinterpret_cast<const char *>(&lhs) + this->offset());
+          const Map * const rm = reinterpret_cast<const Map *>(reinterpret_cast<const char *>(&rhs) + this->offset());
 
-        return COMPARE()(lm->key, rm->key);
-      });
-
-      return std::make_pair(reinterpret_cast<list_pointer_type>(rv.first), rv.second);
+          return COMPARE()(lm->key, rm->key);
+        }));
     }
 
     const key_type & get_key() const {
@@ -37,9 +36,9 @@ namespace Zeni {
     }
 
     void set_key(const key_type &key_) {
-      if(this->prev() && COMPARE()(key_, static_cast<list_pointer_type>(this->prev())->key))
+      if(this->prev() && COMPARE()(key_, static_cast<map_pointer_type>(this->prev())->key))
         throw std::runtime_error("Illegal key modification in Zeni::Map::set_key.");
-      if(this->next() && COMPARE()(static_cast<list_pointer_type>(this->next())->key, key_))
+      if(this->next() && COMPARE()(static_cast<map_pointer_type>(this->next())->key, key_))
         throw std::runtime_error("Illegal key modification in Zeni::Map::set_key.");
       key = key_;
     }

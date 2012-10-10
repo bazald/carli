@@ -314,10 +314,10 @@ namespace Zeni {
     }
 
     /** insert this list entry into the list; requires this to have !prev() && !next()
-     *  return pointer to list entry, and true if inserted : false if not inserted
+     *  return same pointer if inserted, different pointer if already exists, duplicate == false, and deleted
      */ 
     template <typename COMPARE = std::less<TYPE> >
-    std::pair<list_pointer_type, bool> insert_in_order(list_pointer_type &ptr, const bool &duplicate = true, const COMPARE &compare = COMPARE()) {
+    list_pointer_type insert_in_order(list_pointer_type &ptr, const bool &duplicate = true, const COMPARE &compare = COMPARE()) {
       if(ptr) {
         assert(m_offset == ptr->m_offset);
         assert(!m_prev && !m_next);
@@ -325,8 +325,10 @@ namespace Zeni {
         list_pointer_type pptr = nullptr;
         const list_pointer_type pp = ptr->find_gte(**this, compare, &pptr);
 
-        if(pp && !duplicate && !compare(**this, **pp))
-          return std::make_pair(this, false);
+        if(pp && !duplicate && !compare(**this, **pp)) {
+          destroy();
+          return pp;
+        }
 
         if(pptr)
           pptr->m_next = this;
@@ -341,7 +343,7 @@ namespace Zeni {
       else
         ptr = this;
 
-      return std::make_pair(this, true);
+      return this;
     }
 
     /// erase this entry from this list
@@ -353,32 +355,6 @@ namespace Zeni {
 
       m_prev = nullptr;
       m_next = nullptr;
-    }
-
-    /// Swap two list nodes
-    void swap(list_value_type &rhs) {
-      splice_prev(rhs);
-      splice_next(rhs);
-    }
-
-    void splice_prev(list_value_type &rhs) {
-      assert(m_offset == rhs.m_offset);
-
-      if(m_prev)
-        m_prev->m_next = &rhs;
-      std::swap(m_prev, rhs.m_prev);
-      if(m_prev)
-        m_prev->m_next = this;
-    }
-
-    void splice_next(list_value_type &rhs) {
-      assert(m_offset == rhs.m_offset);
-
-      if(m_next)
-        m_next->m_prev = &rhs;
-      std::swap(m_next, rhs.m_next);
-      if(m_next)
-        m_next->m_prev = this;
     }
 
     /// delete every entry in the list between begin() and end(), inclusive

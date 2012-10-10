@@ -2,6 +2,7 @@
 #include "linked_list.h"
 #include "set.h"
 #include "map.h"
+#include "trie.h"
 #include "random.h"
 
 #include <memory>
@@ -34,6 +35,10 @@ public:
   List list;
 };
 
+typedef std::string test_key;
+typedef int test_value;
+typedef Zeni::Trie<test_key, test_value> test_trie;
+
 int main(int argc, char **argv) {
   Zeni::register_new_handler();
 
@@ -54,12 +59,34 @@ int main(int argc, char **argv) {
 
   Q_Value::List * q_values = nullptr;
   (new Q_Value(42, "42"))->list.insert(q_values);
+  (new Q_Value(42, "42"))->list.insert(q_values);
   (new Q_Value(43, "haha"))->list.insert(q_values);
   (new Q_Value(40, "hello"))->list.insert(q_values);
   (new Q_Value(41, "world"))->list.insert(q_values);
   q_values->set_key("1337");
   std::for_each(q_values->begin(), q_values->end(), [](const Q_Value &q) {std::cout << q.list.get_key() << ':' << q << std::endl;});
   q_values->destroy();
+
+  test_trie * trie = nullptr;
+  test_trie::list_pointer_type key = nullptr;
+  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
+  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("world"))->insert_before(key);
+  **reinterpret_cast<test_trie *>(key)->insert(trie) = 10;
+  key = nullptr;
+//   reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
+//   reinterpret_cast<test_trie::list_pointer_type>(new test_trie("you"))->insert_before(key);
+//   **reinterpret_cast<test_trie *>(key)->insert(trie) = 20;
+//   key = nullptr;
+  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
+  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("world"))->insert_before(key);
+  reinterpret_cast<test_trie *>(key)->insert(trie);
+//   std::cout << **reinterpret_cast<test_trie *>(key)->insert(trie) << std::endl;
+  key = nullptr;
+//   reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
+//   reinterpret_cast<test_trie::list_pointer_type>(new test_trie("you"))->insert_before(key);
+//   std::cout << **reinterpret_cast<test_trie *>(key)->insert(trie) << std::endl;
+//   key = nullptr;
+  delete trie;
 
 //   auto map = new Zeni::Map<Q_Value, int>;
 //   (*trie)[*q_values] = 42;

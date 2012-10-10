@@ -3,6 +3,7 @@
 
 #include "clone.h"
 #include "environment.h"
+#include "trie.h"
 
 template <typename DERIVED, typename DERIVED2>
 struct Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
