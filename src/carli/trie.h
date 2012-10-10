@@ -41,14 +41,14 @@ namespace Zeni {
       auto next = m_map.next();
       m_map.erase();
 
-      auto thisp = m_map.insert(reinterpret_cast<map_pointer_type &>(ptr)); /// this possibly deleted
+      auto thisp = reinterpret_cast<trie_pointer_type>(m_map.insert(reinterpret_cast<map_pointer_type &>(ptr))); /// this possibly deleted
 
       if(next)
-        return reinterpret_cast<trie_pointer_type>(next)->insert(m_deeper);
+        return reinterpret_cast<trie_pointer_type>(next)->insert(thisp->m_deeper);
       else {
-        if(!reinterpret_cast<trie_pointer_type>(thisp)->m_value)
-          reinterpret_cast<trie_pointer_type>(thisp)->m_value = new value_type;
-        return reinterpret_cast<trie_pointer_type>(thisp);
+        if(!thisp->m_value)
+          thisp->m_value = new value_type;
+        return thisp;
       }
     }
 

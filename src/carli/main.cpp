@@ -73,19 +73,18 @@ int main(int argc, char **argv) {
   reinterpret_cast<test_trie::list_pointer_type>(new test_trie("world"))->insert_before(key);
   **reinterpret_cast<test_trie *>(key)->insert(trie) = 10;
   key = nullptr;
-//   reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
-//   reinterpret_cast<test_trie::list_pointer_type>(new test_trie("you"))->insert_before(key);
-//   **reinterpret_cast<test_trie *>(key)->insert(trie) = 20;
-//   key = nullptr;
+  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
+  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("you"))->insert_before(key);
+  **reinterpret_cast<test_trie *>(key)->insert(trie) = 20;
+  key = nullptr;
   reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
   reinterpret_cast<test_trie::list_pointer_type>(new test_trie("world"))->insert_before(key);
-  reinterpret_cast<test_trie *>(key)->insert(trie);
-//   std::cout << **reinterpret_cast<test_trie *>(key)->insert(trie) << std::endl;
+  std::cout << **reinterpret_cast<test_trie *>(key)->insert(trie) << std::endl;
   key = nullptr;
-//   reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
-//   reinterpret_cast<test_trie::list_pointer_type>(new test_trie("you"))->insert_before(key);
-//   std::cout << **reinterpret_cast<test_trie *>(key)->insert(trie) << std::endl;
-//   key = nullptr;
+  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
+  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("you"))->insert_before(key);
+  std::cout << **reinterpret_cast<test_trie *>(key)->insert(trie) << std::endl;
+  key = nullptr;
   delete trie;
 
 //   auto map = new Zeni::Map<Q_Value, int>;
