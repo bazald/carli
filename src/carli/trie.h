@@ -10,7 +10,7 @@ namespace Zeni {
   class Trie;
 
   template<typename KEY, typename TYPE, typename COMPARE>
-  class Trie /*: public Zeni::Pool_Allocator<Trie<KEY, TYPE, COMPARE> >*/ {
+  class Trie : public Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>, public Zeni::Pool_Allocator<Trie<KEY, TYPE, COMPARE> > {
   public:
     typedef KEY key_type;
     typedef KEY * key_pointer_type;
@@ -26,25 +26,37 @@ namespace Zeni {
 
   public:
     Trie(const key_type &key_ = key_type())
-     : m_map(this, key_),
+     : Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>(this, key_),
      m_deeper(nullptr),
      m_value(nullptr)
     {
     }
 
     ~Trie() {
-      m_deeper->m_map.destroy();
+      if(m_deeper)
+        m_deeper->destroy();
       delete m_value;
     }
 
-    trie_pointer_type insert(trie_pointer_type &ptr) {
-      auto next = m_map.next();
-      m_map.erase();
+    void list_insert_after(const trie_pointer_type &ptr) {
+      list_value_type::insert_after(ptr);
+    }
+    void list_insert_before(trie_pointer_type &ptr) {
+      auto lp = static_cast<list_pointer_type>(ptr);
+      list_value_type::insert_before(lp);
+      ptr = static_cast<trie_pointer_type>(lp);
+    }
 
-      auto thisp = reinterpret_cast<trie_pointer_type>(m_map.insert(reinterpret_cast<map_pointer_type &>(ptr))); /// this possibly deleted
+    trie_pointer_type insert(trie_pointer_type &ptr) {
+      auto next = this->next();
+      this->erase();
+
+      auto mp = static_cast<map_pointer_type>(ptr);
+      auto thisp = static_cast<trie_pointer_type>(this->Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>::insert(mp)); ///< this possibly deleted
+      ptr = static_cast<trie_pointer_type>(mp);
 
       if(next)
-        return reinterpret_cast<trie_pointer_type>(next)->insert(thisp->m_deeper);
+        return static_cast<trie_pointer_type>(next)->insert(thisp->m_deeper);
       else {
         if(!thisp->m_value)
           thisp->m_value = new value_type;
@@ -66,7 +78,6 @@ namespace Zeni {
     }
 
   private:
-    Map<KEY, trie_value_type, COMPARE> m_map;
     trie_pointer_type m_deeper;
     value_pointer_type m_value;
   };

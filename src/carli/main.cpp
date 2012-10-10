@@ -68,22 +68,22 @@ int main(int argc, char **argv) {
   q_values->destroy();
 
   test_trie * trie = nullptr;
-  test_trie::list_pointer_type key = nullptr;
-  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
-  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("world"))->insert_before(key);
-  **reinterpret_cast<test_trie *>(key)->insert(trie) = 10;
+  test_trie * key = nullptr;
+  (new test_trie("hello"))->list_insert_before(key);
+  (new test_trie("world"))->list_insert_before(key);
+  **key->insert(trie) = 10;
   key = nullptr;
-  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
-  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("you"))->insert_before(key);
-  **reinterpret_cast<test_trie *>(key)->insert(trie) = 20;
+  (new test_trie("hello"))->list_insert_before(key);
+  (new test_trie("you"))->list_insert_before(key);
+  **key->insert(trie)->insert(trie) = 20;
   key = nullptr;
-  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
-  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("world"))->insert_before(key);
-  std::cout << **reinterpret_cast<test_trie *>(key)->insert(trie) << std::endl;
+  (new test_trie("hello"))->list_insert_before(key);
+  (new test_trie("world"))->list_insert_before(key);
+  std::cout << **key->insert(trie) << std::endl;
   key = nullptr;
-  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("hello"))->insert_before(key);
-  reinterpret_cast<test_trie::list_pointer_type>(new test_trie("you"))->insert_before(key);
-  std::cout << **reinterpret_cast<test_trie *>(key)->insert(trie) << std::endl;
+  (new test_trie("hello"))->list_insert_before(key);
+  (new test_trie("you"))->list_insert_before(key);
+  std::cout << **key->insert(trie) << std::endl;
   key = nullptr;
   delete trie;
 
