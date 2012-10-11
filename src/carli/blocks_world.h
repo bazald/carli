@@ -226,6 +226,44 @@ namespace Blocks_World {
     reward_type act_impl() {
       auto env = std::dynamic_pointer_cast<const Environment>(get_env());
 
+      auto action = choose_epsilon_greedily(0.1);
+      const reward_type reward =  get_env()->transition(*action);
+      Value &value = **get_value(*action);
+
+      m_metastate = env->get_blocks() == env->get_goal() ? SUCCESS : NON_TERMINAL;
+
+      return reward;
+    }
+
+    const Blocks_World::Environment::action_type * choose_epsilon_greedily(const double &epsilon) {
+      if(random.rand_lt(1.0) < epsilon)
+        return choose_randomly();
+      else
+        return choose_greedily();
+    }
+
+    const Blocks_World::Environment::action_type * choose_greedily() {
+      double value = double();
+      const Blocks_World::Environment::action_type * action = nullptr;
+      std::for_each(m_candidates->begin(), m_candidates->end(), [this,&action,&value](const Blocks_World::Environment::action_type &action_) {
+        if(!action) {
+          action = &action_;
+          value = **get_value(action_);
+        }
+        else {
+          auto trie = get_value(action_);
+          const double value_ = **trie;
+          if(value_ < value) {
+            action = &action_;
+            value = value_;
+          }
+        }
+      });
+
+      return action;
+    }
+
+    const Blocks_World::Environment::action_type * choose_randomly() {
       int counter = 0;
       std::for_each(m_candidates->begin(), m_candidates->end(), [&counter](const Blocks_World::Environment::action_type &) {
         ++counter;
@@ -238,11 +276,7 @@ namespace Blocks_World {
           action = &action_;
       });
 
-      const reward_type reward =  get_env()->transition(*action);
-
-      m_metastate = env->get_blocks() == env->get_goal() ? SUCCESS : NON_TERMINAL;
-
-      return reward;
+      return action;
     }
 
     void print_impl(std::ostream &os) const {

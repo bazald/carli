@@ -123,8 +123,6 @@ public:
   void act() {
     const reward_type reward = act_impl();
 
-    auto value = get_value(**m_candidates);
-
     m_total_reward += reward;
     ++m_step_count;
 
