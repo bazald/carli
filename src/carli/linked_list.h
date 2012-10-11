@@ -318,9 +318,10 @@ namespace Zeni {
      */ 
     template <typename COMPARE = std::less<TYPE> >
     list_pointer_type insert_in_order(list_pointer_type &ptr, const bool &duplicate = true, const COMPARE &compare = COMPARE()) {
+      assert(!m_prev && !m_next);
+
       if(ptr) {
         assert(m_offset == ptr->m_offset);
-        assert(!m_prev && !m_next);
 
         list_pointer_type pptr = nullptr;
         const list_pointer_type pp = ptr->find_gte(**this, compare, &pptr);

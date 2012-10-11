@@ -24,13 +24,6 @@ namespace Blocks_World {
     {
     }
 
-    bool operator<(const Feature &rhs) const {return compare(rhs) < 0;}
-    bool operator<=(const Feature &rhs) const {return compare(rhs) <= 0;}
-    bool operator>(const Feature &rhs) const {return compare(rhs) > 0;}
-    bool operator>=(const Feature &rhs) const {return compare(rhs) >= 0;}
-    bool operator==(const Feature &rhs) const {return compare(rhs) == 0;}
-    bool operator!=(const Feature &rhs) const {return compare(rhs) != 0;}
-
     virtual int compare(const Feature &rhs) const = 0;
     virtual int compare(const In_Place &rhs) const = 0;
     virtual int compare(const On_Top &rhs) const = 0;
@@ -108,7 +101,7 @@ namespace Blocks_World {
   };
 
   struct Move;
-  typedef Action<Move> action_type;
+  typedef Action<Move, Move> action_type;
 
   struct Move : public action_type {
     Move()
@@ -121,6 +114,14 @@ namespace Blocks_World {
      : block(block_),
      dest(dest_)
     {
+    }
+
+    Move * clone() const {
+      return new Move(block, dest);
+    }
+
+    int compare(const Move &rhs) const {
+      return block != rhs.block ? block - rhs.block : dest - rhs.dest;
     }
 
     void print_impl(std::ostream &os) const {

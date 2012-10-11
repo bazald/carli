@@ -4,11 +4,28 @@
 #include "clone.h"
 #include "environment.h"
 #include "trie.h"
+#include "value.h"
 
-template <typename DERIVED, typename DERIVED2>
+#include <map>
+
+template <typename DERIVED, typename DERIVED2 = DERIVED>
 struct Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
   typedef typename Zeni::Linked_List<DERIVED> List;
   typedef typename List::iterator iterator;
+
+  struct Compare {
+    bool operator()(const Feature &lhs, const Feature &rhs) const {
+      return lhs < rhs;
+    }
+
+    bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {
+      return *lhs < *rhs;
+    }
+
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {
+      return *lhs < *rhs;
+    }
+  };
 
   Feature(const bool &present_ = true)
     : features(static_cast<DERIVED *>(this)),
@@ -18,10 +35,21 @@ struct Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<D
 
   virtual ~Feature() {}
 
+  bool operator<(const Feature &rhs) const {return compare(rhs) < 0;}
+  bool operator<=(const Feature &rhs) const {return compare(rhs) <= 0;}
+  bool operator>(const Feature &rhs) const {return compare(rhs) > 0;}
+  bool operator>=(const Feature &rhs) const {return compare(rhs) >= 0;}
+  bool operator==(const Feature &rhs) const {return compare(rhs) == 0;}
+  bool operator!=(const Feature &rhs) const {return compare(rhs) != 0;}
+
   void print(std::ostream &os) const {
     if(!present)
       os << '!';
     print_impl(os);
+  }
+
+  int compare(const Feature &rhs) const {
+    return dynamic_cast<const DERIVED *>(this)->compare(dynamic_cast<const DERIVED &>(rhs));
   }
 
   virtual void print_impl(std::ostream &os) const = 0;
@@ -47,7 +75,10 @@ public:
   typedef typename FEATURE::List * feature_list;
   typedef ACTION action_type;
   typedef typename ACTION::List * action_list;
+  typedef Zeni::Trie<std::shared_ptr<feature_type>, Value, typename feature_type::Compare> feature_trie_type;
+  typedef feature_trie_type * feature_trie;
   typedef Environment<action_type> environment_type;
+  typedef std::map<std::shared_ptr<action_type>, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
   typedef size_t step_count_type;
   enum metastate_type {NON_TERMINAL, SUCCESS, FAILURE};
@@ -65,6 +96,10 @@ public:
   virtual ~Agent() {
     assert(!m_features);
     assert(!m_candidates);
+
+    for_each(m_value_function.begin(), m_value_function.end(), [](const typename value_function_type::value_type &trie) {
+      trie.second->destroy();
+    });
   }
 
   std::shared_ptr<const environment_type> get_env() const {return m_environment.lock();}
@@ -88,6 +123,8 @@ public:
   void act() {
     const reward_type reward = act_impl();
 
+    auto value = get_value(**m_candidates);
+
     m_total_reward += reward;
     ++m_step_count;
 
@@ -100,6 +137,30 @@ public:
   }
 
 protected:
+  feature_trie get_value(const action_type &action) {
+    feature_trie head = nullptr;
+
+    if(m_features) {
+      auto it = m_features->begin();
+      auto iend = m_features->end();
+
+      if(it != iend) {
+        head = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
+        auto tail = head;
+        ++it;
+
+        while(it != iend) {
+          auto ptr = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
+          ptr->insert_after(tail);
+          tail = ptr;
+          ++it;
+        }
+      }
+    }
+
+    return head->insert(m_value_function[std::shared_ptr<action_type>(action.clone())]);
+  }
+
   metastate_type m_metastate;
   feature_list m_features;
   action_list m_candidates;
@@ -110,6 +171,8 @@ private:
   virtual void print_impl(std::ostream &os) const = 0;
   virtual void generate_lists() = 0;
   virtual void destroy_lists() = 0;
+
+  value_function_type m_value_function;
 
   std::weak_ptr<environment_type> m_environment;
 

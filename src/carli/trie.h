@@ -11,6 +11,9 @@ namespace Zeni {
 
   template<typename KEY, typename TYPE, typename COMPARE>
   class Trie : public Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>, public Zeni::Pool_Allocator<Trie<KEY, TYPE, COMPARE> > {
+    Trie(const Trie &);
+    Trie operator=(const Trie &);
+
   public:
     typedef KEY key_type;
     typedef KEY * key_pointer_type;
@@ -46,13 +49,23 @@ namespace Zeni {
       list_value_type::insert_before(lp);
       ptr = static_cast<trie_pointer_type>(lp);
     }
+    trie_pointer_type list_insert_in_order(trie_pointer_type &ptr) {
+      auto lp = static_cast<list_pointer_type>(ptr);
+      auto rv = list_value_type::insert_in_order(lp, false, COMPARE());
+      ptr = static_cast<trie_pointer_type>(lp);
+      return static_cast<trie_pointer_type>(rv);
+    }
 
+    ///< Destroy a Trie-list, returning a pointer to the leaf
     trie_pointer_type insert(trie_pointer_type &ptr) {
+      if(!this)
+        return ptr;
+
       auto next = this->next();
       this->erase();
 
       auto mp = static_cast<map_pointer_type>(ptr);
-      auto thisp = static_cast<trie_pointer_type>(this->Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>::insert(mp)); ///< this possibly deleted
+      auto thisp = static_cast<trie_pointer_type>(this->map_value_type::insert(mp)); ///< this possibly deleted
       ptr = static_cast<trie_pointer_type>(mp);
 
       if(next)

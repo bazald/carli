@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
   key = nullptr;
   (new test_trie("hello"))->list_insert_before(key);
   (new test_trie("you"))->list_insert_before(key);
-  **key->insert(trie)->insert(trie) = 20;
+  **key->insert(trie) = 20;
   key = nullptr;
   (new test_trie("hello"))->list_insert_before(key);
   (new test_trie("world"))->list_insert_before(key);
@@ -85,15 +85,15 @@ int main(int argc, char **argv) {
   (new test_trie("you"))->list_insert_before(key);
   std::cout << **key->insert(trie) << std::endl;
   key = nullptr;
-  delete trie;
+  trie->destroy();
 
 //   auto map = new Zeni::Map<Q_Value, int>;
 //   (*trie)[*q_values] = 42;
-//   delete map;
+//   map->destroy();
 
 //   auto trie = new Zeni::Trie<Q_Value, int>;
 //   (*trie)[q_values] = 42;
-//   delete trie;
+//   trie->destroy();
 
   return 0;
 }

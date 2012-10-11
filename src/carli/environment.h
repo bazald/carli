@@ -4,13 +4,28 @@
 #include <memory>
 #include <utility>
 
+#include "clone.h"
 #include "linked_list.h"
 #include "memory_pool.h"
 
-template <typename TYPE>
-struct Action : public Zeni::Pool_Allocator<TYPE> {
+template <typename DERIVED, typename DERIVED2 = DERIVED>
+struct Action : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
   typedef typename Zeni::Linked_List<Action> List;
   typedef typename List::iterator iterator;
+
+  struct Compare {
+    bool operator()(const Action &lhs, const Action &rhs) const {
+      return lhs < rhs;
+    }
+
+    bool operator()(const Action * const &lhs, const Action * const &rhs) const {
+      return *lhs < *rhs;
+    }
+
+    bool operator()(const std::shared_ptr<const Action> &lhs, const std::shared_ptr<const Action> &rhs) const {
+      return *lhs < *rhs;
+    }
+  };
 
   Action()
     : candidates(this)
@@ -19,8 +34,19 @@ struct Action : public Zeni::Pool_Allocator<TYPE> {
 
   virtual ~Action() {}
 
+  bool operator<(const Action &rhs) const {return compare(rhs) < 0;}
+  bool operator<=(const Action &rhs) const {return compare(rhs) <= 0;}
+  bool operator>(const Action &rhs) const {return compare(rhs) > 0;}
+  bool operator>=(const Action &rhs) const {return compare(rhs) >= 0;}
+  bool operator==(const Action &rhs) const {return compare(rhs) == 0;}
+  bool operator!=(const Action &rhs) const {return compare(rhs) != 0;}
+
   void print(std::ostream &os) const {
     print_impl(os);
+  }
+
+  int compare(const Action &rhs) const {
+    return dynamic_cast<const DERIVED *>(this)->compare(dynamic_cast<const DERIVED &>(rhs));
   }
 
   virtual void print_impl(std::ostream &os) const = 0;
@@ -28,8 +54,8 @@ struct Action : public Zeni::Pool_Allocator<TYPE> {
   List candidates;
 };
 
-template <typename TYPE>
-std::ostream & operator << (std::ostream &os, const Action<TYPE> &action) {
+template <typename DERIVED, typename DERIVED2>
+std::ostream & operator << (std::ostream &os, const Action<DERIVED, DERIVED2> &action) {
   action.print(os);
   return os;
 }
