@@ -12,6 +12,11 @@ public:
   {
   }
 
+  Value & operator=(const double &q_value_) {
+    value = q_value_;
+    return *this;
+  }
+
   operator double () const {return value;}
   operator double & () {return value;}
 

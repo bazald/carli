@@ -4,7 +4,7 @@
 #include "clone.h"
 #include "environment.h"
 #include "trie.h"
-#include "value.h"
+#include "q_value.h"
 
 #include <map>
 
@@ -75,7 +75,7 @@ public:
   typedef typename FEATURE::List * feature_list;
   typedef ACTION action_type;
   typedef typename ACTION::List * action_list;
-  typedef Zeni::Trie<std::shared_ptr<feature_type>, Value, typename feature_type::Compare> feature_trie_type;
+  typedef Zeni::Trie<std::shared_ptr<feature_type>, Q_Value, typename feature_type::Compare> feature_trie_type;
   typedef feature_trie_type * feature_trie;
   typedef Environment<action_type> environment_type;
   typedef std::map<std::shared_ptr<action_type>, feature_trie, typename action_type::Compare> value_function_type;
@@ -135,7 +135,7 @@ public:
   }
 
 protected:
-  feature_trie get_value(const action_type &action) {
+  Q_Value * get_value(const action_type &action, const size_t &offset) {
     feature_trie head = nullptr;
 
     if(m_features) {
@@ -156,7 +156,7 @@ protected:
       }
     }
 
-    return head->insert(m_value_function[std::shared_ptr<action_type>(action.clone())]);
+    return head->insert(m_value_function[std::shared_ptr<action_type>(action.clone())], offset)->get();
   }
 
   metastate_type m_metastate;

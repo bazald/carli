@@ -9,6 +9,8 @@
 #include <list>
 #include <stdexcept>
 
+#include <iostream>
+
 namespace Blocks_World {
   
   typedef int block_id;
@@ -227,8 +229,9 @@ namespace Blocks_World {
       auto env = std::dynamic_pointer_cast<const Environment>(get_env());
 
       auto action = choose_epsilon_greedily(0.1);
-      const reward_type reward =  get_env()->transition(*action);
-      Value &value = **get_value(*action);
+      const reward_type reward = get_env()->transition(*action);
+
+      Value * value_ptr = get_value(*action, Q_Value::current_offset());
 
       m_metastate = env->get_blocks() == env->get_goal() ? SUCCESS : NON_TERMINAL;
 
@@ -236,23 +239,24 @@ namespace Blocks_World {
     }
 
     const Blocks_World::Environment::action_type * choose_epsilon_greedily(const double &epsilon) {
-      if(random.rand_lt(1.0) < epsilon)
+      if(random.frand_lt() < epsilon)
         return choose_randomly();
       else
         return choose_greedily();
     }
 
     const Blocks_World::Environment::action_type * choose_greedily() {
+      std::cerr << "    choose_greedily" << std::endl;
+
       double value = double();
       const Blocks_World::Environment::action_type * action = nullptr;
       std::for_each(m_candidates->begin(), m_candidates->end(), [this,&action,&value](const Blocks_World::Environment::action_type &action_) {
         if(!action) {
           action = &action_;
-          value = **get_value(action_);
+          value = sum_value(get_value(action_, Q_Value::current_offset())->current);
         }
         else {
-          auto trie = get_value(action_);
-          const double value_ = **trie;
+          const double value_ = sum_value(get_value(action_, Q_Value::current_offset())->current);
           if(value_ < value) {
             action = &action_;
             value = value_;
@@ -264,6 +268,8 @@ namespace Blocks_World {
     }
 
     const Blocks_World::Environment::action_type * choose_randomly() {
+      std::cerr << "    choose_randomly" << std::endl;
+
       int counter = 0;
       std::for_each(m_candidates->begin(), m_candidates->end(), [&counter](const Blocks_World::Environment::action_type &) {
         ++counter;
@@ -277,6 +283,21 @@ namespace Blocks_World {
       });
 
       return action;
+    }
+
+    double sum_value(const Q_Value::List &value_list) {
+      std::cerr << "      sum_value(";
+
+      double sum = double();
+      for_each(value_list.begin(), value_list.end(), [&sum](const Q_Value &value) {
+        std::cerr << ' ' << value;
+
+        sum += value;
+      });
+
+      std::cerr << " )" << std::endl;
+
+      return sum;
     }
 
     void print_impl(std::ostream &os) const {

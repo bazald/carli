@@ -56,8 +56,11 @@ namespace Zeni {
       return static_cast<trie_pointer_type>(rv);
     }
 
-    ///< Destroy a Trie-list, returning a pointer to the leaf
-    trie_pointer_type insert(trie_pointer_type &ptr) {
+    /** Destroy a Trie-list, returning a pointer to the leaf if no offset is specified
+     *  If an offset is specified, return a pointer to the most general match with a value first,
+     *    and treat the value+offset as a Linked_List, stringing together general-to-specific values.
+     */
+    trie_pointer_type insert(trie_pointer_type &ptr, const size_t &offset = size_t(-1)) {
       if(!this)
         return ptr;
 
@@ -68,15 +71,12 @@ namespace Zeni {
       auto thisp = static_cast<trie_pointer_type>(this->map_value_type::insert(mp)); ///< this possibly deleted
       ptr = static_cast<trie_pointer_type>(mp);
 
-      if(next)
-        return static_cast<trie_pointer_type>(next)->insert(thisp->m_deeper);
-      else {
-        if(!thisp->m_value)
-          thisp->m_value = new value_type;
-        return thisp;
-      }
+      return thisp->finish_insert(ptr, offset, next);
     }
 
+    value_pointer_type get() const {
+      return m_value;
+    }
     const value_reference_type operator*() const {
       return *m_value;
     }
@@ -91,6 +91,33 @@ namespace Zeni {
     }
 
   private:
+    trie_pointer_type finish_insert(trie_pointer_type &ptr, const size_t &offset, const list_pointer_type &next) {
+      if(next) {
+        auto deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, offset);
+        if(offset != size_t(-1) && m_value) {
+          auto lhs = reinterpret_cast<Linked_List<value_type> *>(reinterpret_cast<char *>(m_value) + offset);
+          assert(lhs->offset() == offset);
+          auto rhs = reinterpret_cast<Linked_List<value_type> *>(reinterpret_cast<char *>(deeper->m_value) + offset);
+          assert(rhs->offset() == offset);
+          lhs->erase();
+          lhs->insert_before(rhs);
+        }
+        else
+          return deeper;
+      }
+      else {
+        if(!m_value)
+          m_value = new value_type;
+        if(offset != size_t(-1)) {
+          auto lhs = reinterpret_cast<Linked_List<value_type> *>(reinterpret_cast<char *>(m_value) + offset);
+          assert(lhs->offset() == offset);
+          lhs->erase();
+        }
+      }
+
+      return this;
+    }
+
     trie_pointer_type m_deeper;
     value_pointer_type m_value;
   };
