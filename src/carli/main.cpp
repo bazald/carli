@@ -1,3 +1,5 @@
+// #define DEBUG_OUTPUT
+
 #include "memory_pool.h"
 #include "linked_list.h"
 #include "set.h"
@@ -29,11 +31,15 @@ int main(int argc, char **argv) {
     env->init();
     agent->init();
 
-    std::cerr << *env /*<< *agent*/;
+#ifdef DEBUG_OUTPUT
+    std::cerr << *env << *agent;
+#endif
     do {
       agent->act();
 
-      std::cerr << *env /*<< *agent*/;
+#ifdef DEBUG_OUTPUT
+      std::cerr << *env << *agent;
+#endif
     } while(agent->get_metastate() == Blocks_World::Agent::NON_TERMINAL);
 
     std::cout << "SUCCESS in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
