@@ -32,27 +32,26 @@
 
 #include <cassert>
 #include <cstdlib>
-
-#include <SDL/SDL_stdinc.h>
+#include <stdint.h>
 
 namespace Zeni {
 
   class Random {
   public:
-    Random(const Uint32 &seed = Uint32(std::rand()))
+    Random(const uint32_t &seed = uint32_t(std::rand()))
      : m_random_value(seed)
     {
     }
 
     /// Get the maximum size of a random integer returned from rand()
-    Sint32 rand_max() const {
+    int32_t rand_max() const {
       return 32767;
     }
 
     /// Get a random integer in the range [0, rand_max()]
-    Sint32 rand() {
+    int32_t rand() {
       m_random_value = m_random_value * 1103515245 + 12345;
-      return Sint32(static_cast<Sint32>(m_random_value / 65536) % (rand_max() + 1));
+      return int32_t(static_cast<int32_t>(m_random_value / 65536) % (rand_max() + 1));
     }
 
     /// Get a random floating point number in the range [0.0f, 1.0f)
@@ -66,19 +65,19 @@ namespace Zeni {
     }
 
     /// Get a random integer in the range [0, mod)
-    Sint32 rand_lt(const Sint32 &mod) {
+    int32_t rand_lt(const int32_t &mod) {
       assert(mod <= rand_max() + 1);
-      return Sint32(frand_lt() * mod);
+      return int32_t(frand_lt() * mod);
     }
 
     /// Get a random integer in the range [0, mod]
-    Sint32 rand_lte(const Sint32 &mod) {
+    int32_t rand_lte(const int32_t &mod) {
       assert(mod <= rand_max());
-      return Sint32(frand_lt() * (mod + 1));
+      return int32_t(frand_lt() * (mod + 1));
     }
 
   private:
-    Uint32 m_random_value;
+    uint32_t m_random_value;
   };
 
 }

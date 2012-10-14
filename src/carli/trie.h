@@ -71,7 +71,7 @@ namespace Zeni {
       auto thisp = static_cast<trie_pointer_type>(this->map_value_type::insert(mp)); ///< this possibly deleted
       ptr = static_cast<trie_pointer_type>(mp);
 
-      return thisp->finish_insert(ptr, offset, next);
+      return thisp->finish_insert(offset, next);
     }
 
     value_pointer_type get() const {
@@ -91,7 +91,7 @@ namespace Zeni {
     }
 
   private:
-    trie_pointer_type finish_insert(trie_pointer_type &ptr, const size_t &offset, const list_pointer_type &next) {
+    trie_pointer_type finish_insert(const size_t &offset, const list_pointer_type &next) {
       if(next) {
         auto deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, offset);
         if(offset != size_t(-1) && m_value) {

@@ -23,9 +23,9 @@ namespace Zeni {
 
     map_pointer_type insert(map_pointer_type &ptr) {
       return static_cast<map_pointer_type>(
-        this->insert_in_order(reinterpret_cast<Linked_List<TYPE> * &>(ptr), false, [this](const TYPE &lhs, const TYPE &rhs) {
-          const Map * const lm = reinterpret_cast<const Map *>(reinterpret_cast<const char *>(&lhs) + this->offset());
-          const Map * const rm = reinterpret_cast<const Map *>(reinterpret_cast<const char *>(&rhs) + this->offset());
+        this->insert_in_order(reinterpret_cast<Linked_List<TYPE> * &>(ptr), false, [this](const TYPE &lhs, const TYPE &rhs)->bool{
+          const Map<KEY, TYPE, COMPARE> * const lm = reinterpret_cast<const Map<KEY, TYPE, COMPARE> *>(reinterpret_cast<const char *>(&lhs) + this->offset());
+          const Map<KEY, TYPE, COMPARE> * const rm = reinterpret_cast<const Map<KEY, TYPE, COMPARE> *>(reinterpret_cast<const char *>(&rhs) + this->offset());
 
           return COMPARE()(lm->key, rm->key);
         }));

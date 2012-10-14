@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <cstring>
+#include <ctime>
 #include <iostream>
 #include <list>
 
@@ -22,7 +23,7 @@ typedef Zeni::Trie<test_key, test_value> test_trie;
 int main(int argc, char **argv) {
   Zeni::register_new_handler();
 
-  srand(time(0));
+  srand(uint32_t(time(0)));
 
   auto env = std::make_shared<Blocks_World::Environment>();
   auto agent = std::make_shared<Blocks_World::Agent>(env);

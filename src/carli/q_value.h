@@ -40,6 +40,7 @@ public:
       const char * c;
     } u;
     
+    u.c = nullptr;
     u.m = &Q_Value::current;
     return u.c - static_cast<char *>(nullptr);
   }
@@ -50,6 +51,7 @@ public:
       const char * c;
     } u;
     
+    u.c = nullptr;
     u.m = &Q_Value::next;
     return u.c - static_cast<char *>(nullptr);
   }

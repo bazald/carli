@@ -7,6 +7,7 @@
 #include "q_value.h"
 #include "random.h"
 
+#include <functional>
 #include <map>
 
 template <typename DERIVED, typename DERIVED2 = DERIVED>
@@ -101,7 +102,7 @@ public:
   virtual ~Agent() {
     destroy_lists();
 
-    for_each(m_value_function.begin(), m_value_function.end(), [](const typename value_function_type::value_type &trie) {
+    std::for_each(m_value_function.begin(), m_value_function.end(), [](const typename value_function_type::value_type &trie) {
       trie.second->destroy();
     });
   }
@@ -250,13 +251,13 @@ protected:
 
     double count = double();
     double old = double();
-    for_each(current->begin(), current->end(), [&count,&old](const Q_Value &value) {
+    std::for_each(current->begin(), current->end(), [&count,&old](const Q_Value &value) {
       ++count;
       old += value;
     });
 
     const double delta = alpha * (approach - old) / count;
-    for_each(current->begin(), current->end(), [&delta](Q_Value &value) {
+    std::for_each(current->begin(), current->end(), [&delta](Q_Value &value) {
       value += delta;
     });
 
@@ -266,7 +267,7 @@ protected:
 #endif
 
     old = double();
-    for_each(current->begin(), current->end(), [&old](const Q_Value &value) {
+    std::for_each(current->begin(), current->end(), [&old](const Q_Value &value) {
       old += value;
     });
 
@@ -282,7 +283,7 @@ protected:
 #endif
 
     double sum = double();
-    for_each(value_list.begin(), value_list.end(), [&action,&sum](const Q_Value &value) {
+    std::for_each(value_list.begin(), value_list.end(), [&action,&sum](const Q_Value &value) {
 #ifdef DEBUG_OUTPUT
       if(action)
         std::cerr << ' ' << value;

@@ -16,29 +16,33 @@ namespace Zeni {
     typedef Linked_List<TYPE> list_value_type;
     typedef const_list_value_type * const_list_pointer_type;
     typedef list_value_type * list_pointer_type;
+    typedef std::less<value_type> compare_default;
 
     class iterator : public std::iterator<std::bidirectional_iterator_tag, value_type> {
     public:
+      typedef TYPE * pointer;
+      typedef TYPE & reference;
+
       iterator()
-        : offset(0),
-        pointer(nullptr)
+        : m_offset(0),
+        m_pointer(nullptr)
       {
       }
       
-      iterator(const size_t &offset_)
-        : offset(offset_),
-        pointer(nullptr)
+      iterator(const size_t &m_offset_)
+        : m_offset(m_offset_),
+        m_pointer(nullptr)
       {
       }
 
       iterator(const list_pointer_type &ptr)
-        : offset(ptr->m_offset),
-        pointer(ptr)
+        : m_offset(ptr->m_offset),
+        m_pointer(ptr)
       {
       }
 
       value_pointer_type get() const {
-        return pointer->get();
+        return m_pointer->get();
       }
       value_reference_type operator*() const {
         return *get();
@@ -48,98 +52,101 @@ namespace Zeni {
       }
       
       iterator prev() const {
-        if(pointer->m_prev)
-          return iterator(pointer->m_prev->get());
+        if(m_pointer->m_prev)
+          return iterator(m_pointer->m_prev->get());
         else
           return iterator();
       }
       iterator next() const {
-        if(pointer->m_next)
-          return iterator(pointer->m_prev->get());
+        if(m_pointer->m_next)
+          return iterator(m_pointer->m_prev->get());
         else
           return iterator();
       }
       
       iterator operator--() {
-        pointer = pointer->m_prev;
+        m_pointer = m_pointer->m_prev;
         return *this;
       }
       iterator operator--(int) {
         iterator rv(*this);
-        pointer = pointer->m_prev;
+        m_pointer = m_pointer->m_prev;
         return rv;
       }
       iterator operator++() {
-        pointer = pointer->m_next;
+        m_pointer = m_pointer->m_next;
         return *this;
       }
       iterator operator++(int) {
         iterator rv(*this);
-        pointer = pointer->m_next;
+        m_pointer = m_pointer->m_next;
         return rv;
       }
       
       bool operator==(const typename Linked_List<value_type>::iterator &rhs) const {
-        assert(offset == rhs.offset);
-        return offset == rhs.offset &&
-               pointer == rhs.pointer;
+        assert(m_offset == rhs.m_offset);
+        return m_offset == rhs.m_offset &&
+               m_pointer == rhs.m_pointer;
       }
       bool operator!=(const typename Linked_List<value_type>::iterator &rhs) const {
-        assert(offset == rhs.offset);
-        return offset != rhs.offset ||
-               pointer != rhs.pointer;
+        assert(m_offset == rhs.m_offset);
+        return m_offset != rhs.m_offset ||
+               m_pointer != rhs.m_pointer;
       }
 
       operator list_pointer_type () const {
-        return pointer;
+        return m_pointer;
       }
       operator list_pointer_type & () {
-        return pointer;
+        return m_pointer;
       }
 
     private:
-      size_t offset;
-      list_pointer_type pointer;
+      size_t m_offset;
+      list_pointer_type m_pointer;
     };
 
     class iterator_const : public std::iterator<std::bidirectional_iterator_tag, value_type> {
     public:
+      typedef TYPE * pointer;
+      typedef TYPE & reference;
+
       typedef const value_type * value_pointer_type;
       typedef const value_type & value_reference_type;
       typedef const list_value_type * list_pointer_type;
 
       iterator_const()
-        : offset(0),
-        pointer(nullptr)
+        : m_offset(0),
+        m_pointer(nullptr)
       {
       }
       
-      iterator_const(const size_t &offset_)
-        : offset(offset_),
-        pointer(nullptr)
+      iterator_const(const size_t &m_offset_)
+        : m_offset(m_offset_),
+        m_pointer(nullptr)
       {
       }
 
       iterator_const(const list_pointer_type &ptr)
-        : offset(ptr->m_offset),
-        pointer(ptr)
+        : m_offset(ptr->m_offset),
+        m_pointer(ptr)
       {
       }
 
       iterator_const(const iterator &rhs)
-        : offset(rhs.offset),
-        pointer(rhs.pointer)
+        : m_offset(rhs.m_offset),
+        m_pointer(rhs.m_pointer)
       {
       }
 
       iterator_const & operator=(const iterator &rhs) {
-        offset = rhs.offset;
-        pointer = rhs.pointer;
+        m_offset = rhs.m_offset;
+        m_pointer = rhs.m_pointer;
         return *this;
       }
 
       value_pointer_type get() const {
-        return pointer->get();
+        return m_pointer->get();
       }
       value_reference_type operator*() const {
         return *get();
@@ -149,58 +156,58 @@ namespace Zeni {
       }
       
       iterator_const prev() const {
-        if(pointer->m_prev)
-          return iterator_const(pointer->m_prev->get());
+        if(m_pointer->m_prev)
+          return iterator_const(m_pointer->m_prev->get());
         else
           return iterator_const();
       }
       iterator_const next() const {
-        if(pointer->m_next)
-          return iterator_const(pointer->m_prev->get());
+        if(m_pointer->m_next)
+          return iterator_const(m_pointer->m_prev->get());
         else
           return iterator_const();
       }
       
       iterator_const operator--() {
-        pointer = pointer->m_prev;
+        m_pointer = m_pointer->m_prev;
         return *this;
       }
       iterator_const operator--(int) {
         iterator_const rv(*this);
-        pointer = pointer->m_prev;
+        m_pointer = m_pointer->m_prev;
         return rv;
       }
       iterator_const operator++() {
-        pointer = pointer->m_next;
+        m_pointer = m_pointer->m_next;
         return *this;
       }
       iterator_const operator++(int) {
         iterator_const rv(*this);
-        pointer = pointer->m_next;
+        m_pointer = m_pointer->m_next;
         return rv;
       }
       
       bool operator==(const typename Linked_List<value_type>::iterator_const &rhs) const {
-        assert(offset == rhs.offset);
-        return offset == rhs.offset &&
-               pointer == rhs.pointer;
+        assert(m_offset == rhs.m_offset);
+        return m_offset == rhs.m_offset &&
+               m_pointer == rhs.m_pointer;
       }
       bool operator!=(const typename Linked_List<value_type>::iterator_const &rhs) const {
-        assert(offset == rhs.offset);
-        return offset != rhs.offset ||
-               pointer != rhs.pointer;
+        assert(m_offset == rhs.m_offset);
+        return m_offset != rhs.m_offset ||
+               m_pointer != rhs.m_pointer;
       }
 
       operator list_pointer_type () const {
-        return pointer;
+        return m_pointer;
       }
       operator list_pointer_type & () {
-        return pointer;
+        return m_pointer;
       }
 
     private:
-      size_t offset;
-      list_pointer_type pointer;
+      size_t m_offset;
+      list_pointer_type m_pointer;
     };
 
     Linked_List(value_pointer_type value)
@@ -289,7 +296,7 @@ namespace Zeni {
       ptr = this;
     }
 
-    template <typename COMPARE = std::less<TYPE> >
+    template <typename COMPARE>
     list_pointer_type find_gte(const value_type &value, const COMPARE &compare = COMPARE(), list_pointer_type * const &pptr = nullptr) {
       if(pptr)
         *pptr = nullptr;
@@ -303,7 +310,7 @@ namespace Zeni {
       return pp;
     }
 
-    template <typename COMPARE = std::less<TYPE> >
+    template <typename COMPARE>
     list_pointer_type find(const value_type &value, const COMPARE &compare = COMPARE(), list_pointer_type * const &pptr = nullptr) {
       const list_pointer_type pp = find_gte(value, compare, pptr);
 
@@ -316,7 +323,7 @@ namespace Zeni {
     /** insert this list entry into the list; requires this to have !prev() && !next()
      *  return same pointer if inserted, different pointer if already exists, duplicate == false, and deleted
      */ 
-    template <typename COMPARE = std::less<TYPE> >
+    template <typename COMPARE>
     list_pointer_type insert_in_order(list_pointer_type &ptr, const bool &duplicate = true, const COMPARE &compare = COMPARE()) {
       assert(!m_prev && !m_next);
 

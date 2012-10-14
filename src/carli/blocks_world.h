@@ -58,7 +58,7 @@ namespace Blocks_World {
     int compare(const In_Place &rhs) const {
       return present ^ rhs.present ? rhs.present - present : block - rhs.block;
     }
-    int compare(const On_Top &rhs) const {
+    int compare(const On_Top &) const {
       return -1;
     }
 
@@ -90,7 +90,7 @@ namespace Blocks_World {
     int compare(const Feature &rhs) const {
       return -rhs.compare(*this);
     }
-    int compare(const In_Place &rhs) const {
+    int compare(const In_Place &) const {
       return 1;
     }
     int compare(const On_Top &rhs) const {
@@ -195,8 +195,9 @@ namespace Blocks_World {
     void print_impl(std::ostream &os) const {
       os << "Blocks World:" << std::endl;
       std::for_each(m_blocks.begin(), m_blocks.end(), [&os](const Stack &stack) {
-        std::for_each(stack.rbegin(), stack.rend(), [&os](const block_id &id) {
-          os << ' ' << id;
+        auto &os_ = os;
+        std::for_each(stack.rbegin(), stack.rend(), [&os_](const block_id &id) {
+          os_ << ' ' << id;
         });
         os << std::endl;
       });
@@ -225,7 +226,7 @@ namespace Blocks_World {
       auto not_in_place = [this,&place_counter]() {
         while(place_counter) {
           feature_type * out_place = new In_Place(place_counter, false);
-          out_place->features.insert_in_order(m_features);
+          out_place->features.insert_in_order<feature_type::List::compare_default>(m_features);
           --place_counter;
         }
       };
@@ -233,7 +234,7 @@ namespace Blocks_World {
         for(block_id non_bottom = 1; non_bottom <= num_blocks; ++non_bottom) {
           if(top != non_bottom) {
             feature_type * on_top = new On_Top(top, non_bottom, bottom == non_bottom);
-            on_top->features.insert_in_order(m_features);
+            on_top->features.insert_in_order<feature_type::List::compare_default>(m_features);
           }
         }
       };
@@ -253,13 +254,15 @@ namespace Blocks_World {
         is_on_top(*it, 0, 3);
 
         if(place_counter == *stack.rbegin()) {
-          std::find_if(stack.rbegin(), stack.rend(), [this,&place_counter](const block_id &id) {
-            if(place_counter != id)
+          const auto &this_ = this;
+          auto &place_counter_ = place_counter;
+          std::find_if(stack.rbegin(), stack.rend(), [this_,&place_counter_](const block_id &id)->bool{
+            if(place_counter_ != id)
               return true;
 
             feature_type * in_place = new In_Place(id);
-            in_place->features.insert_in_order(m_features);
-            --place_counter;
+            in_place->features.insert_in_order<feature_type::List::compare_default>(this_->m_features);
+            --place_counter_;
 
             return false;
           });
@@ -282,12 +285,13 @@ namespace Blocks_World {
           move->candidates.insert_before(m_candidates);
         }
 
-        std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [this,&stack_src](const Environment::Stack &stack_dest) {
+        const auto &this_ = this;
+        std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [this_,&stack_src](const Environment::Stack &stack_dest) {
           if(&stack_src == &stack_dest)
             return;
 
           action_type * move = new Move(*stack_src.begin(), *stack_dest.begin());
-          move->candidates.insert_before(m_candidates);
+          move->candidates.insert_before(this_->m_candidates);
         });
       });
     }
