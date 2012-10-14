@@ -25,15 +25,19 @@ int main(int argc, char **argv) {
   auto env = std::make_shared<Blocks_World::Environment>();
   auto agent = std::make_shared<Blocks_World::Agent>(env);
 
-  std::cout << *env << *agent;
-  do {
-    agent->act();
+  for(int i = 0; i != 100; ++i) {
+    env->init();
+    agent->init();
 
-    std::cout << *env << *agent;
-  } while(agent->get_metastate() == Blocks_World::Agent::NON_TERMINAL);
+    std::cerr << *env /*<< *agent*/;
+    do {
+      agent->act();
 
-  std::cout << "SUCCESS in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
+      std::cerr << *env /*<< *agent*/;
+    } while(agent->get_metastate() == Blocks_World::Agent::NON_TERMINAL);
 
+    std::cout << "SUCCESS in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
+  }
 
 //   test_trie * trie = nullptr;
 //   test_trie * key = nullptr;

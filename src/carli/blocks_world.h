@@ -57,7 +57,7 @@ namespace Blocks_World {
       return -rhs.compare(*this);
     }
     int compare(const In_Place &rhs) const {
-      return block - rhs.block;
+      return present ^ rhs.present ? rhs.present - present : block - rhs.block;
     }
     int compare(const On_Top &rhs) const {
       return -1;
@@ -95,7 +95,7 @@ namespace Blocks_World {
       return 1;
     }
     int compare(const On_Top &rhs) const {
-      return top != rhs.top ? top - rhs.top : bottom - rhs.bottom;
+      return present ^ rhs.present ? rhs.present - present : top != rhs.top ? top - rhs.top : bottom - rhs.bottom;
     }
 
     block_id top;
@@ -212,52 +212,81 @@ namespace Blocks_World {
     Agent(const std::shared_ptr<environment_type> &env)
      : ::Agent<feature_type, action_type>(env)
     {
-      generate_lists();
+      init_impl();
     }
     
     ~Agent() {
-      destroy_lists();
     }
 
   private:
     void init_impl() {
-      destroy_lists();
-      generate_lists();
+      m_next = decide(false);
     }
 
     reward_type act_impl() {
       auto env = std::dynamic_pointer_cast<const Environment>(get_env());
 
-      auto action = choose_epsilon_greedily(0.1);
-      const reward_type reward = get_env()->transition(*action);
+      m_current = std::move(m_next);
 
-      Value * value_ptr = get_value(*action, Q_Value::current_offset());
+      Q_Value * const value_current = get_value(m_features, *m_current, Q_Value::current_offset());
+
+      const reward_type reward = get_env()->transition(*m_current);
 
       m_metastate = env->get_blocks() == env->get_goal() ? SUCCESS : NON_TERMINAL;
+
+      if(m_metastate == NON_TERMINAL) {
+        m_next = decide(true);
+
+        Q_Value * const value_best = get_value(m_features, *m_next, Q_Value::next_offset());
+
+        td_update(&value_current->current, reward, &value_best->next, 1.0, 1.0);
+
+        m_next = decide(false);
+      }
+      else
+        td_update(&value_current->current, reward, nullptr, 1.0, 1.0);
 
       return reward;
     }
 
-    const Blocks_World::Environment::action_type * choose_epsilon_greedily(const double &epsilon) {
-      if(random.frand_lt() < epsilon)
-        return choose_randomly();
-      else
-        return choose_greedily();
+    std::unique_ptr<action_type> decide(const bool &greedy) {
+      m_features->destroy();
+
+      m_features = generate_features();
+      print_list(std::cerr, " Features:\n ", " ", m_features);
+
+      action_list candidates = generate_candidates();
+      print_list(std::cerr, " Candidates:\n ", " ", candidates);
+
+      auto action = greedy ? choose_greedily(m_features, candidates)
+                           : choose_epsilon_greedily(m_features, candidates, 0.1);
+      auto chosen = std::unique_ptr<action_type>(action->clone());
+
+      candidates->destroy();
+
+      return chosen;
     }
 
-    const Blocks_World::Environment::action_type * choose_greedily() {
-      std::cerr << "    choose_greedily" << std::endl;
+    const Blocks_World::Environment::action_type * choose_epsilon_greedily(const feature_list &features, const action_list &candidates, const double &epsilon) {
+      if(random.frand_lt() < epsilon)
+        return choose_randomly(candidates);
+      else
+        return choose_greedily(features, candidates);
+    }
+
+    const Blocks_World::Environment::action_type * choose_greedily(const feature_list &features, const action_list &candidates) {
+      std::cerr << "  choose_greedily" << std::endl;
 
       double value = double();
       const Blocks_World::Environment::action_type * action = nullptr;
-      std::for_each(m_candidates->begin(), m_candidates->end(), [this,&action,&value](const Blocks_World::Environment::action_type &action_) {
+      std::for_each(candidates->begin(), candidates->end(), [this,features,&action,&value](const Blocks_World::Environment::action_type &action_) {
         if(!action) {
           action = &action_;
-          value = sum_value(get_value(action_, Q_Value::current_offset())->current);
+          value = sum_value(&action_, get_value(features, action_, Q_Value::next_offset())->next);
         }
         else {
-          const double value_ = sum_value(get_value(action_, Q_Value::current_offset())->current);
-          if(value_ < value) {
+          const double value_ = sum_value(&action_, get_value(features, action_, Q_Value::next_offset())->next);
+          if(value_ > value) {
             action = &action_;
             value = value_;
           }
@@ -267,17 +296,17 @@ namespace Blocks_World {
       return action;
     }
 
-    const Blocks_World::Environment::action_type * choose_randomly() {
-      std::cerr << "    choose_randomly" << std::endl;
+    const Blocks_World::Environment::action_type * choose_randomly(const action_list &candidates) {
+      std::cerr << "  choose_randomly" << std::endl;
 
       int counter = 0;
-      std::for_each(m_candidates->begin(), m_candidates->end(), [&counter](const Blocks_World::Environment::action_type &) {
+      std::for_each(candidates->begin(), candidates->end(), [&counter](const Blocks_World::Environment::action_type &) {
         ++counter;
       });
 
       counter = random.rand_lt(counter) + 1;
       const Blocks_World::Environment::action_type * action = nullptr;
-      std::for_each(m_candidates->begin(), m_candidates->end(), [&counter,&action](const Blocks_World::Environment::action_type &action_) {
+      std::for_each(candidates->begin(), candidates->end(), [&counter,&action](const Blocks_World::Environment::action_type &action_) {
         if(!--counter)
           action = &action_;
       });
@@ -285,69 +314,88 @@ namespace Blocks_World {
       return action;
     }
 
-    double sum_value(const Q_Value::List &value_list) {
-      std::cerr << "      sum_value(";
+    void td_update(Q_Value::List * const &current, const reward_type &reward, const Q_Value::List * const &next, const double &alpha, const double &gamma) {
+      if(!current)
+        return;
+
+      const double approach = reward + (next ? gamma * sum_value(nullptr, *next) : 0.0);
+
+      double count = double();
+      double old = double();
+      for_each(current->begin(), current->end(), [&count,&old](const Q_Value &value) {
+        ++count;
+        old += value;
+      });
+
+      const double delta = alpha * (approach - old) / count;
+      for_each(current->begin(), current->end(), [&delta](Q_Value &value) {
+        value += delta;
+      });
+
+      std::cerr << " td_update: " << old << " <" << alpha << "= " << reward << " + " << gamma << " * " << (next ? sum_value(nullptr, *next) : 0.0) << std::endl;
+      std::cerr << "            " << delta << " = " << alpha << " * (" << approach << " - " << old << ") / " << count << std::endl;
+
+      old = double();
+      for_each(current->begin(), current->end(), [&old](const Q_Value &value) {
+        old += value;
+      });
+
+      std:: cerr << "            " << old << std::endl;
+    }
+
+    double sum_value(const action_type * const &action, const Q_Value::List &value_list) {
+      if(action)
+        std::cerr << "   sum_value(" << *action << ") = {";
 
       double sum = double();
-      for_each(value_list.begin(), value_list.end(), [&sum](const Q_Value &value) {
-        std::cerr << ' ' << value;
+      for_each(value_list.begin(), value_list.end(), [&action,&sum](const Q_Value &value) {
+        if(action)
+          std::cerr << ' ' << value;
 
         sum += value;
       });
 
-      std::cerr << " )" << std::endl;
+      if(action)
+        std::cerr << " }" << std::endl;
 
       return sum;
     }
 
-    void print_impl(std::ostream &os) const {
-      os << "Blocks World Agent:" << std::endl;
-      if(m_features) {
-        os << " Features:";
-        std::for_each(m_features->begin(), m_features->end(), [&os](const feature_type &feature) {
-          os << ' ' << feature;
-        });
-        os << std::endl;
-      }
-
-      if(m_candidates) {
-        os << " Candidates:";
-        std::for_each(m_candidates->begin(), m_candidates->end(), [&os](const action_type &action) {
-          os << ' ' << action;
+    template <typename LIST>
+    void print_list(std::ostream &os, const std::string &head, const std::string &pre, const LIST &list) const {
+      if(list) {
+        os << head;
+        std::for_each(list->begin(), list->end(), [&os,&pre](decltype(*list->begin()) &value) {
+          os << pre << value;
         });
         os << std::endl;
       }
     }
 
-    void generate_lists() {
-      generate_features();
-      generate_candidates();
-    }
-
-    void generate_features() {
+    feature_list generate_features() {
       auto env = std::dynamic_pointer_cast<const Environment>(get_env());
 
-      assert(!m_features);
+      feature_list features = nullptr;
 
       block_id place_counter = 3;
 
-      auto not_in_place = [this,&place_counter]() {
+      auto not_in_place = [&features,&place_counter]() {
         while(place_counter) {
           feature_type * out_place = new In_Place(place_counter, false);
-          out_place->features.insert_in_order(m_features);
+          out_place->features.insert_in_order(features);
           --place_counter;
         }
       };
-      auto is_on_top = [this](const block_id &top, const block_id &bottom, const block_id &num_blocks) {
+      auto is_on_top = [&features](const block_id &top, const block_id &bottom, const block_id &num_blocks) {
         for(block_id non_bottom = 1; non_bottom <= num_blocks; ++non_bottom) {
           if(top != non_bottom) {
             feature_type * on_top = new On_Top(top, non_bottom, bottom == non_bottom);
-            on_top->features.insert_in_order(m_features);
+            on_top->features.insert_in_order(features);
           }
         }
       };
 
-      std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [this,&not_in_place,&is_on_top,&place_counter](const Environment::Stack &stack) {
+      std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [&features,&not_in_place,&is_on_top,&place_counter](const Environment::Stack &stack) {
         auto it = stack.begin();
         auto itn = ++stack.begin();
         auto iend = stack.end();
@@ -362,12 +410,12 @@ namespace Blocks_World {
         is_on_top(*it, 0, 3);
 
         if(place_counter == *stack.rbegin()) {
-          std::find_if(stack.rbegin(), stack.rend(), [this,&place_counter](const block_id &id) {
+          std::find_if(stack.rbegin(), stack.rend(), [&features,&place_counter](const block_id &id) {
             if(place_counter != id)
               return true;
 
             feature_type * in_place = new In_Place(id);
-            in_place->features.insert_in_order(m_features);
+            in_place->features.insert_in_order(features);
             --place_counter;
 
             return false;
@@ -378,34 +426,31 @@ namespace Blocks_World {
       });
 
       not_in_place();
+
+      return features;
     }
 
-    void generate_candidates() {
+    action_list generate_candidates() {
       auto env = std::dynamic_pointer_cast<const Environment>(get_env());
 
-      assert(!m_candidates);
+      action_list candidates = nullptr;
 
-      std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [this,&env](const Environment::Stack &stack_src) {
+      std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [&candidates,&env](const Environment::Stack &stack_src) {
         if(stack_src.size() != 1) {
           action_type * move = new Move(*stack_src.begin(), 0);
-          move->candidates.insert_before(m_candidates);
+          move->candidates.insert_before(candidates);
         }
 
-        std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [this,&stack_src](const Environment::Stack &stack_dest) {
+        std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [&candidates,&stack_src](const Environment::Stack &stack_dest) {
           if(&stack_src == &stack_dest)
             return;
 
           action_type * move = new Move(*stack_src.begin(), *stack_dest.begin());
-          move->candidates.insert_before(m_candidates);
+          move->candidates.insert_before(candidates);
         });
       });
-    }
 
-    void destroy_lists() {
-      m_features->destroy();
-      m_features = nullptr;
-      m_candidates->destroy();
-      m_candidates = nullptr;
+      return candidates;
     }
 
     Zeni::Random random;

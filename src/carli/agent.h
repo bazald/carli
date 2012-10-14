@@ -86,7 +86,6 @@ public:
   Agent(const std::shared_ptr<environment_type> &environment)
    : m_metastate(NON_TERMINAL),
    m_features(nullptr),
-   m_candidates(nullptr),
    m_environment(environment),
    m_total_reward(reward_type()),
    m_step_count(step_count_type())
@@ -94,8 +93,7 @@ public:
   }
 
   virtual ~Agent() {
-    assert(!m_features);
-    assert(!m_candidates);
+    m_features->destroy();
 
     for_each(m_value_function.begin(), m_value_function.end(), [](const typename value_function_type::value_type &trie) {
       trie.second->destroy();
@@ -113,11 +111,7 @@ public:
     m_total_reward = reward_type();
     m_step_count = step_count_type();
 
-    destroy_lists();
-
     init_impl();
-    
-    generate_lists();
   }
 
   void act() {
@@ -125,34 +119,31 @@ public:
 
     m_total_reward += reward;
     ++m_step_count;
-
-    destroy_lists();
-    generate_lists();
   }
 
-  void print(std::ostream &os) const {
-    print_impl(os);
-  }
+//   void print(std::ostream &os) const {
+//     print_impl(os);
+//   }
 
 protected:
-  Q_Value * get_value(const action_type &action, const size_t &offset) {
+  Q_Value * get_value(const feature_list &features, const action_type &action, const size_t &offset) {
+    if(!features)
+      return nullptr;
+
     feature_trie head = nullptr;
 
-    if(m_features) {
-      auto it = m_features->begin();
-      auto iend = m_features->end();
+    auto it = features->begin();
+    auto iend = features->end();
+    if(it != iend) {
+      head = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
+      auto tail = head;
+      ++it;
 
-      if(it != iend) {
-        head = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
-        auto tail = head;
+      while(it != iend) {
+        auto ptr = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
+        ptr->insert_after(tail);
+        tail = ptr;
         ++it;
-
-        while(it != iend) {
-          auto ptr = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
-          ptr->insert_after(tail);
-          tail = ptr;
-          ++it;
-        }
       }
     }
 
@@ -161,14 +152,13 @@ protected:
 
   metastate_type m_metastate;
   feature_list m_features;
-  action_list m_candidates;
+  std::unique_ptr<action_type> m_current;
+  std::unique_ptr<action_type> m_next;
 
 private:
   virtual void init_impl() = 0;
   virtual reward_type act_impl() = 0;
-  virtual void print_impl(std::ostream &os) const = 0;
-  virtual void generate_lists() = 0;
-  virtual void destroy_lists() = 0;
+//   virtual void print_impl(std::ostream &os) const = 0;
 
   value_function_type m_value_function;
 
@@ -178,10 +168,10 @@ private:
   step_count_type m_step_count;
 };
 
-template <typename FEATURE, typename ACTION>
-std::ostream & operator << (std::ostream &os, const Agent<FEATURE, ACTION> &agent) {
-  agent.print(os);
-  return os;
-}
+// template <typename FEATURE, typename ACTION>
+// std::ostream & operator << (std::ostream &os, const Agent<FEATURE, ACTION> &agent) {
+//   agent.print(os);
+//   return os;
+// }
 
 #endif
