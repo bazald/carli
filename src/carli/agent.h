@@ -100,7 +100,8 @@ public:
   {
     using namespace std::placeholders;
 
-    m_decider = std::bind(&Agent::choose_epsilon_greedy, this, 0.1);
+    m_target_policy = std::bind(&Agent::choose_greedy, this);
+    m_exploration_policy = std::bind(&Agent::choose_epsilon_greedy, this, 0.1);
   }
 
   virtual ~Agent() {
@@ -128,7 +129,7 @@ public:
     regenerate_lists();
 
     if(m_metastate == NON_TERMINAL)
-      m_next = m_decider();
+      m_next = m_exploration_policy();
   }
 
   void act() {
@@ -143,11 +144,11 @@ public:
     if(m_metastate == NON_TERMINAL) {
       regenerate_lists();
 
-      m_next = m_decider();
+      m_next = m_target_policy();
       Q_Value * const value_best = get_value(m_features, *m_next, Q_Value::next_offset());
       td_update(&value_current->current, reward, &value_best->next, 1.0, 1.0);
 
-      m_next = m_decider();
+      m_next = m_exploration_policy();
     }
     else {
       destroy_lists();
@@ -329,7 +330,8 @@ protected:
   action_list m_candidates;
   std::unique_ptr<const action_type> m_current;
   std::unique_ptr<const action_type> m_next;
-  std::function<action_ptruc ()> m_decider;
+  std::function<action_ptruc ()> m_target_policy; ///< Sarsa/Q-Learning selector
+  std::function<action_ptruc ()> m_exploration_policy; ///< Exploration policy
 
 private:
   virtual void generate_features() = 0;
