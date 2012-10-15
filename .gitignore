@@ -16,6 +16,7 @@
 *.obj
 *.opensdf
 *.pdb
+*.psess
 *.rc
 *.res
 *.sdf
