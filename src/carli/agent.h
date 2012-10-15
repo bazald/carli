@@ -27,6 +27,10 @@ struct Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<D
     bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {
       return *lhs < *rhs;
     }
+
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {
+      return *lhs < *rhs;
+    }
   };
 
   Feature(const bool &present_ = true)
@@ -81,7 +85,7 @@ public:
   typedef Zeni::Trie<std::shared_ptr<feature_type>, Q_Value, typename feature_type::Compare> feature_trie_type;
   typedef feature_trie_type * feature_trie;
   typedef Environment<action_type> environment_type;
-  typedef std::map<std::shared_ptr<action_type>, feature_trie, typename action_type::Compare> value_function_type;
+  typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
   typedef size_t step_count_type;
   enum metastate_type {NON_TERMINAL, SUCCESS, FAILURE};
@@ -102,9 +106,12 @@ public:
   virtual ~Agent() {
     destroy_lists();
 
-    std::for_each(m_value_function.begin(), m_value_function.end(), [](const typename value_function_type::value_type &trie) {
-      trie.second->destroy();
-    });
+    for(value_function_type::iterator vt = m_value_function.begin(), vend = m_value_function.end(); vt != vend; ) {
+      auto ptr = vt->first;
+      vt->second->destroy();
+      m_value_function.erase(vt++);
+      delete ptr;
+    }
   }
 
   const std::shared_ptr<const environment_type> & get_env() const {return m_environment;}
@@ -180,7 +187,11 @@ protected:
       }
     }
 
-    return head->insert(m_value_function[std::shared_ptr<action_type>(action.clone())], offset)->get();
+    auto vf = m_value_function.find(const_cast<action_type *>(&action));
+    if(vf == m_value_function.end())
+      vf = m_value_function.emplace(value_function_type::value_type(action.clone(), nullptr)).first;
+
+    return head->insert(vf->second, offset)->get();
   }
 
   void regenerate_lists() {
