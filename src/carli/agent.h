@@ -106,7 +106,7 @@ public:
   virtual ~Agent() {
     destroy_lists();
 
-    for(value_function_type::iterator vt = m_value_function.begin(), vend = m_value_function.end(); vt != vend; ) {
+    for(typename value_function_type::iterator vt = m_value_function.begin(), vend = m_value_function.end(); vt != vend; ) {
       auto ptr = vt->first;
       vt->second->destroy();
       m_value_function.erase(vt++);
@@ -189,7 +189,7 @@ protected:
 
     auto vf = m_value_function.find(const_cast<action_type *>(&action));
     if(vf == m_value_function.end())
-      vf = m_value_function.emplace(value_function_type::value_type(action.clone(), nullptr)).first;
+      vf = m_value_function.insert(typename value_function_type::value_type(action.clone(), nullptr)).first;
 
     return head->insert(vf->second, offset)->get();
   }
