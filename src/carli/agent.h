@@ -263,28 +263,32 @@ protected:
 
     double count = double();
     double old = double();
-    std::for_each(current->begin(), current->end(), [&count,&old](const Q_Value &value) {
+    std::for_each(current->begin(), current->end(), [&count,&old](const Q_Value &q) {
       ++count;
-      old += value;
+      old += q.value;
     });
 
     const double delta = alpha * (approach - old) / count;
-    std::for_each(current->begin(), current->end(), [&delta](Q_Value &value) {
-      value += delta;
+    std::for_each(current->begin(), current->end(), [this,&delta](Q_Value &q) {
+      q.value += delta;
+      q.cabe += delta < 0.0 ? -delta : delta;
+      this->m_mean_cabe.contribute(q.cabe);
     });
 
 #ifdef DEBUG_OUTPUT
     std::cerr << " td_update: " << old << " <" << alpha << "= " << reward << " + " << gamma << " * " << (next ? sum_value(nullptr, *next) : 0.0) << std::endl;
     std::cerr << "            " << delta << " = " << alpha << " * (" << approach << " - " << old << ") / " << count << std::endl;
-#endif
 
     old = double();
-    std::for_each(current->begin(), current->end(), [&old](const Q_Value &value) {
-      old += value;
+    std::for_each(current->begin(), current->end(), [&old](const Q_Value &q) {
+      old += q.value;
     });
 
-#ifdef DEBUG_OUTPUT
     std:: cerr << "            " << old << std::endl;
+
+    std::for_each(current->begin(), current->end(), [this](const Q_Value &q) {
+      std::cerr << " cabe: " << q.cabe << " of " << this->m_mean_cabe << std::endl;
+    });
 #endif
   }
 
@@ -295,13 +299,13 @@ protected:
 #endif
 
     double sum = double();
-    std::for_each(value_list.begin(), value_list.end(), [&action,&sum](const Q_Value &value) {
+    std::for_each(value_list.begin(), value_list.end(), [&action,&sum](const Q_Value &q) {
 #ifdef DEBUG_OUTPUT
       if(action)
-        std::cerr << ' ' << value;
+        std::cerr << ' ' << q.value;
 #endif
 
-      sum += value;
+      sum += q.value;
     });
 
 #ifdef DEBUG_OUTPUT
@@ -339,6 +343,7 @@ private:
   virtual void update() = 0;
 
   value_function_type m_value_function;
+  Mean m_mean_cabe;
 
   std::shared_ptr<environment_type> m_environment;
 

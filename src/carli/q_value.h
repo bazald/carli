@@ -7,7 +7,7 @@
 #include "linked_list.h"
 
 class Q_Value;
-class Q_Value : public Value, public Zeni::Pool_Allocator<Q_Value>, public Zeni::Cloneable<Q_Value> {
+class Q_Value : public Zeni::Pool_Allocator<Q_Value> {
   Q_Value(const Q_Value &);
   Q_Value & operator=(const Q_Value &);
 
@@ -16,20 +16,19 @@ public:
   typedef List::iterator iterator;
 
   Q_Value(const double &q_value_ = double())
-   : Value(q_value_),
+   : value(q_value_),
    current(this),
    next(this)
   {
   }
 
-  Q_Value * clone() const {
-    return new Q_Value(double(*this));
-  }
-
   Q_Value & operator=(const double &q_value_) {
-    Value::operator=(q_value_);
+    value = q_value_;
     return *this;
   }
+
+  Value value;
+  Value cabe; ///< Cumulative Absolute Bellman Error
 
   List current;
   List next;
