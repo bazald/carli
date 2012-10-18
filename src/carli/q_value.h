@@ -16,7 +16,9 @@ public:
   typedef List::iterator iterator;
 
   Q_Value(const double &q_value_ = double())
-   : value(q_value_),
+   : update_count(0),
+   credit(1.0),
+   value(q_value_),
    current(this),
    next(this)
   {
@@ -27,8 +29,17 @@ public:
     return *this;
   }
 
+  size_t update_count;
+
+  double credit;
+
   Value value;
   Value cabe; ///< Cumulative Absolute Bellman Error
+
+  double mean2;
+  double variance_0;
+  double variance_rest;
+  Value variance_total;
 
   List current;
   List next;

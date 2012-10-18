@@ -259,35 +259,61 @@ protected:
     if(!current)
       return;
 
-    const double approach = reward + (next ? gamma * sum_value(nullptr, *next) : 0.0);
+    const double target_value = reward + (next ? gamma * sum_value(nullptr, *next) : 0.0);
 
     double count = double();
-    double old = double();
-    std::for_each(current->begin(), current->end(), [&count,&old](const Q_Value &q) {
+    double q_old = double();
+    std::for_each(current->begin(), current->end(), [&count,&q_old](const Q_Value &q) {
       ++count;
-      old += q.value;
+      q_old += q.value;
     });
 
-    const double delta = alpha * (approach - old) / count;
-    std::for_each(current->begin(), current->end(), [this,&delta](Q_Value &q) {
-      q.value += delta;
-      q.cabe += delta < 0.0 ? -delta : delta;
+    std::for_each(current->begin(), current->end(), [&count](Q_Value &q) {
+      q.credit = 1.0 / count;
+    });
+
+    double variance_total_next = double();
+    std::for_each(next->begin(), next->end(), [&variance_total_next](const Q_Value &q) {
+      variance_total_next += q.variance_total;
+    });
+
+    const double &alpha_ = alpha;
+    const double delta = target_value - q_old;
+    const double &gamma_ = gamma;
+    double q_new = double();
+    std::for_each(current->begin(), current->end(), [this,&alpha_,&delta,gamma_,&q_new,&variance_total_next](Q_Value &q) {
+      const double local_old = q.value;
+      const double local_alpha = alpha_ * q.credit;
+      const double local_delta = local_alpha * delta;
+
+      ++q.update_count;
+
+      q.value += local_delta;
+      q_new += q.value;
+
+      q.cabe += local_delta < 0.0 ? -local_delta : local_delta;
       this->m_mean_cabe.contribute(q.cabe);
+
+      if(q.update_count > 1) {
+        const double x = local_old + delta;
+        const double mdelta = (x - local_old) * (x - q.value);
+
+        q.mean2 += mdelta / q.credit; ///< divide by q.credit to prevent shrinking of estimated variance due to credit assignment
+        q.variance_0 = q.mean2 / (q.update_count - 1);
+        q.variance_rest += local_alpha * (q.credit * gamma_ * variance_total_next - q.variance_rest);
+        q.variance_total = q.variance_0 + q.variance_rest;
+        this->m_mean_variance.contribute(q.variance_total);
+      }
     });
 
 #ifdef DEBUG_OUTPUT
-    std::cerr << " td_update: " << old << " <" << alpha << "= " << reward << " + " << gamma << " * " << (next ? sum_value(nullptr, *next) : 0.0) << std::endl;
-    std::cerr << "            " << delta << " = " << alpha << " * (" << approach << " - " << old << ") / " << count << std::endl;
-
-    old = double();
-    std::for_each(current->begin(), current->end(), [&old](const Q_Value &q) {
-      old += q.value;
-    });
-
-    std:: cerr << "            " << old << std::endl;
+    std::cerr << " td_update: " << q_old << " <" << alpha << "= " << reward << " + " << gamma << " * " << (next ? sum_value(nullptr, *next) : 0.0) << std::endl;
+    std::cerr << "            " << delta << " = " << alpha << " * (" << target_value << " - " << q_old << ") / " << count << std::endl
+              << "            " << q_new << std::endl;
 
     std::for_each(current->begin(), current->end(), [this](const Q_Value &q) {
-      std::cerr << " cabe: " << q.cabe << " of " << this->m_mean_cabe << std::endl;
+      std::cerr << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << std::endl
+                << " variance: " << q.variance_total << " of " << this->m_mean_variance << std::endl;
     });
 #endif
   }
@@ -344,6 +370,7 @@ private:
 
   value_function_type m_value_function;
   Mean m_mean_cabe;
+  Mean m_mean_variance;
 
   std::shared_ptr<environment_type> m_environment;
 
