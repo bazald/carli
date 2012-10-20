@@ -1,4 +1,4 @@
-// #define DEBUG_OUTPUT
+#define DEBUG_OUTPUT
 
 #include "memory_pool.h"
 #include "linked_list.h"

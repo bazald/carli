@@ -25,9 +25,9 @@ namespace Blocks_World {
     {
     }
 
-    virtual int compare(const Feature &rhs) const = 0;
-    virtual int compare(const In_Place &rhs) const = 0;
-    virtual int compare(const On_Top &rhs) const = 0;
+    virtual int compare_pi(const Feature &rhs) const = 0;
+    virtual int compare_pi(const In_Place &rhs) const = 0;
+    virtual int compare_pi(const On_Top &rhs) const = 0;
   };
 
   typedef Feature feature_type;
@@ -52,13 +52,13 @@ namespace Blocks_World {
       os << "in-place(" << block << ')';
     }
 
-    int compare(const Feature &rhs) const {
-      return -rhs.compare(*this);
+    int compare_pi(const Feature &rhs) const {
+      return -rhs.compare_pi(*this);
     }
-    int compare(const In_Place &rhs) const {
-      return present ^ rhs.present ? rhs.present - present : block - rhs.block;
+    int compare_pi(const In_Place &rhs) const {
+      return block - rhs.block;
     }
-    int compare(const On_Top &) const {
+    int compare_pi(const On_Top &rhs) const {
       return -1;
     }
 
@@ -87,14 +87,14 @@ namespace Blocks_World {
       os << "on-top(" << top << ',' << bottom << ')';
     }
 
-    int compare(const Feature &rhs) const {
-      return -rhs.compare(*this);
+    int compare_pi(const Feature &rhs) const {
+      return -rhs.compare_pi(*this);
     }
-    int compare(const In_Place &) const {
+    int compare_pi(const In_Place &rhs) const {
       return 1;
     }
-    int compare(const On_Top &rhs) const {
-      return present ^ rhs.present ? rhs.present - present : top != rhs.top ? top - rhs.top : bottom - rhs.bottom;
+    int compare_pi(const On_Top &rhs) const {
+      return top != rhs.top ? top - rhs.top : bottom - rhs.bottom;
     }
 
     block_id top;
@@ -272,6 +272,12 @@ namespace Blocks_World {
       });
 
       not_in_place();
+
+//       if(m_features) {
+//         auto next = m_features->next();
+//         m_features->erase_next();
+//         next->destroy();
+//       }
     }
 
     void generate_candidates() {

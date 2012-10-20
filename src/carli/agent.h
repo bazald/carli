@@ -17,19 +17,37 @@ struct Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<D
 
   struct Compare {
     bool operator()(const Feature &lhs, const Feature &rhs) const {
-      return lhs < rhs;
+      return lhs.compare(rhs) < 0;
     }
 
     bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {
-      return *lhs < *rhs;
+      return operator()(*lhs, *rhs);
     }
 
     bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {
-      return *lhs < *rhs;
+      return operator()(*lhs, *rhs);
     }
 
     bool operator()(const std::unique_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {
-      return *lhs < *rhs;
+      return operator()(*lhs, *rhs);
+    }
+  };
+
+  struct Compare_PI {
+    bool operator()(const Feature &lhs, const Feature &rhs) const {
+      return lhs.compare_pi(rhs) < 0;
+    }
+
+    bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {
+      return operator()(*lhs, *rhs);
+    }
+
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {
+      return operator()(*lhs, *rhs);
+    }
+
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {
+      return operator()(*lhs, *rhs);
     }
   };
 
@@ -55,7 +73,11 @@ struct Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<D
   }
 
   int compare(const Feature &rhs) const {
-    return dynamic_cast<const DERIVED *>(this)->compare(dynamic_cast<const DERIVED &>(rhs));
+    return present ^ rhs.present ? rhs.present - present : compare_pi(rhs);
+  }
+
+  int compare_pi(const Feature &rhs) const {
+    return dynamic_cast<const DERIVED *>(this)->compare_pi(dynamic_cast<const DERIVED &>(rhs));
   }
 
   virtual void print_impl(std::ostream &os) const = 0;
