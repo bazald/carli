@@ -432,7 +432,7 @@ private:
       }
       else {
         next->destroy();
-        return match->insert(function, offset, depth);
+        match = match->insert(function, offset, depth);
       }
 
       match->offset_erase(offset);
