@@ -11,7 +11,10 @@
 #include <map>
 
 template <typename DERIVED, typename DERIVED2 = DERIVED>
-struct Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
+class Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
+  Feature & operator=(const Feature &);
+
+public:
   typedef typename Zeni::Linked_List<DERIVED> List;
   typedef typename List::iterator iterator;
 
@@ -54,6 +57,12 @@ struct Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<D
   Feature(const bool &present_ = true)
     : features(static_cast<DERIVED *>(this)),
     present(present_)
+  {
+  }
+
+  Feature(const Feature &rhs)
+   : features(static_cast<DERIVED *>(this)),
+   present(rhs.present)
   {
   }
 
@@ -186,6 +195,9 @@ public:
     os << " Agent:\n";
     print_list(os, "  Features:\n  ", " ", m_features);
     print_list(os, "  Candidates:\n  ", " ", m_candidates);
+#ifdef DEBUG_OUTPUT
+    print_value_function(os);
+#endif
   }
 
 protected:
@@ -204,6 +216,7 @@ protected:
 
       while(it != iend) {
         auto ptr = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
+        assert(it->present == ptr->get_key()->present);
         ptr->insert_after(tail);
         tail = ptr;
         ++it;
@@ -214,7 +227,7 @@ protected:
     if(vf == m_value_function.end())
       vf = m_value_function.insert(typename value_function_type::value_type(action.clone(), nullptr)).first;
 
-    return head->insert(vf->second, offset)->get();
+    return get_value_from_function(head, vf->second, offset);
   }
 
   void regenerate_lists() {
@@ -295,9 +308,11 @@ protected:
     });
 
     double variance_total_next = double();
-    std::for_each(next->begin(), next->end(), [&variance_total_next](const Q_Value &q) {
-      variance_total_next += q.variance_total;
-    });
+    if(next) {
+      std::for_each(next->begin(), next->end(), [&variance_total_next](const Q_Value &q) {
+        variance_total_next += q.variance_total;
+      });
+    }
 
     const double &alpha_ = alpha;
     const double delta = target_value - q_old;
@@ -375,6 +390,15 @@ protected:
       os << std::endl;
     }
   }
+
+  void print_value_function(std::ostream &os) const {
+    os << "  Value Function:";
+    std::for_each(m_value_function.begin(), m_value_function.end(), [this,&os](decltype(*m_value_function.begin()) &value) {
+      os << std::endl << "  " << *value.first << " : ";
+      this->print_value_function_trie(os, value.second);
+    });
+    os << std::endl;
+  }
 #endif
 
   metastate_type m_metastate;
@@ -386,6 +410,46 @@ protected:
   std::function<action_ptruc ()> m_exploration_policy; ///< Exploration policy
 
 private:
+  Q_Value * get_value_from_function(feature_trie &head, feature_trie &function, const size_t &offset) {
+    /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
+    auto match = std::find_first_of(head->begin(), head->end(),
+                                    function ? function->begin() : typename feature_trie_type::iterator(), function ? function->end() : typename feature_trie_type::iterator(),
+                                    [](const feature_trie_type &lhs, const feature_trie_type &rhs)->bool {
+                                      return lhs.get_key()->compare_pi(*rhs.get_key()) == 0;
+                                    });
+
+    if(match) {
+      auto next = static_cast<feature_trie>(head == match ? head->next() : head);
+      match->erase();
+      auto mp = match->map_insert(function);
+      if(next)
+        return next->insert(mp->get_deeper(), offset)->get();
+      else
+        return mp->get();
+    }
+    else
+    /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
+      return head->insert(function, offset)->get();
+  }
+
+#ifdef DEBUG_OUTPUT
+  static void print_value_function_trie(std::ostream &os, const feature_trie_type * const &trie) {
+    if(trie) {
+      for(auto tt = trie->begin(), tend = trie->end(); tt != tend; ++tt) {
+        os << '<' << *tt->get_key() << ',';
+        if(tt->get())
+          os << (*tt)->value;
+        else
+          os << "nullptr";
+        os << ',';
+        if(tt->get_deeper())
+          print_value_function_trie(os, tt->get_deeper());
+        os << '>';
+      }
+    }
+  }
+#endif
+
   virtual void generate_features() = 0;
   virtual void generate_candidates() = 0;
   virtual void update() = 0;

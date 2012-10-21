@@ -14,12 +14,14 @@ namespace Blocks_World {
   
   typedef int block_id;
 
-  struct On_Top;
-  struct In_Place;
-  struct On_Top;
+  class In_Place;
+  class On_Top;
 
-  struct Feature;
-  struct Feature : ::Feature<Feature, On_Top> {
+  class Feature;
+  class Feature : public ::Feature<Feature, On_Top> {
+    Feature & operator=(const Feature &);
+
+  public:
     Feature(const bool &present_ = true)
      : ::Feature<Feature, On_Top>(present_)
     {
@@ -32,7 +34,8 @@ namespace Blocks_World {
 
   typedef Feature feature_type;
 
-  struct In_Place : public feature_type {
+  class In_Place : public feature_type {
+  public:
     In_Place()
      : block(block_id())
     {
@@ -45,7 +48,7 @@ namespace Blocks_World {
     }
 
     In_Place * clone() const {
-      return new In_Place(block);
+      return new In_Place(*this);
     }
 
     void print_impl(std::ostream &os) const {
@@ -65,7 +68,8 @@ namespace Blocks_World {
     block_id block;
   };
 
-  struct On_Top : public feature_type {
+  class On_Top : public feature_type {
+  public:
     On_Top()
      : top(block_id()),
      bottom(block_id())
@@ -80,7 +84,7 @@ namespace Blocks_World {
     }
 
     On_Top * clone() const {
-      return new On_Top(top, bottom);
+      return new On_Top(*this);
     }
 
     void print_impl(std::ostream &os) const {
@@ -101,10 +105,11 @@ namespace Blocks_World {
     block_id bottom;
   };
 
-  struct Move;
+  class Move;
   typedef Action<Move, Move> action_type;
 
-  struct Move : public action_type {
+  class Move : public action_type {
+  public:
     Move()
      : block(block_id()),
      dest(block_id())

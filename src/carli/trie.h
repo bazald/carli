@@ -49,10 +49,10 @@ namespace Zeni {
       list_value_type::insert_before(lp);
       ptr = static_cast<trie_pointer_type>(lp);
     }
-    trie_pointer_type list_insert_in_order(trie_pointer_type &ptr) {
-      auto lp = static_cast<list_pointer_type>(ptr);
-      auto rv = list_value_type::insert_in_order(lp, false, COMPARE());
-      ptr = static_cast<trie_pointer_type>(lp);
+    trie_pointer_type map_insert(trie_pointer_type &ptr) {
+      auto mp = static_cast<map_pointer_type>(ptr);
+      auto rv = map_value_type::insert(mp);
+      ptr = static_cast<trie_pointer_type>(mp);
       return static_cast<trie_pointer_type>(rv);
     }
 
@@ -89,6 +89,9 @@ namespace Zeni {
     value_pointer_type operator->() {
       return m_value;
     }
+    
+    const trie_value_type * get_deeper() const {return m_deeper;}
+    trie_pointer_type & get_deeper() {return m_deeper;}
 
   private:
     trie_pointer_type finish_insert(const size_t &offset, const list_pointer_type &next) {

@@ -9,7 +9,10 @@
 #include "memory_pool.h"
 
 template <typename DERIVED, typename DERIVED2 = DERIVED>
-struct Action : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
+class Action : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
+  Action operator=(const Action &);
+
+public:
   typedef typename Zeni::Linked_List<Action> List;
   typedef typename List::iterator iterator;
 
@@ -32,6 +35,11 @@ struct Action : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DE
   };
 
   Action()
+    : candidates(this)
+  {
+  }
+
+  Action(const Action &)
     : candidates(this)
   {
   }
