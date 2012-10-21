@@ -356,8 +356,13 @@ namespace Zeni {
 
     /// erase this entry from this list
     void erase() {
-      erase_prev();
-      erase_next();
+      if(m_prev)
+        m_prev->m_next = m_next;
+      if(m_next)
+        m_next->m_prev = m_prev;
+
+      m_prev = nullptr;
+      m_next = nullptr;
     }
 
     void erase_prev() {

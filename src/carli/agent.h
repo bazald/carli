@@ -11,7 +11,7 @@
 #include <map>
 #include <string>
 
-#define MAX_DEPTH 1
+#define MAX_DEPTH 2
 
 template <typename DERIVED, typename DERIVED2 = DERIVED>
 class Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
@@ -220,7 +220,7 @@ protected:
       while(it != iend) {
         auto ptr = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
         assert(it->present == ptr->get_key()->present);
-        ptr->insert_after(tail);
+        ptr->list_insert_after(tail);
         tail = ptr;
         ++it;
       }
@@ -230,7 +230,7 @@ protected:
     if(vf == m_value_function.end())
       vf = m_value_function.insert(typename value_function_type::value_type(action.clone(), nullptr)).first;
 
-    return get_value_from_function(head, vf->second, offset, depth);
+    return get_value_from_function(head, vf->second, offset, depth)->get();
   }
 
   void regenerate_lists() {
@@ -413,7 +413,7 @@ protected:
   std::function<action_ptruc ()> m_exploration_policy; ///< Exploration policy
 
 private:
-  Q_Value * get_value_from_function(feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth) {
+  feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth) {
     /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
     auto match = std::find_first_of(head->begin(), head->end(),
                                     function ? function->begin() : typename feature_trie_type::iterator(), function ? function->end() : typename feature_trie_type::iterator(),
@@ -424,15 +424,23 @@ private:
     if(match) {
       auto next = static_cast<feature_trie>(head == match ? head->next() : head);
       match->erase();
-      auto mp = match->insert(function, offset, depth);
-      if(next && depth)
-        return next->insert(mp->get_deeper(), offset, depth - 1)->get();
-      else
-        return mp->get();
+
+      feature_trie deeper = nullptr;
+      if(next && depth) {
+        match = match->map_insert(function);
+        deeper = get_value_from_function(next, match->get_deeper(), offset, depth - 1);
+      }
+      else {
+        next->destroy();
+        return match->insert(function, offset, depth);
+      }
+
+      match->offset_erase(offset);
+      return match->offset_insert_before(offset, deeper);
     }
-    else
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
-      return head->insert(function, offset, depth)->get();
+
+    return head->insert(function, offset, depth);
   }
 
 #ifdef DEBUG_OUTPUT
