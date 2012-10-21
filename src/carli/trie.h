@@ -60,18 +60,21 @@ namespace Zeni {
      *  If an offset is specified, return a pointer to the most general match with a value first,
      *    and treat the value+offset as a Linked_List, stringing together general-to-specific values.
      */
-    trie_pointer_type insert(trie_pointer_type &ptr, const size_t &offset = size_t(-1)) {
+    trie_pointer_type insert(trie_pointer_type &ptr, const size_t &offset = size_t(-1), const size_t &depth = size_t(-1)) {
       if(!this)
         return ptr;
 
       auto next = this->next();
       this->erase();
 
-      auto mp = static_cast<map_pointer_type>(ptr);
-      auto thisp = static_cast<trie_pointer_type>(this->map_value_type::insert(mp)); ///< this possibly deleted
-      ptr = static_cast<trie_pointer_type>(mp);
+      auto thisp = map_insert(ptr); ///< this possibly deleted
 
-      return thisp->finish_insert(offset, next);
+      if(depth)
+        return thisp->finish_insert(offset, next, depth - 1);
+      else {
+        next->destroy();
+        return thisp->finish_insert(offset, nullptr, 0);
+      }
     }
 
     value_pointer_type get() const {
@@ -94,9 +97,9 @@ namespace Zeni {
     trie_pointer_type & get_deeper() {return m_deeper;}
 
   private:
-    trie_pointer_type finish_insert(const size_t &offset, const list_pointer_type &next) {
+    trie_pointer_type finish_insert(const size_t &offset, const list_pointer_type &next, const size_t &depth) {
       if(next) {
-        auto deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, offset);
+        auto deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, offset, depth);
         if(offset != size_t(-1) && m_value) {
           auto lhs = reinterpret_cast<Linked_List<value_type> *>(reinterpret_cast<char *>(m_value) + offset);
           assert(lhs->offset() == offset);

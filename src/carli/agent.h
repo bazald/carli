@@ -10,6 +10,8 @@
 #include <functional>
 #include <map>
 
+#define MAX_DEPTH 1
+
 template <typename DERIVED, typename DERIVED2 = DERIVED>
 class Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
   Feature & operator=(const Feature &);
@@ -166,7 +168,7 @@ public:
   void act() {
     m_current = std::move(m_next);
 
-    Q_Value * const value_current = get_value(m_features, *m_current, Q_Value::current_offset());
+    Q_Value * const value_current = get_value(m_features, *m_current, Q_Value::current_offset(), MAX_DEPTH);
 
     const reward_type reward = m_environment->transition(*m_current);
 
@@ -176,7 +178,7 @@ public:
       regenerate_lists();
 
       m_next = m_target_policy();
-      Q_Value * const value_best = get_value(m_features, *m_next, Q_Value::next_offset());
+      Q_Value * const value_best = get_value(m_features, *m_next, Q_Value::next_offset(), MAX_DEPTH);
       td_update(&value_current->current, reward, &value_best->next, 1.0, 1.0);
 
       m_next = m_exploration_policy();
@@ -201,7 +203,7 @@ public:
   }
 
 protected:
-  Q_Value * get_value(const feature_list &features, const action_type &action, const size_t &offset) {
+  Q_Value * get_value(const feature_list &features, const action_type &action, const size_t &offset, const size_t &depth = size_t(-1)) {
     if(!features)
       return nullptr;
 
@@ -227,7 +229,7 @@ protected:
     if(vf == m_value_function.end())
       vf = m_value_function.insert(typename value_function_type::value_type(action.clone(), nullptr)).first;
 
-    return get_value_from_function(head, vf->second, offset);
+    return get_value_from_function(head, vf->second, offset, depth);
   }
 
   void regenerate_lists() {
@@ -259,7 +261,7 @@ protected:
     double value = double();
     const action_type * action = nullptr;
     std::for_each(m_candidates->begin(), m_candidates->end(), [this,&action,&value](const action_type &action_) {
-      const double value_ = sum_value(&action_, this->get_value(m_features, action_, Q_Value::next_offset())->next);
+      const double value_ = sum_value(&action_, this->get_value(m_features, action_, Q_Value::next_offset(), MAX_DEPTH)->next);
 
       if(!action || value_ > value) {
         action = &action_;
@@ -410,7 +412,7 @@ protected:
   std::function<action_ptruc ()> m_exploration_policy; ///< Exploration policy
 
 private:
-  Q_Value * get_value_from_function(feature_trie &head, feature_trie &function, const size_t &offset) {
+  Q_Value * get_value_from_function(feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth) {
     /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
     auto match = std::find_first_of(head->begin(), head->end(),
                                     function ? function->begin() : typename feature_trie_type::iterator(), function ? function->end() : typename feature_trie_type::iterator(),
@@ -421,15 +423,15 @@ private:
     if(match) {
       auto next = static_cast<feature_trie>(head == match ? head->next() : head);
       match->erase();
-      auto mp = match->map_insert(function);
-      if(next)
-        return next->insert(mp->get_deeper(), offset)->get();
+      auto mp = match->insert(function, offset, depth);
+      if(next && depth)
+        return next->insert(mp->get_deeper(), offset, depth - 1)->get();
       else
         return mp->get();
     }
     else
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
-      return head->insert(function, offset)->get();
+      return head->insert(function, offset, depth)->get();
   }
 
 #ifdef DEBUG_OUTPUT
