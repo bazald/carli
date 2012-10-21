@@ -61,7 +61,7 @@ namespace Blocks_World {
     int compare_pi(const In_Place &rhs) const {
       return block - rhs.block;
     }
-    int compare_pi(const On_Top &rhs) const {
+    int compare_pi(const On_Top &) const {
       return -1;
     }
 
@@ -94,7 +94,7 @@ namespace Blocks_World {
     int compare_pi(const Feature &rhs) const {
       return -rhs.compare_pi(*this);
     }
-    int compare_pi(const In_Place &rhs) const {
+    int compare_pi(const In_Place &) const {
       return 1;
     }
     int compare_pi(const On_Top &rhs) const {

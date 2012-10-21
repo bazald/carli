@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <map>
+#include <string>
 
 #define MAX_DEPTH 1
 

@@ -4,6 +4,7 @@
 *.bak
 *.bbl
 *.blg
+*.cache
 *.dvi
 *.exe
 *.filters
