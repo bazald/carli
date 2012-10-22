@@ -143,7 +143,7 @@ public:
 
     for(typename value_function_type::iterator vt = m_value_function.begin(), vend = m_value_function.end(); vt != vend; ) {
       auto ptr = vt->first;
-      vt->second->destroy();
+      vt->second->destroy(vt->second);
       m_value_function.erase(vt++);
       delete ptr;
     }
@@ -210,8 +210,8 @@ protected:
 
     feature_trie head = nullptr;
 
-    auto it = features->begin();
-    auto iend = features->end();
+    auto it = features->begin(features);
+    auto iend = features->end(features);
     if(it != iend) {
       head = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
       auto tail = head;
@@ -241,10 +241,8 @@ protected:
   }
 
   void destroy_lists() {
-    m_features->destroy();
-    m_features = nullptr;
-    m_candidates->destroy();
-    m_candidates = nullptr;
+    m_features->destroy(m_features);
+    m_candidates->destroy(m_candidates);
   }
 
   action_ptruc choose_epsilon_greedy(const double &epsilon) {
@@ -261,7 +259,7 @@ protected:
 
     double value = double();
     const action_type * action = nullptr;
-    std::for_each(m_candidates->begin(), m_candidates->end(), [this,&action,&value](const action_type &action_) {
+    std::for_each(m_candidates->begin(m_candidates), m_candidates->end(m_candidates), [this,&action,&value](const action_type &action_) {
       const double value_ = sum_value(&action_, this->get_value(m_features, action_, Q_Value::next_offset(), MAX_DEPTH)->next);
 
       if(!action || value_ > value) {
@@ -279,13 +277,13 @@ protected:
 #endif
 
     int counter = 0;
-    std::for_each(m_candidates->begin(), m_candidates->end(), [&counter](const action_type &) {
+    std::for_each(m_candidates->begin(m_candidates), m_candidates->end(m_candidates), [&counter](const action_type &) {
       ++counter;
     });
 
     counter = random.rand_lt(counter) + 1;
     const action_type * action = nullptr;
-    std::for_each(m_candidates->begin(), m_candidates->end(), [&counter,&action](const action_type &action_) {
+    std::for_each(m_candidates->begin(m_candidates), m_candidates->end(m_candidates), [&counter,&action](const action_type &action_) {
       if(!--counter)
         action = &action_;
     });
@@ -301,18 +299,18 @@ protected:
 
     double count = double();
     double q_old = double();
-    std::for_each(current->begin(), current->end(), [&count,&q_old](const Q_Value &q) {
+    std::for_each(current->begin(current), current->end(current), [&count,&q_old](const Q_Value &q) {
       ++count;
       q_old += q.value;
     });
 
-    std::for_each(current->begin(), current->end(), [&count](Q_Value &q) {
+    std::for_each(current->begin(current), current->end(current), [&count](Q_Value &q) {
       q.credit = 1.0 / count;
     });
 
     double variance_total_next = double();
     if(next) {
-      std::for_each(next->begin(), next->end(), [&variance_total_next](const Q_Value &q) {
+      std::for_each(next->begin(next), next->end(next), [&variance_total_next](const Q_Value &q) {
         variance_total_next += q.variance_total;
       });
     }
@@ -321,7 +319,7 @@ protected:
     const double delta = target_value - q_old;
     const double &gamma_ = gamma;
     double q_new = double();
-    std::for_each(current->begin(), current->end(), [this,&alpha_,&delta,gamma_,&q_new,&variance_total_next](Q_Value &q) {
+    std::for_each(current->begin(current), current->end(current), [this,&alpha_,&delta,gamma_,&q_new,&variance_total_next](Q_Value &q) {
       const double local_old = q.value;
       const double local_alpha = alpha_ * q.credit;
       const double local_delta = local_alpha * delta;
@@ -351,7 +349,7 @@ protected:
     std::cerr << "            " << delta << " = " << alpha << " * (" << target_value << " - " << q_old << ") / " << count << std::endl
               << "            " << q_new << std::endl;
 
-    std::for_each(current->begin(), current->end(), [this](const Q_Value &q) {
+    std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {
       std::cerr << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << std::endl
                 << " variance: " << q.variance_total << " of " << this->m_mean_variance << std::endl;
     });
@@ -365,7 +363,7 @@ protected:
 #endif
 
     double sum = double();
-    std::for_each(value_list.begin(), value_list.end(), [&action,&sum](const Q_Value &q) {
+    std::for_each(value_list.begin(&value_list), value_list.end(&value_list), [&action,&sum](const Q_Value &q) {
 #ifdef DEBUG_OUTPUT
       if(action)
         std::cerr << ' ' << q.value;
@@ -387,7 +385,7 @@ protected:
   static void print_list(std::ostream &os, const std::string &head, const std::string &pre, const LIST &list) {
     if(list) {
       os << head;
-      std::for_each(list->begin(), list->end(), [&os,&pre](decltype(*list->begin()) &value) {
+      std::for_each(list->begin(list), list->end(list), [&os,&pre](decltype(*list->begin(list)) &value) {
         os << pre << value;
       });
       os << std::endl;
@@ -415,8 +413,8 @@ protected:
 private:
   feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth) {
     /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
-    auto match = std::find_first_of(head->begin(), head->end(),
-                                    function ? function->begin() : typename feature_trie_type::iterator(), function ? function->end() : typename feature_trie_type::iterator(),
+    auto match = std::find_first_of(head->begin(head), head->end(head),
+                                    function->begin(function), function->end(function),
                                     [](const feature_trie_type &lhs, const feature_trie_type &rhs)->bool {
                                       return lhs.get_key()->compare_pi(*rhs.get_key()) == 0;
                                     });
@@ -431,7 +429,7 @@ private:
         deeper = get_value_from_function(next, match->get_deeper(), offset, depth - 1);
       }
       else {
-        next->destroy();
+        next->destroy(next);
         match = match->insert(function, offset, depth);
       }
 
@@ -446,7 +444,7 @@ private:
 #ifdef DEBUG_OUTPUT
   static void print_value_function_trie(std::ostream &os, const feature_trie_type * const &trie) {
     if(trie) {
-      for(auto tt = trie->begin(), tend = trie->end(); tt != tend; ++tt) {
+      for(auto tt = trie->begin(trie), tend = trie->end(trie); tt != tend; ++tt) {
         os << '<' << *tt->get_key() << ',';
         if(tt->get())
           os << (*tt)->value;

@@ -36,8 +36,7 @@ namespace Zeni {
     }
 
     ~Trie() {
-      if(m_deeper)
-        m_deeper->destroy();
+      m_deeper->destroy(m_deeper);
       delete m_value;
     }
 
@@ -72,7 +71,7 @@ namespace Zeni {
       if(depth)
         return thisp->finish_insert(offset, next, depth - 1);
       else {
-        next->destroy();
+        next->destroy(next);
         return thisp->finish_insert(offset, nullptr, 0);
       }
     }

@@ -245,20 +245,24 @@ namespace Zeni {
     }
     
     /// return an iterator_const pointing to this list entry; only the beginning if !prev()
-    iterator_const begin() const {
-      return iterator_const(this);
+    template <typename DERIVED>
+    static iterator_const begin(const DERIVED * const &ptr) {
+      return ptr ? iterator_const(ptr) : iterator_const();
     }
     /// return an iterator pointing to this list entry; only the beginning if !prev()
-    iterator begin() {
-      return iterator(this);
+    template <typename DERIVED>
+    static iterator begin(DERIVED * const &ptr) {
+      return ptr ? iterator(ptr) : iterator();
     }
     /// return an iterator_const pointing to an empty list entry of the appropriate size
-    iterator_const end() const {
-      return iterator_const(m_offset);
+    template <typename DERIVED>
+    static iterator_const end(const DERIVED * const &ptr) {
+      return ptr ? iterator_const(ptr->offset()) : iterator_const();
     }
     /// return an iterator pointing to an empty list entry of the appropriate size
-    iterator end() {
-      return iterator(m_offset);
+    template <typename DERIVED>
+    static iterator end(DERIVED * const &ptr) {
+      return ptr ? iterator(ptr->offset()) : iterator();
     }
 
     /// insert this list entry after ptr; requires this or ptr to have !next()
@@ -334,7 +338,7 @@ namespace Zeni {
         const list_pointer_type pp = ptr->find_gte(**this, compare, &pptr);
 
         if(pp && !duplicate && !compare(**this, **pp)) {
-          destroy();
+          destroy(this);
           return pp;
         }
 
@@ -380,36 +384,40 @@ namespace Zeni {
     }
 
     /// delete every entry in the list between begin() and end(), inclusive
-    void destroy() {
-      if(this) {
-        auto it = begin();
-        auto iend = end();
-        while(it != iend) {
-          auto ptr = it.get();
-          ++it;
-          delete ptr;
-        }
+    template <typename DERIVED>
+    static void destroy(DERIVED * const &ptr_) {
+      auto ptr = ptr_;
+      destroy(ptr);
+    }
+    template <typename DERIVED>
+    static void destroy(DERIVED * &ptr_) {
+      auto it = begin(ptr_);
+      auto iend = end(ptr_);
+      while(it != iend) {
+        auto ptr = it.get();
+        ++it;
+        delete ptr;
       }
+      ptr_ = nullptr;
     }
 
-    Linked_List<TYPE> * clone() const {
+    template <typename DERIVED>
+    static Linked_List<TYPE> * clone(const DERIVED * const &ptr_) {
       Linked_List<TYPE> * head = nullptr;
 
-      if(this) {
-        auto it = begin();
-        auto iend = end();
+      auto it = begin(ptr_);
+      auto iend = end(ptr_);
 
-        if(it != iend) {
-          head = reinterpret_cast<list_pointer_type>(reinterpret_cast<char *>(it->clone()) + m_offset);
-          auto tail = head;
+      if(it != iend) {
+        head = reinterpret_cast<list_pointer_type>(reinterpret_cast<char *>((*it)->clone()) + it->offset());
+        auto tail = head;
+        ++it;
+
+        while(it != iend) {
+          auto ptr = reinterpret_cast<list_pointer_type>(reinterpret_cast<char *>((*it)->clone()) + it->offset());
+          ptr->insert_after(tail);
+          tail = ptr;
           ++it;
-
-          while(it != iend) {
-            auto ptr = reinterpret_cast<list_pointer_type>(reinterpret_cast<char *>(it->clone()) + m_offset);
-            ptr->insert_after(tail);
-            tail = ptr;
-            ++it;
-          }
         }
       }
 

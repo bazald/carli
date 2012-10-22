@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     std::cout << "SUCCESS in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
   }
 
-//   test_trie * trie = nullptr;
+//   test_trie * trie = new test_trie;
 //   test_trie * key = nullptr;
 //   (new test_trie("world"))->list_insert_before(key);
 //   (new test_trie("hello"))->list_insert_before(key);
@@ -65,7 +65,10 @@ int main(int argc, char **argv) {
 //   for_each((*key)->list.begin(), (*key)->list.end(), [](const Q_Value &q) {
 //     std::cout << q << std::endl;
 //   });
-//   trie->destroy();
+//   auto clone = trie->clone(trie);
+//   key = clone ? clone->get() : nullptr;
+//   key->destroy(key);
+//   trie->destroy(trie);
 
   return 0;
 }
