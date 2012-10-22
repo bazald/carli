@@ -65,9 +65,6 @@ int main(int argc, char **argv) {
 //   for_each((*key)->list.begin(), (*key)->list.end(), [](const Q_Value &q) {
 //     std::cout << q << std::endl;
 //   });
-//   auto clone = trie->clone(trie);
-//   key = clone ? clone->get() : nullptr;
-//   key->destroy(key);
 //   trie->destroy(trie);
 
   return 0;

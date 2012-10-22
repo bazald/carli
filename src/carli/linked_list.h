@@ -401,29 +401,6 @@ namespace Zeni {
       ptr_ = nullptr;
     }
 
-    template <typename DERIVED>
-    static Linked_List<TYPE> * clone(const DERIVED * const &ptr_) {
-      Linked_List<TYPE> * head = nullptr;
-
-      auto it = begin(ptr_);
-      auto iend = end(ptr_);
-
-      if(it != iend) {
-        head = reinterpret_cast<list_pointer_type>(reinterpret_cast<char *>((*it)->clone()) + it->offset());
-        auto tail = head;
-        ++it;
-
-        while(it != iend) {
-          auto ptr = reinterpret_cast<list_pointer_type>(reinterpret_cast<char *>((*it)->clone()) + it->offset());
-          ptr->insert_after(tail);
-          tail = ptr;
-          ++it;
-        }
-      }
-
-      return head;
-    }
-
     bool operator<(const Linked_List<TYPE> &rhs) const {return compare(rhs) < 0;}
     bool operator<=(const Linked_List<TYPE> &rhs) const {return compare(rhs) <= 0;}
     bool operator>(const Linked_List<TYPE> &rhs) const {return compare(rhs) > 0;}
