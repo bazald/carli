@@ -217,6 +217,11 @@ namespace Blocks_World {
     Agent(const std::shared_ptr<environment_type> &env)
      : ::Agent<feature_type, action_type>(env)
     {
+      set_learning_rate(1.0);
+      set_discount_rate(1.0);
+      set_on_policy(false);
+      set_epsilon(0.1);
+
       init();
     }
 

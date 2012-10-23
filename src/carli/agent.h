@@ -130,12 +130,16 @@ public:
    m_candidates(nullptr),
    m_environment(environment),
    m_total_reward(reward_type()),
-   m_step_count(step_count_type())
+   m_step_count(step_count_type()),
+   m_learning_rate(0.3),
+   m_discount_rate(0.9),
+   m_on_policy(false),
+   m_epsilon(0.1)
   {
     using namespace std::placeholders;
 
-    m_target_policy = std::bind(&Agent::choose_greedy, this);
-    m_exploration_policy = std::bind(&Agent::choose_epsilon_greedy, this, 0.1);
+    m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
+    m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
   }
 
   virtual ~Agent() {
@@ -147,6 +151,37 @@ public:
       m_value_function.erase(vt++);
       delete ptr;
     }
+  }
+
+  double get_learning_rate() const {return m_learning_rate;}
+  void set_learning_rate(const double &learning_rate) {
+    if(learning_rate <= 0.0 || learning_rate > 1.0)
+      throw std::range_error("Illegal learning rate.");
+    m_learning_rate = learning_rate;
+  }
+
+  double get_discount_rate() const {return m_discount_rate;}
+  void set_discount_rate(const double &discount_rate) {
+    if(discount_rate < 0.0 || discount_rate > 1.0)
+      throw std::range_error("Illegal discount rate.");
+    m_discount_rate = discount_rate;
+  }
+
+  double get_epsilon() const {return m_epsilon;}
+  void set_epsilon(const double &epsilon) {
+    if(epsilon < 0.0 || epsilon > 1.0)
+      throw std::range_error("Illegal epsilon.");
+    m_epsilon = epsilon;
+  }
+
+  bool get_on_policy() const {return m_on_policy;}
+  void set_on_policy(const bool &on_policy) {
+    if(on_policy)
+      m_target_policy = [this]()->action_ptruc{return this->m_exploration_policy();};
+    else
+      m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
+
+    m_on_policy = on_policy;
   }
 
   const std::shared_ptr<const environment_type> & get_env() const {return m_environment;}
@@ -180,14 +215,15 @@ public:
 
       m_next = m_target_policy();
       Q_Value * const value_best = get_value(m_features, *m_next, Q_Value::next_offset(), MAX_DEPTH);
-      td_update(&value_current->current, reward, &value_best->next, 1.0, 1.0);
+      td_update(&value_current->current, reward, &value_best->next);
 
-      m_next = m_exploration_policy();
+      if(!m_on_policy)
+        m_next = m_exploration_policy();
     }
     else {
       destroy_lists();
 
-      td_update(&value_current->current, reward, nullptr, 1.0, 1.0);
+      td_update(&value_current->current, reward, nullptr);
     }
 
     m_total_reward += reward;
@@ -291,11 +327,11 @@ protected:
     return action_ptruc(action->clone());
   }
 
-  void td_update(Q_Value::List * const &current, const reward_type &reward, const Q_Value::List * const &next, const double &alpha, const double &gamma) {
+  void td_update(Q_Value::List * const &current, const reward_type &reward, const Q_Value::List * const &next) {
     if(!current)
       return;
 
-    const double target_value = reward + (next ? gamma * sum_value(nullptr, *next) : 0.0);
+    const double target_value = reward + (next ? m_discount_rate * sum_value(nullptr, *next) : 0.0);
 
     double count = double();
     double q_old = double();
@@ -315,14 +351,12 @@ protected:
       });
     }
 
-    const double &alpha_ = alpha;
     const double delta = target_value - q_old;
-    const double &gamma_ = gamma;
     double q_new = double();
-    std::for_each(current->begin(current), current->end(current), [this,&alpha_,&delta,gamma_,&q_new,&variance_total_next](Q_Value &q) {
+    std::for_each(current->begin(current), current->end(current), [this,&delta,&q_new,&variance_total_next](Q_Value &q) {
       const double local_old = q.value;
-      const double local_alpha = alpha_ * q.credit;
-      const double local_delta = local_alpha * delta;
+      const double local_learning_rate = this->m_learning_rate * q.credit;
+      const double local_delta = local_learning_rate * delta;
 
       ++q.update_count;
 
@@ -338,15 +372,15 @@ protected:
 
         q.mean2 += mdelta / q.credit; ///< divide by q.credit to prevent shrinking of estimated variance due to credit assignment
         q.variance_0 = q.mean2 / (q.update_count - 1);
-        q.variance_rest += local_alpha * (q.credit * gamma_ * variance_total_next - q.variance_rest);
+        q.variance_rest += local_learning_rate * (q.credit * this->m_discount_rate * variance_total_next - q.variance_rest);
         q.variance_total = q.variance_0 + q.variance_rest;
         this->m_mean_variance.contribute(q.variance_total);
       }
     });
 
 #ifdef DEBUG_OUTPUT
-    std::cerr << " td_update: " << q_old << " <" << alpha << "= " << reward << " + " << gamma << " * " << (next ? sum_value(nullptr, *next) : 0.0) << std::endl;
-    std::cerr << "            " << delta << " = " << alpha << " * (" << target_value << " - " << q_old << ") / " << count << std::endl
+    std::cerr << " td_update: " << q_old << " <" << m_learning_rate << "= " << reward << " + " << m_discount_rate << " * " << (next ? sum_value(nullptr, *next) : 0.0) << std::endl;
+    std::cerr << "            " << delta << " = " << m_learning_rate << " * (" << target_value << " - " << q_old << ") / " << count << std::endl
               << "            " << q_new << std::endl;
 
     std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {
@@ -473,6 +507,12 @@ private:
 
   reward_type m_total_reward;
   step_count_type m_step_count;
+
+  double m_learning_rate; ///< alpha
+  double m_discount_rate; ///< gamma
+
+  bool m_on_policy; ///< for Sarsa/Q-learning selection
+  double m_epsilon; ///< for epsilon-greedy decision-making
 };
 
 template <typename FEATURE, typename ACTION>
