@@ -384,7 +384,7 @@ protected:
               << "            " << q_new << std::endl;
 
     std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {
-      std::cerr << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << std::endl
+      std::cerr << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl
                 << " variance: " << q.variance_total << " of " << this->m_mean_variance << std::endl;
     });
 #endif
