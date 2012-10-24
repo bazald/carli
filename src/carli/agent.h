@@ -139,6 +139,7 @@ public:
 
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
     m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
+    m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
     m_split_test = [](Q_Value * const &q, const size_t &depth)->bool{return true;};
   }
 
@@ -341,15 +342,10 @@ protected:
 
     const double target_value = reward + (next ? m_discount_rate * sum_value(nullptr, *next) : 0.0);
 
-    double count = double();
     double q_old = double();
-    std::for_each(current->begin(current), current->end(current), [&count,&q_old](const Q_Value &q) {
-      ++count;
+    std::for_each(current->begin(current), current->end(current), [&q_old](Q_Value &q) {
       q_old += q.value;
-    });
-
-    std::for_each(current->begin(current), current->end(current), [&count](Q_Value &q) {
-      q.credit = 1.0 / count;
+      ++q.update_count;
     });
 
     double variance_total_next = double();
@@ -358,6 +354,8 @@ protected:
         variance_total_next += q.variance_total;
       });
     }
+
+    m_credit_assignment(current);
 
     const double delta = target_value - q_old;
     double q_new = double();
@@ -382,8 +380,6 @@ protected:
           ++q.pseudoepisode_count;
         q.last_step_fired = this->m_step_count;
 
-        ++q.update_count;
-
         q.cabe += local_delta < 0.0 ? -local_delta : local_delta;
         this->m_mean_cabe.contribute(q.cabe);
 
@@ -402,7 +398,7 @@ protected:
 
 #ifdef DEBUG_OUTPUT
     std::cerr << " td_update: " << q_old << " <" << m_learning_rate << "= " << reward << " + " << m_discount_rate << " * " << (next ? sum_value(nullptr, *next) : 0.0) << std::endl;
-    std::cerr << "            " << delta << " = " << m_learning_rate << " * (" << target_value << " - " << q_old << ") / " << count << std::endl
+    std::cerr << "            " << delta << " = " << m_learning_rate << " * (" << target_value << " - " << q_old << ')' << std::endl
               << "            " << q_new << std::endl;
 
     std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {
@@ -413,6 +409,41 @@ protected:
       }
     });
 #endif
+  }
+
+  void assign_credit_evenly(Q_Value::List * const &value_list) {
+    double count = double();
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](const Q_Value &q) {
+      ++count;
+    });
+
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](Q_Value &q) {
+      q.credit = 1.0 / count;
+    });
+  }
+
+  void assign_credit_inv_update_count(Q_Value::List * const &value_list) {
+    double sum = double();
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
+      q.credit = 1.0 / q.update_count;
+      sum += q.credit;
+    });
+
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
+      q.credit /= sum;
+    });
+  }
+
+  void assign_credit_inv_log_update_count(Q_Value::List * const &value_list) {
+    double sum = double();
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
+      q.credit = 1.0 / log(q.update_count);
+      sum += q.credit;
+    });
+
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
+      q.credit /= sum;
+    });
   }
 
   static double sum_value(const action_type * const &action, const Q_Value::List &value_list) {
@@ -468,6 +499,7 @@ protected:
   std::unique_ptr<const action_type> m_next;
   std::function<action_ptruc ()> m_target_policy; ///< Sarsa/Q-Learning selector
   std::function<action_ptruc ()> m_exploration_policy; ///< Exploration policy
+  std::function<void (Q_Value::List * const &)> m_credit_assignment; ///< How to assign credit to multiple Q-values
   std::function<bool (Q_Value * const &, const size_t &)> m_split_test; ///< true if too general, false if sufficiently general
 
 private:
