@@ -135,12 +135,10 @@ public:
    m_epsilon(0.1),
    m_pseudoepisode_threshold(20)
   {
-    using namespace std::placeholders;
-
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
     m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
     m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
-    m_split_test = [](Q_Value * const &q, const size_t &depth)->bool{return true;};
+    m_split_test = [](Q_Value * const &/*q*/, const size_t &/*depth*/)->bool{return true;};
   }
 
   virtual ~Agent() {
