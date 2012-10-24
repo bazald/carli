@@ -16,7 +16,10 @@ public:
   typedef List::iterator iterator;
 
   Q_Value(const double &q_value_ = double())
-   : update_count(0),
+   : last_episode_fired(size_t(-1)),
+   last_step_fired(size_t(-1)),
+   pseudoepisode_count(0),
+   update_count(0),
    split(false),
    credit(1.0),
    value(q_value_),
@@ -30,6 +33,10 @@ public:
     return *this;
   }
 
+  size_t last_episode_fired;
+  size_t last_step_fired;
+
+  size_t pseudoepisode_count;
   size_t update_count;
 
   bool split;

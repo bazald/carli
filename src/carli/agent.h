@@ -119,7 +119,6 @@ public:
   typedef Environment<action_type> environment_type;
   typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
-  typedef size_t step_count_type;
   enum metastate_type {NON_TERMINAL, SUCCESS, FAILURE};
 
   Agent(const std::shared_ptr<environment_type> &environment)
@@ -127,27 +126,20 @@ public:
    m_features(nullptr),
    m_candidates(nullptr),
    m_environment(environment),
+   m_episode_number(0),
+   m_step_count(0),
    m_total_reward(reward_type()),
-   m_step_count(step_count_type()),
    m_learning_rate(0.3),
    m_discount_rate(0.9),
    m_on_policy(false),
-   m_epsilon(0.1)
+   m_epsilon(0.1),
+   m_pseudoepisode_threshold(20)
   {
     using namespace std::placeholders;
 
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
     m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
-    m_split_test = [](Q_Value * const &value, const size_t &depth)->bool{
-      if(!value)
-        return false;
-      if(value->split)
-        return true;
-
-      value->split |= value->update_count > 10;
-
-      return value->split;
-    };
+    m_split_test = [](Q_Value * const &q, const size_t &depth)->bool{return true;};
   }
 
   virtual ~Agent() {
@@ -192,16 +184,24 @@ public:
     m_on_policy = on_policy;
   }
 
+  size_t get_pseudoepisode_threshold() const {return m_pseudoepisode_threshold;}
+  void set_pseudoepisode_threshold(const size_t &pseudoepisode_threshold) {
+    m_pseudoepisode_threshold = pseudoepisode_threshold;
+  }
+
   const std::shared_ptr<const environment_type> & get_env() const {return m_environment;}
   std::shared_ptr<environment_type> & get_env() {return m_environment;}
   metastate_type get_metastate() const {return m_metastate;}
+  size_t get_episode_number() const {return m_episode_number;}
+  size_t get_step_count() const {return m_step_count;}
   reward_type get_total_reward() const {return m_total_reward;}
-  step_count_type get_step_count() const {return m_step_count;}
 
   void init() {
+    if(m_metastate != NON_TERMINAL)
+      ++m_episode_number;
     m_metastate = NON_TERMINAL;
+    m_step_count = 0;
     m_total_reward = reward_type();
-    m_step_count = step_count_type();
 
     regenerate_lists();
 
@@ -366,8 +366,6 @@ protected:
       const double local_learning_rate = this->m_learning_rate * q.credit;
       const double local_delta = local_learning_rate * delta;
 
-      ++q.update_count;
-
       q.value += local_delta;
       q_new += q.value;
 
@@ -376,6 +374,16 @@ protected:
         this->m_mean_variance.uncontribute(q.variance_total);
       }
       else {
+        if(q.last_episode_fired != this->m_episode_number) {
+          ++q.pseudoepisode_count;
+          q.last_episode_fired = this->m_episode_number;
+        }
+        else if(this->m_step_count - q.last_step_fired > m_pseudoepisode_threshold)
+          ++q.pseudoepisode_count;
+        q.last_step_fired = this->m_step_count;
+
+        ++q.update_count;
+
         q.cabe += local_delta < 0.0 ? -local_delta : local_delta;
         this->m_mean_cabe.contribute(q.cabe);
 
@@ -523,14 +531,16 @@ private:
 
   Zeni::Random random;
 
+  size_t m_episode_number;
+  size_t m_step_count;
   reward_type m_total_reward;
-  step_count_type m_step_count;
 
   double m_learning_rate; ///< alpha
   double m_discount_rate; ///< gamma
 
   bool m_on_policy; ///< for Sarsa/Q-learning selection
   double m_epsilon; ///< for epsilon-greedy decision-making
+  double m_pseudoepisode_threshold; ///< For deciding how many steps indicates a pseudoepisode
 };
 
 template <typename FEATURE, typename ACTION>
