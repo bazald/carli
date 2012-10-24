@@ -17,6 +17,7 @@ public:
 
   Q_Value(const double &q_value_ = double())
    : update_count(0),
+   split(false),
    credit(1.0),
    value(q_value_),
    current(this),
@@ -30,6 +31,8 @@ public:
   }
 
   size_t update_count;
+
+  bool split;
 
   double credit;
 

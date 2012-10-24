@@ -6,10 +6,10 @@
 
 namespace Zeni {
 
-  template<typename KEY, typename TYPE, typename COMPARE = std::less<KEY> >
+  template <typename KEY, typename TYPE, typename COMPARE = std::less<KEY> >
   class Trie;
 
-  template<typename KEY, typename TYPE, typename COMPARE>
+  template <typename KEY, typename TYPE, typename COMPARE>
   class Trie : public Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>, public Zeni::Pool_Allocator<Trie<KEY, TYPE, COMPARE> > {
     Trie(const Trie &);
     Trie operator=(const Trie &);
@@ -59,7 +59,8 @@ namespace Zeni {
      *  If an offset is specified, return a pointer to the most general match with a value first,
      *    and treat the value+offset as a Linked_List, stringing together general-to-specific values.
      */
-    trie_pointer_type insert(trie_pointer_type &ptr, const size_t &offset = size_t(-1), const size_t &depth = size_t(-1)) {
+    template <typename TEST>
+    trie_pointer_type insert(trie_pointer_type &ptr, const TEST &test, const size_t &offset = size_t(-1), const size_t &depth = size_t()) {
       if(!this)
         return ptr;
 
@@ -68,15 +69,18 @@ namespace Zeni {
 
       auto thisp = map_insert(ptr); ///< this possibly deleted
 
-      if(depth)
-        return thisp->finish_insert(offset, next, depth - 1);
-      else {
+      if(!test(m_value, depth)) {
         next->destroy(next);
-        return thisp->finish_insert(offset, nullptr, 0);
+        next = nullptr;
       }
+
+      return thisp->finish_insert(test, offset, depth, next);
     }
 
     value_pointer_type get() const {
+      return m_value;
+    }
+    value_pointer_type & get() {
       return m_value;
     }
     const value_reference_type operator*() const {
@@ -122,9 +126,10 @@ namespace Zeni {
     }
 
   private:
-    trie_pointer_type finish_insert(const size_t &offset, const list_pointer_type &next, const size_t &depth) {
+    template <typename TEST>
+    trie_pointer_type finish_insert(const TEST &test, const size_t &offset, const size_t &depth, const list_pointer_type &next) {
       if(next) {
-        auto deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, offset, depth);
+        auto deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, test, offset, depth + 1);
         offset_erase(offset);
         return offset_insert_before(offset, deeper);
       }

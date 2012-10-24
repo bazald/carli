@@ -5,7 +5,7 @@
 
 namespace Zeni {
 
-  template<typename TYPE, typename COMPARE = std::less<TYPE> >
+  template <typename TYPE, typename COMPARE = std::less<TYPE> >
   class Set : public Linked_List<TYPE> {
   public:
     typedef TYPE value_type;

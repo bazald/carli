@@ -6,7 +6,7 @@
 
 namespace Zeni {
 
-  template<typename TYPE>
+  template <typename TYPE>
   class Linked_List {
   public:
     typedef TYPE value_type;

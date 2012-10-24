@@ -11,8 +11,6 @@
 #include <map>
 #include <string>
 
-#define MAX_DEPTH 2
-
 template <typename DERIVED, typename DERIVED2 = DERIVED>
 class Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
   Feature & operator=(const Feature &);
@@ -140,6 +138,16 @@ public:
 
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
     m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
+    m_split_test = [](Q_Value * const &value, const size_t &depth)->bool{
+      if(!value)
+        return false;
+      if(value->split)
+        return true;
+
+      value->split |= value->update_count > 10;
+
+      return value->split;
+    };
   }
 
   virtual ~Agent() {
@@ -204,7 +212,7 @@ public:
   void act() {
     m_current = std::move(m_next);
 
-    Q_Value * const value_current = get_value(m_features, *m_current, Q_Value::current_offset(), MAX_DEPTH);
+    Q_Value * const value_current = get_value(m_features, *m_current, Q_Value::current_offset());
 
     const reward_type reward = m_environment->transition(*m_current);
 
@@ -214,7 +222,7 @@ public:
       regenerate_lists();
 
       m_next = m_target_policy();
-      Q_Value * const value_best = get_value(m_features, *m_next, Q_Value::next_offset(), MAX_DEPTH);
+      Q_Value * const value_best = get_value(m_features, *m_next, Q_Value::next_offset());
       td_update(&value_current->current, reward, &value_best->next);
 
       if(!m_on_policy)
@@ -240,7 +248,7 @@ public:
   }
 
 protected:
-  Q_Value * get_value(const feature_list &features, const action_type &action, const size_t &offset, const size_t &depth = size_t(-1)) {
+  Q_Value * get_value(const feature_list &features, const action_type &action, const size_t &offset, const size_t &depth = size_t()) {
     if(!features)
       return nullptr;
 
@@ -296,7 +304,7 @@ protected:
     double value = double();
     const action_type * action = nullptr;
     std::for_each(m_candidates->begin(m_candidates), m_candidates->end(m_candidates), [this,&action,&value](const action_type &action_) {
-      const double value_ = sum_value(&action_, this->get_value(m_features, action_, Q_Value::next_offset(), MAX_DEPTH)->next);
+      const double value_ = sum_value(&action_, this->get_value(m_features, action_, Q_Value::next_offset())->next);
 
       if(!action || value_ > value) {
         action = &action_;
@@ -363,18 +371,24 @@ protected:
       q.value += local_delta;
       q_new += q.value;
 
-      q.cabe += local_delta < 0.0 ? -local_delta : local_delta;
-      this->m_mean_cabe.contribute(q.cabe);
+      if(q.split) {
+        this->m_mean_cabe.uncontribute(q.cabe);
+        this->m_mean_variance.uncontribute(q.variance_total);
+      }
+      else {
+        q.cabe += local_delta < 0.0 ? -local_delta : local_delta;
+        this->m_mean_cabe.contribute(q.cabe);
 
-      if(q.update_count > 1) {
-        const double x = local_old + delta;
-        const double mdelta = (x - local_old) * (x - q.value);
+        if(q.update_count > 1) {
+          const double x = local_old + delta;
+          const double mdelta = (x - local_old) * (x - q.value);
 
-        q.mean2 += mdelta / q.credit; ///< divide by q.credit to prevent shrinking of estimated variance due to credit assignment
-        q.variance_0 = q.mean2 / (q.update_count - 1);
-        q.variance_rest += local_learning_rate * (q.credit * this->m_discount_rate * variance_total_next - q.variance_rest);
-        q.variance_total = q.variance_0 + q.variance_rest;
-        this->m_mean_variance.contribute(q.variance_total);
+          q.mean2 += mdelta / q.credit; ///< divide by q.credit to prevent shrinking of estimated variance due to credit assignment
+          q.variance_0 = q.mean2 / (q.update_count - 1);
+          q.variance_rest += local_learning_rate * (q.credit * this->m_discount_rate * variance_total_next - q.variance_rest);
+          q.variance_total = q.variance_0 + q.variance_rest;
+          this->m_mean_variance.contribute(q.variance_total);
+        }
       }
     });
 
@@ -384,8 +398,11 @@ protected:
               << "            " << q_new << std::endl;
 
     std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {
-      std::cerr << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl
-                << " variance: " << q.variance_total << " of " << this->m_mean_variance << std::endl;
+      if(!q.split) {
+        std::cerr << " updates:  " << q.update_count << std::endl
+                  << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl
+                  << " variance: " << q.variance_total << " of " << this->m_mean_variance << ':' << this->m_mean_variance.get_stddev() << std::endl;
+      }
     });
 #endif
   }
@@ -443,6 +460,7 @@ protected:
   std::unique_ptr<const action_type> m_next;
   std::function<action_ptruc ()> m_target_policy; ///< Sarsa/Q-Learning selector
   std::function<action_ptruc ()> m_exploration_policy; ///< Exploration policy
+  std::function<bool (Q_Value * const &, const size_t &)> m_split_test; ///< true if too general, false if sufficiently general
 
 private:
   feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth) {
@@ -456,15 +474,15 @@ private:
     if(match) {
       auto next = static_cast<feature_trie>(head == match ? head->next() : head);
       match->erase();
+      match = match->map_insert(function);
 
       feature_trie deeper = nullptr;
-      if(next && depth) {
-        match = match->map_insert(function);
-        deeper = get_value_from_function(next, match->get_deeper(), offset, depth - 1);
-      }
+      if(next && m_split_test(match->get(), depth))
+        deeper = get_value_from_function(next, match->get_deeper(), offset, depth + 1);
       else {
         next->destroy(next);
-        match = match->insert(function, offset, depth);
+        if(!match->get())
+          match->get() = new Q_Value;
       }
 
       match->offset_erase(offset);
@@ -472,7 +490,7 @@ private:
     }
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
 
-    return head->insert(function, offset, depth);
+    return head->insert(function, m_split_test, offset, depth);
   }
 
 #ifdef DEBUG_OUTPUT

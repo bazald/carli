@@ -6,7 +6,7 @@
 
 namespace Zeni {
 
-  template<typename KEY, typename TYPE, typename COMPARE = std::less<KEY> >
+  template <typename KEY, typename TYPE, typename COMPARE = std::less<KEY> >
   class Map : public Linked_List<TYPE> {
   public:
     typedef KEY key_type;
