@@ -8,8 +8,6 @@
 #include <list>
 #include <stdexcept>
 
-#include <iostream>
-
 namespace Blocks_World {
   
   typedef int block_id;

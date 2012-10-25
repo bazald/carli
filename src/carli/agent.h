@@ -11,6 +11,8 @@
 #include <map>
 #include <string>
 
+#include <iostream>
+
 template <typename DERIVED, typename DERIVED2 = DERIVED>
 class Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
   Feature & operator=(const Feature &);
@@ -87,8 +89,10 @@ public:
   }
 
   int compare_pi(const Feature &rhs) const {
-    return dynamic_cast<const DERIVED *>(this)->compare_pi(dynamic_cast<const DERIVED &>(rhs));
+    return compare_pi(dynamic_cast<const DERIVED &>(rhs));
   }
+
+  virtual int compare_pi(const DERIVED &rhs) const = 0;
 
   virtual void print_impl(std::ostream &os) const = 0;
 

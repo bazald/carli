@@ -1,20 +1,13 @@
 #define DEBUG_OUTPUT
 
-#include "memory_pool.h"
-#include "linked_list.h"
-#include "set.h"
-#include "map.h"
-#include "trie.h"
-#include "random.h"
+#include "blocks_world.h"
+#include "puddle_world.h"
 
 #include <memory>
 #include <cstring>
 #include <ctime>
 #include <iostream>
 #include <list>
-
-#include "blocks_world.h"
-#include "q_value.h"
 
 typedef std::string test_key;
 typedef Q_Value test_value;
@@ -25,8 +18,11 @@ int main(int argc, char **argv) {
 
   srand(uint32_t(time(0)));
 
-  auto env = std::make_shared<Blocks_World::Environment>();
-  auto agent = std::make_shared<Blocks_World::Agent>(env);
+//   auto env = std::make_shared<Blocks_World::Environment>();
+//   auto agent = std::make_shared<Blocks_World::Agent>(env);
+
+  auto env = std::make_shared<Puddle_World::Environment>();
+  auto agent = std::make_shared<Puddle_World::Agent>(env);
 
   for(int i = 0; i != 100; ++i) {
     env->init();
@@ -41,7 +37,7 @@ int main(int argc, char **argv) {
 #ifdef DEBUG_OUTPUT
       std::cerr << *env << *agent;
 #endif
-    } while(agent->get_metastate() == Blocks_World::Agent::NON_TERMINAL);
+    } while(agent->get_metastate() == Puddle_World::Agent::NON_TERMINAL);
 
     std::cout << "SUCCESS in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
   }
