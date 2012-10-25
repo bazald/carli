@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <algorithm>
+#include <functional>
 
 namespace Zeni {
 

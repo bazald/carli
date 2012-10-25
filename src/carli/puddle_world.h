@@ -36,8 +36,8 @@ namespace Puddle_World {
     int compare_pi(const Feature &rhs) const {
       return depth != rhs.depth ? depth - rhs.depth :
              axis != rhs.axis ? axis - rhs.axis :
-             bound_lower != rhs.bound_lower ? bound_lower - rhs.bound_lower :
-             bound_higher - rhs.bound_higher;
+             bound_lower != rhs.bound_lower ? (bound_lower < rhs.bound_lower ? -1 : 1) :
+             (bound_higher < rhs.bound_higher ? -1 : 1);
     }
 
     double midpt() const {
@@ -135,13 +135,13 @@ namespace Puddle_World {
     }
 
     reward_type transition_impl(const action_type &action) {
-      const float shift = (m_random_motion.frand_lt() - 0.5) * 0.02; ///< Should really be Gaussian, stddev = 0.01f
+      const double shift = (m_random_motion.frand_lt() - 0.5) * 0.02; ///< Should really be Gaussian, stddev = 0.01f
 
       switch(dynamic_cast<const Move &>(action).direction) {
-        case Move::NORTH: m_position.second += 0.05f + shift; break;
-        case Move::SOUTH: m_position.second -= 0.05f + shift; break;
-        case Move::EAST:  m_position.first  += 0.05f + shift; break;
-        case Move::WEST:  m_position.first  -= 0.05f + shift; break;
+        case Move::NORTH: m_position.second += 0.05 + shift; break;
+        case Move::SOUTH: m_position.second -= 0.05 + shift; break;
+        case Move::EAST:  m_position.first  += 0.05 + shift; break;
+        case Move::WEST:  m_position.first  -= 0.05 + shift; break;
         default: abort();
       }
 
