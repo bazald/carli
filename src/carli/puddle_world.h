@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <list>
 #include <stdexcept>
+#include <array>
 
 namespace Puddle_World {
   
@@ -19,13 +20,13 @@ namespace Puddle_World {
   public:
     enum Axis {X, Y};
 
-    Feature(const bool &present_ = true)
-     : ::Feature<Feature>(present_)
+    Feature()
+     : ::Feature<Feature>(true)
     {
     }
 
-    Feature(const Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_, const bool &present_ = true)
-     : ::Feature<Feature>(present_),
+    Feature(const Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_)
+     : ::Feature<Feature>(true),
      axis(axis_),
      bound_lower(bound_lower_),
      bound_higher(bound_higher_),
@@ -37,7 +38,7 @@ namespace Puddle_World {
       return depth != rhs.depth ? depth - rhs.depth :
              axis != rhs.axis ? axis - rhs.axis :
              bound_lower != rhs.bound_lower ? (bound_lower < rhs.bound_lower ? -1 : 1) :
-             (bound_higher < rhs.bound_higher ? -1 : 1);
+             (bound_higher == rhs.bound_higher ? 0 : bound_higher < rhs.bound_higher ? -1 : 1);
     }
 
     double midpt() const {
@@ -154,8 +155,12 @@ namespace Puddle_World {
       else if(m_position.second > 1.0f)
         m_position.second = 1.0f;
 
-      return -1.0 - 400.0 * (horizontal_puddle_reward(0.1, 0.45, 0.25, 0.1) +
-                             vertical_puddle_reward(0.45, 0.2, 0.6, 0.1));
+      double reward = -1.0;
+
+      reward -= 400.0 * horizontal_puddle_reward(0.1, 0.45, 0.75, 0.1);
+      reward -= 400.0 * vertical_puddle_reward(0.45, 0.4, 0.8, 0.1);
+
+      return reward;
     }
 
     double horizontal_puddle_reward(const double &left, const double &right, const double &y, const double &radius) {
@@ -230,7 +235,7 @@ namespace Puddle_World {
           return true;
 
 //         q->split |= q->update_count > 5;
-        q->split |= depth < 4;
+        q->split |= depth < 9;
 
         return q->split;
       };
@@ -244,8 +249,52 @@ namespace Puddle_World {
 
       assert(!m_features);
 
-      (new Feature(Feature::X, 0.0, 1.0, 0))->features.insert_in_order<feature_type::List::compare_default>(m_features);
-      (new Feature(Feature::Y, 0.0, 1.0, 0))->features.insert_in_order<feature_type::List::compare_default>(m_features);
+      Feature::List * x_tail = &(new Feature(Feature::X, 0.0, 1.0, 0))->features;
+      x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+      Feature::List * y_tail = &(new Feature(Feature::Y, 0.0, 1.0, 0))->features;
+      y_tail = y_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+
+      std::array<feature_trie, 4> tries = {{get_trie(Move(Move::NORTH)),
+                                            get_trie(Move(Move::SOUTH)),
+                                            get_trie(Move(Move::EAST)),
+                                            get_trie(Move(Move::WEST))}};
+
+      bool done = false;
+      while(!done) {
+        done = true;
+
+        for_each(tries.begin(), tries.end(), [this,&done,&env,&x_tail,&y_tail](feature_trie &trie) {
+          auto &x_tail_ = x_tail;
+          auto &y_tail_ = y_tail;
+
+          auto match = std::find_if(trie->begin(trie), trie->end(trie), [&x_tail_](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**x_tail_) == 0;});
+          if(match) {
+            auto feature = match->get_key();
+            const auto midpt = feature->midpt();
+            if(env->get_position().first < midpt)
+              x_tail = &(new Feature(Feature::X, feature->bound_lower, midpt, feature->depth + 1))->features;
+            else
+              x_tail = &(new Feature(Feature::X, midpt, feature->bound_higher, feature->depth + 1))->features;
+            x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+            trie = match->get_deeper();
+            done = false;
+            return;
+          }
+
+          match = std::find_if(trie->begin(trie), trie->end(trie), [&y_tail_](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**y_tail_) == 0;});
+          if(match) {
+            auto feature = match->get_key();
+            const auto midpt = feature->midpt();
+            if(env->get_position().second < midpt)
+              y_tail = &(new Feature(Feature::Y, feature->bound_lower, midpt, feature->depth + 1))->features;
+            else
+              y_tail = &(new Feature(Feature::Y, midpt, feature->bound_higher, feature->depth + 1))->features;
+            y_tail = y_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+            trie = match->get_deeper();
+            done = false;
+          }
+        });
+      }
     }
 
     void generate_candidates() {

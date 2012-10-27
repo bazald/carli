@@ -1,4 +1,4 @@
-#define DEBUG_OUTPUT
+// #define DEBUG_OUTPUT
 
 #include "blocks_world.h"
 #include "puddle_world.h"
@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
   auto env = std::make_shared<Puddle_World::Environment>();
   auto agent = std::make_shared<Puddle_World::Agent>(env);
 
-  for(int i = 0; i != 100; ++i) {
+  for(int i = 0; i != 1000; ++i) {
     env->init();
     agent->init();
 

@@ -273,11 +273,14 @@ protected:
       }
     }
 
+    return get_value_from_function(head, get_trie(action), offset, depth)->get();
+  }
+
+  feature_trie & get_trie(const action_type &action) {
     auto vf = m_value_function.find(const_cast<action_type *>(&action));
     if(vf == m_value_function.end())
       vf = m_value_function.insert(typename value_function_type::value_type(action.clone(), nullptr)).first;
-
-    return get_value_from_function(head, vf->second, offset, depth)->get();
+    return vf->second;
   }
 
   void regenerate_lists() {
@@ -466,7 +469,7 @@ protected:
 
 #ifdef DEBUG_OUTPUT
     if(action)
-      std::cerr << " }" << std::endl;
+      std::cerr << " } = " << sum << std::endl;
 #endif
 
     return sum;
