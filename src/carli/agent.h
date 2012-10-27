@@ -112,6 +112,8 @@ class Agent : public std::enable_shared_from_this<Agent<FEATURE, ACTION> > {
   Agent(const Agent &);
   Agent operator=(const Agent &);
 
+  class Again {};
+
 public:
   typedef FEATURE feature_type;
   typedef typename FEATURE::List * feature_list;
@@ -128,6 +130,7 @@ public:
   Agent(const std::shared_ptr<environment_type> &environment)
    : m_metastate(NON_TERMINAL),
    m_features(nullptr),
+   m_features_complete(true),
    m_candidates(nullptr),
    m_environment(environment),
    m_episode_number(0),
@@ -142,7 +145,7 @@ public:
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
     m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
     m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
-    m_split_test = [](Q_Value * const &/*q*/, const size_t &/*depth*/)->bool{return true;};
+    m_split_test = [this](Q_Value * const &/*q*/, const size_t &/*depth*/)->bool{return m_features_complete;};
   }
 
   virtual ~Agent() {
@@ -255,25 +258,31 @@ protected:
     if(!features)
       return nullptr;
 
-    feature_trie head = nullptr;
+    for(;;) {
+      try {
+        feature_trie head = nullptr;
 
-    auto it = features->begin(features);
-    auto iend = features->end(features);
-    if(it != iend) {
-      head = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
-      auto tail = head;
-      ++it;
+        auto it = features->begin(features);
+        auto iend = features->end(features);
+        if(it != iend) {
+          head = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
+          auto tail = head;
+          ++it;
 
-      while(it != iend) {
-        auto ptr = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
-        assert(it->present == ptr->get_key()->present);
-        ptr->list_insert_after(tail);
-        tail = ptr;
-        ++it;
+          while(it != iend) {
+            auto ptr = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
+            assert(it->present == ptr->get_key()->present);
+            ptr->list_insert_after(tail);
+            tail = ptr;
+            ++it;
+          }
+        }
+
+        return get_value_from_function(head, get_trie(action), offset, depth)->get();
+      }
+      catch(Again &) {
       }
     }
-
-    return get_value_from_function(head, get_trie(action), offset, depth)->get();
   }
 
   feature_trie & get_trie(const action_type &action) {
@@ -327,8 +336,9 @@ protected:
 #endif
 
     int counter = 0;
-    std::for_each(m_candidates->begin(m_candidates), m_candidates->end(m_candidates), [&counter](const action_type &) {
+    std::for_each(m_candidates->begin(m_candidates), m_candidates->end(m_candidates), [this,&counter](const action_type &action_) {
       ++counter;
+      this->get_value(m_features, action_, Q_Value::next_offset()); ///< Trigger additional feature generation, as needed
     });
 
     counter = random.rand_lt(counter) + 1;
@@ -499,6 +509,7 @@ protected:
 
   metastate_type m_metastate;
   feature_list m_features;
+  bool m_features_complete;
   action_list m_candidates;
   std::unique_ptr<const action_type> m_current;
   std::unique_ptr<const action_type> m_next;
@@ -526,6 +537,7 @@ private:
         deeper = get_value_from_function(next, match->get_deeper(), offset, depth + 1);
       else {
         next->destroy(next);
+        generate_more_features(match->get(), depth);
         if(!match->get())
           match->get() = new Q_Value;
       }
@@ -535,7 +547,18 @@ private:
     }
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
 
-    return head->insert(function, m_split_test, offset, depth);
+    return head->insert(function, m_split_test, [this](Q_Value * const &q, const size_t &depth){this->generate_more_features(q, depth);}, offset, depth);
+  }
+
+  void generate_more_features(Q_Value * const &q, const size_t &depth) {
+    if(!m_features_complete && m_split_test(q, depth)) {
+      m_features->destroy(m_features);
+      generate_features();
+#ifdef DEBUG_OUTPUT
+      std::cerr << "Again:" << std::endl << *this;
+#endif
+      throw Again();
+    }
   }
 
 #ifdef DEBUG_OUTPUT

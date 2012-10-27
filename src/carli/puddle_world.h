@@ -227,15 +227,20 @@ namespace Puddle_World {
       set_on_policy(false);
       set_epsilon(0.1);
       set_pseudoepisode_threshold(20);
+      m_features_complete = false;
 
       m_split_test = [](Q_Value * const &q, const size_t &depth)->bool{
+//         if(depth < 3)
+//           return true;
+        if(depth > 8)
+          return false;
+
         if(!q)
           return false;
         if(q->split)
           return true;
 
-//         q->split |= q->update_count > 5;
-        q->split |= depth < 9;
+        q->split |= q->update_count > 5;
 
         return q->split;
       };
@@ -259,11 +264,11 @@ namespace Puddle_World {
                                             get_trie(Move(Move::EAST)),
                                             get_trie(Move(Move::WEST))}};
 
-      bool done = false;
-      while(!done) {
-        done = true;
+      for(;;) {
+        Feature::List * x_tail_next = nullptr;
+        Feature::List * y_tail_next = nullptr;
 
-        for_each(tries.begin(), tries.end(), [this,&done,&env,&x_tail,&y_tail](feature_trie &trie) {
+        for_each(tries.begin(), tries.end(), [this,&env,&x_tail,&y_tail,&x_tail_next,&y_tail_next](feature_trie &trie) {
           auto &x_tail_ = x_tail;
           auto &y_tail_ = y_tail;
 
@@ -272,12 +277,11 @@ namespace Puddle_World {
             auto feature = match->get_key();
             const auto midpt = feature->midpt();
             if(env->get_position().first < midpt)
-              x_tail = &(new Feature(Feature::X, feature->bound_lower, midpt, feature->depth + 1))->features;
+              x_tail_next = &(new Feature(Feature::X, feature->bound_lower, midpt, feature->depth + 1))->features;
             else
-              x_tail = &(new Feature(Feature::X, midpt, feature->bound_higher, feature->depth + 1))->features;
-            x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+              x_tail_next = &(new Feature(Feature::X, midpt, feature->bound_higher, feature->depth + 1))->features;
+            x_tail_next = x_tail_next->insert_in_order<feature_type::List::compare_default>(m_features, false);
             trie = match->get_deeper();
-            done = false;
             return;
           }
 
@@ -286,14 +290,21 @@ namespace Puddle_World {
             auto feature = match->get_key();
             const auto midpt = feature->midpt();
             if(env->get_position().second < midpt)
-              y_tail = &(new Feature(Feature::Y, feature->bound_lower, midpt, feature->depth + 1))->features;
+              y_tail_next = &(new Feature(Feature::Y, feature->bound_lower, midpt, feature->depth + 1))->features;
             else
-              y_tail = &(new Feature(Feature::Y, midpt, feature->bound_higher, feature->depth + 1))->features;
-            y_tail = y_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+              y_tail_next = &(new Feature(Feature::Y, midpt, feature->bound_higher, feature->depth + 1))->features;
+            y_tail_next = y_tail_next->insert_in_order<feature_type::List::compare_default>(m_features, false);
             trie = match->get_deeper();
-            done = false;
           }
         });
+
+        if(x_tail_next)
+          x_tail = x_tail_next;
+        if(y_tail_next)
+          y_tail = y_tail_next;
+
+        if(!x_tail_next && !y_tail_next)
+          break;
       }
     }
 

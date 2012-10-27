@@ -59,8 +59,8 @@ namespace Zeni {
      *  If an offset is specified, return a pointer to the most general match with a value first,
      *    and treat the value+offset as a Linked_List, stringing together general-to-specific values.
      */
-    template <typename TEST>
-    trie_pointer_type insert(trie_pointer_type &ptr, const TEST &test, const size_t &offset = size_t(-1), const size_t &depth = size_t()) {
+    template <typename DEPTH_TEST, typename TERMINAL_TEST>
+    trie_pointer_type insert(trie_pointer_type &ptr, const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const size_t &offset = size_t(-1), const size_t &depth = size_t()) {
       if(!this)
         return ptr;
 
@@ -69,12 +69,12 @@ namespace Zeni {
 
       auto thisp = map_insert(ptr); ///< this possibly deleted
 
-      if(!test(m_value, depth)) {
+      if(!depth_test(m_value, depth)) {
         next->destroy(next);
         next = nullptr;
       }
 
-      return thisp->finish_insert(test, offset, depth, next);
+      return thisp->finish_insert(depth_test, terminal_test, offset, depth, next);
     }
 
     value_pointer_type get() const {
@@ -126,14 +126,15 @@ namespace Zeni {
     }
 
   private:
-    template <typename TEST>
-    trie_pointer_type finish_insert(const TEST &test, const size_t &offset, const size_t &depth, const list_pointer_type &next) {
+    template <typename DEPTH_TEST, typename TERMINAL_TEST>
+    trie_pointer_type finish_insert(const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const size_t &offset, const size_t &depth, const list_pointer_type &next) {
       if(next) {
-        auto deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, test, offset, depth + 1);
+        auto deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, depth_test, terminal_test, offset, depth + 1);
         offset_erase(offset);
         return offset_insert_before(offset, deeper);
       }
       else {
+        terminal_test(m_value, depth);
         offset_erase(offset);
         if(!m_value)
           m_value = new value_type;
