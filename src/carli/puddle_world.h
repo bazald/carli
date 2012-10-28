@@ -136,7 +136,7 @@ namespace Puddle_World {
     }
 
     reward_type transition_impl(const action_type &action) {
-      const double shift = (m_random_motion.frand_lt() - 0.5) * 0.02; ///< Should really be Gaussian, stddev = 0.01f
+      const double shift = (m_random_motion.frand_lt() - 0.5) * 0.02; ///< Should really be Gaussian, stddev = 0.01
 
       switch(dynamic_cast<const Move &>(action).direction) {
         case Move::NORTH: m_position.second += 0.05 + shift; break;
@@ -146,14 +146,14 @@ namespace Puddle_World {
         default: abort();
       }
 
-      if(m_position.first < 0.0f)
-        m_position.first = 0.0f;
-      else if(m_position.first > 1.0f)
-        m_position.first = 1.0f;
-      if(m_position.second < 0.0f)
-        m_position.second = 0.0f;
-      else if(m_position.second > 1.0f)
-        m_position.second = 1.0f;
+      if(m_position.first < 0.0)
+        m_position.first = 0.0;
+      else if(m_position.first > 1.0)
+        m_position.first = 1.0;
+      if(m_position.second < 0.0)
+        m_position.second = 0.0;
+      else if(m_position.second > 1.0)
+        m_position.second = 1.0;
 
       double reward = -1.0;
 
@@ -222,30 +222,31 @@ namespace Puddle_World {
     Agent(const std::shared_ptr<environment_type> &env)
      : ::Agent<feature_type, action_type>(env)
     {
-      set_learning_rate(0.2);
+      set_learning_rate(0.3);
       set_discount_rate(1.0);
-      set_on_policy(false);
+      set_on_policy(true);
       set_epsilon(0.1);
       set_pseudoepisode_threshold(10);
       m_features_complete = false;
 
-      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
-      m_split_test = [](Q_Value * const &, const size_t &depth)->bool{return depth < Binary_Log<16>::value * 2 + 1;};
+//       m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
+//       m_split_test = [](Q_Value * const &, const size_t &depth)->bool{return depth < Binary_Log<16>::value * 2 + 1;};
 
-//       m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
-//       m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{
-//         if(depth < Binary_Log<4>::value * 2 + 1)
-//           return true;
-// 
-//         if(!q)
-//           return false;
-//         if(q->split)
-//           return true;
-// 
-//         q->split |= q->update_count > 1 && q->cabe > this->get_mean_cabe() + 0.85 * this->get_mean_cabe().get_stddev();
-// 
-//         return q->split;
-//       };
+      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
+      m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{
+        if(depth < Binary_Log<8>::value * 2 + 1)
+          return true;
+
+        if(!q)
+          return false;
+        if(q->split)
+          return true;
+
+        q->split |= q->pseudoepisode_count > 0 &&
+                    this->get_mean_cabe().outlier_above(q->cabe, 0.0);
+
+        return q->split;
+      };
 
       init();
     }

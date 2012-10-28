@@ -41,6 +41,10 @@ public:
   {
   }
 
+  double outlier_above(const Value &value, const double &z = 0.84155) {
+    return count > 1 && value > mean + z * stddev;
+  }
+
   void contribute(Value &value) {
     if(!value.contributor) {
       const unsigned long new_count = count + 1lu;
@@ -51,11 +55,10 @@ public:
       count = new_count;
     }
 
-    const double mean_old = mean;
-
     mean += (value.value - value.value_contribution) / count;
 
-    const double mark2_contrib = (value.value - mean_old) * (value.value - mean);
+    const double diff = value.value - mean;
+    const double mark2_contrib = diff * diff;
     mean_mark2 += mark2_contrib - value.value_mark2;
     value.value_mark2 = mark2_contrib;
     if(count > 1) {
