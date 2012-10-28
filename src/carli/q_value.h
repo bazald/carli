@@ -43,13 +43,15 @@ public:
 
   double credit;
 
-  Value value;
+  double value;
   Value cabe; ///< Cumulative Absolute Bellman Error
 
+#ifdef TRACK_Q_VALUE_VARIANCE
   double mean2;
   double variance_0;
   double variance_rest;
   Value variance_total;
+#endif
 
   List current;
   List next;

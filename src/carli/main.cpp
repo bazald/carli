@@ -21,10 +21,26 @@ int main(int argc, char **argv) {
 //   auto env = std::make_shared<Blocks_World::Environment>();
 //   auto agent = std::make_shared<Blocks_World::Agent>(env);
 
+//   auto env = std::make_shared<Blocks_World::Environment>();
+//   auto agent = std::make_shared<Blocks_World::Agent>(env);
   auto env = std::make_shared<Puddle_World::Environment>();
   auto agent = std::make_shared<Puddle_World::Agent>(env);
 
-  for(int i = 0; i != 1000; ++i) {
+  std::cerr << "sizeof(env) = " << sizeof(*env) << std::endl;
+  std::cerr << "sizeof(agent) = " << sizeof(*agent) << std::endl;
+  std::cerr << "sizeof(Blocks_World::Feature) = " << sizeof(Blocks_World::Feature) << std::endl;
+  std::cerr << "sizeof(Blocks_World::In_Place) = " << sizeof(Blocks_World::In_Place) << std::endl;
+  std::cerr << "sizeof(Blocks_World::On_Top) = " << sizeof(Blocks_World::On_Top) << std::endl;
+  std::cerr << "sizeof(Blocks_World::Move) = " << sizeof(Blocks_World::Move) << std::endl;
+  std::cerr << "sizeof(Puddle_World::Feature) = " << sizeof(Puddle_World::Feature) << std::endl;
+  std::cerr << "sizeof(Puddle_World::Move) = " << sizeof(Puddle_World::Move) << std::endl;
+  std::cerr << "sizeof(Q_Value) = " << sizeof(Q_Value) << std::endl;
+  std::cerr << "sizeof(Trie) = " << sizeof(Blocks_World::Agent::feature_trie_type) << std::endl;
+
+  size_t total_steps = 0;
+  size_t successes = 0;
+  size_t failures = 0;
+  while(total_steps < 50000) {
     env->init();
     agent->init();
 
@@ -33,14 +49,27 @@ int main(int argc, char **argv) {
 #endif
     do {
       agent->act();
+      ++total_steps;
 
 #ifdef DEBUG_OUTPUT
       std::cerr << *env << *agent;
 #endif
-    } while(agent->get_metastate() == Puddle_World::Agent::NON_TERMINAL);
+    } while(agent->get_metastate() == NON_TERMINAL && agent->get_step_count() < 5000);
 
-    std::cout << "SUCCESS in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
+    if(agent->get_metastate() == SUCCESS) {
+      std::cout << "SUCCESS";
+      ++successes;
+    }
+    else {
+      std::cout << "FAILURE";
+      ++failures;
+    }
+
+    std::cout << " in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
   }
+
+  std::cout << successes << " SUCCESSes" << std::endl
+            << failures << " FAILUREs" << std::endl;
 
 //   test_trie * trie = new test_trie;
 //   test_trie * key = nullptr;

@@ -226,24 +226,26 @@ namespace Puddle_World {
       set_discount_rate(1.0);
       set_on_policy(false);
       set_epsilon(0.1);
-      set_pseudoepisode_threshold(20);
+      set_pseudoepisode_threshold(10);
       m_features_complete = false;
 
-      m_split_test = [](Q_Value * const &q, const size_t &depth)->bool{
-//         if(depth < 3)
+      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
+      m_split_test = [](Q_Value * const &q, const size_t &depth)->bool{return depth < Binary_Log<16>::value * 2 + 1;};
+
+//       m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
+//       m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{
+//         if(depth < Binary_Log<4>::value * 2 + 1)
 //           return true;
-        if(depth > 8)
-          return false;
-
-        if(!q)
-          return false;
-        if(q->split)
-          return true;
-
-        q->split |= q->update_count > 5;
-
-        return q->split;
-      };
+// 
+//         if(!q)
+//           return false;
+//         if(q->split)
+//           return true;
+// 
+//         q->split |= q->update_count > 1 && q->cabe > this->get_mean_cabe() + 0.85 * this->get_mean_cabe().get_stddev();
+// 
+//         return q->split;
+//       };
 
       init();
     }

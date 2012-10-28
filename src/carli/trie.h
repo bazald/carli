@@ -128,16 +128,24 @@ namespace Zeni {
   private:
     template <typename DEPTH_TEST, typename TERMINAL_TEST>
     trie_pointer_type finish_insert(const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const size_t &offset, const size_t &depth, const list_pointer_type &next) {
+#ifndef NULL_Q_VALUES
+      if(!m_value)
+        m_value = new value_type;
+#endif
       if(next) {
         auto deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, depth_test, terminal_test, offset, depth + 1);
         offset_erase(offset);
         return offset_insert_before(offset, deeper);
       }
       else {
+#ifdef NULL_Q_VALUES
         terminal_test(m_value, depth);
-        offset_erase(offset);
         if(!m_value)
           m_value = new value_type;
+#else
+        terminal_test(m_value, depth);
+#endif
+        offset_erase(offset);
       }
 
       return this;

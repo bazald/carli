@@ -13,6 +13,15 @@
 
 #include <iostream>
 
+template <size_t VALUE>
+struct Binary_Log {
+  enum Value {value = Binary_Log<VALUE / 2>::value + 1};
+};
+template <>
+struct Binary_Log<1> {
+  enum Value {value = 0};
+};
+
 template <typename DERIVED, typename DERIVED2 = DERIVED>
 class Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
   Feature & operator=(const Feature &);
@@ -107,6 +116,8 @@ std::ostream & operator << (std::ostream &os, const Feature<DERIVED, DERIVED2> &
   return os;
 }
 
+enum Metastate {NON_TERMINAL, SUCCESS, FAILURE};
+
 template <typename FEATURE, typename ACTION>
 class Agent : public std::enable_shared_from_this<Agent<FEATURE, ACTION> > {
   Agent(const Agent &);
@@ -125,7 +136,6 @@ public:
   typedef Environment<action_type> environment_type;
   typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
-  enum metastate_type {NON_TERMINAL, SUCCESS, FAILURE};
 
   Agent(const std::shared_ptr<environment_type> &environment)
    : m_metastate(NON_TERMINAL),
@@ -197,10 +207,11 @@ public:
 
   const std::shared_ptr<const environment_type> & get_env() const {return m_environment;}
   std::shared_ptr<environment_type> & get_env() {return m_environment;}
-  metastate_type get_metastate() const {return m_metastate;}
+  Metastate get_metastate() const {return m_metastate;}
   size_t get_episode_number() const {return m_episode_number;}
   size_t get_step_count() const {return m_step_count;}
   reward_type get_total_reward() const {return m_total_reward;}
+  Mean get_mean_cabe() const {return m_mean_cabe;}
 
   void init() {
     if(m_metastate != NON_TERMINAL)
@@ -363,19 +374,27 @@ protected:
       ++q.update_count;
     });
 
+#ifdef TRACK_Q_VALUE_VARIANCE
     double variance_total_next = double();
     if(next) {
       std::for_each(next->begin(next), next->end(next), [&variance_total_next](const Q_Value &q) {
         variance_total_next += q.variance_total;
       });
     }
+#endif
 
     m_credit_assignment(current);
 
     const double delta = target_value - q_old;
     double q_new = double();
-    std::for_each(current->begin(current), current->end(current), [this,&delta,&q_new,&variance_total_next](Q_Value &q) {
+    std::for_each(current->begin(current), current->end(current), [this,&delta,&q_new
+#ifdef TRACK_Q_VALUE_VARIANCE
+                                                                   ,&variance_total_next
+#endif
+                                                                   ](Q_Value &q) {
+#ifdef TRACK_Q_VALUE_VARIANCE
       const double local_old = q.value;
+#endif
       const double local_learning_rate = this->m_learning_rate * q.credit;
       const double local_delta = local_learning_rate * delta;
 
@@ -384,7 +403,9 @@ protected:
 
       if(q.split) {
         this->m_mean_cabe.uncontribute(q.cabe);
+#ifdef TRACK_Q_VALUE_VARIANCE
         this->m_mean_variance.uncontribute(q.variance_total);
+#endif
       }
       else {
         if(q.last_episode_fired != this->m_episode_number) {
@@ -398,6 +419,7 @@ protected:
         q.cabe += local_delta < 0.0 ? -local_delta : local_delta;
         this->m_mean_cabe.contribute(q.cabe);
 
+#ifdef TRACK_Q_VALUE_VARIANCE
         if(q.update_count > 1) {
           const double x = local_old + delta;
           const double mdelta = (x - local_old) * (x - q.value);
@@ -408,6 +430,7 @@ protected:
           q.variance_total = q.variance_0 + q.variance_rest;
           this->m_mean_variance.contribute(q.variance_total);
         }
+#endif
       }
     });
 
@@ -419,8 +442,10 @@ protected:
     std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {
       if(!q.split) {
         std::cerr << " updates:  " << q.update_count << std::endl
-                  << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl
-                  << " variance: " << q.variance_total << " of " << this->m_mean_variance << ':' << this->m_mean_variance.get_stddev() << std::endl;
+                  << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl;
+#ifdef TRACK_Q_VALUE_VARIANCE
+        std::cerr << " variance: " << q.variance_total << " of " << this->m_mean_variance << ':' << this->m_mean_variance.get_stddev() << std::endl;
+#endif
       }
     });
 #endif
@@ -452,7 +477,7 @@ protected:
   void assign_credit_inv_log_update_count(Q_Value::List * const &value_list) {
     double sum = double();
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-      q.credit = 1.0 / log(q.update_count);
+      q.credit = 1.0 / log(q.update_count + 1);
       sum += q.credit;
     });
 
@@ -507,7 +532,7 @@ protected:
   }
 #endif
 
-  metastate_type m_metastate;
+  Metastate m_metastate;
   feature_list m_features;
   bool m_features_complete;
   action_list m_candidates;
@@ -538,8 +563,10 @@ private:
       else {
         next->destroy(next);
         generate_more_features(match->get(), depth);
+#ifdef NULL_Q_VALUES
         if(!match->get())
           match->get() = new Q_Value;
+#endif
       }
 
       match->offset_erase(offset);
@@ -585,7 +612,9 @@ private:
 
   value_function_type m_value_function;
   Mean m_mean_cabe;
+#ifdef TRACK_Q_VALUE_VARIANCE
   Mean m_mean_variance;
+#endif
 
   std::shared_ptr<environment_type> m_environment;
 
