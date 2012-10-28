@@ -35,7 +35,7 @@ namespace Puddle_World {
     }
 
     int compare_pi(const Feature &rhs) const {
-      return depth != rhs.depth ? depth - rhs.depth :
+      return depth != rhs.depth ? (depth < rhs.depth ? -1 : 1) :
              axis != rhs.axis ? axis - rhs.axis :
              bound_lower != rhs.bound_lower ? (bound_lower < rhs.bound_lower ? -1 : 1) :
              (bound_higher == rhs.bound_higher ? 0 : bound_higher < rhs.bound_higher ? -1 : 1);

@@ -629,7 +629,7 @@ private:
 
   bool m_on_policy; ///< for Sarsa/Q-learning selection
   double m_epsilon; ///< for epsilon-greedy decision-making
-  double m_pseudoepisode_threshold; ///< For deciding how many steps indicates a pseudoepisode
+  size_t m_pseudoepisode_threshold; ///< For deciding how many steps indicates a pseudoepisode
 };
 
 template <typename FEATURE, typename ACTION>
