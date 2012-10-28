@@ -34,17 +34,48 @@
 #include <cstdlib>
 #include <stdint.h>
 
+#ifdef RANDOM_LOG
+#include <fstream>
+#endif
+
 namespace Zeni {
 
   class Random {
+#ifdef RANDOM_LOG
+    static std::ostream & get_os() {
+      static std::ofstream os("random.txt");
+      return os;
+    }
+
+    template <typename IDENT, typename VALUE1>
+    static void log1(const IDENT &id, const VALUE1 &value1) {
+      get_os() << id << '(' << value1 << ')' << std::endl;
+    }
+
+    template <typename IDENT, typename VALUE1, typename VALUE2>
+    static void log2(const IDENT &id, const VALUE1 &value1, const VALUE2 &value2) {
+      get_os() << id << '(' << value1 << ',' << value2 << ')' << std::endl;
+    }
+#else
+    template <typename IDENT, typename VALUE1>
+    static void log1(const IDENT &, const VALUE1 &) {
+    }
+
+    template <typename IDENT, typename VALUE1, typename VALUE2>
+    static void log2(const IDENT &, const VALUE1 &, const VALUE2 &) {
+    }
+#endif
+
   public:
     Random(const uint32_t &seed = Random::get().rand())
      : m_random_value(seed)
     {
+      log1("Random", seed);
     }
 
     void seed(const uint32_t &seed) {
       m_random_value = seed;
+      log1("seed", seed);
     }
 
     /// Get the maximum size of a random integer returned from rand()
@@ -55,29 +86,39 @@ namespace Zeni {
     /// Get a random integer in the range [0, rand_max()]
     int32_t rand() {
       m_random_value = m_random_value * 1103515245 + 12345;
-      return int32_t(static_cast<int32_t>(m_random_value / 65536) % (rand_max() + 1));
+      int32_t rv = int32_t(static_cast<int32_t>(m_random_value / 65536) % (rand_max() + 1));
+      log2("rand", m_random_value, rv);
+      return rv;
     }
 
-    /// Get a random floating point number in the range [0.0f, 1.0f)
-    float frand_lt() {
-      return rand() / float(rand_max() + 1);
+    /// Get a random floating point number in the range [0.0, 1.0)
+    double frand_lt() {
+      double rv = rand() / double(rand_max() + 1.0);
+      log1("frand_lt", rv);
+      return rv;
     }
 
-    /// Get a random floating point number in the range [0.0f, 1.0f]
-    float frand_lte() {
-      return rand() / float(rand_max());
+    /// Get a random floating point number in the range [0.0, 1.0]
+    double frand_lte() {
+      double rv = rand() / double(rand_max());
+      log1("frand_lte", rv);
+      return rv;
     }
 
     /// Get a random integer in the range [0, mod)
     int32_t rand_lt(const int32_t &mod) {
       assert(mod <= rand_max() + 1);
-      return int32_t(frand_lt() * mod);
+      int32_t rv = int32_t(frand_lt() * mod);
+      log2("rand_lt", mod, rv);
+      return rv;
     }
 
     /// Get a random integer in the range [0, mod]
     int32_t rand_lte(const int32_t &mod) {
       assert(mod <= rand_max());
-      return int32_t(frand_lt() * (mod + 1));
+      int32_t rv = int32_t(frand_lt() * (mod + 1));
+      log2("rand_lte", mod, rv);
+      return rv;
     }
 
     static Random & get() {

@@ -9,7 +9,10 @@
 #include <ctime>
 #include <iostream>
 #include <list>
+
+#ifdef TO_FILE
 #include <fstream>
+#endif
 
 typedef std::string test_key;
 typedef Q_Value test_value;
@@ -50,7 +53,7 @@ int main(int argc, char **argv) {
   size_t total_steps = 0;
   size_t successes = 0;
   size_t failures = 0;
-  while(total_steps < 100) {
+  while(total_steps < 50000) {
     env->init();
     agent->init();
 
