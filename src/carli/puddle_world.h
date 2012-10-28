@@ -169,7 +169,7 @@ namespace Puddle_World {
       if(m_position.first < left)
         dist = pythagoras(m_position.first - left, m_position.second - y);
       else if(m_position.first < right)
-        dist = abs_is_broken_in_gcc(m_position.second - y);
+        dist = std::abs(m_position.second - y);
       else
         dist = pythagoras(m_position.first - right, m_position.second - y);
 
@@ -182,7 +182,7 @@ namespace Puddle_World {
       if(m_position.second < bottom)
         dist = pythagoras(m_position.first - x, m_position.second - bottom);
       else if(m_position.second < top)
-        dist = abs_is_broken_in_gcc(m_position.first - x);
+        dist = std::abs(m_position.first - x);
       else
         dist = pythagoras(m_position.first - x, m_position.second - top);
 
@@ -197,11 +197,6 @@ namespace Puddle_World {
     template <typename TYPE>
     TYPE squared(const TYPE &value) {
       return value * value;
-    }
-
-    template <typename TYPE>
-    TYPE abs_is_broken_in_gcc(const TYPE &type) {
-      return type < TYPE() ? -type : type;
     }
 
     void print_impl(std::ostream &os) const {
