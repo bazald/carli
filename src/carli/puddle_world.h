@@ -230,7 +230,7 @@ namespace Puddle_World {
       m_features_complete = false;
 
       m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
-      m_split_test = [](Q_Value * const &q, const size_t &depth)->bool{return depth < Binary_Log<16>::value * 2 + 1;};
+      m_split_test = [](Q_Value * const &, const size_t &depth)->bool{return depth < Binary_Log<16>::value * 2 + 1;};
 
 //       m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
 //       m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{
@@ -270,7 +270,7 @@ namespace Puddle_World {
         Feature::List * x_tail_next = nullptr;
         Feature::List * y_tail_next = nullptr;
 
-        for_each(tries.begin(), tries.end(), [this,&env,&x_tail,&y_tail,&x_tail_next,&y_tail_next](feature_trie &trie) {
+        std::for_each(tries.begin(), tries.end(), [this,&env,&x_tail,&y_tail,&x_tail_next,&y_tail_next](feature_trie &trie) {
           auto &x_tail_ = x_tail;
           auto &y_tail_ = y_tail;
 
