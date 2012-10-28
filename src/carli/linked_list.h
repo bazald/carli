@@ -94,6 +94,12 @@ namespace Zeni {
         return m_offset != rhs.m_offset ||
                m_pointer != rhs.m_pointer;
       }
+      bool operator==(const list_pointer_type &rhs) const {
+        return m_pointer == rhs;
+      }
+      bool operator!=(const list_pointer_type &rhs) const {
+        return m_pointer != rhs;
+      }
 
       operator list_pointer_type () const {
         return m_pointer;
@@ -197,6 +203,12 @@ namespace Zeni {
         assert(m_offset == rhs.m_offset);
         return m_offset != rhs.m_offset ||
                m_pointer != rhs.m_pointer;
+      }
+      bool operator==(const list_pointer_type &rhs) const {
+        return m_pointer == rhs;
+      }
+      bool operator!=(const list_pointer_type &rhs) const {
+        return m_pointer != rhs;
       }
 
       operator list_pointer_type () const {

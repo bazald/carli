@@ -477,7 +477,7 @@ protected:
   void assign_credit_inv_log_update_count(Q_Value::List * const &value_list) {
     double sum = double();
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-      q.credit = 1.0 / (log(q.update_count) + 1.0);
+      q.credit = 1.0 / (log(double(q.update_count)) + 1.0);
       sum += q.credit;
     });
 

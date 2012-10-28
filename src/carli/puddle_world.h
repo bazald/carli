@@ -224,7 +224,7 @@ namespace Puddle_World {
     {
       set_learning_rate(0.3);
       set_discount_rate(1.0);
-      set_on_policy(true);
+      set_on_policy(false);
       set_epsilon(0.1);
       set_pseudoepisode_threshold(10);
       m_features_complete = false;
@@ -276,7 +276,7 @@ namespace Puddle_World {
           auto &y_tail_ = y_tail;
 
           auto match = std::find_if(trie->begin(trie), trie->end(trie), [&x_tail_](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**x_tail_) == 0;});
-          if(match) {
+          if(match != nullptr) {
             auto feature = match->get_key();
             const auto midpt = feature->midpt();
             if(env->get_position().first < midpt)
@@ -289,7 +289,7 @@ namespace Puddle_World {
           }
 
           match = std::find_if(trie->begin(trie), trie->end(trie), [&y_tail_](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**y_tail_) == 0;});
-          if(match) {
+          if(match != nullptr) {
             auto feature = match->get_key();
             const auto midpt = feature->midpt();
             if(env->get_position().second < midpt)
