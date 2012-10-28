@@ -1,4 +1,5 @@
-// #define DEBUG_OUTPUT
+#define DEBUG_OUTPUT
+// #define TO_FILE
 
 #include "blocks_world.h"
 #include "puddle_world.h"
@@ -8,15 +9,24 @@
 #include <ctime>
 #include <iostream>
 #include <list>
+#include <fstream>
 
 typedef std::string test_key;
 typedef Q_Value test_value;
 typedef Zeni::Trie<test_key, test_value> test_trie;
 
 int main(int argc, char **argv) {
+#ifdef TO_FILE
+  auto cout_bak = std::cout.rdbuf();
+  auto cerr_bak = std::cerr.rdbuf();
+  std::ofstream cout2file("dump.txt");
+  std::cout.rdbuf(cout2file.rdbuf());
+  std::cerr.rdbuf(cout2file.rdbuf());
+#endif
+
   Zeni::register_new_handler();
 
-  srand(uint32_t(time(0)));
+  Zeni::Random::get().seed(uint32_t(time(0)));
 
 //   auto env = std::make_shared<Blocks_World::Environment>();
 //   auto agent = std::make_shared<Blocks_World::Agent>(env);
@@ -40,7 +50,7 @@ int main(int argc, char **argv) {
   size_t total_steps = 0;
   size_t successes = 0;
   size_t failures = 0;
-  while(total_steps < 50000) {
+  while(total_steps < 100) {
     env->init();
     agent->init();
 
@@ -113,6 +123,11 @@ int main(int argc, char **argv) {
 //     mean.uncontribute(value);
 //     std::cout << "Removing " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << std::endl;
 //   });
+
+#ifdef TO_FILE
+  std::cout.rdbuf(cout_bak);
+  std::cerr.rdbuf(cerr_bak);
+#endif
 
   return 0;
 }

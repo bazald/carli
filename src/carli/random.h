@@ -38,9 +38,13 @@ namespace Zeni {
 
   class Random {
   public:
-    Random(const uint32_t &seed = uint32_t(std::rand()))
+    Random(const uint32_t &seed = Random::get().rand())
      : m_random_value(seed)
     {
+    }
+
+    void seed(const uint32_t &seed) {
+      m_random_value = seed;
     }
 
     /// Get the maximum size of a random integer returned from rand()
@@ -74,6 +78,11 @@ namespace Zeni {
     int32_t rand_lte(const int32_t &mod) {
       assert(mod <= rand_max());
       return int32_t(frand_lt() * (mod + 1));
+    }
+
+    static Random & get() {
+      static Random g_random(0);
+      return g_random;
     }
 
   private:

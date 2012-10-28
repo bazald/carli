@@ -11,11 +11,13 @@ solution "carli"
     platforms { "native", "universal" }
   else
     defines { "_LINUX" }
-    platforms { "native", "x32", "x64" }
+    platforms { "native" }
   end
 
+  flags { "ExtraWarnings" }
+
   configuration "Debug*"
-    defines { "_DEBUG", "DEBUG", "TEST_NASTY_CONDITIONS" }
+    defines { "_DEBUG", "DEBUG" }
     flags { "Symbols" }
     targetsuffix "_d"
 
@@ -29,6 +31,6 @@ solution "carli"
     linkoptions { "-stdlib=libc++" }
 
   configuration "linux or macosx"
-    buildoptions { "-std=c++0x" }
+    buildoptions { "-std=c++0x", "-pedantic" }
 
   include "src/carli"
