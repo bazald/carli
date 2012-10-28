@@ -556,6 +556,10 @@ private:
       auto next = static_cast<feature_trie>(head == match ? head->next() : head);
       match->erase();
       match = match->map_insert(function);
+#ifndef NULL_Q_VALUES
+      if(!match->get())
+        match->get() = new Q_Value;
+#endif
 
       feature_trie deeper = nullptr;
       if(next && m_split_test(match->get(), depth))
@@ -570,11 +574,15 @@ private:
       }
 
       match->offset_erase(offset);
-      return match->offset_insert_before(offset, deeper);
+      auto rv = match->offset_insert_before(offset, deeper);
+      assert(rv);
+      return rv;
     }
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
 
-    return head->insert(function, m_split_test, [this](Q_Value * const &q, const size_t &depth){this->generate_more_features(q, depth);}, offset, depth);
+    auto rv = head->insert(function, m_split_test, [this](Q_Value * const &q, const size_t &depth){this->generate_more_features(q, depth);}, offset, depth);
+    assert(rv);
+    return rv;
   }
 
   void generate_more_features(Q_Value * const &q, const size_t &depth) {

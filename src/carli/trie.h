@@ -100,6 +100,10 @@ namespace Zeni {
     trie_pointer_type & get_deeper() {return m_deeper;}
 
     trie_pointer_type offset_insert_before(const size_t &offset, trie_pointer_type &rhs_) {
+#ifndef NULL_Q_VALUES
+      assert(m_value);
+      assert(!rhs_ || rhs_->m_value);
+#endif
       const bool rhs_check = rhs_ && rhs_->m_value && offset != size_t(-1);
       if(m_value) {
         if(rhs_check) {

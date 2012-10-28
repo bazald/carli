@@ -1,4 +1,5 @@
 #define DEBUG_OUTPUT
+// #define NULL_Q_VALUES
 // #define TO_FILE
 
 #include "blocks_world.h"
