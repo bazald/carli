@@ -264,6 +264,14 @@ public:
 #endif
   }
 
+  size_t get_value_function_size() const {
+    size_t size = 0lu;
+    std::for_each(m_value_function.begin(), m_value_function.end(), [this,&size](const typename value_function_type::value_type &vf) {
+      size += this->get_trie_size(vf.second);
+    });
+    return size;
+  }
+
 protected:
   Q_Value * get_value(const feature_list &features, const action_type &action, const size_t &offset, const size_t &depth = size_t()) {
     if(!features)
@@ -544,6 +552,16 @@ protected:
   std::function<bool (Q_Value * const &, const size_t &)> m_split_test; ///< true if too general, false if sufficiently general
 
 private:
+  static size_t get_trie_size(const feature_trie_type * const &trie) {
+    size_t size = 0lu;
+    std::for_each(trie->begin(trie), trie->end(trie), [&size](const feature_trie_type &trie2) {
+      if(trie2.get())
+        ++size;
+      size += get_trie_size(trie2.get_deeper());
+    });
+    return size;
+  }
+
   feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth) {
     /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
     auto match = std::find_first_of(head->begin(head), head->end(head),

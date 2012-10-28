@@ -231,7 +231,7 @@ namespace Puddle_World {
 
       m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
 
-//       m_split_test = [](Q_Value * const &, const size_t &depth)->bool{return depth < Binary_Log<16>::value * 2 + 1;};
+//       m_split_test = [](Q_Value * const &, const size_t &depth)->bool{return depth < Binary_Log<64>::value * 2 + 1;};
 
       m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{
         if(depth < Binary_Log<8>::value * 2 + 1)
@@ -243,7 +243,7 @@ namespace Puddle_World {
           return true;
 
         q->split |= q->pseudoepisode_count > 0 &&
-                    this->get_mean_cabe().outlier_above(q->cabe, -0.5);
+                    this->get_mean_cabe().outlier_above(q->cabe, -0.15);
 
         return q->split;
       };

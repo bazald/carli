@@ -83,7 +83,8 @@ int main(int argc, char **argv) {
   }
 
   std::cout << successes << " SUCCESSes" << std::endl
-            << failures << " FAILUREs" << std::endl;
+            << failures << " FAILUREs" << std::endl
+            << agent->get_value_function_size() << " Q-values" << std::endl;
 
 //   test_trie * trie = new test_trie;
 //   test_trie * key = nullptr;
