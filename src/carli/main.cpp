@@ -5,11 +5,11 @@
 #include "blocks_world.h"
 #include "puddle_world.h"
 
-#include <memory>
 #include <cstring>
 #include <ctime>
 #include <iostream>
-#include <list>
+#include <memory>
+#include <unistd.h>
 
 #ifdef TO_FILE
 #include <fstream>
@@ -18,6 +18,18 @@
 typedef std::string test_key;
 typedef Q_Value test_value;
 typedef Zeni::Trie<test_key, test_value> test_trie;
+
+template <typename ENVIRONMENT, typename AGENT>
+void run_agent();
+
+struct Arguments {
+  double discount_rate = 1.0;
+  enum {BLOCKS_WORLD, PUDDLE_WORLD} environment = BLOCKS_WORLD;
+  double epsilon = 0.1;
+  double learning_rate = 1.0;
+  bool on_policy = true;
+  uint32_t seed = uint32_t(time(0));
+} g_args;
 
 int main(int argc, char **argv) {
 #ifdef TO_FILE
@@ -30,16 +42,6 @@ int main(int argc, char **argv) {
 
   Zeni::register_new_handler();
 
-  Zeni::Random::get().seed(uint32_t(time(0)));
-
-//   auto env = std::make_shared<Blocks_World::Environment>();
-//   auto agent = std::make_shared<Blocks_World::Agent>(env);
-
-//   auto env = std::make_shared<Blocks_World::Environment>();
-//   auto agent = std::make_shared<Blocks_World::Agent>(env);
-  auto env = std::make_shared<Puddle_World::Environment>();
-  auto agent = std::make_shared<Puddle_World::Agent>(env);
-
 //   std::cerr << "sizeof(env) = " << sizeof(*env) << std::endl;
 //   std::cerr << "sizeof(agent) = " << sizeof(*agent) << std::endl;
 //   std::cerr << "sizeof(Blocks_World::Feature) = " << sizeof(Blocks_World::Feature) << std::endl;
@@ -51,40 +53,105 @@ int main(int argc, char **argv) {
 //   std::cerr << "sizeof(Q_Value) = " << sizeof(Q_Value) << std::endl;
 //   std::cerr << "sizeof(Trie) = " << sizeof(Blocks_World::Agent::feature_trie_type) << std::endl;
 
-  size_t total_steps = 0;
-  size_t successes = 0;
-  size_t failures = 0;
-  while(total_steps < 50000) {
-    env->init();
-    agent->init();
+  int c;
+  const char * const options = "d:e:g:hl:p:s:";
+  while((c = getopt(argc, argv, options)) != -1) {
+    switch (c) {
+    case 'd':
+      g_args.discount_rate = atof(optarg);
+      if(g_args.discount_rate < 0.0 || g_args.discount_rate > 1.0) {
+        std::cerr << "Illegal discount rate selection: " << optarg << std::endl;
+        throw std::runtime_error("Illegal discount rate selection.");
+      }
+      break;
 
-#ifdef DEBUG_OUTPUT
-    std::cerr << *env << *agent;
-#endif
-    do {
-      agent->act();
-      ++total_steps;
+    case 'e':
+      if(!strcmp(optarg, "blocks-world"))
+        g_args.environment = Arguments::BLOCKS_WORLD;
+      else if(!strcmp(optarg, "puddle-world"))
+        g_args.environment = Arguments::PUDDLE_WORLD;
+      else {
+        std::cerr << "Illegal environment selection: " << optarg << std::endl;
+        throw std::runtime_error("Illegal environment selection.");
+      }
+      break;
 
-#ifdef DEBUG_OUTPUT
-      std::cerr << *env << *agent;
-#endif
-    } while(agent->get_metastate() == NON_TERMINAL && agent->get_step_count() < 5000);
+    case 'g':
+      g_args.epsilon = atof(optarg);
+      if(g_args.epsilon < 0.0 || g_args.epsilon > 1.0) {
+        std::cerr << "Illegal epsilon-greedy selection: " << optarg << std::endl;
+        throw std::runtime_error("Illegal epsilon-greedy selection.");
+      }
+      break;
 
-    if(agent->get_metastate() == SUCCESS) {
-      std::cout << "SUCCESS";
-      ++successes;
+    case 'l':
+      g_args.learning_rate = atof(optarg);
+      if(g_args.learning_rate <= 0.0 || g_args.learning_rate > 1.0) {
+        std::cerr << "Illegal learning rate selection: " << optarg << std::endl;
+        throw std::runtime_error("Illegal learning rate selection.");
+      }
+      break;
+
+    case 'p':
+      if(!strcmp(optarg, "on-policy"))
+        g_args.on_policy = true;
+      else if(!strcmp(optarg, "off-policy"))
+        g_args.on_policy = false;
+      else {
+        std::cerr << "Illegal policy selection: " << optarg << std::endl;
+        throw std::runtime_error("Illegal policy selection.");
+      }
+      break;
+
+    case 's':
+      g_args.seed = atoi(optarg);
+      break;
+
+    case 'h':
+    case '?':
+      std::cerr << "Usage: carli [" << options << ']' << std::endl;
+      std::cerr << "  -d Set the discount rate:" << std::endl
+                << "       [0,1]" << std::endl;
+      std::cerr << "  -e Select an environment:" << std::endl
+                << "       blocks-world" << std::endl
+                << "       puddle-world" << std::endl;
+      std::cerr << "  -g Set the epsilon-greedy policy:" << std::endl
+                << "       [0,1]" << std::endl;
+      std::cerr << "  -h Print this help." << std::endl;
+      std::cerr << "  -l Set the learning rate:" << std::endl
+                << "       (0,1]" << std::endl;
+      std::cerr << "  -p Choose:" << std::endl
+                << "       on-policy" << std::endl
+                << "       off-policy" << std::endl;
+      std::cerr << "  -s Set the random seed:" << std::endl
+                << "       (-inf,inf)" << std::endl;
+      return c == '?';
+
+    default:
+      std::cerr << "?? getopt returned character code 0" << c << " ??\n";
+      break;
     }
-    else {
-      std::cout << "FAILURE";
-      ++failures;
-    }
-
-    std::cout << " in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
+  }
+  if(optind < argc) {
+    std::cerr << "Unknown trailing arguments:";
+    while(optind < argc)
+      std::cerr << ' ' << argv[optind++];
+    std::cerr << std::endl;
+    throw std::runtime_error("Unknown trailing arguments.");
   }
 
-  std::cout << successes << " SUCCESSes" << std::endl
-            << failures << " FAILUREs" << std::endl
-            << agent->get_value_function_size() << " Q-values" << std::endl;
+  switch(g_args.environment) {
+    case Arguments::BLOCKS_WORLD:
+      run_agent<Blocks_World::Environment, Blocks_World::Agent>();
+      break;
+
+    case Arguments::PUDDLE_WORLD:
+      run_agent<Puddle_World::Environment, Puddle_World::Agent>();
+      break;
+
+    default:
+      throw std::runtime_error("Internal error: g_args.environment");
+  }
 
 //   test_trie * trie = new test_trie;
 //   test_trie * key = nullptr;
@@ -135,4 +202,52 @@ int main(int argc, char **argv) {
 #endif
 
   return 0;
+}
+
+template <typename ENVIRONMENT, typename AGENT>
+void run_agent() {
+  Zeni::Random::get().seed(uint32_t(g_args.seed));
+
+  auto env = std::make_shared<ENVIRONMENT>();
+  auto agent = std::make_shared<AGENT>(env);
+
+  agent->set_discount_rate(g_args.discount_rate);
+  agent->set_epsilon(g_args.epsilon);
+  agent->set_learning_rate(g_args.learning_rate);
+  agent->set_on_policy(g_args.on_policy);
+
+  size_t total_steps = 0;
+  size_t successes = 0;
+  size_t failures = 0;
+  while(total_steps < 50000) {
+    env->init();
+    agent->init();
+
+#ifdef DEBUG_OUTPUT
+    std::cerr << *env << *agent;
+#endif
+    do {
+      agent->act();
+      ++total_steps;
+
+#ifdef DEBUG_OUTPUT
+      std::cerr << *env << *agent;
+#endif
+    } while(agent->get_metastate() == NON_TERMINAL && agent->get_step_count() < 5000);
+
+    if(agent->get_metastate() == SUCCESS) {
+      std::cout << "SUCCESS";
+      ++successes;
+    }
+    else {
+      std::cout << "FAILURE";
+      ++failures;
+    }
+
+    std::cout << " in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
+  }
+
+  std::cout << successes << " SUCCESSes" << std::endl
+            << failures << " FAILUREs" << std::endl
+            << agent->get_value_function_size() << " Q-values" << std::endl;
 }
