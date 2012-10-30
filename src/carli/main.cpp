@@ -4,6 +4,7 @@
 
 #include "blocks_world.h"
 #include "puddle_world.h"
+#include "getopt.h"
 
 #include <cstring>
 #include <ctime>
@@ -12,12 +13,6 @@
 
 #ifdef TO_FILE
 #include <fstream>
-#endif
-
-#ifndef _MSC_VER
-#include <unistd.h>
-#else
-#include "getopt.h"
 #endif
 
 typedef std::string test_key;
