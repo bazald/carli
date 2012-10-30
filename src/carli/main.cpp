@@ -9,10 +9,15 @@
 #include <ctime>
 #include <iostream>
 #include <memory>
-#include <unistd.h>
 
 #ifdef TO_FILE
 #include <fstream>
+#endif
+
+#ifndef _MSC_VER
+#include <unistd.h>
+#else
+#include "getopt.h"
 #endif
 
 typedef std::string test_key;
@@ -23,15 +28,25 @@ template <typename ENVIRONMENT, typename AGENT>
 void run_agent();
 
 struct Arguments {
-  double discount_rate = 1.0;
-  enum {BLOCKS_WORLD, PUDDLE_WORLD} environment = BLOCKS_WORLD;
-  double epsilon = 0.1;
-  double learning_rate = 1.0;
-  bool on_policy = true;
-  uint32_t seed = uint32_t(time(0));
+  Arguments()
+    : discount_rate(1.0),
+    environment(BLOCKS_WORLD),
+    epsilon(0.1),
+    learning_rate(1.0),
+    on_policy(true),
+    seed(uint32_t(time(0)))
+  {
+  }
+
+  double discount_rate;
+  enum {BLOCKS_WORLD, PUDDLE_WORLD} environment;
+  double epsilon;
+  double learning_rate;
+  bool on_policy;
+  uint32_t seed;
 } g_args;
 
-int main(int argc, char **argv) {
+int main2(int argc, char **argv) {
 #ifdef TO_FILE
   auto cout_bak = std::cout.rdbuf();
   auto cerr_bak = std::cerr.rdbuf();
@@ -202,6 +217,20 @@ int main(int argc, char **argv) {
 #endif
 
   return 0;
+}
+
+int main(int argc, char **argv) {
+  try {
+    return main2(argc, argv);
+  }
+  catch(std::exception &ex) {
+    std::cerr << "Exiting with exception: " << ex.what() << std::endl;
+  }
+  catch(...) {
+    std::cerr << "Exiting with unknown exception." << std::endl;
+  }
+
+  return -1;
 }
 
 template <typename ENVIRONMENT, typename AGENT>
