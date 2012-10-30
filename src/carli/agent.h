@@ -143,7 +143,7 @@ public:
    m_features_complete(true),
    m_candidates(nullptr),
    m_environment(environment),
-   m_episode_number(0),
+   m_episode_number(1),
    m_step_count(0),
    m_total_reward(reward_type()),
    m_learning_rate(0.3),
@@ -226,7 +226,7 @@ public:
       m_next = m_exploration_policy();
   }
 
-  void act() {
+  reward_type act() {
     m_current = std::move(m_next);
 
     Q_Value * const value_current = get_value(m_features, *m_current, Q_Value::current_offset());
@@ -253,6 +253,8 @@ public:
 
     m_total_reward += reward;
     ++m_step_count;
+
+    return reward;
   }
 
   void print(std::ostream &os) const {

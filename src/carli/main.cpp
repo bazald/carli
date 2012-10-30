@@ -1,4 +1,4 @@
-#define DEBUG_OUTPUT
+// #define DEBUG_OUTPUT
 // #define NULL_Q_VALUES
 // #define TO_FILE
 
@@ -28,6 +28,7 @@ struct Arguments {
     environment(BLOCKS_WORLD),
     epsilon(0.1),
     learning_rate(1.0),
+    output(SIMPLE),
     on_policy(true),
     seed(uint32_t(time(0)))
   {
@@ -37,6 +38,7 @@ struct Arguments {
   enum {BLOCKS_WORLD, PUDDLE_WORLD} environment;
   double epsilon;
   double learning_rate;
+  enum {SIMPLE, EXPERIMENTAL} output;
   bool on_policy;
   uint32_t seed;
 } g_args;
@@ -64,7 +66,7 @@ int main2(int argc, char **argv) {
 //   std::cerr << "sizeof(Trie) = " << sizeof(Blocks_World::Agent::feature_trie_type) << std::endl;
 
   int c;
-  const char * const options = "d:e:g:hl:p:s:";
+  const char * const options = "d:e:g:hl:o:p:s:";
   while((c = getopt(argc, argv, options)) != -1) {
     switch (c) {
     case 'd':
@@ -99,6 +101,17 @@ int main2(int argc, char **argv) {
       if(g_args.learning_rate <= 0.0 || g_args.learning_rate > 1.0) {
         std::cerr << "Illegal learning rate selection: " << optarg << std::endl;
         throw std::runtime_error("Illegal learning rate selection.");
+      }
+      break;
+
+    case 'o':
+      if(!strcmp(optarg, "simple"))
+        g_args.output = Arguments::SIMPLE;
+      else if(!strcmp(optarg, "experimental"))
+        g_args.output = Arguments::EXPERIMENTAL;
+      else {
+        std::cerr << "Illegal output selection: " << optarg << std::endl;
+        throw std::runtime_error("Illegal output selection.");
       }
       break;
 
@@ -231,6 +244,7 @@ int main(int argc, char **argv) {
 template <typename ENVIRONMENT, typename AGENT>
 void run_agent() {
   Zeni::Random::get().seed(uint32_t(g_args.seed));
+  std::cout << "SEED " << g_args.seed << std::endl;
 
   auto env = std::make_shared<ENVIRONMENT>();
   auto agent = std::make_shared<AGENT>(env);
@@ -251,8 +265,11 @@ void run_agent() {
     std::cerr << *env << *agent;
 #endif
     do {
-      agent->act();
+      const double reward = agent->act();
       ++total_steps;
+
+      if(g_args.output == Arguments::EXPERIMENTAL)
+        std::cout << total_steps << ' ' << agent->get_episode_number() << ' ' << agent->get_step_count() << ' ' << reward << std::endl;
 
 #ifdef DEBUG_OUTPUT
       std::cerr << *env << *agent;
@@ -260,18 +277,23 @@ void run_agent() {
     } while(agent->get_metastate() == NON_TERMINAL && agent->get_step_count() < 5000);
 
     if(agent->get_metastate() == SUCCESS) {
-      std::cout << "SUCCESS";
+      if(g_args.output == Arguments::SIMPLE)
+        std::cout << "SUCCESS";
       ++successes;
     }
     else {
-      std::cout << "FAILURE";
+      if(g_args.output == Arguments::SIMPLE)
+        std::cout << "FAILURE";
       ++failures;
     }
 
-    std::cout << " in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
+    if(g_args.output == Arguments::SIMPLE)
+      std::cout << " in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
   }
 
-  std::cout << successes << " SUCCESSes" << std::endl
-            << failures << " FAILUREs" << std::endl
-            << agent->get_value_function_size() << " Q-values" << std::endl;
+  if(g_args.output == Arguments::SIMPLE) {
+    std::cout << successes << " SUCCESSes" << std::endl;
+    std::cout << failures << " FAILUREs" << std::endl;
+    std::cout << agent->get_value_function_size() << " Q-values" << std::endl;
+  }
 }
