@@ -9,6 +9,8 @@
 
 #include <functional>
 #include <map>
+#include <set>
+#include <stack>
 #include <string>
 
 #include <iostream>
@@ -264,6 +266,15 @@ public:
 #ifdef DEBUG_OUTPUT
     print_value_function(os);
 #endif
+  }
+
+  void print_value_function(std::ostream &os) const {
+    os << "  Value Function:";
+    std::for_each(m_value_function.begin(), m_value_function.end(), [this,&os](decltype(*m_value_function.begin()) &value) {
+      os << std::endl << "  " << *value.first << " : ";
+      this->print_value_function_trie(os, value.second);
+    });
+    os << std::endl;
   }
 
   size_t get_value_function_size() const {
@@ -531,21 +542,13 @@ protected:
       os << std::endl;
     }
   }
-
-  void print_value_function(std::ostream &os) const {
-    os << "  Value Function:";
-    std::for_each(m_value_function.begin(), m_value_function.end(), [this,&os](decltype(*m_value_function.begin()) &value) {
-      os << std::endl << "  " << *value.first << " : ";
-      this->print_value_function_trie(os, value.second);
-    });
-    os << std::endl;
-  }
 #endif
 
   Metastate m_metastate;
   feature_list m_features;
   bool m_features_complete;
   action_list m_candidates;
+  value_function_type m_value_function;
   std::unique_ptr<const action_type> m_current;
   std::unique_ptr<const action_type> m_next;
   std::function<action_ptruc ()> m_target_policy; ///< Sarsa/Q-Learning selector
@@ -616,7 +619,6 @@ private:
     }
   }
 
-#ifdef DEBUG_OUTPUT
   static void print_value_function_trie(std::ostream &os, const feature_trie_type * const &trie) {
     if(trie) {
       for(auto tt = trie->begin(trie), tend = trie->end(trie); tt != tend; ++tt) {
@@ -632,13 +634,11 @@ private:
       }
     }
   }
-#endif
 
   virtual void generate_features() = 0;
   virtual void generate_candidates() = 0;
   virtual void update() = 0;
 
-  value_function_type m_value_function;
   Mean m_mean_cabe;
 #ifdef TRACK_Q_VALUE_VARIANCE
   Mean m_mean_variance;

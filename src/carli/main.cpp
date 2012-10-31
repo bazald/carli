@@ -296,4 +296,8 @@ void run_agent() {
     std::cout << failures << " FAILUREs" << std::endl;
     std::cout << agent->get_value_function_size() << " Q-values" << std::endl;
   }
+  else if(g_args.output == Arguments::EXPERIMENTAL) {
+    if(g_args.environment == Arguments::PUDDLE_WORLD)
+      std::dynamic_pointer_cast<Puddle_World::Agent>(agent)->print_value_function_grid(std::cerr);
+  }
 }

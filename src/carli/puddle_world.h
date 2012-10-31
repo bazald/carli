@@ -219,6 +219,9 @@ namespace Puddle_World {
 
   class Agent : public ::Agent<feature_type, action_type> {
   public:
+    typedef std::pair<double, double> point_type;
+    typedef std::pair<point_type, point_type> line_segment_type;
+
     Agent(const std::shared_ptr<environment_type> &env)
      : ::Agent<feature_type, action_type>(env)
     {
@@ -251,7 +254,64 @@ namespace Puddle_World {
       init();
     }
 
+    void print_value_function_grid(std::ostream &os) const {
+      std::set<line_segment_type> line_segments;
+      std::for_each(m_value_function.begin(), m_value_function.end(), [this,&os,&line_segments](decltype(*m_value_function.begin()) &value) {
+        os << *value.first << ":" << std::endl;
+        const auto line_segments2 = this->generate_value_function_grid_sets(value.second);
+        this->merge_value_function_grid_sets(line_segments, line_segments2);
+        this->print_value_function_grid_set(os, line_segments2);
+      });
+      os << "all:" << std::endl;
+      print_value_function_grid_set(os, line_segments);
+    }
+
   private:
+    std::set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0))) const {
+      std::set<line_segment_type> line_segments;
+      if(trie) {
+        std::for_each(trie->begin(trie), trie->end(trie), [this,&line_segments,&extents](const feature_trie_type &trie2) {
+          if(trie2.get_deeper()) {
+            auto new_extents = extents;
+            const auto &key = trie2.get_key();
+            if(key->axis == Feature::X) {
+              new_extents.first.first = key->bound_lower;
+              new_extents.first.second = key->bound_higher;
+            }
+            else {
+              new_extents.second.first = key->bound_lower;
+              new_extents.second.second = key->bound_higher;
+            }
+
+            if(new_extents.first.first != extents.first.first)
+              line_segments.insert(line_segment_type(point_type(new_extents.first.first, new_extents.first.second), point_type(new_extents.first.first, new_extents.second.second)));
+            if(new_extents.first.second != extents.first.second)
+              line_segments.insert(line_segment_type(point_type(new_extents.first.first, new_extents.first.second), point_type(new_extents.second.first, new_extents.first.second)));
+            if(new_extents.second.first != extents.second.first)
+              line_segments.insert(line_segment_type(point_type(new_extents.second.first, new_extents.first.second), point_type(new_extents.second.first, new_extents.second.second)));
+            if(new_extents.second.second != extents.second.second)
+              line_segments.insert(line_segment_type(point_type(new_extents.first.first, new_extents.second.second), point_type(new_extents.second.first, new_extents.second.second)));
+
+            const auto line_segments2 = this->generate_value_function_grid_sets(trie2.get_deeper(), new_extents);
+            this->merge_value_function_grid_sets(line_segments, line_segments2);
+          }
+        });
+      }
+      return line_segments;
+    }
+
+    void print_value_function_grid_set(std::ostream &os, const std::set<line_segment_type> &line_segments) const {
+      std::for_each(line_segments.begin(), line_segments.end(), [&os](const line_segment_type &line_segment) {
+        os << line_segment.first.first << ' ' << line_segment.first.second << ' ' << line_segment.second.first << ' ' << line_segment.second.second << std::endl;
+      });
+    }
+
+    void merge_value_function_grid_sets(std::set<line_segment_type> &combination, const std::set<line_segment_type> &additions) const {
+      std::for_each(additions.begin(), additions.end(), [&combination](const line_segment_type &line_segment) {
+        combination.insert(line_segment);
+      });
+    }
+
     void generate_features() {
       auto env = std::dynamic_pointer_cast<const Environment>(get_env());
 
