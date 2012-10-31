@@ -274,7 +274,7 @@ void run_agent() {
 #ifdef DEBUG_OUTPUT
       std::cerr << *env << *agent;
 #endif
-    } while(agent->get_metastate() == NON_TERMINAL && agent->get_step_count() < 5000);
+    } while(agent->get_metastate() == NON_TERMINAL && agent->get_step_count() < 5000 && total_steps < 50000);
 
     if(agent->get_metastate() == SUCCESS) {
       if(g_args.output == Arguments::SIMPLE)

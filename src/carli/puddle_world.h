@@ -5,9 +5,10 @@
 #include "environment.h"
 
 #include <algorithm>
+#include <array>
+#include <cfloat>
 #include <list>
 #include <stdexcept>
-#include <array>
 
 namespace Puddle_World {
   
@@ -148,12 +149,12 @@ namespace Puddle_World {
 
       if(m_position.first < 0.0)
         m_position.first = 0.0;
-      else if(m_position.first > 1.0)
-        m_position.first = 1.0;
+      else if(m_position.first >= 1.0)
+        m_position.first = 1.0 - DBL_EPSILON;
       if(m_position.second < 0.0)
         m_position.second = 0.0;
-      else if(m_position.second > 1.0)
-        m_position.second = 1.0;
+      else if(m_position.second >= 1.0)
+        m_position.second = 1.0 - DBL_EPSILON;
 
       double reward = -1.0;
 
@@ -271,27 +272,27 @@ namespace Puddle_World {
       std::set<line_segment_type> line_segments;
       if(trie) {
         std::for_each(trie->begin(trie), trie->end(trie), [this,&line_segments,&extents](const feature_trie_type &trie2) {
+          auto new_extents = extents;
+          const auto &key = trie2.get_key();
+          if(key->axis == Feature::X) {
+            new_extents.first.first = key->bound_lower;
+            new_extents.second.first = key->bound_higher;
+          }
+          else {
+            new_extents.first.second = key->bound_lower;
+            new_extents.second.second = key->bound_higher;
+          }
+
+          if(new_extents.first.first != extents.first.first)
+            line_segments.insert(line_segment_type(point_type(new_extents.first.first, new_extents.first.second), point_type(new_extents.first.first, new_extents.second.second)));
+          if(new_extents.first.second != extents.first.second)
+            line_segments.insert(line_segment_type(point_type(new_extents.first.first, new_extents.first.second), point_type(new_extents.second.first, new_extents.first.second)));
+          if(new_extents.second.first != extents.second.first)
+            line_segments.insert(line_segment_type(point_type(new_extents.second.first, new_extents.first.second), point_type(new_extents.second.first, new_extents.second.second)));
+          if(new_extents.second.second != extents.second.second)
+            line_segments.insert(line_segment_type(point_type(new_extents.first.first, new_extents.second.second), point_type(new_extents.second.first, new_extents.second.second)));
+
           if(trie2.get_deeper()) {
-            auto new_extents = extents;
-            const auto &key = trie2.get_key();
-            if(key->axis == Feature::X) {
-              new_extents.first.first = key->bound_lower;
-              new_extents.first.second = key->bound_higher;
-            }
-            else {
-              new_extents.second.first = key->bound_lower;
-              new_extents.second.second = key->bound_higher;
-            }
-
-            if(new_extents.first.first != extents.first.first)
-              line_segments.insert(line_segment_type(point_type(new_extents.first.first, new_extents.first.second), point_type(new_extents.first.first, new_extents.second.second)));
-            if(new_extents.first.second != extents.first.second)
-              line_segments.insert(line_segment_type(point_type(new_extents.first.first, new_extents.first.second), point_type(new_extents.second.first, new_extents.first.second)));
-            if(new_extents.second.first != extents.second.first)
-              line_segments.insert(line_segment_type(point_type(new_extents.second.first, new_extents.first.second), point_type(new_extents.second.first, new_extents.second.second)));
-            if(new_extents.second.second != extents.second.second)
-              line_segments.insert(line_segment_type(point_type(new_extents.first.first, new_extents.second.second), point_type(new_extents.second.first, new_extents.second.second)));
-
             const auto line_segments2 = this->generate_value_function_grid_sets(trie2.get_deeper(), new_extents);
             this->merge_value_function_grid_sets(line_segments, line_segments2);
           }

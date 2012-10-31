@@ -437,7 +437,7 @@ protected:
           ++q.pseudoepisode_count;
         q.last_step_fired = this->m_step_count;
 
-        q.cabe += delta < 0.0 ? -delta : delta;
+        q.cabe += std::abs(delta);
         this->m_mean_cabe.contribute(q.cabe);
 
 #ifdef TRACK_Q_VALUE_VARIANCE
