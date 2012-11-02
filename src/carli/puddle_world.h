@@ -316,13 +316,13 @@ namespace Puddle_World {
           }
 
           if(new_extents.first.first != extents.first.first)
-            line_segments.insert(line_segment_type(point_type(new_extents.first.first, new_extents.first.second), point_type(new_extents.first.first, new_extents.second.second)));
+            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.first.second), std::make_pair(new_extents.first.first, new_extents.second.second)));
           if(new_extents.first.second != extents.first.second)
-            line_segments.insert(line_segment_type(point_type(new_extents.first.first, new_extents.first.second), point_type(new_extents.second.first, new_extents.first.second)));
+            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.first.second), std::make_pair(new_extents.second.first, new_extents.first.second)));
           if(new_extents.second.first != extents.second.first)
-            line_segments.insert(line_segment_type(point_type(new_extents.second.first, new_extents.first.second), point_type(new_extents.second.first, new_extents.second.second)));
+            line_segments.insert(std::make_pair(std::make_pair(new_extents.second.first, new_extents.first.second), std::make_pair(new_extents.second.first, new_extents.second.second)));
           if(new_extents.second.second != extents.second.second)
-            line_segments.insert(line_segment_type(point_type(new_extents.first.first, new_extents.second.second), point_type(new_extents.second.first, new_extents.second.second)));
+            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.second.second), std::make_pair(new_extents.second.first, new_extents.second.second)));
 
           if(trie2.get_deeper()) {
             const auto line_segments2 = this->generate_value_function_grid_sets(trie2.get_deeper(), new_extents);
