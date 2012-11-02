@@ -1,4 +1,5 @@
 // #define DEBUG_OUTPUT
+// #define DEBUG_OUTPUT_VALUE_FUNCTION
 // #define NULL_Q_VALUES
 // #define TO_FILE
 
@@ -28,6 +29,7 @@ struct Arguments {
     environment(BLOCKS_WORLD),
     epsilon(0.1),
     learning_rate(1.0),
+    number_of_steps(50000),
     output(SIMPLE),
     on_policy(true),
     seed(uint32_t(time(0)))
@@ -38,6 +40,7 @@ struct Arguments {
   enum {BLOCKS_WORLD, PUDDLE_WORLD} environment;
   double epsilon;
   double learning_rate;
+  uint32_t number_of_steps;
   enum {SIMPLE, EXPERIMENTAL} output;
   bool on_policy;
   uint32_t seed;
@@ -66,7 +69,7 @@ int main2(int argc, char **argv) {
 //   std::cerr << "sizeof(Trie) = " << sizeof(Blocks_World::Agent::feature_trie_type) << std::endl;
 
   int c;
-  const char * const options = "d:e:g:hl:o:p:s:";
+  const char * const options = "d:e:g:hl:n:o:p:s:";
   while((c = getopt(argc, argv, options)) != -1) {
     switch (c) {
     case 'd':
@@ -102,6 +105,10 @@ int main2(int argc, char **argv) {
         std::cerr << "Illegal learning rate selection: " << optarg << std::endl;
         throw std::runtime_error("Illegal learning rate selection.");
       }
+      break;
+
+    case 'n':
+      g_args.number_of_steps = atoi(optarg);
       break;
 
     case 'o':
@@ -257,7 +264,7 @@ void run_agent() {
   size_t total_steps = 0;
   size_t successes = 0;
   size_t failures = 0;
-  while(total_steps < 50000) {
+  while(total_steps < g_args.number_of_steps) {
     env->init();
     agent->init();
 
@@ -274,7 +281,7 @@ void run_agent() {
 #ifdef DEBUG_OUTPUT
       std::cerr << *env << *agent;
 #endif
-    } while(agent->get_metastate() == NON_TERMINAL && agent->get_step_count() < 5000 && total_steps < 50000);
+    } while(agent->get_metastate() == NON_TERMINAL && agent->get_step_count() < 5000 && total_steps < g_args.number_of_steps);
 
     if(agent->get_metastate() == SUCCESS) {
       if(g_args.output == Arguments::SIMPLE)
@@ -295,9 +302,17 @@ void run_agent() {
     std::cout << successes << " SUCCESSes" << std::endl;
     std::cout << failures << " FAILUREs" << std::endl;
     std::cout << agent->get_value_function_size() << " Q-values" << std::endl;
+
+    if(g_args.environment == Arguments::PUDDLE_WORLD) {
+      auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
+      pwa->print_policy(std::cout, 32);
+    }
   }
   else if(g_args.output == Arguments::EXPERIMENTAL) {
-    if(g_args.environment == Arguments::PUDDLE_WORLD)
-      std::dynamic_pointer_cast<Puddle_World::Agent>(agent)->print_value_function_grid(std::cerr);
+    if(g_args.environment == Arguments::PUDDLE_WORLD) {
+      auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
+      pwa->print_policy(std::cerr, 32);
+      pwa->print_value_function_grid(std::cerr);
+    }
   }
 }

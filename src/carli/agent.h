@@ -241,11 +241,18 @@ public:
       regenerate_lists();
 
       m_next = m_target_policy();
+#ifdef DEBUG_OUTPUT
+      std::cerr << "   " << *m_next << " is next." << std::endl;
+#endif
       Q_Value * const value_best = get_value(m_features, *m_next, Q_Value::next_offset());
       td_update(&value_current->current, reward, &value_best->next);
 
-      if(!m_on_policy)
+      if(!m_on_policy) {
         m_next = m_exploration_policy();
+#ifdef DEBUG_OUTPUT
+        std::cerr << "   " << *m_next << " is next." << std::endl;
+#endif
+      }
     }
     else {
       destroy_lists();
@@ -263,7 +270,7 @@ public:
     os << " Agent:\n";
     print_list(os, "  Features:\n  ", " ", m_features);
     print_list(os, "  Candidates:\n  ", " ", m_candidates);
-#ifdef DEBUG_OUTPUT
+#if defined(DEBUG_OUTPUT) && defined(DEBUG_OUTPUT_VALUE_FUNCTION)
     print_value_function(os);
 #endif
   }
@@ -387,13 +394,28 @@ protected:
     if(!current)
       return;
 
-    const double target_value = reward + (next ? m_discount_rate * sum_value(nullptr, *next) : 0.0);
+    const double target_next = next ? m_discount_rate * sum_value(nullptr, *next) : 0.0;
+    const double target_value = reward + target_next;
 
     double q_old = double();
+#ifdef DEBUG_OUTPUT
+    std::cerr << " current :";
+#endif
     std::for_each(current->begin(current), current->end(current), [&q_old](Q_Value &q) {
       q_old += q.value;
       ++q.update_count;
+#ifdef DEBUG_OUTPUT
+      std::cerr << ' ' << &q;
+#endif
     });
+#ifdef DEBUG_OUTPUT
+    std::cerr << std::endl;
+    std::cerr << " next    :";
+    std::for_each(next->begin(next), next->end(next), [](const Q_Value &q) {
+      std::cerr << ' ' << &q;
+    });
+    std::cerr << std::endl;
+#endif
 
 #ifdef TRACK_Q_VALUE_VARIANCE
     double variance_total_next = double();
@@ -416,10 +438,8 @@ protected:
 #ifdef TRACK_Q_VALUE_VARIANCE
       const double local_old = q.value;
 #endif
-      const double local_learning_rate = this->m_learning_rate * q.credit;
-      const double local_delta = local_learning_rate * delta;
 
-      q.value += local_delta;
+      q.value += this->m_learning_rate * q.credit * delta;
       q_new += q.value;
 
       if(q.split) {
@@ -456,8 +476,8 @@ protected:
     });
 
 #ifdef DEBUG_OUTPUT
-    std::cerr << " td_update: " << q_old << " <" << m_learning_rate << "= " << reward << " + " << m_discount_rate << " * " << (next ? sum_value(nullptr, *next) : 0.0) << std::endl;
-    std::cerr << "            " << delta << " = " << m_learning_rate << " * (" << target_value << " - " << q_old << ')' << std::endl
+    std::cerr << " td_update: " << q_old << " <" << m_learning_rate << "= " << reward << " + " << m_discount_rate << " * " << target_next << std::endl;
+    std::cerr << "            " << delta << " = " << target_value << " - " << q_old << std::endl
               << "            " << q_new << std::endl;
 
     std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {

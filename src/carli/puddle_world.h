@@ -121,6 +121,8 @@ namespace Puddle_World {
     const double_pair & get_goal_x() const {return m_goal_x;}
     const double_pair & get_goal_y() const {return m_goal_y;}
 
+    void set_position(const double_pair &position_) {m_position = position_;}
+
     bool goal_reached() const {
       return m_goal_x.first <= m_position.first  && m_position.first  < m_goal_x.second &&
              m_goal_y.first <= m_position.second && m_position.second < m_goal_y.second;
@@ -130,7 +132,7 @@ namespace Puddle_World {
     void init_impl() {
       do {
         m_position.first = m_init_x.first + m_random_init.frand_lt() * (m_init_x.second - m_init_x.first);
-        m_position.first = m_init_y.first + m_random_init.frand_lt() * (m_init_y.second - m_init_y.first);
+        m_position.second = m_init_y.first + m_random_init.frand_lt() * (m_init_y.second - m_init_y.first);
       } while(goal_reached());
 
       m_random_motion = Zeni::Random(m_random_init.rand());
@@ -138,12 +140,13 @@ namespace Puddle_World {
 
     reward_type transition_impl(const action_type &action) {
       const double shift = (m_random_motion.frand_lt() - 0.5) * 0.02; ///< Should really be Gaussian, stddev = 0.01
+      const double step_size = shift + 0.05;
 
       switch(dynamic_cast<const Move &>(action).direction) {
-        case Move::NORTH: m_position.second += 0.05 + shift; break;
-        case Move::SOUTH: m_position.second -= 0.05 + shift; break;
-        case Move::EAST:  m_position.first  += 0.05 + shift; break;
-        case Move::WEST:  m_position.first  -= 0.05 + shift; break;
+        case Move::NORTH: m_position.second += step_size; break;
+        case Move::SOUTH: m_position.second -= step_size; break;
+        case Move::EAST:  m_position.first  += step_size; break;
+        case Move::WEST:  m_position.first  -= step_size; break;
         default: abort();
       }
 
@@ -164,7 +167,7 @@ namespace Puddle_World {
       return reward;
     }
 
-    double horizontal_puddle_reward(const double &left, const double &right, const double &y, const double &radius) {
+    double horizontal_puddle_reward(const double &left, const double &right, const double &y, const double &radius) const {
       double dist;
 
       if(m_position.first < left)
@@ -177,7 +180,7 @@ namespace Puddle_World {
       return std::max(0.0, radius - dist);
     }
 
-    double vertical_puddle_reward(const double &x, const double &bottom, const double &top, const double &radius) {
+    double vertical_puddle_reward(const double &x, const double &bottom, const double &top, const double &radius) const {
       double dist;
 
       if(m_position.second < bottom)
@@ -191,12 +194,12 @@ namespace Puddle_World {
     }
 
     template <typename TYPE>
-    TYPE pythagoras(const TYPE &lhs, const TYPE &rhs) {
+    TYPE pythagoras(const TYPE &lhs, const TYPE &rhs) const {
       return sqrt(squared(lhs) + squared(rhs));
     }
 
     template <typename TYPE>
-    TYPE squared(const TYPE &value) {
+    TYPE squared(const TYPE &value) const {
       return value * value;
     }
 
@@ -235,11 +238,16 @@ namespace Puddle_World {
 
       m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
 
-//       m_split_test = [](Q_Value * const &, const size_t &depth)->bool{return depth < Binary_Log<64>::value * 2 + 1;};
+//       m_split_test = [](Q_Value * const &, const size_t &depth)->bool{return depth < Binary_Log<32>::value * 2 + 1;};
 
       m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{
-        if(depth < Binary_Log<8>::value * 2 + 1)
+        if(depth < Binary_Log<4>::value * 2 + 1) {
+          if(q)
+            q->split = true;
           return true;
+        }
+        if(depth >= Binary_Log<64>::value * 2 + 1)
+          return false;
 
         if(!q)
           return false;
@@ -247,7 +255,7 @@ namespace Puddle_World {
           return true;
 
         q->split |= q->pseudoepisode_count > 0 &&
-                    this->get_mean_cabe().outlier_above(q->cabe, -0.15);
+                    this->get_mean_cabe().outlier_above(q->cabe, 0.5);
 
         return q->split;
       };
@@ -265,6 +273,30 @@ namespace Puddle_World {
       });
       os << "all:" << std::endl;
       print_value_function_grid_set(os, line_segments);
+    }
+
+    void print_policy(std::ostream &os, const size_t &granularity) {
+      auto env = std::dynamic_pointer_cast<Environment>(get_env());
+      const auto position = env->get_position();
+
+      for(size_t y = granularity; y != 0lu; --y) {
+        for(size_t x = 0lu; x != granularity; ++x) {
+          env->set_position(Environment::double_pair((x + 0.5) / granularity, (y - 0.5) / granularity));
+          regenerate_lists();
+          auto action = choose_greedy();
+          switch(dynamic_cast<const Move &>(*action).direction) {
+            case Move::NORTH: os << 'N'; break;
+            case Move::SOUTH: os << 'S'; break;
+            case Move::EAST:  os << 'E'; break;
+            case Move::WEST:  os << 'W'; break;
+            default: abort();
+          }
+        }
+        os << std::endl;
+      }
+
+      env->set_position(position);
+      regenerate_lists();
     }
 
   private:
