@@ -90,10 +90,11 @@ def main():
   if len(sys.argv) > 1:
     target_dir = sys.argv[1]
   
-  if len(sys.argv) < 3:
-    f = open('stderr.txt', 'r')
+  lines = {}
+  for filename in sys.argv[2:]:
+    f = open(filename, 'r')
     regt = re.compile('([^:]+):')
-    regls = re.compile('([^ ]+) ([^ ]+) ([^ ]+) ([^ ]+)')
+    regls = re.compile('([^ ]+) ([^ ]+) ([^ ]+) ([^ \r\n]+)')
     dir = ''
     while True:
       line = f.readline()
@@ -106,10 +107,19 @@ def main():
       elif dir == target_dir:
         ls = regls.search(line)
         if not ls == None:
-          fig.axes[0].add_line(pylab.Line2D([ls.group(1), ls.group(3)], [ls.group(2), ls.group(4)], color='black'))
+          key = (ls.group(1), ls.group(2), ls.group(3), ls.group(4))
+          try:
+            lines[key] += 1.0
+          except KeyError:
+            lines[key] = 1.0
         else:
           raise Exception('Unknown line encountered in stderr.txt')
     f.close()
+  
+  divisor = len(sys.argv[2:])
+  for key, value in lines.iteritems():
+    rgb = 1 - value / divisor;
+    fig.axes[0].add_line(pylab.Line2D([key[0], key[2]], [key[1], key[3]], color=(rgb, rgb, rgb)))
   
   #pylab.legend(loc=4, handlelength=4.2, numpoints=2)
   
