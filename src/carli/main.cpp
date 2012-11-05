@@ -84,6 +84,13 @@ Options generate_options() {
       throw std::runtime_error("Illegal learning rate selection.");
     }
   }, 1), "(0,1]");
+  options.add('n', "num-steps", Options::Option([](const std::vector<const char *> &args) {
+    g_args.number_of_steps = atof(args.at(0));
+    if(g_args.number_of_steps < 1) {
+      std::cerr << "Illegal number of steps selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal number of steps selection.");
+    }
+  }, 1), "[1,inf)");
   options.add('o', "output", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "simple"))
       g_args.output = Arguments::SIMPLE;
