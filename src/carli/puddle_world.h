@@ -255,7 +255,7 @@ namespace Puddle_World {
           return true;
 
         q->split |= q->pseudoepisode_count > 0 &&
-                    this->get_mean_cabe().outlier_above(q->cabe, 0.5);
+                    this->get_mean_cabe().outlier_above(q->cabe, 0.5); // 0.84155
 
         return q->split;
       };

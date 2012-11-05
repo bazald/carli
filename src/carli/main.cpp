@@ -46,6 +46,71 @@ struct Arguments {
   uint32_t seed;
 } g_args;
 
+Options generate_options() {
+  Options options("carli");
+
+  options.add('h', "help", Options::Option([&options](const std::vector<const char *> &) {
+    options.print_help(std::cout);
+    exit(0);
+  }, 0), "");
+  options.add('d', "discount-rate", Options::Option([](const std::vector<const char *> &args) {
+    g_args.discount_rate = atof(args.at(0));
+    if(g_args.discount_rate < 0.0 || g_args.discount_rate > 1.0) {
+      std::cerr << "Illegal discount rate selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal discount rate selection.");
+    }
+  }, 1), "[0,1]");
+  options.add('g', "epsilon-greedy", Options::Option([](const std::vector<const char *> &args) {
+    g_args.epsilon = atof(args.at(0));
+    if(g_args.epsilon < 0.0 || g_args.epsilon > 1.0) {
+      std::cerr << "Illegal epsilon-greedy selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal epsilon-greedy selection.");
+    }
+  }, 1), "[0,1]");
+  options.add('e', "environment", Options::Option([](const std::vector<const char *> &args) {
+    if(!strcmp(args.at(0), "blocks-world"))
+      g_args.environment = Arguments::BLOCKS_WORLD;
+    else if(!strcmp(args.at(0), "puddle-world"))
+      g_args.environment = Arguments::PUDDLE_WORLD;
+    else {
+      std::cerr << "Illegal environment selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal environment selection.");
+    }
+  }, 1), "blocks-world/puddle-world");
+  options.add('l', "learning-rate", Options::Option([](const std::vector<const char *> &args) {
+    g_args.learning_rate = atof(args.at(0));
+    if(g_args.learning_rate <= 0.0 || g_args.learning_rate > 1.0) {
+      std::cerr << "Illegal learning rate selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal learning rate selection.");
+    }
+  }, 1), "(0,1]");
+  options.add('o', "output", Options::Option([](const std::vector<const char *> &args) {
+    if(!strcmp(args.at(0), "simple"))
+      g_args.output = Arguments::SIMPLE;
+    else if(!strcmp(args.at(0), "experimental"))
+      g_args.output = Arguments::EXPERIMENTAL;
+    else {
+      std::cerr << "Illegal output selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal output selection.");
+    }
+  }, 1), "simple/experimental");
+  options.add('p', "policy", Options::Option([](const std::vector<const char *> &args) {
+    if(!strcmp(args.at(0), "on-policy"))
+      g_args.on_policy = true;
+    else if(!strcmp(args.at(0), "off-policy"))
+      g_args.on_policy = false;
+    else {
+      std::cerr << "Illegal policy selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal policy selection.");
+    }
+  }, 1), "on-policy/off-policy");
+  options.add('s', "seed", Options::Option([](const std::vector<const char *> &args) {
+    g_args.seed = atoi(args.at(0));
+  }, 1), "(-inf,inf)");
+
+  return options;
+}
+
 int main2(int argc, char **argv) {
 #ifdef TO_FILE
   auto cout_bak = std::cout.rdbuf();
@@ -68,104 +133,14 @@ int main2(int argc, char **argv) {
 //   std::cerr << "sizeof(Q_Value) = " << sizeof(Q_Value) << std::endl;
 //   std::cerr << "sizeof(Trie) = " << sizeof(Blocks_World::Agent::feature_trie_type) << std::endl;
 
-  int c;
-  const char * const options = "d:e:g:hl:n:o:p:s:";
-  while((c = getopt(argc, argv, options)) != -1) {
-    switch (c) {
-    case 'd':
-      g_args.discount_rate = atof(optarg);
-      if(g_args.discount_rate < 0.0 || g_args.discount_rate > 1.0) {
-        std::cerr << "Illegal discount rate selection: " << optarg << std::endl;
-        throw std::runtime_error("Illegal discount rate selection.");
-      }
-      break;
-
-    case 'e':
-      if(!strcmp(optarg, "blocks-world"))
-        g_args.environment = Arguments::BLOCKS_WORLD;
-      else if(!strcmp(optarg, "puddle-world"))
-        g_args.environment = Arguments::PUDDLE_WORLD;
-      else {
-        std::cerr << "Illegal environment selection: " << optarg << std::endl;
-        throw std::runtime_error("Illegal environment selection.");
-      }
-      break;
-
-    case 'g':
-      g_args.epsilon = atof(optarg);
-      if(g_args.epsilon < 0.0 || g_args.epsilon > 1.0) {
-        std::cerr << "Illegal epsilon-greedy selection: " << optarg << std::endl;
-        throw std::runtime_error("Illegal epsilon-greedy selection.");
-      }
-      break;
-
-    case 'l':
-      g_args.learning_rate = atof(optarg);
-      if(g_args.learning_rate <= 0.0 || g_args.learning_rate > 1.0) {
-        std::cerr << "Illegal learning rate selection: " << optarg << std::endl;
-        throw std::runtime_error("Illegal learning rate selection.");
-      }
-      break;
-
-    case 'n':
-      g_args.number_of_steps = atoi(optarg);
-      break;
-
-    case 'o':
-      if(!strcmp(optarg, "simple"))
-        g_args.output = Arguments::SIMPLE;
-      else if(!strcmp(optarg, "experimental"))
-        g_args.output = Arguments::EXPERIMENTAL;
-      else {
-        std::cerr << "Illegal output selection: " << optarg << std::endl;
-        throw std::runtime_error("Illegal output selection.");
-      }
-      break;
-
-    case 'p':
-      if(!strcmp(optarg, "on-policy"))
-        g_args.on_policy = true;
-      else if(!strcmp(optarg, "off-policy"))
-        g_args.on_policy = false;
-      else {
-        std::cerr << "Illegal policy selection: " << optarg << std::endl;
-        throw std::runtime_error("Illegal policy selection.");
-      }
-      break;
-
-    case 's':
-      g_args.seed = atoi(optarg);
-      break;
-
-    case 'h':
-    case '?':
-      std::cerr << "Usage: carli [" << options << ']' << std::endl;
-      std::cerr << "  -d Set the discount rate:" << std::endl
-                << "       [0,1]" << std::endl;
-      std::cerr << "  -e Select an environment:" << std::endl
-                << "       blocks-world" << std::endl
-                << "       puddle-world" << std::endl;
-      std::cerr << "  -g Set the epsilon-greedy policy:" << std::endl
-                << "       [0,1]" << std::endl;
-      std::cerr << "  -h Print this help." << std::endl;
-      std::cerr << "  -l Set the learning rate:" << std::endl
-                << "       (0,1]" << std::endl;
-      std::cerr << "  -p Choose:" << std::endl
-                << "       on-policy" << std::endl
-                << "       off-policy" << std::endl;
-      std::cerr << "  -s Set the random seed:" << std::endl
-                << "       (-inf,inf)" << std::endl;
-      return c == '?';
-
-    default:
-      std::cerr << "?? getopt returned character code 0" << c << " ??\n";
-      break;
-    }
-  }
-  if(optind < argc) {
+  Options options = generate_options();
+  options.get(argc, argv);
+  if(options.optind < argc) {
     std::cerr << "Unknown trailing arguments:";
-    while(optind < argc)
-      std::cerr << ' ' << argv[optind++];
+    while(options.optind < argc)
+      std::cerr << ' ' << argv[options.optind++];
+    std::cerr << std::endl;
+    options.print_help(std::cerr);
     std::cerr << std::endl;
     throw std::runtime_error("Unknown trailing arguments.");
   }
