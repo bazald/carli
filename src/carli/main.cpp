@@ -85,7 +85,7 @@ Options generate_options() {
     }
   }, 1), "(0,1]");
   options.add('n', "num-steps", Options::Option([](const std::vector<const char *> &args) {
-    g_args.number_of_steps = atof(args.at(0));
+    g_args.number_of_steps = atoi(args.at(0));
     if(g_args.number_of_steps < 1) {
       std::cerr << "Illegal number of steps selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal number of steps selection.");
