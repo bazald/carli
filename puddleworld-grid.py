@@ -85,8 +85,12 @@ def main():
   fig.canvas.set_window_title('Puddle World')
   
   pylab.axes([0.125,0.15,0.8375,0.75])
-    
-  if len(sys.argv) == 1:
+  
+  target_dir = 'all'
+  if len(sys.argv) > 1:
+    target_dir = sys.argv[1]
+  
+  if len(sys.argv) < 3:
     f = open('stderr.txt', 'r')
     regt = re.compile('([^:]+):')
     regls = re.compile('([^ ]+) ([^ ]+) ([^ ]+) ([^ ]+)')
@@ -99,7 +103,7 @@ def main():
       if not t == None:
         dir = t.group(1)
         print dir + ':'
-      elif dir == 'all':
+      elif dir == target_dir:
         ls = regls.search(line)
         if not ls == None:
           fig.axes[0].add_line(pylab.Line2D([ls.group(1), ls.group(3)], [ls.group(2), ls.group(4)], color='black'))
