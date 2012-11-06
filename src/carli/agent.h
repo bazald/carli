@@ -558,7 +558,7 @@ protected:
 
   void assign_credit_evenly(Q_Value::List * const &value_list) {
     double count = double();
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](const Q_Value &q) {
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](const Q_Value &) {
       ++count;
     });
 
