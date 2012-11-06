@@ -221,17 +221,6 @@ namespace Blocks_World {
       set_epsilon(0.1);
       set_pseudoepisode_threshold(5);
 
-      m_split_test = [](Q_Value * const &q, const size_t &/*depth*/)->bool{
-        if(!q)
-          return false;
-        if(q->split)
-          return true;
-
-        q->split |= q->update_count > 5;
-
-        return q->split;
-      };
-
       init();
     }
 

@@ -25,25 +25,37 @@ void run_agent();
 
 struct Arguments {
   Arguments()
-    : discount_rate(1.0),
+    : credit_assignment(Blocks_World::Agent::EVEN),
+    discount_rate(1.0),
     environment(BLOCKS_WORLD),
     epsilon(0.1),
     learning_rate(1.0),
     number_of_steps(50000),
     output(SIMPLE),
     on_policy(true),
-    seed(uint32_t(time(0)))
+    pseudoepisode_threshold(20),
+    seed(uint32_t(time(0))),
+    split_min(0),
+    split_max(size_t(-1)),
+    split_pseudoepisodes(0),
+    split_cabe(0.84155)
   {
   }
 
+  Blocks_World::Agent::Credit_Assignment credit_assignment;
   double discount_rate;
   enum {BLOCKS_WORLD, PUDDLE_WORLD} environment;
   double epsilon;
   double learning_rate;
-  uint32_t number_of_steps;
+  size_t number_of_steps;
   enum {SIMPLE, EXPERIMENTAL} output;
   bool on_policy;
+  size_t pseudoepisode_threshold;
   uint32_t seed;
+  size_t split_min;
+  size_t split_max;
+  size_t split_pseudoepisodes;
+  double split_cabe;
 } g_args;
 
 Options generate_options() {
@@ -53,6 +65,18 @@ Options generate_options() {
     options.print_help(std::cout);
     exit(0);
   }, 0), "");
+  options.add('c', "credit-assignment", Options::Option([](const std::vector<const char *> &args) {
+    if(!strcmp(args.at(0), "even"))
+      g_args.credit_assignment = Blocks_World::Agent::EVEN;
+    else if(!strcmp(args.at(0), "inv-update-count"))
+      g_args.credit_assignment = Blocks_World::Agent::INV_UPDATE_COUNT;
+    else if(!strcmp(args.at(0), "inv-log-update-count"))
+      g_args.credit_assignment = Blocks_World::Agent::INV_LOG_UPDATE_COUNT;
+    else {
+      std::cerr << "Illegal credit assignment selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal credit assignment selection.");
+    }
+  }, 1), "even/inv-update-count/inv-log-update-count");
   options.add('d', "discount-rate", Options::Option([](const std::vector<const char *> &args) {
     g_args.discount_rate = atof(args.at(0));
     if(g_args.discount_rate < 0.0 || g_args.discount_rate > 1.0) {
@@ -114,6 +138,21 @@ Options generate_options() {
   options.add('s', "seed", Options::Option([](const std::vector<const char *> &args) {
     g_args.seed = atoi(args.at(0));
   }, 1), "(-inf,inf)");
+  options.add(     "split-cabe", Options::Option([](const std::vector<const char *> &args) {
+    g_args.split_cabe = atof(args.at(0));
+  }, 1), "[0,inf)");
+  options.add(     "split-max", Options::Option([](const std::vector<const char *> &args) {
+    g_args.split_max = atoi(args.at(0));
+  }, 1), "[0,inf)");
+  options.add(     "split-min", Options::Option([](const std::vector<const char *> &args) {
+    g_args.split_min = atoi(args.at(0));
+  }, 1), "[0,inf)");
+  options.add(     "split-pseudoepisodes", Options::Option([](const std::vector<const char *> &args) {
+    g_args.split_pseudoepisodes = atoi(args.at(0));
+  }, 1), "[0,inf)");
+  options.add('t', "pseudoepisode-threshold", Options::Option([](const std::vector<const char *> &args) {
+    g_args.pseudoepisode_threshold = atoi(args.at(0));
+  }, 1), "[0,inf)");
 
   return options;
 }
@@ -238,10 +277,16 @@ void run_agent() {
   auto env = std::make_shared<ENVIRONMENT>();
   auto agent = std::make_shared<AGENT>(env);
 
+  agent->set_credit_assignment(typename AGENT::Credit_Assignment(g_args.credit_assignment));
   agent->set_discount_rate(g_args.discount_rate);
   agent->set_epsilon(g_args.epsilon);
   agent->set_learning_rate(g_args.learning_rate);
   agent->set_on_policy(g_args.on_policy);
+  agent->set_pseudoepisode_threshold(g_args.pseudoepisode_threshold);
+  agent->set_split_min(g_args.split_min);
+  agent->set_split_max(g_args.split_max);
+  agent->set_split_pseudoepisodes(g_args.split_pseudoepisodes);
+  agent->set_split_cabe(g_args.split_cabe);
 
   size_t total_steps = 0;
   size_t successes = 0;

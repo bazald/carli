@@ -229,36 +229,35 @@ namespace Puddle_World {
     Agent(const std::shared_ptr<environment_type> &env)
      : ::Agent<feature_type, action_type>(env)
     {
-      set_learning_rate(0.3);
+      set_credit_assignment(INV_LOG_UPDATE_COUNT);
       set_discount_rate(1.0);
+      set_learning_rate(0.3);
       set_on_policy(false);
       set_epsilon(0.1);
       set_pseudoepisode_threshold(10);
       m_features_complete = false;
 
-      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
-
 //       m_split_test = [](Q_Value * const &, const size_t &depth)->bool{return depth < Binary_Log<32>::value * 2 + 1;};
 
-      m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{
-        if(depth < Binary_Log<4>::value * 2 + 1) {
-          if(q)
-            q->split = true;
-          return true;
-        }
-        if(depth >= Binary_Log<64>::value * 2 + 1)
-          return false;
-
-        if(!q)
-          return false;
-        if(q->split)
-          return true;
-
-        q->split |= q->pseudoepisode_count > 0 &&
-                    this->get_mean_cabe().outlier_above(q->cabe, 0.5); // 0.84155
-
-        return q->split;
-      };
+//       m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{
+//         if(depth < Binary_Log<4>::value * 2 + 1) {
+//           if(q)
+//             q->split = true;
+//           return true;
+//         }
+//         if(depth >= Binary_Log<64>::value * 2 + 1)
+//           return false;
+// 
+//         if(!q)
+//           return false;
+//         if(q->split)
+//           return true;
+// 
+//         q->split |= q->pseudoepisode_count > 0 &&
+//                     this->get_mean_cabe().outlier_above(q->cabe, 0.5); // 0.84155
+// 
+//         return q->split;
+//       };
 
       init();
     }

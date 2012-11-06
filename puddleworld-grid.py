@@ -103,7 +103,7 @@ def main():
       t = regt.search(line)
       if not t == None:
         dir = t.group(1)
-        print dir + ':'
+        #print dir + ':'
       elif dir == target_dir:
         ls = regls.search(line)
         if not ls == None:

@@ -138,6 +138,7 @@ public:
   typedef Environment<action_type> environment_type;
   typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
+  enum Credit_Assignment {EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT};
 
   Agent(const std::shared_ptr<environment_type> &environment)
    : m_metastate(NON_TERMINAL),
@@ -150,14 +151,38 @@ public:
    m_total_reward(reward_type()),
    m_learning_rate(0.3),
    m_discount_rate(0.9),
+   m_credit_assignment_code(EVEN),
    m_on_policy(false),
    m_epsilon(0.1),
-   m_pseudoepisode_threshold(20)
+   m_pseudoepisode_threshold(20),
+   m_split_min(0),
+   m_split_max(size_t(-1)),
+   m_split_pseudoepisodes(0),
+   m_split_cabe(0.84155)
   {
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
     m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
-    m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
-    m_split_test = [this](Q_Value * const &/*q*/, const size_t &/*depth*/)->bool{return m_features_complete;};
+    m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
+
+    m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{
+      if(depth < m_split_min) {
+        if(q)
+          q->split = true;
+        return true;
+      }
+      if(depth >= m_split_max)
+        return false;
+
+      if(!q)
+        return false;
+      if(q->split)
+        return true;
+
+      q->split |= q->pseudoepisode_count > m_split_pseudoepisodes &&
+                  this->get_mean_cabe().outlier_above(q->cabe, m_split_cabe);
+
+      return q->split;
+    };
   }
 
   virtual ~Agent() {
@@ -185,11 +210,23 @@ public:
     m_discount_rate = discount_rate;
   }
 
-  double get_epsilon() const {return m_epsilon;}
-  void set_epsilon(const double &epsilon) {
-    if(epsilon < 0.0 || epsilon > 1.0)
-      throw std::range_error("Illegal epsilon.");
-    m_epsilon = epsilon;
+  Credit_Assignment get_credit_assignment() const {return m_credit_assignment_code;}
+  void set_credit_assignment(const Credit_Assignment &credit_assignment) {
+    switch(credit_assignment) {
+      case EVEN:
+        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
+        break;
+        
+      case INV_UPDATE_COUNT:
+        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
+        break;
+        
+      case INV_LOG_UPDATE_COUNT:
+        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
+        break;
+    }
+
+    m_credit_assignment_code = credit_assignment;
   }
 
   bool get_on_policy() const {return m_on_policy;}
@@ -202,9 +239,36 @@ public:
     m_on_policy = on_policy;
   }
 
+  double get_epsilon() const {return m_epsilon;}
+  void set_epsilon(const double &epsilon) {
+    if(epsilon < 0.0 || epsilon > 1.0)
+      throw std::range_error("Illegal epsilon.");
+    m_epsilon = epsilon;
+  }
+
   size_t get_pseudoepisode_threshold() const {return m_pseudoepisode_threshold;}
   void set_pseudoepisode_threshold(const size_t &pseudoepisode_threshold) {
     m_pseudoepisode_threshold = pseudoepisode_threshold;
+  }
+
+  size_t get_split_min() const {return m_split_min;}
+  void set_split_min(const size_t &split_min) {
+    m_split_min = split_min;
+  }
+
+  size_t get_split_max() const {return m_split_max;}
+  void set_split_max(const size_t &split_max) {
+    m_split_max = split_max;
+  }
+
+  size_t get_split_pseudoepisodes() const {return m_split_pseudoepisodes;}
+  void set_split_pseudoepisodes(const size_t &split_pseudoepisodes) {
+    m_split_pseudoepisodes = split_pseudoepisodes;
+  }
+
+  double get_split_cabe() const {return m_split_cabe;}
+  void set_split_cabe(const double &split_cabe) {
+    m_split_cabe = split_cabe;
   }
 
   const std::shared_ptr<const environment_type> & get_env() const {return m_environment;}
@@ -573,7 +637,6 @@ protected:
   std::unique_ptr<const action_type> m_next;
   std::function<action_ptruc ()> m_target_policy; ///< Sarsa/Q-Learning selector
   std::function<action_ptruc ()> m_exploration_policy; ///< Exploration policy
-  std::function<void (Q_Value::List * const &)> m_credit_assignment; ///< How to assign credit to multiple Q-values
   std::function<bool (Q_Value * const &, const size_t &)> m_split_test; ///< true if too general, false if sufficiently general
 
 private:
@@ -675,9 +738,17 @@ private:
   double m_learning_rate; ///< alpha
   double m_discount_rate; ///< gamma
 
+  Credit_Assignment m_credit_assignment_code;
+  std::function<void (Q_Value::List * const &)> m_credit_assignment; ///< How to assign credit to multiple Q-values
+
   bool m_on_policy; ///< for Sarsa/Q-learning selection
   double m_epsilon; ///< for epsilon-greedy decision-making
   size_t m_pseudoepisode_threshold; ///< For deciding how many steps indicates a pseudoepisode
+
+  size_t m_split_min;
+  size_t m_split_max;
+  size_t m_split_pseudoepisodes;
+  double m_split_cabe;
 };
 
 template <typename FEATURE, typename ACTION>

@@ -47,7 +47,7 @@ public:
     m_short_options[std::string(short_arg, 1)] = option;
 
     if(help)
-      m_help.push_back(std::string("  -") + short_arg + "   " + help);
+      m_help.push_back(std::string("  -") + short_arg + ' ' + help);
   }
 
   void add(const std::string &long_arg, const Option &option, const char * const help = nullptr) {
@@ -59,7 +59,7 @@ public:
     m_long_options[long_arg] = option;
 
     if(help)
-      m_help.push_back(std::string("  --") + long_arg + "   " + help);
+      m_help.push_back(std::string("     --") + long_arg + ' ' + help);
   }
 
   void get(const int &argc, const char * const * const &argv) {

@@ -9,7 +9,7 @@ g_plotter = './puddleworld.py'
 
 g_ep_tuples = []
 
-g_ep_tuples.append(('puddle-world', 1.0, 0.1, 0.2, 'off-policy'))
+g_ep_tuples.append(('puddle-world', 'inv-log-update-count', 1.0, 0.1, 0.2, 'off-policy', 10, 5, 13, 0, 0.5))
 
 parser = argparse.ArgumentParser(description='Run PuddleWorld experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,
@@ -56,20 +56,32 @@ class Experiment:
     self.stdout = stdout
     self.ep_tuple = ep_tuple
     self.environment = ep_tuple[0]
-    self.discount_rate = ep_tuple[1]
-    self.epsilon_greedy = ep_tuple[2]
-    self.learning_rate = ep_tuple[3]
-    self.policy = ep_tuple[4]
+    self.credit_assignment = ep_tuple[1]
+    self.discount_rate = ep_tuple[2]
+    self.epsilon_greedy = ep_tuple[3]
+    self.learning_rate = ep_tuple[4]
+    self.policy = ep_tuple[5]
+    self.pseudoepisode_threshold = ep_tuple[6]
+    self.split_min = ep_tuple[7]
+    self.split_max = ep_tuple[8]
+    self.split_pseudoepisodes = ep_tuple[9]
+    self.split_cabe = ep_tuple[10]
     
   def get_args(self):
     args = ['./carli',
             '--num-steps', str(self.num_steps),
             '--seed', str(self.seed),
             '--environment', self.environment,
+            '--credit-assignment', self.credit_assignment,
             '--discount-rate', str(self.discount_rate),
             '--epsilon-greedy', str(self.epsilon_greedy),
             '--learning-rate', str(self.learning_rate),
             '--policy', self.policy,
+            '--pseudoepisode-threshold', str(self.pseudoepisode_threshold),
+            '--split-min', str(self.split_min),
+            '--split-max', str(self.split_max),
+            '--split-pseudoepisodes', str(self.split_pseudoepisodes),
+            '--split-cabe', str(self.split_cabe),
             '--output', 'experimental']
     return args
   
@@ -96,10 +108,16 @@ dirs = []
 experiments = []
 for ep_tuple in g_ep_tuples:
   dir = g_dir + '/' + ep_tuple[0]
-  dir += '_' + str(ep_tuple[1])
+  dir += '_' + ep_tuple[1]
   dir += '_' + str(ep_tuple[2])
   dir += '_' + str(ep_tuple[3])
-  dir += '_' + ep_tuple[4]
+  dir += '_' + str(ep_tuple[4])
+  dir += '_' + ep_tuple[5]
+  dir += '_' + str(ep_tuple[6])
+  dir += '_' + str(ep_tuple[7])
+  dir += '_' + str(ep_tuple[8])
+  dir += '_' + str(ep_tuple[9])
+  dir += '_' + str(ep_tuple[10])
   if not os.path.isdir(dir):
     os.mkdir(dir)
   dirs.append(dir)
