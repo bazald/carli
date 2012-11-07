@@ -10,7 +10,7 @@
 
 template <typename DERIVED, typename DERIVED2 = DERIVED>
 class Action : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
-  Action operator=(const Action &);
+  Action & operator=(const Action &);
 
 public:
   typedef typename Zeni::Linked_List<Action> List;
@@ -75,7 +75,7 @@ std::ostream & operator << (std::ostream &os, const Action<DERIVED, DERIVED2> &a
 template <typename ACTION>
 class Environment : public std::enable_shared_from_this<Environment<ACTION> > {
   Environment(const Environment &);
-  Environment operator=(const Environment &);
+  Environment & operator=(const Environment &);
 
 public:
   typedef ACTION action_type;

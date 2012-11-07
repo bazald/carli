@@ -123,7 +123,7 @@ enum Metastate {NON_TERMINAL, SUCCESS, FAILURE};
 template <typename FEATURE, typename ACTION>
 class Agent : public std::enable_shared_from_this<Agent<FEATURE, ACTION> > {
   Agent(const Agent &);
-  Agent operator=(const Agent &);
+  Agent & operator=(const Agent &);
 
   class Again {};
 

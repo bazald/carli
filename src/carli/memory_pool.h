@@ -163,7 +163,7 @@ namespace Zeni {
   template <typename TYPE>
   Pool_Map * Pool_Allocator<TYPE>::pool_map = &Pool_Map::get();
   template <typename TYPE>
-  Pool * Pool_Allocator<TYPE>::pool = &pool_map->get_Pool(sizeof(TYPE));
+  Pool * Pool_Allocator<TYPE>::pool = &Pool_Map::get().get_Pool(sizeof(TYPE));
 
   void register_new_handler(const bool &force_reregister = false);
 
