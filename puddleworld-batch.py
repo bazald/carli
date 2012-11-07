@@ -6,6 +6,8 @@ import pp
 
 g_dir = 'experiment'
 g_plotter = './puddleworld.py'
+g_plotter_grid = './puddleworld-grid.py'
+g_plotter_grid_filters = ['move(north)', 'move(south)', 'move(east)', 'move(west)', 'all']
 
 g_ep_tuples = []
 
@@ -174,5 +176,9 @@ for ep_tuple, dir in zip(g_ep_tuples, dirs):
   args = [g_plotter] + glob.glob(dir + '/*.out')
   print 'Plotting data for ' + str(ep_tuple) + '\n'
   subprocess.call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+  for filter in g_plotter_grid_filters:
+    args = [g_plotter_grid, filter] + glob.glob(dir + '/*.err')
+    print 'Plotting grid data for ' + str(ep_tuple) + ', ' + filter + '\n'
+    subprocess.call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
 print 'Total time elapsed: ', time.time() - start_time, 'seconds'
