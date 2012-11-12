@@ -9,6 +9,7 @@ from pylab import arange,pi,sin,cos,sqrt
 import matplotlib
 from matplotlib.patches import CirclePolygon
 from matplotlib.collections import PolyCollection
+from matplotlib.patches import Rectangle
 import pylab 
 
 if os.name is 'posix':
@@ -91,8 +92,9 @@ def main():
   lines = {}
   for filename in sys.argv[2:]:
     f = open(filename, 'r')
-    regt = re.compile('([^:]+):')
-    regls = re.compile('([^ ]+) ([^ ]+) ([^ ]+) ([^ \r\n]+)')
+    regt = re.compile('(.+):')
+    regls = re.compile('(.+),(.+)-(.+),([^=]+)$')
+    regr = re.compile('(.+),(.+)-(.+),(.+)=(.+)$')
     entries = ''
     while True:
       line = f.readline()
@@ -110,16 +112,16 @@ def main():
             lines[key] += 1.0
           except KeyError:
             lines[key] = 1.0
-        else:
-          raise Exception('Unknown line encountered in stderr.txt')
+        #else:
+          #raise Exception('Unknown line encountered in stderr.txt')
     f.close()
     directory=re.search('(^.*[^/]+)/+[^/]*$', filename).group(1)
   
   divisor = len(sys.argv[2:])
   for key, value in lines.iteritems():
-    rgb = 1 - value / divisor;
+    rgb = 1 - value / divisor
     fig.axes[0].add_line(pylab.Line2D([key[0], key[2]], [key[1], key[3]], color=(rgb, rgb, rgb)))
-  
+
   #pylab.legend(loc=4, handlelength=4.2, numpoints=2)
   
   pylab.grid(False)

@@ -340,6 +340,7 @@ void run_agent() {
       auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
       pwa->print_policy(std::cerr, 32);
       pwa->print_value_function_grid(std::cerr);
+      pwa->print_update_count_grid(std::cerr);
     }
   }
 }

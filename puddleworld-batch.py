@@ -6,12 +6,18 @@ import pp
 
 g_dir = 'experiment'
 g_plotter = './puddleworld.py'
-g_plotter_grid = './puddleworld-grid.py'
+g_plotter_grid = ['./puddleworld-grid.py', './puddleworld-heat.py']
+g_plotter_grid = ['./puddleworld-heat.py']
 g_plotter_grid_filters = ['move(north)', 'move(south)', 'move(east)', 'move(west)', 'all']
 
 g_ep_tuples = []
 
-g_ep_tuples.append(('puddle-world', 'inv-log-update-count', 1.0, 0.1, 0.2, 'off-policy', 10, 5, 13, 0, 0.5))
+
+#g_ep_tuples.append(('puddle-world', 'even', 1.0, 0.1, 0.2, 'off-policy', 10, 5, 13, 0, 0.5))
+#g_ep_tuples.append(('puddle-world', 'inv-update-count', 1.0, 0.1, 0.2, 'off-policy', 10, 5, 13, 0, 0.5))
+g_ep_tuples.append(('puddle-world', 'inv-update-count', 1.0, 0.1, 0.2, 'off-policy', 5, 5, 13, 1, 0.5))
+#g_ep_tuples.append(('puddle-world', 'inv-log-update-count', 1.0, 0.1, 0.2, 'off-policy', 10, 5, 13, 0, 0.5))
+
 
 parser = argparse.ArgumentParser(description='Run PuddleWorld experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,
@@ -40,13 +46,16 @@ if os.path.isfile(seeds_file):
     seeds.append(int(seed))
   f.close()
 if len(seeds) != args.runs:
-  seeds = []
-  for i in range(0, args.runs):
-    seeds.append(random.randint(0,65535))
-  f = open(seeds_file, 'w')
-  for seed in seeds:
-    f.write(str(seed) + '\n')
-  f.close()
+  if len(seeds) > 0:
+    raise Exception('Number of seeds differs from number of runs.')
+  else:
+    seeds = []
+    for i in range(0, args.runs):
+      seeds.append(random.randint(0,65535))
+    f = open(seeds_file, 'w')
+    for seed in seeds:
+      f.write(str(seed) + '\n')
+    f.close()
 print str(seeds) + '\n'
 
 
@@ -163,22 +172,23 @@ class Progress:
 job_server = pp.Server(args.jobs)
 progress = Progress(experiments)
 start_time = time.time()
-jobs = [(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread',), callback=progress.just_finished, group=experiment.ep_tuple)) for experiment in experiments]
+#jobs = [(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread',), callback=progress.just_finished, group=experiment.ep_tuple)) for experiment in experiments]
 
 for ep_tuple, dir in zip(g_ep_tuples, dirs):
-  while True:
-    job_server.print_stats()
-    if progress.all_finished(ep_tuple):
-      break
-    else:
-      time.sleep(5)
-  job_server.wait(ep_tuple)
-  args = [g_plotter] + glob.glob(dir + '/*.out')
-  print 'Plotting data for ' + str(ep_tuple) + '\n'
-  subprocess.call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-  for filter in g_plotter_grid_filters:
-    args = [g_plotter_grid, filter] + glob.glob(dir + '/*.err')
-    print 'Plotting grid data for ' + str(ep_tuple) + ', ' + filter + '\n'
-    subprocess.call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+  #while True:
+    #job_server.print_stats()
+    #if progress.all_finished(ep_tuple):
+      #break
+    #else:
+      #time.sleep(5)
+  #job_server.wait(ep_tuple)
+  #args = [g_plotter] + glob.glob(dir + '/*.out')
+  #print 'Plotting data for ' + str(ep_tuple) + '\n'
+  #subprocess.call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+  for plotter in g_plotter_grid:
+    for filter in g_plotter_grid_filters:
+      args = [plotter, filter] + glob.glob(dir + '/*.err')
+      print 'Plotting ' + plotter + ' data for ' + str(ep_tuple) + ', ' + filter + '\n'
+      subprocess.call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
 print 'Total time elapsed: ', time.time() - start_time, 'seconds'

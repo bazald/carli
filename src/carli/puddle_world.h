@@ -274,6 +274,18 @@ namespace Puddle_World {
       print_value_function_grid_set(os, line_segments);
     }
 
+    void print_update_count_grid(std::ostream &os) const {
+      std::map<line_segment_type, size_t> update_counts;
+      std::for_each(m_value_function.begin(), m_value_function.end(), [this,&os,&update_counts](decltype(*m_value_function.begin()) &value) {
+        os << *value.first << ":" << std::endl;
+        const auto update_counts2 = this->generate_update_count_maps(value.second);
+        this->merge_update_count_maps(update_counts, update_counts2);
+        this->print_update_count_map(os, update_counts2);
+      });
+      os << "all:" << std::endl;
+      print_update_count_map(os, update_counts);
+    }
+
     void print_policy(std::ostream &os, const size_t &granularity) {
       auto env = std::dynamic_pointer_cast<Environment>(get_env());
       const auto position = env->get_position();
@@ -332,15 +344,53 @@ namespace Puddle_World {
       return line_segments;
     }
 
+    std::map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0))) const {
+      std::map<line_segment_type, size_t> update_counts;
+      if(trie) {
+        std::for_each(trie->begin(trie), trie->end(trie), [this,&update_counts,&extents](const feature_trie_type &trie2) {
+          auto new_extents = extents;
+          const auto &key = trie2.get_key();
+          if(key->axis == Feature::X) {
+            new_extents.first.first = key->bound_lower;
+            new_extents.second.first = key->bound_higher;
+          }
+          else {
+            new_extents.first.second = key->bound_lower;
+            new_extents.second.second = key->bound_higher;
+          }
+
+          if(trie2.get_deeper()) {
+            const auto update_counts2 = this->generate_update_count_maps(trie2.get_deeper(), new_extents);
+            this->merge_update_count_maps(update_counts, update_counts2);
+          }
+          else
+            update_counts[new_extents] = trie2.get() ? trie2->update_count : 0;
+        });
+      }
+      return update_counts;
+    }
+
     void print_value_function_grid_set(std::ostream &os, const std::set<line_segment_type> &line_segments) const {
       std::for_each(line_segments.begin(), line_segments.end(), [&os](const line_segment_type &line_segment) {
-        os << line_segment.first.first << ' ' << line_segment.first.second << ' ' << line_segment.second.first << ' ' << line_segment.second.second << std::endl;
+        os << line_segment.first.first << ',' << line_segment.first.second << '-' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
+      });
+    }
+
+    void print_update_count_map(std::ostream &os, const std::map<line_segment_type, size_t> &update_counts) const {
+      std::for_each(update_counts.begin(), update_counts.end(), [&os](const std::pair<line_segment_type, size_t> &rect) {
+        os << rect.first.first.first << ',' << rect.first.first.second << '-' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
       });
     }
 
     void merge_value_function_grid_sets(std::set<line_segment_type> &combination, const std::set<line_segment_type> &additions) const {
       std::for_each(additions.begin(), additions.end(), [&combination](const line_segment_type &line_segment) {
         combination.insert(line_segment);
+      });
+    }
+
+    void merge_update_count_maps(std::map<line_segment_type, size_t> &combination, const std::map<line_segment_type, size_t> &additions) const {
+      std::for_each(additions.begin(), additions.end(), [&combination](const std::pair<line_segment_type, size_t> &rect) {
+        combination[rect.first] += rect.second;
       });
     }
 
