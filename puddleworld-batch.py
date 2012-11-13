@@ -7,7 +7,6 @@ import pp
 g_dir = 'experiment'
 g_plotter = './puddleworld.py'
 g_plotter_grid = ['./puddleworld-grid.py', './puddleworld-heat.py']
-g_plotter_grid = ['./puddleworld-heat.py']
 g_plotter_grid_filters = ['move(north)', 'move(south)', 'move(east)', 'move(west)', 'all']
 
 g_ep_tuples = []
@@ -172,19 +171,19 @@ class Progress:
 job_server = pp.Server(args.jobs)
 progress = Progress(experiments)
 start_time = time.time()
-#jobs = [(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread',), callback=progress.just_finished, group=experiment.ep_tuple)) for experiment in experiments]
+jobs = [(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread',), callback=progress.just_finished, group=experiment.ep_tuple)) for experiment in experiments]
 
 for ep_tuple, dir in zip(g_ep_tuples, dirs):
-  #while True:
-    #job_server.print_stats()
-    #if progress.all_finished(ep_tuple):
-      #break
-    #else:
-      #time.sleep(5)
-  #job_server.wait(ep_tuple)
-  #args = [g_plotter] + glob.glob(dir + '/*.out')
-  #print 'Plotting data for ' + str(ep_tuple) + '\n'
-  #subprocess.call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+  while True:
+    job_server.print_stats()
+    if progress.all_finished(ep_tuple):
+      break
+    else:
+      time.sleep(5)
+  job_server.wait(ep_tuple)
+  args = [g_plotter] + glob.glob(dir + '/*.out')
+  print 'Plotting data for ' + str(ep_tuple) + '\n'
+  subprocess.call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
   for plotter in g_plotter_grid:
     for filter in g_plotter_grid_filters:
       args = [plotter, filter] + glob.glob(dir + '/*.err')
