@@ -347,7 +347,7 @@ namespace Puddle_World {
     std::map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0)), const size_t &update_count = 0) const {
       std::map<line_segment_type, size_t> update_counts;
       if(trie) {
-        std::for_each(trie->begin(trie), trie->end(trie), [this,&update_counts,&extents](const feature_trie_type &trie2) {
+        std::for_each(trie->begin(trie), trie->end(trie), [this,&update_counts,&extents,&update_count](const feature_trie_type &trie2) {
           auto new_extents = extents;
           const auto &key = trie2.get_key();
           if(key->axis == Feature::X) {
@@ -359,7 +359,7 @@ namespace Puddle_World {
             new_extents.second.second = key->bound_higher;
           }
 
-          const auto update_count2 = trie2.get() ? trie2->update_count : 0;
+          const auto update_count2 = update_count + (trie2.get() ? trie2->update_count : 0);
 
           update_counts[new_extents] = update_count2;
 
