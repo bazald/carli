@@ -220,8 +220,6 @@ namespace Blocks_World {
       set_on_policy(false);
       set_epsilon(0.1);
       set_pseudoepisode_threshold(5);
-
-      init();
     }
 
   private:

@@ -165,27 +165,7 @@ public:
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
     m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
     m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
-
-    m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{
-      if(depth < m_split_min) {
-        if(q)
-          q->split = true;
-        return true;
-      }
-      if(depth >= m_split_max)
-        return false;
-
-      if(!q)
-        return false;
-      if(q->split)
-        return true;
-
-      q->split |= q->update_count > m_split_update_count &&
-                  q->pseudoepisode_count > m_split_pseudoepisodes &&
-                  this->get_mean_cabe().outlier_above(q->cabe, m_split_cabe);
-
-      return q->split;
-    };
+    m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{return this->split_test(q, depth);};
   }
 
   virtual ~Agent() {
@@ -603,6 +583,27 @@ protected:
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
       q.credit /= sum;
     });
+  }
+  
+  bool split_test(Q_Value * const &q, const size_t &depth) const {
+    if(depth < m_split_min) {
+      if(q)
+        q->split = true;
+      return true;
+    }
+    if(depth >= m_split_max)
+      return false;
+
+    if(!q)
+      return false;
+    if(q->split)
+      return true;
+
+    q->split |= q->update_count > m_split_update_count &&
+                q->pseudoepisode_count > m_split_pseudoepisodes &&
+                this->get_mean_cabe().outlier_above(q->cabe, m_split_cabe);
+
+    return q->split;
   }
 
   static double sum_value(const action_type * const &action, const Q_Value::List &value_list) {

@@ -17,14 +17,19 @@ g_ep_tuples = []
 #g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
 
 
+#g_ep_tuples.append(('puddle-world', 0, 'even',                 1.0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',     1.0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 1.0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+
+
+g_ep_tuples.append(('puddle-world', 0, 'even',                 1.0, 0.1, 0.2, 'off-policy', 20, 9, 9, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',     1.0, 0.1, 0.2, 'off-policy', 20, 9, 9, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 1.0, 0.1, 0.2, 'off-policy', 20, 9, 9, 0, 0.5, 0))
+
+
 #g_ep_tuples.append(('puddle-world', 0, 'even',                 1.0, 0.1, 0.2, 'off-policy', 20, 5, 99, 1, 0.84155, 0))
 #g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',     1.0, 0.1, 0.2, 'off-policy', 20, 5, 99, 1, 0.84155, 0))
 #g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 1.0, 0.1, 0.2, 'off-policy', 20, 5, 99, 1, 0.84155, 0))
-
-
-g_ep_tuples.append(('puddle-world', 3, 'even',                 1.0, 0.1, 0.2, 'off-policy', 20, 5, 99, 0, 0.84155, 0))
-g_ep_tuples.append(('puddle-world', 3, 'inv-update-count',     1.0, 0.1, 0.2, 'off-policy', 20, 5, 99, 0, 0.84155, 0))
-g_ep_tuples.append(('puddle-world', 3, 'inv-log-update-count', 1.0, 0.1, 0.2, 'off-policy', 20, 5, 99, 0, 0.84155, 0))
 
 
 parser = argparse.ArgumentParser(description='Run PuddleWorld experiments.')
@@ -130,19 +135,20 @@ class Experiment:
 dirs = []
 experiments = []
 for ep_tuple in g_ep_tuples:
-  dir = g_dir + '/' + ep_tuple[0]
-  dir += '_' + str(ep_tuple[1])
-  dir += '_' + ep_tuple[2]
-  dir += '_' + str(ep_tuple[3])
-  dir += '_' + str(ep_tuple[4])
-  dir += '_' + str(ep_tuple[5])
-  dir += '_' + ep_tuple[6]
+  dir = g_dir + '/' #+ ep_tuple[0]
+  dir += ep_tuple[2]
+  #dir += '_' + str(ep_tuple[1])
+  #dir += '_' + ep_tuple[2]
+  #dir += '_' + str(ep_tuple[3])
+  #dir += '_' + str(ep_tuple[4])
+  #dir += '_' + str(ep_tuple[5])
+  #dir += '_' + ep_tuple[6]
   dir += '_' + str(ep_tuple[7])
   dir += '_' + str(ep_tuple[8])
   dir += '_' + str(ep_tuple[9])
   dir += '_' + str(ep_tuple[10])
   dir += '_' + str(ep_tuple[11])
-  dir += '_' + str(ep_tuple[12])
+  #dir += '_' + str(ep_tuple[12])
   if not os.path.isdir(dir):
     os.mkdir(dir)
   dirs.append(dir)

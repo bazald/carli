@@ -236,30 +236,6 @@ namespace Puddle_World {
       set_epsilon(0.1);
       set_pseudoepisode_threshold(10);
       m_features_complete = false;
-
-//       m_split_test = [](Q_Value * const &, const size_t &depth)->bool{return depth < Binary_Log<32>::value * 2 + 1;};
-
-//       m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{
-//         if(depth < Binary_Log<4>::value * 2 + 1) {
-//           if(q)
-//             q->split = true;
-//           return true;
-//         }
-//         if(depth >= Binary_Log<64>::value * 2 + 1)
-//           return false;
-// 
-//         if(!q)
-//           return false;
-//         if(q->split)
-//           return true;
-// 
-//         q->split |= q->pseudoepisode_count > 0 &&
-//                     this->get_mean_cabe().outlier_above(q->cabe, 0.5); // 0.84155
-// 
-//         return q->split;
-//       };
-
-      init();
     }
 
     void print_value_function_grid(std::ostream &os) const {
