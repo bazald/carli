@@ -157,8 +157,10 @@ public:
    m_pseudoepisode_threshold(20),
    m_split_min(0),
    m_split_max(size_t(-1)),
+   m_split_update_count(0),
    m_split_pseudoepisodes(0),
-   m_split_cabe(0.84155)
+   m_split_cabe(0.84155),
+   m_contribute_update_count(0)
   {
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
     m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
@@ -178,7 +180,8 @@ public:
       if(q->split)
         return true;
 
-      q->split |= q->pseudoepisode_count > m_split_pseudoepisodes &&
+      q->split |= q->update_count > m_split_update_count &&
+                  q->pseudoepisode_count > m_split_pseudoepisodes &&
                   this->get_mean_cabe().outlier_above(q->cabe, m_split_cabe);
 
       return q->split;
@@ -261,6 +264,11 @@ public:
     m_split_max = split_max;
   }
 
+  size_t get_split_update_count() const {return m_split_update_count;}
+  void set_split_update_count(const size_t &split_update_count) {
+    m_split_update_count = split_update_count;
+  }
+
   size_t get_split_pseudoepisodes() const {return m_split_pseudoepisodes;}
   void set_split_pseudoepisodes(const size_t &split_pseudoepisodes) {
     m_split_pseudoepisodes = split_pseudoepisodes;
@@ -269,6 +277,11 @@ public:
   double get_split_cabe() const {return m_split_cabe;}
   void set_split_cabe(const double &split_cabe) {
     m_split_cabe = split_cabe;
+  }
+
+  size_t get_contribute_update_count() const {return m_contribute_update_count;}
+  void set_contribute_update_count(const size_t &contribute_update_count) {
+    m_contribute_update_count = contribute_update_count;
   }
 
   const std::shared_ptr<const environment_type> & get_env() const {return m_environment;}
@@ -522,7 +535,8 @@ protected:
         q.last_step_fired = this->m_step_count;
 
         q.cabe += std::abs(delta);
-        this->m_mean_cabe.contribute(q.cabe);
+        if(q.update_count > m_contribute_update_count)
+          this->m_mean_cabe.contribute(q.cabe);
 
 #ifdef TRACK_Q_VALUE_VARIANCE
         if(q.update_count > 1) {
@@ -747,8 +761,10 @@ private:
 
   size_t m_split_min;
   size_t m_split_max;
+  size_t m_split_update_count;
   size_t m_split_pseudoepisodes;
   double m_split_cabe;
+  size_t m_contribute_update_count;
 };
 
 template <typename FEATURE, typename ACTION>

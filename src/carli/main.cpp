@@ -37,8 +37,10 @@ struct Arguments {
     seed(uint32_t(time(0))),
     split_min(0),
     split_max(size_t(-1)),
+    split_update_count(0),
     split_pseudoepisodes(0),
-    split_cabe(0.84155)
+    split_cabe(0.84155),
+    contribute_update_count(0)
   {
   }
 
@@ -54,8 +56,10 @@ struct Arguments {
   uint32_t seed;
   size_t split_min;
   size_t split_max;
+  size_t split_update_count;
   size_t split_pseudoepisodes;
   double split_cabe;
+  size_t contribute_update_count;
 } g_args;
 
 Options generate_options() {
@@ -65,6 +69,9 @@ Options generate_options() {
     options.print_help(std::cout);
     exit(0);
   }, 0), "");
+  options.add(     "contribute-update-count", Options::Option([](const std::vector<const char *> &args) {
+    g_args.contribute_update_count = atoi(args.at(0));
+  }, 1), "[0,inf)");
   options.add('c', "credit-assignment", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "even"))
       g_args.credit_assignment = Blocks_World::Agent::EVEN;
@@ -149,6 +156,9 @@ Options generate_options() {
   }, 1), "[0,inf)");
   options.add(     "split-pseudoepisodes", Options::Option([](const std::vector<const char *> &args) {
     g_args.split_pseudoepisodes = atoi(args.at(0));
+  }, 1), "[0,inf)");
+  options.add(     "split-update-count", Options::Option([](const std::vector<const char *> &args) {
+    g_args.split_update_count = atoi(args.at(0));
   }, 1), "[0,inf)");
   options.add('t', "pseudoepisode-threshold", Options::Option([](const std::vector<const char *> &args) {
     g_args.pseudoepisode_threshold = atoi(args.at(0));
@@ -277,6 +287,7 @@ void run_agent() {
   auto env = std::make_shared<ENVIRONMENT>();
   auto agent = std::make_shared<AGENT>(env);
 
+  agent->set_contribute_update_count(g_args.contribute_update_count);
   agent->set_credit_assignment(typename AGENT::Credit_Assignment(g_args.credit_assignment));
   agent->set_discount_rate(g_args.discount_rate);
   agent->set_epsilon(g_args.epsilon);
@@ -285,6 +296,7 @@ void run_agent() {
   agent->set_pseudoepisode_threshold(g_args.pseudoepisode_threshold);
   agent->set_split_min(g_args.split_min);
   agent->set_split_max(g_args.split_max);
+  agent->set_split_update_count(g_args.split_update_count);
   agent->set_split_pseudoepisodes(g_args.split_pseudoepisodes);
   agent->set_split_cabe(g_args.split_cabe);
 
