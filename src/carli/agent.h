@@ -138,7 +138,7 @@ public:
   typedef Environment<action_type> environment_type;
   typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
-  enum Credit_Assignment {EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT};
+  enum Credit_Assignment {EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_DEPTH};
 
   Agent(const std::shared_ptr<environment_type> &environment)
    : m_metastate(NON_TERMINAL),
@@ -206,6 +206,10 @@ public:
         
       case INV_LOG_UPDATE_COUNT:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
+        break;
+        
+      case INV_DEPTH:
+        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);};
         break;
     }
 
@@ -584,7 +588,24 @@ protected:
       q.credit /= sum;
     });
   }
-  
+
+  void assign_credit_inv_depth(Q_Value::List * const &value_list) {
+    size_t depth = 0;
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&depth](Q_Value &q) {
+      ++depth;
+    });
+
+    double sum = double();
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&depth,&sum](Q_Value &q) {
+      q.credit = 1.0 / std::pow(2, --depth);
+      sum += q.credit;
+    });
+
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
+      q.credit /= sum;
+    });
+  }
+
   bool split_test(Q_Value * const &q, const size_t &depth) const {
     if(depth < m_split_min) {
       if(q)

@@ -23,6 +23,11 @@ public:
    split(false),
    credit(1.0),
    value(q_value_),
+#ifdef TRACK_Q_VALUE_VARIANCE
+   mean2(0),
+   variance_0(0),
+   variance_rest(0),
+#endif
    current(this),
    next(this)
   {
