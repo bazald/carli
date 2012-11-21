@@ -119,8 +119,9 @@ def main():
   
   divisor = len(sys.argv[2:])
   for key, value in lines.iteritems():
-    rgb = 1 - value / divisor
-    fig.axes[0].add_line(pylab.Line2D([key[0], key[2]], [key[1], key[3]], color=(rgb, rgb, rgb)))
+    frequency = value / divisor
+    rgb = 1 - frequency
+    fig.axes[0].add_line(pylab.Line2D([key[0], key[2]], [key[1], key[3]], color=(rgb, rgb, rgb), zorder=frequency))
 
   #pylab.legend(loc=4, handlelength=4.2, numpoints=2)
   

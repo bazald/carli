@@ -127,15 +127,11 @@ def main():
   for key, value in all_rects.iteritems():
     divisor = max(divisor, float(value) / ((float(key[2]) - float(key[0])) * (float(key[3]) - float(key[1]))))
 
-  rects2 = []
   for key, value in rects.iteritems():
-    rects2.append((key[0], key[1], key[2], key[3], value))
-  rects2 = sorted(rects2, key=lambda x: (x[2] - x[0]) * (x[3] - x[1]), reverse=True)
-  
-  for key in rects2:
-    rgb = 1 - (key[4] / ((key[2] - key[0]) * (key[3] - key[1]))) / divisor
+    area = (key[2] - key[0]) * (key[3] - key[1])
+    rgb = 1 - (value / area) / divisor
     #print str(key[0]) + ',' + str(key[1]) + '-' + str(key[2]) + ',' + str(key[3]) + '=' + str(rgb)
-    fig.axes[0].add_patch(Rectangle((key[0], key[1]), key[2] - key[0], key[3] - key[1], color=(rgb, rgb, rgb), linewidth=0))
+    fig.axes[0].add_patch(Rectangle((key[0], key[1]), key[2] - key[0], key[3] - key[1], color=(rgb, rgb, rgb), linewidth=0, zorder=(1 - area)))
 
   #pylab.legend(loc=4, handlelength=4.2, numpoints=2)
   
