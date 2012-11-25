@@ -214,11 +214,18 @@ public:
         break;
 
       case EPSILON_EVEN_DEPTH:
-        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent::assign_credit_evenly, &Agent::assign_credit_inv_depth, this->m_credit_assignment_epsilon);};
+        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent::assign_credit_evenly, &Agent::assign_credit_inv_depth);};
         break;
     }
 
     m_credit_assignment_code = credit_assignment;
+  }
+
+  double get_credit_assignment_epsilon() const {return m_credit_assignment_epsilon;}
+  void set_credit_assignment_epsilon(const double &credit_assignment_epsilon) {
+    if(credit_assignment_epsilon < 0.0 || credit_assignment_epsilon > 1.0)
+      throw std::range_error("Illegal credit-assignment epsilon.");
+    m_credit_assignment_epsilon = credit_assignment_epsilon;
   }
 
   bool get_on_policy() const {return m_on_policy;}
@@ -561,8 +568,7 @@ protected:
 
   void assign_credit_epsilon(Q_Value::List * const &value_list,
                              void (Agent::*exploration)(Q_Value::List * const &),
-                             void (Agent::*target)(Q_Value::List * const &),
-                             const double &epsilon)
+                             void (Agent::*target)(Q_Value::List * const &))
   {
     (this->*exploration)(value_list);
 
@@ -572,9 +578,9 @@ protected:
 
     (this->*target)(value_list);
 
-    const double inverse = 1.0 - epsilon;
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&epsilon,&inverse](Q_Value &q) {
-      q.credit = epsilon * q.credit + inverse * q.t0;
+    const double inverse = 1.0 - this->m_credit_assignment_epsilon;
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [this,&inverse](Q_Value &q) {
+      q.credit = this->m_credit_assignment_epsilon * q.credit + inverse * q.t0;
     });
   }
 

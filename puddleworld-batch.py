@@ -12,27 +12,35 @@ g_plotter_grid_filters = ['move(north)', 'move(south)', 'move(east)', 'move(west
 g_ep_tuples = []
 
 
-g_ep_tuples.append(('puddle-world', 0, 'even',                 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',     1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'inv-depth',            1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',   1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'even',                 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',     0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-depth',            0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',   0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
 
 
-#g_ep_tuples.append(('puddle-world', 0, 'even',                 1.0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',     1.0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 1.0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-depth',            1.0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'even',                 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',     0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-depth',            0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
 
 
-#g_ep_tuples.append(('puddle-world', 0, 'even',                 1.0, 0.1, 0.2, 'off-policy', 20, 7, 7, 0, 0.5, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',     1.0, 0.1, 0.2, 'off-policy', 20, 7, 7, 0, 0.5, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 1.0, 0.1, 0.2, 'off-policy', 20, 7, 7, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'even',                 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 7, 7, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',     0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 7, 7, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 7, 7, 0, 0.5, 0))
 
 
-#g_ep_tuples.append(('puddle-world', 0, 'even',                 1.0, 0.1, 0.2, 'off-policy', 20, 5, 99, 1, 0.84155, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',     1.0, 0.1, 0.2, 'off-policy', 20, 5, 99, 1, 0.84155, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 1.0, 0.1, 0.2, 'off-policy', 20, 5, 99, 1, 0.84155, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'even',                 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 99, 1, 0.84155, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',     0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 99, 1, 0.84155, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 99, 1, 0.84155, 0))
+
+
+g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',   0.0, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',   0.2, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',   0.4, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',   0.6, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',   0.8, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',   1.0, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
 
 
 parser = argparse.ArgumentParser(description='Run PuddleWorld experiments.')
@@ -85,16 +93,17 @@ class Experiment:
     self.environment = ep_tuple[0]
     self.contribute_update_count = ep_tuple[1]
     self.credit_assignment = ep_tuple[2]
-    self.discount_rate = ep_tuple[3]
-    self.epsilon_greedy = ep_tuple[4]
-    self.learning_rate = ep_tuple[5]
-    self.policy = ep_tuple[6]
-    self.pseudoepisode_threshold = ep_tuple[7]
-    self.split_min = ep_tuple[8]
-    self.split_max = ep_tuple[9]
-    self.split_pseudoepisodes = ep_tuple[10]
-    self.split_cabe = ep_tuple[11]
-    self.split_update_count = ep_tuple[12]
+    self.credit_assignment_epsilon = ep_tuple[3]
+    self.discount_rate = ep_tuple[4]
+    self.epsilon_greedy = ep_tuple[5]
+    self.learning_rate = ep_tuple[6]
+    self.policy = ep_tuple[7]
+    self.pseudoepisode_threshold = ep_tuple[8]
+    self.split_min = ep_tuple[9]
+    self.split_max = ep_tuple[10]
+    self.split_pseudoepisodes = ep_tuple[11]
+    self.split_cabe = ep_tuple[12]
+    self.split_update_count = ep_tuple[13]
     
   def get_args(self):
     args = ['./carli',
@@ -103,6 +112,7 @@ class Experiment:
             '--environment', self.environment,
             '--contribute-update-count', str(self.contribute_update_count),
             '--credit-assignment', self.credit_assignment,
+            '--credit-assignment-epsilon', str(self.credit_assignment_epsilon),
             '--discount-rate', str(self.discount_rate),
             '--epsilon-greedy', str(self.epsilon_greedy),
             '--learning-rate', str(self.learning_rate),
@@ -142,16 +152,17 @@ for ep_tuple in g_ep_tuples:
   dir += ep_tuple[2]
   #dir += '_' + str(ep_tuple[1])
   #dir += '_' + ep_tuple[2]
-  #dir += '_' + str(ep_tuple[3])
+  dir += '_' + str(ep_tuple[3])
   #dir += '_' + str(ep_tuple[4])
   #dir += '_' + str(ep_tuple[5])
-  #dir += '_' + ep_tuple[6]
-  dir += '_' + str(ep_tuple[7])
+  #dir += '_' + str(ep_tuple[6])
+  #dir += '_' + ep_tuple[7]
   dir += '_' + str(ep_tuple[8])
   dir += '_' + str(ep_tuple[9])
   dir += '_' + str(ep_tuple[10])
   dir += '_' + str(ep_tuple[11])
-  #dir += '_' + str(ep_tuple[12])
+  dir += '_' + str(ep_tuple[12])
+  #dir += '_' + str(ep_tuple[13])
   if not os.path.isdir(dir):
     os.mkdir(dir)
   dirs.append(dir)

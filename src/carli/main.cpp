@@ -26,6 +26,7 @@ void run_agent();
 struct Arguments {
   Arguments()
     : credit_assignment(Blocks_World::Agent::EVEN),
+    credit_assignment_epsilon(0.5),
     discount_rate(1.0),
     environment(BLOCKS_WORLD),
     epsilon(0.1),
@@ -45,6 +46,7 @@ struct Arguments {
   }
 
   Blocks_World::Agent::Credit_Assignment credit_assignment;
+  double credit_assignment_epsilon;
   double discount_rate;
   enum {BLOCKS_WORLD, PUDDLE_WORLD} environment;
   double epsilon;
@@ -93,6 +95,13 @@ Options generate_options() {
     if(g_args.discount_rate < 0.0 || g_args.discount_rate > 1.0) {
       std::cerr << "Illegal discount rate selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal discount rate selection.");
+    }
+  }, 1), "[0,1]");
+  options.add(     "credit-assignment-epsilon", Options::Option([](const std::vector<const char *> &args) {
+    g_args.credit_assignment_epsilon = atof(args.at(0));
+    if(g_args.credit_assignment_epsilon < 0.0 || g_args.credit_assignment_epsilon > 1.0) {
+      std::cerr << "Illegal credit-assignment epsilon selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal credit-assignment epsilon selection.");
     }
   }, 1), "[0,1]");
   options.add('g', "epsilon-greedy", Options::Option([](const std::vector<const char *> &args) {
@@ -293,6 +302,7 @@ void run_agent() {
 
   agent->set_contribute_update_count(g_args.contribute_update_count);
   agent->set_credit_assignment(typename AGENT::Credit_Assignment(g_args.credit_assignment));
+  agent->set_credit_assignment_epsilon(g_args.credit_assignment_epsilon);
   agent->set_discount_rate(g_args.discount_rate);
   agent->set_epsilon(g_args.epsilon);
   agent->set_learning_rate(g_args.learning_rate);
