@@ -58,6 +58,8 @@ public:
   Value variance_total;
 #endif
 
+  double t0; ///< temp "register"
+
   List current;
   List next;
 

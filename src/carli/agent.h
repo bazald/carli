@@ -138,7 +138,7 @@ public:
   typedef Environment<action_type> environment_type;
   typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
-  enum Credit_Assignment {EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_DEPTH};
+  enum Credit_Assignment {EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_DEPTH};
 
   Agent(const std::shared_ptr<environment_type> &environment)
    : m_metastate(NON_TERMINAL),
@@ -152,6 +152,7 @@ public:
    m_learning_rate(0.3),
    m_discount_rate(0.9),
    m_credit_assignment_code(EVEN),
+   m_credit_assignment_epsilon(0.5),
    m_on_policy(false),
    m_epsilon(0.1),
    m_pseudoepisode_threshold(20),
@@ -210,6 +211,10 @@ public:
         
       case INV_DEPTH:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);};
+        break;
+
+      case EPSILON_EVEN_DEPTH:
+        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent::assign_credit_evenly, &Agent::assign_credit_inv_depth, this->m_credit_assignment_epsilon);};
         break;
     }
 
@@ -554,6 +559,25 @@ protected:
 #endif
   }
 
+  void assign_credit_epsilon(Q_Value::List * const &value_list,
+                             void (Agent::*exploration)(Q_Value::List * const &),
+                             void (Agent::*target)(Q_Value::List * const &),
+                             const double &epsilon)
+  {
+    (this->*exploration)(value_list);
+
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [](Q_Value &q) {
+      q.t0 = q.credit;
+    });
+
+    (this->*target)(value_list);
+
+    const double inverse = 1.0 - epsilon;
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&epsilon,&inverse](Q_Value &q) {
+      q.credit = epsilon * q.credit + inverse * q.t0;
+    });
+  }
+
   void assign_credit_evenly(Q_Value::List * const &value_list) {
     double count = double();
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](const Q_Value &) {
@@ -776,6 +800,7 @@ private:
 
   Credit_Assignment m_credit_assignment_code;
   std::function<void (Q_Value::List * const &)> m_credit_assignment; ///< How to assign credit to multiple Q-values
+  double m_credit_assignment_epsilon;
 
   bool m_on_policy; ///< for Sarsa/Q-learning selection
   double m_epsilon; ///< for epsilon-greedy decision-making
