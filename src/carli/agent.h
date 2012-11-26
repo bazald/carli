@@ -218,11 +218,11 @@ public:
         break;
 
       case EPSILON_EVEN_SPECIFIC:
-        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent::assign_credit_evenly, &Agent::assign_credit_specific);};
+        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_specific);};
         break;
 
       case EPSILON_EVEN_DEPTH:
-        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent::assign_credit_evenly, &Agent::assign_credit_inv_depth);};
+        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);};
         break;
     }
 
@@ -640,13 +640,13 @@ protected:
 
   void assign_credit_inv_depth(Q_Value::List * const &value_list) {
     size_t depth = 0;
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&depth](Q_Value &q) {
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&depth](Q_Value &) {
       ++depth;
     });
 
     double sum = double();
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&depth,&sum](Q_Value &q) {
-      q.credit = 1.0 / std::pow(2, --depth);
+      q.credit = 1.0 / std::pow(2.0, double(--depth));
       sum += q.credit;
     });
 
