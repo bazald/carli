@@ -138,7 +138,7 @@ public:
   typedef Environment<action_type> environment_type;
   typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
-  enum Credit_Assignment {EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_DEPTH};
+  enum Credit_Assignment {SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_SPECIFIC, EPSILON_EVEN_DEPTH};
 
   Agent(const std::shared_ptr<environment_type> &environment)
    : m_metastate(NON_TERMINAL),
@@ -197,6 +197,10 @@ public:
   Credit_Assignment get_credit_assignment() const {return m_credit_assignment_code;}
   void set_credit_assignment(const Credit_Assignment &credit_assignment) {
     switch(credit_assignment) {
+      case SPECIFIC:
+        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_specific(value_list);};
+        break;
+        
       case EVEN:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
         break;
@@ -211,6 +215,10 @@ public:
         
       case INV_DEPTH:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);};
+        break;
+
+      case EPSILON_EVEN_SPECIFIC:
+        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent::assign_credit_evenly, &Agent::assign_credit_specific);};
         break;
 
       case EPSILON_EVEN_DEPTH:
@@ -582,6 +590,17 @@ protected:
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [this,&inverse](Q_Value &q) {
       q.credit = this->m_credit_assignment_epsilon * q.credit + inverse * q.t0;
     });
+  }
+
+  void assign_credit_specific(Q_Value::List * const &value_list) {
+    Q_Value * last = nullptr;
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&last](Q_Value &q) {
+      q.credit = 0.0;
+      last = &q;
+    });
+
+    if(last)
+      last->credit = 1.0;
   }
 
   void assign_credit_evenly(Q_Value::List * const &value_list) {
