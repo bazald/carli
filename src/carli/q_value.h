@@ -50,6 +50,7 @@ public:
 
   double value;
   Value cabe; ///< Cumulative Absolute Bellman Error
+  Value mabe; ///< Mean Absolute Bellman Error (cabe / update_count)
 
 #ifdef TRACK_Q_VALUE_VARIANCE
   double mean2;

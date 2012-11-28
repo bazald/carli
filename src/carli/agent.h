@@ -161,6 +161,7 @@ public:
    m_split_update_count(0),
    m_split_pseudoepisodes(0),
    m_split_cabe(0.84155),
+   m_split_mabe(0.84155),
    m_contribute_update_count(0)
   {
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
@@ -283,6 +284,11 @@ public:
     m_split_cabe = split_cabe;
   }
 
+  double get_split_mabe() const {return m_split_mabe;}
+  void set_split_mabe(const double &split_mabe) {
+    m_split_mabe = split_mabe;
+  }
+
   size_t get_contribute_update_count() const {return m_contribute_update_count;}
   void set_contribute_update_count(const size_t &contribute_update_count) {
     m_contribute_update_count = contribute_update_count;
@@ -295,6 +301,7 @@ public:
   size_t get_step_count() const {return m_step_count;}
   reward_type get_total_reward() const {return m_total_reward;}
   Mean get_mean_cabe() const {return m_mean_cabe;}
+  Mean get_mean_mabe() const {return m_mean_mabe;}
 
   void init() {
     if(m_metastate != NON_TERMINAL)
@@ -524,6 +531,7 @@ protected:
       q_new += q.value;
 
       if(q.split) {
+        this->m_mean_mabe.uncontribute(q.mabe);
         this->m_mean_cabe.uncontribute(q.cabe);
 #ifdef TRACK_Q_VALUE_VARIANCE
         this->m_mean_variance.uncontribute(q.variance_total);
@@ -539,8 +547,11 @@ protected:
         q.last_step_fired = this->m_step_count;
 
         q.cabe += std::abs(delta);
-        if(q.update_count > m_contribute_update_count)
+        q.mabe = q.cabe / q.update_count;
+        if(q.update_count > m_contribute_update_count) {
           this->m_mean_cabe.contribute(q.cabe);
+          this->m_mean_mabe.contribute(q.mabe);
+        }
 
 #ifdef TRACK_Q_VALUE_VARIANCE
         if(q.update_count > 1) {
@@ -566,6 +577,7 @@ protected:
       if(!q.split) {
         std::cerr << " updates:  " << q.update_count << std::endl
                   << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl;
+                  << " mabe:     " << q.mabe << " of " << this->m_mean_mabe << ':' << this->m_mean_mabe.get_stddev() << std::endl;
 #ifdef TRACK_Q_VALUE_VARIANCE
         std::cerr << " variance: " << q.variance_total << " of " << this->m_mean_variance << ':' << this->m_mean_variance.get_stddev() << std::endl;
 #endif
@@ -671,7 +683,8 @@ protected:
 
     q->split |= q->update_count > m_split_update_count &&
                 q->pseudoepisode_count > m_split_pseudoepisodes &&
-                this->get_mean_cabe().outlier_above(q->cabe, m_split_cabe);
+                m_mean_cabe.outlier_above(q->cabe, m_split_cabe) &&
+                m_mean_mabe.outlier_above(q->mabe, m_split_mabe);
 
     return q->split;
   }
@@ -808,6 +821,7 @@ private:
   virtual void update() = 0;
 
   Mean m_mean_cabe;
+  Mean m_mean_mabe;
 #ifdef TRACK_Q_VALUE_VARIANCE
   Mean m_mean_variance;
 #endif
@@ -836,6 +850,7 @@ private:
   size_t m_split_update_count;
   size_t m_split_pseudoepisodes;
   double m_split_cabe;
+  double m_split_mabe;
   size_t m_contribute_update_count;
 };
 

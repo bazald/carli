@@ -41,6 +41,7 @@ struct Arguments {
     split_update_count(0),
     split_pseudoepisodes(0),
     split_cabe(0.84155),
+    split_mabe(0.84155),
     contribute_update_count(0)
   {
   }
@@ -61,6 +62,7 @@ struct Arguments {
   size_t split_update_count;
   size_t split_pseudoepisodes;
   double split_cabe;
+  double split_mabe;
   size_t contribute_update_count;
 } g_args;
 
@@ -164,6 +166,9 @@ Options generate_options() {
   }, 1), "(-inf,inf)");
   options.add(     "split-cabe", Options::Option([](const std::vector<const char *> &args) {
     g_args.split_cabe = atof(args.at(0));
+  }, 1), "[0,inf)");
+  options.add(     "split-mabe", Options::Option([](const std::vector<const char *> &args) {
+    g_args.split_mabe = atof(args.at(0));
   }, 1), "[0,inf)");
   options.add(     "split-max", Options::Option([](const std::vector<const char *> &args) {
     g_args.split_max = atoi(args.at(0));
@@ -317,6 +322,7 @@ void run_agent() {
   agent->set_split_update_count(g_args.split_update_count);
   agent->set_split_pseudoepisodes(g_args.split_pseudoepisodes);
   agent->set_split_cabe(g_args.split_cabe);
+  agent->set_split_mabe(g_args.split_mabe);
 
   size_t total_steps = 0;
   size_t successes = 0;

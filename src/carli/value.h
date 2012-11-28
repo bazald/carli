@@ -41,7 +41,7 @@ public:
   {
   }
 
-  double outlier_above(const Value &value, const double &z = 0.84155) {
+  double outlier_above(const Value &value, const double &z = 0.84155) const {
     return count > 1 && value > mean + z * stddev;
   }
 
