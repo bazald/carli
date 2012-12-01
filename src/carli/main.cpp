@@ -1,3 +1,6 @@
+// #define TRACK_Q_VALUE_VARIANCE
+// #define ENABLE_FRINGE
+// #define WHITESON_ADAPTIVE_TILE
 // #define DEBUG_OUTPUT
 // #define DEBUG_OUTPUT_VALUE_FUNCTION
 // #define NULL_Q_VALUES

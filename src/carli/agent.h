@@ -145,6 +145,9 @@ public:
    m_features(nullptr),
    m_features_complete(true),
    m_candidates(nullptr),
+#ifdef WHITESON_ADAPTIVE_TILE
+   m_steps_since_minbe(0),
+#endif
    m_environment(environment),
    m_episode_number(1),
    m_step_count(0),
@@ -530,14 +533,14 @@ protected:
       q.value += this->m_learning_rate * q.credit * delta;
       q_new += q.value;
 
-      if(q.split) {
+      if(q.type == Q_Value::SPLIT) {
         this->m_mean_mabe.uncontribute(q.mabe);
         this->m_mean_cabe.uncontribute(q.cabe);
 #ifdef TRACK_Q_VALUE_VARIANCE
         this->m_mean_variance.uncontribute(q.variance_total);
 #endif
       }
-      else {
+      else /*if(q.type == Q_Value::UNSPLIT)*/ {
         if(q.last_episode_fired != this->m_episode_number) {
           ++q.pseudoepisode_count;
           q.last_episode_fired = this->m_episode_number;
@@ -546,12 +549,23 @@ protected:
           ++q.pseudoepisode_count;
         q.last_step_fired = this->m_step_count;
 
-        q.cabe += std::abs(delta);
+        const double abs_delta = std::abs(delta);
+
+        q.cabe += abs_delta;
         q.mabe = q.cabe / q.update_count;
         if(q.update_count > m_contribute_update_count) {
           this->m_mean_cabe.contribute(q.cabe);
           this->m_mean_mabe.contribute(q.mabe);
         }
+
+#ifdef WHITESON_ADAPTIVE_TILE
+        if(abs_delta < q.minbe) {
+          q.minbe = abs_delta;
+          this->m_steps_since_minbe = 0;
+        }
+        else
+          ++this->m_steps_since_minbe;
+#endif
 
 #ifdef TRACK_Q_VALUE_VARIANCE
         if(q.update_count > 1) {
@@ -574,9 +588,9 @@ protected:
               << "            " << q_new << std::endl;
 
     std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {
-      if(!q.split) {
+      if(q.type == Q_Value::UNSPLIT) {
         std::cerr << " updates:  " << q.update_count << std::endl
-                  << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl;
+                  << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl
                   << " mabe:     " << q.mabe << " of " << this->m_mean_mabe << ':' << this->m_mean_mabe.get_stddev() << std::endl;
 #ifdef TRACK_Q_VALUE_VARIANCE
         std::cerr << " variance: " << q.variance_total << " of " << this->m_mean_variance << ':' << this->m_mean_variance.get_stddev() << std::endl;
@@ -668,9 +682,11 @@ protected:
   }
 
   bool split_test(Q_Value * const &q, const size_t &depth) const {
+    assert(!q || q->type != Q_Value::FRINGE);
+
     if(depth < m_split_min) {
       if(q)
-        q->split = true;
+        q->type = Q_Value::SPLIT;
       return true;
     }
     if(depth >= m_split_max)
@@ -678,15 +694,19 @@ protected:
 
     if(!q)
       return false;
-    if(q->split)
+    if(q->type == Q_Value::SPLIT)
       return true;
 
-    q->split |= q->update_count > m_split_update_count &&
-                q->pseudoepisode_count > m_split_pseudoepisodes &&
-                m_mean_cabe.outlier_above(q->cabe, m_split_cabe) &&
-                m_mean_mabe.outlier_above(q->mabe, m_split_mabe);
-
-    return q->split;
+    if(q->update_count > m_split_update_count &&
+       q->pseudoepisode_count > m_split_pseudoepisodes &&
+       m_mean_cabe.outlier_above(q->cabe, m_split_cabe) &&
+       m_mean_mabe.outlier_above(q->mabe, m_split_mabe))
+    {
+      q->type = Q_Value::SPLIT;
+      return true;
+    }
+    else
+      return false;
   }
 
   static double sum_value(const action_type * const &action, const Q_Value::List &value_list) {
@@ -766,11 +786,21 @@ private:
 #endif
 
       feature_trie deeper = nullptr;
-      if(next && m_split_test(match->get(), depth))
+      if(next && m_split_test(match->get(), depth)) {
+        collapse_fringe(match->get_deeper());
         deeper = get_value_from_function(next, match->get_deeper(), offset, depth + 1);
+      }
       else {
-        next->destroy(next);
-        generate_more_features(match->get(), depth);
+        try {
+          generate_more_features(match->get(), depth);
+        }
+        catch(Again &) {
+          next->destroy(next);
+          throw;
+        }
+
+        generate_fringe(match->get_deeper(), next);
+
 #ifdef NULL_Q_VALUES
         if(!match->get())
           match->get() = new Q_Value;
@@ -784,7 +814,7 @@ private:
     }
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
 
-    auto rv = head->insert(function, m_split_test, [this](Q_Value * const &q, const size_t &depth){this->generate_more_features(q, depth);}, offset, depth);
+    auto rv = head->insert(function, m_split_test, [this](Q_Value * const &q, const size_t &depth){this->generate_more_features(q, depth);}, generate_fringe, collapse_fringe, offset, depth);
     assert(rv);
     return rv;
   }
@@ -800,6 +830,35 @@ private:
     }
   }
 
+#ifdef ENABLE_FRINGE
+  /// Use up the rest of the features to generate a fringe
+  static void generate_fringe(feature_trie &leaf_fringe, feature_trie head) {
+    assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type == Q_Value::FRINGE);
+
+    while(head) {
+      auto next = static_cast<feature_trie>(head->next());
+      head->erase();
+      auto inserted = head->map_insert(leaf_fringe);
+      if(!inserted->get())
+        inserted->get() = new Q_Value(double(), Q_Value::FRINGE);
+      head = next;
+    }
+  }
+  
+  static void collapse_fringe(feature_trie &leaf_fringe) {
+    assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type != Q_Value::FRINGE); ///< TODO: Convert FRINGE to UNSPLIT
+    
+    leaf_fringe->destroy(leaf_fringe);
+  }
+#else
+  static void generate_fringe(feature_trie &, feature_trie head) {
+    head->destroy(head); ///< Destroy the rest of the features instead of generating a fringe
+  }
+
+  static void collapse_fringe(feature_trie &) {
+  }
+#endif
+
   static void print_value_function_trie(std::ostream &os, const feature_trie_type * const &trie) {
     if(trie) {
       for(auto tt = trie->begin(trie), tend = trie->end(trie); tt != tend; ++tt) {
@@ -811,6 +870,8 @@ private:
         os << ',';
         if(tt->get_deeper())
           print_value_function_trie(os, tt->get_deeper());
+        else if(tt->get() && tt->get()->type == Q_Value::FRINGE)
+          os << 'f';
         os << '>';
       }
     }
@@ -824,6 +885,10 @@ private:
   Mean m_mean_mabe;
 #ifdef TRACK_Q_VALUE_VARIANCE
   Mean m_mean_variance;
+#endif
+
+#ifdef WHITESON_ADAPTIVE_TILE
+  size_t m_steps_since_minbe;
 #endif
 
   std::shared_ptr<environment_type> m_environment;

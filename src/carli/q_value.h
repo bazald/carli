@@ -6,6 +6,8 @@
 #include "value.h"
 #include "linked_list.h"
 
+#include <cfloat>
+
 class Q_Value;
 class Q_Value : public Zeni::Pool_Allocator<Q_Value> {
   Q_Value(const Q_Value &);
@@ -14,15 +16,19 @@ class Q_Value : public Zeni::Pool_Allocator<Q_Value> {
 public:
   typedef Zeni::Linked_List<Q_Value> List;
   typedef List::iterator iterator;
+  enum Type {SPLIT, UNSPLIT, FRINGE};
 
-  Q_Value(const double &q_value_ = double())
+  Q_Value(const double &q_value_ = double(), const Type &type_ = UNSPLIT)
    : last_episode_fired(size_t(-1)),
    last_step_fired(size_t(-1)),
    pseudoepisode_count(0),
    update_count(0),
-   split(false),
+   type(type_),
    credit(1.0),
    value(q_value_),
+#ifdef WHITESON_ADAPTIVE_TILE
+   minbe(DBL_MAX),
+#endif
 #ifdef TRACK_Q_VALUE_VARIANCE
    mean2(0),
    variance_0(0),
@@ -44,13 +50,17 @@ public:
   size_t pseudoepisode_count;
   size_t update_count;
 
-  bool split;
+  Type type;
 
   double credit;
 
   double value;
   Value cabe; ///< Cumulative Absolute Bellman Error
   Value mabe; ///< Mean Absolute Bellman Error (cabe / update_count)
+
+#ifdef WHITESON_ADAPTIVE_TILE
+  double minbe; ///< Minimum Bellman Error experienced
+#endif
 
 #ifdef TRACK_Q_VALUE_VARIANCE
   double mean2;

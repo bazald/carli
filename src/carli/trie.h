@@ -59,22 +59,17 @@ namespace Zeni {
      *  If an offset is specified, return a pointer to the most general match with a value first,
      *    and treat the value+offset as a Linked_List, stringing together general-to-specific values.
      */
-    template <typename DEPTH_TEST, typename TERMINAL_TEST>
-    trie_pointer_type insert(trie_pointer_type &ptr, const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const size_t &offset = size_t(-1), const size_t &depth = size_t()) {
+    template <typename DEPTH_TEST, typename TERMINAL_TEST, typename GENERATE_FRINGE, typename COLLAPSE_FRINGE>
+    trie_pointer_type insert(trie_pointer_type &ptr, const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const size_t &offset = size_t(-1), const size_t &depth = size_t()) {
       if(!this)
         return ptr;
 
-      auto next = this->next();
+      auto next = static_cast<trie_pointer_type>(this->next());
       this->erase();
 
       auto thisp = map_insert(ptr); ///< this possibly deleted
 
-      if(!depth_test(m_value, depth)) {
-        next->destroy(next);
-        next = nullptr;
-      }
-
-      return thisp->finish_insert(depth_test, terminal_test, offset, depth, next);
+      return thisp->finish_insert(depth_test, terminal_test, generate_fringe, collapse_fringe, offset, depth, next);
     }
 
     value_pointer_type get() const {
@@ -130,25 +125,38 @@ namespace Zeni {
     }
 
   private:
-    template <typename DEPTH_TEST, typename TERMINAL_TEST>
-    trie_pointer_type finish_insert(const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const size_t &offset, const size_t &depth, const list_pointer_type &next) {
+    template <typename DEPTH_TEST, typename TERMINAL_TEST, typename GENERATE_FRINGE, typename COLLAPSE_FRINGE>
+    trie_pointer_type finish_insert(const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const size_t &offset, const size_t &depth, const trie_pointer_type &next) {
 #ifndef NULL_Q_VALUES
       if(!m_value)
         m_value = new value_type;
 #endif
-      if(next) {
-        auto deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, depth_test, terminal_test, offset, depth + 1);
+
+      const bool dtr = depth_test(m_value, depth);
+
+      if(next && dtr) {
+        collapse_fringe(m_deeper);
+        auto deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, depth_test, terminal_test, generate_fringe, collapse_fringe, offset, depth + 1);
         offset_erase(offset);
         return offset_insert_before(offset, deeper);
       }
       else {
+        try {
+          terminal_test(m_value, depth);
+        }
+        catch(/*Again &*/...) {
+          if(!dtr)
+            next->destroy(next);
+          throw;
+        }
 #ifdef NULL_Q_VALUES
-        terminal_test(m_value, depth);
         if(!m_value)
           m_value = new value_type;
-#else
-        terminal_test(m_value, depth);
 #endif
+
+        if(!dtr)
+          generate_fringe(m_deeper, next);
+
         offset_erase(offset);
       }
 

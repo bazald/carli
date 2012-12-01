@@ -43,10 +43,11 @@ g_ep_tuples = []
 #g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',   1.0, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
 
 #g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-specific', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-specific', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, -1.0, -1.0, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, -1.0, -1.0, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, -1.0, -1.0, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, -1.0, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-depth', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, -1.0, 0))
 g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, -1.0, 0))
+g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-specific', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, -1.0, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, -1.0, -1.0, 0))
 
 
 parser = argparse.ArgumentParser(description='Run PuddleWorld experiments.')
