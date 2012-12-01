@@ -133,12 +133,11 @@ namespace Zeni {
 #endif
 
       const bool dtr = depth_test(m_value, depth);
+      trie_pointer_type deeper = nullptr;
 
       if(next && dtr) {
-        collapse_fringe(m_deeper);
-        auto deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, depth_test, terminal_test, generate_fringe, collapse_fringe, offset, depth + 1);
-        offset_erase(offset);
-        return offset_insert_before(offset, deeper);
+        collapse_fringe(m_deeper, next);
+        deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, depth_test, terminal_test, generate_fringe, collapse_fringe, offset, depth + 1);
       }
       else {
         try {
@@ -154,13 +153,14 @@ namespace Zeni {
           m_value = new value_type;
 #endif
 
-        if(!dtr)
-          generate_fringe(m_deeper, next);
-
-        offset_erase(offset);
+        if(!dtr) {
+          generate_fringe(m_deeper, next, offset);
+          deeper = m_deeper;
+        }
       }
 
-      return this;
+      offset_erase(offset);
+      return offset_insert_before(offset, deeper);
     }
 
     trie_pointer_type m_deeper;

@@ -493,17 +493,20 @@ protected:
     std::cerr << " current :";
 #endif
     std::for_each(current->begin(current), current->end(current), [&q_old](Q_Value &q) {
-      q_old += q.value;
-      ++q.update_count;
+      if(q.type != Q_Value::FRINGE) {
+        q_old += q.value;
+        ++q.update_count;
 #ifdef DEBUG_OUTPUT
-      std::cerr << ' ' << &q;
+        std::cerr << ' ' << &q;
 #endif
+      }
     });
 #ifdef DEBUG_OUTPUT
     std::cerr << std::endl;
     std::cerr << " next    :";
     std::for_each(next->begin(next), next->end(next), [](const Q_Value &q) {
-      std::cerr << ' ' << &q;
+      if(q.type != Q_Value::FRINGE)
+        std::cerr << ' ' << &q;
     });
     std::cerr << std::endl;
 #endif
@@ -512,7 +515,8 @@ protected:
     double variance_total_next = double();
     if(next) {
       std::for_each(next->begin(next), next->end(next), [&variance_total_next](const Q_Value &q) {
-        variance_total_next += q.variance_total;
+        if(q.type != Q_Value::FRINGE)
+          variance_total_next += q.variance_total;
       });
     }
 #endif
@@ -540,7 +544,7 @@ protected:
         this->m_mean_variance.uncontribute(q.variance_total);
 #endif
       }
-      else /*if(q.type == Q_Value::UNSPLIT)*/ {
+      else if(q.type == Q_Value::UNSPLIT) {
         if(q.last_episode_fired != this->m_episode_number) {
           ++q.pseudoepisode_count;
           q.last_episode_fired = this->m_episode_number;
@@ -621,7 +625,7 @@ protected:
   void assign_credit_specific(Q_Value::List * const &value_list) {
     Q_Value * last = nullptr;
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&last](Q_Value &q) {
-      q.credit = 0.0;
+      q.credit = q.type == Q_Value::FRINGE ? 1.0 : 0.0;
       last = &q;
     });
 
@@ -631,53 +635,70 @@ protected:
 
   void assign_credit_evenly(Q_Value::List * const &value_list) {
     double count = double();
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](const Q_Value &) {
-      ++count;
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](const Q_Value &q) {
+      if(q.type != Q_Value::FRINGE)
+        ++count;
     });
 
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](Q_Value &q) {
-      q.credit = 1.0 / count;
+      q.credit = q.type == Q_Value::FRINGE ? 1.0 : 1.0 / count;
     });
   }
 
   void assign_credit_inv_update_count(Q_Value::List * const &value_list) {
     double sum = double();
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-      q.credit = 1.0 / q.update_count;
-      sum += q.credit;
+      if(q.type != Q_Value::FRINGE) {
+        q.credit = 1.0 / q.update_count;
+        sum += q.credit;
+      }
     });
 
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-      q.credit /= sum;
+      if(q.type == Q_Value::FRINGE)
+        q.credit = 1.0;
+      else
+        q.credit /= sum;
     });
   }
 
   void assign_credit_inv_log_update_count(Q_Value::List * const &value_list) {
     double sum = double();
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-      q.credit = 1.0 / (log(double(q.update_count)) + 1.0);
-      sum += q.credit;
+      if(q.type != Q_Value::FRINGE) {
+        q.credit = 1.0 / (log(double(q.update_count)) + 1.0);
+        sum += q.credit;
+      }
     });
 
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-      q.credit /= sum;
+      if(q.type == Q_Value::FRINGE)
+        q.credit = 1.0;
+      else
+        q.credit /= sum;
     });
   }
 
   void assign_credit_inv_depth(Q_Value::List * const &value_list) {
     size_t depth = 0;
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&depth](Q_Value &) {
-      ++depth;
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&depth](Q_Value &q) {
+      if(q.type != Q_Value::FRINGE)
+        ++depth;
     });
 
     double sum = double();
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&depth,&sum](Q_Value &q) {
-      q.credit = 1.0 / std::pow(2.0, double(--depth));
-      sum += q.credit;
+      if(q.type != Q_Value::FRINGE) {
+        q.credit = 1.0 / std::pow(2.0, double(--depth));
+        sum += q.credit;
+      }
     });
 
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-      q.credit /= sum;
+      if(q.type == Q_Value::FRINGE)
+        q.credit = 1.0;
+      else
+        q.credit /= sum;
     });
   }
 
@@ -717,12 +738,14 @@ protected:
 
     double sum = double();
     std::for_each(value_list.begin(&value_list), value_list.end(&value_list), [&action,&sum](const Q_Value &q) {
+      if(q.type != Q_Value::FRINGE) {
 #ifdef DEBUG_OUTPUT
-      if(action)
-        std::cerr << ' ' << q.value;
+        if(action)
+          std::cerr << ' ' << q.value;
 #endif
 
-      sum += q.value;
+        sum += q.value;
+      }
     });
 
 #ifdef DEBUG_OUTPUT
@@ -787,7 +810,7 @@ private:
 
       feature_trie deeper = nullptr;
       if(next && m_split_test(match->get(), depth)) {
-        collapse_fringe(match->get_deeper());
+        collapse_fringe(match->get_deeper(), next);
         deeper = get_value_from_function(next, match->get_deeper(), offset, depth + 1);
       }
       else {
@@ -799,7 +822,8 @@ private:
           throw;
         }
 
-        generate_fringe(match->get_deeper(), next);
+        generate_fringe(match->get_deeper(), next, offset);
+        deeper = match->get_deeper();
 
 #ifdef NULL_Q_VALUES
         if(!match->get())
@@ -832,30 +856,51 @@ private:
 
 #ifdef ENABLE_FRINGE
   /// Use up the rest of the features to generate a fringe
-  static void generate_fringe(feature_trie &leaf_fringe, feature_trie head) {
+  static void generate_fringe(feature_trie &leaf_fringe, feature_trie head, const size_t &offset) {
     assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type == Q_Value::FRINGE);
 
-    while(head) {
-      auto next = static_cast<feature_trie>(head->next());
-      head->erase();
-      auto inserted = head->map_insert(leaf_fringe);
-      if(!inserted->get())
-        inserted->get() = new Q_Value(double(), Q_Value::FRINGE);
-      head = next;
+    if(leaf_fringe)
+      head->destroy(head);
+    else {
+      while(head) {
+        auto next = static_cast<feature_trie>(head->next());
+        head->erase();
+        auto inserted = head->map_insert(leaf_fringe);
+        if(!inserted->get())
+          inserted->get() = new Q_Value(double(), Q_Value::FRINGE);
+        head = next;
+      }
+    }
+
+    if(leaf_fringe) {
+      leaf_fringe->offset_erase(offset);
+
+      feature_trie fringe = leaf_fringe;
+      for(;;) {
+        auto next = static_cast<feature_trie>(fringe->next());
+        if(next) {
+          next->offset_erase(offset);
+          fringe->offset_insert_before(offset, next);
+          fringe = next;
+        }
+        else
+          break;
+      }
     }
   }
   
-  static void collapse_fringe(feature_trie &leaf_fringe) {
+  static void collapse_fringe(feature_trie &leaf_fringe, feature_trie head) {
     assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type != Q_Value::FRINGE); ///< TODO: Convert FRINGE to UNSPLIT
     
-    leaf_fringe->destroy(leaf_fringe);
+    if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::FRINGE)
+      leaf_fringe->destroy(leaf_fringe);
   }
 #else
-  static void generate_fringe(feature_trie &, feature_trie head) {
+  static void generate_fringe(feature_trie &, feature_trie head, const size_t &) {
     head->destroy(head); ///< Destroy the rest of the features instead of generating a fringe
   }
 
-  static void collapse_fringe(feature_trie &) {
+  static void collapse_fringe(feature_trie &, feature_trie) {
   }
 #endif
 
