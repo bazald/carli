@@ -42,6 +42,11 @@ namespace Puddle_World {
              (bound_higher == rhs.bound_higher ? 0 : bound_higher < rhs.bound_higher ? -1 : 1);
     }
 
+    bool precedes(const Feature &rhs) const {
+      const auto mdpt = midpt();
+      return axis == rhs.axis && (rhs.bound_lower == mdpt || rhs.bound_higher == mdpt);
+    }
+
     double midpt() const {
       return (bound_lower + bound_higher) / 2.0;
     }

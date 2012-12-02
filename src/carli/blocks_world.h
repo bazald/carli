@@ -28,6 +28,10 @@ namespace Blocks_World {
     virtual int compare_pi(const Feature &rhs) const = 0;
     virtual int compare_pi(const In_Place &rhs) const = 0;
     virtual int compare_pi(const On_Top &rhs) const = 0;
+
+    bool precedes(const Feature &rhs) const {
+      return false;
+    }
   };
 
   typedef Feature feature_type;

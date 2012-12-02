@@ -67,9 +67,12 @@ namespace Zeni {
       auto next = static_cast<trie_pointer_type>(this->next());
       this->erase();
 
+      trie_pointer_type inserted = this;
       auto thisp = map_insert(ptr); ///< this possibly deleted
+      if(thisp != inserted)
+        inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
 
-      return thisp->finish_insert(depth_test, terminal_test, generate_fringe, collapse_fringe, offset, depth, next);
+      return thisp->finish_insert(depth_test, terminal_test, generate_fringe, collapse_fringe, offset, depth, inserted != nullptr, next);
     }
 
     value_pointer_type get() const {
@@ -126,7 +129,7 @@ namespace Zeni {
 
   private:
     template <typename DEPTH_TEST, typename TERMINAL_TEST, typename GENERATE_FRINGE, typename COLLAPSE_FRINGE>
-    trie_pointer_type finish_insert(const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const size_t &offset, const size_t &depth, const trie_pointer_type &next) {
+    trie_pointer_type finish_insert(const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const size_t &offset, const size_t &depth, const bool &force, const trie_pointer_type &next) {
 #ifndef NULL_Q_VALUES
       if(!m_value)
         m_value = new value_type;
@@ -141,7 +144,7 @@ namespace Zeni {
       }
       else {
         try {
-          terminal_test(m_value, depth);
+          terminal_test(m_value, depth, force);
         }
         catch(/*Again &*/...) {
           if(!dtr)

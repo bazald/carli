@@ -105,6 +105,8 @@ public:
 
   virtual int compare_pi(const DERIVED &rhs) const = 0;
 
+  virtual bool precedes(const DERIVED &rhs) const = 0;
+
   virtual void print_impl(std::ostream &os) const = 0;
 
   List features;
@@ -802,7 +804,10 @@ private:
     if(match) {
       auto next = static_cast<feature_trie>(head == match ? head->next() : head);
       match->erase();
+      feature_trie inserted = match.get();
       match = match->map_insert(function);
+      if(match != inserted)
+        inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
 #ifndef NULL_Q_VALUES
       if(!match->get())
         match->get() = new Q_Value;
@@ -815,7 +820,7 @@ private:
       }
       else {
         try {
-          generate_more_features(match->get(), depth);
+          generate_more_features(match->get(), depth, inserted != nullptr);
         }
         catch(Again &) {
           next->destroy(next);
@@ -838,13 +843,17 @@ private:
     }
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
 
-    auto rv = head->insert(function, m_split_test, [this](Q_Value * const &q, const size_t &depth){this->generate_more_features(q, depth);}, generate_fringe, collapse_fringe, offset, depth);
+    auto rv = head->insert(function, m_split_test, [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);}, generate_fringe, collapse_fringe, offset, depth);
     assert(rv);
     return rv;
   }
 
-  void generate_more_features(Q_Value * const &q, const size_t &depth) {
-    if(!m_features_complete && m_split_test(q, depth)) {
+  void generate_more_features(Q_Value * const &q, const size_t &depth, const bool &force) {
+    if(!m_features_complete && (
+#ifdef ENABLE_FRINGE
+                                force ||
+#endif
+                                         m_split_test(q, depth))) {
       m_features->destroy(m_features);
       generate_features();
 #ifdef DEBUG_OUTPUT
@@ -862,9 +871,20 @@ private:
     while(head) {
       auto next = static_cast<feature_trie>(head->next());
       head->erase();
-      auto inserted = head->map_insert(leaf_fringe);
-      if(!inserted->get())
-        inserted->get() = new Q_Value(double(), Q_Value::FRINGE);
+
+      auto predecessor = std::find_if(leaf_fringe->begin(leaf_fringe), leaf_fringe->end(leaf_fringe),
+                                      [&head](const feature_trie_type &existing)->bool {
+                                        return existing.get_key()->precedes(*head->get_key());
+                                      });
+
+      if(predecessor)
+        delete head;
+      else {
+        auto inserted = head->map_insert(leaf_fringe);
+        if(!inserted->get())
+          inserted->get() = new Q_Value(double(), Q_Value::FRINGE);
+      }
+
       head = next;
     }
 
