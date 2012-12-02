@@ -859,17 +859,13 @@ private:
   static void generate_fringe(feature_trie &leaf_fringe, feature_trie head, const size_t &offset) {
     assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type == Q_Value::FRINGE);
 
-    if(leaf_fringe)
-      head->destroy(head);
-    else {
-      while(head) {
-        auto next = static_cast<feature_trie>(head->next());
-        head->erase();
-        auto inserted = head->map_insert(leaf_fringe);
-        if(!inserted->get())
-          inserted->get() = new Q_Value(double(), Q_Value::FRINGE);
-        head = next;
-      }
+    while(head) {
+      auto next = static_cast<feature_trie>(head->next());
+      head->erase();
+      auto inserted = head->map_insert(leaf_fringe);
+      if(!inserted->get())
+        inserted->get() = new Q_Value(double(), Q_Value::FRINGE);
+      head = next;
     }
 
     if(leaf_fringe) {

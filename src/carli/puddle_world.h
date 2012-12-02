@@ -396,7 +396,7 @@ namespace Puddle_World {
           auto &y_tail_ = y_tail;
 
           auto match = std::find_if(trie->begin(trie), trie->end(trie), [&x_tail_](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**x_tail_) == 0;});
-          if(match != nullptr) {
+          if(match && match->get() && match->get()->type != Q_Value::FRINGE) {
             auto feature = match->get_key();
             const auto midpt = feature->midpt();
             if(env->get_position().first < midpt)
@@ -409,7 +409,7 @@ namespace Puddle_World {
           }
 
           match = std::find_if(trie->begin(trie), trie->end(trie), [&y_tail_](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**y_tail_) == 0;});
-          if(match != nullptr) {
+          if(match && match->get() && match->get()->type != Q_Value::FRINGE) {
             auto feature = match->get_key();
             const auto midpt = feature->midpt();
             if(env->get_position().second < midpt)
