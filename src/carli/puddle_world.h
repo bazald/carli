@@ -113,18 +113,15 @@ namespace Puddle_World {
      : m_init_x(0.0, 1.0),
      m_init_y(0.0, 1.0),
      m_goal_x(0.95, 1.0),
-     m_goal_y(0.95, 1.0),
-     m_terminal_reward(0.0)
+     m_goal_y(0.95, 1.0)
     {
       Environment::init_impl();
     }
 
-    typedef std::list<block_id> Stack;
-    typedef std::list<Stack> Stacks;
-
     const double_pair & get_position() const {return m_position;}
     const double_pair & get_goal_x() const {return m_goal_x;}
     const double_pair & get_goal_y() const {return m_goal_y;}
+    const double & get_value(const Feature::Axis &index) const {return *(&m_position.first + index);}
 
     void set_position(const double_pair &position_) {m_position = position_;}
 
@@ -223,7 +220,6 @@ namespace Puddle_World {
 
     double_pair m_goal_x;
     double_pair m_goal_y;
-    double m_terminal_reward;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {
@@ -397,33 +393,10 @@ namespace Puddle_World {
         Feature::List * y_tail_next = nullptr;
 
         std::for_each(tries.begin(), tries.end(), [this,&env,&x_tail,&y_tail,&x_tail_next,&y_tail_next](feature_trie &trie) {
-          auto &x_tail_ = x_tail;
-          auto &y_tail_ = y_tail;
-
-          auto match = std::find_if(trie->begin(trie), trie->end(trie), [&x_tail_](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**x_tail_) == 0;});
-          if(match && match->get() && match->get()->type != Q_Value::FRINGE) {
-            auto feature = match->get_key();
-            const auto midpt = feature->midpt();
-            if(env->get_position().first < midpt)
-              x_tail_next = &(new Feature(Feature::X, feature->bound_lower, midpt, feature->depth + 1))->features;
-            else
-              x_tail_next = &(new Feature(Feature::X, midpt, feature->bound_higher, feature->depth + 1))->features;
-            x_tail_next = x_tail_next->insert_in_order<feature_type::List::compare_default>(m_features, false);
-            trie = match->get_deeper();
+          if(generate_feature_ranged(env, trie, x_tail, x_tail_next))
             return;
-          }
-
-          match = std::find_if(trie->begin(trie), trie->end(trie), [&y_tail_](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**y_tail_) == 0;});
-          if(match && match->get() && match->get()->type != Q_Value::FRINGE) {
-            auto feature = match->get_key();
-            const auto midpt = feature->midpt();
-            if(env->get_position().second < midpt)
-              y_tail_next = &(new Feature(Feature::Y, feature->bound_lower, midpt, feature->depth + 1))->features;
-            else
-              y_tail_next = &(new Feature(Feature::Y, midpt, feature->bound_higher, feature->depth + 1))->features;
-            y_tail_next = y_tail_next->insert_in_order<feature_type::List::compare_default>(m_features, false);
-            trie = match->get_deeper();
-          }
+          if(generate_feature_ranged(env, trie, y_tail, y_tail_next))
+            return;
         });
 
         if(x_tail_next)
@@ -434,6 +407,24 @@ namespace Puddle_World {
         if(!x_tail_next && !y_tail_next)
           break;
       }
+    }
+
+    bool generate_feature_ranged(const std::shared_ptr<const Environment> &env, feature_trie &trie, const Feature::List * const &tail, Feature::List * &tail_next) {
+      auto match = std::find_if(trie->begin(trie), trie->end(trie), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
+
+      if(match && match->get() && match->get()->type != Q_Value::FRINGE) {
+        auto feature = match->get_key();
+        const auto midpt = feature->midpt();
+        if(env->get_value(feature->axis) < midpt)
+          tail_next = &(new Feature(feature->axis, feature->bound_lower, midpt, feature->depth + 1))->features;
+        else
+          tail_next = &(new Feature(feature->axis, midpt, feature->bound_higher, feature->depth + 1))->features;
+        tail_next = tail_next->insert_in_order<feature_type::List::compare_default>(m_features, false);
+        trie = match->get_deeper();
+        return true;
+      }
+
+      return false;
     }
 
     void generate_candidates() {

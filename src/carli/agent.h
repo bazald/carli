@@ -230,6 +230,9 @@ public:
       case EPSILON_EVEN_DEPTH:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);};
         break;
+
+      default:
+        abort();
     }
 
     m_credit_assignment_code = credit_assignment;

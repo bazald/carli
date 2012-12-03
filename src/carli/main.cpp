@@ -1,12 +1,13 @@
 // #define TRACK_Q_VALUE_VARIANCE
 #define ENABLE_FRINGE
 // #define WHITESON_ADAPTIVE_TILE
-#define DEBUG_OUTPUT
-#define DEBUG_OUTPUT_VALUE_FUNCTION
+// #define DEBUG_OUTPUT
+// #define DEBUG_OUTPUT_VALUE_FUNCTION
 // #define NULL_Q_VALUES
 // #define TO_FILE
 
 #include "blocks_world.h"
+#include "cart_pole.h"
 #include "puddle_world.h"
 #include "getopt.h"
 
@@ -52,7 +53,7 @@ struct Arguments {
   Blocks_World::Agent::Credit_Assignment credit_assignment;
   double credit_assignment_epsilon;
   double discount_rate;
-  enum {BLOCKS_WORLD, PUDDLE_WORLD} environment;
+  enum {BLOCKS_WORLD, CART_POLE, PUDDLE_WORLD} environment;
   double epsilon;
   double learning_rate;
   size_t number_of_steps;
@@ -123,13 +124,15 @@ Options generate_options() {
   options.add('e', "environment", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "blocks-world"))
       g_args.environment = Arguments::BLOCKS_WORLD;
+    else if(!strcmp(args.at(0), "cart-pole"))
+      g_args.environment = Arguments::CART_POLE;
     else if(!strcmp(args.at(0), "puddle-world"))
       g_args.environment = Arguments::PUDDLE_WORLD;
     else {
       std::cerr << "Illegal environment selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal environment selection.");
     }
-  }, 1), "blocks-world/puddle-world");
+  }, 1), "blocks-world/cart-pole/puddle-world");
   options.add('l', "learning-rate", Options::Option([](const std::vector<const char *> &args) {
     g_args.learning_rate = atof(args.at(0));
     if(g_args.learning_rate <= 0.0 || g_args.learning_rate > 1.0) {
@@ -229,6 +232,10 @@ int main2(int argc, char **argv) {
   switch(g_args.environment) {
     case Arguments::BLOCKS_WORLD:
       run_agent<Blocks_World::Environment, Blocks_World::Agent>();
+      break;
+
+    case Arguments::CART_POLE:
+      run_agent<Cart_Pole::Environment, Cart_Pole::Agent>();
       break;
 
     case Arguments::PUDDLE_WORLD:
@@ -369,13 +376,23 @@ void run_agent() {
     std::cout << failures << " FAILUREs" << std::endl;
     std::cout << agent->get_value_function_size() << " Q-values" << std::endl;
 
-    if(g_args.environment == Arguments::PUDDLE_WORLD) {
+    if(g_args.environment == Arguments::CART_POLE) {
+      auto pwa = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent);
+      pwa->print_policy(std::cout, 32);
+    }
+    else if(g_args.environment == Arguments::PUDDLE_WORLD) {
       auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
       pwa->print_policy(std::cout, 32);
     }
   }
   else if(g_args.output == Arguments::EXPERIMENTAL) {
-    if(g_args.environment == Arguments::PUDDLE_WORLD) {
+    if(g_args.environment == Arguments::CART_POLE) {
+      auto pwa = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent);
+      pwa->print_policy(std::cerr, 32);
+      pwa->print_value_function_grid(std::cerr);
+      pwa->print_update_count_grid(std::cerr);
+    }
+    else if(g_args.environment == Arguments::PUDDLE_WORLD) {
       auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
       pwa->print_policy(std::cerr, 32);
       pwa->print_value_function_grid(std::cerr);
