@@ -389,7 +389,7 @@ public:
   }
 
 protected:
-  Q_Value * get_value(const feature_list &features, const action_type &action, const size_t &offset, const size_t &depth = size_t()) {
+  Q_Value * get_value(const feature_list &features, const action_type &action, const size_t &offset, const size_t &depth = 0) {
     if(!features)
       return nullptr;
 

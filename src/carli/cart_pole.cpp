@@ -44,7 +44,7 @@ namespace Cart_Pole {
   }
 
   float Environment::pole_random() {
-    return m_random_motion.frand_lt();
+    return float(m_random_motion.frand_lt());
 //     return float(rand()) / ((1u << 31u) - 1.0f);
   }
 
@@ -191,25 +191,25 @@ namespace Cart_Pole {
   {
       float xacc,thetaacc,force,costheta,sintheta,temp;
 
-      force = (action>0)? FORCE_MAG : -FORCE_MAG;
-      costheta = cos(double(*theta));
-      sintheta = sin(double(*theta));
+      force = float((action>0)? FORCE_MAG : -FORCE_MAG);
+      costheta = float(cos(double(*theta)));
+      sintheta = float(sin(double(*theta)));
 
-      temp = (force + POLEMASS_LENGTH * *theta_dot * *theta_dot * sintheta)
-              / TOTAL_MASS;
+      temp = float((force + POLEMASS_LENGTH * *theta_dot * *theta_dot * sintheta)
+              / TOTAL_MASS);
 
-      thetaacc = (GRAVITY * sintheta - costheta* temp)
+      thetaacc = float((GRAVITY * sintheta - costheta* temp)
           / (LENGTH * (FOURTHIRDS - MASSPOLE * costheta * costheta
-                                                / TOTAL_MASS));
+                                                / TOTAL_MASS)));
 
-      xacc  = temp - POLEMASS_LENGTH * thetaacc* costheta / TOTAL_MASS;
+      xacc  = float(temp - POLEMASS_LENGTH * thetaacc* costheta / TOTAL_MASS);
 
   /*** Update the four state variables, using Euler's method. ***/
 
-      *x  += TAU * *x_dot;
-      *x_dot += TAU * xacc;
-      *theta += TAU * *theta_dot;
-      *theta_dot += TAU * thetaacc;
+      *x  += float(TAU * *x_dot);
+      *x_dot += float(TAU * xacc);
+      *theta += float(TAU * *theta_dot);
+      *theta_dot += float(TAU * thetaacc);
   }
   
   /*----------------------------------------------------------------------
