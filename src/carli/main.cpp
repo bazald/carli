@@ -35,6 +35,7 @@ struct Arguments {
     environment(BLOCKS_WORLD),
     epsilon(0.1),
     learning_rate(1.0),
+    number_of_episodes(0),
     number_of_steps(50000),
     output(SIMPLE),
     on_policy(true),
@@ -56,6 +57,7 @@ struct Arguments {
   enum {BLOCKS_WORLD, CART_POLE, PUDDLE_WORLD} environment;
   double epsilon;
   double learning_rate;
+  size_t number_of_episodes;
   size_t number_of_steps;
   enum {SIMPLE, EXPERIMENTAL} output;
   bool on_policy;
@@ -140,7 +142,16 @@ Options generate_options() {
       throw std::runtime_error("Illegal learning rate selection.");
     }
   }, 1), "(0,1]");
+  options.add(     "num-episodes", Options::Option([](const std::vector<const char *> &args) {
+    g_args.number_of_episodes = atoi(args.at(0));
+    g_args.number_of_steps = 0;
+    if(g_args.number_of_episodes < 1) {
+      std::cerr << "Illegal number of episodes selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal number of episodes selection.");
+    }
+  }, 1), "[1,inf)");
   options.add('n', "num-steps", Options::Option([](const std::vector<const char *> &args) {
+    g_args.number_of_episodes = 0;
     g_args.number_of_steps = atoi(args.at(0));
     if(g_args.number_of_steps < 1) {
       std::cerr << "Illegal number of steps selection: " << args.at(0) << std::endl;
@@ -337,7 +348,10 @@ void run_agent() {
   size_t total_steps = 0;
   size_t successes = 0;
   size_t failures = 0;
-  while(total_steps < g_args.number_of_steps) {
+  for(size_t episodes = 0; !g_args.number_of_episodes || episodes < g_args.number_of_episodes; ++episodes) {
+    if(g_args.number_of_steps && total_steps >= g_args.number_of_steps)
+      break;
+
     env->init();
     agent->init();
 
@@ -354,7 +368,7 @@ void run_agent() {
 #ifdef DEBUG_OUTPUT
       std::cerr << *env << *agent;
 #endif
-    } while(agent->get_metastate() == NON_TERMINAL && agent->get_step_count() < 5000 && total_steps < g_args.number_of_steps);
+    } while(agent->get_metastate() == NON_TERMINAL && agent->get_step_count() < 5000 && (!g_args.number_of_steps || total_steps < g_args.number_of_steps));
 
     if(agent->get_metastate() == SUCCESS) {
       if(g_args.output == Arguments::SIMPLE)
