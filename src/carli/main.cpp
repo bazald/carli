@@ -1,5 +1,6 @@
 // #define TRACK_Q_VALUE_VARIANCE
-#define ENABLE_FRINGE
+// #define TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+// #define ENABLE_FRINGE
 // #define WHITESON_ADAPTIVE_TILE
 // #define DEBUG_OUTPUT
 // #define DEBUG_OUTPUT_VALUE_FUNCTION
@@ -34,6 +35,7 @@ struct Arguments {
     discount_rate(1.0),
     environment(BLOCKS_WORLD),
     epsilon(0.1),
+    ignore_x(false),
     learning_rate(1.0),
     number_of_episodes(0),
     number_of_steps(50000),
@@ -46,7 +48,9 @@ struct Arguments {
     split_update_count(0),
     split_pseudoepisodes(0),
     split_cabe(0.84155),
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
     split_mabe(0.84155),
+#endif
     contribute_update_count(0)
   {
   }
@@ -56,6 +60,7 @@ struct Arguments {
   double discount_rate;
   enum {BLOCKS_WORLD, CART_POLE, PUDDLE_WORLD} environment;
   double epsilon;
+  bool ignore_x;
   double learning_rate;
   size_t number_of_episodes;
   size_t number_of_steps;
@@ -68,7 +73,9 @@ struct Arguments {
   size_t split_update_count;
   size_t split_pseudoepisodes;
   double split_cabe;
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   double split_mabe;
+#endif
   size_t contribute_update_count;
 } g_args;
 
@@ -135,6 +142,16 @@ Options generate_options() {
       throw std::runtime_error("Illegal environment selection.");
     }
   }, 1), "blocks-world/cart-pole/puddle-world");
+  options.add(     "ignore-x", Options::Option([](const std::vector<const char *> &args) {
+    if(!strcmp(args.at(0), "true"))
+      g_args.ignore_x = true;
+    else if(!strcmp(args.at(0), "false"))
+      g_args.ignore_x = false;
+    else {
+      std::cerr << "Illegal ignore-x selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal ignore-x selection.");
+    }
+  }, 1), "true/false, applies only to cart-pole");
   options.add('l', "learning-rate", Options::Option([](const std::vector<const char *> &args) {
     g_args.learning_rate = atof(args.at(0));
     if(g_args.learning_rate <= 0.0 || g_args.learning_rate > 1.0) {
@@ -184,9 +201,11 @@ Options generate_options() {
   options.add(     "split-cabe", Options::Option([](const std::vector<const char *> &args) {
     g_args.split_cabe = atof(args.at(0));
   }, 1), "[0,inf)");
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   options.add(     "split-mabe", Options::Option([](const std::vector<const char *> &args) {
     g_args.split_mabe = atof(args.at(0));
   }, 1), "[0,inf)");
+#endif
   options.add(     "split-max", Options::Option([](const std::vector<const char *> &args) {
     g_args.split_max = atoi(args.at(0));
   }, 1), "[0,inf)");
@@ -335,6 +354,10 @@ void run_agent() {
   agent->set_credit_assignment_epsilon(g_args.credit_assignment_epsilon);
   agent->set_discount_rate(g_args.discount_rate);
   agent->set_epsilon(g_args.epsilon);
+  if(auto cart_pole = std::dynamic_pointer_cast<Cart_Pole::Environment>(env))
+    cart_pole->ignore_x(g_args.ignore_x);
+  if(auto cart_pole = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent))
+    cart_pole->ignore_x(g_args.ignore_x);
   agent->set_learning_rate(g_args.learning_rate);
   agent->set_on_policy(g_args.on_policy);
   agent->set_pseudoepisode_threshold(g_args.pseudoepisode_threshold);
@@ -343,7 +366,9 @@ void run_agent() {
   agent->set_split_update_count(g_args.split_update_count);
   agent->set_split_pseudoepisodes(g_args.split_pseudoepisodes);
   agent->set_split_cabe(g_args.split_cabe);
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   agent->set_split_mabe(g_args.split_mabe);
+#endif
 
   size_t total_steps = 0;
   size_t successes = 0;
@@ -368,7 +393,7 @@ void run_agent() {
 #ifdef DEBUG_OUTPUT
       std::cerr << *env << *agent;
 #endif
-    } while(agent->get_metastate() == NON_TERMINAL && agent->get_step_count() < 5000 && (!g_args.number_of_steps || total_steps < g_args.number_of_steps));
+    } while(agent->get_metastate() == NON_TERMINAL /*&& agent->get_step_count() < 5000*/ && (!g_args.number_of_steps || total_steps < g_args.number_of_steps));
 
     if(agent->get_metastate() == SUCCESS) {
       if(g_args.output == Arguments::SIMPLE)

@@ -122,7 +122,8 @@ namespace Cart_Pole {
      : m_x(0.0f),
      m_x_dot(0.0f),
      m_theta(0.0f),
-     m_theta_dot(0.0f)
+     m_theta_dot(0.0f),
+     m_ignore_x(false)
     {
       Environment::init_impl();
     }
@@ -132,11 +133,13 @@ namespace Cart_Pole {
     const float & get_theta() const {return m_theta;}
     const float & get_theta_dot() const {return m_theta_dot;}
     const float & get_value(const Feature::Axis &index) const {return *(&m_x + index);}
+    bool is_ignoring_x() const {return m_ignore_x;}
 
     void set_x(const float &x_) {m_x = x_;}
     void set_x_dot(const float &x_dot_) {m_x = x_dot_;}
     void set_theta_dot(const float &theta_dot_) {m_theta = theta_dot_;}
     void set_theta(const float &theta_) {m_theta = theta_;}
+    void ignore_x(const bool &ignore_x_) {m_ignore_x = ignore_x_;}
 
     bool failed() const {
       return get_box(m_x, m_x_dot, m_theta, m_theta_dot) < 0;
@@ -154,6 +157,11 @@ namespace Cart_Pole {
 
     reward_type transition_impl(const action_type &action) {
       cart_pole(dynamic_cast<const Move &>(action).direction == Move::RIGHT, &m_x, &m_x_dot, &m_theta, &m_theta_dot);
+
+      if(m_ignore_x) {
+        m_x = 0.0;
+        m_x_dot = 0.0;
+      }
 
       return failed() ? -1.0 : 0.0;
     }
@@ -175,6 +183,7 @@ namespace Cart_Pole {
     float m_x_dot;
     float m_theta;
     float m_theta_dot;
+    bool m_ignore_x;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {
@@ -183,7 +192,8 @@ namespace Cart_Pole {
     typedef std::pair<point_type, point_type> line_segment_type;
 
     Agent(const std::shared_ptr<environment_type> &env)
-     : ::Agent<feature_type, action_type>(env)
+     : ::Agent<feature_type, action_type>(env),
+     m_ignore_x(false)
     {
       set_credit_assignment(INV_LOG_UPDATE_COUNT);
       set_discount_rate(1.0);
@@ -193,6 +203,9 @@ namespace Cart_Pole {
       set_pseudoepisode_threshold(10);
       m_features_complete = false;
     }
+
+    bool is_ignoring_x() const {return m_ignore_x;}
+    void ignore_x(const bool &ignore_x_) {m_ignore_x = ignore_x_;}
 
     void print_value_function_grid(std::ostream &os) const {
 //       std::set<line_segment_type> line_segments;
@@ -333,10 +346,14 @@ namespace Cart_Pole {
 
       assert(!m_features);
 
-      Feature::List * x_tail = &(new Feature(Feature::X, -2.4, 2.4, 0))->features;
-      x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-      Feature::List * x_dot_tail = &(new Feature(Feature::X_DOT, -10, 10, 0))->features;
-      x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+      Feature::List * x_tail = nullptr;
+      Feature::List * x_dot_tail = nullptr;
+      if(!m_ignore_x) {
+        x_tail = &(new Feature(Feature::X, -2.4, 2.4, 0))->features;
+        x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+        x_dot_tail = &(new Feature(Feature::X_DOT, -10, 10, 0))->features;
+        x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+      }
       Feature::List * theta_tail = &(new Feature(Feature::THETA, -0.2094384, 0.2094384, 0))->features;
       theta_tail = theta_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
       Feature::List * theta_dot_tail = &(new Feature(Feature::THETA_DOT, -10, 10, 0))->features;
@@ -352,10 +369,12 @@ namespace Cart_Pole {
         Feature::List * theta_dot_tail_next = nullptr;
 
         std::for_each(tries.begin(), tries.end(), [this,&env,&x_tail,&x_dot_tail,&theta_tail,&theta_dot_tail,&x_tail_next,&x_dot_tail_next,&theta_tail_next,&theta_dot_tail_next](feature_trie &trie) {
-          if(generate_feature_ranged(env, trie, x_tail, x_tail_next))
-            return;
-          if(generate_feature_ranged(env, trie, x_dot_tail, x_dot_tail_next))
-            return;
+          if(!m_ignore_x) {
+            if(generate_feature_ranged(env, trie, x_tail, x_tail_next))
+              return;
+            if(generate_feature_ranged(env, trie, x_dot_tail, x_dot_tail_next))
+              return;
+          }
           if(generate_feature_ranged(env, trie, theta_tail, theta_tail_next))
             return;
           if(generate_feature_ranged(env, trie, theta_dot_tail, theta_dot_tail_next))
@@ -413,6 +432,8 @@ namespace Cart_Pole {
       else
         m_metastate = NON_TERMINAL;
     }
+
+    bool m_ignore_x;
   };
 
 }

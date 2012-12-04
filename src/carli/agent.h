@@ -166,7 +166,9 @@ public:
    m_split_update_count(0),
    m_split_pseudoepisodes(0),
    m_split_cabe(0.84155),
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
    m_split_mabe(0.84155),
+#endif
    m_contribute_update_count(0)
   {
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
@@ -292,10 +294,12 @@ public:
     m_split_cabe = split_cabe;
   }
 
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   double get_split_mabe() const {return m_split_mabe;}
   void set_split_mabe(const double &split_mabe) {
     m_split_mabe = split_mabe;
   }
+#endif
 
   size_t get_contribute_update_count() const {return m_contribute_update_count;}
   void set_contribute_update_count(const size_t &contribute_update_count) {
@@ -309,7 +313,9 @@ public:
   size_t get_step_count() const {return m_step_count;}
   reward_type get_total_reward() const {return m_total_reward;}
   Mean get_mean_cabe() const {return m_mean_cabe;}
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   Mean get_mean_mabe() const {return m_mean_mabe;}
+#endif
 
   void init() {
     if(m_metastate != NON_TERMINAL)
@@ -543,7 +549,9 @@ protected:
       q_new += q.value;
 
       if(q.type == Q_Value::SPLIT) {
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
         this->m_mean_mabe.uncontribute(q.mabe);
+#endif
         this->m_mean_cabe.uncontribute(q.cabe);
 #ifdef TRACK_Q_VALUE_VARIANCE
         this->m_mean_variance.uncontribute(q.variance_total);
@@ -561,10 +569,14 @@ protected:
         const double abs_delta = std::abs(delta);
 
         q.cabe += abs_delta;
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
         q.mabe = q.cabe / q.update_count;
+#endif
         if(q.update_count > m_contribute_update_count) {
           this->m_mean_cabe.contribute(q.cabe);
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
           this->m_mean_mabe.contribute(q.mabe);
+#endif
         }
 
 #ifdef WHITESON_ADAPTIVE_TILE
@@ -599,8 +611,10 @@ protected:
     std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {
       if(q.type == Q_Value::UNSPLIT) {
         std::cerr << " updates:  " << q.update_count << std::endl
-                  << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl
-                  << " mabe:     " << q.mabe << " of " << this->m_mean_mabe << ':' << this->m_mean_mabe.get_stddev() << std::endl;
+                  << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl;
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+        std::cerr << " mabe:     " << q.mabe << " of " << this->m_mean_mabe << ':' << this->m_mean_mabe.get_stddev() << std::endl;
+#endif
 #ifdef TRACK_Q_VALUE_VARIANCE
         std::cerr << " variance: " << q.variance_total << " of " << this->m_mean_variance << ':' << this->m_mean_variance.get_stddev() << std::endl;
 #endif
@@ -725,8 +739,7 @@ protected:
 
     if(q->update_count > m_split_update_count &&
        q->pseudoepisode_count > m_split_pseudoepisodes &&
-       m_mean_cabe.outlier_above(q->cabe, m_split_cabe) &&
-       m_mean_mabe.outlier_above(q->mabe, m_split_mabe))
+       m_mean_cabe.outlier_above(q->cabe, m_split_cabe))
     {
       q->type = Q_Value::SPLIT;
       return true;
@@ -909,7 +922,7 @@ private:
   }
   
   static void collapse_fringe(feature_trie &leaf_fringe, feature_trie head) {
-    assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type != Q_Value::FRINGE); ///< TODO: Convert FRINGE to UNSPLIT
+//     assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type != Q_Value::FRINGE); ///< TODO: Convert FRINGE to UNSPLIT
     
     if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::FRINGE)
       leaf_fringe->destroy(leaf_fringe);
@@ -946,7 +959,9 @@ private:
   virtual void update() = 0;
 
   Mean m_mean_cabe;
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   Mean m_mean_mabe;
+#endif
 #ifdef TRACK_Q_VALUE_VARIANCE
   Mean m_mean_variance;
 #endif
