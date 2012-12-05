@@ -46,7 +46,7 @@ namespace Mountain_Car {
       velocity += float((a-1)*0.001 + cos(3*position)*(-0.0025));
       if (velocity > mcar_max_velocity) velocity = float(mcar_max_velocity);
       if (velocity < -mcar_max_velocity) velocity = float(-mcar_max_velocity);
-      float(position += velocity);
+      position += float(velocity);
       if (position > mcar_max_position) position = float(mcar_max_position);
       if (position < mcar_min_position) position = float(mcar_min_position);
       if (position==mcar_min_position && velocity<0) velocity = 0;}
