@@ -9,6 +9,7 @@
 
 #include "blocks_world.h"
 #include "cart_pole.h"
+#include "mountain_car.h"
 #include "puddle_world.h"
 #include "getopt.h"
 
@@ -58,7 +59,7 @@ struct Arguments {
   Blocks_World::Agent::Credit_Assignment credit_assignment;
   double credit_assignment_epsilon;
   double discount_rate;
-  enum {BLOCKS_WORLD, CART_POLE, PUDDLE_WORLD} environment;
+  enum {BLOCKS_WORLD, CART_POLE, MOUNTAIN_CAR, PUDDLE_WORLD} environment;
   double epsilon;
   bool ignore_x;
   double learning_rate;
@@ -135,13 +136,15 @@ Options generate_options() {
       g_args.environment = Arguments::BLOCKS_WORLD;
     else if(!strcmp(args.at(0), "cart-pole"))
       g_args.environment = Arguments::CART_POLE;
+    else if(!strcmp(args.at(0), "mountain-car"))
+      g_args.environment = Arguments::MOUNTAIN_CAR;
     else if(!strcmp(args.at(0), "puddle-world"))
       g_args.environment = Arguments::PUDDLE_WORLD;
     else {
       std::cerr << "Illegal environment selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal environment selection.");
     }
-  }, 1), "blocks-world/cart-pole/puddle-world");
+  }, 1), "blocks-world/cart-pole/mountain-car/puddle-world");
   options.add(     "ignore-x", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "true"))
       g_args.ignore_x = true;
@@ -266,6 +269,10 @@ int main2(int argc, char **argv) {
 
     case Arguments::CART_POLE:
       run_agent<Cart_Pole::Environment, Cart_Pole::Agent>();
+      break;
+
+    case Arguments::MOUNTAIN_CAR:
+      run_agent<Mountain_Car::Environment, Mountain_Car::Agent>();
       break;
 
     case Arguments::PUDDLE_WORLD:
@@ -419,6 +426,10 @@ void run_agent() {
       auto pwa = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent);
       pwa->print_policy(std::cout, 32);
     }
+    else if(g_args.environment == Arguments::MOUNTAIN_CAR) {
+      auto pwa = std::dynamic_pointer_cast<Mountain_Car::Agent>(agent);
+      pwa->print_policy(std::cout, 32);
+    }
     else if(g_args.environment == Arguments::PUDDLE_WORLD) {
       auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
       pwa->print_policy(std::cout, 32);
@@ -426,10 +437,16 @@ void run_agent() {
   }
   else if(g_args.output == Arguments::EXPERIMENTAL) {
     if(g_args.environment == Arguments::CART_POLE) {
-      auto pwa = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent);
-      pwa->print_policy(std::cerr, 32);
-      pwa->print_value_function_grid(std::cerr);
-      pwa->print_update_count_grid(std::cerr);
+      auto cpa = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent);
+      cpa->print_policy(std::cerr, 32);
+      cpa->print_value_function_grid(std::cerr);
+      cpa->print_update_count_grid(std::cerr);
+    }
+    else if(g_args.environment == Arguments::MOUNTAIN_CAR) {
+      auto mca = std::dynamic_pointer_cast<Mountain_Car::Agent>(agent);
+      mca->print_policy(std::cerr, 32);
+      mca->print_value_function_grid(std::cerr);
+      mca->print_update_count_grid(std::cerr);
     }
     else if(g_args.environment == Arguments::PUDDLE_WORLD) {
       auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);

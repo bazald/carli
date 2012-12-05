@@ -11,8 +11,6 @@
 #include <stdexcept>
 
 namespace Puddle_World {
-  
-  typedef int block_id;
 
   class Feature;
   class Feature : public ::Feature<Feature> {

@@ -1,5 +1,5 @@
-#ifndef CART_POLE_H
-#define CART_POLE_H
+#ifndef MOUNTAIN_CAR_H
+#define MOUNTAIN_CAR_H
 
 #include "agent.h"
 #include "environment.h"
@@ -10,14 +10,14 @@
 #include <list>
 #include <stdexcept>
 
-namespace Cart_Pole {
+namespace Mountain_Car {
 
   class Feature;
   class Feature : public ::Feature<Feature> {
     Feature & operator=(const Feature &);
 
   public:
-    enum Axis {X, X_DOT, THETA, THETA_DOT};
+    enum Axis {X, X_DOT};
 
     Feature()
      : ::Feature<Feature>(true)
@@ -55,10 +55,8 @@ namespace Cart_Pole {
 
     void print_impl(std::ostream &os) const {
       switch(axis) {
-        case X:         os << 'x';         break;
-        case X_DOT:     os << "x-dot";     break;
-        case THETA:     os << "theta";     break;
-        case THETA_DOT: os << "theta-dot"; break;
+        case X:     os << 'x';     break;
+        case X_DOT: os << "x-dot"; break;
         default: abort();
       }
 
@@ -79,9 +77,9 @@ namespace Cart_Pole {
 
   class Move : public action_type {
   public:
-    enum Direction {LEFT, RIGHT};
+    enum Direction {LEFT = 0, IDLE = 1, RIGHT = 2};
 
-    Move(const Direction &direction_ = LEFT)
+    Move(const Direction &direction_ = IDLE)
      : direction(direction_)
     {
     }
@@ -99,6 +97,7 @@ namespace Cart_Pole {
 
       switch(direction) {
         case LEFT:  os << "left";  break;
+        case IDLE:  os << "idle";  break;
         case RIGHT: os << "right"; break;
         default: abort();
       }
@@ -115,70 +114,44 @@ namespace Cart_Pole {
 
     Environment()
      : m_x(0.0f),
-     m_x_dot(0.0f),
-     m_theta(0.0f),
-     m_theta_dot(0.0f),
-     m_ignore_x(false)
+     m_x_dot(0.0f)
     {
       Environment::init_impl();
     }
 
     const float & get_x() const {return m_x;}
     const float & get_x_dot() const {return m_x_dot;}
-    const float & get_theta() const {return m_theta;}
-    const float & get_theta_dot() const {return m_theta_dot;}
     const float & get_value(const Feature::Axis &index) const {return *(&m_x + index);}
-    bool is_ignoring_x() const {return m_ignore_x;}
 
     void set_x(const float &x_) {m_x = x_;}
     void set_x_dot(const float &x_dot_) {m_x = x_dot_;}
-    void set_theta_dot(const float &theta_dot_) {m_theta = theta_dot_;}
-    void set_theta(const float &theta_) {m_theta = theta_;}
-    void ignore_x(const bool &ignore_x_) {m_ignore_x = ignore_x_;}
 
-    bool failed() const {
-      return get_box(m_x, m_x_dot, m_theta, m_theta_dot) < 0;
+    bool success() const {
+      return MCarAtGoal(m_x, m_x_dot);
     }
 
   private:
     void init_impl() {
-      m_x = 0.0;
-      m_x_dot = 0.0;
-      m_theta = 0.0;
-      m_theta_dot = 0.0;
-
-      m_random_motion = Zeni::Random(m_random_init.rand());
+      MCarInit(m_x, m_x_dot);
     }
 
     reward_type transition_impl(const action_type &action) {
-      cart_pole(dynamic_cast<const Move &>(action).direction == Move::RIGHT, &m_x, &m_x_dot, &m_theta, &m_theta_dot);
+      MCarStep(m_x, m_x_dot, int(dynamic_cast<const Move &>(action).direction));
 
-      if(m_ignore_x) {
-        m_x = 0.0;
-        m_x_dot = 0.0;
-      }
-
-      return failed() ? -1.0 : 0.0;
+      return success() ? 1 : 0;
     }
 
     void print_impl(std::ostream &os) const {
-      os << "Cart Pole:" << std::endl;
-      os << " (" << m_x << ", " << m_x_dot << ", " << m_theta << ", " << m_theta_dot << ')' << std::endl;
+      os << "Mountain Car:" << std::endl;
+      os << " (" << m_x << ", " << m_x_dot << ')' << std::endl;
     }
 
-    static double prob_push_right(const double &s);
-    float pole_random();
-    void cart_pole(int action, float *x, float *x_dot, float *theta, float *theta_dot);
-    static int get_box(float x, float x_dot, float theta, float theta_dot);
-
-    Zeni::Random m_random_init;
-    Zeni::Random m_random_motion;
+    static void MCarInit(float &position, float &velocity);               // initialize car state
+    static void MCarStep(float &position, float &velocity, int a);        // update car state for given action
+    static bool MCarAtGoal(const float &position, const float &velocity); // is car at goal?
 
     float m_x;
     float m_x_dot;
-    float m_theta;
-    float m_theta_dot;
-    bool m_ignore_x;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {
@@ -187,8 +160,7 @@ namespace Cart_Pole {
     typedef std::pair<point_type, point_type> line_segment_type;
 
     Agent(const std::shared_ptr<environment_type> &env)
-     : ::Agent<feature_type, action_type>(env),
-     m_ignore_x(false)
+     : ::Agent<feature_type, action_type>(env)
     {
       set_credit_assignment(INV_LOG_UPDATE_COUNT);
       set_discount_rate(1.0);
@@ -198,9 +170,6 @@ namespace Cart_Pole {
       set_pseudoepisode_threshold(10);
       m_features_complete = false;
     }
-
-    bool is_ignoring_x() const {return m_ignore_x;}
-    void ignore_x(const bool &ignore_x_) {m_ignore_x = ignore_x_;}
 
     void print_value_function_grid(std::ostream &os) const {
 //       std::set<line_segment_type> line_segments;
@@ -341,38 +310,23 @@ namespace Cart_Pole {
 
       assert(!m_features);
 
-      Feature::List * x_tail = nullptr;
-      Feature::List * x_dot_tail = nullptr;
-      if(!m_ignore_x) {
-        x_tail = &(new Feature(Feature::X, -2.4, 2.4, 0))->features;
-        x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-        x_dot_tail = &(new Feature(Feature::X_DOT, -10, 10, 0))->features;
-        x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-      }
-      Feature::List * theta_tail = &(new Feature(Feature::THETA, -0.2094384, 0.2094384, 0))->features;
-      theta_tail = theta_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-      Feature::List * theta_dot_tail = &(new Feature(Feature::THETA_DOT, -10, 10, 0))->features;
-      theta_dot_tail = theta_dot_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+      Feature::List * x_tail = &(new Feature(Feature::X, -1.2, 0.6, 0))->features;
+      x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+      Feature::List * x_dot_tail = &(new Feature(Feature::X_DOT, -0.07, 0.07, 0))->features;
+      x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
 
-      std::array<feature_trie, 2> tries = {{get_trie(Move(Move::LEFT)),
+      std::array<feature_trie, 3> tries = {{get_trie(Move(Move::LEFT)),
+                                            get_trie(Move(Move::IDLE)),
                                             get_trie(Move(Move::RIGHT))}};
 
       for(;;) {
         Feature::List * x_tail_next = nullptr;
         Feature::List * x_dot_tail_next = nullptr;
-        Feature::List * theta_tail_next = nullptr;
-        Feature::List * theta_dot_tail_next = nullptr;
 
-        std::for_each(tries.begin(), tries.end(), [this,&env,&x_tail,&x_dot_tail,&theta_tail,&theta_dot_tail,&x_tail_next,&x_dot_tail_next,&theta_tail_next,&theta_dot_tail_next](feature_trie &trie) {
-          if(!m_ignore_x) {
-            if(generate_feature_ranged(env, trie, x_tail, x_tail_next))
-              return;
-            if(generate_feature_ranged(env, trie, x_dot_tail, x_dot_tail_next))
-              return;
-          }
-          if(generate_feature_ranged(env, trie, theta_tail, theta_tail_next))
+        std::for_each(tries.begin(), tries.end(), [this,&env,&x_tail,&x_dot_tail,&x_tail_next,&x_dot_tail_next](feature_trie &trie) {
+          if(generate_feature_ranged(env, trie, x_tail, x_tail_next))
             return;
-          if(generate_feature_ranged(env, trie, theta_dot_tail, theta_dot_tail_next))
+          if(generate_feature_ranged(env, trie, x_dot_tail, x_dot_tail_next))
             return;
         });
 
@@ -380,12 +334,8 @@ namespace Cart_Pole {
           x_tail = x_tail_next;
         if(x_dot_tail_next)
           x_dot_tail = x_dot_tail_next;
-        if(theta_dot_tail_next)
-          theta_dot_tail = theta_dot_tail_next;
-        if(theta_tail_next)
-          theta_tail = theta_tail_next;
 
-        if(!x_tail_next && !x_dot_tail_next && !theta_tail_next && !theta_dot_tail_next)
+        if(!x_tail_next && !x_dot_tail_next)
           break;
       }
     }
@@ -414,21 +364,15 @@ namespace Cart_Pole {
       assert(!m_candidates);
 
       (new Move(Move::LEFT))->candidates.insert_before(m_candidates);
+      (new Move(Move::IDLE))->candidates.insert_before(m_candidates);
       (new Move(Move::RIGHT))->candidates.insert_before(m_candidates);
     }
 
     void update() {
       auto env = std::dynamic_pointer_cast<const Environment>(get_env());
 
-      if(env->failed())
-        m_metastate = FAILURE;
-      else if(get_step_count() > 9999)
-        m_metastate = SUCCESS;
-      else
-        m_metastate = NON_TERMINAL;
+      m_metastate = env->success() ? SUCCESS : NON_TERMINAL;
     }
-
-    bool m_ignore_x;
   };
 
 }
