@@ -43,15 +43,15 @@ namespace Mountain_Car {
   void Environment::MCarStep(float &position, float &velocity, int a)
   // Take action a, update state of car
     { assert(0 <= a && a <= 2);
-      velocity += (a-1)*0.001 + cos(3*position)*(-0.0025);
-      if (velocity > mcar_max_velocity) velocity = mcar_max_velocity;
-      if (velocity < -mcar_max_velocity) velocity = -mcar_max_velocity;
-      position += velocity;
-      if (position > mcar_max_position) position = mcar_max_position;
-      if (position < mcar_min_position) position = mcar_min_position;
+      velocity += float((a-1)*0.001 + cos(3*position)*(-0.0025));
+      if (velocity > mcar_max_velocity) velocity = float(mcar_max_velocity);
+      if (velocity < -mcar_max_velocity) velocity = float(-mcar_max_velocity);
+      float(position += velocity);
+      if (position > mcar_max_position) position = float(mcar_max_position);
+      if (position < mcar_min_position) position = float(mcar_min_position);
       if (position==mcar_min_position && velocity<0) velocity = 0;}
 
-  bool Environment::MCarAtGoal(const float &position, const float &velocity)
+  bool Environment::MCarAtGoal(const float &position, const float &/*velocity*/)
   // Is Car within goal region?
     { return position >= mcar_goal_position;}
 
