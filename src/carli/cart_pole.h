@@ -134,7 +134,7 @@ namespace Cart_Pole {
     void set_x_dot(const float &x_dot_) {m_x = x_dot_;}
     void set_theta_dot(const float &theta_dot_) {m_theta = theta_dot_;}
     void set_theta(const float &theta_) {m_theta = theta_;}
-    void ignore_x(const bool &ignore_x_) {m_ignore_x = ignore_x_;}
+    void set_ignore_x(const bool &ignore_x_) {m_ignore_x = ignore_x_;}
 
     bool failed() const {
       return get_box(m_x, m_x_dot, m_theta, m_theta_dot) < 0;
@@ -200,7 +200,7 @@ namespace Cart_Pole {
     }
 
     bool is_ignoring_x() const {return m_ignore_x;}
-    void ignore_x(const bool &ignore_x_) {m_ignore_x = ignore_x_;}
+    void set_ignore_x(const bool &ignore_x_) {m_ignore_x = ignore_x_;}
 
     void print_value_function_grid(std::ostream &os) const {
 //       std::set<line_segment_type> line_segments;

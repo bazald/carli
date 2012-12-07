@@ -43,6 +43,7 @@ struct Arguments {
     output(SIMPLE),
     on_policy(true),
     pseudoepisode_threshold(20),
+    reward_negative(false),
     seed(uint32_t(time(0))),
     split_min(0),
     split_max(size_t(-1)),
@@ -68,6 +69,7 @@ struct Arguments {
   enum {SIMPLE, EXPERIMENTAL} output;
   bool on_policy;
   size_t pseudoepisode_threshold;
+  bool reward_negative;
   uint32_t seed;
   size_t split_min;
   size_t split_max;
@@ -198,6 +200,16 @@ Options generate_options() {
       throw std::runtime_error("Illegal policy selection.");
     }
   }, 1), "on-policy/off-policy");
+  options.add(     "reward-negative", Options::Option([](const std::vector<const char *> &args) {
+    if(!strcmp(args.at(0), "true"))
+      g_args.reward_negative = true;
+    else if(!strcmp(args.at(0), "false"))
+      g_args.reward_negative = false;
+    else {
+      std::cerr << "Illegal reward-negative selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal reward-negative selection.");
+    }
+  }, 1), "true/false, applies only to mountain-car");
   options.add('s', "seed", Options::Option([](const std::vector<const char *> &args) {
     g_args.seed = atoi(args.at(0));
   }, 1), "(-inf,inf)");
@@ -362,12 +374,14 @@ void run_agent() {
   agent->set_discount_rate(g_args.discount_rate);
   agent->set_epsilon(g_args.epsilon);
   if(auto cart_pole = std::dynamic_pointer_cast<Cart_Pole::Environment>(env))
-    cart_pole->ignore_x(g_args.ignore_x);
+    cart_pole->set_ignore_x(g_args.ignore_x);
   if(auto cart_pole = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent))
-    cart_pole->ignore_x(g_args.ignore_x);
+    cart_pole->set_ignore_x(g_args.ignore_x);
   agent->set_learning_rate(g_args.learning_rate);
   agent->set_on_policy(g_args.on_policy);
   agent->set_pseudoepisode_threshold(g_args.pseudoepisode_threshold);
+  if(auto mountain_car = std::dynamic_pointer_cast<Mountain_Car::Environment>(env))
+    mountain_car->set_reward_negative(g_args.reward_negative);
   agent->set_split_min(g_args.split_min);
   agent->set_split_max(g_args.split_max);
   agent->set_split_update_count(g_args.split_update_count);

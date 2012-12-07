@@ -114,7 +114,8 @@ namespace Mountain_Car {
 
     Environment()
      : m_x(0.0f),
-     m_x_dot(0.0f)
+     m_x_dot(0.0f),
+     m_reward_negative(false)
     {
       Environment::init_impl();
     }
@@ -122,9 +123,11 @@ namespace Mountain_Car {
     const float & get_x() const {return m_x;}
     const float & get_x_dot() const {return m_x_dot;}
     const float & get_value(const Feature::Axis &index) const {return *(&m_x + index);}
+    bool is_reward_negative() const {return m_reward_negative;}
 
     void set_x(const float &x_) {m_x = x_;}
     void set_x_dot(const float &x_dot_) {m_x = x_dot_;}
+    void set_reward_negative(const bool &reward_negative_) {m_reward_negative = reward_negative_;}
 
     bool success() const {
       return MCarAtGoal(m_x, m_x_dot);
@@ -138,7 +141,7 @@ namespace Mountain_Car {
     reward_type transition_impl(const action_type &action) {
       MCarStep(m_x, m_x_dot, int(dynamic_cast<const Move &>(action).direction));
 
-      return success() ? 1 : 0;
+      return (success() ? 1 : 0) + (m_reward_negative ? -1 : 0);
     }
 
     void print_impl(std::ostream &os) const {
@@ -152,6 +155,7 @@ namespace Mountain_Car {
 
     float m_x;
     float m_x_dot;
+    bool m_reward_negative;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {
