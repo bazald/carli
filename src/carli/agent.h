@@ -156,6 +156,8 @@ public:
    m_total_reward(reward_type()),
    m_learning_rate(0.3),
    m_discount_rate(0.9),
+   m_eligibility_trace_decay_rate(0.0),
+   m_eligibility_trace_decay_threshold(0.0001),
    m_credit_assignment_code(EVEN),
    m_credit_assignment_epsilon(0.5),
    m_on_policy(false),
@@ -169,7 +171,8 @@ public:
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
    m_split_mabe(0.84155),
 #endif
-   m_contribute_update_count(0)
+   m_contribute_update_count(0),
+   m_eligible(nullptr)
   {
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
     m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
@@ -200,6 +203,20 @@ public:
     if(discount_rate < 0.0 || discount_rate > 1.0)
       throw std::range_error("Illegal discount rate.");
     m_discount_rate = discount_rate;
+  }
+
+  double get_eligibility_trace_decay_rate() const {return m_eligibility_trace_decay_rate;}
+  void set_eligibility_trace_decay_rate(const double &eligibility_trace_decay_rate) {
+    if(eligibility_trace_decay_rate < 0.0 || eligibility_trace_decay_rate > 1.0)
+      throw std::range_error("Illegal eligibility trace decay rate rate.");
+    m_eligibility_trace_decay_rate = eligibility_trace_decay_rate;
+  }
+
+  double get_eligibility_trace_decay_threshold() const {return m_eligibility_trace_decay_threshold;}
+  void set_eligibility_trace_decay_threshold(const double &eligibility_trace_decay_threshold) {
+    if(eligibility_trace_decay_threshold < 0.0 || eligibility_trace_decay_threshold > 1.0)
+      throw std::range_error("Illegal eligibility trace decay threshold threshold.");
+    m_eligibility_trace_decay_threshold = eligibility_trace_decay_threshold;
   }
 
   Credit_Assignment get_credit_assignment() const {return m_credit_assignment_code;}
@@ -324,6 +341,8 @@ public:
     m_step_count = 0;
     m_total_reward = reward_type();
 
+    m_eligible = nullptr;
+
     regenerate_lists();
 
     if(m_metastate == NON_TERMINAL)
@@ -350,7 +369,13 @@ public:
       td_update(&value_current->current, reward, &value_best->next);
 
       if(!m_on_policy) {
-        m_next = m_exploration_policy();
+        std::unique_ptr<const action_type> next = m_exploration_policy();
+
+        if(*m_next != *next) {
+          m_eligible = nullptr;
+          m_next = std::move(next);
+        }
+
 #ifdef DEBUG_OUTPUT
         std::cerr << "   " << *m_next << " is next." << std::endl;
 #endif
@@ -534,72 +559,99 @@ protected:
 
     m_credit_assignment(current);
 
+    std::for_each(current->begin(current), current->end(current), [this](Q_Value &q) {
+      const double credit = this->m_learning_rate * q.credit;
+
+      if(q.eligibility < m_eligibility_trace_decay_threshold) {
+        if(credit >= m_eligibility_trace_decay_threshold) {
+          q.eligible.erase();
+          q.eligible.insert_before(this->m_eligible);
+        }
+      }
+
+      q.eligibility_init = true;
+      q.eligibility = credit;
+    });
+
     const double delta = target_value - q_old;
     double q_new = double();
-    std::for_each(current->begin(current), current->end(current), [this,&delta,&q_new
+    std::for_each(m_eligible->begin(m_eligible), m_eligible->end(m_eligible), [this,&delta,&q_new
 #ifdef TRACK_Q_VALUE_VARIANCE
-                                                                   ,&variance_total_next
+                                                                              ,&variance_total_next
 #endif
-                                                                   ](Q_Value &q) {
+                                                                              ](Q_Value &q) {
 #ifdef TRACK_Q_VALUE_VARIANCE
       const double local_old = q.value;
 #endif
 
-      q.value += this->m_learning_rate * q.credit * delta;
+      q.value += q.eligibility * delta;
       q_new += q.value;
 
-      if(q.type == Q_Value::SPLIT) {
-#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-        this->m_mean_mabe.uncontribute(q.mabe);
-#endif
-        this->m_mean_cabe.uncontribute(q.cabe);
-#ifdef TRACK_Q_VALUE_VARIANCE
-        this->m_mean_variance.uncontribute(q.variance_total);
-#endif
+      if(q.eligibility >= m_eligibility_trace_decay_threshold) {
+        q.eligibility *= this->m_eligibility_trace_decay_rate;
+        if(q.eligibility < m_eligibility_trace_decay_threshold) {
+          if(&q.eligible == this->m_eligible)
+            this->m_eligible = this->m_eligible->next();
+          q.eligible.erase();
+        }
       }
-      else if(q.type == Q_Value::UNSPLIT) {
-        if(q.last_episode_fired != this->m_episode_number) {
-          ++q.pseudoepisode_count;
-          q.last_episode_fired = this->m_episode_number;
-        }
-        else if(this->m_step_count - q.last_step_fired > m_pseudoepisode_threshold)
-          ++q.pseudoepisode_count;
-        q.last_step_fired = this->m_step_count;
 
-        const double abs_delta = std::abs(delta);
+      if(q.eligibility_init) {
+        q.eligibility_init = false;
 
-        q.cabe += abs_delta;
+        if(q.type == Q_Value::SPLIT) {
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-        q.mabe = q.cabe / q.update_count;
+          this->m_mean_mabe.uncontribute(q.mabe);
 #endif
-        if(q.update_count > m_contribute_update_count) {
-          this->m_mean_cabe.contribute(q.cabe);
-#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-          this->m_mean_mabe.contribute(q.mabe);
+          this->m_mean_cabe.uncontribute(q.cabe);
+#ifdef TRACK_Q_VALUE_VARIANCE
+          this->m_mean_variance.uncontribute(q.variance_total);
 #endif
         }
+        else if(q.type == Q_Value::UNSPLIT) {
+          if(q.last_episode_fired != this->m_episode_number) {
+            ++q.pseudoepisode_count;
+            q.last_episode_fired = this->m_episode_number;
+          }
+          else if(this->m_step_count - q.last_step_fired > m_pseudoepisode_threshold)
+            ++q.pseudoepisode_count;
+          q.last_step_fired = this->m_step_count;
+
+          const double abs_delta = std::abs(delta);
+
+          q.cabe += abs_delta;
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+          q.mabe = q.cabe / q.update_count;
+#endif
+          if(q.update_count > m_contribute_update_count) {
+            this->m_mean_cabe.contribute(q.cabe);
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+            this->m_mean_mabe.contribute(q.mabe);
+#endif
+          }
 
 #ifdef WHITESON_ADAPTIVE_TILE
-        if(abs_delta < q.minbe) {
-          q.minbe = abs_delta;
-          this->m_steps_since_minbe = 0;
-        }
-        else
-          ++this->m_steps_since_minbe;
+          if(abs_delta < q.minbe) {
+            q.minbe = abs_delta;
+            this->m_steps_since_minbe = 0;
+          }
+          else
+            ++this->m_steps_since_minbe;
 #endif
 
 #ifdef TRACK_Q_VALUE_VARIANCE
-        if(q.update_count > 1) {
-          const double x = local_old + delta;
-          const double mdelta = (x - local_old) * (x - q.value);
+          if(q.update_count > 1) {
+            const double x = local_old + delta;
+            const double mdelta = (x - local_old) * (x - q.value);
 
-          q.mean2 += mdelta / q.credit; ///< divide by q.credit to prevent shrinking of estimated variance due to credit assignment
-          q.variance_0 = q.mean2 / (q.update_count - 1);
-          q.variance_rest += local_learning_rate * (q.credit * this->m_discount_rate * variance_total_next - q.variance_rest);
-          q.variance_total = q.variance_0 + q.variance_rest;
-          this->m_mean_variance.contribute(q.variance_total);
-        }
+            q.mean2 += mdelta / q.credit; ///< divide by q.credit to prevent shrinking of estimated variance due to credit assignment
+            q.variance_0 = q.mean2 / (q.update_count - 1);
+            q.variance_rest += local_learning_rate * (q.credit * this->m_discount_rate * variance_total_next - q.variance_rest);
+            q.variance_total = q.variance_0 + q.variance_rest;
+            this->m_mean_variance.contribute(q.variance_total);
+          }
 #endif
+        }
       }
     });
 
@@ -980,6 +1032,8 @@ private:
 
   double m_learning_rate; ///< alpha
   double m_discount_rate; ///< gamma
+  double m_eligibility_trace_decay_rate; ///< lambda
+  double m_eligibility_trace_decay_threshold;
 
   Credit_Assignment m_credit_assignment_code;
   std::function<void (Q_Value::List * const &)> m_credit_assignment; ///< How to assign credit to multiple Q-values
@@ -996,6 +1050,8 @@ private:
   double m_split_cabe;
   double m_split_mabe;
   size_t m_contribute_update_count;
+
+  Q_Value::List * m_eligible;
 };
 
 template <typename FEATURE, typename ACTION>

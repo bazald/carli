@@ -24,6 +24,8 @@ public:
    pseudoepisode_count(0),
    update_count(0),
    type(type_),
+   eligibility_init(false),
+   eligibility(0.0),
    credit(1.0),
    value(q_value_),
 #ifdef WHITESON_ADAPTIVE_TILE
@@ -34,6 +36,7 @@ public:
    variance_0(0),
    variance_rest(0),
 #endif
+   eligible(this),
    current(this),
    next(this)
   {
@@ -52,6 +55,8 @@ public:
 
   Type type;
 
+  bool eligibility_init;
+  double eligibility;
   double credit;
 
   double value;
@@ -71,8 +76,20 @@ public:
 
   double t0; ///< temp "register"
 
+  List eligible;
   List current;
   List next;
+
+  static size_t eligible_offset() {
+    union {
+      const List Q_Value:: * m;
+      const char * c;
+    } u;
+    
+    u.c = nullptr;
+    u.m = &Q_Value::eligible;
+    return u.c - static_cast<char *>(nullptr);
+  }
 
   static size_t current_offset() {
     union {

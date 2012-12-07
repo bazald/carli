@@ -34,6 +34,8 @@ struct Arguments {
     : credit_assignment(Blocks_World::Agent::EVEN),
     credit_assignment_epsilon(0.5),
     discount_rate(1.0),
+    eligibility_trace_decay_rate(0.0),
+    eligibility_trace_decay_threshold(0.0001),
     environment(BLOCKS_WORLD),
     epsilon(0.1),
     ignore_x(false),
@@ -60,6 +62,8 @@ struct Arguments {
   Blocks_World::Agent::Credit_Assignment credit_assignment;
   double credit_assignment_epsilon;
   double discount_rate;
+  double eligibility_trace_decay_rate;
+  double eligibility_trace_decay_threshold;
   enum {BLOCKS_WORLD, CART_POLE, MOUNTAIN_CAR, PUDDLE_WORLD} environment;
   double epsilon;
   bool ignore_x;
@@ -124,6 +128,20 @@ Options generate_options() {
     if(g_args.credit_assignment_epsilon < 0.0 || g_args.credit_assignment_epsilon > 1.0) {
       std::cerr << "Illegal credit-assignment epsilon selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal credit-assignment epsilon selection.");
+    }
+  }, 1), "[0,1]");
+  options.add(     "eligibility-trace-decay-rate", Options::Option([](const std::vector<const char *> &args) {
+    g_args.eligibility_trace_decay_rate = atof(args.at(0));
+    if(g_args.eligibility_trace_decay_rate < 0.0 || g_args.eligibility_trace_decay_rate > 1.0) {
+      std::cerr << "Illegal eligibility trace decay rate selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal eligibility trace decay rate selection.");
+    }
+  }, 1), "[0,1]");
+  options.add(     "eligibility-trace-decay-threshold", Options::Option([](const std::vector<const char *> &args) {
+    g_args.eligibility_trace_decay_threshold = atof(args.at(0));
+    if(g_args.eligibility_trace_decay_threshold < 0.0 || g_args.eligibility_trace_decay_threshold > 1.0) {
+      std::cerr << "Illegal eligibility trace decay threshold selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal eligibility trace decay threshold selection.");
     }
   }, 1), "[0,1]");
   options.add('g', "epsilon-greedy", Options::Option([](const std::vector<const char *> &args) {
@@ -372,6 +390,8 @@ void run_agent() {
   agent->set_credit_assignment(typename AGENT::Credit_Assignment(g_args.credit_assignment));
   agent->set_credit_assignment_epsilon(g_args.credit_assignment_epsilon);
   agent->set_discount_rate(g_args.discount_rate);
+  agent->set_eligibility_trace_decay_rate(g_args.eligibility_trace_decay_rate);
+  agent->set_eligibility_trace_decay_threshold(g_args.eligibility_trace_decay_threshold);
   agent->set_epsilon(g_args.epsilon);
   if(auto cart_pole = std::dynamic_pointer_cast<Cart_Pole::Environment>(env))
     cart_pole->set_ignore_x(g_args.ignore_x);
