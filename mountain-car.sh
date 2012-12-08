@@ -1,1 +1,1 @@
-SEED=$RANDOM; ./carli -s $SEED -e mountain-car -c epsilon-even-depth --reward-negative true -d 1.0 -g 0.05 -l 0.15 -p off-policy --split-min 3 -t 10 --num-episodes 1000; echo $SEED
+SEED=$RANDOM; ./carli -s $SEED -e mountain-car -c inv-log-update-count --reward-negative false --eligibility-trace-decay-rate 0.3 -d 0.99 -g 0.01 -l 1 -p off-policy --split-min 3 -t 10 --num-episodes 1000; echo $SEED
