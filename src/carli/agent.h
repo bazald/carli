@@ -575,11 +575,10 @@ protected:
 
     const double delta = target_value - q_old;
     double q_new = double();
-    std::for_each(m_eligible->begin(m_eligible), m_eligible->end(m_eligible), [this,&delta,&q_new
-#ifdef TRACK_Q_VALUE_VARIANCE
-                                                                              ,&variance_total_next
-#endif
-                                                                              ](Q_Value &q) {
+    for(Q_Value::List * q_ptr = m_eligible; q_ptr; ) {
+      Q_Value &q = **q_ptr;
+      q_ptr = q.eligible.next();
+
 #ifdef TRACK_Q_VALUE_VARIANCE
       const double local_old = q.value;
 #endif
@@ -587,28 +586,21 @@ protected:
       q.value += q.eligibility * delta;
       q_new += q.value;
 
-      if(q.eligibility >= m_eligibility_trace_decay_threshold) {
-        q.eligibility *= this->m_eligibility_trace_decay_rate;
-        if(q.eligibility < m_eligibility_trace_decay_threshold) {
-          if(&q.eligible == this->m_eligible)
-            this->m_eligible = this->m_eligible->next();
-          q.eligible.erase();
-        }
-      }
+      q.eligibility_init = false;
 
-      if(q.eligibility_init) {
-        q.eligibility_init = false;
-
-        if(q.type == Q_Value::SPLIT) {
+      if(q.type == Q_Value::SPLIT) {
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-          this->m_mean_mabe.uncontribute(q.mabe);
+        this->m_mean_mabe.uncontribute(q.mabe);
 #endif
-          this->m_mean_cabe.uncontribute(q.cabe);
+        this->m_mean_cabe.uncontribute(q.cabe);
 #ifdef TRACK_Q_VALUE_VARIANCE
-          this->m_mean_variance.uncontribute(q.variance_total);
+        this->m_mean_variance.uncontribute(q.variance_total);
 #endif
-        }
-        else if(q.type == Q_Value::UNSPLIT) {
+      }
+      else if(q.type == Q_Value::UNSPLIT) {
+        const double abs_delta = std::abs(q.eligibility * delta);
+
+        if(q.eligibility_init) {
           if(q.last_episode_fired != this->m_episode_number) {
             ++q.pseudoepisode_count;
             q.last_episode_fired = this->m_episode_number;
@@ -616,19 +608,6 @@ protected:
           else if(this->m_step_count - q.last_step_fired > m_pseudoepisode_threshold)
             ++q.pseudoepisode_count;
           q.last_step_fired = this->m_step_count;
-
-          const double abs_delta = std::abs(delta);
-
-          q.cabe += abs_delta;
-#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-          q.mabe = q.cabe / q.update_count;
-#endif
-          if(q.update_count > m_contribute_update_count) {
-            this->m_mean_cabe.contribute(q.cabe);
-#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-            this->m_mean_mabe.contribute(q.mabe);
-#endif
-          }
 
 #ifdef WHITESON_ADAPTIVE_TILE
           if(abs_delta < q.minbe) {
@@ -638,22 +617,41 @@ protected:
           else
             ++this->m_steps_since_minbe;
 #endif
+        }
 
-#ifdef TRACK_Q_VALUE_VARIANCE
-          if(q.update_count > 1) {
-            const double x = local_old + delta;
-            const double mdelta = (x - local_old) * (x - q.value);
-
-            q.mean2 += mdelta / q.credit; ///< divide by q.credit to prevent shrinking of estimated variance due to credit assignment
-            q.variance_0 = q.mean2 / (q.update_count - 1);
-            q.variance_rest += local_learning_rate * (q.credit * this->m_discount_rate * variance_total_next - q.variance_rest);
-            q.variance_total = q.variance_0 + q.variance_rest;
-            this->m_mean_variance.contribute(q.variance_total);
-          }
+        q.cabe += abs_delta;
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+        q.mabe = q.cabe / q.update_count;
+#endif
+        if(q.update_count > m_contribute_update_count) {
+          this->m_mean_cabe.contribute(q.cabe);
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+          this->m_mean_mabe.contribute(q.mabe);
 #endif
         }
+
+#ifdef TRACK_Q_VALUE_VARIANCE
+        if(q.update_count > 1) {
+          const double x = local_old + delta;
+          const double mdelta = (x - local_old) * (x - q.value);
+
+          q.mean2 += mdelta / q.credit; ///< divide by q.credit to prevent shrinking of estimated variance due to credit assignment
+          q.variance_0 = q.mean2 / (q.update_count - 1);
+          q.variance_rest += local_learning_rate * (q.credit * this->m_discount_rate * variance_total_next - q.variance_rest);
+          q.variance_total = q.variance_0 + q.variance_rest;
+          this->m_mean_variance.contribute(q.variance_total);
+        }
+#endif
       }
-    });
+
+      assert(q.eligibility >= m_eligibility_trace_decay_threshold);
+      q.eligibility *= this->m_eligibility_trace_decay_rate;
+      if(q.eligibility < m_eligibility_trace_decay_threshold) {
+        if(&q.eligible == this->m_eligible)
+          this->m_eligible = this->m_eligible->next();
+        q.eligible.erase();
+      }
+    }
 
 #ifdef DEBUG_OUTPUT
     std::cerr << " td_update: " << q_old << " <" << m_learning_rate << "= " << reward << " + " << m_discount_rate << " * " << target_next << std::endl;
