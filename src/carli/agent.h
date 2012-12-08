@@ -372,7 +372,8 @@ public:
         std::unique_ptr<const action_type> next = m_exploration_policy();
 
         if(*m_next != *next) {
-          clear_eligibility_trace();
+          if(sum_value(nullptr, get_value(m_features, *next, Q_Value::current_offset())->current) < sum_value(nullptr, value_best->next))
+            clear_eligibility_trace();
           m_next = std::move(next);
         }
 
