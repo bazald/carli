@@ -586,8 +586,6 @@ protected:
       q.value += q.eligibility * delta;
       q_new += q.value;
 
-      q.eligibility_init = false;
-
       if(q.type == Q_Value::SPLIT) {
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
         this->m_mean_mabe.uncontribute(q.mabe);
@@ -651,6 +649,8 @@ protected:
           this->m_eligible = this->m_eligible->next();
         q.eligible.erase();
       }
+      else
+        q.eligibility_init = false;
     }
 
 #ifdef DEBUG_OUTPUT

@@ -43,11 +43,11 @@ g_ep_tuples = []
 #g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',   1.0, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
 
 #g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-specific', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, -1.0, 0))
-g_ep_tuples.append(('puddle-world', 0, 'inv-depth', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, -1.0, 0))
-g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, -1.0, 0))
-g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-specific', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, -1.0, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, -1.0, -1.0, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-depth', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-specific', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0))
 
 
 parser = argparse.ArgumentParser(description='Run PuddleWorld experiments.')
@@ -110,8 +110,7 @@ class Experiment:
     self.split_max = ep_tuple[10]
     self.split_pseudoepisodes = ep_tuple[11]
     self.split_cabe = ep_tuple[12]
-    self.split_mabe = ep_tuple[13]
-    self.split_update_count = ep_tuple[14]
+    self.split_update_count = ep_tuple[13]
     
   def get_args(self):
     args = ['./carli',
@@ -130,7 +129,6 @@ class Experiment:
             '--split-max', str(self.split_max),
             '--split-pseudoepisodes', str(self.split_pseudoepisodes),
             '--split-cabe', str(self.split_cabe),
-            '--split-mabe', str(self.split_mabe),
             '--split-update-count', str(self.split_update_count),
             '--output', 'experimental']
     return args
@@ -171,8 +169,7 @@ for ep_tuple in g_ep_tuples:
   dir += '_' + str(ep_tuple[10])
   dir += '_' + str(ep_tuple[11])
   dir += '_' + str(ep_tuple[12])
-  dir += '_' + str(ep_tuple[13])
-  #dir += '_' + str(ep_tuple[14])
+  #dir += '_' + str(ep_tuple[13])
   if not os.path.isdir(dir):
     os.mkdir(dir)
   dirs.append(dir)
