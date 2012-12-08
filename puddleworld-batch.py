@@ -43,11 +43,12 @@ g_ep_tuples = []
 #g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',   1.0, 1.0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
 
 #g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-specific', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-depth', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-specific', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
 g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-depth', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-specific', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
 
 
 parser = argparse.ArgumentParser(description='Run PuddleWorld experiments.')
@@ -206,6 +207,11 @@ class Progress:
     self.finished[experiment.ep_tuple] += 1
     self.lock.release()
 
+  def just_finished_plot(self, args):
+    self.lock.acquire()
+    self.finished['plots'] += 1
+    self.lock.release()
+
   def all_finished(self, ep_tuple):
     self.lock.acquire()
     num = self.count[ep_tuple]
@@ -213,26 +219,42 @@ class Progress:
     self.lock.release()
     return fin is num
 
+class Plots:
+  def __init__(self):
+    self.ep_tuple = 'plots'
+
+plots = []
+for i in range(len(g_ep_tuples) * (1 + len(g_plotter_grid) * len(g_plotter_grid_filters))):
+  plots.append(Plots())
+
+def syscall(args):
+  subprocess.call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+
+def take_fives(group):
+  while True:
+    job_server.print_stats()
+    if progress.all_finished(group):
+      break
+    else:
+      time.sleep(5)
+  job_server.wait(group)
+
 job_server = pp.Server(args.jobs)
-progress = Progress(experiments)
+progress = Progress(experiments + plots)
 start_time = time.time()
 jobs = [(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread',), callback=progress.just_finished, group=experiment.ep_tuple)) for experiment in experiments]
 
 for ep_tuple, dir in zip(g_ep_tuples, dirs):
-  while True:
-    job_server.print_stats()
-    if progress.all_finished(ep_tuple):
-      break
-    else:
-      time.sleep(5)
-  job_server.wait(ep_tuple)
+  take_fives(ep_tuple)
   args = [g_plotter] + glob.glob(dir + '/*.out')
   print 'Plotting data for ' + str(ep_tuple) + '\n'
-  subprocess.call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+  jobs.append(job_server.submit(syscall, (args,), (), ('subprocess', 'thread',), callback=progress.just_finished_plot, group='plots'))
   for plotter in g_plotter_grid:
     for filter in g_plotter_grid_filters:
       args = [plotter, filter] + glob.glob(dir + '/*.err')
       print 'Plotting ' + plotter + ' data for ' + str(ep_tuple) + ', ' + filter + '\n'
-      subprocess.call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+      jobs.append(job_server.submit(syscall, (args,), (), ('subprocess', 'thread',), callback=progress.just_finished_plot, group='plots'))
+
+take_fives('plots')
 
 print 'Total time elapsed: ', time.time() - start_time, 'seconds'
