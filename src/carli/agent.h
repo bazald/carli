@@ -341,7 +341,7 @@ public:
     m_step_count = 0;
     m_total_reward = reward_type();
 
-    m_eligible = nullptr;
+    clear_eligibility_trace();
 
     regenerate_lists();
 
@@ -372,7 +372,7 @@ public:
         std::unique_ptr<const action_type> next = m_exploration_policy();
 
         if(*m_next != *next) {
-          m_eligible = nullptr;
+          clear_eligibility_trace();
           m_next = std::move(next);
         }
 
@@ -525,10 +525,11 @@ protected:
     const double target_value = reward + target_next;
 
     double q_old = double();
+    Q_Value * last = nullptr;
 #ifdef DEBUG_OUTPUT
     std::cerr << " current :";
 #endif
-    std::for_each(current->begin(current), current->end(current), [&q_old](Q_Value &q) {
+    std::for_each(current->begin(current), current->end(current), [&q_old,&last](Q_Value &q) {
       if(q.type != Q_Value::FRINGE) {
         q_old += q.value;
         ++q.update_count;
@@ -536,6 +537,8 @@ protected:
         std::cerr << ' ' << &q;
 #endif
       }
+
+      last = &q;
     });
 #ifdef DEBUG_OUTPUT
     std::cerr << std::endl;
@@ -560,6 +563,10 @@ protected:
     m_credit_assignment(current);
 
     std::for_each(current->begin(current), current->end(current), [this](Q_Value &q) {
+//     assert(last);
+//     {
+//       Q_Value &q = *last;
+
       const double credit = this->m_learning_rate * q.credit;
 
       if(q.eligibility < m_eligibility_trace_decay_threshold) {
@@ -571,6 +578,7 @@ protected:
 
       q.eligibility_init = true;
       q.eligibility = credit;
+//     }
     });
 
     const double delta = target_value - q_old;
@@ -671,6 +679,14 @@ protected:
       }
     });
 #endif
+  }
+  
+  void clear_eligibility_trace() {
+    std::for_each(m_eligible->begin(m_eligible), m_eligible->end(m_eligible), [this](Q_Value &q) {
+      q.eligibility = 0.0;
+    });
+
+    m_eligible = nullptr;
   }
 
   void assign_credit_epsilon(Q_Value::List * const &value_list,
