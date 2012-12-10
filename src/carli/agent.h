@@ -569,16 +569,17 @@ protected:
 //       Q_Value &q = *last;
 
       const double credit = this->m_learning_rate * q.credit;
+//       const double credit_accum = credit + (q.eligibility < 0.0 ? 0.0 : q.eligibility);
 
-      if(q.eligibility < m_eligibility_trace_decay_threshold) {
-        if(credit >= m_eligibility_trace_decay_threshold) {
+      if(credit >= q.eligibility) {
+        if(q.eligibility < 0.0) {
           q.eligible.erase();
           q.eligible.insert_before(this->m_eligible);
         }
-      }
 
-      q.eligibility_init = true;
-      q.eligibility = credit;
+        q.eligibility_init = true;
+        q.eligibility = credit;
+      }
 //     }
     });
 
@@ -651,15 +652,15 @@ protected:
 #endif
       }
 
-      assert(q.eligibility >= m_eligibility_trace_decay_threshold);
+      assert(q.eligibility >= 0.0);
+      q.eligibility_init = false;
       q.eligibility *= this->m_eligibility_trace_decay_rate;
       if(q.eligibility < m_eligibility_trace_decay_threshold) {
         if(&q.eligible == this->m_eligible)
           this->m_eligible = this->m_eligible->next();
         q.eligible.erase();
+        q.eligibility = -1.0;
       }
-      else
-        q.eligibility_init = false;
     }
 
 #ifdef DEBUG_OUTPUT
@@ -684,7 +685,8 @@ protected:
   
   void clear_eligibility_trace() {
     std::for_each(m_eligible->begin(m_eligible), m_eligible->end(m_eligible), [this](Q_Value &q) {
-      q.eligibility = 0.0;
+      q.eligibility_init = false;
+      q.eligibility = -1.0;
     });
 
     m_eligible = nullptr;

@@ -25,7 +25,7 @@ public:
    update_count(0),
    type(type_),
    eligibility_init(false),
-   eligibility(0.0),
+   eligibility(-1.0),
    credit(1.0),
    value(q_value_),
 #ifdef WHITESON_ADAPTIVE_TILE
