@@ -81,7 +81,7 @@ class Handles:
 
 def main():
   fig = plt.figure()
-  fig.canvas.set_window_title('Puddle World')
+  fig.canvas.set_window_title('Mountain Car')
   
   pylab.axes([0.125,0.15,0.8375,0.75])
   
@@ -131,13 +131,13 @@ def main():
   pylab.ylabel('Y', fontsize=8)
   pylab.title('Generated Value Function for ' + target_entries, fontsize=10)
   
-  pylab.xlim(xmin=0, xmax=1)
-  pylab.ylim(ymin=0, ymax=1)
+  pylab.xlim(xmin=-1.2, xmax=0.6)
+  pylab.ylim(ymin=-0.07, ymax=0.07)
   
   #fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   #fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
-  fig.axes[0].set_xticks([0,1])
-  fig.axes[0].set_yticks([0,1])
+  fig.axes[0].set_xticks([-1,0])
+  fig.axes[0].set_yticks([0])
   
   #xlabels = fig.axes[0].xaxis.get_ticklabels()
   #last_xlabel = xlabels[len(xlabels) - 1]
@@ -150,8 +150,8 @@ def main():
   ##print last_xlabel
   
   if len(sys.argv) == 2:
-    pylab.savefig('puddle-world-' + target_entries + '.eps')
-    pylab.savefig('puddle-world-' + target_entries + '.png', dpi=1200)
+    pylab.savefig('mountain-car-' + target_entries + '.eps')
+    pylab.savefig('mountain-car-' + target_entries + '.png', dpi=1200)
     plt.show()
   else:
     splitd = directory.rsplit('/', 1)

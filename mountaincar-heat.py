@@ -81,7 +81,7 @@ class Handles:
 
 def main():
   fig = plt.figure()
-  fig.canvas.set_window_title('Puddle World')
+  fig.canvas.set_window_title('Mountain Car')
   
   pylab.axes([0.125,0.15,0.8375,0.75])
   
@@ -89,7 +89,8 @@ def main():
   if len(sys.argv) > 1:
     target_entries = sys.argv[1]
   
-  lines = {}
+  rects = {}
+  all_rects = {}
   for filename in sys.argv[2:]:
     f = open(filename, 'r')
     regt = re.compile('(.+):')
@@ -104,24 +105,33 @@ def main():
       if not t == None:
         entries = t.group(1)
         #print entries + ':'
-      elif entries == target_entries:
-        ls = regls.search(line)
-        if not ls == None:
-          key = (ls.group(1), ls.group(2), ls.group(3), ls.group(4))
+      else:
+        r = regr.search(line)
+        if not r == None:
+          key = (r.group(1), r.group(2), r.group(3), r.group(4), entries)
           try:
-            lines[key] += 1.0
+            all_rects[key] += int(r.group(5))
           except KeyError:
-            lines[key] = 1.0
-        #else:
-          #raise Exception('Unknown line encountered in stderr.txt')
+            all_rects[key] = int(r.group(5))
+
+          if entries == target_entries:
+            key = (float(r.group(1)), float(r.group(2)), float(r.group(3)), float(r.group(4)))
+            try:
+              rects[key] += int(r.group(5))
+            except KeyError:
+              rects[key] = int(r.group(5))
     f.close()
     directory=re.search('(^.*[^/]+)/+[^/]*$', filename).group(1)
   
-  divisor = len(sys.argv[2:])
-  for key, value in lines.iteritems():
-    frequency = value / divisor
-    rgb = 1 - frequency
-    fig.axes[0].add_line(pylab.Line2D([key[0], key[2]], [key[1], key[3]], color=(rgb, rgb, rgb), zorder=frequency))
+  divisor = 0
+  for key, value in all_rects.iteritems():
+    divisor = max(divisor, float(value) / ((float(key[2]) - float(key[0])) * (float(key[3]) - float(key[1]))))
+
+  for key, value in rects.iteritems():
+    area = (key[2] - key[0]) * (key[3] - key[1])
+    rgb = 1 - (value / area) / divisor
+    #print str(key[0]) + ',' + str(key[1]) + '-' + str(key[2]) + ',' + str(key[3]) + '=' + str(rgb)
+    fig.axes[0].add_patch(Rectangle((key[0], key[1]), key[2] - key[0], key[3] - key[1], color=(rgb, rgb, rgb), linewidth=0, zorder=(1 - area)))
 
   #pylab.legend(loc=4, handlelength=4.2, numpoints=2)
   
@@ -131,13 +141,13 @@ def main():
   pylab.ylabel('Y', fontsize=8)
   pylab.title('Generated Value Function for ' + target_entries, fontsize=10)
   
-  pylab.xlim(xmin=0, xmax=1)
-  pylab.ylim(ymin=0, ymax=1)
+  pylab.xlim(xmin=-1.2, xmax=0.6)
+  pylab.ylim(ymin=-0.07, ymax=0.07)
   
   #fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   #fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
-  fig.axes[0].set_xticks([0,1])
-  fig.axes[0].set_yticks([0,1])
+  fig.axes[0].set_xticks([-1,0])
+  fig.axes[0].set_yticks([0])
   
   #xlabels = fig.axes[0].xaxis.get_ticklabels()
   #last_xlabel = xlabels[len(xlabels) - 1]
@@ -150,12 +160,12 @@ def main():
   ##print last_xlabel
   
   if len(sys.argv) == 2:
-    pylab.savefig('puddle-world-' + target_entries + '.eps')
-    pylab.savefig('puddle-world-' + target_entries + '.png', dpi=1200)
+    pylab.savefig('mountain-car-' + target_entries + '.eps')
+    pylab.savefig('mountain-car-' + target_entries + '.png', dpi=1200)
     plt.show()
   else:
     splitd = directory.rsplit('/', 1)
-    filename = splitd[1]
+    filename = splitd[1] + '-heat'
     
     if not os.path.exists(splitd[0] + '/eps'):
       os.makedirs(splitd[0] + '/eps')

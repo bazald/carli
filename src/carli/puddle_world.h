@@ -349,13 +349,13 @@ namespace Puddle_World {
 
     void print_value_function_grid_set(std::ostream &os, const std::set<line_segment_type> &line_segments) const {
       std::for_each(line_segments.begin(), line_segments.end(), [&os](const line_segment_type &line_segment) {
-        os << line_segment.first.first << ',' << line_segment.first.second << '-' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
+        os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
       });
     }
 
     void print_update_count_map(std::ostream &os, const std::map<line_segment_type, size_t> &update_counts) const {
       std::for_each(update_counts.begin(), update_counts.end(), [&os](const std::pair<line_segment_type, size_t> &rect) {
-        os << rect.first.first.first << ',' << rect.first.first.second << '-' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
+        os << rect.first.first.first << ',' << rect.first.first.second << '/' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
       });
     }
 

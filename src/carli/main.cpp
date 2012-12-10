@@ -45,7 +45,7 @@ struct Arguments {
     output(SIMPLE),
     on_policy(true),
     pseudoepisode_threshold(20),
-    reward_negative(false),
+    reward_negative(true),
     seed(uint32_t(time(0))),
     split_min(0),
     split_max(size_t(-1)),

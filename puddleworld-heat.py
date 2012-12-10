@@ -94,8 +94,8 @@ def main():
   for filename in sys.argv[2:]:
     f = open(filename, 'r')
     regt = re.compile('(.+):')
-    regls = re.compile('(.+),(.+)-(.+),([^=]+)$')
-    regr = re.compile('(.+),(.+)-(.+),(.+)=(.+)$')
+    regls = re.compile('(.+),(.+)/(.+),([^=]+)$')
+    regr = re.compile('(.+),(.+)/(.+),(.+)=(.+)$')
     entries = ''
     while True:
       line = f.readline()
