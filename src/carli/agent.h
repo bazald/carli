@@ -933,7 +933,11 @@ private:
     return rv;
   }
 
-  void generate_more_features(Q_Value * const &q, const size_t &depth, const bool &force) {
+  void generate_more_features(Q_Value * const &q, const size_t &depth, const bool &
+#ifdef ENABLE_FRINGE
+                                                                                   force
+#endif
+  ) {
     if(!m_features_complete && (
 #ifdef ENABLE_FRINGE
                                 force ||

@@ -205,9 +205,9 @@ namespace Mountain_Car {
       const auto x_dot_bak = env->get_x_dot();
 
       for(size_t x_dot = granularity; x_dot != 0lu; --x_dot) {
-        env->set_x_dot(((x_dot - 0.5) / granularity) * 0.14 - 0.07);
+        env->set_x_dot(float(((x_dot - 0.5) / granularity) * 0.14 - 0.07));
         for(size_t x = 0lu; x != granularity; ++x) {
-          env->set_x(((x + 0.5) / granularity) * 1.8 - 1.2);
+          env->set_x(float(((x + 0.5) / granularity) * 1.8 - 1.2));
           regenerate_lists();
           auto action = choose_greedy();
           switch(dynamic_cast<const Move &>(*action).direction) {
