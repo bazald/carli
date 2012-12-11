@@ -126,7 +126,7 @@ namespace Mountain_Car {
     bool is_reward_negative() const {return m_reward_negative;}
 
     void set_x(const float &x_) {m_x = x_;}
-    void set_x_dot(const float &x_dot_) {m_x = x_dot_;}
+    void set_x_dot(const float &x_dot_) {m_x_dot = x_dot_;}
     void set_reward_negative(const bool &reward_negative_) {m_reward_negative = reward_negative_;}
 
     bool success() const {
@@ -205,15 +205,15 @@ namespace Mountain_Car {
       const auto x_dot_bak = env->get_x_dot();
 
       for(size_t x_dot = granularity; x_dot != 0lu; --x_dot) {
+        env->set_x_dot(((x_dot - 0.5) / granularity) * 0.14 - 0.07);
         for(size_t x = 0lu; x != granularity; ++x) {
           env->set_x(((x + 0.5) / granularity) * 1.8 - 1.2);
-          env->set_x_dot(((x_dot - 0.5) / granularity) * 0.14 - 0.07);
           regenerate_lists();
           auto action = choose_greedy();
           switch(dynamic_cast<const Move &>(*action).direction) {
-            case Move::LEFT:  os << 'L'; break;
-            case Move::IDLE:  os << 'I'; break;
-            case Move::RIGHT: os << 'R'; break;
+            case Move::LEFT:  os << '0'; break;
+            case Move::IDLE:  os << '-'; break;
+            case Move::RIGHT: os << '1'; break;
             default: abort();
           }
         }

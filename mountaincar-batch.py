@@ -12,7 +12,7 @@ g_plotter_grid_filters = ['move(left)', 'move(idle)', 'move(right)', 'all']
 g_ep_tuples = []
 
 
-g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.99, 0.3, 0.01, 1, 'off-policy', 20, 3, 15, 0, 0.5, 0))
+g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.99, 0.5, 0.01, 1, 'off-policy', 20, 3, 15, 0, 0.5, 0))
 
 
 parser = argparse.ArgumentParser(description='Run MountainCar experiments.')
@@ -23,7 +23,7 @@ parser.add_argument('-r', '--runs', metavar='N', type=int,
                    action='store', default=1,
                    help='number of runs per experiment')
 parser.add_argument('-s', '--steps', metavar='N', type=int,
-                   action='store', default=200000,
+                   action='store', default=500000,
                    help='number of steps per run')
 
 args = parser.parse_args()

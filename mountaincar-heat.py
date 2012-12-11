@@ -138,7 +138,7 @@ def main():
   pylab.grid(False)
   
   pylab.xlabel('X', fontsize=8)
-  pylab.ylabel('Y', fontsize=8)
+  pylab.ylabel('X-Dot', fontsize=8)
   pylab.title('Generated Value Function for ' + target_entries, fontsize=10)
   
   pylab.xlim(xmin=-1.2, xmax=0.6)
@@ -146,8 +146,8 @@ def main():
   
   #fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   #fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
-  fig.axes[0].set_xticks([-1,0])
-  fig.axes[0].set_yticks([0])
+  fig.axes[0].set_xticks([-1.2,0.6])
+  fig.axes[0].set_yticks([-0.07,0.07])
   
   #xlabels = fig.axes[0].xaxis.get_ticklabels()
   #last_xlabel = xlabels[len(xlabels) - 1]
