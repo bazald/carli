@@ -115,6 +115,7 @@ namespace Mountain_Car {
     Environment()
      : m_x(0.0f),
      m_x_dot(0.0f),
+     m_random_start(false),
      m_reward_negative(true)
     {
       Environment::init_impl();
@@ -123,25 +124,27 @@ namespace Mountain_Car {
     const float & get_x() const {return m_x;}
     const float & get_x_dot() const {return m_x_dot;}
     const float & get_value(const Feature::Axis &index) const {return *(&m_x + index);}
+    bool is_random_start() const {return m_random_start;}
     bool is_reward_negative() const {return m_reward_negative;}
 
     void set_x(const float &x_) {m_x = x_;}
     void set_x_dot(const float &x_dot_) {m_x_dot = x_dot_;}
+    void set_random_start(const bool &random_start_) {m_random_start = random_start_;}
     void set_reward_negative(const bool &reward_negative_) {m_reward_negative = reward_negative_;}
 
     bool success() const {
-      return MCarAtGoal(m_x, m_x_dot);
+      return MCarAtGoal();
     }
 
   private:
     void init_impl() {
-      MCarInit(m_x, m_x_dot);
+      MCarInit();
     }
 
     reward_type transition_impl(const action_type &action) {
-      MCarStep(m_x, m_x_dot, int(dynamic_cast<const Move &>(action).direction));
+      MCarStep(int(dynamic_cast<const Move &>(action).direction));
 
-      return (success() ? 1 : 0) + (m_reward_negative ? -1 : 0);
+      return m_reward_negative ? -1 : success() ? 1 : 0;
     }
 
     void print_impl(std::ostream &os) const {
@@ -149,12 +152,15 @@ namespace Mountain_Car {
       os << " (" << m_x << ", " << m_x_dot << ')' << std::endl;
     }
 
-    static void MCarInit(float &position, float &velocity);               // initialize car state
-    static void MCarStep(float &position, float &velocity, int a);        // update car state for given action
-    static bool MCarAtGoal(const float &position, const float &velocity); // is car at goal?
+    void MCarInit();         ///< initialize car state
+    void MCarStep(int a);    ///< update car state for given action
+    bool MCarAtGoal() const; ///< is car at goal?
+
+    Zeni::Random m_random_init;
 
     float m_x;
     float m_x_dot;
+    bool m_random_start;
     bool m_reward_negative;
   };
 

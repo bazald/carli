@@ -68,7 +68,8 @@ namespace Zeni {
 
   public:
     Random(const uint32_t &seed = Random::get().rand())
-     : m_random_value(seed)
+     : m_random_value(seed),
+     m_have_next_gaussian(false)
     {
       log1("Random", seed);
     }
@@ -121,6 +122,27 @@ namespace Zeni {
       return rv;
     }
 
+    /// Get a Gaussian floating point number in the range [-1.0, 1.0]
+    double frand_gaussian() {
+      // from http://docs.oracle.com/javase/1.4.2/docs/api/java/util/Random.html#nextGaussian%28%29
+      if(m_have_next_gaussian) {
+        m_have_next_gaussian = false;
+        return m_next_gaussian;
+      }
+      else {
+        double v1, v2, s;
+        do { 
+          v1 = 2.0 * frand_lte() - 1.0; // between -1.0 and 1.0
+          v2 = 2.0 * frand_lte() - 1.0; // between -1.0 and 1.0
+          s = v1 * v1 + v2 * v2;
+        } while (s >= 1 || s == 0);
+        const double multiplier = std::sqrt(-2.0 * std::log(s) / s);
+        m_have_next_gaussian = true;
+        m_next_gaussian = v2 * multiplier;
+        return v1 * multiplier;
+      }
+    }
+
     static Random & get() {
       static Random g_random(0);
       return g_random;
@@ -128,6 +150,9 @@ namespace Zeni {
 
   private:
     uint32_t m_random_value;
+
+    bool m_have_next_gaussian;
+    double m_next_gaussian;
   };
 
 }

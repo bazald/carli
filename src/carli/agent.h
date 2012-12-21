@@ -878,7 +878,7 @@ private:
     return size;
   }
 
-  feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth) {
+  feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const double &value = 0.0) {
     /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
     auto match = std::find_first_of(head->begin(head), head->end(head),
                                     function->begin(function), function->end(function),
@@ -898,10 +898,12 @@ private:
         match->get() = new Q_Value;
 #endif
 
+      const double value_next = value + (match->get() ? match->get()->value : 0.0);
+
       feature_trie deeper = nullptr;
       if(next && m_split_test(match->get(), depth)) {
         collapse_fringe(match->get_deeper(), next);
-        deeper = get_value_from_function(next, match->get_deeper(), offset, depth + 1);
+        deeper = get_value_from_function(next, match->get_deeper(), offset, depth + 1, value_next);
       }
       else {
         try {
@@ -912,7 +914,7 @@ private:
           throw;
         }
 
-        generate_fringe(match->get_deeper(), next, offset);
+        generate_fringe(match->get_deeper(), next, offset, value_next);
         deeper = match->get_deeper();
 
 #ifdef NULL_Q_VALUES
@@ -954,7 +956,7 @@ private:
 
 #ifdef ENABLE_FRINGE
   /// Use up the rest of the features to generate a fringe
-  static void generate_fringe(feature_trie &leaf_fringe, feature_trie head, const size_t &offset) {
+  static void generate_fringe(feature_trie &leaf_fringe, feature_trie head, const size_t &offset, const double &value) {
     assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type == Q_Value::FRINGE);
 
     while(head) {
@@ -971,7 +973,7 @@ private:
       else {
         auto inserted = head->map_insert(leaf_fringe);
         if(!inserted->get())
-          inserted->get() = new Q_Value(double(), Q_Value::FRINGE);
+          inserted->get() = new Q_Value(value, Q_Value::FRINGE);
       }
 
       head = next;
@@ -1001,7 +1003,7 @@ private:
       leaf_fringe->destroy(leaf_fringe);
   }
 #else
-  static void generate_fringe(feature_trie &, feature_trie head, const size_t &) {
+  static void generate_fringe(feature_trie &, feature_trie head, const size_t &, const double &) {
     head->destroy(head); ///< Destroy the rest of the features instead of generating a fringe
   }
 

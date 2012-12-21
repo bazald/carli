@@ -45,6 +45,7 @@ struct Arguments {
     output(SIMPLE),
     on_policy(true),
     pseudoepisode_threshold(20),
+    random_start(false),
     reward_negative(true),
     seed(uint32_t(time(0))),
     split_min(0),
@@ -70,9 +71,10 @@ struct Arguments {
   double learning_rate;
   size_t number_of_episodes;
   size_t number_of_steps;
-  enum {SIMPLE, EXPERIMENTAL} output;
+  enum {NULL_OUTPUT, SIMPLE, EXPERIMENTAL} output;
   bool on_policy;
   size_t pseudoepisode_threshold;
+  bool random_start;
   bool reward_negative;
   uint32_t seed;
   size_t split_min;
@@ -199,7 +201,9 @@ Options generate_options() {
     }
   }, 1), "[1,inf)");
   options.add('o', "output", Options::Option([](const std::vector<const char *> &args) {
-    if(!strcmp(args.at(0), "simple"))
+    if(!strcmp(args.at(0), "null"))
+      g_args.output = Arguments::NULL_OUTPUT;
+    else if(!strcmp(args.at(0), "simple"))
       g_args.output = Arguments::SIMPLE;
     else if(!strcmp(args.at(0), "experimental"))
       g_args.output = Arguments::EXPERIMENTAL;
@@ -207,7 +211,7 @@ Options generate_options() {
       std::cerr << "Illegal output selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal output selection.");
     }
-  }, 1), "simple/experimental");
+  }, 1), "null/simple/experimental");
   options.add('p', "policy", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "on-policy"))
       g_args.on_policy = true;
@@ -218,6 +222,16 @@ Options generate_options() {
       throw std::runtime_error("Illegal policy selection.");
     }
   }, 1), "on-policy/off-policy");
+  options.add(     "random-start", Options::Option([](const std::vector<const char *> &args) {
+    if(!strcmp(args.at(0), "true"))
+      g_args.random_start = true;
+    else if(!strcmp(args.at(0), "false"))
+      g_args.random_start = false;
+    else {
+      std::cerr << "Illegal random-start selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal random-start selection.");
+    }
+  }, 1), "true/false, applies only to mountain-car");
   options.add(     "reward-negative", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "true"))
       g_args.reward_negative = true;
@@ -400,8 +414,10 @@ void run_agent() {
   agent->set_learning_rate(g_args.learning_rate);
   agent->set_on_policy(g_args.on_policy);
   agent->set_pseudoepisode_threshold(g_args.pseudoepisode_threshold);
-  if(auto mountain_car = std::dynamic_pointer_cast<Mountain_Car::Environment>(env))
+  if(auto mountain_car = std::dynamic_pointer_cast<Mountain_Car::Environment>(env)) {
+    mountain_car->set_random_start(g_args.random_start);
     mountain_car->set_reward_negative(g_args.reward_negative);
+  }
   agent->set_split_min(g_args.split_min);
   agent->set_split_max(g_args.split_max);
   agent->set_split_update_count(g_args.split_update_count);

@@ -35,24 +35,41 @@ namespace Mountain_Car {
   static const double mcar_max_velocity = 0.07;            // the negative of this in the minimum velocity
   static const double mcar_goal_position = 0.5;
 
-  void Environment::MCarInit(float &position, float &velocity)
-  // Initialize state of Car
-    { position = -0.5;
-      velocity = 0.0;}
+  /// Initialize state of Car
+  void Environment::MCarInit() {
+    if(m_random_start) {
+      m_x = m_random_init.frand_lt() * (mcar_goal_position - mcar_min_position) + mcar_min_position;
+      m_x_dot = m_random_init.frand_lt() * (2 * mcar_max_velocity) - mcar_max_velocity;
+    }
+    else {
+      m_x = -0.5;
+      m_x_dot = 0.0;
+    }
+  }
 
-  void Environment::MCarStep(float &position, float &velocity, int a)
-  // Take action a, update state of car
-    { assert(0 <= a && a <= 2);
-      velocity += float((a-1)*0.001 + cos(3*position)*(-0.0025));
-      if (velocity > mcar_max_velocity) velocity = float(mcar_max_velocity);
-      if (velocity < -mcar_max_velocity) velocity = float(-mcar_max_velocity);
-      position += float(velocity);
-      if (position > mcar_max_position) position = float(mcar_max_position);
-      if (position < mcar_min_position) position = float(mcar_min_position);
-      if (position==mcar_min_position && velocity<0) velocity = 0;}
+  /// Take action a, update state of car
+  void Environment::MCarStep(int a) {
+    assert(0 <= a && a <= 2);
 
-  bool Environment::MCarAtGoal(const float &position, const float &/*velocity*/)
-  // Is Car within goal region?
-    { return position >= mcar_goal_position;}
+    m_x_dot += float((a - 1) * 0.001 + cos(3 * m_x) * -0.0025);
+    if(m_x_dot > mcar_max_velocity)
+      m_x_dot = float(mcar_max_velocity);
+    if(m_x_dot < -mcar_max_velocity)
+      m_x_dot = float(-mcar_max_velocity);
+
+    m_x += float(m_x_dot);
+    if(m_x > mcar_max_position)
+      m_x = float(mcar_max_position);
+    if(m_x < mcar_min_position)
+      m_x = float(mcar_min_position);
+
+    if(m_x == mcar_min_position && m_x_dot < 0)
+      m_x_dot = 0;
+  }
+
+  /// Is Car within goal region?
+  bool Environment::MCarAtGoal() const {
+    return m_x >= mcar_goal_position;
+  }
 
 }

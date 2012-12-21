@@ -139,7 +139,7 @@ namespace Puddle_World {
     }
 
     reward_type transition_impl(const action_type &action) {
-      const double shift = (m_random_motion.frand_lt() - 0.5) * 0.02; ///< Should really be Gaussian, stddev = 0.01
+      const double shift = m_random_motion.frand_gaussian() * 0.01;
       const double step_size = shift + 0.05;
 
       switch(dynamic_cast<const Move &>(action).direction) {
