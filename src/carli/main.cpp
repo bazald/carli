@@ -4,7 +4,6 @@
 // #define WHITESON_ADAPTIVE_TILE
 // #define DEBUG_OUTPUT
 // #define DEBUG_OUTPUT_VALUE_FUNCTION
-// #define NULL_Q_VALUES
 // #define TO_FILE
 
 #include "blocks_world.h"
@@ -40,6 +39,7 @@ struct Arguments {
     epsilon(0.1),
     ignore_x(false),
     learning_rate(1.0),
+    null_q_values(false),
     number_of_episodes(0),
     number_of_steps(50000),
     output(SIMPLE),
@@ -69,6 +69,7 @@ struct Arguments {
   double epsilon;
   bool ignore_x;
   double learning_rate;
+  bool null_q_values;
   size_t number_of_episodes;
   size_t number_of_steps;
   enum {NULL_OUTPUT, SIMPLE, EXPERIMENTAL} output;
@@ -184,6 +185,16 @@ Options generate_options() {
       throw std::runtime_error("Illegal learning rate selection.");
     }
   }, 1), "(0,1]");
+  options.add(     "null-q-values", Options::Option([](const std::vector<const char *> &args) {
+    if(!strcmp(args.at(0), "true"))
+      g_args.on_policy = true;
+    else if(!strcmp(args.at(0), "false"))
+      g_args.on_policy = false;
+    else {
+      std::cerr << "Illegal null-q-values selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal null-q-values selection.");
+    }
+  }, 1), "true/false to enable null Q values leading up to the leaves");
   options.add(     "num-episodes", Options::Option([](const std::vector<const char *> &args) {
     g_args.number_of_episodes = atoi(args.at(0));
     g_args.number_of_steps = 0;
@@ -412,6 +423,7 @@ void run_agent() {
   if(auto cart_pole = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent))
     cart_pole->set_ignore_x(g_args.ignore_x);
   agent->set_learning_rate(g_args.learning_rate);
+  agent->set_null_q_values(g_args.null_q_values);
   agent->set_on_policy(g_args.on_policy);
   agent->set_pseudoepisode_threshold(g_args.pseudoepisode_threshold);
   if(auto mountain_car = std::dynamic_pointer_cast<Mountain_Car::Environment>(env)) {

@@ -60,7 +60,7 @@ namespace Zeni {
      *    and treat the value+offset as a Linked_List, stringing together general-to-specific values.
      */
     template <typename DEPTH_TEST, typename TERMINAL_TEST, typename GENERATE_FRINGE, typename COLLAPSE_FRINGE>
-    trie_pointer_type insert(trie_pointer_type &ptr, const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const size_t &offset = size_t(-1), const size_t &depth = size_t(), const double &value = double()) {
+    trie_pointer_type insert(trie_pointer_type &ptr, const bool &null_q_values, const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const size_t &offset = size_t(-1), const size_t &depth = size_t(), const double &value = double()) {
       if(!this)
         return ptr;
 
@@ -72,7 +72,7 @@ namespace Zeni {
       if(thisp != inserted)
         inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
 
-      return thisp->finish_insert(depth_test, terminal_test, generate_fringe, collapse_fringe, offset, depth, value, inserted != nullptr, next);
+      return thisp->finish_insert(null_q_values, depth_test, terminal_test, generate_fringe, collapse_fringe, offset, depth, value, inserted != nullptr, next);
     }
 
     value_pointer_type get() const {
@@ -98,10 +98,6 @@ namespace Zeni {
     trie_pointer_type & get_deeper() {return m_deeper;}
 
     trie_pointer_type offset_insert_before(const size_t &offset, trie_pointer_type &rhs_) {
-#ifndef NULL_Q_VALUES
-      assert(m_value);
-      assert(!rhs_ || rhs_->m_value);
-#endif
       const bool rhs_check = rhs_ && rhs_->m_value && offset != size_t(-1);
       if(m_value) {
         if(rhs_check) {
@@ -129,11 +125,9 @@ namespace Zeni {
 
   private:
     template <typename DEPTH_TEST, typename TERMINAL_TEST, typename GENERATE_FRINGE, typename COLLAPSE_FRINGE>
-    trie_pointer_type finish_insert(const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const size_t &offset, const size_t &depth, const double &value, const bool &force, const trie_pointer_type &next) {
-#ifndef NULL_Q_VALUES
-      if(!m_value)
+    trie_pointer_type finish_insert(const bool &null_q_values, const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const size_t &offset, const size_t &depth, const double &value, const bool &force, const trie_pointer_type &next) {
+      if(!null_q_values && !m_value)
         m_value = new value_type;
-#endif
 
       const bool dtr = depth_test(m_value, depth);
       trie_pointer_type deeper = nullptr;
@@ -141,7 +135,7 @@ namespace Zeni {
 
       if(next && dtr) {
         collapse_fringe(m_deeper, next);
-        deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, depth_test, terminal_test, generate_fringe, collapse_fringe, offset, depth + 1, value_next);
+        deeper = static_cast<trie_pointer_type>(next)->insert(m_deeper, null_q_values, depth_test, terminal_test, generate_fringe, collapse_fringe, offset, depth + 1, value_next);
       }
       else {
         try {
@@ -152,10 +146,9 @@ namespace Zeni {
             next->destroy(next);
           throw;
         }
-#ifdef NULL_Q_VALUES
-        if(!m_value)
+
+        if(null_q_values && !m_value)
           m_value = new value_type;
-#endif
 
         if(!dtr) {
           generate_fringe(m_deeper, next, offset, value_next);

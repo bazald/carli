@@ -154,6 +154,7 @@ public:
    m_episode_number(1),
    m_step_count(0),
    m_total_reward(reward_type()),
+   m_null_q_values(false),
    m_learning_rate(0.3),
    m_discount_rate(0.9),
    m_eligibility_trace_decay_rate(0.0),
@@ -189,6 +190,11 @@ public:
       m_value_function.erase(vt++);
       delete ptr;
     }
+  }
+
+  bool is_null_q_values() const {return m_null_q_values;}
+  void set_null_q_values(const bool &null_q_values) {
+    m_null_q_values = null_q_values;
   }
 
   double get_learning_rate() const {return m_learning_rate;}
@@ -264,7 +270,7 @@ public:
     m_credit_assignment_epsilon = credit_assignment_epsilon;
   }
 
-  bool get_on_policy() const {return m_on_policy;}
+  bool is_on_policy() const {return m_on_policy;}
   void set_on_policy(const bool &on_policy) {
     if(on_policy)
       m_target_policy = [this]()->action_ptruc{return this->m_exploration_policy();};
@@ -893,10 +899,8 @@ private:
       match = match->map_insert(function);
       if(match != inserted)
         inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
-#ifndef NULL_Q_VALUES
-      if(!match->get())
+      if(!m_null_q_values && !match->get())
         match->get() = new Q_Value;
-#endif
 
       const double value_next = value + (match->get() ? match->get()->value : 0.0);
 
@@ -917,10 +921,8 @@ private:
         generate_fringe(match->get_deeper(), next, offset, value_next);
         deeper = match->get_deeper();
 
-#ifdef NULL_Q_VALUES
-        if(!match->get())
+        if(m_null_q_values && !match->get())
           match->get() = new Q_Value;
-#endif
       }
 
       match->offset_erase(offset);
@@ -930,7 +932,7 @@ private:
     }
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
 
-    auto rv = head->insert(function, m_split_test, [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);}, generate_fringe, collapse_fringe, offset, depth);
+    auto rv = head->insert(function, m_null_q_values, m_split_test, [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);}, generate_fringe, collapse_fringe, offset, depth);
     assert(rv);
     return rv;
   }
@@ -1052,6 +1054,8 @@ private:
   size_t m_episode_number;
   size_t m_step_count;
   reward_type m_total_reward;
+
+  bool m_null_q_values; ///< insert nullptr instead of new Q_Values until reaching the leaf
 
   double m_learning_rate; ///< alpha
   double m_discount_rate; ///< gamma

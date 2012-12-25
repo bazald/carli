@@ -92,6 +92,7 @@ class Experiment:
             '--learning-rate', str(self.learning_rate),
             '--policy', self.policy,
             '--pseudoepisode-threshold', str(self.pseudoepisode_threshold),
+            '--random-start', 'true',
             '--split-min', str(self.split_min),
             '--split-max', str(self.split_max),
             '--split-pseudoepisodes', str(self.split_pseudoepisodes),
