@@ -38,8 +38,8 @@ namespace Mountain_Car {
   /// Initialize state of Car
   void Environment::MCarInit() {
     if(m_random_start) {
-      m_x = m_random_init.frand_lt() * (mcar_goal_position - mcar_min_position) + mcar_min_position;
-      m_x_dot = m_random_init.frand_lt() * (2 * mcar_max_velocity) - mcar_max_velocity;
+      m_x = float(m_random_init.frand_lt() * (mcar_goal_position - mcar_min_position) + mcar_min_position);
+      m_x_dot = float(m_random_init.frand_lt() * (2 * mcar_max_velocity) - mcar_max_velocity);
     }
     else {
       m_x = -0.5;
