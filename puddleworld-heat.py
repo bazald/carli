@@ -129,7 +129,7 @@ def main():
 
   for key, value in rects.iteritems():
     area = (key[2] - key[0]) * (key[3] - key[1])
-    rgb = min(1, max(0, 1 - (value / area) / divisor
+    rgb = min(1, max(0, 1 - (value / area) / divisor))
     #print str(key[0]) + ',' + str(key[1]) + '-' + str(key[2]) + ',' + str(key[3]) + '=' + str(rgb)
     fig.axes[0].add_patch(Rectangle((key[0], key[1]), key[2] - key[0], key[3] - key[1], color=(rgb, rgb, rgb), linewidth=0, zorder=(1 - area)))
 

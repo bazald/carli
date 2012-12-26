@@ -109,23 +109,18 @@ namespace Puddle_World {
 
     Environment()
      : m_init_x(0.0, 1.0),
-     m_init_y(0.0, 1.0),
-     m_goal_x(0.95, 1.0),
-     m_goal_y(0.95, 1.0)
+     m_init_y(0.0, 1.0)
     {
       Environment::init_impl();
     }
 
     const double_pair & get_position() const {return m_position;}
-    const double_pair & get_goal_x() const {return m_goal_x;}
-    const double_pair & get_goal_y() const {return m_goal_y;}
     const double & get_value(const Feature::Axis &index) const {return *(&m_position.first + index);}
 
     void set_position(const double_pair &position_) {m_position = position_;}
 
     bool goal_reached() const {
-      return m_goal_x.first <= m_position.first  && m_position.first  < m_goal_x.second &&
-             m_goal_y.first <= m_position.second && m_position.second < m_goal_y.second;
+      return m_position.first + m_position.second > 1.9;
     }
 
   private:
@@ -410,7 +405,7 @@ namespace Puddle_World {
     bool generate_feature_ranged(const std::shared_ptr<const Environment> &env, feature_trie &trie, const Feature::List * const &tail, Feature::List * &tail_next) {
       auto match = std::find_if(trie->begin(trie), trie->end(trie), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
 
-      if(match && match->get() && match->get()->type != Q_Value::FRINGE) {
+      if(match && (!match->get() || match->get()->type != Q_Value::FRINGE)) {
         auto feature = match->get_key();
         const auto midpt = feature->midpt();
         if(env->get_value(feature->axis) < midpt)

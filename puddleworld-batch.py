@@ -50,12 +50,15 @@ g_ep_tuples = []
 #g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
 #g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-specific', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
 
-g_ep_tuples.append(('puddle-world', 0, 'specific',           0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'even',               0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'specific',           0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'even',               0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'specific',           0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'even',               0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'specific',           0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'even',               0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 5, 13, 0, 0.5, 0))
+
+g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0, 0.1, 'on-policy', 20, 8, 8, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0, 0.1, 'on-policy', 20, 9, 9, 0, 0.5, 0))
 
 
 parser = argparse.ArgumentParser(description='Run PuddleWorld experiments.')
@@ -66,7 +69,7 @@ parser.add_argument('-r', '--runs', metavar='N', type=int,
                    action='store', default=1,
                    help='number of runs per experiment')
 parser.add_argument('-s', '--steps', metavar='N', type=int,
-                   action='store', default=50000,
+                   action='store', default=500000,
                    help='number of steps per run')
 
 args = parser.parse_args()

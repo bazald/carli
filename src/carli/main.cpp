@@ -187,9 +187,9 @@ Options generate_options() {
   }, 1), "(0,1]");
   options.add(     "null-q-values", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "true"))
-      g_args.on_policy = true;
+      g_args.null_q_values = true;
     else if(!strcmp(args.at(0), "false"))
-      g_args.on_policy = false;
+      g_args.null_q_values = false;
     else {
       std::cerr << "Illegal null-q-values selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal null-q-values selection.");

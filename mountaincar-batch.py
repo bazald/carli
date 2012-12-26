@@ -12,7 +12,7 @@ g_plotter_grid_filters = ['move(left)', 'move(idle)', 'move(right)', 'all']
 g_ep_tuples = []
 
 
-g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.99, 0.5, 0.01, 1, 'off-policy', 20, 3, 15, 0, 0.5, 0))
+g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0, 0.1, 'on-policy', 20, 9, 9, 0, 0.5, 0))
 
 
 parser = argparse.ArgumentParser(description='Run MountainCar experiments.')

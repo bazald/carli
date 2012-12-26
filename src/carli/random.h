@@ -31,6 +31,7 @@
 #define ZENI_RANDOM_H
 
 #include <cassert>
+#include <cmath>
 #include <cstdlib>
 #include <stdint.h>
 

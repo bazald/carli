@@ -355,7 +355,7 @@ namespace Mountain_Car {
     bool generate_feature_ranged(const std::shared_ptr<const Environment> &env, feature_trie &trie, const Feature::List * const &tail, Feature::List * &tail_next) {
       auto match = std::find_if(trie->begin(trie), trie->end(trie), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
 
-      if(match && match->get() && match->get()->type != Q_Value::FRINGE) {
+      if(match && (!match->get() || match->get()->type != Q_Value::FRINGE)) {
         auto feature = match->get_key();
         const auto midpt = feature->midpt();
         if(env->get_value(feature->axis) < midpt)
