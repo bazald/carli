@@ -140,7 +140,7 @@ public:
   typedef Environment<action_type> environment_type;
   typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
-  enum Credit_Assignment {SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_SPECIFIC, EPSILON_EVEN_DEPTH};
+  enum Credit_Assignment {SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_ROOT_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_SPECIFIC, EPSILON_EVEN_DEPTH};
 
   Agent(const std::shared_ptr<environment_type> &environment)
    : m_metastate(NON_TERMINAL),
@@ -161,6 +161,10 @@ public:
    m_eligibility_trace_decay_threshold(0.0001),
    m_credit_assignment_code(EVEN),
    m_credit_assignment_epsilon(0.5),
+   m_credit_assignment_log_base(2.71828182846),
+   m_credit_assignment_log_base_value(std::log(m_credit_assignment_log_base)),
+   m_credit_assignment_root(2.0),
+   m_credit_assignment_root_value(1.0 / m_credit_assignment_root),
    m_on_policy(false),
    m_epsilon(0.1),
    m_pseudoepisode_threshold(20),
@@ -244,6 +248,10 @@ public:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
         break;
         
+      case INV_ROOT_UPDATE_COUNT:
+        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_root_update_count(value_list);};
+        break;
+        
       case INV_DEPTH:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);};
         break;
@@ -268,6 +276,22 @@ public:
     if(credit_assignment_epsilon < 0.0 || credit_assignment_epsilon > 1.0)
       throw std::range_error("Illegal credit-assignment epsilon.");
     m_credit_assignment_epsilon = credit_assignment_epsilon;
+  }
+
+  double get_credit_assignment_log_base() const {return m_credit_assignment_log_base;}
+  void set_credit_assignment_log_base(const double &credit_assignment_log_base) {
+    if(credit_assignment_log_base <= 1.0)
+      throw std::range_error("Illegal credit-assignment log_base.");
+    m_credit_assignment_log_base = credit_assignment_log_base;
+    m_credit_assignment_log_base_value = std::log(m_credit_assignment_log_base);
+  }
+
+  double get_credit_assignment_root() const {return m_credit_assignment_root;}
+  void set_credit_assignment_root(const double &credit_assignment_root) {
+    if(credit_assignment_root <= 1.0)
+      throw std::range_error("Illegal credit-assignment root.");
+    m_credit_assignment_root = credit_assignment_root;
+    m_credit_assignment_root_value = 1.0 / m_credit_assignment_root;
   }
 
   bool is_on_policy() const {return m_on_policy;}
@@ -758,9 +782,26 @@ protected:
 
   void assign_credit_inv_log_update_count(Q_Value::List * const &value_list) {
     double sum = double();
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [this,&sum](Q_Value &q) {
       if(q.type != Q_Value::FRINGE) {
-        q.credit = 1.0 / (log(double(q.update_count)) + 1.0);
+        q.credit = 1.0 / (std::log(double(q.update_count)) / this->m_credit_assignment_log_base_value + 1.0);
+        sum += q.credit;
+      }
+    });
+
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
+      if(q.type == Q_Value::FRINGE)
+        q.credit = 1.0;
+      else
+        q.credit /= sum;
+    });
+  }
+
+  void assign_credit_inv_root_update_count(Q_Value::List * const &value_list) {
+    double sum = double();
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [this,&sum](Q_Value &q) {
+      if(q.type != Q_Value::FRINGE) {
+        q.credit = 1.0 / std::pow(double(q.update_count), this->m_credit_assignment_root_value);
         sum += q.credit;
       }
     });
@@ -1065,6 +1106,10 @@ private:
   Credit_Assignment m_credit_assignment_code;
   std::function<void (Q_Value::List * const &)> m_credit_assignment; ///< How to assign credit to multiple Q-values
   double m_credit_assignment_epsilon;
+  double m_credit_assignment_log_base;
+  mutable double m_credit_assignment_log_base_value;
+  double m_credit_assignment_root;
+  mutable double m_credit_assignment_root_value;
 
   bool m_on_policy; ///< for Sarsa/Q-learning selection
   double m_epsilon; ///< for epsilon-greedy decision-making

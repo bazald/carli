@@ -32,6 +32,8 @@ struct Arguments {
   Arguments()
     : credit_assignment(Blocks_World::Agent::EVEN),
     credit_assignment_epsilon(0.5),
+    credit_assignment_log_base(2.71828182846),
+    credit_assignment_root(2.0),
     discount_rate(1.0),
     eligibility_trace_decay_rate(0.0),
     eligibility_trace_decay_threshold(0.0001),
@@ -62,6 +64,8 @@ struct Arguments {
 
   Blocks_World::Agent::Credit_Assignment credit_assignment;
   double credit_assignment_epsilon;
+  double credit_assignment_log_base;
+  double credit_assignment_root;
   double discount_rate;
   double eligibility_trace_decay_rate;
   double eligibility_trace_decay_threshold;
@@ -108,6 +112,8 @@ Options generate_options() {
       g_args.credit_assignment = Blocks_World::Agent::INV_UPDATE_COUNT;
     else if(!strcmp(args.at(0), "inv-log-update-count"))
       g_args.credit_assignment = Blocks_World::Agent::INV_LOG_UPDATE_COUNT;
+    else if(!strcmp(args.at(0), "inv-root-update-count"))
+      g_args.credit_assignment = Blocks_World::Agent::INV_ROOT_UPDATE_COUNT;
     else if(!strcmp(args.at(0), "inv-depth"))
       g_args.credit_assignment = Blocks_World::Agent::INV_DEPTH;
     else if(!strcmp(args.at(0), "epsilon-even-specific"))
@@ -118,7 +124,7 @@ Options generate_options() {
       std::cerr << "Illegal credit assignment selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal credit assignment selection.");
     }
-  }, 1), "specific/even/inv-update-count/inv-log-update-count/inv-depth/epsilon-even-specific/epsilon-even-depth");
+  }, 1), "specific/even/inv-update-count/inv-log-update-count/inv-root-update-count/inv-depth/epsilon-even-specific/epsilon-even-depth");
   options.add('d', "discount-rate", Options::Option([](const std::vector<const char *> &args) {
     g_args.discount_rate = atof(args.at(0));
     if(g_args.discount_rate < 0.0 || g_args.discount_rate > 1.0) {
@@ -133,6 +139,20 @@ Options generate_options() {
       throw std::runtime_error("Illegal credit-assignment epsilon selection.");
     }
   }, 1), "[0,1]");
+  options.add(     "credit-assignment-log-base", Options::Option([](const std::vector<const char *> &args) {
+    g_args.credit_assignment_log_base = atof(args.at(0));
+    if(g_args.credit_assignment_log_base <= 1.0) {
+      std::cerr << "Illegal credit-assignment log-base selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal credit-assignment log-base selection.");
+    }
+  }, 1), "(1,inf)");
+  options.add(     "credit-assignment-root", Options::Option([](const std::vector<const char *> &args) {
+    g_args.credit_assignment_root = atof(args.at(0));
+    if(g_args.credit_assignment_root <= 1.0) {
+      std::cerr << "Illegal credit-assignment root selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal credit-assignment root selection.");
+    }
+  }, 1), "(1,inf)");
   options.add(     "eligibility-trace-decay-rate", Options::Option([](const std::vector<const char *> &args) {
     g_args.eligibility_trace_decay_rate = atof(args.at(0));
     if(g_args.eligibility_trace_decay_rate < 0.0 || g_args.eligibility_trace_decay_rate > 1.0) {
@@ -414,6 +434,8 @@ void run_agent() {
   agent->set_contribute_update_count(g_args.contribute_update_count);
   agent->set_credit_assignment(typename AGENT::Credit_Assignment(g_args.credit_assignment));
   agent->set_credit_assignment_epsilon(g_args.credit_assignment_epsilon);
+  agent->set_credit_assignment_log_base(g_args.credit_assignment_log_base);
+  agent->set_credit_assignment_root(g_args.credit_assignment_root);
   agent->set_discount_rate(g_args.discount_rate);
   agent->set_eligibility_trace_decay_rate(g_args.eligibility_trace_decay_rate);
   agent->set_eligibility_trace_decay_threshold(g_args.eligibility_trace_decay_threshold);

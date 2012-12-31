@@ -11,8 +11,13 @@ g_plotter_grid_filters = ['move(left)', 'move(idle)', 'move(right)', 'all']
 
 g_ep_tuples = []
 
+#g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.1, 0.5, 'off-policy', 20, 3, 15, 0, 0.5, 0))
+#g_ep_tuples.append(('mountain-car', 0, 'epsilon-even-depth', 0.5, 0.999, 0, 0.1, 0.5, 'off-policy', 20, 3, 15, 0, 0.5, 0))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.1, 0.5, 'off-policy', 20, 3, 15, 0, 0.5, 0))
+g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.5, 'off-policy', 20, 3, 15, 0, 0.5, 0))
 
-g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0, 0.1, 'on-policy', 20, 9, 9, 0, 0.5, 0))
+#g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0, 0.1, 'on-policy', 20, 9, 9, 0, 0.5, 0))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-sqrt-update-count', 0.5, 0.999, 0, 0, 0.1, 'on-policy', 20, 3, 19, 0, 0.5, 0))
 
 
 parser = argparse.ArgumentParser(description='Run MountainCar experiments.')
@@ -86,6 +91,8 @@ class Experiment:
             '--contribute-update-count', str(self.contribute_update_count),
             '--credit-assignment', self.credit_assignment,
             '--credit-assignment-epsilon', str(self.credit_assignment_epsilon),
+            #'--credit-assignment-log-base', '2',
+            #'--credit-assignment-root', '3',
             '--discount-rate', str(self.discount_rate),
             '--eligibility-trace-decay-rate', str(self.eligibility_trace_decay_rate),
             '--epsilon-greedy', str(self.epsilon_greedy),

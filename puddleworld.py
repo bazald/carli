@@ -105,6 +105,8 @@ def main():
         files[directory].handles.append(Handle(f, filename, seed))
     
     cumulative_rewards = {}
+    plot_every = 1
+    plot_counter = plot_every
     for group in files:
       files[group].smith['avg'] = []
       files[group].smith['min'] = []
@@ -126,13 +128,22 @@ def main():
             vals.append(cumulative_rewards[handle] / int(split[1]))
         if not done:
           vals = sorted(vals)
-          files[group].smith['avg'].append(sum(vals) / len(vals))
-          files[group].smith['min'].append(vals[0])
-          files[group].smith['max'].append(vals[len(vals) - 1])
-          if len(vals) % 2 == 1:
-            files[group].smith['med'].append(vals[int(len(vals) / 2)])
+          if plot_counter == plot_every:
+            files[group].smith['avg'].append(0)
+            files[group].smith['min'].append(0)
+            files[group].smith['max'].append(0)
+            files[group].smith['med'].append(0)
+            plot_counter = 1
           else:
-            files[group].smith['med'].append((vals[len(vals) / 2 - 1] + vals[len(vals) / 2]) / 2)
+            plot_counter += 1
+          last = len(files[group].smith['avg']) - 1
+          files[group].smith['avg'][last] += (sum(vals) / len(vals)) / plot_every
+          files[group].smith['min'][last] += (vals[0] / plot_every) / plot_every
+          files[group].smith['max'][last] += (vals[len(vals) - 1]) / plot_every
+          if len(vals) % 2 == 1:
+            files[group].smith['med'][last] += (vals[int(len(vals) / 2)]) / plot_every
+          else:
+            files[group].smith['med'][last] += ((vals[len(vals) / 2 - 1] + vals[len(vals) / 2]) / 2) / plot_every
       
       for handle in files[group].handles:
         handle.f.close()
@@ -173,7 +184,7 @@ def main():
     i = 0
     for s in smith:
       i += 1
-      x.append(i)
+      x.append(i * plot_every / 10000.0)
     
     for i in range(1, len(smith)):
       smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
@@ -187,7 +198,7 @@ def main():
       r = len(smith[agent])
     for s in range(0,r):
       i += 1
-      x.append(i)
+      x.append(i * plot_every / 10000.0)
     
     for a in smith:
       for i in range(1, len(smith[a])):
@@ -209,7 +220,7 @@ def main():
   
   pylab.grid(True)
   
-  pylab.xlabel('Step Number', fontsize=8)
+  pylab.xlabel('Step Number (in 10,000s)', fontsize=8)
   pylab.ylabel('Reward / \# Episodes (Mvng Avg, n=20)', fontsize=8)
   pylab.title(title, fontsize=10)
   pylab.ylim(ymin=-500, ymax=0)
