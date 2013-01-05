@@ -165,6 +165,7 @@ public:
    m_credit_assignment_log_base_value(std::log(m_credit_assignment_log_base)),
    m_credit_assignment_root(2.0),
    m_credit_assignment_root_value(1.0 / m_credit_assignment_root),
+   m_credit_assignment_normalize(true),
    m_on_policy(false),
    m_epsilon(0.1),
    m_pseudoepisode_threshold(20),
@@ -292,6 +293,11 @@ public:
       throw std::range_error("Illegal credit-assignment root.");
     m_credit_assignment_root = credit_assignment_root;
     m_credit_assignment_root_value = 1.0 / m_credit_assignment_root;
+  }
+
+  bool is_credit_assignment_normalize() const {return m_credit_assignment_normalize;}
+  void set_credit_assignment_normalize(const bool &credit_assignment_normalize) {
+    m_credit_assignment_normalize = credit_assignment_normalize;
   }
 
   bool is_on_policy() const {return m_on_policy;}
@@ -771,13 +777,8 @@ protected:
         sum += q.credit;
       }
     });
-
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-      if(q.type == Q_Value::FRINGE)
-        q.credit = 1.0;
-      else
-        q.credit /= sum;
-    });
+    
+    assign_credit_normalize(value_list, sum);
   }
 
   void assign_credit_inv_log_update_count(Q_Value::List * const &value_list) {
@@ -788,13 +789,8 @@ protected:
         sum += q.credit;
       }
     });
-
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-      if(q.type == Q_Value::FRINGE)
-        q.credit = 1.0;
-      else
-        q.credit /= sum;
-    });
+    
+    assign_credit_normalize(value_list, sum);
   }
 
   void assign_credit_inv_root_update_count(Q_Value::List * const &value_list) {
@@ -805,13 +801,8 @@ protected:
         sum += q.credit;
       }
     });
-
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-      if(q.type == Q_Value::FRINGE)
-        q.credit = 1.0;
-      else
-        q.credit /= sum;
-    });
+    
+    assign_credit_normalize(value_list, sum);
   }
 
   void assign_credit_inv_depth(Q_Value::List * const &value_list) {
@@ -828,13 +819,19 @@ protected:
         sum += q.credit;
       }
     });
+    
+    assign_credit_normalize(value_list, sum);
+  }
 
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-      if(q.type == Q_Value::FRINGE)
-        q.credit = 1.0;
-      else
-        q.credit /= sum;
-    });
+  void assign_credit_normalize(Q_Value::List * const &value_list, const double &sum) {
+    if(m_credit_assignment_normalize || sum > 1.0) {
+      std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
+        if(q.type == Q_Value::FRINGE)
+          q.credit = 1.0;
+        else
+          q.credit /= sum;
+      });
+    }
   }
 
   bool split_test(Q_Value * const &q, const size_t &depth) const {
@@ -1110,6 +1107,7 @@ private:
   mutable double m_credit_assignment_log_base_value;
   double m_credit_assignment_root;
   mutable double m_credit_assignment_root_value;
+  bool m_credit_assignment_normalize;
 
   bool m_on_policy; ///< for Sarsa/Q-learning selection
   double m_epsilon; ///< for epsilon-greedy decision-making

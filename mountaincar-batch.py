@@ -93,6 +93,7 @@ class Experiment:
             '--credit-assignment-epsilon', str(self.credit_assignment_epsilon),
             #'--credit-assignment-log-base', '2',
             #'--credit-assignment-root', '3',
+            #'--credit-assignment-normalize', 'false',
             '--discount-rate', str(self.discount_rate),
             '--eligibility-trace-decay-rate', str(self.eligibility_trace_decay_rate),
             '--epsilon-greedy', str(self.epsilon_greedy),

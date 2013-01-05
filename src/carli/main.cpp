@@ -34,6 +34,7 @@ struct Arguments {
     credit_assignment_epsilon(0.5),
     credit_assignment_log_base(2.71828182846),
     credit_assignment_root(2.0),
+    credit_assignment_normalize(true),
     discount_rate(1.0),
     eligibility_trace_decay_rate(0.0),
     eligibility_trace_decay_threshold(0.0001),
@@ -66,6 +67,7 @@ struct Arguments {
   double credit_assignment_epsilon;
   double credit_assignment_log_base;
   double credit_assignment_root;
+  bool credit_assignment_normalize;
   double discount_rate;
   double eligibility_trace_decay_rate;
   double eligibility_trace_decay_threshold;
@@ -153,6 +155,16 @@ Options generate_options() {
       throw std::runtime_error("Illegal credit-assignment root selection.");
     }
   }, 1), "(1,inf)");
+  options.add(     "credit-assignment-normalize", Options::Option([](const std::vector<const char *> &args) {
+    if(!strcmp(args.at(0), "true"))
+      g_args.credit_assignment_normalize = true;
+    else if(!strcmp(args.at(0), "false"))
+      g_args.credit_assignment_normalize = false;
+    else {
+      std::cerr << "Illegal credit-assignment-normalize selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal credit-assignment-normalize selection.");
+    }
+  }, 1), "true/false");
   options.add(     "eligibility-trace-decay-rate", Options::Option([](const std::vector<const char *> &args) {
     g_args.eligibility_trace_decay_rate = atof(args.at(0));
     if(g_args.eligibility_trace_decay_rate < 0.0 || g_args.eligibility_trace_decay_rate > 1.0) {
@@ -436,6 +448,7 @@ void run_agent() {
   agent->set_credit_assignment_epsilon(g_args.credit_assignment_epsilon);
   agent->set_credit_assignment_log_base(g_args.credit_assignment_log_base);
   agent->set_credit_assignment_root(g_args.credit_assignment_root);
+  agent->set_credit_assignment_normalize(g_args.credit_assignment_normalize);
   agent->set_discount_rate(g_args.discount_rate);
   agent->set_eligibility_trace_decay_rate(g_args.eligibility_trace_decay_rate);
   agent->set_eligibility_trace_decay_threshold(g_args.eligibility_trace_decay_threshold);

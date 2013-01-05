@@ -109,8 +109,12 @@ namespace Puddle_World {
 
     Environment()
      : m_init_x(0.0, 1.0),
-     m_init_y(0.0, 1.0)
+     m_init_y(0.0, 1.0),
+     m_step_count(0)
     {
+      m_horizontal_puddles.push_back({{0.1, 0.45, 0.75, 0.1}});
+      m_vertical_puddles.push_back({{0.45, 0.4, 0.8, 0.1}});
+
       Environment::init_impl();
     }
 
@@ -124,6 +128,8 @@ namespace Puddle_World {
     }
 
   private:
+    typedef std::array<double, 4> Puddle;
+
     void init_impl() {
       do {
         m_position.first = m_init_x.first + m_random_init.frand_lt() * (m_init_x.second - m_init_x.first);
@@ -155,9 +161,26 @@ namespace Puddle_World {
         m_position.second = 1.0 - DBL_EPSILON;
 
       double reward = -1.0;
+      
+      switch(++m_step_count) {
+//         case 40000:
+//           m_horizontal_puddles.at(0)[1] = 0.25;
+//           m_horizontal_puddles.push_back({{0.65, 1.0, 0.5, 0.1}});
+//           m_vertical_puddles.push_back(m_vertical_puddles.at(0));
+//           m_vertical_puddles.at(0)[2] = 0.45;
+//           m_vertical_puddles.at(1)[1] = 0.75;
+//           break;
 
-      reward -= 400.0 * horizontal_puddle_reward(0.1, 0.45, 0.75, 0.1);
-      reward -= 400.0 * vertical_puddle_reward(0.45, 0.4, 0.8, 0.1);
+        default:
+          break;
+      }
+
+      std::for_each(m_horizontal_puddles.begin(), m_horizontal_puddles.end(), [this,&reward](const Puddle &puddle) {
+        reward -= 400.0 * horizontal_puddle_reward(puddle[0], puddle[1], puddle[2], puddle[3]);
+      });
+      std::for_each(m_vertical_puddles.begin(), m_vertical_puddles.end(), [this,&reward](const Puddle &puddle) {
+        reward -= 400.0 * vertical_puddle_reward(puddle[0], puddle[1], puddle[2], puddle[3]);
+      });
 
       return reward;
     }
@@ -213,6 +236,11 @@ namespace Puddle_World {
 
     double_pair m_goal_x;
     double_pair m_goal_y;
+
+    size_t m_step_count;
+
+    std::vector<Puddle> m_horizontal_puddles;
+    std::vector<Puddle> m_vertical_puddles;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {

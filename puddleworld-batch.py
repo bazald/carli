@@ -53,10 +53,10 @@ g_ep_tuples = []
 #g_ep_tuples.append(('puddle-world', 0, 'specific',           0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
 #g_ep_tuples.append(('puddle-world', 0, 'even',               0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
 #g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth', 0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'specific',           0.5, 1.0, 0.1, 0.1, 0.2, 'off-policy', 20, 3, 13, 0, 0.5, 0))
-#g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 3, 13, 0, 0.5, 0))
 #g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',    0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 3, 13, 0, 0.5, 0))
 #g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 3, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'even',                  0.6, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 3, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.6, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 3, 13, 0, 0.5, 0))
 g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.6, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 3, 13, 0, 0.5, 0))
 
 #g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0, 0.1, 'on-policy', 20, 8, 8, 0, 0.5, 0))
@@ -136,6 +136,7 @@ class Experiment:
             '--credit-assignment-epsilon', str(self.credit_assignment_epsilon),
             #'--credit-assignment-log-base', '2',
             #'--credit-assignment-root', '3',
+            #'--credit-assignment-normalize', 'false',
             '--discount-rate', str(self.discount_rate),
             '--eligibility-trace-decay-rate', str(self.eligibility_trace_decay_rate),
             '--epsilon-greedy', str(self.epsilon_greedy),

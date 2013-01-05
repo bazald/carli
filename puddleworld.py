@@ -107,12 +107,14 @@ def main():
     cumulative_rewards = {}
     plot_every = 1
     plot_counter = plot_every
+    plot_offset = 0
     for group in files:
       files[group].smith['avg'] = []
       files[group].smith['min'] = []
       files[group].smith['max'] = []
       files[group].smith['med'] = []
       done = False
+      skip_count = plot_offset
       for handle in files[group].handles:
         cumulative_rewards[handle] = 0
       while not done:
@@ -127,6 +129,12 @@ def main():
             cumulative_rewards[handle] += float(split[3])
             vals.append(cumulative_rewards[handle] / int(split[1]))
         if not done:
+          if plot_counter <= skip_count:
+            plot_counter += 1
+            continue
+          elif plot_counter == skip_count + 1:
+            plot_counter = plot_every
+            skip_count = 0
           vals = sorted(vals)
           if plot_counter == plot_every:
             files[group].smith['avg'].append(0)
@@ -181,7 +189,7 @@ def main():
   
   if len(sys.argv) == 1:
     x = []
-    i = 0
+    i = plot_offset
     for s in smith:
       i += 1
       x.append(i * plot_every / 10000.0)
@@ -192,7 +200,7 @@ def main():
     pylab.plot(x, smith, label="Values", color='blue', linestyle='solid')
   else:
     x = []
-    i = 0
+    i = plot_offset
     r = 0
     for agent in smith:
       r = len(smith[agent])
@@ -223,7 +231,7 @@ def main():
   pylab.xlabel('Step Number (in 10,000s)', fontsize=8)
   pylab.ylabel('Reward / \# Episodes (Mvng Avg, n=20)', fontsize=8)
   pylab.title(title, fontsize=10)
-  pylab.ylim(ymin=-500, ymax=0)
+  pylab.ylim(ymin=-250, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())

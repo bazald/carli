@@ -223,7 +223,7 @@ def main():
   pylab.xlabel('Step Number (in 10,000s)', fontsize=8)
   pylab.ylabel('Reward / \# Episodes (Mvng Avg, n=20)', fontsize=8)
   pylab.title(title, fontsize=10)
-  pylab.ylim(ymin=-500, ymax=0)
+  pylab.ylim(ymin=-250, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
