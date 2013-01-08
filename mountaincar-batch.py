@@ -4,7 +4,7 @@
 import argparse, glob, os, random, shutil, subprocess, sys, thread, time
 import pp
 
-g_dir = 'experiment'
+g_dir = 'experiment-mc'
 g_plotter = './mountaincar.py'
 g_plotter_grid = []#['./mountaincar-grid.py', './mountaincar-heat.py']
 g_plotter_grid_filters = ['move(left)', 'move(idle)', 'move(right)', 'all']

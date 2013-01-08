@@ -129,9 +129,9 @@ def main():
               y_max = float(split[3])
               y_count = 1
             else:
-              y_min = min(y_min, split[1])
-              y_avg = y_avg * (y_count / (y_count + 1.0)) + split[2] / (y_count + 1.0)
-              y_max = max(y_max, split[3])
+              y_min = min(y_min, float(split[1]))
+              y_avg = y_avg * (y_count / (y_count + 1.0)) + float(split[2]) / (y_count + 1.0)
+              y_max = max(y_max, float(split[3]))
               y_count = y_count + 1
         if not done:
           files[group].smith['min'].append(y_min)

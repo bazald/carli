@@ -4,7 +4,7 @@
 import argparse, glob, os, random, shutil, subprocess, sys, thread, time
 import pp
 
-g_dir = 'experiment'
+g_dir = 'experiment-pw'
 g_plotter = './puddleworld.py'
 g_plotter_grid = []#['./puddleworld-grid.py', './puddleworld-heat.py']
 g_plotter_grid_filters = ['move(north)', 'move(south)', 'move(east)', 'move(west)', 'all']
