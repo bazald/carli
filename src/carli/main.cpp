@@ -10,6 +10,7 @@
 #include "cart_pole.h"
 #include "mountain_car.h"
 #include "puddle_world.h"
+#include "experimental_output.h"
 #include "getopt.h"
 
 #include <cstring>
@@ -47,6 +48,7 @@ struct Arguments {
     number_of_steps(50000),
     output(SIMPLE),
     on_policy(true),
+    print_every(100),
     pseudoepisode_threshold(20),
     random_start(false),
     reward_negative(true),
@@ -80,6 +82,7 @@ struct Arguments {
   size_t number_of_steps;
   enum {NULL_OUTPUT, SIMPLE, EXPERIMENTAL} output;
   bool on_policy;
+  size_t print_every;
   size_t pseudoepisode_threshold;
   bool random_start;
   bool reward_negative;
@@ -255,6 +258,13 @@ Options generate_options() {
       throw std::runtime_error("Illegal output selection.");
     }
   }, 1), "null/simple/experimental");
+  options.add(     "print-every", Options::Option([](const std::vector<const char *> &args) {
+    g_args.print_every = atoi(args.at(0));
+    if(g_args.print_every == 0) {
+      std::cerr << "Illegal print-every specification: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal print-every specification.");
+    }
+  }, 1), "[1,inf), applies only to experimental output");
   options.add('p', "policy", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "on-policy"))
       g_args.on_policy = true;
@@ -442,6 +452,7 @@ void run_agent() {
 
   auto env = std::make_shared<ENVIRONMENT>();
   auto agent = std::make_shared<AGENT>(env);
+  Experimental_Output experimental_output(g_args.print_every);
 
   agent->set_contribute_update_count(g_args.contribute_update_count);
   agent->set_credit_assignment(typename AGENT::Credit_Assignment(g_args.credit_assignment));
@@ -492,7 +503,7 @@ void run_agent() {
       ++total_steps;
 
       if(g_args.output == Arguments::EXPERIMENTAL)
-        std::cout << total_steps << ' ' << agent->get_episode_number() << ' ' << agent->get_step_count() << ' ' << reward << std::endl;
+        experimental_output.print(total_steps, agent->get_episode_number(), agent->get_step_count(), reward);
 
 #ifdef DEBUG_OUTPUT
       std::cerr << *env << *agent;

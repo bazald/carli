@@ -77,16 +77,16 @@ def main():
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')
     seed = int(f.readline().split(' ', 1)[1])
+    x = []
     smith = []
-    cumulative_reward = 0
     while True:
       line = f.readline()
       if not line or line == '':
         break
       else:
         split = line.split(' ')
-        cumulative_reward += float(split[3])
-        smith.append(cumulative_reward / int(split[1]))
+        x.append(int(split[0]))
+        smith.append(float(split[2]))
     f.close()
     
     directory=''
@@ -104,19 +104,15 @@ def main():
         files[directory] = Handles()
         files[directory].handles.append(Handle(f, filename, seed))
     
-    cumulative_rewards = {}
-    plot_every = 1
-    plot_counter = plot_every
+    first_group = True
+    x = []
     for group in files:
       files[group].smith['avg'] = []
       files[group].smith['min'] = []
       files[group].smith['max'] = []
-      files[group].smith['med'] = []
       done = False
-      for handle in files[group].handles:
-        cumulative_rewards[handle] = 0
       while not done:
-        vals = []
+        first_handle = True
         for handle in files[group].handles:
           line = handle.f.readline()
           if not line or line == '':
@@ -124,29 +120,28 @@ def main():
             break
           else:
             split = line.split(' ')
-            cumulative_rewards[handle] += float(split[3])
-            vals.append(cumulative_rewards[handle] / int(split[1]))
+            if first_handle:
+              first_handle = False
+              if first_group:
+                x.append(int(split[0]))
+              y_min = float(split[1])
+              y_avg = float(split[2])
+              y_max = float(split[3])
+              y_count = 1
+            else:
+              y_min = min(y_min, split[1])
+              y_avg = y_avg * (y_count / (y_count + 1.0)) + split[2] / (y_count + 1.0)
+              y_max = max(y_max, split[3])
+              y_count = y_count + 1
         if not done:
-          vals = sorted(vals)
-          if plot_counter == plot_every:
-            files[group].smith['avg'].append(0)
-            files[group].smith['min'].append(0)
-            files[group].smith['max'].append(0)
-            files[group].smith['med'].append(0)
-            plot_counter = 1
-          else:
-            plot_counter += 1
-          last = len(files[group].smith['avg']) - 1
-          files[group].smith['avg'][last] += (sum(vals) / len(vals)) / plot_every
-          files[group].smith['min'][last] += (vals[0] / plot_every) / plot_every
-          files[group].smith['max'][last] += (vals[len(vals) - 1]) / plot_every
-          if len(vals) % 2 == 1:
-            files[group].smith['med'][last] += (vals[int(len(vals) / 2)]) / plot_every
-          else:
-            files[group].smith['med'][last] += ((vals[len(vals) / 2 - 1] + vals[len(vals) / 2]) / 2) / plot_every
+          files[group].smith['min'].append(y_min)
+          files[group].smith['avg'].append(y_avg)
+          files[group].smith['max'].append(y_max)
       
       for handle in files[group].handles:
         handle.f.close()
+      
+      first_group = False
     
     if len(files) == 1:
       title='Mountain Car (' + group.rsplit('/',1)[1].replace('_', '\_') + ')'
@@ -161,45 +156,17 @@ def main():
       
       mode = 'multiple experiment evaluation'
   
-  #if title == 'Puddle World (puddle-world-overgeneral.soar\_0-0\_rl\_uperf)':
-    #title = 'UPERF Performance in Puddle World (' + str(len(sys.argv) - 1) + ' Runs)'
-  if title == 'Puddle World (puddle-world-overgeneral.soar\_0-0\_rl\_td-error\_0.84155\_2\_1.0\_20\_True)':
-    title = 'TD-Error Performance in Puddle World (' + str(len(sys.argv) - 1) + ' Runs)'
-  if title == 'Puddle World (puddle-world.soar\_1-1\_even\_td-error\_0.84155\_2\_1.0\_20\_True\_0-1-1\_0-1-1\_0-2-1\_0-2-2\_0-4-2\_0-4-4\_0-8-4\_0-8-8\_0-16-8\_0-16-16)':
-    title = 'Even Credit Assignment in Puddle World (' + str(len(sys.argv) - 1) + ' Runs)'
-  if title == 'Puddle World (puddle-world.soar\_1-1\_fc\_td-error\_0.84155\_2\_1.0\_20\_True\_0-1-1\_0-1-1\_0-2-1\_0-2-2\_0-4-2\_0-4-4\_0-8-4\_0-8-8\_0-16-8\_0-16-16)':
-    title = '1/FC Credit Assignment in Puddle World (' + str(len(sys.argv) - 1) + ' Runs)'
-  if title == 'Puddle World (puddle-world.soar\_1-1\_rl\_td-error\_0.84155\_2\_1.0\_20\_True\_0-1-1\_0-1-1\_0-2-1\_0-2-2\_0-4-2\_0-4-4\_0-8-4\_0-8-8\_0-16-8\_0-16-16)':
-    title = '1/RL Credit Assignment in Puddle World (' + str(len(sys.argv) - 1) + ' Runs)'
-  if title == 'Puddle World (puddle-world.soar\_1-1\_log-rl\_td-error\_0.84155\_2\_1.0\_20\_True\_0-1-1\_0-1-1\_0-2-1\_0-2-2\_0-4-2\_0-4-4\_0-8-4\_0-8-8\_0-16-8\_0-16-16)':
-    title = '1/log(RL) Credit Assignment in Puddle World (' + str(len(sys.argv) - 1) + ' Runs)'
-  
   fig = plt.figure()
   fig.canvas.set_window_title('Mountain Car')
   
   pylab.axes([0.125,0.15,0.8375,0.75])
   
   if len(sys.argv) == 1:
-    x = []
-    i = 0
-    for s in smith:
-      i += 1
-      x.append(i * plot_every / 10000.0)
-    
     for i in range(1, len(smith)):
       smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
     
     pylab.plot(x, smith, label="Values", color='blue', linestyle='solid')
   else:
-    x = []
-    i = 0
-    r = 0
-    for agent in smith:
-      r = len(smith[agent])
-    for s in range(0,r):
-      i += 1
-      x.append(i * plot_every / 10000.0)
-    
     for a in smith:
       for i in range(1, len(smith[a])):
         smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
@@ -239,8 +206,8 @@ def main():
   #print last_xlabel
   
   if len(sys.argv) == 1:
-    pylab.savefig('moutaincar.eps')
-    pylab.savefig('moutaincar.png', dpi=1200)
+    pylab.savefig('mountaincar.eps')
+    pylab.savefig('mountaincar.png', dpi=1200)
     plt.show()
   else:
     splitd = directory.rsplit('/', 1)

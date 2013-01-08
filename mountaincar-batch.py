@@ -6,7 +6,7 @@ import pp
 
 g_dir = 'experiment'
 g_plotter = './mountaincar.py'
-g_plotter_grid = ['./mountaincar-grid.py', './mountaincar-heat.py']
+g_plotter_grid = []#['./mountaincar-grid.py', './mountaincar-heat.py']
 g_plotter_grid_filters = ['move(left)', 'move(idle)', 'move(right)', 'all']
 
 g_ep_tuples = []
@@ -14,11 +14,41 @@ g_ep_tuples = []
 #g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.1, 0.5, 'off-policy', 20, 3, 15, 0, 0.5, 0))
 #g_ep_tuples.append(('mountain-car', 0, 'epsilon-even-depth', 0.5, 0.999, 0, 0.1, 0.5, 'off-policy', 20, 3, 15, 0, 0.5, 0))
 #g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.1, 0.5, 'off-policy', 20, 3, 15, 0, 0.5, 0))
-g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.5, 'off-policy', 20, 3, 15, 0, 0.5, 0))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.5, 'off-policy', 20, 3, 15, 0, 0.5, 0))
 
 #g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0, 0.1, 'on-policy', 20, 9, 9, 0, 0.5, 0))
 #g_ep_tuples.append(('mountain-car', 0, 'inv-sqrt-update-count', 0.5, 0.999, 0, 0, 0.1, 'on-policy', 20, 3, 19, 0, 0.5, 0))
 
+g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  5,  5, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  5,  5, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',      0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  5,  5, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  5,  5, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  5,  5, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',      0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',      0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20, 11, 11, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20, 11, 11, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',      0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20, 11, 11, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20, 11, 11, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20, 11, 11, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',      0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-update-count',      0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0))
 
 parser = argparse.ArgumentParser(description='Run MountainCar experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,
