@@ -286,7 +286,7 @@ Options generate_options() {
       std::cerr << "Illegal random-start selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal random-start selection.");
     }
-  }, 1), "true/false, applies only to mountain-car");
+  }, 1), "true/false, applies only to mountain-car and puddle-world");
   options.add(     "reward-negative", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "true"))
       g_args.reward_negative = true;
