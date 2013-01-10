@@ -165,11 +165,13 @@ class Experiment:
             '--learning-rate', str(self.learning_rate),
             '--policy', self.policy,
             '--pseudoepisode-threshold', str(self.pseudoepisode_threshold),
+            '--random-start', 'true',
             '--split-min', str(self.split_min),
             '--split-max', str(self.split_max),
             '--split-pseudoepisodes', str(self.split_pseudoepisodes),
             '--split-cabe', str(self.split_cabe),
             '--split-update-count', str(self.split_update_count),
+            #'--value-function-cap', str(16 * 16 * 4),
             '--output', 'experimental']
     return args
   

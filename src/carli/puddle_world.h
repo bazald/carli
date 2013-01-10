@@ -108,9 +108,10 @@ namespace Puddle_World {
     typedef std::pair<double, double> double_pair;
 
     Environment()
-     : m_init_x(0.0, 1.0),
-     m_init_y(0.0, 1.0),
-     m_step_count(0)
+     : m_init_x(0.15, 0.45),
+     m_init_y(0.15, 0.45),
+     m_step_count(0),
+     m_random_start(false)
     {
       m_horizontal_puddles.push_back({{0.1, 0.45, 0.75, 0.1}});
       m_vertical_puddles.push_back({{0.45, 0.4, 0.8, 0.1}});
@@ -120,8 +121,21 @@ namespace Puddle_World {
 
     const double_pair & get_position() const {return m_position;}
     const double & get_value(const Feature::Axis &index) const {return *(&m_position.first + index);}
+    bool is_random_start() const {return m_random_start;}
 
     void set_position(const double_pair &position_) {m_position = position_;}
+    void set_random_start(const bool &random_start_) {
+      m_random_start = random_start_;
+
+      if(m_random_start) {
+        m_init_x = double_pair(0.0, 1.0);
+        m_init_y = double_pair(0.0, 1.0);
+      }
+      else {
+        m_init_x = double_pair(0.15, 0.45);
+        m_init_y = double_pair(0.15, 0.45);
+      }
+    }
 
     bool goal_reached() const {
       return m_position.first + m_position.second > 1.9;
@@ -238,6 +252,7 @@ namespace Puddle_World {
     double_pair m_goal_y;
 
     size_t m_step_count;
+    bool m_random_start;
 
     std::vector<Puddle> m_horizontal_puddles;
     std::vector<Puddle> m_vertical_puddles;

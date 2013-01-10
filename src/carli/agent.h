@@ -155,6 +155,7 @@ public:
    m_step_count(0),
    m_total_reward(reward_type()),
    m_null_q_values(false),
+   m_value_function_cap(0),
    m_learning_rate(0.3),
    m_discount_rate(0.9),
    m_eligibility_trace_decay_rate(0.0),
@@ -357,6 +358,11 @@ public:
   size_t get_contribute_update_count() const {return m_contribute_update_count;}
   void set_contribute_update_count(const size_t &contribute_update_count) {
     m_contribute_update_count = contribute_update_count;
+  }
+
+  size_t get_value_function_cap() const {return m_value_function_cap;}
+  void set_value_function_cap(const size_t &value_function_cap) {
+    m_value_function_cap = value_function_cap;
   }
 
   const std::shared_ptr<const environment_type> & get_env() const {return m_environment;}
@@ -850,6 +856,9 @@ protected:
     if(q->type == Q_Value::SPLIT)
       return true;
 
+    if(m_value_function_cap && get_value_function_size() >= m_value_function_cap)
+      return false;
+
     if(q->update_count > m_split_update_count &&
        q->pseudoepisode_count > m_split_pseudoepisodes &&
        m_mean_cabe.outlier_above(q->cabe, m_split_cabe))
@@ -1094,6 +1103,7 @@ private:
   reward_type m_total_reward;
 
   bool m_null_q_values; ///< insert nullptr instead of new Q_Values until reaching the leaf
+  size_t m_value_function_cap; ///< at this threshold, no more entries will be added to the value functions through refinement
 
   double m_learning_rate; ///< alpha
   double m_discount_rate; ///< gamma

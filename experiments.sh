@@ -36,6 +36,7 @@ function averages {
 ./puddleworld.py experiment-pw/*_11_11_*/*.out
 ./puddleworld.py experiment-pw/*_13_13_*/*.out
 ./puddleworld.py experiment-pw/*_3_13_*/*.out
+# ./puddleworld.py experiment-pw/*_0.6_*/*.out
 averages experiment-pw/specific_*/
 averages experiment-pw/*_5_5_*/
 averages experiment-pw/*_7_7_*/
@@ -43,6 +44,7 @@ averages experiment-pw/*_9_9_*/
 averages experiment-pw/*_11_11_*/
 averages experiment-pw/*_13_13_*/
 averages experiment-pw/*_3_13_*/
+# averages experiment-pw/*_0.6_*/
 ./puddleworld.py \
 	experiment-pw/specific_*_7_7_*/*.out \
 	experiment-pw/inv-root-update-count_*_5_5_*/*.out \

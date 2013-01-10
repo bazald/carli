@@ -61,7 +61,8 @@ struct Arguments {
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
     split_mabe(0.84155),
 #endif
-    contribute_update_count(0)
+    contribute_update_count(0),
+    value_function_cap(0)
   {
   }
 
@@ -96,6 +97,7 @@ struct Arguments {
   double split_mabe;
 #endif
   size_t contribute_update_count;
+  size_t value_function_cap;
 } g_args;
 
 Options generate_options() {
@@ -321,6 +323,9 @@ Options generate_options() {
   options.add('t', "pseudoepisode-threshold", Options::Option([](const std::vector<const char *> &args) {
     g_args.pseudoepisode_threshold = atoi(args.at(0));
   }, 1), "[0,inf)");
+  options.add(     "value-function-cap", Options::Option([](const std::vector<const char *> &args) {
+    g_args.value_function_cap = atoi(args.at(0));
+  }, 1), "[0,inf)");
 
   return options;
 }
@@ -475,7 +480,9 @@ void run_agent() {
   if(auto mountain_car = std::dynamic_pointer_cast<Mountain_Car::Environment>(env)) {
     mountain_car->set_random_start(g_args.random_start);
     mountain_car->set_reward_negative(g_args.reward_negative);
-  }
+  };
+  if(auto puddle_world = std::dynamic_pointer_cast<Puddle_World::Environment>(env))
+    puddle_world->set_random_start(g_args.random_start);
   agent->set_split_min(g_args.split_min);
   agent->set_split_max(g_args.split_max);
   agent->set_split_update_count(g_args.split_update_count);
@@ -484,6 +491,7 @@ void run_agent() {
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   agent->set_split_mabe(g_args.split_mabe);
 #endif
+  agent->set_value_function_cap(g_args.value_function_cap);
 
   size_t total_steps = 0;
   size_t successes = 0;
