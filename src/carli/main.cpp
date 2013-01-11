@@ -52,6 +52,7 @@ struct Arguments {
     pseudoepisode_threshold(20),
     random_start(false),
     reward_negative(true),
+    scenario(0),
     seed(uint32_t(time(0))),
     split_min(0),
     split_max(size_t(-1)),
@@ -87,6 +88,7 @@ struct Arguments {
   size_t pseudoepisode_threshold;
   bool random_start;
   bool reward_negative;
+  uint32_t scenario;
   uint32_t seed;
   size_t split_min;
   size_t split_max;
@@ -297,9 +299,12 @@ Options generate_options() {
       throw std::runtime_error("Illegal reward-negative selection.");
     }
   }, 1), "true/false, applies only to mountain-car");
+  options.add(     "scenario", Options::Option([](const std::vector<const char *> &args) {
+    g_args.scenario = atoi(args.at(0));
+  }, 1), "[0,inf)");
   options.add('s', "seed", Options::Option([](const std::vector<const char *> &args) {
     g_args.seed = atoi(args.at(0));
-  }, 1), "(-inf,inf)");
+  }, 1), "[0,inf)");
   options.add(     "split-cabe", Options::Option([](const std::vector<const char *> &args) {
     g_args.split_cabe = atof(args.at(0));
   }, 1), "[0,inf)");
@@ -456,9 +461,9 @@ void run_agent() {
   std::cout << "SEED " << g_args.seed << std::endl;
 
   auto env = std::make_shared<ENVIRONMENT>();
-  auto agent = std::make_shared<AGENT>(env);
-  Experimental_Output experimental_output(g_args.print_every);
+  env->set_scenario(g_args.scenario);
 
+  auto agent = std::make_shared<AGENT>(env);
   agent->set_contribute_update_count(g_args.contribute_update_count);
   agent->set_credit_assignment(typename AGENT::Credit_Assignment(g_args.credit_assignment));
   agent->set_credit_assignment_epsilon(g_args.credit_assignment_epsilon);
@@ -492,6 +497,8 @@ void run_agent() {
   agent->set_split_mabe(g_args.split_mabe);
 #endif
   agent->set_value_function_cap(g_args.value_function_cap);
+
+  Experimental_Output experimental_output(g_args.print_every);
 
   size_t total_steps = 0;
   size_t successes = 0;

@@ -95,10 +95,15 @@ public:
     print_impl(os);
   }
 
+  uint32_t get_scenario() const {return m_scenario;}
+  void set_scenario(const uint32_t &scenario) {m_scenario = scenario;}
+
 private:
   virtual void init_impl() = 0;
   virtual reward_type transition_impl(const action_type &action) = 0;
   virtual void print_impl(std::ostream &os) const = 0;
+
+  uint32_t m_scenario;
 };
 
 template <typename ACTION>
