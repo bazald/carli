@@ -376,6 +376,12 @@ public:
   Mean get_mean_mabe() const {return m_mean_mabe;}
 #endif
 
+  void reset_statistics() {
+    m_episode_number = m_episode_number ? 1 : 0;
+    m_step_count = 0;
+    m_total_reward = 0.0;
+  }
+
   void init() {
     if(m_metastate != NON_TERMINAL)
       ++m_episode_number;

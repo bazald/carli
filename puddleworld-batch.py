@@ -43,14 +43,48 @@ g_ep_tuples = []
 #g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0))
 #g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0))
 
-g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  5,  5, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 11, 11, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0))
-g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0))
+g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0, 0, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  5,  5, 0, 0.5, 0, 0, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0, 0, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0, 0, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0, 0, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0, 0, 0))
+g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0, 1, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  5,  5, 0, 0.5, 0, 1, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0, 1, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0, 1, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 11, 11, 0, 0.5, 0, 1, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0, 1, 0))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0, 1, 0))
+g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0, 2, 25000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  5,  5, 0, 0.5, 0, 2, 25000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0, 2, 25000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0, 2, 25000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 11, 11, 0, 0.5, 0, 2, 25000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0, 2, 25000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0, 2, 25000))
+g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0, 3, 75000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  5,  5, 0, 0.5, 0, 3, 75000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0, 3, 75000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0, 3, 75000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 11, 11, 0, 0.5, 0, 3, 75000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0, 3, 75000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0, 3, 75000))
+g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0, 4, 125000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  5,  5, 0, 0.5, 0, 4, 125000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  7,  7, 0, 0.5, 0, 4, 125000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0, 4, 125000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 11, 11, 0, 0.5, 0, 4, 125000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20, 13, 13, 0, 0.5, 0, 4, 125000))
+g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0, 4, 125000))
 
+#g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0, 3, 75000))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0, 3, 75000))
+#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',    0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  9,  9, 0, 0.5, 0, 3, 75000))
+#g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0, 3, 75000))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0, 3, 75000))
+#g_ep_tuples.append(('puddle-world', 0, 'epsilon-even-depth',    0.5, 1.0, 0, 0.1, 0.2, 'off-policy', 20,  3, 13, 0, 0.5, 0, 3, 75000))
 
 parser = argparse.ArgumentParser(description='Run PuddleWorld experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,
@@ -114,6 +148,8 @@ class Experiment:
     self.split_pseudoepisodes = ep_tuple[12]
     self.split_cabe = ep_tuple[13]
     self.split_update_count = ep_tuple[14]
+    self.scenario = ep_tuple[15]
+    self.skip_steps = ep_tuple[16]
     
   def get_args(self):
     args = ['./carli',
@@ -138,6 +174,8 @@ class Experiment:
             '--split-pseudoepisodes', str(self.split_pseudoepisodes),
             '--split-cabe', str(self.split_cabe),
             '--split-update-count', str(self.split_update_count),
+            '--scenario', str(self.scenario),
+            '--skip-steps', str(self.skip_steps),
             #'--value-function-cap', str(16 * 16 * 4),
             '--output', 'experimental']
     return args
@@ -184,6 +222,8 @@ for ep_tuple in g_ep_tuples:
   #dir += '_' + str(ep_tuple[12])
   #dir += '_' + str(ep_tuple[13])
   #dir += '_' + str(ep_tuple[14])
+  dir += '_' + str(ep_tuple[15])
+  #dir += '_' + str(ep_tuple[16])
   if not os.path.isdir(dir):
     os.mkdir(dir)
   dirs.append(dir)
