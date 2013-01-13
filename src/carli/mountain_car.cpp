@@ -51,7 +51,7 @@ namespace Mountain_Car {
   void Environment::MCarStep(int a) {
     assert(0 <= a && a <= 2);
 
-    m_x_dot += float((a - 1) * 0.001 + cos(3 * m_x) * -0.0025);
+    m_x_dot += float((a - 1) * m_cart_force + cos(3 * m_x) * -m_grav_force);
     if(m_x_dot > mcar_max_velocity)
       m_x_dot = float(mcar_max_velocity);
     if(m_x_dot < -mcar_max_velocity)

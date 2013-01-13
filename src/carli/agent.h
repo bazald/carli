@@ -468,6 +468,12 @@ public:
     return size;
   }
 
+  void reset_update_counts() const {
+    std::for_each(m_value_function.begin(), m_value_function.end(), [this](const typename value_function_type::value_type &vf) {
+      reset_update_counts_for_trie(vf.second);
+    });
+  }
+
 protected:
   Q_Value * get_value(const feature_list &features, const action_type &action, const size_t &offset, const size_t &depth = 0) {
     if(!features)
@@ -935,6 +941,14 @@ private:
       size += get_trie_size(trie2.get_deeper());
     });
     return size;
+  }
+
+  static void reset_update_counts_for_trie(const feature_trie_type * const &trie) {
+    std::for_each(trie->begin(trie), trie->end(trie), [](const feature_trie_type &trie2) {
+      if(trie2.get())
+        trie2.get()->update_count = 0;
+      reset_update_counts_for_trie(trie2.get_deeper());
+    });
   }
 
   feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const double &value = 0.0) {

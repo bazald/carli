@@ -112,8 +112,7 @@ namespace Puddle_World {
      m_init_y(0.15, 0.45),
      m_goal_dynamic(false),
      m_step_count(0),
-     m_random_start(false),
-     m_altered_experiment(false)
+     m_random_start(false)
     {
       m_horizontal_puddles.push_back({{0.1, 0.45, 0.75, 0.1}});
       m_vertical_puddles.push_back({{0.45, 0.4, 0.8, 0.1}});
@@ -159,6 +158,20 @@ namespace Puddle_World {
       m_random_motion = Zeni::Random(m_random_init.rand());
     }
 
+    void alter_impl() {
+      /// Too extreme
+//       m_horizontal_puddles.at(0)[1] = 0.3;
+//       m_vertical_puddles.at(0)[2] = 0.6;
+//       m_horizontal_puddles.push_back({{0.6, 0.75, 0.5, 0.1}});
+//       m_goal_dynamic = true;
+//       m_goal_x = std::make_pair(0.4, 0.5);
+//       m_goal_y = std::make_pair(0.7, 0.8);
+
+      m_goal_dynamic = true;
+      m_goal_x = std::make_pair(0.7, 0.8);
+      m_goal_y = std::make_pair(0.9, 1.0);
+    }
+
     reward_type transition_impl(const action_type &action) {
       const double shift = m_random_motion.frand_gaussian() * 0.01;
       const double step_size = shift + 0.05;
@@ -180,35 +193,9 @@ namespace Puddle_World {
       else if(m_position.second >= 1.0)
         m_position.second = 1.0 - DBL_EPSILON;
 
+      ++m_step_count;
+
       double reward = -1.0;
-
-//       m_horizontal_puddles.push_back({{0.1, 0.45, 0.75, 0.1}});
-//       m_vertical_puddles.push_back({{0.45, 0.4, 0.8, 0.1}});
-
-      switch(++m_step_count) {
-        case 1:
-          if(get_scenario() == 1)
-            alter_experiment();
-          break;
-
-        case 25000:
-          if(get_scenario() == 2)
-            alter_experiment();
-          break;
-
-        case 75000:
-          if(get_scenario() == 3)
-            alter_experiment();
-          break;
-
-        case 150000:
-          if(get_scenario() == 4)
-            alter_experiment();
-          break;
-
-        default:
-          break;
-      }
 
       std::for_each(m_horizontal_puddles.begin(), m_horizontal_puddles.end(), [this,&reward](const Puddle &puddle) {
         reward -= 400.0 * horizontal_puddle_reward(puddle[0], puddle[1], puddle[2], puddle[3]);
@@ -218,20 +205,6 @@ namespace Puddle_World {
       });
 
       return reward;
-    }
-
-    void alter_experiment() {
-      if(!m_altered_experiment) {
-        m_horizontal_puddles.at(0)[1] = 0.3;
-        m_vertical_puddles.at(0)[2] = 0.6;
-        m_horizontal_puddles.push_back({{0.6, 0.75, 0.5, 0.1}});
-
-        m_goal_dynamic = true;
-        m_goal_x = std::make_pair(0.4, 0.5);
-        m_goal_y = std::make_pair(0.7, 0.8);
-        
-        m_altered_experiment = true;
-      }
     }
 
     double horizontal_puddle_reward(const double &left, const double &right, const double &y, const double &radius) const {
@@ -292,8 +265,6 @@ namespace Puddle_World {
 
     std::vector<Puddle> m_horizontal_puddles;
     std::vector<Puddle> m_vertical_puddles;
-
-    bool m_altered_experiment;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {

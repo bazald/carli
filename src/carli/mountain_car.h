@@ -115,6 +115,8 @@ namespace Mountain_Car {
     Environment()
      : m_x(0.0f),
      m_x_dot(0.0f),
+     m_cart_force(0.001),
+     m_grav_force(0.0025),
      m_random_start(false),
      m_reward_negative(true)
     {
@@ -141,6 +143,10 @@ namespace Mountain_Car {
       MCarInit();
     }
 
+    void alter_impl() {
+      m_cart_force = 0.0009;
+    }
+
     reward_type transition_impl(const action_type &action) {
       MCarStep(int(dynamic_cast<const Move &>(action).direction));
 
@@ -160,6 +166,10 @@ namespace Mountain_Car {
 
     float m_x;
     float m_x_dot;
+
+    double m_cart_force;
+    double m_grav_force;
+
     bool m_random_start;
     bool m_reward_negative;
   };

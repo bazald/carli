@@ -81,10 +81,20 @@ public:
   typedef ACTION action_type;
   typedef double reward_type;
 
-  Environment() {}
+  Environment()
+   : m_altered(false)
+  {
+  }
 
   void init() {
     init_impl();
+  }
+
+  void alter() {
+    if(!m_altered) {
+      alter_impl();
+      m_altered = true;
+    }
   }
 
   reward_type transition(const action_type &action) {
@@ -100,10 +110,12 @@ public:
 
 private:
   virtual void init_impl() = 0;
+  virtual void alter_impl() {}
   virtual reward_type transition_impl(const action_type &action) = 0;
   virtual void print_impl(std::ostream &os) const = 0;
 
   uint32_t m_scenario;
+  bool m_altered;
 };
 
 template <typename ACTION>

@@ -524,7 +524,10 @@ void run_agent() {
 
       if(g_args.output == Arguments::EXPERIMENTAL && total_steps > -1) {
         if(!total_steps) {
+          env->alter();
           agent->reset_statistics();
+          if(env->get_scenario() > 4)
+            agent->reset_update_counts();
           ++total_steps;
         }
 
