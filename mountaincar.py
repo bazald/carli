@@ -123,7 +123,7 @@ def main():
             if first_handle:
               first_handle = False
               if first_group:
-                x.append(int(split[0]))
+                x.append(int(split[0]) / 10000.0)
               y_min = float(split[1])
               y_avg = float(split[2])
               y_max = float(split[3])

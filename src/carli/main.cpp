@@ -88,6 +88,7 @@ struct Arguments {
   size_t print_every;
   size_t pseudoepisode_threshold;
   bool random_start;
+  bool reset_update_counts;
   bool reward_negative;
   uint32_t scenario;
   uint32_t seed;
@@ -301,6 +302,16 @@ Options generate_options() {
       throw std::runtime_error("Illegal reward-negative selection.");
     }
   }, 1), "true/false, applies only to mountain-car");
+  options.add(     "reset-update-counts", Options::Option([](const std::vector<const char *> &args) {
+    if(!strcmp(args.at(0), "true"))
+      g_args.reset_update_counts = true;
+    else if(!strcmp(args.at(0), "false"))
+      g_args.reset_update_counts = false;
+    else {
+      std::cerr << "Illegal reset-update-counts selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal reset-update-counts selection.");
+    }
+  }, 1), "true/false, applies only when skip-steps > 0");
   options.add(     "scenario", Options::Option([](const std::vector<const char *> &args) {
     g_args.scenario = atoi(args.at(0));
   }, 1), "[0,inf)");
@@ -526,7 +537,7 @@ void run_agent() {
         if(!total_steps) {
           env->alter();
           agent->reset_statistics();
-          if(env->get_scenario() > 4)
+          if(g_args.reset_update_counts)
             agent->reset_update_counts();
           ++total_steps;
         }
