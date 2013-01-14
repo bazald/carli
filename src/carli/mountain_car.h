@@ -144,7 +144,11 @@ namespace Mountain_Car {
     }
 
     void alter_impl() {
-      m_cart_force = 0.0009;
+      if(get_scenario() < 400)
+        return;
+      else if(get_scenario() < 500) {
+        m_cart_force = 0.0009;
+      }
     }
 
     reward_type transition_impl(const action_type &action) {

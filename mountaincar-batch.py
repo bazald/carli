@@ -11,21 +11,21 @@ g_plotter_grid_filters = ['move(left)', 'move(idle)', 'move(right)', 'all']
 
 g_ep_tuples = []
 
-# Experiment 1, non-hierarchical agents comparison
+# Experiment 0, non-hierarchical agents comparison
 g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  5,  5, 0, 0.5, 0, 0, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  7,  7, 0, 0.5, 0, 0, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 0, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 0, 0, 'false'))
 
-# Experiment 2, hierarchical agents performance comparison - compare to 0
+# Experiment 1, hierarchical agents performance comparison - compare to 0
 g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  5,  5, 0, 0.5, 0, 1, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  7,  7, 0, 0.5, 0, 1, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 1, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 1, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 1, 0, 'false'))
 
-# Experiment 3, alternative credit assignment performance comparison - compare to 1
+# Experiment 2, alternative credit assignment performance comparison - compare to 1
 g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  5,  5, 0, 0.5, 0, 2, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  7,  7, 0, 0.5, 0, 2, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 2, 0, 'false'))
@@ -37,10 +37,18 @@ g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0
 g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 2, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 2, 0, 'false'))
 
-# Experiment 4, dynamically refined hierarchical agents performance comparison - compare to 1 and 2
+# Experiment 3, dynamically refined hierarchical agents performance comparison - compare to 1 and 2
 g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0, 3, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0, 3, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0, 3, 0, 'false'))
+
+# Experiment 400s, move goal
+g_ep_tuples.append(('mountain-car', 0, 'specific',              0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  5,  5, 0, 0.5, 0, 400, -1, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 400, -1, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  3, 13, 0, 0.5, 0, 400, -1, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'specific',              0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  5,  5, 0, 0.5, 0, 401, 500000, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 401, 500000, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  3, 13, 0, 0.5, 0, 401, 500000, 'false'))
 
 
 
@@ -90,13 +98,13 @@ g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0
 #g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0, 'false'))
 #g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 0, 0, 'false'))
 #g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  3, 13, 0, 0.5, 0, 0, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'specific',              0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 1, 1, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  5,  5, 0, 0.5, 0, 1, 1, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  7,  7, 0, 0.5, 0, 1, 1, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 1, 1, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 1, 1, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 1, 1, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  3, 13, 0, 0.5, 0, 1, 1, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'specific',              0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 1, -1, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  5,  5, 0, 0.5, 0, 1, -1, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  7,  7, 0, 0.5, 0, 1, -1, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 1, -1, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 1, -1, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 1, -1, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  3, 13, 0, 0.5, 0, 1, -1, 'false'))
 #g_ep_tuples.append(('mountain-car', 0, 'specific',              0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 2, 25000, 'false'))
 #g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  5,  5, 0, 0.5, 0, 2, 25000, 'false'))
 #g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0, 0.1, 'off-policy', 20,  7,  7, 0, 0.5, 0, 2, 25000, 'false'))

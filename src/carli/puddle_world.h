@@ -112,7 +112,8 @@ namespace Puddle_World {
      m_init_y(0.15, 0.45),
      m_goal_dynamic(false),
      m_step_count(0),
-     m_random_start(false)
+     m_random_start(false),
+     m_noise(0.01)
     {
       m_horizontal_puddles.push_back({{0.1, 0.45, 0.75, 0.1}});
       m_vertical_puddles.push_back({{0.45, 0.4, 0.8, 0.1}});
@@ -167,9 +168,20 @@ namespace Puddle_World {
 //       m_goal_x = std::make_pair(0.4, 0.5);
 //       m_goal_y = std::make_pair(0.7, 0.8);
 
-      m_goal_dynamic = true;
-      m_goal_x = std::make_pair(0.7, 0.8);
-      m_goal_y = std::make_pair(0.9, 1.0);
+      if(get_scenario() < 100)
+        return;
+      else if(get_scenario() < 200) {
+        m_goal_dynamic = true;
+        m_goal_x = std::make_pair(0.8, 0.85);
+        m_goal_y = std::make_pair(0.9, 1.0);
+      }
+      else if(get_scenario() < 300) {
+        m_horizontal_puddles.at(0)[3] = 0.15;
+        m_vertical_puddles.at(0)[3] = 0.15;
+      }
+      else if(get_scenario() < 400) {
+        m_noise = 0.02;
+      }
     }
 
     reward_type transition_impl(const action_type &action) {
@@ -265,6 +277,8 @@ namespace Puddle_World {
 
     std::vector<Puddle> m_horizontal_puddles;
     std::vector<Puddle> m_vertical_puddles;
+
+    double m_noise;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {

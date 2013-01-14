@@ -92,7 +92,7 @@ struct Arguments {
   bool reward_negative;
   uint32_t scenario;
   uint32_t seed;
-  size_t skip_steps;
+  int32_t skip_steps;
   size_t split_min;
   size_t split_max;
   size_t split_update_count;
@@ -320,7 +320,7 @@ Options generate_options() {
   }, 1), "[0,inf)");
   options.add(     "skip-steps", Options::Option([](const std::vector<const char *> &args) {
     g_args.skip_steps = atoi(args.at(0));
-  }, 1), "[0,inf)");
+  }, 1), "[-1,inf)");
   options.add(     "split-cabe", Options::Option([](const std::vector<const char *> &args) {
     g_args.split_cabe = atof(args.at(0));
   }, 1), "[0,inf)");
@@ -516,7 +516,12 @@ void run_agent() {
 
   Experimental_Output experimental_output(g_args.print_every);
 
-  int32_t total_steps = -int32_t(g_args.skip_steps);
+  int32_t total_steps = -g_args.skip_steps;
+  if(total_steps == -1) {
+    total_steps = 0;
+    env->alter();
+  }
+
   size_t successes = 0;
   size_t failures = 0;
   for(size_t episodes = 0; !g_args.number_of_episodes || episodes < g_args.number_of_episodes; ++episodes) {
@@ -533,17 +538,16 @@ void run_agent() {
       const double reward = agent->act();
       ++total_steps;
 
-      if(g_args.output == Arguments::EXPERIMENTAL && total_steps > -1) {
-        if(!total_steps) {
-          env->alter();
-          agent->reset_statistics();
-          if(g_args.reset_update_counts)
-            agent->reset_update_counts();
-          ++total_steps;
-        }
-
-        experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward);
+      if(!total_steps) {
+        env->alter();
+        agent->reset_statistics();
+        if(g_args.reset_update_counts)
+          agent->reset_update_counts();
+        ++total_steps;
       }
+
+      if(g_args.output == Arguments::EXPERIMENTAL && total_steps > -1)
+        experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward);
 
 #ifdef DEBUG_OUTPUT
       std::cerr << *env << *agent;
