@@ -196,8 +196,7 @@ def main():
   
   pylab.grid(True)
   
-  x_label = 'Step Number (in 10,000s)'
-  pylab.xlabel(x_label, fontsize=8)
+  pylab.xlabel('Step Number (in 10,000s)', fontsize=8)
   pylab.ylabel('Number of (Possibly Partial) Q-Values', fontsize=8)
   pylab.title(title, fontsize=10)
   pylab.ylim(ymin=0)
@@ -216,7 +215,7 @@ def main():
   #print last_xlabel
   
   if len(sys.argv) == 1:
-    write_to_csv('memory.csv', x_label, xs, y_labels, yss)
+    write_to_csv('memory.csv', 'Step Number', xs, y_labels, yss)
     pylab.savefig('memory.eps')
     pylab.savefig('memory.png', dpi=1200)
     pylab.savefig('memory.svg')
@@ -234,7 +233,7 @@ def main():
     
     if not os.path.exists(splitd[0] + '/csv'):
       os.makedirs(splitd[0] + '/csv')
-    write_to_csv(splitd[0] + '/csv/' + filename + '-memory.csv', x_label, xs, y_labels, yss)
+    write_to_csv(splitd[0] + '/csv/' + filename + '-memory.csv', 'Step Number', xs, y_labels, yss)
     
     if not os.path.exists(splitd[0] + '/eps'):
       os.makedirs(splitd[0] + '/eps')

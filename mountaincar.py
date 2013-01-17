@@ -216,8 +216,7 @@ def main():
   
   pylab.grid(True)
   
-  x_label = 'Step Number (in 10,000s)'
-  pylab.xlabel(x_label, fontsize=8)
+  pylab.xlabel('Step Number (in 10,000s)', fontsize=8)
   pylab.ylabel('Reward / \# Episodes (Mvng Avg, n=20)', fontsize=8)
   pylab.title(title, fontsize=10)
   pylab.ylim(ymin=-500, ymax=0)
@@ -236,7 +235,7 @@ def main():
   #print last_xlabel
   
   if len(sys.argv) == 1:
-    write_to_csv('mountaincar.csv', x_label, xs, y_labels, yss)
+    write_to_csv('mountaincar.csv', 'Step Number', xs, y_labels, yss)
     pylab.savefig('mountaincar.eps')
     pylab.savefig('mountaincar.png', dpi=1200)
     pylab.savefig('mountaincar.svg')
@@ -254,7 +253,7 @@ def main():
     
     if not os.path.exists(splitd[0] + '/csv'):
       os.makedirs(splitd[0] + '/csv')
-    write_to_csv(splitd[0] + '/csv/' + filename + '.csv', x_label, xs, y_labels, yss)
+    write_to_csv(splitd[0] + '/csv/' + filename + '.csv', 'Step Number', xs, y_labels, yss)
     
     if not os.path.exists(splitd[0] + '/eps'):
       os.makedirs(splitd[0] + '/eps')
