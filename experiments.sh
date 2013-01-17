@@ -31,25 +31,43 @@ function averages {
 
 ./puddleworld-batch.py -r 3
 ./puddleworld.py experiment-pw/*_0/*.out
+./memory.py experiment-pw/*_0/*.out
 ./puddleworld.py experiment-pw/*_1/*.out
+./memory.py experiment-pw/*_1/*.out
 ./puddleworld.py experiment-pw/inv-log-*_2/*.out
+./memory.py experiment-pw/inv-log-*_2/*.out
 ./puddleworld.py experiment-pw/inv-root-*_2/*.out
+./memory.py experiment-pw/inv-root-*_2/*.out
 ./puddleworld.py experiment-pw/*_3/*.out
+./memory.py experiment-pw/*_3/*.out
 ./puddleworld.py experiment-pw/*_100/*.out
+./memory.py experiment-pw/*_100/*.out
 ./puddleworld.py experiment-pw/*_101/*.out
+./memory.py experiment-pw/*_101/*.out
 ./puddleworld.py experiment-pw/*_200/*.out
+./memory.py experiment-pw/*_200/*.out
 ./puddleworld.py experiment-pw/*_201/*.out
+./memory.py experiment-pw/*_201/*.out
 ./puddleworld.py experiment-pw/*_300/*.out
+./memory.py experiment-pw/*_300/*.out
 ./puddleworld.py experiment-pw/*_301/*.out
+./memory.py experiment-pw/*_301/*.out
 
 ./mountaincar-batch.py -r 3
 ./mountaincar.py experiment-mc/*_0/*.out
+./memory.py experiment-mc/*_0/*.out
 ./mountaincar.py experiment-mc/*_1/*.out
+./memory.py experiment-mc/*_1/*.out
 ./mountaincar.py experiment-mc/inv-log-*_2/*.out
+./memory.py experiment-mc/inv-log-*_2/*.out
 ./mountaincar.py experiment-mc/inv-root-*_2/*.out
+./memory.py experiment-mc/inv-root-*_2/*.out
 ./mountaincar.py experiment-mc/*_3/*.out
+./memory.py experiment-mc/*_3/*.out
 ./mountaincar.py experiment-mc/*_400/*.out
+./memory.py experiment-mc/*_400/*.out
 ./mountaincar.py experiment-mc/*_401/*.out
+./memory.py experiment-mc/*_401/*.out
 
 echo ""
 averages experiment-pw/*_0

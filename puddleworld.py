@@ -73,11 +73,26 @@ class Handles:
     self.handles = []
     self.smith = {}
 
+def write_to_csv(filename, x_label, xs, y_labels, yss):
+  f = open(filename, 'w')
+  
+  f.write(x_label.translate(None, ',\\'))
+  for y_label in y_labels:
+    f.write(',' + y_label.translate(None, ',\\'))
+  f.write('\n')
+  
+  for i in range(len(xs)):
+    f.write(str(xs[i]))
+    for ys in yss:
+      f.write(',' + str(ys[i]))
+    f.write('\n')
+
 def main():
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')
     seed = int(f.readline().split(' ', 1)[1])
     x = []
+    xs = []
     smith = []
     while True:
       line = f.readline()
@@ -85,7 +100,8 @@ def main():
         break
       else:
         split = line.split(' ')
-        x.append(int(split[0]))
+        x.append(int(split[0]) / 10000.0)
+        xs.append(int(split[0]))
         smith.append(float(split[2]))
     f.close()
     
@@ -106,6 +122,7 @@ def main():
     
     first_group = True
     x = []
+    xs = []
     for group in files:
       files[group].smith['avg'] = []
       files[group].smith['min'] = []
@@ -124,6 +141,7 @@ def main():
               first_handle = False
               if first_group:
                 x.append(int(split[0]) / 10000.0)
+                xs.append(int(split[0]))
               y_min = float(split[1])
               y_avg = float(split[2])
               y_max = float(split[3])
@@ -178,6 +196,9 @@ def main():
     for i in range(1, len(smith)):
       smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
     
+    y_labels = ['Values']
+    yss = [smith]
+    
     pylab.plot(x, smith, label="Values", color='blue', linestyle='solid')
   else:
     for a in smith:
@@ -185,6 +206,9 @@ def main():
         smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
     
     if mode == 'single experiment evaluation':
+      y_labels = ['Maximum', 'Average', 'Minimum']
+      yss = [smith['max'], smith['avg'], smith['min']]
+      
       pylab.plot(x, smith['max'], label="Maximum", color='black', linestyle='dotted')
       pylab.plot(x, smith['avg'], label="Average", color='black', linestyle='solid')
       pylab.plot(x, smith['min'], label="Minimum", color='black', linestyle='dashed')
@@ -193,14 +217,20 @@ def main():
       #pylab.plot(x, smith['min'], label="Minimum", color='teal', linestyle='solid')
       #pylab.plot(x, smith['avg'], label="Average", color='blue', linestyle='solid')
     else:
+      y_labels = []
+      yss = []
       for agent in smith:
+        y_labels.append(agent)
+        yss.append(smith[agent])
+        
         pylab.plot(x, smith[agent], label=agent, linestyle='solid')
   
   pylab.legend(loc=4, handlelength=4.2, numpoints=2)
   
   pylab.grid(True)
   
-  pylab.xlabel('Step Number (in 10,000s)', fontsize=8)
+  x_label = 'Step Number (in 10,000s)'
+  pylab.xlabel(x_label, fontsize=8)
   pylab.ylabel('Reward / \# Episodes (Mvng Avg, n=20)', fontsize=8)
   pylab.title(title, fontsize=10)
   pylab.ylim(ymin=-250, ymax=0)
@@ -219,8 +249,10 @@ def main():
   #print last_xlabel
   
   if len(sys.argv) == 1:
+    write_to_csv('puddleworld.csv', x_label, xs, y_labels, yss)
     pylab.savefig('puddleworld.eps')
     pylab.savefig('puddleworld.png', dpi=1200)
+    pylab.savefig('puddleworld.svg')
     plt.show()
   else:
     splitd = directory.rsplit('/', 1)
@@ -233,6 +265,10 @@ def main():
         m.update(agent)
       filename = str(m.hexdigest())
     
+    if not os.path.exists(splitd[0] + '/csv'):
+      os.makedirs(splitd[0] + '/csv')
+    write_to_csv(splitd[0] + '/csv/' + filename + '.csv', x_label, xs, y_labels, yss)
+    
     if not os.path.exists(splitd[0] + '/eps'):
       os.makedirs(splitd[0] + '/eps')
     pylab.savefig(splitd[0] + '/eps/' + filename + '.eps')
@@ -240,6 +276,10 @@ def main():
     if not os.path.exists(splitd[0] + '/png'):
       os.makedirs(splitd[0] + '/png')
     pylab.savefig(splitd[0] + '/png/' + filename + '.png', dpi=1200)
+    
+    if not os.path.exists(splitd[0] + '/svg'):
+      os.makedirs(splitd[0] + '/svg')
+    pylab.savefig(splitd[0] + '/svg/' + filename + '.svg')
 
 if __name__ == "__main__":
   main()

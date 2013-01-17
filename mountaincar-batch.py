@@ -5,7 +5,7 @@ import argparse, glob, os, random, shutil, subprocess, sys, thread, time
 import pp
 
 g_dir = 'experiment-mc'
-g_plotter = './mountaincar.py'
+g_plotters = ['./mountaincar.py', './memory.py']
 g_plotter_grid = []#['./mountaincar-grid.py', './mountaincar-heat.py']
 g_plotter_grid_filters = ['move(left)', 'move(idle)', 'move(right)', 'all']
 
@@ -243,7 +243,7 @@ class Plots:
     self.ep_tuple = 'plots'
 
 plots = []
-for i in range(len(g_ep_tuples) * (1 + len(g_plotter_grid) * len(g_plotter_grid_filters))):
+for i in range(len(g_ep_tuples) * (len(g_plotters) + len(g_plotter_grid) * len(g_plotter_grid_filters))):
   plots.append(Plots())
 
 def syscall(args):
@@ -265,9 +265,10 @@ jobs = [(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'th
 
 for ep_tuple, dir in zip(g_ep_tuples, dirs):
   take_fives(ep_tuple)
-  args = [g_plotter] + glob.glob(dir + '/*.out')
   print 'Plotting data for ' + str(ep_tuple) + '\n'
-  jobs.append(job_server.submit(syscall, (args,), (), ('subprocess', 'thread',), callback=progress.just_finished_plot, group='plots'))
+  for plotter in g_plotters:
+    args = [plotter] + glob.glob(dir + '/*.out')
+    jobs.append(job_server.submit(syscall, (args,), (), ('subprocess', 'thread',), callback=progress.just_finished_plot, group='plots'))
   for plotter in g_plotter_grid:
     for filter in g_plotter_grid_filters:
       args = [plotter, filter] + glob.glob(dir + '/*.err')

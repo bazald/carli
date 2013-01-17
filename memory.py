@@ -92,21 +92,20 @@ def main():
     f = open('stdout.txt', 'r')
     seed = int(f.readline().split(' ', 1)[1])
     x = []
-    xs = []
     smith = []
+    memory = []
     while True:
       line = f.readline()
       if not line or line == '':
         break
       else:
         split = line.split(' ')
-        x.append(int(split[0]) / 10000.0)
-        xs.append(int(split[0]))
-        smith.append(float(split[2]))
+        x.append(int(split[0]))
+        smith.append(float(split[4]))
     f.close()
     
     directory=''
-    title='Mountain Car (seed ' + str(seed) + ')'
+    title='Value Function Size (seed ' + str(seed) + ')'
   else:
     files = {}
     for filename in sys.argv[1:]:
@@ -142,19 +141,13 @@ def main():
               if first_group:
                 x.append(int(split[0]) / 10000.0)
                 xs.append(int(split[0]))
-              y_min = float(split[1])
-              y_avg = float(split[2])
-              y_max = float(split[3])
+              y_avg = float(split[4])
               y_count = 1
             else:
-              y_min = min(y_min, float(split[1]))
-              y_avg = y_avg * (y_count / (y_count + 1.0)) + float(split[2]) / (y_count + 1.0)
-              y_max = max(y_max, float(split[3]))
+              y_avg = y_avg * (y_count / (y_count + 1.0)) + float(split[4]) / (y_count + 1.0)
               y_count = y_count + 1
         if not done:
-          files[group].smith['min'].append(y_min)
           files[group].smith['avg'].append(y_avg)
-          files[group].smith['max'].append(y_max)
       
       for handle in files[group].handles:
         handle.f.close()
@@ -162,11 +155,11 @@ def main():
       first_group = False
     
     if len(files) == 1:
-      title='Mountain Car (' + group.rsplit('/',1)[1].replace('_', '\_') + ')'
+      title='Value Function Size (' + group.rsplit('/',1)[1].replace('_', '\_') + ')'
       smith = files[group].smith
       mode = 'single experiment evaluation'
     else:
-      title='Mountain Car (' + group.rsplit('/',1)[0].replace('_', '\_') + ')'
+      title='Value Function Size (' + group.rsplit('/',1)[0].replace('_', '\_') + ')'
       
       smith = {}
       for group in files:
@@ -175,34 +168,21 @@ def main():
       mode = 'multiple experiment evaluation'
   
   fig = plt.figure()
-  fig.canvas.set_window_title('Mountain Car')
+  fig.canvas.set_window_title('Value Function Size')
   
-  pylab.axes([0.125,0.15,0.8375,0.75])
+  pylab.axes([0.145,0.15,0.8175,0.75])
   
   if len(sys.argv) == 1:
-    for i in range(1, len(smith)):
-      smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
-    
     y_labels = ['Values']
     yss = [smith]
     
-    pylab.plot(x, smith, label="Values", color='blue', linestyle='solid')
+    pylab.plot(x, smith, label="Number of Q-Values", color='blue', linestyle='solid')
   else:
-    for a in smith:
-      for i in range(1, len(smith[a])):
-        smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
-    
     if mode == 'single experiment evaluation':
       y_labels = ['Maximum', 'Average', 'Minimum']
-      yss = [smith['max'], smith['avg'], smith['min']]
+      yss = [smith['avg']]
       
-      pylab.plot(x, smith['max'], label="Maximum", color='black', linestyle='dotted')
       pylab.plot(x, smith['avg'], label="Average", color='black', linestyle='solid')
-      pylab.plot(x, smith['min'], label="Minimum", color='black', linestyle='dashed')
-      #pylab.plot(x, smith['max'], label="Maximum", color='green', linestyle='solid')
-      ##pylab.plot(x, smith['med'], label="Median", color='brown', linestyle='solid')
-      #pylab.plot(x, smith['min'], label="Minimum", color='teal', linestyle='solid')
-      #pylab.plot(x, smith['avg'], label="Average", color='blue', linestyle='solid')
     else:
       y_labels = []
       yss = []
@@ -218,9 +198,9 @@ def main():
   
   x_label = 'Step Number (in 10,000s)'
   pylab.xlabel(x_label, fontsize=8)
-  pylab.ylabel('Reward / \# Episodes (Mvng Avg, n=20)', fontsize=8)
+  pylab.ylabel('Number of (Possibly Partial) Q-Values', fontsize=8)
   pylab.title(title, fontsize=10)
-  pylab.ylim(ymin=-500, ymax=0)
+  pylab.ylim(ymin=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
@@ -236,10 +216,10 @@ def main():
   #print last_xlabel
   
   if len(sys.argv) == 1:
-    write_to_csv('mountaincar.csv', x_label, xs, y_labels, yss)
-    pylab.savefig('mountaincar.eps')
-    pylab.savefig('mountaincar.png', dpi=1200)
-    pylab.savefig('mountaincar.svg')
+    write_to_csv('memory.csv', x_label, xs, y_labels, yss)
+    pylab.savefig('memory.eps')
+    pylab.savefig('memory.png', dpi=1200)
+    pylab.savefig('memory.svg')
     plt.show()
   else:
     splitd = directory.rsplit('/', 1)
@@ -254,19 +234,19 @@ def main():
     
     if not os.path.exists(splitd[0] + '/csv'):
       os.makedirs(splitd[0] + '/csv')
-    write_to_csv(splitd[0] + '/csv/' + filename + '.csv', x_label, xs, y_labels, yss)
+    write_to_csv(splitd[0] + '/csv/' + filename + '-memory.csv', x_label, xs, y_labels, yss)
     
     if not os.path.exists(splitd[0] + '/eps'):
       os.makedirs(splitd[0] + '/eps')
-    pylab.savefig(splitd[0] + '/eps/' + filename + '.eps')
+    pylab.savefig(splitd[0] + '/eps/' + filename + '-memory.eps')
     
     if not os.path.exists(splitd[0] + '/png'):
       os.makedirs(splitd[0] + '/png')
-    pylab.savefig(splitd[0] + '/png/' + filename + '.png', dpi=1200)
+    pylab.savefig(splitd[0] + '/png/' + filename + '-memory.png', dpi=1200)
     
     if not os.path.exists(splitd[0] + '/svg'):
       os.makedirs(splitd[0] + '/svg')
-    pylab.savefig(splitd[0] + '/svg/' + filename + '.svg')
+    pylab.savefig(splitd[0] + '/svg/' + filename + '-memory.svg')
 
 if __name__ == "__main__":
   main()
