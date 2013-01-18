@@ -146,8 +146,15 @@ namespace Mountain_Car {
     void alter_impl() {
       if(get_scenario() < 400)
         return;
-      else if(get_scenario() < 500) {
+
+      else if(get_scenario() < 410) {
         m_cart_force = 0.0009;
+      }
+      else if(get_scenario() < 420) {
+        m_cart_force = 0.0008;
+      }
+      else if(get_scenario() < 500) {
+        m_cart_force = 0.0006;
       }
     }
 

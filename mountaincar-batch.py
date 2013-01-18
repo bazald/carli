@@ -51,6 +51,22 @@ g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0
 g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 401, 500000, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 401, 500000, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  3, 17, 0, 0.5, 0, 401, 500000, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 410,     -1, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 410,     -1, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 410,     -1, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  3, 17, 0, 0.5, 0, 410,     -1, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 411, 500000, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 411, 500000, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 411, 500000, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  3, 17, 0, 0.5, 0, 411, 500000, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 420,     -1, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 420,     -1, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 420,     -1, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  3, 17, 0, 0.5, 0, 420,     -1, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 421, 500000, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 421, 500000, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 421, 500000, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  3, 17, 0, 0.5, 0, 421, 500000, 'false'))
 
 
 
