@@ -180,17 +180,17 @@ def main():
   pylab.axes([0.125,0.15,0.8375,0.75])
   
   if len(sys.argv) == 1:
-    for i in range(1, len(smith)):
-      smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
+    #for i in range(1, len(smith)):
+      #smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
     
     y_labels = ['Values']
     yss = [smith]
     
     pylab.plot(x, smith, label="Values", color='blue', linestyle='solid')
   else:
-    for a in smith:
-      for i in range(1, len(smith[a])):
-        smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
+    #for a in smith:
+      #for i in range(1, len(smith[a])):
+        #smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
     
     if mode == 'single experiment evaluation':
       y_labels = ['Maximum', 'Average', 'Minimum']
@@ -217,7 +217,7 @@ def main():
   pylab.grid(True)
   
   pylab.xlabel('Step Number (in 10,000s)', fontsize=8)
-  pylab.ylabel('Reward / \# Episodes (Mvng Avg, n=20)', fontsize=8)
+  pylab.ylabel('Reward / \# Episodes', fontsize=8)
   pylab.title(title, fontsize=10)
   pylab.ylim(ymin=-500, ymax=0)
   
