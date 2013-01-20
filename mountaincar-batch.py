@@ -41,6 +41,8 @@ g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0
 g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 3, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 3, 0, 'false'))
 g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 3, 0, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 13, 0, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 13, 0, 'false'))
 
 # Experiment 400s, move goal
 g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 400,     -1, 'false'))
