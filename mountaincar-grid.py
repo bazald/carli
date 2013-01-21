@@ -83,7 +83,7 @@ def main():
   fig = plt.figure()
   fig.canvas.set_window_title('Mountain Car')
   
-  pylab.axes([0.125,0.15,0.8375,0.75])
+  pylab.axes([0.1325,0.1,0.8,0.8])
   
   target_entries = 'all'
   if len(sys.argv) > 1:

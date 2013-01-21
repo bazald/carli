@@ -219,7 +219,8 @@ def main():
   pylab.xlabel('Step Number (in 10,000s)', fontsize=8)
   pylab.ylabel('Reward / \# Episodes', fontsize=8)
   pylab.title(title, fontsize=10)
-  pylab.ylim(ymin=-500, ymax=0)
+  if len(sys.argv) > 1:
+    pylab.ylim(ymin=-500, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
