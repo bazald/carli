@@ -182,17 +182,49 @@ namespace Puddle_World {
 
       if(get_scenario() < 100)
         return;
-      else if(get_scenario() < 200) {
+
+      else if(get_scenario() < 110) {
         m_goal_dynamic = true;
         m_goal_x = std::make_pair(0.8, 0.85);
         m_goal_y = std::make_pair(0.9, 1.0);
       }
-      else if(get_scenario() < 300) {
+      else if(get_scenario() < 120) {
+        m_goal_dynamic = true;
+        m_goal_x = std::make_pair(0.7, 0.75);
+        m_goal_y = std::make_pair(0.9, 1.0);
+      }
+      else if(get_scenario() < 130) {
+        m_goal_dynamic = true;
+        m_goal_x = std::make_pair(0.5, 0.55);
+        m_goal_y = std::make_pair(0.9, 1.0);
+      }
+      else if(get_scenario() < 200) {
+        m_goal_dynamic = true;
+        m_goal_x = std::make_pair(0.1, 0.15);
+        m_goal_y = std::make_pair(0.9, 1.0);
+      }
+
+      else if(get_scenario() < 210) {
         m_horizontal_puddles.at(0)[3] = 0.15;
         m_vertical_puddles.at(0)[3] = 0.15;
       }
-      else if(get_scenario() < 400) {
+      else if(get_scenario() < 220) {
+        m_horizontal_puddles.at(0)[3] = 0.2;
+        m_vertical_puddles.at(0)[3] = 0.2;
+      }
+      else if(get_scenario() < 300) {
+        m_horizontal_puddles.at(0)[3] = 0.4;
+        m_vertical_puddles.at(0)[3] = 0.4;
+      }
+
+      else if(get_scenario() < 310) {
         m_noise = 0.02;
+      }
+      else if(get_scenario() < 320) {
+        m_noise = 0.04;
+      }
+      else if(get_scenario() < 400) {
+        m_noise = 0.08;
       }
     }
 

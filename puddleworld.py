@@ -73,11 +73,26 @@ class Handles:
     self.handles = []
     self.smith = {}
 
+def write_to_csv(filename, x_label, xs, y_labels, yss):
+  f = open(filename, 'w')
+  
+  f.write(x_label.translate(None, ',\\'))
+  for y_label in y_labels:
+    f.write(',' + y_label.translate(None, ',\\'))
+  f.write('\n')
+  
+  for i in range(len(xs)):
+    f.write(str(xs[i]))
+    for ys in yss:
+      f.write(',' + str(ys[i]))
+    f.write('\n')
+
 def main():
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')
     seed = int(f.readline().split(' ', 1)[1])
     x = []
+    xs = []
     smith = []
     while True:
       line = f.readline()
@@ -85,7 +100,8 @@ def main():
         break
       else:
         split = line.split(' ')
-        x.append(int(split[0]))
+        x.append(int(split[0]))#) / 10000.0)
+        xs.append(int(split[0]))
         smith.append(float(split[2]))
     f.close()
     
@@ -106,6 +122,7 @@ def main():
     
     first_group = True
     x = []
+    xs = []
     for group in files:
       files[group].smith['avg'] = []
       files[group].smith['min'] = []
@@ -123,7 +140,8 @@ def main():
             if first_handle:
               first_handle = False
               if first_group:
-                x.append(int(split[0]) / 10000.0)
+                x.append(int(split[0]))#/ 10000.0)
+                xs.append(int(split[0]))
               y_min = float(split[1])
               y_avg = float(split[2])
               y_max = float(split[3])
@@ -156,35 +174,28 @@ def main():
       
       mode = 'multiple experiment evaluation'
   
-  #if title == 'Puddle World (puddle-world-overgeneral.soar\_0-0\_rl\_uperf)':
-    #title = 'UPERF Performance in Puddle World (' + str(len(sys.argv) - 1) + ' Runs)'
-  if title == 'Puddle World (puddle-world-overgeneral.soar\_0-0\_rl\_td-error\_0.84155\_2\_1.0\_20\_True)':
-    title = 'TD-Error Performance in Puddle World (' + str(len(sys.argv) - 1) + ' Runs)'
-  if title == 'Puddle World (puddle-world.soar\_1-1\_even\_td-error\_0.84155\_2\_1.0\_20\_True\_0-1-1\_0-1-1\_0-2-1\_0-2-2\_0-4-2\_0-4-4\_0-8-4\_0-8-8\_0-16-8\_0-16-16)':
-    title = 'Even Credit Assignment in Puddle World (' + str(len(sys.argv) - 1) + ' Runs)'
-  if title == 'Puddle World (puddle-world.soar\_1-1\_fc\_td-error\_0.84155\_2\_1.0\_20\_True\_0-1-1\_0-1-1\_0-2-1\_0-2-2\_0-4-2\_0-4-4\_0-8-4\_0-8-8\_0-16-8\_0-16-16)':
-    title = '1/FC Credit Assignment in Puddle World (' + str(len(sys.argv) - 1) + ' Runs)'
-  if title == 'Puddle World (puddle-world.soar\_1-1\_rl\_td-error\_0.84155\_2\_1.0\_20\_True\_0-1-1\_0-1-1\_0-2-1\_0-2-2\_0-4-2\_0-4-4\_0-8-4\_0-8-8\_0-16-8\_0-16-16)':
-    title = '1/RL Credit Assignment in Puddle World (' + str(len(sys.argv) - 1) + ' Runs)'
-  if title == 'Puddle World (puddle-world.soar\_1-1\_log-rl\_td-error\_0.84155\_2\_1.0\_20\_True\_0-1-1\_0-1-1\_0-2-1\_0-2-2\_0-4-2\_0-4-4\_0-8-4\_0-8-8\_0-16-8\_0-16-16)':
-    title = '1/log(RL) Credit Assignment in Puddle World (' + str(len(sys.argv) - 1) + ' Runs)'
-  
   fig = plt.figure()
   fig.canvas.set_window_title('Puddle World')
   
-  pylab.axes([0.125,0.15,0.8375,0.75])
+  pylab.axes([0.19,0.15,0.7725,0.75])
   
   if len(sys.argv) == 1:
-    for i in range(1, len(smith)):
-      smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
+    #for i in range(1, len(smith)):
+      #smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
+    
+    y_labels = ['Values']
+    yss = [smith]
     
     pylab.plot(x, smith, label="Values", color='blue', linestyle='solid')
   else:
-    for a in smith:
-      for i in range(1, len(smith[a])):
-        smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
+    #for a in smith:
+      #for i in range(1, len(smith[a])):
+        #smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
     
     if mode == 'single experiment evaluation':
+      y_labels = ['Maximum', 'Average', 'Minimum']
+      yss = [smith['max'], smith['avg'], smith['min']]
+      
       pylab.plot(x, smith['max'], label="Maximum", color='black', linestyle='dotted')
       pylab.plot(x, smith['avg'], label="Average", color='black', linestyle='solid')
       pylab.plot(x, smith['min'], label="Minimum", color='black', linestyle='dashed')
@@ -193,17 +204,75 @@ def main():
       #pylab.plot(x, smith['min'], label="Minimum", color='teal', linestyle='solid')
       #pylab.plot(x, smith['avg'], label="Average", color='blue', linestyle='solid')
     else:
+      y_labels = []
+      yss = []
+
       for agent in smith:
+        y_labels.append(agent)
+        yss.append(smith[agent])
+        
         pylab.plot(x, smith[agent], label=agent, linestyle='solid')
+
+      remap_names = {}
+      remap_names['specific\\_4x4\\_4x4\\_0'] = '4x4'
+      remap_names['specific\\_8x8\\_8x8\\_0'] = '8x8'
+      remap_names['specific\\_16x16\\_16x16\\_0'] = '16x16'
+      remap_names['specific\\_32x32\\_32x32\\_0'] = '32x32'
+      remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
+      remap_names['even\\_2x2\\_64x64\\_3'] = '2-64 static'
+
+      ## ./puddleworld.py experiment-pw/*_0/*.out
+      #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0']:
+      ## ./puddleworld.py experiment-pw/*_0/*.out
+      #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0']:
+      ## ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_3/*.out
+      #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'even\\_2x2\\_64x64\\_3']:
+        #y_labels.append(remap_names[agent])
+        #yss.append(smith[agent])
+        
+        #if agent is 'specific\\_4x4\\_4x4\\_0':
+          #color = 'grey'
+          #linestyle = '-'
+        #elif agent is 'specific\\_8x8\\_8x8\\_0':
+          #color = 'red'
+          #linestyle = '-.'
+        #elif agent is 'specific\\_16x16\\_16x16\\_0':
+          #color = 'blue'
+          #linestyle = ':'
+        #elif agent is 'specific\\_32x32\\_32x32\\_0':
+          #color = 'black'
+          #linestyle = '-'
+        #elif agent is 'specific\\_64x64\\_64x64\\_0':
+          #color = 'green'
+          #linestyle = '-'
+        #elif agent is 'even\\_2x2\\_64x64\\_3':
+          #color = 'brown'
+          #linestyle = '-'
+        
+        #pylab.plot(x, smith[agent], label=agent, color=color, linestyle=linestyle)
   
   pylab.legend(loc=4, handlelength=4.2, numpoints=2)
   
   pylab.grid(True)
   
-  pylab.xlabel('Step Number (in 10,000s)', fontsize=8)
-  pylab.ylabel('Reward / \# Episodes (Mvng Avg, n=20)', fontsize=8)
+  pylab.xlabel('Step Number', fontsize=8)
+  pylab.ylabel('Cumulative Reward / \# Episodes', fontsize=8)
+  
   pylab.title(title, fontsize=10)
-  pylab.ylim(ymin=-250, ymax=0)
+  if len(sys.argv) > 1:
+    pylab.ylim(ymin=-250, ymax=0)
+  
+  #pylab.title('Puddle World: Single Level Tilings', fontsize=10)
+  #pylab.ylim(ymin=-100000, ymax=0)
+  
+  #pylab.title('Puddle World: Single Level Tilings Expanded', fontsize=10)
+  #pylab.xlim(xmax=50000)
+  #pylab.ylim(ymin=-7000, ymax=0)
+  
+  #override = {'x': '0.45', 'fontsize': 'medium', 'verticalalignment': 'baseline', 'horizontalalignment': 'center'}
+  #pylab.title('Puddle World: Includes Static Hierarchical Tiling 2-64', fontsize=10, fontdict=override)
+  #pylab.xlim(xmax=50000)
+  #pylab.ylim(ymin=-7000, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
@@ -219,8 +288,10 @@ def main():
   #print last_xlabel
   
   if len(sys.argv) == 1:
+    write_to_csv('puddleworld.csv', 'Step Number', xs, y_labels, yss)
     pylab.savefig('puddleworld.eps')
     pylab.savefig('puddleworld.png', dpi=1200)
+    pylab.savefig('puddleworld.svg')
     plt.show()
   else:
     splitd = directory.rsplit('/', 1)
@@ -233,6 +304,10 @@ def main():
         m.update(agent)
       filename = str(m.hexdigest())
     
+    if not os.path.exists(splitd[0] + '/csv'):
+      os.makedirs(splitd[0] + '/csv')
+    write_to_csv(splitd[0] + '/csv/' + filename + '.csv', 'Step Number', xs, y_labels, yss)
+    
     if not os.path.exists(splitd[0] + '/eps'):
       os.makedirs(splitd[0] + '/eps')
     pylab.savefig(splitd[0] + '/eps/' + filename + '.eps')
@@ -240,6 +315,10 @@ def main():
     if not os.path.exists(splitd[0] + '/png'):
       os.makedirs(splitd[0] + '/png')
     pylab.savefig(splitd[0] + '/png/' + filename + '.png', dpi=1200)
+    
+    if not os.path.exists(splitd[0] + '/svg'):
+      os.makedirs(splitd[0] + '/svg')
+    pylab.savefig(splitd[0] + '/svg/' + filename + '.svg')
 
 if __name__ == "__main__":
   main()

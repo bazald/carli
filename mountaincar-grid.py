@@ -83,7 +83,7 @@ def main():
   fig = plt.figure()
   fig.canvas.set_window_title('Mountain Car')
   
-  pylab.axes([0.125,0.15,0.8375,0.75])
+  pylab.axes([0.1325,0.1,0.8,0.8])
   
   target_entries = 'all'
   if len(sys.argv) > 1:
@@ -152,6 +152,7 @@ def main():
   if len(sys.argv) == 2:
     pylab.savefig('mountain-car-' + target_entries + '.eps')
     pylab.savefig('mountain-car-' + target_entries + '.png', dpi=1200)
+    pylab.savefig('mountain-car-' + target_entries + '.svg')
     plt.show()
   else:
     splitd = directory.rsplit('/', 1)
@@ -164,6 +165,10 @@ def main():
     if not os.path.exists(splitd[0] + '/png'):
       os.makedirs(splitd[0] + '/png')
     pylab.savefig(splitd[0] + '/png/' + filename + '-' + target_entries + '.png', dpi=1200)
+    
+    if not os.path.exists(splitd[0] + '/svg'):
+      os.makedirs(splitd[0] + '/svg')
+    pylab.savefig(splitd[0] + '/svg/' + filename + '-' + target_entries + '.svg')
 
 if __name__ == "__main__":
   main()

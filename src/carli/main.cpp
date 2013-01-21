@@ -517,7 +517,7 @@ void run_agent() {
   Experimental_Output experimental_output(g_args.print_every);
 
   int32_t total_steps = -g_args.skip_steps;
-  if(total_steps == -1) {
+  if(total_steps > 0) {
     total_steps = 0;
     env->alter();
   }
@@ -534,6 +534,7 @@ void run_agent() {
 #ifdef DEBUG_OUTPUT
     std::cerr << *env << *agent;
 #endif
+    bool done = false;
     do {
       const double reward = agent->act();
       ++total_steps;
@@ -543,16 +544,17 @@ void run_agent() {
         agent->reset_statistics();
         if(g_args.reset_update_counts)
           agent->reset_update_counts();
-        ++total_steps;
       }
+      
+      done = agent->get_metastate() != NON_TERMINAL /*|| agent->get_step_count() >= 5000*/ || (g_args.number_of_steps && total_steps > 0 && size_t(total_steps) >= g_args.number_of_steps);
 
       if(g_args.output == Arguments::EXPERIMENTAL && total_steps > -1)
-        experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward);
+        experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, [&agent]()->size_t{return agent->get_value_function_size();});
 
 #ifdef DEBUG_OUTPUT
       std::cerr << *env << *agent;
 #endif
-    } while(agent->get_metastate() == NON_TERMINAL /*&& agent->get_step_count() < 5000*/ && (!g_args.number_of_steps || total_steps < 0 || size_t(total_steps) < g_args.number_of_steps));
+    } while(!done);
 
     if(agent->get_metastate() == SUCCESS) {
       if(g_args.output == Arguments::SIMPLE)
