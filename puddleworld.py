@@ -219,14 +219,14 @@ def main():
       remap_names['specific\\_16x16\\_16x16\\_0'] = '16x16'
       remap_names['specific\\_32x32\\_32x32\\_0'] = '32x32'
       remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
-      remap_names['even\\_2x2\\_64x64\\_3'] = '2-64 static'
+      remap_names['even\\_64x64\\_64x64\\_1'] = '2-64 static'
 
       ## ./puddleworld.py experiment-pw/*_0/*.out
       #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0']:
       ## ./puddleworld.py experiment-pw/*_0/*.out
       #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0']:
-      ## ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_3/*.out
-      #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'even\\_2x2\\_64x64\\_3']:
+      # ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out
+      #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'even\\_64x64\\_64x64\\_1']:
         #y_labels.append(remap_names[agent])
         #yss.append(smith[agent])
         
@@ -245,11 +245,11 @@ def main():
         #elif agent is 'specific\\_64x64\\_64x64\\_0':
           #color = 'green'
           #linestyle = '-'
-        #elif agent is 'even\\_2x2\\_64x64\\_3':
+        #elif agent is 'even\\_64x64\\_64x64\\_1':
           #color = 'brown'
           #linestyle = '-'
         
-        #pylab.plot(x, smith[agent], label=agent, color=color, linestyle=linestyle)
+        #pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
   
   pylab.legend(loc=4, handlelength=4.2, numpoints=2)
   
