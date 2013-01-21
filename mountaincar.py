@@ -100,7 +100,7 @@ def main():
         break
       else:
         split = line.split(' ')
-        x.append(int(split[0]) / 10000.0)
+        x.append(int(split[0]))
         xs.append(int(split[0]))
         smith.append(float(split[2]))
     f.close()
@@ -140,7 +140,7 @@ def main():
             if first_handle:
               first_handle = False
               if first_group:
-                x.append(int(split[0]) / 10000.0)
+                x.append(int(split[0]))
                 xs.append(int(split[0]))
               y_min = float(split[1])
               y_avg = float(split[2])
@@ -177,7 +177,7 @@ def main():
   fig = plt.figure()
   fig.canvas.set_window_title('Mountain Car')
   
-  pylab.axes([0.125,0.15,0.8375,0.75])
+  pylab.axes([0.17,0.15,0.7925,0.75])
   
   if len(sys.argv) == 1:
     #for i in range(1, len(smith)):
@@ -206,21 +206,73 @@ def main():
     else:
       y_labels = []
       yss = []
+      
       for agent in smith:
         y_labels.append(agent)
         yss.append(smith[agent])
         
         pylab.plot(x, smith[agent], label=agent, linestyle='solid')
+
+      remap_names = {}
+      remap_names['specific\\_16x16\\_16x16\\_0'] = '16x16'
+      remap_names['specific\\_32x32\\_32x32\\_0'] = '32x32'
+      remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
+      remap_names['specific\\_128x128\\_128x128\\_0'] = '128x128'
+      remap_names['specific\\_256x256\\_256x256\\_0'] = '256x256'
+      remap_names['even\\_256x256\\_256x256\\_1'] = '1-256 static'
+
+      ## ./mountaincar.py experiment-mc/*_0/*.out
+      #for agent in ['specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0', 'specific\\_128x128\\_128x128\\_0', 'specific\\_256x256\\_256x256\\_0']:
+      ## ./mountaincar.py experiment-mc/*_0/*.out
+      #for agent in ['specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0', 'specific\\_128x128\\_128x128\\_0', 'specific\\_256x256\\_256x256\\_0']:
+      ## ./mountaincar.py experiment-mc/*_0/*.out experiment-mc/*_1/*.out
+      #for agent in ['specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0', 'specific\\_128x128\\_128x128\\_0', 'specific\\_256x256\\_256x256\\_0', 'even\\_256x256\\_256x256\\_1']:
+        #y_labels.append(remap_names[agent])
+        #yss.append(smith[agent])
+        
+        #if agent is 'specific\\_16x16\\_16x16\\_0':
+          #color = 'blue'
+          #linestyle = ':'
+        #elif agent is 'specific\\_32x32\\_32x32\\_0':
+          #color = 'black'
+          #linestyle = '-'
+        #elif agent is 'specific\\_64x64\\_64x64\\_0':
+          #color = 'green'
+          #linestyle = '-'
+        #if agent is 'specific\\_128x128\\_128x128\\_0':
+          #color = 'grey'
+          #linestyle = '-'
+        #elif agent is 'specific\\_256x256\\_256x256\\_0':
+          #color = 'red'
+          #linestyle = '-.'
+        #elif agent is 'even\\_256x256\\_256x256\\_1':
+          #color = 'brown'
+          #linestyle = '-'
+        
+        #pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
   
   pylab.legend(loc=4, handlelength=4.2, numpoints=2)
   
   pylab.grid(True)
   
-  pylab.xlabel('Step Number (in 10,000s)', fontsize=8)
+  pylab.xlabel('Step Number', fontsize=8)
   pylab.ylabel('Reward / \# Episodes', fontsize=8)
+  
   pylab.title(title, fontsize=10)
   if len(sys.argv) > 1:
     pylab.ylim(ymin=-500, ymax=0)
+  
+  #pylab.title('Mountain Car: Single Level Tilings', fontsize=10)
+  #pylab.ylim(ymin=-7000, ymax=0)
+  
+  #pylab.title('Mountain Car: Single Level Tilings Expanded', fontsize=10)
+  #pylab.xlim(xmax=100000)
+  #pylab.ylim(ymin=-7000, ymax=0)
+  
+  #override = {'x': '0.45', 'fontsize': 'medium', 'verticalalignment': 'baseline', 'horizontalalignment': 'center'}
+  #pylab.title('Mountain Car: Includes Static Hierarchical Tiling 1-256', fontsize=10, fontdict=override)
+  #pylab.xlim(xmax=100000)
+  #pylab.ylim(ymin=-7000, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())

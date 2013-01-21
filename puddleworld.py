@@ -219,13 +219,13 @@ def main():
       remap_names['specific\\_16x16\\_16x16\\_0'] = '16x16'
       remap_names['specific\\_32x32\\_32x32\\_0'] = '32x32'
       remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
-      remap_names['even\\_64x64\\_64x64\\_1'] = '2-64 static'
+      remap_names['even\\_64x64\\_64x64\\_1'] = '1-64 static'
 
       ## ./puddleworld.py experiment-pw/*_0/*.out
       #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0']:
       ## ./puddleworld.py experiment-pw/*_0/*.out
       #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0']:
-      # ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out
+      ##./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out
       #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'even\\_64x64\\_64x64\\_1']:
         #y_labels.append(remap_names[agent])
         #yss.append(smith[agent])
@@ -270,7 +270,7 @@ def main():
   #pylab.ylim(ymin=-7000, ymax=0)
   
   #override = {'x': '0.45', 'fontsize': 'medium', 'verticalalignment': 'baseline', 'horizontalalignment': 'center'}
-  #pylab.title('Puddle World: Includes Static Hierarchical Tiling 2-64', fontsize=10, fontdict=override)
+  #pylab.title('Puddle World: Includes Static Hierarchical Tiling 1-64', fontsize=10, fontdict=override)
   #pylab.xlim(xmax=50000)
   #pylab.ylim(ymin=-7000, ymax=0)
   

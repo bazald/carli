@@ -11,6 +11,7 @@
 *.idb
 *.ilk
 *.ipch
+*.kate-swp
 *.lastbuildstate
 *.log
 *.manifest
