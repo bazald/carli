@@ -17,6 +17,7 @@
 *.obj
 *.opensdf
 *.pdb
+*-converted-to.pdf
 *.psess
 *.rc
 *.res
