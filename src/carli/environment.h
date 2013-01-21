@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <utility>
+#include <stdint.h>
 
 #include "clone.h"
 #include "linked_list.h"

@@ -64,7 +64,7 @@ public:
 
   void get(const int &argc, const char * const * const &argv) {
     while(argc != optind) {
-      const int arglen = strlen(argv[optind]);
+      const int arglen = int(strlen(argv[optind]));
       switch(arglen) {
         case 0:
         case 1:

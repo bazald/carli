@@ -9,6 +9,7 @@
 #include <cfloat>
 #include <list>
 #include <stdexcept>
+#include <vector>
 
 namespace Puddle_World {
 
@@ -104,6 +105,8 @@ namespace Puddle_World {
   };
 
   class Environment : public ::Environment<action_type> {
+    typedef std::array<double, 4> Puddle;
+
   public:
     typedef std::pair<double, double> double_pair;
 
@@ -115,8 +118,19 @@ namespace Puddle_World {
      m_random_start(false),
      m_noise(0.01)
     {
-      m_horizontal_puddles.push_back({{0.1, 0.45, 0.75, 0.1}});
-      m_vertical_puddles.push_back({{0.45, 0.4, 0.8, 0.1}});
+      Puddle puddle;
+
+      puddle[0] = 0.1;
+      puddle[1] = 0.45;
+      puddle[2] = 0.75;
+      puddle[3] = 0.1;
+      m_horizontal_puddles.push_back(puddle);
+
+      puddle[0] = 0.45;
+      puddle[1] = 0.4;
+      puddle[2] = 0.8;
+      puddle[3] = 0.1;
+      m_vertical_puddles.push_back(puddle);
 
       Environment::init_impl();
     }
@@ -148,8 +162,6 @@ namespace Puddle_World {
     }
 
   private:
-    typedef std::array<double, 4> Puddle;
-
     void init_impl() {
       do {
         m_position.first = m_init_x.first + m_random_init.frand_lt() * (m_init_x.second - m_init_x.first);
