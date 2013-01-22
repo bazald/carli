@@ -207,17 +207,19 @@ def main():
   
   labels = []
   if len(sys.argv) == 1:
-    #for i in range(1, len(smith)):
-      #smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
+    if val0 == 4:
+      for i in range(1, len(smith)):
+        smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
     
     y_labels = ['Values']
     yss = [smith]
     
     pylab.plot(x, smith, label="Values", color='blue', linestyle='solid')
   else:
-    #for a in smith:
-      #for i in range(1, len(smith[a])):
-        #smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
+    if val0 == 4:
+      for a in smith:
+        for i in range(1, len(smith[a])):
+          smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
     
     if mode == 'single experiment evaluation':
       y_labels = ['Maximum', 'Average', 'Minimum']
@@ -247,10 +249,8 @@ def main():
       remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
       remap_names['specific\\_128x128\\_128x128\\_0'] = '128x128'
       remap_names['specific\\_256x256\\_256x256\\_0'] = '256x256'
-      remap_names['even\\_256x256\\_256x256\\_1'] = '1-256 static'
-      remap_names['even\\_2x2\\_256x256\\_3'] = '1-256 incremental'
-      if scenario == 5:
-        remap_names['even\\_2x2\\_256x256\\_3'] = '1-256 incremental even'
+      remap_names['even\\_256x256\\_256x256\\_1'] = '1-256 static even'
+      remap_names['even\\_2x2\\_256x256\\_3'] = '1-256 incremental even'
       remap_names['inv-log-update-count\\_2x2\\_256x256\\_3'] = r'1-256 incremental $1/\ln$'
 
       if scenario == 1:

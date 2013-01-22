@@ -279,10 +279,10 @@ def take_fives(group):
 job_server = pp.Server(args.jobs)
 progress = Progress(experiments + plots)
 start_time = time.time()
-jobs = [(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread',), callback=progress.just_finished, group=experiment.ep_tuple)) for experiment in experiments]
+jobs = []#[(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread',), callback=progress.just_finished, group=experiment.ep_tuple)) for experiment in experiments]
 
 for ep_tuple, dir in zip(g_ep_tuples, dirs):
-  take_fives(ep_tuple)
+  #take_fives(ep_tuple)
   print 'Plotting data for ' + str(ep_tuple) + '\n'
   for plotter in g_plotters:
     args = [plotter] + glob.glob(dir + '/*.out')

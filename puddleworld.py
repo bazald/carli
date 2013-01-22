@@ -206,17 +206,19 @@ def main():
   
   labels = []
   if len(sys.argv) == 1:
-    #for i in range(1, len(smith)):
-      #smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
+    if val0 == 4:
+      for i in range(1, len(smith)):
+        smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
     
     y_labels = ['Values']
     yss = [smith]
     
     labels += pylab.plot(x, smith, label="Values", color='blue', linestyle='solid')
   else:
-    #for a in smith:
-      #for i in range(1, len(smith[a])):
-        #smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
+    if val0 == 4:
+      for a in smith:
+        for i in range(1, len(smith[a])):
+          smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
     
     if mode == 'single experiment evaluation':
       y_labels = ['Maximum', 'Average', 'Minimum']
@@ -246,8 +248,8 @@ def main():
       remap_names['specific\\_16x16\\_16x16\\_0'] = '16x16'
       remap_names['specific\\_32x32\\_32x32\\_0'] = '32x32'
       remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
-      remap_names['even\\_64x64\\_64x64\\_1'] = '1-64 static'
-      remap_names['even\\_2x2\\_64x64\\_3'] = '1-64 incremental'
+      remap_names['even\\_64x64\\_64x64\\_1'] = '1-64 static even'
+      remap_names['even\\_2x2\\_64x64\\_3'] = '1-64 incremental even'
       
       if scenario == 1:
         agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0']
