@@ -348,10 +348,10 @@ def main():
     ax2.tick_params(axis='y', colors='red')
     #ax2.yaxis.label.set_color('red')
   
-  ## lower right
-  #pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
   # lower right
-  pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.055,1,1))
+  pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
+  ## lower right
+  #pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.055,1,1))
   
   if len(sys.argv) == 1:
     write_to_csv('puddleworld.csv', 'Step Number', xs, y_labels, yss)

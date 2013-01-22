@@ -303,7 +303,7 @@ def main():
   #pylab.ylim(ymin=-7000, ymax=0)
   
   #pylab.title('Mountain Car: Static and Incremental Hierarchical Tiling', fontsize=10)
-  #pylab.xlim(xmax=100000)
+  #pylab.xlim(xmax=200000)
   #pylab.ylim(ymin=-4000, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
@@ -336,7 +336,7 @@ def main():
         linestyle = '--'
       
       labels += pylab.plot(x, memory[agent], label='Memory: ' + remap_names[agent], color=color, linestyle=linestyle)
-    ax2.set_xlim(0, 100000)
+    ax2.set_xlim(0, 200000)
     ax2.set_ylim(0, 400000)
     
     #ax2.set_ylabel(r"Temperature ($^\circ$C)")
@@ -348,10 +348,10 @@ def main():
     ax2.tick_params(axis='y', colors='red')
     #ax2.yaxis.label.set_color('red')
   
-  ## lower right
-  #pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
   # lower right
-  pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.03,1,1))
+  pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
+  ## lower right
+  #pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.07,1,1))
   
   if len(sys.argv) == 1:
     write_to_csv('mountaincar.csv', 'Step Number', xs, y_labels, yss)
