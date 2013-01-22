@@ -286,9 +286,9 @@ def main():
   pylab.xlabel('Step Number', fontsize=8)
   pylab.ylabel('Cumulative Reward / \# Episodes', fontsize=8)
   
-  #pylab.title(title, fontsize=10)
-  #if len(sys.argv) > 1:
-    #pylab.ylim(ymin=-250, ymax=0)
+  pylab.title(title, fontsize=10)
+  if len(sys.argv) > 1:
+    pylab.ylim(ymin=-250, ymax=0)
   
   #pylab.title('Puddle World: Single Level Tilings', fontsize=10)
   #pylab.ylim(ymin=-100000, ymax=0)
@@ -302,9 +302,9 @@ def main():
   #pylab.xlim(xmax=50000)
   #pylab.ylim(ymin=-7000, ymax=0)
   
-  pylab.title('Puddle World: Static and Incremental Hierarchical Tiling', fontsize=10)
-  pylab.xlim(xmax=20000)
-  pylab.ylim(ymin=-2000, ymax=0)
+  #pylab.title('Puddle World: Static and Incremental Hierarchical Tiling', fontsize=10)
+  #pylab.xlim(xmax=20000)
+  #pylab.ylim(ymin=-2000, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
@@ -321,6 +321,8 @@ def main():
   
   if two_sided_plot:
     ax2 = fig.axes[0].twinx()
+    ax2.xaxis.set_major_formatter(CommaFormatter())
+    ax2.yaxis.set_major_formatter(CommaFormatter())
 
     for agent in ['even\\_64x64\\_64x64\\_1', 'even\\_2x2\\_64x64\\_3']:
       y_labels.append('Memory: ' + remap_names[agent])
