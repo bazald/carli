@@ -8,7 +8,7 @@ from pylab import arange,pi,sin,cos,sqrt
 
 if os.name is 'posix':
   golden_mean = (sqrt(5)-1.0)/2.0     # Aesthetic ratio
-  fig_width = 3.375                   # width in inches
+  fig_width = 3                       # width in inches
   fig_height = fig_width*golden_mean  # height in inches
   fig_size =  [fig_width,fig_height]
   params = {'backend': 'ps',
