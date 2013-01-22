@@ -94,6 +94,7 @@ def main():
     x = []
     xs = []
     smith = []
+    memory = []
     while True:
       line = f.readline()
       if not line or line == '':
@@ -103,6 +104,7 @@ def main():
         x.append(int(split[0]))
         xs.append(int(split[0]))
         smith.append(float(split[2]))
+        memory.append(float(split[4]))
     f.close()
     
     directory=''
@@ -127,6 +129,7 @@ def main():
       files[group].smith['avg'] = []
       files[group].smith['min'] = []
       files[group].smith['max'] = []
+      files[group].smith['mem'] = []
       done = False
       while not done:
         first_handle = True
@@ -145,16 +148,19 @@ def main():
               y_min = float(split[1])
               y_avg = float(split[2])
               y_max = float(split[3])
+              y_mem = float(split[4])
               y_count = 1
             else:
               y_min = min(y_min, float(split[1]))
               y_avg = y_avg * (y_count / (y_count + 1.0)) + float(split[2]) / (y_count + 1.0)
               y_max = max(y_max, float(split[3]))
+              y_mem = y_mem * (y_count / (y_count + 1.0)) + float(split[4]) / (y_count + 1.0)
               y_count = y_count + 1
         if not done:
           files[group].smith['min'].append(y_min)
           files[group].smith['avg'].append(y_avg)
           files[group].smith['max'].append(y_max)
+          files[group].smith['mem'].append(y_mem)
       
       for handle in files[group].handles:
         handle.f.close()
@@ -169,16 +175,25 @@ def main():
       title='Mountain Car (' + group.rsplit('/',1)[0].replace('_', '\_') + ')'
       
       smith = {}
+      memory = {}
       for group in files:
         smith[group.rsplit('/',1)[1].replace('_', '\_')] = files[group].smith['avg']
+        memory[group.rsplit('/',1)[1].replace('_', '\_')] = files[group].smith['mem']
       
       mode = 'multiple experiment evaluation'
   
   fig = plt.figure()
   fig.canvas.set_window_title('Mountain Car')
   
-  pylab.axes([0.17,0.15,0.7925,0.75])
+  two_sided_plot = False
   
+  if two_sided_plot:
+    rect = [0.17,0.15,0.6725,0.75]
+  else:
+    rect = [0.17,0.15,0.7925,0.75]
+  pylab.axes(rect)
+  
+  labels = []
   if len(sys.argv) == 1:
     #for i in range(1, len(smith)):
       #smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
@@ -196,13 +211,13 @@ def main():
       y_labels = ['Maximum', 'Average', 'Minimum']
       yss = [smith['max'], smith['avg'], smith['min']]
       
-      pylab.plot(x, smith['max'], label="Maximum", color='black', linestyle='dotted')
-      pylab.plot(x, smith['avg'], label="Average", color='black', linestyle='solid')
-      pylab.plot(x, smith['min'], label="Minimum", color='black', linestyle='dashed')
-      #pylab.plot(x, smith['max'], label="Maximum", color='green', linestyle='solid')
-      ##pylab.plot(x, smith['med'], label="Median", color='brown', linestyle='solid')
-      #pylab.plot(x, smith['min'], label="Minimum", color='teal', linestyle='solid')
-      #pylab.plot(x, smith['avg'], label="Average", color='blue', linestyle='solid')
+      labels += pylab.plot(x, smith['max'], label="Maximum", color='black', linestyle='dotted')
+      labels += pylab.plot(x, smith['avg'], label="Average", color='black', linestyle='solid')
+      labels += pylab.plot(x, smith['min'], label="Minimum", color='black', linestyle='dashed')
+      #labels += pylab.plot(x, smith['max'], label="Maximum", color='green', linestyle='solid')
+      ##labels += pylab.plot(x, smith['med'], label="Median", color='brown', linestyle='solid')
+      #labels += pylab.plot(x, smith['min'], label="Minimum", color='teal', linestyle='solid')
+      #labels += pylab.plot(x, smith['avg'], label="Average", color='blue', linestyle='solid')
     else:
       y_labels = []
       yss = []
@@ -211,7 +226,7 @@ def main():
         y_labels.append(agent)
         yss.append(smith[agent])
         
-        pylab.plot(x, smith[agent], label=agent, linestyle='solid')
+        labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
 
       remap_names = {}
       remap_names['specific\\_16x16\\_16x16\\_0'] = '16x16'
@@ -220,6 +235,7 @@ def main():
       remap_names['specific\\_128x128\\_128x128\\_0'] = '128x128'
       remap_names['specific\\_256x256\\_256x256\\_0'] = '256x256'
       remap_names['even\\_256x256\\_256x256\\_1'] = '1-256 static'
+      remap_names['even\\_2x2\\_256x256\\_3'] = '1-256 incremental'
 
       ## ./mountaincar.py experiment-mc/*_0/*.out
       #for agent in ['specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0', 'specific\\_128x128\\_128x128\\_0', 'specific\\_256x256\\_256x256\\_0']:
@@ -249,18 +265,30 @@ def main():
           #color = 'brown'
           #linestyle = '-'
         
-        #pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
+        #labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
   
-  pylab.legend(loc=4, handlelength=4.2, numpoints=2)
+      ## ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/*_3/*.out
+      #for agent in ['even\\_256x256\\_256x256\\_1', 'even\\_2x2\\_256x256\\_3']:
+        #y_labels.append('Reward: ' + remap_names[agent])
+        #yss.append(smith[agent])
+        
+        #if agent is 'even\\_256x256\\_256x256\\_1':
+          #color = 'blue'
+          #linestyle = '-'
+        #elif agent is 'even\\_2x2\\_256x256\\_3':
+          #color = 'blue'
+          #linestyle = '--'
+        
+        #labels += pylab.plot(x, smith[agent], label='Reward: ' + remap_names[agent], color=color, linestyle=linestyle)
   
   pylab.grid(True)
   
   pylab.xlabel('Step Number', fontsize=8)
   pylab.ylabel('Reward / \# Episodes', fontsize=8)
   
-  pylab.title(title, fontsize=10)
-  if len(sys.argv) > 1:
-    pylab.ylim(ymin=-500, ymax=0)
+  #pylab.title(title, fontsize=10)
+  #if len(sys.argv) > 1:
+    #pylab.ylim(ymin=-500, ymax=0)
   
   #pylab.title('Mountain Car: Single Level Tilings', fontsize=10)
   #pylab.ylim(ymin=-7000, ymax=0)
@@ -274,6 +302,10 @@ def main():
   #pylab.xlim(xmax=100000)
   #pylab.ylim(ymin=-7000, ymax=0)
   
+  pylab.title('Mountain Car: Static and Incremental Hierarchical Tiling', fontsize=10)
+  pylab.xlim(xmax=100000)
+  pylab.ylim(ymin=-4000, ymax=0)
+  
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
   
@@ -286,6 +318,38 @@ def main():
   #print last_xlabel.get_position()
   #print last_xlabel.get_text()
   #print last_xlabel
+  
+  if two_sided_plot:
+    ax2 = fig.axes[0].twinx()
+
+    for agent in ['even\\_256x256\\_256x256\\_1', 'even\\_2x2\\_256x256\\_3']:
+      y_labels.append('Memory: ' + remap_names[agent])
+      yss.append(memory[agent])
+      
+      if agent is 'even\\_256x256\\_256x256\\_1':
+        color = 'red'
+        linestyle = '-'
+      elif agent is 'even\\_2x2\\_256x256\\_3':
+        color = 'red'
+        linestyle = '--'
+      
+      labels += pylab.plot(x, memory[agent], label='Memory: ' + remap_names[agent], color=color, linestyle=linestyle)
+    ax2.set_xlim(0, 100000)
+    ax2.set_ylim(0, 400000)
+    
+    #ax2.set_ylabel(r"Temperature ($^\circ$C)")
+    ax2.set_ylabel('Number of Q-Values')
+    fig.axes[0].spines['left'].set_color('red')
+    fig.axes[0].tick_params(axis='y', colors='blue')
+    #fig.axes[0].yaxis.label.set_color('blue')
+    ax2.spines['right'].set_color('red')
+    ax2.tick_params(axis='y', colors='red')
+    #ax2.yaxis.label.set_color('red')
+  
+  ## lower right
+  #pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
+  # lower right
+  pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.03,1,1))
   
   if len(sys.argv) == 1:
     write_to_csv('mountaincar.csv', 'Step Number', xs, y_labels, yss)

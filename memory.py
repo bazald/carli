@@ -93,7 +93,6 @@ def main():
     seed = int(f.readline().split(' ', 1)[1])
     x = []
     smith = []
-    memory = []
     while True:
       line = f.readline()
       if not line or line == '':
