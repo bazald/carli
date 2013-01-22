@@ -360,6 +360,11 @@ int main2(int argc, char **argv) {
   std::cerr.rdbuf(cout2file.rdbuf());
 #endif
 
+  std::cerr << std::fixed;
+  std::cout << std::fixed;
+  std::cerr.precision(9);
+  std::cout.precision(9);
+
   Zeni::register_new_handler();
 
 //   std::cerr << "sizeof(env) = " << sizeof(*env) << std::endl;

@@ -116,7 +116,9 @@ averages experiment-pw/*_0
 averages experiment-pw/*_1
 # averages experiment-pw/inv-log-*_2
 # averages experiment-pw/inv-root-*_2
-averages experiment-pw/*_3
+averages experiment-pw/even_*_3
+# averages experiment-pw/inv-log-*_3
+# averages experiment-pw/inv-root-*_3
 # averages experiment-pw/*_4
 # averages experiment-pw/*_100
 # averages experiment-pw/*_101
@@ -141,9 +143,11 @@ averages experiment-pw/*_3
 echo ""
 averages experiment-mc/*_0
 averages experiment-mc/*_1
-# averages experiment-mc/inv-log-*_2
+averages experiment-mc/inv-log-*_2
 # averages experiment-mc/inv-root-*_2
-averages experiment-mc/*_3
+averages experiment-mc/even_*_3
+averages experiment-mc/inv-log-*_3
+# averages experiment-mc/inv-root-*_3
 # averages experiment-mc/*_4
 # averages experiment-mc/*_400
 # averages experiment-mc/*_401

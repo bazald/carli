@@ -100,7 +100,7 @@ def main():
       else:
         split = line.split(' ')
         x.append(int(split[0]))
-        smith.append(float(split[4]))
+        smith.append(float(split[7]))
     f.close()
     
     directory=''
@@ -140,10 +140,10 @@ def main():
               if first_group:
                 x.append(int(split[0]) / 10000.0)
                 xs.append(int(split[0]))
-              y_avg = float(split[4])
+              y_avg = float(split[7])
               y_count = 1
             else:
-              y_avg = y_avg * (y_count / (y_count + 1.0)) + float(split[4]) / (y_count + 1.0)
+              y_avg = y_avg * (y_count / (y_count + 1.0)) + float(split[7]) / (y_count + 1.0)
               y_count = y_count + 1
         if not done:
           files[group].smith['avg'].append(y_avg)

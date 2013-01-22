@@ -88,6 +88,19 @@ def write_to_csv(filename, x_label, xs, y_labels, yss):
     f.write('\n')
 
 def main():
+  reward_label = 'Cumulative Reward / \# Episodes'
+  val0 = 1
+  #reward_label = 'Reward Within an Episode'
+  #val0 = 4
+  
+  # 1: ./puddleworld.py experiment-pw/*_0/*.out
+  # 2: ./puddleworld.py experiment-pw/*_0/*.out
+  # 3: ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out
+  # 4: ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/*_3/*.out
+  scenario = 0
+  
+  two_sided_plot = scenario == 4
+  
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')
     seed = int(f.readline().split(' ', 1)[1])
@@ -103,8 +116,8 @@ def main():
         split = line.split(' ')
         x.append(int(split[0]))#) / 10000.0)
         xs.append(int(split[0]))
-        smith.append(float(split[2]))
-        memory.append(float(split[4]))
+        smith.append(float(split[val0 + 1]))
+        memory.append(float(split[7]))
     f.close()
     
     directory=''
@@ -145,16 +158,16 @@ def main():
               if first_group:
                 x.append(int(split[0]))#/ 10000.0)
                 xs.append(int(split[0]))
-              y_min = float(split[1])
-              y_avg = float(split[2])
-              y_max = float(split[3])
-              y_mem = float(split[4])
+              y_min = float(split[val0 + 0])
+              y_avg = float(split[val0 + 1])
+              y_max = float(split[val0 + 2])
+              y_mem = float(split[7])
               y_count = 1
             else:
-              y_min = min(y_min, float(split[1]))
-              y_avg = y_avg * (y_count / (y_count + 1.0)) + float(split[2]) / (y_count + 1.0)
-              y_max = max(y_max, float(split[3]))
-              y_mem = y_mem * (y_count / (y_count + 1.0)) + float(split[4]) / (y_count + 1.0)
+              y_min = min(y_min, float(split[val0 + 0]))
+              y_avg = y_avg * (y_count / (y_count + 1.0)) + float(split[val0 + 1]) / (y_count + 1.0)
+              y_max = max(y_max, float(split[val0 + 2]))
+              y_mem = y_mem * (y_count / (y_count + 1.0)) + float(split[7]) / (y_count + 1.0)
               y_count = y_count + 1
         if not done:
           files[group].smith['min'].append(y_min)
@@ -185,12 +198,10 @@ def main():
   fig = plt.figure()
   fig.canvas.set_window_title('Puddle World')
   
-  two_sided_plot = False
-  
   if two_sided_plot:
-    rect = [0.19,0.15,0.6525,0.75]
+    rect = [0.19,0.15,0.6525,0.82]
   else:
-    rect = [0.19,0.15,0.7725,0.75]
+    rect = [0.19,0.15,0.7725,0.82]
   pylab.axes(rect)
   
   labels = []
@@ -222,11 +233,12 @@ def main():
       y_labels = []
       yss = []
       
-      for agent in smith:
-        y_labels.append(agent)
-        yss.append(smith[agent])
-        
-        labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
+      if scenario == 0:
+        for agent in smith:
+          y_labels.append(agent)
+          yss.append(smith[agent])
+          
+          labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
       
       remap_names = {}
       remap_names['specific\\_4x4\\_4x4\\_0'] = '4x4'
@@ -237,74 +249,78 @@ def main():
       remap_names['even\\_64x64\\_64x64\\_1'] = '1-64 static'
       remap_names['even\\_2x2\\_64x64\\_3'] = '1-64 incremental'
       
-      ## ./puddleworld.py experiment-pw/*_0/*.out
-      #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0']:
-      ## ./puddleworld.py experiment-pw/*_0/*.out
-      #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0']:
-      ##./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out
-      #for agent in ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'even\\_64x64\\_64x64\\_1']:
-        #y_labels.append(remap_names[agent])
-        #yss.append(smith[agent])
-        
-        #if agent is 'specific\\_4x4\\_4x4\\_0':
-          #color = 'grey'
-          #linestyle = '-'
-        #elif agent is 'specific\\_8x8\\_8x8\\_0':
-          #color = 'red'
-          #linestyle = '-.'
-        #elif agent is 'specific\\_16x16\\_16x16\\_0':
-          #color = 'blue'
-          #linestyle = ':'
-        #elif agent is 'specific\\_32x32\\_32x32\\_0':
-          #color = 'black'
-          #linestyle = '-'
-        #elif agent is 'specific\\_64x64\\_64x64\\_0':
-          #color = 'green'
-          #linestyle = '-'
-        #elif agent is 'even\\_64x64\\_64x64\\_1':
-          #color = 'brown'
-          #linestyle = '-'
-        
-        #labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
+      if scenario == 1:
+        agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0']
+      elif scenario == 2:
+        agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0']
+      elif scenario == 3:
+        agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'even\\_64x64\\_64x64\\_1']
+      if scenario > 0 and scenario < 4:
+        for agent in agent_list:
+          y_labels.append(remap_names[agent])
+          yss.append(smith[agent])
+          
+          if agent is 'specific\\_4x4\\_4x4\\_0':
+            color = 'grey'
+            linestyle = '-'
+          elif agent is 'specific\\_8x8\\_8x8\\_0':
+            color = 'red'
+            linestyle = '-.'
+          elif agent is 'specific\\_16x16\\_16x16\\_0':
+            color = 'blue'
+            linestyle = ':'
+          elif agent is 'specific\\_32x32\\_32x32\\_0':
+            color = 'black'
+            linestyle = '-'
+          elif agent is 'specific\\_64x64\\_64x64\\_0':
+            color = 'green'
+            linestyle = '-'
+          elif agent is 'even\\_64x64\\_64x64\\_1':
+            color = 'brown'
+            linestyle = '-'
+          
+          labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
       
-      ## ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/*_3/*.out
-      #for agent in ['even\\_64x64\\_64x64\\_1', 'even\\_2x2\\_64x64\\_3']:
-        #y_labels.append('Reward: ' + remap_names[agent])
-        #yss.append(smith[agent])
-        
-        #if agent is 'even\\_64x64\\_64x64\\_1':
-          #color = 'blue'
-          #linestyle = '-'
-        #elif agent is 'even\\_2x2\\_64x64\\_3':
-          #color = 'blue'
-          #linestyle = '--'
-        
-        #labels += pylab.plot(x, smith[agent], label='Reward: ' + remap_names[agent], color=color, linestyle=linestyle)
+      agent_list = ['even\\_64x64\\_64x64\\_1', 'even\\_2x2\\_64x64\\_3']
+      if scenario == 4:
+        for agent in agent_list:
+          y_labels.append('Reward: ' + remap_names[agent])
+          yss.append(smith[agent])
+          
+          if agent is 'even\\_64x64\\_64x64\\_1':
+            color = 'blue'
+            linestyle = '-'
+          elif agent is 'even\\_2x2\\_64x64\\_3':
+            color = 'blue'
+            linestyle = '--'
+          
+          labels += pylab.plot(x, smith[agent], label='Reward: ' + remap_names[agent], color=color, linestyle=linestyle)
   
   pylab.grid(True)
   
   pylab.xlabel('Step Number', fontsize=8)
-  pylab.ylabel('Cumulative Reward / \# Episodes', fontsize=8)
+  pylab.ylabel(reward_label, fontsize=8)
   
-  pylab.title(title, fontsize=10)
-  if len(sys.argv) > 1:
-    pylab.ylim(ymin=-250, ymax=0)
-  
-  #pylab.title('Puddle World: Single Level Tilings', fontsize=10)
-  #pylab.ylim(ymin=-100000, ymax=0)
-  
-  #pylab.title('Puddle World: Single Level Tilings Expanded', fontsize=10)
-  #pylab.xlim(xmax=50000)
-  #pylab.ylim(ymin=-7000, ymax=0)
-  
-  #override = {'x': '0.45', 'fontsize': 'medium', 'verticalalignment': 'baseline', 'horizontalalignment': 'center'}
-  #pylab.title('Puddle World: Includes Static Hierarchical Tiling 1-64', fontsize=10, fontdict=override)
-  #pylab.xlim(xmax=50000)
-  #pylab.ylim(ymin=-7000, ymax=0)
-  
-  #pylab.title('Puddle World: Static and Incremental Hierarchical Tiling', fontsize=10)
-  #pylab.xlim(xmax=20000)
-  #pylab.ylim(ymin=-2000, ymax=0)
+  if scenario == 0:
+    #pylab.title(title, fontsize=10)
+    if len(sys.argv) > 1:
+      pylab.ylim(ymin=-250, ymax=0)
+  elif scenario == 1:
+    #pylab.title('Puddle World: Single Level Tilings', fontsize=10)
+    pylab.ylim(ymin=-100000, ymax=0)
+  elif scenario == 2:
+    #pylab.title('Puddle World: Single Level Tilings Expanded', fontsize=10)
+    pylab.xlim(xmax=50000)
+    pylab.ylim(ymin=-7000, ymax=0)
+  elif scenario == 3:
+    override = {'x': '0.45', 'fontsize': 'medium', 'verticalalignment': 'baseline', 'horizontalalignment': 'center'}
+    #pylab.title('Puddle World: Includes Static Hierarchical Tiling 1-64', fontsize=10, fontdict=override)
+    pylab.xlim(xmax=50000)
+    pylab.ylim(ymin=-7000, ymax=0)
+  elif scenario == 4:
+    #pylab.title('Puddle World: Static and Incremental Hierarchical Tiling', fontsize=10)
+    pylab.xlim(xmax=20000)
+    pylab.ylim(ymin=-4000, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
@@ -324,7 +340,7 @@ def main():
     ax2.xaxis.set_major_formatter(CommaFormatter())
     ax2.yaxis.set_major_formatter(CommaFormatter())
 
-    for agent in ['even\\_64x64\\_64x64\\_1', 'even\\_2x2\\_64x64\\_3']:
+    for agent in agent_list:
       y_labels.append('Memory: ' + remap_names[agent])
       yss.append(memory[agent])
       
@@ -347,11 +363,12 @@ def main():
     ax2.spines['right'].set_color('red')
     ax2.tick_params(axis='y', colors='red')
     #ax2.yaxis.label.set_color('red')
-  
-  # lower right
-  pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
-  ## lower right
-  #pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.055,1,1))
+    
+    # lower right
+    pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.07,1,1))
+  else:
+    # lower right
+    pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
   
   if len(sys.argv) == 1:
     write_to_csv('puddleworld.csv', 'Step Number', xs, y_labels, yss)
