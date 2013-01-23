@@ -83,7 +83,7 @@ def main():
   fig = plt.figure()
   fig.canvas.set_window_title('Puddle World')
   
-  pylab.axes([0.1325,0.1,0.8,0.8])
+  pylab.axes([0.1125,0.12,0.84,0.84])
   
   target_entries = 'all'
   if len(sys.argv) > 1:
@@ -129,7 +129,7 @@ def main():
   
   pylab.xlabel('X', fontsize=8)
   pylab.ylabel('Y', fontsize=8)
-  pylab.title('Generated Value Function for ' + target_entries, fontsize=10)
+  #pylab.title('Generated Value Function for ' + target_entries, fontsize=10)
   
   pylab.xlim(xmin=0, xmax=1)
   pylab.ylim(ymin=0, ymax=1)

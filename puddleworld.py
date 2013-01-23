@@ -355,7 +355,7 @@ def main():
       
       labels += pylab.plot(x, memory[agent], label='Memory: ' + remap_names[agent], color=color, linestyle=linestyle)
     ax2.set_xlim(0, 20000)
-    ax2.set_ylim(0, 60000)
+    ax2.set_ylim(0, 35000)
     
     #ax2.set_ylabel(r"Temperature ($^\circ$C)")
     ax2.set_ylabel('Number of Q-Values')
@@ -367,7 +367,7 @@ def main():
     #ax2.yaxis.label.set_color('red')
     
     # lower right
-    pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.07,1,1))
+    pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.12,1,1))
   else:
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)

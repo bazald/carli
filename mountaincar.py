@@ -334,7 +334,7 @@ def main():
   elif scenario == 5:
     #pylab.title('Mountain Car: Static and Incremental Hierarchical Tilings', fontsize=10)
     pylab.xlim(xmax=200000)
-    pylab.ylim(ymin=-1000, ymax=0)
+    pylab.ylim(ymin=-1500, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
@@ -370,7 +370,7 @@ def main():
       
       labels += pylab.plot(x, memory[agent], label='Memory: ' + remap_names[agent], color=color, linestyle=linestyle)
     ax2.set_xlim(0, 200000)
-    ax2.set_ylim(0, 400000)
+    ax2.set_ylim(0, 250000)
     
     #ax2.set_ylabel(r"Temperature ($^\circ$C)")
     ax2.set_ylabel('Number of Q-Values')
@@ -382,7 +382,7 @@ def main():
     #ax2.yaxis.label.set_color('red')
 
     # lower right
-    pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.08,1,1))
+    pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.09,1,1))
   else:
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
