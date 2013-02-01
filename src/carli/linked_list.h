@@ -8,6 +8,21 @@
 namespace Zeni {
 
   template <typename TYPE>
+  class Linked_List;
+
+  template <typename TYPE>
+  Linked_List<const TYPE> * value_to_Linked_List(const TYPE * const type, const size_t &offset);
+
+  template <typename TYPE>
+  Linked_List<TYPE> * value_to_Linked_List(TYPE * const type, const size_t &offset);
+
+  template <typename TYPE>
+  typename Linked_List<TYPE>::iterator_const begin(const TYPE * const type, const size_t &offset);
+
+  template <typename TYPE>
+  typename Linked_List<TYPE>::iterator begin(TYPE * const type, const size_t &offset);
+
+  template <typename TYPE>
   class Linked_List {
   public:
     typedef TYPE value_type;
@@ -449,6 +464,28 @@ namespace Zeni {
     list_pointer_type m_prev;
     list_pointer_type m_next;
   };
+
+  template <typename TYPE>
+  Linked_List<const TYPE> * value_to_Linked_List(const TYPE * const type, const size_t &offset) {
+    return type ? reinterpret_cast<Linked_List<const TYPE> *>(reinterpret_cast<char *>(type) + offset) : nullptr;
+  }
+
+  template <typename TYPE>
+  Linked_List<TYPE> * value_to_Linked_List(TYPE * const type, const size_t &offset) {
+    return type ? reinterpret_cast<Linked_List<TYPE> *>(reinterpret_cast<char *>(type) + offset) : nullptr;
+  }
+
+  template <typename TYPE>
+  typename Linked_List<TYPE>::iterator_const begin(const TYPE * const type, const size_t &offset) {
+    auto list = value_to_Linked_List(type, offset);
+    return list->begin(list);
+  }
+
+  template <typename TYPE>
+  typename Linked_List<TYPE>::iterator begin(TYPE * const type, const size_t &offset) {
+    auto list = value_to_Linked_List(type, offset);
+    return list->begin(list);
+  }
 
 }
 

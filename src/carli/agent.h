@@ -140,7 +140,7 @@ public:
   typedef Environment<action_type> environment_type;
   typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
-  enum Credit_Assignment {SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_ROOT_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_SPECIFIC, EPSILON_EVEN_DEPTH};
+  enum Credit_Assignment {ALL, SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_ROOT_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_SPECIFIC, EPSILON_EVEN_DEPTH};
 
   Agent(const std::shared_ptr<environment_type> &environment)
    : m_metastate(NON_TERMINAL),
@@ -167,6 +167,7 @@ public:
    m_credit_assignment_root(2.0),
    m_credit_assignment_root_value(1.0 / m_credit_assignment_root),
    m_credit_assignment_normalize(true),
+   m_weight_assignment_code(EVEN),
    m_on_policy(false),
    m_epsilon(0.1),
    m_pseudoepisode_threshold(20),
@@ -184,6 +185,7 @@ public:
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
     m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
     m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
+    m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
     m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{return this->split_test(q, depth);};
   }
 
@@ -234,26 +236,30 @@ public:
   Credit_Assignment get_credit_assignment() const {return m_credit_assignment_code;}
   void set_credit_assignment(const Credit_Assignment &credit_assignment) {
     switch(credit_assignment) {
+      case ALL:
+        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_all(value_list);};
+        break;
+
       case SPECIFIC:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_specific(value_list);};
         break;
-        
+
       case EVEN:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
         break;
-        
+
       case INV_UPDATE_COUNT:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
         break;
-        
+  
       case INV_LOG_UPDATE_COUNT:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
         break;
-        
+
       case INV_ROOT_UPDATE_COUNT:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_root_update_count(value_list);};
         break;
-        
+  
       case INV_DEPTH:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);};
         break;
@@ -299,6 +305,52 @@ public:
   bool is_credit_assignment_normalize() const {return m_credit_assignment_normalize;}
   void set_credit_assignment_normalize(const bool &credit_assignment_normalize) {
     m_credit_assignment_normalize = credit_assignment_normalize;
+  }
+
+  Credit_Assignment get_weight_assignment() const {return m_weight_assignment_code;}
+  void set_weight_assignment(const Credit_Assignment &weight_assignment) {
+    switch(weight_assignment) {
+      case ALL:
+        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_all(value_list);};
+        break;
+
+      case SPECIFIC:
+        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_specific(value_list);};
+        break;
+
+      case EVEN:
+        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
+        break;
+
+      case INV_UPDATE_COUNT:
+        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
+        break;
+  
+      case INV_LOG_UPDATE_COUNT:
+        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
+        break;
+
+      case INV_ROOT_UPDATE_COUNT:
+        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_root_update_count(value_list);};
+        break;
+  
+      case INV_DEPTH:
+        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);};
+        break;
+
+      case EPSILON_EVEN_SPECIFIC:
+        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_specific);};
+        break;
+
+      case EPSILON_EVEN_DEPTH:
+        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);};
+        break;
+
+      default:
+        abort();
+    }
+
+    m_weight_assignment_code = weight_assignment;
   }
 
   bool is_on_policy() const {return m_on_policy;}
@@ -499,7 +551,11 @@ protected:
           }
         }
 
-        return get_value_from_function(head, get_trie(action), offset, depth)->get();
+        Q_Value * const rv = get_value_from_function(head, get_trie(action), offset, depth)->get();
+
+        assign_weight(value_to_Linked_List(rv, offset));
+
+        return rv;
       }
       catch(Again &) {
       }
@@ -586,8 +642,7 @@ protected:
 #endif
     std::for_each(current->begin(current), current->end(current), [&q_old,&last](Q_Value &q) {
       if(q.type != Q_Value::FRINGE) {
-        q_old += q.value;
-        ++q.update_count;
+        q_old += q.value * q.weight;
 #ifdef DEBUG_OUTPUT
         std::cerr << ' ' << &q;
 #endif
@@ -618,6 +673,8 @@ protected:
     m_credit_assignment(current);
 
     std::for_each(current->begin(current), current->end(current), [this](Q_Value &q) {
+      ++q.update_count;
+
 //     assert(last);
 //     {
 //       Q_Value &q = *last;
@@ -637,8 +694,10 @@ protected:
 //     }
     });
 
+#ifdef DEBUG_OUTPUT
+    double q_new = 0.0;
+#endif
     const double delta = target_value - q_old;
-    double q_new = double();
     for(Q_Value::List * q_ptr = m_eligible; q_ptr; ) {
       Q_Value &q = **q_ptr;
       q_ptr = q.eligible.next();
@@ -646,9 +705,13 @@ protected:
 #ifdef TRACK_Q_VALUE_VARIANCE
       const double local_old = q.value;
 #endif
+      
+      const double edelta = q.eligibility * delta;
 
-      q.value += q.eligibility * delta;
-      q_new += q.value;
+      q.value += edelta;
+#ifdef DEBUG_OUTPUT
+      q_new += q.value * q.weight;
+#endif
 
       if(q.type == Q_Value::SPLIT) {
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
@@ -660,7 +723,7 @@ protected:
 #endif
       }
       else if(q.type == Q_Value::UNSPLIT) {
-        const double abs_delta = std::abs(q.eligibility * delta);
+        const double abs_edelta = std::abs(edelta);
 
         if(q.eligibility_init) {
           if(q.last_episode_fired != this->m_episode_number) {
@@ -672,8 +735,8 @@ protected:
           q.last_step_fired = this->m_step_count;
 
 #ifdef WHITESON_ADAPTIVE_TILE
-          if(abs_delta < q.minbe) {
-            q.minbe = abs_delta;
+          if(abs_edelta < q.minbe) {
+            q.minbe = abs_edelta;
             this->m_steps_since_minbe = 0;
           }
           else
@@ -681,7 +744,7 @@ protected:
 #endif
         }
 
-        q.cabe += abs_delta;
+        q.cabe += abs_edelta;
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
         q.mabe = q.cabe / q.update_count;
 #endif
@@ -719,8 +782,8 @@ protected:
 
 #ifdef DEBUG_OUTPUT
     std::cerr << " td_update: " << q_old << " <" << m_learning_rate << "= " << reward << " + " << m_discount_rate << " * " << target_next << std::endl;
-    std::cerr << "            " << delta << " = " << target_value << " - " << q_old << std::endl
-              << "            " << q_new << std::endl;
+    std::cerr << "            " << delta << " = " << target_value << " - " << q_old << std::endl;
+    std::cerr << "            " << q_new << std::endl;
 
     std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {
       if(q.type == Q_Value::UNSPLIT) {
@@ -744,6 +807,14 @@ protected:
     });
 
     m_eligible = nullptr;
+  }
+
+  void assign_weight(Q_Value::List * const &value_list) {
+    m_weight_assignment(value_list);
+
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [](Q_Value &q) {
+      q.weight = q.type == Q_Value::FRINGE ? 0.0 : q.credit;
+    });
   }
 
   void assign_credit_epsilon(Q_Value::List * const &value_list,
@@ -784,6 +855,12 @@ protected:
 
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](Q_Value &q) {
       q.credit = q.type == Q_Value::FRINGE ? 1.0 : 1.0 / count;
+    });
+  }
+
+  void assign_credit_all(Q_Value::List * const &value_list) {
+    std::for_each(value_list->begin(value_list), value_list->end(value_list), [](Q_Value &q) {
+      q.credit = 1.0;
     });
   }
 
@@ -893,10 +970,10 @@ protected:
       if(q.type != Q_Value::FRINGE) {
 #ifdef DEBUG_OUTPUT
         if(action)
-          std::cerr << ' ' << q.value;
+          std::cerr << ' ' << q.value * q.weight;
 #endif
 
-        sum += q.value;
+        sum += q.value * q.weight;
       }
     });
 
@@ -946,7 +1023,7 @@ private:
   static void reset_update_counts_for_trie(const feature_trie_type * const &trie) {
     std::for_each(trie->begin(trie), trie->end(trie), [](const feature_trie_type &trie2) {
       if(trie2.get())
-        trie2.get()->update_count = 0;
+        trie2.get()->update_count = 1;
       reset_update_counts_for_trie(trie2.get_deeper());
     });
   }
@@ -1138,6 +1215,9 @@ private:
   double m_credit_assignment_root;
   mutable double m_credit_assignment_root_value;
   bool m_credit_assignment_normalize;
+
+  Credit_Assignment m_weight_assignment_code;
+  std::function<void (Q_Value::List * const &)> m_weight_assignment; ///< How to assign weight to multiple Q-values at summation time
 
   bool m_on_policy; ///< for Sarsa/Q-learning selection
   double m_epsilon; ///< for epsilon-greedy decision-making

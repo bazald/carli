@@ -101,9 +101,9 @@ namespace Zeni {
       const bool rhs_check = rhs_ && rhs_->m_value && offset != size_t(-1);
       if(m_value) {
         if(rhs_check) {
-          auto lhs = reinterpret_cast<Linked_List<value_type> *>(reinterpret_cast<char *>(m_value) + offset);
+          auto lhs = value_to_Linked_List(m_value, offset);
           assert(lhs->offset() == offset);
-          auto rhs = reinterpret_cast<Linked_List<value_type> *>(reinterpret_cast<char *>(rhs_->m_value) + offset);
+          auto rhs = value_to_Linked_List(rhs_->m_value, offset);
           assert(rhs->offset() == offset);
           lhs->insert_before(rhs);
           return this;
@@ -117,7 +117,7 @@ namespace Zeni {
 
     void offset_erase(const size_t &offset) {
       if(m_value && offset != size_t(-1)) {
-        auto lhs = reinterpret_cast<Linked_List<value_type> *>(reinterpret_cast<char *>(m_value) + offset);
+        auto lhs = value_to_Linked_List(m_value, offset);
         assert(lhs->offset() == offset);
         lhs->erase();
       }

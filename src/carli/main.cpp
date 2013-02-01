@@ -36,6 +36,7 @@ struct Arguments {
     credit_assignment_log_base(2.71828182846),
     credit_assignment_root(2.0),
     credit_assignment_normalize(true),
+    weight_assignment(Blocks_World::Agent::EVEN),
     discount_rate(1.0),
     eligibility_trace_decay_rate(0.0),
     eligibility_trace_decay_threshold(0.0001),
@@ -73,6 +74,7 @@ struct Arguments {
   double credit_assignment_log_base;
   double credit_assignment_root;
   bool credit_assignment_normalize;
+  Blocks_World::Agent::Credit_Assignment weight_assignment;
   double discount_rate;
   double eligibility_trace_decay_rate;
   double eligibility_trace_decay_threshold;
@@ -116,7 +118,9 @@ Options generate_options() {
     g_args.contribute_update_count = atoi(args.at(0));
   }, 1), "[0,inf)");
   options.add('c', "credit-assignment", Options::Option([](const std::vector<const char *> &args) {
-    if(!strcmp(args.at(0), "specific"))
+    if(!strcmp(args.at(0), "all"))
+      g_args.credit_assignment = Blocks_World::Agent::ALL;
+    else if(!strcmp(args.at(0), "specific"))
       g_args.credit_assignment = Blocks_World::Agent::SPECIFIC;
     else if(!strcmp(args.at(0), "even"))
       g_args.credit_assignment = Blocks_World::Agent::EVEN;
@@ -136,7 +140,7 @@ Options generate_options() {
       std::cerr << "Illegal credit assignment selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal credit assignment selection.");
     }
-  }, 1), "specific/even/inv-update-count/inv-log-update-count/inv-root-update-count/inv-depth/epsilon-even-specific/epsilon-even-depth");
+  }, 1), "all/specific/even/inv-update-count/inv-log-update-count/inv-root-update-count/inv-depth/epsilon-even-specific/epsilon-even-depth");
   options.add('d', "discount-rate", Options::Option([](const std::vector<const char *> &args) {
     g_args.discount_rate = atof(args.at(0));
     if(g_args.discount_rate < 0.0 || g_args.discount_rate > 1.0) {
@@ -347,6 +351,30 @@ Options generate_options() {
   options.add(     "value-function-cap", Options::Option([](const std::vector<const char *> &args) {
     g_args.value_function_cap = atoi(args.at(0));
   }, 1), "[0,inf)");
+  options.add('w', "weight-assignment", Options::Option([](const std::vector<const char *> &args) {
+    if(!strcmp(args.at(0), "all"))
+      g_args.weight_assignment = Blocks_World::Agent::ALL;
+    else if(!strcmp(args.at(0), "specific"))
+      g_args.weight_assignment = Blocks_World::Agent::SPECIFIC;
+    else if(!strcmp(args.at(0), "even"))
+      g_args.weight_assignment = Blocks_World::Agent::EVEN;
+    else if(!strcmp(args.at(0), "inv-update-count"))
+      g_args.weight_assignment = Blocks_World::Agent::INV_UPDATE_COUNT;
+    else if(!strcmp(args.at(0), "inv-log-update-count"))
+      g_args.weight_assignment = Blocks_World::Agent::INV_LOG_UPDATE_COUNT;
+    else if(!strcmp(args.at(0), "inv-root-update-count"))
+      g_args.weight_assignment = Blocks_World::Agent::INV_ROOT_UPDATE_COUNT;
+    else if(!strcmp(args.at(0), "inv-depth"))
+      g_args.weight_assignment = Blocks_World::Agent::INV_DEPTH;
+    else if(!strcmp(args.at(0), "epsilon-even-specific"))
+      g_args.weight_assignment = Blocks_World::Agent::EPSILON_EVEN_SPECIFIC;
+    else if(!strcmp(args.at(0), "epsilon-even-depth"))
+      g_args.weight_assignment = Blocks_World::Agent::EPSILON_EVEN_DEPTH;
+    else {
+      std::cerr << "Illegal weight assignment selection: " << args.at(0) << std::endl;
+      throw std::runtime_error("Illegal weight assignment selection.");
+    }
+  }, 1), "all/specific/even/inv-update-count/inv-log-update-count/inv-root-update-count/inv-depth/epsilon-even-specific/epsilon-even-depth");
 
   return options;
 }
@@ -518,6 +546,7 @@ void run_agent() {
   agent->set_split_mabe(g_args.split_mabe);
 #endif
   agent->set_value_function_cap(g_args.value_function_cap);
+  agent->set_weight_assignment(typename AGENT::Credit_Assignment(g_args.weight_assignment));
 
   Experimental_Output experimental_output(g_args.print_every);
 

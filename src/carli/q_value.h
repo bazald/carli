@@ -22,11 +22,12 @@ public:
    : last_episode_fired(size_t(-1)),
    last_step_fired(size_t(-1)),
    pseudoepisode_count(0),
-   update_count(0),
+   update_count(1),
    type(type_),
    eligibility_init(false),
    eligibility(-1.0),
    credit(1.0),
+   weight(0.0),
    value(q_value_),
 #ifdef WHITESON_ADAPTIVE_TILE
    minbe(DBL_MAX),
@@ -58,6 +59,7 @@ public:
   bool eligibility_init;
   double eligibility;
   double credit;
+  double weight;
 
   double value;
   Value cabe; ///< Cumulative Absolute Bellman Error
