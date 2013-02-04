@@ -706,7 +706,8 @@ protected:
       const double local_old = q.value;
 #endif
       
-      const double edelta = q.eligibility * delta;
+      const double ldelta = m_weight_assignment_code != ALL ? target_value - q.value : delta;
+      const double edelta = q.eligibility * ldelta;
 
       q.value += edelta;
 #ifdef DEBUG_OUTPUT
@@ -1044,7 +1045,7 @@ private:
       if(match != inserted)
         inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
       if(!m_null_q_values && !match->get())
-        match->get() = new Q_Value;
+        match->get() = new Q_Value(m_weight_assignment_code != ALL ? value : 0.0);
 
       const double value_next = value + (match->get() ? match->get()->value : 0.0);
 
@@ -1066,7 +1067,7 @@ private:
         deeper = match->get_deeper();
 
         if(m_null_q_values && !match->get())
-          match->get() = new Q_Value;
+          match->get() = new Q_Value(m_weight_assignment_code != ALL ? value : 0.0);
       }
 
       match->offset_erase(offset);
@@ -1076,7 +1077,7 @@ private:
     }
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
 
-    auto rv = head->insert(function, m_null_q_values, m_split_test, [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);}, generate_fringe, collapse_fringe, offset, depth);
+    auto rv = head->insert(function, m_null_q_values, m_split_test, [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);}, generate_fringe, collapse_fringe, offset, depth, value, m_weight_assignment_code != ALL);
     assert(rv);
     return rv;
   }
