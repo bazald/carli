@@ -1,5 +1,5 @@
-#ifndef MEAN_H
-#define MEAN_H
+#ifndef VALUE_H
+#define VALUE_H
 
 class Value {
   friend class Mean;

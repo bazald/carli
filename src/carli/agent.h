@@ -1037,6 +1037,8 @@ private:
                                       return lhs.get_key()->compare_pi(*rhs.get_key()) == 0;
                                     });
 
+    const bool use_value = m_weight_assignment_code != ALL;
+
     if(match) {
       auto next = static_cast<feature_trie>(head == match ? head->next() : head);
       match->erase();
@@ -1045,9 +1047,9 @@ private:
       if(match != inserted)
         inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
       if(!m_null_q_values && !match->get())
-        match->get() = new Q_Value(m_weight_assignment_code != ALL ? value : 0.0);
+        match->get() = new Q_Value(use_value ? value : 0.0);
 
-      const double value_next = value + (match->get() ? match->get()->value : 0.0);
+      const double value_next = value + (match->get() ? match->get()->value * match->get()->weight : 0.0);
 
       feature_trie deeper = nullptr;
       if(next && m_split_test(match->get(), depth)) {
@@ -1067,7 +1069,7 @@ private:
         deeper = match->get_deeper();
 
         if(m_null_q_values && !match->get())
-          match->get() = new Q_Value(m_weight_assignment_code != ALL ? value : 0.0);
+          match->get() = new Q_Value(use_value ? value : 0.0);
       }
 
       match->offset_erase(offset);
@@ -1077,7 +1079,7 @@ private:
     }
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
 
-    auto rv = head->insert(function, m_null_q_values, m_split_test, [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);}, generate_fringe, collapse_fringe, offset, depth, value, m_weight_assignment_code != ALL);
+    auto rv = head->insert(function, m_null_q_values, m_split_test, [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);}, generate_fringe, collapse_fringe, offset, depth, value, use_value);
     assert(rv);
     return rv;
   }

@@ -12,6 +12,7 @@
 #include "puddle_world.h"
 #include "experimental_output.h"
 #include "getopt.h"
+#include "value_queue.h"
 
 #include <cstring>
 #include <ctime>

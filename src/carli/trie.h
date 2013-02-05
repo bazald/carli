@@ -131,7 +131,7 @@ namespace Zeni {
 
       const bool dtr = depth_test(m_value, depth);
       trie_pointer_type deeper = nullptr;
-      const double value_next = value + (m_value ? m_value->value : 0.0);
+      const double value_next = value + (m_value ? m_value->value * m_value->weight : 0.0);
 
       if(next && dtr) {
         collapse_fringe(m_deeper, next);
