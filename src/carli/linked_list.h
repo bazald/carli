@@ -255,7 +255,7 @@ namespace Zeni {
     value_reference_type operator*() {
       return *get();
     }
-    const value_pointer_type operator->() const {
+    value_pointer_type operator->() const {
       return get();
     }
     value_pointer_type operator->() {

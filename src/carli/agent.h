@@ -6,6 +6,7 @@
 #include "trie.h"
 #include "q_value.h"
 #include "random.h"
+#include "value_queue.h"
 
 #include <functional>
 #include <map>
@@ -147,6 +148,7 @@ public:
    m_features(nullptr),
    m_features_complete(true),
    m_candidates(nullptr),
+   m_mean_cabe_queue_size(0),
 #ifdef WHITESON_ADAPTIVE_TILE
    m_steps_since_minbe(0),
 #endif
@@ -415,6 +417,11 @@ public:
   size_t get_value_function_cap() const {return m_value_function_cap;}
   void set_value_function_cap(const size_t &value_function_cap) {
     m_value_function_cap = value_function_cap;
+  }
+
+  size_t get_mean_cabe_queue_size() const {return m_mean_cabe_queue_size;}
+  void set_mean_cabe_queue_size(const size_t &mean_cabe_queue_size) {
+    m_mean_cabe_queue_size = mean_cabe_queue_size;
   }
 
   const std::shared_ptr<const environment_type> & get_env() const {return m_environment;}
@@ -718,7 +725,8 @@ protected:
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
         this->m_mean_mabe.uncontribute(q.mabe);
 #endif
-        this->m_mean_cabe.uncontribute(q.cabe);
+        if(!m_mean_cabe_queue_size)
+          this->m_mean_cabe.uncontribute(q.cabe);
 #ifdef TRACK_Q_VALUE_VARIANCE
         this->m_mean_variance.uncontribute(q.variance_total);
 #endif
@@ -750,7 +758,14 @@ protected:
         q.mabe = q.cabe / q.update_count;
 #endif
         if(q.update_count > m_contribute_update_count) {
-          this->m_mean_cabe.contribute(q.cabe);
+          if(m_mean_cabe_queue_size) {
+            if(this->m_mean_cabe_queue.size() == m_mean_cabe_queue_size)
+              this->m_mean_cabe_queue.pop();
+            this->m_mean_cabe_queue.push(q.cabe);
+          }
+          else
+            this->m_mean_cabe.contribute(q.cabe);
+
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
           this->m_mean_mabe.contribute(q.mabe);
 #endif
@@ -788,8 +803,11 @@ protected:
 
     std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {
       if(q.type == Q_Value::UNSPLIT) {
-        std::cerr << " updates:  " << q.update_count << std::endl
-                  << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl;
+        std::cerr << " updates:  " << q.update_count << std::endl;
+        if(m_mean_cabe_queue_size)
+          std::cerr << " cabe q:   " << q.cabe << " of " << this->m_mean_cabe_queue.mean() << ':' << this->m_mean_cabe_queue.mean().get_stddev() << std::endl;
+        else
+          std::cerr << " cabe:     " << q.cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl;
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
         std::cerr << " mabe:     " << q.mabe << " of " << this->m_mean_mabe << ':' << this->m_mean_mabe.get_stddev() << std::endl;
 #endif
@@ -951,7 +969,8 @@ protected:
 
     if(q->update_count > m_split_update_count &&
        q->pseudoepisode_count > m_split_pseudoepisodes &&
-       m_mean_cabe.outlier_above(q->cabe, m_split_cabe))
+       (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean().outlier_above(q->cabe, m_split_cabe)
+                               : m_mean_cabe.outlier_above(q->cabe, m_split_cabe)))
     {
       q->type = Q_Value::SPLIT;
       return true;
@@ -1183,6 +1202,9 @@ private:
   virtual void update() = 0;
 
   Mean m_mean_cabe;
+  Value_Queue m_mean_cabe_queue;
+  size_t m_mean_cabe_queue_size;
+
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   Mean m_mean_mabe;
 #endif

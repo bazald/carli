@@ -2,6 +2,7 @@
 #define VALUE_QUEUE_H
 
 #include "linked_list.h"
+#include "memory_pool.h"
 #include "value.h"
 
 class Value_Queue {
@@ -69,7 +70,7 @@ public:
     return m_size;
   }
 
-  const Mean & mean() const {
+  Mean mean() const {
     return m_mean;
   }
 

@@ -12,7 +12,6 @@
 #include "puddle_world.h"
 #include "experimental_output.h"
 #include "getopt.h"
-#include "value_queue.h"
 
 #include <cstring>
 #include <ctime>
@@ -45,6 +44,7 @@ struct Arguments {
     epsilon(0.1),
     ignore_x(false),
     learning_rate(1.0),
+    mean_cabe_queue_size(0),
     null_q_values(false),
     number_of_episodes(0),
     number_of_steps(50000),
@@ -83,6 +83,7 @@ struct Arguments {
   double epsilon;
   bool ignore_x;
   double learning_rate;
+  size_t mean_cabe_queue_size;
   bool null_q_values;
   size_t number_of_episodes;
   size_t number_of_steps;
@@ -232,6 +233,9 @@ Options generate_options() {
       throw std::runtime_error("Illegal learning rate selection.");
     }
   }, 1), "(0,1]");
+  options.add(     "mean-cabe-queue-size", Options::Option([](const std::vector<const char *> &args) {
+    g_args.mean_cabe_queue_size = atoi(args.at(0));
+  }, 1), "[0,inf)");
   options.add(     "null-q-values", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "true"))
       g_args.null_q_values = true;
@@ -529,6 +533,7 @@ void run_agent() {
   if(auto cart_pole = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent))
     cart_pole->set_ignore_x(g_args.ignore_x);
   agent->set_learning_rate(g_args.learning_rate);
+  agent->set_mean_cabe_queue_size(g_args.mean_cabe_queue_size);
   agent->set_null_q_values(g_args.null_q_values);
   agent->set_on_policy(g_args.on_policy);
   agent->set_pseudoepisode_threshold(g_args.pseudoepisode_threshold);
