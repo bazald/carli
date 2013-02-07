@@ -11,38 +11,43 @@ g_plotter_grid_filters = ['move(left)', 'move(idle)', 'move(right)', 'all']
 
 g_ep_tuples = []
 
-# Experiment 0, non-hierarchical agents comparison
-g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 0, 0, 'false'))
-g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0, 'false'))
-g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 0, 0, 'false'))
-g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 15, 15, 0, 0.5, 0, 0, 0, 'false'))
-g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 0, 0, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.1, 0, 0, 0, 0, 0, 'false'))
+g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.1, 0.0001, 0, 10000, 0, 0, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, -0.5, 0.0001, 0, 10000, 0, 0, 'false'))
 
-# Experiment 1, hierarchical agents performance comparison - compare to 0
-#g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 1, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 1, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 1, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 15, 15, 0, 0.5, 0, 1, 0, 'false'))
-g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 1, 0, 'false'))
+## Experiment 0, non-hierarchical agents comparison
+#g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 0, 0, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 0, 0, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 15, 15, 0, 0.5, 0, 0, 0, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 0, 0, 'false'))
 
-## Experiment 2, alternative credit assignment performance comparison - compare to 1
-#g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 2, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 2, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 2, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 15, 15, 0, 0.5, 0, 2, 0, 'false'))
-g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 2, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 2, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 2, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 2, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 15, 15, 0, 0.5, 0, 2, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 2, 0, 'false'))
+## Experiment 1, hierarchical agents performance comparison - compare to 0
+##g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 1, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 1, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 1, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 15, 15, 0, 0.5, 0, 1, 0, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 1, 0, 'false'))
 
-# Experiment 3, dynamically refined hierarchical agents performance comparison - compare to 1 and 2
-g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 3, 0, 'false'))
-g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 3, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 3, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 13, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 13, 0, 'false'))
+### Experiment 2, alternative credit assignment performance comparison - compare to 1
+##g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 2, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 2, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 2, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 15, 15, 0, 0.5, 0, 2, 0, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 2, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 2, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 2, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 2, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 15, 15, 0, 0.5, 0, 2, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 2, 0, 'false'))
+
+## Experiment 3, dynamically refined hierarchical agents performance comparison - compare to 1 and 2
+#g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 3, 0, 'false'))
+#g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 3, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 3, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 13, 0, 'false'))
+##g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 13, 0, 'false'))
 
 ## Experiment 400s, move goal
 #g_ep_tuples.append(('mountain-car', 0, 'even',                  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 400,     -1, 'false'))
@@ -133,10 +138,12 @@ class Experiment:
     self.split_max = ep_tuple[11]
     self.split_pseudoepisodes = ep_tuple[12]
     self.split_cabe = ep_tuple[13]
-    self.split_update_count = ep_tuple[14]
-    self.scenario = ep_tuple[15]
-    self.skip_steps = ep_tuple[16]
-    self.reset_update_counts = ep_tuple[17]
+    self.split_cabe_qmult = ep_tuple[14]
+    self.split_update_count = ep_tuple[15]
+    self.mean_cabe_queue_size = ep_tuple[16]
+    self.scenario = ep_tuple[17]
+    self.skip_steps = ep_tuple[18]
+    self.reset_update_counts = ep_tuple[19]
     
   def get_args(self):
     args = ['./carli',
@@ -161,7 +168,9 @@ class Experiment:
             '--split-max', str(self.split_max),
             '--split-pseudoepisodes', str(self.split_pseudoepisodes),
             '--split-cabe', str(self.split_cabe),
+            '--split-cabe-qmult', str(self.split_cabe_qmult),
             '--split-update-count', str(self.split_update_count),
+            '--mean-cabe-queue-size', str(self.mean_cabe_queue_size),
             '--scenario', str(self.scenario),
             '--skip-steps', str(self.skip_steps),
             '--output', 'experimental']
@@ -199,7 +208,7 @@ for ep_tuple in g_ep_tuples:
   #dir += '_' + ep_tuple[2]
   #dir += '_' + str(ep_tuple[3])
   #dir += '_' + str(ep_tuple[4])
-  #dir += '_' + str(ep_tuple[5])
+  dir += '_' + str(ep_tuple[5])
   #dir += '_' + str(ep_tuple[6])
   #dir += '_' + str(ep_tuple[7])
   #dir += '_' + ep_tuple[8]
@@ -207,10 +216,13 @@ for ep_tuple in g_ep_tuples:
   dir += '_' + resolution(ep_tuple[10])
   dir += '_' + resolution(ep_tuple[11])
   #dir += '_' + str(ep_tuple[12])
-  #dir += '_' + str(ep_tuple[13])
-  #dir += '_' + str(ep_tuple[14])
-  dir += '_' + str(ep_tuple[15])
-  #dir += '_' + str(ep_tuple[16])
+  dir += '_' + str(ep_tuple[13])
+  dir += '_' + str(ep_tuple[14])
+  #dir += '_' + str(ep_tuple[15])
+  dir += '_' + str(ep_tuple[16])
+  dir += '_' + str(ep_tuple[17])
+  #dir += '_' + str(ep_tuple[18])
+  #dir += '_' + str(ep_tuple[19])
   if not os.path.isdir(dir):
     os.mkdir(dir)
   dirs.append(dir)
@@ -279,10 +291,10 @@ def take_fives(group):
 job_server = pp.Server(args.jobs)
 progress = Progress(experiments + plots)
 start_time = time.time()
-jobs = []#[(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread',), callback=progress.just_finished, group=experiment.ep_tuple)) for experiment in experiments]
+jobs = [(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread',), callback=progress.just_finished, group=experiment.ep_tuple)) for experiment in experiments]
 
 for ep_tuple, dir in zip(g_ep_tuples, dirs):
-  #take_fives(ep_tuple)
+  take_fives(ep_tuple)
   print 'Plotting data for ' + str(ep_tuple) + '\n'
   for plotter in g_plotters:
     args = [plotter] + glob.glob(dir + '/*.out')
