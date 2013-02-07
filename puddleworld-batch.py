@@ -11,8 +11,11 @@ g_plotter_grid_filters = ['move(north)', 'move(south)', 'move(east)', 'move(west
 
 g_ep_tuples = []
 
-g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0,    0, 0, 0, 'false'))
-g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0, 1000, 0, 0, 'false'))
+#g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0,    0, 0, 0, 'false'))
+#g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0, 1000, 0, 0, 'false'))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0,    0, 0, 0, 'false'))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0, 1000, 0, 0, 'false'))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 2.0, 0, 1000, 0, 0, 'false'))
 
 ## Experiment 0, non-hierarchical agents comparison
 #g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20,  5,  5, 0, 0.5, 0, 0, 0, 'false'))
@@ -312,7 +315,7 @@ for ep_tuple in g_ep_tuples:
   dir += '_' + resolution(ep_tuple[10])
   dir += '_' + resolution(ep_tuple[11])
   #dir += '_' + str(ep_tuple[12])
-  #dir += '_' + str(ep_tuple[13])
+  dir += '_' + str(ep_tuple[13])
   #dir += '_' + str(ep_tuple[14])
   dir += '_' + str(ep_tuple[15])
   dir += '_' + str(ep_tuple[16])

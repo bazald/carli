@@ -36,7 +36,7 @@ struct Arguments {
     credit_assignment_log_base(2.71828182846),
     credit_assignment_root(2.0),
     credit_assignment_normalize(true),
-    weight_assignment(Blocks_World::Agent::EVEN),
+    weight_assignment(Blocks_World::Agent::ALL),
     discount_rate(1.0),
     eligibility_trace_decay_rate(0.0),
     eligibility_trace_decay_threshold(0.0001),
