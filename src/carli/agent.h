@@ -182,7 +182,8 @@ public:
    m_split_mabe(0.84155),
 #endif
    m_contribute_update_count(0),
-   m_eligible(nullptr)
+   m_eligible(nullptr),
+   m_q_value_count(0)
   {
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
     m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
@@ -520,11 +521,13 @@ public:
   }
 
   size_t get_value_function_size() const {
-    size_t size = 0lu;
-    std::for_each(m_value_function.begin(), m_value_function.end(), [this,&size](const typename value_function_type::value_type &vf) {
-      size += this->get_trie_size(vf.second);
-    });
-    return size;
+    return m_q_value_count;
+
+//     size_t size = 0lu;
+//     std::for_each(m_value_function.begin(), m_value_function.end(), [this,&size](const typename value_function_type::value_type &vf) {
+//       size += this->get_trie_size(vf.second);
+//     });
+//     return size;
   }
 
   void reset_update_counts() const {
@@ -1065,8 +1068,10 @@ private:
       match = match->map_insert(function);
       if(match != inserted)
         inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
-      if(!m_null_q_values && !match->get())
+      if(!m_null_q_values && !match->get()) {
         match->get() = new Q_Value(use_value ? value : 0.0);
+        ++m_q_value_count;
+      }
 
       const double value_next = value + (match->get() ? match->get()->value * match->get()->weight : 0.0);
 
@@ -1087,8 +1092,10 @@ private:
         generate_fringe(match->get_deeper(), next, offset, value_next);
         deeper = match->get_deeper();
 
-        if(m_null_q_values && !match->get())
+        if(m_null_q_values && !match->get()) {
           match->get() = new Q_Value(use_value ? value : 0.0);
+          ++m_q_value_count;
+        }
       }
 
       match->offset_erase(offset);
@@ -1098,7 +1105,7 @@ private:
     }
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
 
-    auto rv = head->insert(function, m_null_q_values, m_split_test, [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);}, generate_fringe, collapse_fringe, offset, depth, value, use_value);
+    auto rv = head->insert(function, m_null_q_values, m_split_test, [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);}, generate_fringe, collapse_fringe, offset, depth, value, use_value, m_q_value_count);
     assert(rv);
     return rv;
   }
@@ -1257,6 +1264,8 @@ private:
   size_t m_contribute_update_count;
 
   Q_Value::List * m_eligible;
+  
+  size_t m_q_value_count;
 };
 
 template <typename FEATURE, typename ACTION>
