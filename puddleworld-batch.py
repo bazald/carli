@@ -14,9 +14,9 @@ g_ep_tuples = []
 #g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0,    0, 0, 0, 'false'))
 #g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0, 1000, 0, 0, 'false'))
 #g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0,    0, 0, 0, 'false'))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0, 1000, 0, 0, 'false'))
+g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 0.5, 0.001, 0, 1000, 0, 0, 'false'))
 #g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 2.0, 0, 1000, 0, 0, 'false'))
-g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 1.75, 0, 0, 0, 0, 'false'))
+#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20, 3, 13, 0, 1.75, 0, 0, 0, 0, 'false'))
 
 ## Experiment 0, non-hierarchical agents comparison
 #g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'off-policy', 20,  5,  5, 0, 0.5, 0, 0, 0, 'false'))
@@ -239,11 +239,12 @@ class Experiment:
     self.split_max = ep_tuple[11]
     self.split_pseudoepisodes = ep_tuple[12]
     self.split_cabe = ep_tuple[13]
-    self.split_update_count = ep_tuple[14]
-    self.mean_cabe_queue_size = ep_tuple[15]
-    self.scenario = ep_tuple[16]
-    self.skip_steps = ep_tuple[17]
-    self.reset_update_counts = ep_tuple[18]
+    self.split_cabe_qmult = ep_tuple[14]
+    self.split_update_count = ep_tuple[15]
+    self.mean_cabe_queue_size = ep_tuple[16]
+    self.scenario = ep_tuple[17]
+    self.skip_steps = ep_tuple[18]
+    self.reset_update_counts = ep_tuple[19]
     
   def get_args(self):
     args = ['./carli',
@@ -268,6 +269,7 @@ class Experiment:
             '--split-max', str(self.split_max),
             '--split-pseudoepisodes', str(self.split_pseudoepisodes),
             '--split-cabe', str(self.split_cabe),
+            '--split-cabe-qmult', str(self.split_cabe_qmult),
             '--split-update-count', str(self.split_update_count),
             '--mean-cabe-queue-size', str(self.mean_cabe_queue_size),
             '--scenario', str(self.scenario),
@@ -317,11 +319,12 @@ for ep_tuple in g_ep_tuples:
   dir += '_' + resolution(ep_tuple[11])
   #dir += '_' + str(ep_tuple[12])
   dir += '_' + str(ep_tuple[13])
-  #dir += '_' + str(ep_tuple[14])
-  dir += '_' + str(ep_tuple[15])
+  dir += '_' + str(ep_tuple[14])
+  #dir += '_' + str(ep_tuple[15])
   dir += '_' + str(ep_tuple[16])
-  #dir += '_' + str(ep_tuple[17])
+  dir += '_' + str(ep_tuple[17])
   #dir += '_' + str(ep_tuple[18])
+  #dir += '_' + str(ep_tuple[19])
   if not os.path.isdir(dir):
     os.mkdir(dir)
   dirs.append(dir)

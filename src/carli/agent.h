@@ -178,6 +178,7 @@ public:
    m_split_update_count(0),
    m_split_pseudoepisodes(0),
    m_split_cabe(0.84155),
+   m_split_cabe_qmult(0.0),
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
    m_split_mabe(0.84155),
 #endif
@@ -401,6 +402,11 @@ public:
   double get_split_cabe() const {return m_split_cabe;}
   void set_split_cabe(const double &split_cabe) {
     m_split_cabe = split_cabe;
+  }
+
+  double get_split_cabe_qmult() const {return m_split_cabe_qmult;}
+  void set_split_cabe_qmult(const double &split_cabe_qmult) {
+    m_split_cabe_qmult = split_cabe_qmult;
   }
 
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
@@ -972,8 +978,8 @@ protected:
 
     if(q->update_count > m_split_update_count &&
        q->pseudoepisode_count > m_split_pseudoepisodes &&
-       (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean().outlier_above(q->cabe, m_split_cabe)
-                               : m_mean_cabe.outlier_above(q->cabe, m_split_cabe)))
+       (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean().outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * m_q_value_count)
+                               : m_mean_cabe.outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * m_q_value_count)))
     {
       q->type = Q_Value::SPLIT;
       return true;
@@ -1260,6 +1266,7 @@ private:
   size_t m_split_update_count;
   size_t m_split_pseudoepisodes;
   double m_split_cabe;
+  double m_split_cabe_qmult;
   double m_split_mabe;
   size_t m_contribute_update_count;
 
