@@ -13,10 +13,12 @@
 *.ipch
 *.kate-swp
 *.lastbuildstate
+*.lof
 *.log
 *.manifest
 *.obj
 *.opensdf
+*.out
 *.pdb
 *-converted-to.pdf
 *.psess
@@ -27,6 +29,7 @@
 *.suo
 *.synctex.gz
 *.tlog
+*.toc
 *.user
 *.vcxproj
 *.vsp
