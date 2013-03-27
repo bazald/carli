@@ -373,7 +373,7 @@ def main():
     ax2.set_ylim(0, 250000)
     
     #ax2.set_ylabel(r"Temperature ($^\circ$C)")
-    ax2.set_ylabel('Number of Q-Values')
+    ax2.set_ylabel('Number of Tiles / Weights')
     fig.axes[0].spines['left'].set_color('red')
     fig.axes[0].tick_params(axis='y', colors='blue')
     #fig.axes[0].yaxis.label.set_color('blue')

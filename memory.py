@@ -8,7 +8,7 @@ from pylab import arange,pi,sin,cos,sqrt
 
 if os.name is 'posix':
   golden_mean = (sqrt(5)-1.0)/2.0     # Aesthetic ratio
-  fig_width = 3.375                   # width in inches
+  fig_width = 3                       # width in inches
   fig_height = fig_width*golden_mean  # height in inches
   fig_size =  [fig_width,fig_height]
   params = {'backend': 'ps',
@@ -88,6 +88,8 @@ def write_to_csv(filename, x_label, xs, y_labels, yss):
     f.write('\n')
 
 def main():
+  scenario = 4
+  
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')
     seed = int(f.readline().split(' ', 1)[1])
@@ -138,7 +140,7 @@ def main():
             if first_handle:
               first_handle = False
               if first_group:
-                x.append(int(split[0]) / 10000.0)
+                x.append(int(split[0]))#) / 10000.0)
                 xs.append(int(split[0]))
               y_avg = float(split[7])
               y_count = 1
@@ -169,13 +171,15 @@ def main():
   fig = plt.figure()
   fig.canvas.set_window_title('Value Function Size')
   
-  pylab.axes([0.145,0.15,0.8175,0.75])
+  rect = [0.19,0.15,0.7725,0.82]
+  pylab.axes(rect)
   
+  labels = []
   if len(sys.argv) == 1:
     y_labels = ['Values']
     yss = [smith]
     
-    pylab.plot(x, smith, label="Number of Q-Values", color='blue', linestyle='solid')
+    pylab.plot(x, smith, label="Number of Tiles / Weights", color='blue', linestyle='solid')
   else:
     if mode == 'single experiment evaluation':
       y_labels = ['Maximum', 'Average', 'Minimum']
@@ -185,20 +189,51 @@ def main():
     else:
       y_labels = []
       yss = []
-      for agent in smith:
-        y_labels.append(agent)
-        yss.append(smith[agent])
-        
-        pylab.plot(x, smith[agent], label=agent, linestyle='solid')
-  
-  pylab.legend(loc=4, handlelength=4.2, numpoints=2)
+      
+      if scenario == 0:
+        for agent in smith:
+          y_labels.append(agent)
+          yss.append(smith[agent])
+          
+          labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
+      
+      remap_names = {}
+      remap_names['specific\\_4x4\\_4x4\\_0'] = '4x4'
+      remap_names['specific\\_8x8\\_8x8\\_0'] = '8x8'
+      remap_names['specific\\_16x16\\_16x16\\_0'] = '16x16'
+      remap_names['specific\\_32x32\\_32x32\\_0'] = '32x32'
+      remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
+      remap_names['even\\_64x64\\_64x64\\_1'] = '1-64 static even'
+      remap_names['even\\_2x2\\_64x64\\_3'] = '1-64 incremental even'
+      
+      if scenario == 4:
+        agent_list = ['even\\_64x64\\_64x64\\_1', 'even\\_2x2\\_64x64\\_3']
+        for agent in agent_list:
+          y_labels.append('Reward: ' + remap_names[agent])
+          yss.append(smith[agent])
+          
+          if agent is 'even\\_64x64\\_64x64\\_1':
+            color = 'blue'
+            linestyle = '-'
+          elif agent is 'even\\_2x2\\_64x64\\_3':
+            color = 'blue'
+            linestyle = '--'
+          
+          labels += pylab.plot(x, smith[agent], label='Reward: ' + remap_names[agent], color=color, linestyle=linestyle)
   
   pylab.grid(True)
   
-  pylab.xlabel('Step Number (in 10,000s)', fontsize=8)
-  pylab.ylabel('Number of (Possibly Partial) Q-Values', fontsize=8)
-  pylab.title(title, fontsize=10)
+  #pylab.title(title, fontsize=10)
+  pylab.xlabel('Step Number', fontsize=8)
+  pylab.ylabel('Number of Tiles / Weights', fontsize=8)
   pylab.ylim(ymin=0)
+  
+  if scenario == 4:
+    pylab.xlim(xmax=20000)
+    
+    pylab.legend(loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.12,1,1))
+  else:
+    pylab.legend(loc=4, handlelength=4.2, numpoints=2)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())

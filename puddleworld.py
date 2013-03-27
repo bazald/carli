@@ -97,9 +97,9 @@ def main():
   # 2: ./puddleworld.py experiment-pw/*_0/*.out
   # 3: ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out
   # 4: ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/*_3/*.out
-  scenario = 0
+  scenario = 4
   
-  two_sided_plot = scenario == 4
+  two_sided_plot = False #scenario == 4
   
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')
@@ -358,7 +358,7 @@ def main():
     ax2.set_ylim(0, 35000)
     
     #ax2.set_ylabel(r"Temperature ($^\circ$C)")
-    ax2.set_ylabel('Number of Q-Values')
+    ax2.set_ylabel('Number of Tiles / Weights')
     fig.axes[0].spines['left'].set_color('red')
     fig.axes[0].tick_params(axis='y', colors='blue')
     #fig.axes[0].yaxis.label.set_color('blue')
