@@ -96,7 +96,8 @@ def main():
   # 1: ./puddleworld.py experiment-pw/*_0/*.out
   # 2: ./puddleworld.py experiment-pw/*_0/*.out
   # 3: ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out
-  # 4: ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/*_3/*.out
+  # 4: ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/even_*_3/*.out
+  # 5: ./puddleworld.py experiment-pw/*_3/*.out
   scenario = 0
   
   #two_sided_plot = scenario == 4
@@ -251,6 +252,9 @@ def main():
       remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
       remap_names['even\\_64x64\\_64x64\\_1'] = '1-64 static even'
       remap_names['even\\_2x2\\_64x64\\_3'] = '1-64 incremental even'
+      remap_names['inv-log-update-count\\_2x2\\_64x64\\_3'] = r'1-64 incremental $1/\ln$'
+      remap_names['inv-root-update-count\\_2x2\\_64x64\\_3'] = r'1-64 incremental $1/\sqrt{~~~}$'
+      remap_names['specific\\_2x2\\_64x64\\_3'] = '1-64 incremental specific'
       
       if scenario == 1:
         agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0']
@@ -284,8 +288,8 @@ def main():
           
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
       
-      agent_list = ['even\\_64x64\\_64x64\\_1', 'even\\_2x2\\_64x64\\_3']
       if scenario == 4:
+        agent_list = ['even\\_64x64\\_64x64\\_1', 'even\\_2x2\\_64x64\\_3']
         for agent in agent_list:
           y_labels.append('Reward: ' + remap_names[agent])
           yss.append(smith[agent])
@@ -298,6 +302,26 @@ def main():
             linestyle = '--'
           
           labels += pylab.plot(x, smith[agent], label='Reward: ' + remap_names[agent], color=color, linestyle=linestyle)
+      elif scenario == 5:
+        agent_list = ['even\\_2x2\\_64x64\\_3', 'inv-log-update-count\\_2x2\\_64x64\\_3', 'inv-root-update-count\\_2x2\\_64x64\\_3', 'specific\\_2x2\\_64x64\\_3']
+        for agent in agent_list:
+          y_labels.append(remap_names[agent])
+          yss.append(smith[agent])
+          
+          if agent is 'even\\_2x2\\_64x64\\_3':
+            color = 'blue'
+            linestyle = '-'
+          elif agent is 'inv-log-update-count\\_2x2\\_64x64\\_3':
+            color = 'blue'
+            linestyle = ':'
+          elif agent is 'inv-root-update-count\\_2x2\\_64x64\\_3':
+            color = 'blue'
+            linestyle = '-.'
+          elif agent is 'specific\\_2x2\\_64x64\\_3':
+            color = 'red'
+            linestyle = '-'
+          
+          labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
   
   pylab.grid(True)
   

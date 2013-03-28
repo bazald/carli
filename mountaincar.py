@@ -97,7 +97,8 @@ def main():
   # 2: ./mountaincar.py experiment-mc/*_0/*.out
   # 3: ./mountaincar.py experiment-mc/*_0/*.out experiment-mc/*_1/*.out
   # 4: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out
-  # 5: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/*_3/*.out
+  # 5: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out experiment-mc/inv-log_*_3/*.out
+  # 6: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/*_3/*.out
   scenario = 0
   
   #two_sided_plot = scenario > 3 and scenario < 6
@@ -253,6 +254,8 @@ def main():
       remap_names['even\\_256x256\\_256x256\\_1'] = '1-256 static even'
       remap_names['even\\_2x2\\_256x256\\_3'] = '1-256 incremental even'
       remap_names['inv-log-update-count\\_2x2\\_256x256\\_3'] = r'1-256 incremental $1/\ln$'
+      remap_names['inv-root-update-count\\_2x2\\_256x256\\_3'] = r'1-256 incremental $1/\sqrt{~~~}$'
+      remap_names['specific\\_2x2\\_256x256\\_3'] = '1-256 incremental specific'
 
       if scenario == 1:
         agent_list = ['specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0', 'specific\\_128x128\\_128x128\\_0', 'specific\\_256x256\\_256x256\\_0']
@@ -306,6 +309,27 @@ def main():
             linestyle = ':'
           
           labels += pylab.plot(x, smith[agent], label='Reward: ' + remap_names[agent], color=color, linestyle=linestyle)
+
+      if scenario == 6:
+        agent_list = ['even\\_2x2\\_256x256\\_3', 'inv-log-update-count\\_2x2\\_256x256\\_3', 'inv-root-update-count\\_2x2\\_256x256\\_3', 'specific\\_2x2\\_256x256\\_3']
+        for agent in agent_list:
+          y_labels.append(remap_names[agent])
+          yss.append(smith[agent])
+          
+          if agent is 'even\\_2x2\\_256x256\\_3':
+            color = 'blue'
+            linestyle = '-'
+          elif agent is 'inv-log-update-count\\_2x2\\_256x256\\_3':
+            color = 'blue'
+            linestyle = ':'
+          elif agent is 'inv-root-update-count\\_2x2\\_256x256\\_3':
+            color = 'blue'
+            linestyle = '-.'
+          elif agent is 'specific\\_2x2\\_256x256\\_3':
+            color = 'red'
+            linestyle = '-'
+          
+          labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
   
   pylab.grid(True)
   
@@ -336,6 +360,10 @@ def main():
     #pylab.title('Mountain Car: Static and Incremental Hierarchical Tilings', fontsize=10)
     pylab.xlim(xmax=200000)
     pylab.ylim(ymin=-1500, ymax=0)
+  elif scenario == 6:
+    #pylab.title('Mountain Car: Incremental Hierarchical Tilings', fontsize=10)
+    pylab.xlim(xmax=200000)
+    pylab.ylim(ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
