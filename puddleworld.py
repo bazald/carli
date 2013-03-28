@@ -97,9 +97,10 @@ def main():
   # 2: ./puddleworld.py experiment-pw/*_0/*.out
   # 3: ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out
   # 4: ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/*_3/*.out
-  scenario = 4
+  scenario = 0
   
-  two_sided_plot = False #scenario == 4
+  #two_sided_plot = scenario == 4
+  two_sided_plot = False
   
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')

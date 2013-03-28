@@ -100,7 +100,8 @@ def main():
   # 5: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/*_3/*.out
   scenario = 0
   
-  two_sided_plot = scenario > 3 and scenario < 6
+  #two_sided_plot = scenario > 3 and scenario < 6
+  two_sided_plot = False
   
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')

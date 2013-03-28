@@ -88,7 +88,7 @@ def write_to_csv(filename, x_label, xs, y_labels, yss):
     f.write('\n')
 
 def main():
-  scenario = 4
+  scenario = 5
   
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')
@@ -205,21 +205,46 @@ def main():
       remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
       remap_names['even\\_64x64\\_64x64\\_1'] = '1-64 static even'
       remap_names['even\\_2x2\\_64x64\\_3'] = '1-64 incremental even'
+      remap_names['specific\\_16x16\\_16x16\\_0'] = '16x16'
+      remap_names['specific\\_32x32\\_32x32\\_0'] = '32x32'
+      remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
+      remap_names['specific\\_128x128\\_128x128\\_0'] = '128x128'
+      remap_names['specific\\_256x256\\_256x256\\_0'] = '256x256'
+      remap_names['even\\_256x256\\_256x256\\_1'] = '1-256 static even'
+      remap_names['even\\_2x2\\_256x256\\_3'] = '1-256 incremental even'
+      remap_names['inv-log-update-count\\_2x2\\_256x256\\_3'] = r'1-256 incremental $1/\ln$'
       
       if scenario == 4:
         agent_list = ['even\\_64x64\\_64x64\\_1', 'even\\_2x2\\_64x64\\_3']
         for agent in agent_list:
-          y_labels.append('Reward: ' + remap_names[agent])
+          y_labels.append('Weights: ' + remap_names[agent])
           yss.append(smith[agent])
           
           if agent is 'even\\_64x64\\_64x64\\_1':
-            color = 'blue'
+            color = 'red'
             linestyle = '-'
           elif agent is 'even\\_2x2\\_64x64\\_3':
-            color = 'blue'
+            color = 'red'
             linestyle = '--'
           
-          labels += pylab.plot(x, smith[agent], label='Reward: ' + remap_names[agent], color=color, linestyle=linestyle)
+          labels += pylab.plot(x, smith[agent], label='Weights: ' + remap_names[agent], color=color, linestyle=linestyle)
+      elif scenario == 5:
+        agent_list = ['even\\_256x256\\_256x256\\_1', 'even\\_2x2\\_256x256\\_3', 'inv-log-update-count\\_2x2\\_256x256\\_3']
+        for agent in agent_list:
+          y_labels.append('Weights: ' + remap_names[agent])
+          yss.append(smith[agent])
+          
+          if agent is 'even\\_256x256\\_256x256\\_1':
+            color = 'red'
+            linestyle = '-'
+          elif agent is 'even\\_2x2\\_256x256\\_3':
+            color = 'red'
+            linestyle = '--'
+          elif agent is 'inv-log-update-count\\_2x2\\_256x256\\_3':
+            color = 'red'
+            linestyle = ':'
+          
+          labels += pylab.plot(x, smith[agent], label='Weights: ' + remap_names[agent], color=color, linestyle=linestyle)
   
   pylab.grid(True)
   
@@ -230,6 +255,10 @@ def main():
   
   if scenario == 4:
     pylab.xlim(xmax=20000)
+    
+    pylab.legend(loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.12,1,1))
+  elif scenario == 5:
+    pylab.xlim(xmax=200000)
     
     pylab.legend(loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.12,1,1))
   else:
