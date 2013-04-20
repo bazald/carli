@@ -251,6 +251,8 @@ def main():
       remap_names['specific\\_32x32\\_32x32\\_0'] = '32x32'
       remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
       remap_names['even\\_64x64\\_64x64\\_1'] = '1-64 static even'
+      remap_names['inv-log-update-count\\_64x64\\_64x64\\_1'] = '1-64 static $1/\ln$'
+      remap_names['inv-root-update-count\\_64x64\\_64x64\\_1'] = '1-64 static $1/\sqrt{~~~}$'
       remap_names['even\\_2x2\\_64x64\\_3'] = '1-64 incremental even'
       remap_names['inv-log-update-count\\_2x2\\_64x64\\_3'] = r'1-64 incremental $1/\ln$'
       remap_names['inv-root-update-count\\_2x2\\_64x64\\_3'] = r'1-64 incremental $1/\sqrt{~~~}$'

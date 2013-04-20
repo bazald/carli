@@ -252,6 +252,8 @@ def main():
       remap_names['specific\\_128x128\\_128x128\\_0'] = '128x128'
       remap_names['specific\\_256x256\\_256x256\\_0'] = '256x256'
       remap_names['even\\_256x256\\_256x256\\_1'] = '1-256 static even'
+      remap_names['inv-log-update-count\\_256x256\\_256x256\\_1'] = '1-256 static $1/\ln$'
+      remap_names['inv-root-update-count\\_256x256\\_256x256\\_1'] = '1-256 static $1/\sqrt{~~~}$'
       remap_names['even\\_2x2\\_256x256\\_3'] = '1-256 incremental even'
       remap_names['inv-log-update-count\\_2x2\\_256x256\\_3'] = r'1-256 incremental $1/\ln$'
       remap_names['inv-root-update-count\\_2x2\\_256x256\\_3'] = r'1-256 incremental $1/\sqrt{~~~}$'
