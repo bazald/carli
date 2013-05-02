@@ -113,13 +113,7 @@ namespace Cart_Pole {
   public:
     typedef std::pair<double, double> double_pair;
 
-    Environment()
-     : m_x(0.0f),
-     m_x_dot(0.0f),
-     m_theta(0.0f),
-     m_theta_dot(0.0f),
-     m_ignore_x(false)
-    {
+    Environment() {
       Environment::init_impl();
     }
 
@@ -174,11 +168,11 @@ namespace Cart_Pole {
     Zeni::Random m_random_init;
     Zeni::Random m_random_motion;
 
-    float m_x;
-    float m_x_dot;
-    float m_theta;
-    float m_theta_dot;
-    bool m_ignore_x;
+    float m_x = 0.0f;
+    float m_x_dot = 0.0f;
+    float m_theta = 0.0f;
+    float m_theta_dot = 0.0f;
+    bool m_ignore_x = false;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {

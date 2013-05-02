@@ -144,47 +144,7 @@ public:
   enum Credit_Assignment {ALL, SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_ROOT_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_SPECIFIC, EPSILON_EVEN_DEPTH};
 
   Agent(const std::shared_ptr<environment_type> &environment)
-   : m_metastate(NON_TERMINAL),
-   m_features(nullptr),
-   m_features_complete(true),
-   m_candidates(nullptr),
-   m_mean_cabe_queue_size(0),
-#ifdef WHITESON_ADAPTIVE_TILE
-   m_steps_since_minbe(0),
-#endif
-   m_environment(environment),
-   m_episode_number(1),
-   m_step_count(0),
-   m_total_reward(reward_type()),
-   m_null_q_values(false),
-   m_value_function_cap(0),
-   m_learning_rate(0.3),
-   m_discount_rate(0.9),
-   m_eligibility_trace_decay_rate(0.0),
-   m_eligibility_trace_decay_threshold(0.0001),
-   m_credit_assignment_code(EVEN),
-   m_credit_assignment_epsilon(0.5),
-   m_credit_assignment_log_base(2.71828182846),
-   m_credit_assignment_log_base_value(std::log(m_credit_assignment_log_base)),
-   m_credit_assignment_root(2.0),
-   m_credit_assignment_root_value(1.0 / m_credit_assignment_root),
-   m_credit_assignment_normalize(true),
-   m_weight_assignment_code(EVEN),
-   m_on_policy(false),
-   m_epsilon(0.1),
-   m_pseudoepisode_threshold(20),
-   m_split_min(0),
-   m_split_max(size_t(-1)),
-   m_split_update_count(0),
-   m_split_pseudoepisodes(0),
-   m_split_cabe(0.84155),
-   m_split_cabe_qmult(0.0),
-#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-   m_split_mabe(0.84155),
-#endif
-   m_contribute_update_count(0),
-   m_eligible(nullptr),
-   m_q_value_count(0)
+   : m_environment(environment)
   {
     m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
     m_exploration_policy = [this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);};
@@ -1027,10 +987,10 @@ protected:
   }
 #endif
 
-  Metastate m_metastate;
-  feature_list m_features;
-  bool m_features_complete;
-  action_list m_candidates;
+  Metastate m_metastate = NON_TERMINAL;
+  feature_list m_features = nullptr;
+  bool m_features_complete = true;
+  action_list m_candidates = nullptr;
   value_function_type m_value_function;
   std::unique_ptr<const action_type> m_current;
   std::unique_ptr<const action_type> m_next;
@@ -1216,7 +1176,7 @@ private:
 
   Mean m_mean_cabe;
   Value_Queue m_mean_cabe_queue;
-  size_t m_mean_cabe_queue_size;
+  size_t m_mean_cabe_queue_size = 0;
 
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   Mean m_mean_mabe;
@@ -1226,53 +1186,55 @@ private:
 #endif
 
 #ifdef WHITESON_ADAPTIVE_TILE
-  size_t m_steps_since_minbe;
+  size_t m_steps_since_minbe = 0;
 #endif
 
   std::shared_ptr<environment_type> m_environment;
 
   Zeni::Random random;
 
-  size_t m_episode_number;
-  size_t m_step_count;
-  reward_type m_total_reward;
+  size_t m_episode_number = 1;
+  size_t m_step_count = 0;
+  reward_type m_total_reward = 0.0;
 
-  bool m_null_q_values; ///< insert nullptr instead of new Q_Values until reaching the leaf
-  size_t m_value_function_cap; ///< at this threshold, no more entries will be added to the value functions through refinement
+  bool m_null_q_values = false; ///< insert nullptr instead of new Q_Values until reaching the leaf
+  size_t m_value_function_cap = 0; ///< at this threshold, no more entries will be added to the value functions through refinement
 
-  double m_learning_rate; ///< alpha
-  double m_discount_rate; ///< gamma
-  double m_eligibility_trace_decay_rate; ///< lambda
-  double m_eligibility_trace_decay_threshold;
+  double m_learning_rate = 0.3; ///< alpha
+  double m_discount_rate = 0.9; ///< gamma
+  double m_eligibility_trace_decay_rate = 0.0; ///< lambda
+  double m_eligibility_trace_decay_threshold = 0.0001;
 
-  Credit_Assignment m_credit_assignment_code;
+  Credit_Assignment m_credit_assignment_code = EVEN;
   std::function<void (Q_Value::List * const &)> m_credit_assignment; ///< How to assign credit to multiple Q-values
-  double m_credit_assignment_epsilon;
-  double m_credit_assignment_log_base;
-  mutable double m_credit_assignment_log_base_value;
-  double m_credit_assignment_root;
-  mutable double m_credit_assignment_root_value;
-  bool m_credit_assignment_normalize;
+  double m_credit_assignment_epsilon = 0.5;
+  double m_credit_assignment_log_base = 2.71828182846;
+  mutable double m_credit_assignment_log_base_value = std::log(m_credit_assignment_log_base);
+  double m_credit_assignment_root = 2.0;
+  mutable double m_credit_assignment_root_value = 1.0 / m_credit_assignment_root;
+  bool m_credit_assignment_normalize = true;
 
-  Credit_Assignment m_weight_assignment_code;
+  Credit_Assignment m_weight_assignment_code = EVEN;
   std::function<void (Q_Value::List * const &)> m_weight_assignment; ///< How to assign weight to multiple Q-values at summation time
 
-  bool m_on_policy; ///< for Sarsa/Q-learning selection
-  double m_epsilon; ///< for epsilon-greedy decision-making
-  size_t m_pseudoepisode_threshold; ///< For deciding how many steps indicates a pseudoepisode
+  bool m_on_policy = false; ///< for Sarsa/Q-learning selection
+  double m_epsilon = 0.1; ///< for epsilon-greedy decision-making
+  size_t m_pseudoepisode_threshold = 20; ///< For deciding how many steps indicates a pseudoepisode
 
-  size_t m_split_min;
-  size_t m_split_max;
-  size_t m_split_update_count;
-  size_t m_split_pseudoepisodes;
-  double m_split_cabe;
-  double m_split_cabe_qmult;
-  double m_split_mabe;
-  size_t m_contribute_update_count;
+  size_t m_split_min = 0;
+  size_t m_split_max = size_t(-1);
+  size_t m_split_update_count = 0;
+  size_t m_split_pseudoepisodes = 0;
+  double m_split_cabe = 0.84155;
+  double m_split_cabe_qmult = 0.0;
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+  double m_split_mabe = 0.84155;
+#endif
+  size_t m_contribute_update_count = 0;
 
-  Q_Value::List * m_eligible;
+  Q_Value::List * m_eligible = nullptr;
   
-  size_t m_q_value_count;
+  size_t m_q_value_count = 0;
 };
 
 template <typename FEATURE, typename ACTION>

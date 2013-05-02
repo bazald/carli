@@ -81,9 +81,8 @@ class Environment : public std::enable_shared_from_this<Environment<ACTION> > {
 public:
   typedef ACTION action_type;
   typedef double reward_type;
-
+  
   Environment()
-   : m_altered(false)
   {
   }
 
@@ -115,8 +114,8 @@ private:
   virtual reward_type transition_impl(const action_type &action) = 0;
   virtual void print_impl(std::ostream &os) const = 0;
 
-  uint32_t m_scenario;
-  bool m_altered;
+  uint32_t m_scenario = 0;
+  bool m_altered = false;
 };
 
 template <typename ACTION>

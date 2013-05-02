@@ -69,8 +69,7 @@ namespace Zeni {
 
   public:
     Random(const uint32_t &seed = Random::get().rand())
-     : m_random_value(seed),
-     m_have_next_gaussian(false)
+     : m_random_value(seed)
     {
       log1("Random", seed);
     }
@@ -152,7 +151,7 @@ namespace Zeni {
   private:
     uint32_t m_random_value;
 
-    bool m_have_next_gaussian;
+    bool m_have_next_gaussian = false;
     double m_next_gaussian;
   };
 

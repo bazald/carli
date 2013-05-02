@@ -7,17 +7,9 @@
 class Experimental_Output {
 public:
   Experimental_Output(const size_t &print_every = 1)
-   : m_print_every(print_every),
-   m_print_count(0),
-   m_cumulative_reward(0.0),
-   m_cumulative_min(DBL_MAX),
-   m_cumulative_mean(0.0),
-   m_cumulative_max(-DBL_MAX),
-   m_simple_reward(0.0),
-   m_simple_min(DBL_MAX),
-   m_simple_mean(0.0),
-   m_simple_max(-DBL_MAX)
+   : m_print_every(print_every)
   {
+    reset_stats();
   }
 
   void print(const size_t &total_steps, const size_t &episode_number, const size_t &step_count, const double &reward, const bool &done, const std::function<size_t ()> get_value_function_size) {
@@ -46,13 +38,8 @@ public:
                     << m_cumulative_min << ' ' << m_cumulative_mean << ' ' << m_cumulative_max << ' '
                     << m_simple_min << ' ' << m_simple_mean << ' ' << m_simple_max << ' '
                     << value_function_size << std::endl;
-          m_print_count = 0;
-          m_cumulative_min = DBL_MAX;
-          m_cumulative_mean = 0.0;
-          m_cumulative_max = -DBL_MAX;
-          m_simple_min = DBL_MAX;
-          m_simple_mean = 0.0;
-          m_simple_max = -DBL_MAX;
+
+          reset_stats();
         }
       }
 
@@ -61,16 +48,29 @@ public:
   }
 
 private:
-  size_t m_print_every;
-  size_t m_print_count;
 
-  double m_cumulative_reward;
+  void reset_stats() {
+    m_print_count = 0;
+
+    m_cumulative_min = DBL_MAX;
+    m_cumulative_mean = 0.0;
+    m_cumulative_max = -DBL_MAX;
+
+    m_simple_min = DBL_MAX;
+    m_simple_mean = 0.0;
+    m_simple_max = -DBL_MAX;
+  }
+
+  double m_cumulative_reward = 0.0;
+  double m_simple_reward = 0.0;
+
+  size_t m_print_every;
+
+  size_t m_print_count;
 
   double m_cumulative_min;
   double m_cumulative_mean;
   double m_cumulative_max;
-
-  double m_simple_reward;
 
   double m_simple_min;
   double m_simple_mean;

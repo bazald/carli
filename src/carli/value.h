@@ -6,10 +6,7 @@ class Value {
 
 public:
   Value(const double &value_ = double())
-    : value(value_),
-    contributor(false),
-    value_contribution(double()),
-    value_mark2(double())
+    : value(value_)
   {
   }
 
@@ -24,23 +21,14 @@ public:
 private:
   double value;
 
-  bool contributor;
-  double value_contribution;
+  bool contributor = false;
+  double value_contribution = 0.0;
 
-  double value_mark2;
+  double value_mark2 = 0.0;
 };
 
 class Mean {
 public:
-  Mean()
-   : count(0lu),
-   mean(double()),
-   mean_mark2(double()),
-   variance(double()),
-   stddev(double())
-  {
-  }
-
   double outlier_above(const Value &value, const double &z = 0.84155) const {
     return count > 1 && value > mean + z * stddev;
   }
@@ -107,13 +95,13 @@ public:
   double get_stddev() const {return stddev;}
 
 private:
-  unsigned long count;
+  unsigned long count = 0lu;
 
-  double mean;
+  double mean = 0.0;
 
-  double mean_mark2;
-  double variance;
-  double stddev;
+  double mean_mark2 = 0.0;
+  double variance = 0.0;
+  double stddev = 0.0;
 };
 
 #endif

@@ -29,9 +29,7 @@ namespace Zeni {
 
   public:
     Trie(const key_type &key_ = key_type())
-     : Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>(this, key_),
-     m_deeper(nullptr),
-     m_value(nullptr)
+     : Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>(this, key_)
     {
     }
 
@@ -164,8 +162,8 @@ namespace Zeni {
       return offset_insert_before(offset, deeper);
     }
 
-    trie_pointer_type m_deeper;
-    value_pointer_type m_value;
+    trie_pointer_type m_deeper = nullptr;
+    value_pointer_type m_value = nullptr;
   };
 
 }

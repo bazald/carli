@@ -112,14 +112,7 @@ namespace Mountain_Car {
   public:
     typedef std::pair<double, double> double_pair;
 
-    Environment()
-     : m_x(0.0f),
-     m_x_dot(0.0f),
-     m_cart_force(0.001),
-     m_grav_force(0.0025),
-     m_random_start(false),
-     m_reward_negative(true)
-    {
+    Environment() {
       Environment::init_impl();
     }
 
@@ -175,14 +168,14 @@ namespace Mountain_Car {
 
     Zeni::Random m_random_init;
 
-    float m_x;
-    float m_x_dot;
+    float m_x = 0.0f;
+    float m_x_dot = 0.0f;
 
-    double m_cart_force;
-    double m_grav_force;
+    double m_cart_force = 0.001;
+    double m_grav_force = 0.0025;
 
-    bool m_random_start;
-    bool m_reward_negative;
+    bool m_random_start = false;
+    bool m_reward_negative = true;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {

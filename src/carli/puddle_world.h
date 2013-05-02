@@ -112,11 +112,7 @@ namespace Puddle_World {
 
     Environment()
      : m_init_x(0.15, 0.45),
-     m_init_y(0.15, 0.45),
-     m_goal_dynamic(false),
-     m_step_count(0),
-     m_random_start(false),
-     m_noise(0.01)
+     m_init_y(0.15, 0.45)
     {
       Puddle puddle;
 
@@ -312,17 +308,17 @@ namespace Puddle_World {
     double_pair m_init_x;
     double_pair m_init_y;
     
-    bool m_goal_dynamic;
+    bool m_goal_dynamic = false;
     double_pair m_goal_x;
     double_pair m_goal_y;
 
-    size_t m_step_count;
-    bool m_random_start;
+    size_t m_step_count = 0lu;
+    bool m_random_start = false;
 
     std::vector<Puddle> m_horizontal_puddles;
     std::vector<Puddle> m_vertical_puddles;
 
-    double m_noise;
+    double m_noise = 0.01;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {

@@ -19,24 +19,8 @@ public:
   enum Type {SPLIT, UNSPLIT, FRINGE};
 
   Q_Value(const double &q_value_ = double(), const Type &type_ = UNSPLIT)
-   : last_episode_fired(size_t(-1)),
-   last_step_fired(size_t(-1)),
-   pseudoepisode_count(0),
-   update_count(1),
-   type(type_),
-   eligibility_init(false),
-   eligibility(-1.0),
-   credit(1.0),
-   weight(0.0),
+   : type(type_),
    value(q_value_),
-#ifdef WHITESON_ADAPTIVE_TILE
-   minbe(DBL_MAX),
-#endif
-#ifdef TRACK_Q_VALUE_VARIANCE
-   mean2(0),
-   variance_0(0),
-   variance_rest(0),
-#endif
    eligible(this),
    current(this),
    next(this)
@@ -48,31 +32,31 @@ public:
     return *this;
   }
 
-  size_t last_episode_fired;
-  size_t last_step_fired;
+  size_t last_episode_fired = size_t(-1);
+  size_t last_step_fired = size_t(-1);
 
-  size_t pseudoepisode_count;
-  size_t update_count;
+  size_t pseudoepisode_count = 0;
+  size_t update_count = 1;
 
   Type type;
 
-  bool eligibility_init;
-  double eligibility;
-  double credit;
-  double weight;
+  bool eligibility_init = false;
+  double eligibility = -1.0;
+  double credit = 1.0;
+  double weight = 0.0;
 
   double value;
   Value cabe; ///< Cumulative Absolute Bellman Error
   Value mabe; ///< Mean Absolute Bellman Error (cabe / update_count)
 
 #ifdef WHITESON_ADAPTIVE_TILE
-  double minbe; ///< Minimum Bellman Error experienced
+  double minbe = DBL_MAX; ///< Minimum Bellman Error experienced
 #endif
 
 #ifdef TRACK_Q_VALUE_VARIANCE
-  double mean2;
-  double variance_0;
-  double variance_rest;
+  double mean2 = 0.0;
+  double variance_0 = 0.0;
+  double variance_rest = 0.0;
   Value variance_total;
 #endif
 

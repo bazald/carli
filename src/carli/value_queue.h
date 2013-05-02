@@ -26,9 +26,6 @@ class Value_Queue {
 
 public:
   Value_Queue()
-   : m_value_list(nullptr),
-   m_value_list_tail(nullptr),
-   m_size(0u)
   {
   }
 
@@ -75,10 +72,10 @@ public:
   }
 
 private:
-  Value_List::List * m_value_list;
-  Value_List::List * m_value_list_tail;
+  Value_List::List * m_value_list = nullptr;
+  Value_List::List * m_value_list_tail = nullptr;
   Mean m_mean;
-  size_t m_size;
+  size_t m_size = 0lu;
 };
 
 #endif
