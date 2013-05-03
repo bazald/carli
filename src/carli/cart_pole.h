@@ -14,10 +14,10 @@ namespace Cart_Pole {
 
   class Feature;
   class Feature : public ::Feature<Feature> {
-    Feature & operator=(const Feature &);
+    Feature & operator=(const Feature &) = delete;
 
   public:
-    enum Axis {X, X_DOT, THETA, THETA_DOT};
+    enum Axis : char {X, X_DOT, THETA, THETA_DOT};
 
     Feature()
      : ::Feature<Feature>(true)
@@ -79,7 +79,7 @@ namespace Cart_Pole {
 
   class Move : public action_type {
   public:
-    enum Direction {LEFT, RIGHT};
+    enum Direction : char {LEFT, RIGHT};
 
     Move(const Direction &direction_ = LEFT)
      : direction(direction_)
@@ -184,7 +184,7 @@ namespace Cart_Pole {
      : ::Agent<feature_type, action_type>(env),
      m_ignore_x(false)
     {
-      set_credit_assignment(INV_LOG_UPDATE_COUNT);
+      set_credit_assignment(Credit_Assignment::INV_LOG_UPDATE_COUNT);
       set_discount_rate(1.0);
       set_learning_rate(0.3);
       set_on_policy(false);
@@ -387,7 +387,7 @@ namespace Cart_Pole {
     bool generate_feature_ranged(const std::shared_ptr<const Environment> &env, feature_trie &trie, const Feature::List * const &tail, Feature::List * &tail_next) {
       auto match = std::find_if(trie->begin(trie), trie->end(trie), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
 
-      if(match && match->get() && match->get()->type != Q_Value::FRINGE) {
+      if(match && match->get() && match->get()->type != Q_Value::Type::FRINGE) {
         auto feature = match->get_key();
         const auto midpt = feature->midpt();
         if(env->get_value(feature->axis) < midpt)
@@ -415,11 +415,11 @@ namespace Cart_Pole {
       auto env = std::dynamic_pointer_cast<const Environment>(get_env());
 
       if(env->failed())
-        m_metastate = FAILURE;
+        m_metastate = Metastate::FAILURE;
       else if(get_step_count() > 9999)
-        m_metastate = SUCCESS;
+        m_metastate = Metastate::SUCCESS;
       else
-        m_metastate = NON_TERMINAL;
+        m_metastate = Metastate::NON_TERMINAL;
     }
 
     bool m_ignore_x;

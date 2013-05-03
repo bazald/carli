@@ -6,8 +6,8 @@
 #include "value.h"
 
 class Value_Queue {
-  Value_Queue(const Value_Queue &);
-  Value_Queue operator=(const Value_Queue &);
+  Value_Queue(const Value_Queue &) = delete;
+  Value_Queue operator=(const Value_Queue &) = delete;
 
   class Value_List;
   class Value_List : public Zeni::Pool_Allocator<Value_List> {

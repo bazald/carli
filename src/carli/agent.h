@@ -16,18 +16,9 @@
 
 #include <iostream>
 
-template <size_t VALUE>
-struct Binary_Log {
-  enum Value {value = Binary_Log<VALUE / 2>::value + 1};
-};
-template <>
-struct Binary_Log<1> {
-  enum Value {value = 0};
-};
-
 template <typename DERIVED, typename DERIVED2 = DERIVED>
 class Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
-  Feature & operator=(const Feature &);
+  Feature & operator=(const Feature &) = delete;
 
 public:
   typedef typename Zeni::Linked_List<DERIVED> List;
@@ -121,12 +112,13 @@ std::ostream & operator << (std::ostream &os, const Feature<DERIVED, DERIVED2> &
   return os;
 }
 
-enum Metastate {NON_TERMINAL, SUCCESS, FAILURE};
+enum class Credit_Assignment : char {ALL, SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_ROOT_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_SPECIFIC, EPSILON_EVEN_DEPTH};
+enum class Metastate : char {NON_TERMINAL, SUCCESS, FAILURE};
 
 template <typename FEATURE, typename ACTION>
 class Agent : public std::enable_shared_from_this<Agent<FEATURE, ACTION> > {
-  Agent(const Agent &);
-  Agent & operator=(const Agent &);
+  Agent(const Agent &) = delete;
+  Agent & operator=(const Agent &) = delete;
 
   class Again {};
 
@@ -141,7 +133,6 @@ public:
   typedef Environment<action_type> environment_type;
   typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
-  enum Credit_Assignment {ALL, SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_ROOT_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_SPECIFIC, EPSILON_EVEN_DEPTH};
 
   Agent(const std::shared_ptr<environment_type> &environment)
    : m_environment(environment)
@@ -200,39 +191,39 @@ public:
   Credit_Assignment get_credit_assignment() const {return m_credit_assignment_code;}
   void set_credit_assignment(const Credit_Assignment &credit_assignment) {
     switch(credit_assignment) {
-      case ALL:
+      case Credit_Assignment::ALL:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_all(value_list);};
         break;
 
-      case SPECIFIC:
+      case Credit_Assignment::SPECIFIC:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_specific(value_list);};
         break;
 
-      case EVEN:
+      case Credit_Assignment::EVEN:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
         break;
 
-      case INV_UPDATE_COUNT:
+      case Credit_Assignment::INV_UPDATE_COUNT:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
         break;
   
-      case INV_LOG_UPDATE_COUNT:
+      case Credit_Assignment::INV_LOG_UPDATE_COUNT:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
         break;
 
-      case INV_ROOT_UPDATE_COUNT:
+      case Credit_Assignment::INV_ROOT_UPDATE_COUNT:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_root_update_count(value_list);};
         break;
   
-      case INV_DEPTH:
+      case Credit_Assignment::INV_DEPTH:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);};
         break;
 
-      case EPSILON_EVEN_SPECIFIC:
+      case Credit_Assignment::EPSILON_EVEN_SPECIFIC:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_specific);};
         break;
 
-      case EPSILON_EVEN_DEPTH:
+      case Credit_Assignment::EPSILON_EVEN_DEPTH:
         m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);};
         break;
 
@@ -274,39 +265,39 @@ public:
   Credit_Assignment get_weight_assignment() const {return m_weight_assignment_code;}
   void set_weight_assignment(const Credit_Assignment &weight_assignment) {
     switch(weight_assignment) {
-      case ALL:
+      case Credit_Assignment::ALL:
         m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_all(value_list);};
         break;
 
-      case SPECIFIC:
+      case Credit_Assignment::SPECIFIC:
         m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_specific(value_list);};
         break;
 
-      case EVEN:
+      case Credit_Assignment::EVEN:
         m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
         break;
 
-      case INV_UPDATE_COUNT:
+      case Credit_Assignment::INV_UPDATE_COUNT:
         m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
         break;
   
-      case INV_LOG_UPDATE_COUNT:
+      case Credit_Assignment::INV_LOG_UPDATE_COUNT:
         m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
         break;
 
-      case INV_ROOT_UPDATE_COUNT:
+      case Credit_Assignment::INV_ROOT_UPDATE_COUNT:
         m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_root_update_count(value_list);};
         break;
   
-      case INV_DEPTH:
+      case Credit_Assignment::INV_DEPTH:
         m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);};
         break;
 
-      case EPSILON_EVEN_SPECIFIC:
+      case Credit_Assignment::EPSILON_EVEN_SPECIFIC:
         m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_specific);};
         break;
 
-      case EPSILON_EVEN_DEPTH:
+      case Credit_Assignment::EPSILON_EVEN_DEPTH:
         m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);};
         break;
 
@@ -409,9 +400,9 @@ public:
   }
 
   void init() {
-    if(m_metastate != NON_TERMINAL)
+    if(m_metastate != Metastate::NON_TERMINAL)
       ++m_episode_number;
-    m_metastate = NON_TERMINAL;
+    m_metastate = Metastate::NON_TERMINAL;
     m_step_count = 0;
     m_total_reward = reward_type();
 
@@ -419,7 +410,7 @@ public:
 
     regenerate_lists();
 
-    if(m_metastate == NON_TERMINAL)
+    if(m_metastate == Metastate::NON_TERMINAL)
       m_next = m_exploration_policy();
   }
 
@@ -432,7 +423,7 @@ public:
 
     update();
 
-    if(m_metastate == NON_TERMINAL) {
+    if(m_metastate == Metastate::NON_TERMINAL) {
       regenerate_lists();
 
       m_next = m_target_policy();
@@ -617,7 +608,7 @@ protected:
     std::cerr << " current :";
 #endif
     std::for_each(current->begin(current), current->end(current), [&q_old,&last](Q_Value &q) {
-      if(q.type != Q_Value::FRINGE) {
+      if(q.type != Q_Value::Type::FRINGE) {
         q_old += q.value * q.weight;
 #ifdef DEBUG_OUTPUT
         std::cerr << ' ' << &q;
@@ -630,7 +621,7 @@ protected:
     std::cerr << std::endl;
     std::cerr << " next    :";
     std::for_each(next->begin(next), next->end(next), [](const Q_Value &q) {
-      if(q.type != Q_Value::FRINGE)
+      if(q.type != Q_Value::Type::FRINGE)
         std::cerr << ' ' << &q;
     });
     std::cerr << std::endl;
@@ -640,7 +631,7 @@ protected:
     double variance_total_next = double();
     if(next) {
       std::for_each(next->begin(next), next->end(next), [&variance_total_next](const Q_Value &q) {
-        if(q.type != Q_Value::FRINGE)
+        if(q.type != Q_Value::Type::FRINGE)
           variance_total_next += q.variance_total;
       });
     }
@@ -682,7 +673,7 @@ protected:
       const double local_old = q.value;
 #endif
       
-      const double ldelta = m_weight_assignment_code != ALL ? target_value - q.value : delta;
+      const double ldelta = m_weight_assignment_code != Credit_Assignment::ALL ? target_value - q.value : delta;
       const double edelta = q.eligibility * ldelta;
 
       q.value += edelta;
@@ -690,7 +681,7 @@ protected:
       q_new += q.value * q.weight;
 #endif
 
-      if(q.type == Q_Value::SPLIT) {
+      if(q.type == Q_Value::Type::SPLIT) {
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
         this->m_mean_mabe.uncontribute(q.mabe);
 #endif
@@ -700,7 +691,7 @@ protected:
         this->m_mean_variance.uncontribute(q.variance_total);
 #endif
       }
-      else if(q.type == Q_Value::UNSPLIT) {
+      else if(q.type == Q_Value::Type::UNSPLIT) {
         const double abs_edelta = std::abs(edelta);
 
         if(q.eligibility_init) {
@@ -771,7 +762,7 @@ protected:
     std::cerr << "            " << q_new << std::endl;
 
     std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {
-      if(q.type == Q_Value::UNSPLIT) {
+      if(q.type == Q_Value::Type::UNSPLIT) {
         std::cerr << " updates:  " << q.update_count << std::endl;
         if(m_mean_cabe_queue_size)
           std::cerr << " cabe q:   " << q.cabe << " of " << this->m_mean_cabe_queue.mean() << ':' << this->m_mean_cabe_queue.mean().get_stddev() << std::endl;
@@ -801,7 +792,7 @@ protected:
     m_weight_assignment(value_list);
 
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [](Q_Value &q) {
-      q.weight = q.type == Q_Value::FRINGE ? 0.0 : q.credit;
+      q.weight = q.type == Q_Value::Type::FRINGE ? 0.0 : q.credit;
     });
   }
 
@@ -826,7 +817,7 @@ protected:
   void assign_credit_specific(Q_Value::List * const &value_list) {
     Q_Value * last = nullptr;
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&last](Q_Value &q) {
-      q.credit = q.type == Q_Value::FRINGE ? 1.0 : 0.0;
+      q.credit = q.type == Q_Value::Type::FRINGE ? 1.0 : 0.0;
       last = &q;
     });
 
@@ -837,12 +828,12 @@ protected:
   void assign_credit_evenly(Q_Value::List * const &value_list) {
     double count = double();
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](const Q_Value &q) {
-      if(q.type != Q_Value::FRINGE)
+      if(q.type != Q_Value::Type::FRINGE)
         ++count;
     });
 
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](Q_Value &q) {
-      q.credit = q.type == Q_Value::FRINGE ? 1.0 : 1.0 / count;
+      q.credit = q.type == Q_Value::Type::FRINGE ? 1.0 : 1.0 / count;
     });
   }
 
@@ -855,7 +846,7 @@ protected:
   void assign_credit_inv_update_count(Q_Value::List * const &value_list) {
     double sum = double();
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-      if(q.type != Q_Value::FRINGE) {
+      if(q.type != Q_Value::Type::FRINGE) {
         q.credit = 1.0 / q.update_count;
         sum += q.credit;
       }
@@ -867,7 +858,7 @@ protected:
   void assign_credit_inv_log_update_count(Q_Value::List * const &value_list) {
     double sum = double();
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [this,&sum](Q_Value &q) {
-      if(q.type != Q_Value::FRINGE) {
+      if(q.type != Q_Value::Type::FRINGE) {
         q.credit = 1.0 / (std::log(double(q.update_count)) / this->m_credit_assignment_log_base_value + 1.0);
         sum += q.credit;
       }
@@ -879,7 +870,7 @@ protected:
   void assign_credit_inv_root_update_count(Q_Value::List * const &value_list) {
     double sum = double();
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [this,&sum](Q_Value &q) {
-      if(q.type != Q_Value::FRINGE) {
+      if(q.type != Q_Value::Type::FRINGE) {
         q.credit = 1.0 / std::pow(double(q.update_count), this->m_credit_assignment_root_value);
         sum += q.credit;
       }
@@ -891,13 +882,13 @@ protected:
   void assign_credit_inv_depth(Q_Value::List * const &value_list) {
     size_t depth = 0;
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&depth](Q_Value &q) {
-      if(q.type != Q_Value::FRINGE)
+      if(q.type != Q_Value::Type::FRINGE)
         ++depth;
     });
 
     double sum = double();
     std::for_each(value_list->begin(value_list), value_list->end(value_list), [&depth,&sum](Q_Value &q) {
-      if(q.type != Q_Value::FRINGE) {
+      if(q.type != Q_Value::Type::FRINGE) {
         q.credit = 1.0 / std::pow(2.0, double(--depth));
         sum += q.credit;
       }
@@ -909,7 +900,7 @@ protected:
   void assign_credit_normalize(Q_Value::List * const &value_list, const double &sum) {
     if(m_credit_assignment_normalize || sum > 1.0) {
       std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
-        if(q.type == Q_Value::FRINGE)
+        if(q.type == Q_Value::Type::FRINGE)
           q.credit = 1.0;
         else
           q.credit /= sum;
@@ -918,11 +909,11 @@ protected:
   }
 
   bool split_test(Q_Value * const &q, const size_t &depth) const {
-    assert(!q || q->type != Q_Value::FRINGE);
+    assert(!q || q->type != Q_Value::Type::FRINGE);
 
     if(depth < m_split_min) {
       if(q)
-        q->type = Q_Value::SPLIT;
+        q->type = Q_Value::Type::SPLIT;
       return true;
     }
     if(depth >= m_split_max)
@@ -930,7 +921,7 @@ protected:
 
     if(!q)
       return false;
-    if(q->type == Q_Value::SPLIT)
+    if(q->type == Q_Value::Type::SPLIT)
       return true;
 
     if(m_value_function_cap && get_value_function_size() >= m_value_function_cap)
@@ -941,7 +932,7 @@ protected:
        (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean().outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * m_q_value_count)
                                : m_mean_cabe.outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * m_q_value_count)))
     {
-      q->type = Q_Value::SPLIT;
+      q->type = Q_Value::Type::SPLIT;
       return true;
     }
     else
@@ -956,7 +947,7 @@ protected:
 
     double sum = double();
     std::for_each(value_list.begin(&value_list), value_list.end(&value_list), [&action,&sum](const Q_Value &q) {
-      if(q.type != Q_Value::FRINGE) {
+      if(q.type != Q_Value::Type::FRINGE) {
 #ifdef DEBUG_OUTPUT
         if(action)
           std::cerr << ' ' << q.value * q.weight;
@@ -987,7 +978,7 @@ protected:
   }
 #endif
 
-  Metastate m_metastate = NON_TERMINAL;
+  Metastate m_metastate = Metastate::NON_TERMINAL;
   feature_list m_features = nullptr;
   bool m_features_complete = true;
   action_list m_candidates = nullptr;
@@ -1025,7 +1016,7 @@ private:
                                       return lhs.get_key()->compare_pi(*rhs.get_key()) == 0;
                                     });
 
-    const bool use_value = m_weight_assignment_code != ALL;
+    const bool use_value = m_weight_assignment_code != Credit_Assignment::ALL;
 
     if(match) {
       auto next = static_cast<feature_trie>(head == match ? head->next() : head);
@@ -1098,7 +1089,7 @@ private:
 #ifdef ENABLE_FRINGE
   /// Use up the rest of the features to generate a fringe
   static void generate_fringe(feature_trie &leaf_fringe, feature_trie head, const size_t &offset, const double &value) {
-    assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type == Q_Value::FRINGE);
+    assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type == Q_Value::Type::FRINGE);
 
     while(head) {
       auto next = static_cast<feature_trie>(head->next());
@@ -1114,7 +1105,7 @@ private:
       else {
         auto inserted = head->map_insert(leaf_fringe);
         if(!inserted->get())
-          inserted->get() = new Q_Value(value, Q_Value::FRINGE);
+          inserted->get() = new Q_Value(value, Q_Value::Type::FRINGE);
       }
 
       head = next;
@@ -1138,9 +1129,9 @@ private:
   }
   
   static void collapse_fringe(feature_trie &leaf_fringe, feature_trie head) {
-//     assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type != Q_Value::FRINGE); ///< TODO: Convert FRINGE to UNSPLIT
+//     assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type != Q_Value::Type::FRINGE); ///< TODO: Convert FRINGE to UNSPLIT
     
-    if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::FRINGE)
+    if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::Type::FRINGE)
       leaf_fringe->destroy(leaf_fringe);
   }
 #else
@@ -1163,7 +1154,7 @@ private:
         os << ',';
         if(tt->get_deeper())
           print_value_function_trie(os, tt->get_deeper());
-        else if(tt->get() && tt->get()->type == Q_Value::FRINGE)
+        else if(tt->get() && tt->get()->type == Q_Value::Type::FRINGE)
           os << 'f';
         os << '>';
       }
@@ -1205,7 +1196,7 @@ private:
   double m_eligibility_trace_decay_rate = 0.0; ///< lambda
   double m_eligibility_trace_decay_threshold = 0.0001;
 
-  Credit_Assignment m_credit_assignment_code = EVEN;
+  Credit_Assignment m_credit_assignment_code = Credit_Assignment::EVEN;
   std::function<void (Q_Value::List * const &)> m_credit_assignment; ///< How to assign credit to multiple Q-values
   double m_credit_assignment_epsilon = 0.5;
   double m_credit_assignment_log_base = 2.71828182846;
@@ -1214,7 +1205,7 @@ private:
   mutable double m_credit_assignment_root_value = 1.0 / m_credit_assignment_root;
   bool m_credit_assignment_normalize = true;
 
-  Credit_Assignment m_weight_assignment_code = EVEN;
+  Credit_Assignment m_weight_assignment_code = Credit_Assignment::EVEN;
   std::function<void (Q_Value::List * const &)> m_weight_assignment; ///< How to assign weight to multiple Q-values at summation time
 
   bool m_on_policy = false; ///< for Sarsa/Q-learning selection

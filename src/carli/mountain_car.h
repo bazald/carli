@@ -14,10 +14,10 @@ namespace Mountain_Car {
 
   class Feature;
   class Feature : public ::Feature<Feature> {
-    Feature & operator=(const Feature &);
+    Feature & operator=(const Feature &) = delete;
 
   public:
-    enum Axis {X, X_DOT};
+    enum Axis : char {X, X_DOT};
 
     Feature()
      : ::Feature<Feature>(true)
@@ -77,7 +77,7 @@ namespace Mountain_Car {
 
   class Move : public action_type {
   public:
-    enum Direction {LEFT = 0, IDLE = 1, RIGHT = 2};
+    enum Direction : char {LEFT = 0, IDLE = 1, RIGHT = 2};
 
     Move(const Direction &direction_ = IDLE)
      : direction(direction_)
@@ -186,7 +186,7 @@ namespace Mountain_Car {
     Agent(const std::shared_ptr<environment_type> &env)
      : ::Agent<feature_type, action_type>(env)
     {
-      set_credit_assignment(INV_LOG_UPDATE_COUNT);
+      set_credit_assignment(Credit_Assignment::INV_LOG_UPDATE_COUNT);
       set_discount_rate(1.0);
       set_learning_rate(0.3);
       set_on_policy(false);
@@ -365,7 +365,7 @@ namespace Mountain_Car {
     bool generate_feature_ranged(const std::shared_ptr<const Environment> &env, feature_trie &trie, const Feature::List * const &tail, Feature::List * &tail_next) {
       auto match = std::find_if(trie->begin(trie), trie->end(trie), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
 
-      if(match && (!match->get() || match->get()->type != Q_Value::FRINGE)) {
+      if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
         auto feature = match->get_key();
         const auto midpt = feature->midpt();
         if(env->get_value(feature->axis) < midpt)
@@ -393,7 +393,7 @@ namespace Mountain_Car {
     void update() {
       auto env = std::dynamic_pointer_cast<const Environment>(get_env());
 
-      m_metastate = env->success() ? SUCCESS : NON_TERMINAL;
+      m_metastate = env->success() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
     }
   };
 

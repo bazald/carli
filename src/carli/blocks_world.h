@@ -17,7 +17,7 @@ namespace Blocks_World {
 
   class Feature;
   class Feature : public ::Feature<Feature, On_Top> {
-    Feature & operator=(const Feature &);
+    Feature & operator=(const Feature &) = delete;
 
   public:
     Feature(const bool &present_ = true)
@@ -311,7 +311,7 @@ namespace Blocks_World {
     void update() {
       auto env = std::dynamic_pointer_cast<const Environment>(get_env());
 
-      m_metastate = env->get_blocks() == env->get_goal() ? SUCCESS : NON_TERMINAL;
+      m_metastate = env->get_blocks() == env->get_goal() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
     }
   };
 

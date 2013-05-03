@@ -11,8 +11,8 @@ namespace Zeni {
 
   template <typename KEY, typename TYPE, typename COMPARE>
   class Trie : public Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>, public Zeni::Pool_Allocator<Trie<KEY, TYPE, COMPARE> > {
-    Trie(const Trie &);
-    Trie operator=(const Trie &);
+    Trie(const Trie &) = delete;
+    Trie operator=(const Trie &) = delete;
 
   public:
     typedef KEY key_type;

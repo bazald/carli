@@ -30,17 +30,20 @@ template <typename ENVIRONMENT, typename AGENT>
 void run_agent();
 
 struct Arguments {
+  enum class Environment : char {BLOCKS_WORLD, CART_POLE, MOUNTAIN_CAR, PUDDLE_WORLD};
+  enum class Output : char {NULL_OUTPUT, SIMPLE, EXPERIMENTAL};
+
   Arguments()
-    : credit_assignment(Blocks_World::Agent::EVEN),
+    : credit_assignment(Credit_Assignment::EVEN),
     credit_assignment_epsilon(0.5),
     credit_assignment_log_base(2.71828182846),
     credit_assignment_root(2.0),
     credit_assignment_normalize(true),
-    weight_assignment(Blocks_World::Agent::ALL),
+    weight_assignment(Credit_Assignment::ALL),
     discount_rate(1.0),
     eligibility_trace_decay_rate(0.0),
     eligibility_trace_decay_threshold(0.0001),
-    environment(BLOCKS_WORLD),
+    environment(Environment::BLOCKS_WORLD),
     epsilon(0.1),
     ignore_x(false),
     learning_rate(1.0),
@@ -48,7 +51,7 @@ struct Arguments {
     null_q_values(false),
     number_of_episodes(0),
     number_of_steps(50000),
-    output(SIMPLE),
+    output(Output::SIMPLE),
     on_policy(true),
     print_every(100),
     pseudoepisode_threshold(20),
@@ -71,16 +74,16 @@ struct Arguments {
   {
   }
 
-  Blocks_World::Agent::Credit_Assignment credit_assignment;
+  Credit_Assignment credit_assignment;
   double credit_assignment_epsilon;
   double credit_assignment_log_base;
   double credit_assignment_root;
   bool credit_assignment_normalize;
-  Blocks_World::Agent::Credit_Assignment weight_assignment;
+  Credit_Assignment weight_assignment;
   double discount_rate;
   double eligibility_trace_decay_rate;
   double eligibility_trace_decay_threshold;
-  enum {BLOCKS_WORLD, CART_POLE, MOUNTAIN_CAR, PUDDLE_WORLD} environment;
+  Environment environment;
   double epsilon;
   bool ignore_x;
   double learning_rate;
@@ -88,7 +91,7 @@ struct Arguments {
   bool null_q_values;
   size_t number_of_episodes;
   size_t number_of_steps;
-  enum {NULL_OUTPUT, SIMPLE, EXPERIMENTAL} output;
+  Output output;
   bool on_policy;
   size_t print_every;
   size_t pseudoepisode_threshold;
@@ -123,23 +126,23 @@ Options generate_options() {
   }, 1), "[0,inf)");
   options.add('c', "credit-assignment", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "all"))
-      g_args.credit_assignment = Blocks_World::Agent::ALL;
+      g_args.credit_assignment = Credit_Assignment::ALL;
     else if(!strcmp(args.at(0), "specific"))
-      g_args.credit_assignment = Blocks_World::Agent::SPECIFIC;
+      g_args.credit_assignment = Credit_Assignment::SPECIFIC;
     else if(!strcmp(args.at(0), "even"))
-      g_args.credit_assignment = Blocks_World::Agent::EVEN;
+      g_args.credit_assignment = Credit_Assignment::EVEN;
     else if(!strcmp(args.at(0), "inv-update-count"))
-      g_args.credit_assignment = Blocks_World::Agent::INV_UPDATE_COUNT;
+      g_args.credit_assignment = Credit_Assignment::INV_UPDATE_COUNT;
     else if(!strcmp(args.at(0), "inv-log-update-count"))
-      g_args.credit_assignment = Blocks_World::Agent::INV_LOG_UPDATE_COUNT;
+      g_args.credit_assignment = Credit_Assignment::INV_LOG_UPDATE_COUNT;
     else if(!strcmp(args.at(0), "inv-root-update-count"))
-      g_args.credit_assignment = Blocks_World::Agent::INV_ROOT_UPDATE_COUNT;
+      g_args.credit_assignment = Credit_Assignment::INV_ROOT_UPDATE_COUNT;
     else if(!strcmp(args.at(0), "inv-depth"))
-      g_args.credit_assignment = Blocks_World::Agent::INV_DEPTH;
+      g_args.credit_assignment = Credit_Assignment::INV_DEPTH;
     else if(!strcmp(args.at(0), "epsilon-even-specific"))
-      g_args.credit_assignment = Blocks_World::Agent::EPSILON_EVEN_SPECIFIC;
+      g_args.credit_assignment = Credit_Assignment::EPSILON_EVEN_SPECIFIC;
     else if(!strcmp(args.at(0), "epsilon-even-depth"))
-      g_args.credit_assignment = Blocks_World::Agent::EPSILON_EVEN_DEPTH;
+      g_args.credit_assignment = Credit_Assignment::EPSILON_EVEN_DEPTH;
     else {
       std::cerr << "Illegal credit assignment selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal credit assignment selection.");
@@ -206,13 +209,13 @@ Options generate_options() {
   }, 1), "[0,1]");
   options.add('e', "environment", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "blocks-world"))
-      g_args.environment = Arguments::BLOCKS_WORLD;
+      g_args.environment = Arguments::Environment::BLOCKS_WORLD;
     else if(!strcmp(args.at(0), "cart-pole"))
-      g_args.environment = Arguments::CART_POLE;
+      g_args.environment = Arguments::Environment::CART_POLE;
     else if(!strcmp(args.at(0), "mountain-car"))
-      g_args.environment = Arguments::MOUNTAIN_CAR;
+      g_args.environment = Arguments::Environment::MOUNTAIN_CAR;
     else if(!strcmp(args.at(0), "puddle-world"))
-      g_args.environment = Arguments::PUDDLE_WORLD;
+      g_args.environment = Arguments::Environment::PUDDLE_WORLD;
     else {
       std::cerr << "Illegal environment selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal environment selection.");
@@ -266,11 +269,11 @@ Options generate_options() {
   }, 1), "[1,inf)");
   options.add('o', "output", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "null"))
-      g_args.output = Arguments::NULL_OUTPUT;
+      g_args.output = Arguments::Output::NULL_OUTPUT;
     else if(!strcmp(args.at(0), "simple"))
-      g_args.output = Arguments::SIMPLE;
+      g_args.output = Arguments::Output::SIMPLE;
     else if(!strcmp(args.at(0), "experimental"))
-      g_args.output = Arguments::EXPERIMENTAL;
+      g_args.output = Arguments::Output::EXPERIMENTAL;
     else {
       std::cerr << "Illegal output selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal output selection.");
@@ -363,23 +366,23 @@ Options generate_options() {
   }, 1), "[0,inf)");
   options.add('w', "weight-assignment", Options::Option([](const std::vector<const char *> &args) {
     if(!strcmp(args.at(0), "all"))
-      g_args.weight_assignment = Blocks_World::Agent::ALL;
+      g_args.weight_assignment = Credit_Assignment::ALL;
     else if(!strcmp(args.at(0), "specific"))
-      g_args.weight_assignment = Blocks_World::Agent::SPECIFIC;
+      g_args.weight_assignment = Credit_Assignment::SPECIFIC;
     else if(!strcmp(args.at(0), "even"))
-      g_args.weight_assignment = Blocks_World::Agent::EVEN;
+      g_args.weight_assignment = Credit_Assignment::EVEN;
     else if(!strcmp(args.at(0), "inv-update-count"))
-      g_args.weight_assignment = Blocks_World::Agent::INV_UPDATE_COUNT;
+      g_args.weight_assignment = Credit_Assignment::INV_UPDATE_COUNT;
     else if(!strcmp(args.at(0), "inv-log-update-count"))
-      g_args.weight_assignment = Blocks_World::Agent::INV_LOG_UPDATE_COUNT;
+      g_args.weight_assignment = Credit_Assignment::INV_LOG_UPDATE_COUNT;
     else if(!strcmp(args.at(0), "inv-root-update-count"))
-      g_args.weight_assignment = Blocks_World::Agent::INV_ROOT_UPDATE_COUNT;
+      g_args.weight_assignment = Credit_Assignment::INV_ROOT_UPDATE_COUNT;
     else if(!strcmp(args.at(0), "inv-depth"))
-      g_args.weight_assignment = Blocks_World::Agent::INV_DEPTH;
+      g_args.weight_assignment = Credit_Assignment::INV_DEPTH;
     else if(!strcmp(args.at(0), "epsilon-even-specific"))
-      g_args.weight_assignment = Blocks_World::Agent::EPSILON_EVEN_SPECIFIC;
+      g_args.weight_assignment = Credit_Assignment::EPSILON_EVEN_SPECIFIC;
     else if(!strcmp(args.at(0), "epsilon-even-depth"))
-      g_args.weight_assignment = Blocks_World::Agent::EPSILON_EVEN_DEPTH;
+      g_args.weight_assignment = Credit_Assignment::EPSILON_EVEN_DEPTH;
     else {
       std::cerr << "Illegal weight assignment selection: " << args.at(0) << std::endl;
       throw std::runtime_error("Illegal weight assignment selection.");
@@ -429,19 +432,19 @@ int main2(int argc, char **argv) {
   }
 
   switch(g_args.environment) {
-    case Arguments::BLOCKS_WORLD:
+    case Arguments::Environment::BLOCKS_WORLD:
       run_agent<Blocks_World::Environment, Blocks_World::Agent>();
       break;
 
-    case Arguments::CART_POLE:
+    case Arguments::Environment::CART_POLE:
       run_agent<Cart_Pole::Environment, Cart_Pole::Agent>();
       break;
 
-    case Arguments::MOUNTAIN_CAR:
+    case Arguments::Environment::MOUNTAIN_CAR:
       run_agent<Mountain_Car::Environment, Mountain_Car::Agent>();
       break;
 
-    case Arguments::PUDDLE_WORLD:
+    case Arguments::Environment::PUDDLE_WORLD:
       run_agent<Puddle_World::Environment, Puddle_World::Agent>();
       break;
 
@@ -524,7 +527,7 @@ void run_agent() {
 
   auto agent = std::make_shared<AGENT>(env);
   agent->set_contribute_update_count(g_args.contribute_update_count);
-  agent->set_credit_assignment(typename AGENT::Credit_Assignment(g_args.credit_assignment));
+  agent->set_credit_assignment(g_args.credit_assignment);
   agent->set_credit_assignment_epsilon(g_args.credit_assignment_epsilon);
   agent->set_credit_assignment_log_base(g_args.credit_assignment_log_base);
   agent->set_credit_assignment_root(g_args.credit_assignment_root);
@@ -558,7 +561,7 @@ void run_agent() {
   agent->set_split_mabe(g_args.split_mabe);
 #endif
   agent->set_value_function_cap(g_args.value_function_cap);
-  agent->set_weight_assignment(typename AGENT::Credit_Assignment(g_args.weight_assignment));
+  agent->set_weight_assignment(g_args.weight_assignment);
 
   Experimental_Output experimental_output(g_args.print_every);
 
@@ -592,9 +595,9 @@ void run_agent() {
           agent->reset_update_counts();
       }
       
-      done = agent->get_metastate() != NON_TERMINAL /*|| agent->get_step_count() >= 5000*/ || (g_args.number_of_steps && total_steps > 0 && size_t(total_steps) >= g_args.number_of_steps);
+      done = agent->get_metastate() != Metastate::NON_TERMINAL /*|| agent->get_step_count() >= 5000*/ || (g_args.number_of_steps && total_steps > 0 && size_t(total_steps) >= g_args.number_of_steps);
 
-      if(g_args.output == Arguments::EXPERIMENTAL && total_steps > -1)
+      if(g_args.output == Arguments::Output::EXPERIMENTAL && total_steps > -1)
         experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, [&agent]()->size_t{return agent->get_value_function_size();});
 
 #ifdef DEBUG_OUTPUT
@@ -602,53 +605,53 @@ void run_agent() {
 #endif
     } while(!done);
 
-    if(agent->get_metastate() == SUCCESS) {
-      if(g_args.output == Arguments::SIMPLE)
+    if(agent->get_metastate() == Metastate::SUCCESS) {
+      if(g_args.output == Arguments::Output::SIMPLE)
         std::cout << "SUCCESS";
       ++successes;
     }
     else {
-      if(g_args.output == Arguments::SIMPLE)
+      if(g_args.output == Arguments::Output::SIMPLE)
         std::cout << "FAILURE";
       ++failures;
     }
 
-    if(g_args.output == Arguments::SIMPLE)
+    if(g_args.output == Arguments::Output::SIMPLE)
       std::cout << " in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
   }
 
-  if(g_args.output == Arguments::SIMPLE) {
+  if(g_args.output == Arguments::Output::SIMPLE) {
     std::cout << successes << " SUCCESSes" << std::endl;
     std::cout << failures << " FAILUREs" << std::endl;
     std::cout << agent->get_value_function_size() << " Q-values" << std::endl;
 
-    if(g_args.environment == Arguments::CART_POLE) {
+    if(g_args.environment == Arguments::Environment::CART_POLE) {
       auto pwa = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent);
       pwa->print_policy(std::cout, 32);
     }
-    else if(g_args.environment == Arguments::MOUNTAIN_CAR) {
+    else if(g_args.environment == Arguments::Environment::MOUNTAIN_CAR) {
       auto pwa = std::dynamic_pointer_cast<Mountain_Car::Agent>(agent);
       pwa->print_policy(std::cout, 32);
     }
-    else if(g_args.environment == Arguments::PUDDLE_WORLD) {
+    else if(g_args.environment == Arguments::Environment::PUDDLE_WORLD) {
       auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
       pwa->print_policy(std::cout, 32);
     }
   }
-  else if(g_args.output == Arguments::EXPERIMENTAL) {
-    if(g_args.environment == Arguments::CART_POLE) {
+  else if(g_args.output == Arguments::Output::EXPERIMENTAL) {
+    if(g_args.environment == Arguments::Environment::CART_POLE) {
       auto cpa = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent);
       cpa->print_policy(std::cerr, 32);
       cpa->print_value_function_grid(std::cerr);
       cpa->print_update_count_grid(std::cerr);
     }
-    else if(g_args.environment == Arguments::MOUNTAIN_CAR) {
+    else if(g_args.environment == Arguments::Environment::MOUNTAIN_CAR) {
       auto mca = std::dynamic_pointer_cast<Mountain_Car::Agent>(agent);
       mca->print_policy(std::cerr, 32);
       mca->print_value_function_grid(std::cerr);
       mca->print_update_count_grid(std::cerr);
     }
-    else if(g_args.environment == Arguments::PUDDLE_WORLD) {
+    else if(g_args.environment == Arguments::Environment::PUDDLE_WORLD) {
       auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
       pwa->print_policy(std::cerr, 32);
       pwa->print_value_function_grid(std::cerr);

@@ -10,15 +10,15 @@
 
 class Q_Value;
 class Q_Value : public Zeni::Pool_Allocator<Q_Value> {
-  Q_Value(const Q_Value &);
-  Q_Value & operator=(const Q_Value &);
+  Q_Value(const Q_Value &) = delete;
+  Q_Value & operator=(const Q_Value &) = delete;
 
 public:
   typedef Zeni::Linked_List<Q_Value> List;
   typedef List::iterator iterator;
-  enum Type {SPLIT, UNSPLIT, FRINGE};
+  enum class Type : char {SPLIT, UNSPLIT, FRINGE};
 
-  Q_Value(const double &q_value_ = double(), const Type &type_ = UNSPLIT)
+  Q_Value(const double &q_value_ = double(), const Type &type_ = Type::UNSPLIT)
    : type(type_),
    value(q_value_),
    eligible(this),

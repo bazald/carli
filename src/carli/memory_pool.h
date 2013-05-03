@@ -8,8 +8,8 @@
 namespace Zeni {
 
   class Pool {
-    Pool(const Pool &rhs);
-    Pool & operator=(const Pool &rhs);
+    Pool(const Pool &rhs) = delete;
+    Pool & operator=(const Pool &rhs) = delete;
 
   public:
     Pool(const size_t &size_) throw()
@@ -80,8 +80,8 @@ namespace Zeni {
   };
 
   class Pool_Map {
-    Pool_Map(const Pool_Map &rhs);
-    Pool_Map & operator=(const Pool_Map &rhs);
+    Pool_Map(const Pool_Map &rhs) = delete;
+    Pool_Map & operator=(const Pool_Map &rhs) = delete;
 
     Pool_Map() throw() {}
     ~Pool_Map() throw() {

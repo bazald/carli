@@ -15,10 +15,10 @@ namespace Puddle_World {
 
   class Feature;
   class Feature : public ::Feature<Feature> {
-    Feature & operator=(const Feature &);
+    Feature & operator=(const Feature &) = delete;
 
   public:
-    enum Axis {X, Y};
+    enum Axis : char {X, Y};
 
     Feature()
      : ::Feature<Feature>(true)
@@ -72,7 +72,7 @@ namespace Puddle_World {
 
   class Move : public action_type {
   public:
-    enum Direction {NORTH, SOUTH, EAST, WEST};
+    enum Direction : char {NORTH, SOUTH, EAST, WEST};
 
     Move(const Direction &direction_ = NORTH)
      : direction(direction_)
@@ -327,7 +327,7 @@ namespace Puddle_World {
     Agent(const std::shared_ptr<environment_type> &env)
      : ::Agent<feature_type, action_type>(env)
     {
-      set_credit_assignment(INV_LOG_UPDATE_COUNT);
+      set_credit_assignment(Credit_Assignment::INV_LOG_UPDATE_COUNT);
       set_discount_rate(1.0);
       set_learning_rate(0.3);
       set_on_policy(false);
@@ -505,7 +505,7 @@ namespace Puddle_World {
     bool generate_feature_ranged(const std::shared_ptr<const Environment> &env, feature_trie &trie, const Feature::List * const &tail, Feature::List * &tail_next) {
       auto match = std::find_if(trie->begin(trie), trie->end(trie), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
 
-      if(match && (!match->get() || match->get()->type != Q_Value::FRINGE)) {
+      if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
         auto feature = match->get_key();
         const auto midpt = feature->midpt();
         if(env->get_value(feature->axis) < midpt)
@@ -534,7 +534,7 @@ namespace Puddle_World {
     void update() {
       auto env = std::dynamic_pointer_cast<const Environment>(get_env());
 
-      m_metastate = env->goal_reached() ? SUCCESS : NON_TERMINAL;
+      m_metastate = env->goal_reached() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
     }
   };
 
