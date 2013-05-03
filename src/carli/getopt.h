@@ -126,9 +126,9 @@ public:
 
   void print_help(std::ostream &os) {
     os << "Usage: " << name << " [...]" << std::endl;
-    std::for_each(m_help.begin(), m_help.end(), [&os](const std::string &opt) {
+    for(const auto &opt : m_help) {
       os << opt << std::endl;
-    });
+    }
   }
 
   std::string name;

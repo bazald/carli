@@ -85,8 +85,8 @@ namespace Zeni {
 
     Pool_Map() throw() {}
     ~Pool_Map() throw() {
-      for(std::map<size_t, Pool *>::iterator it = m_pools.begin(), iend = m_pools.end(); it != iend; ++it)
-        delete it->second;
+      for(auto &pool : m_pools)
+        delete pool.second;
     }
 
   public:

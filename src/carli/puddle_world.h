@@ -249,12 +249,10 @@ namespace Puddle_World {
 
       double reward = -1.0;
 
-      std::for_each(m_horizontal_puddles.begin(), m_horizontal_puddles.end(), [this,&reward](const Puddle &puddle) {
+      for(const Puddle &puddle : m_horizontal_puddles)
         reward -= 400.0 * horizontal_puddle_reward(puddle[0], puddle[1], puddle[2], puddle[3]);
-      });
-      std::for_each(m_vertical_puddles.begin(), m_vertical_puddles.end(), [this,&reward](const Puddle &puddle) {
+      for(const Puddle &puddle : m_vertical_puddles)
         reward -= 400.0 * vertical_puddle_reward(puddle[0], puddle[1], puddle[2], puddle[3]);
-      });
 
       return reward;
     }
@@ -340,24 +338,24 @@ namespace Puddle_World {
 
     void print_value_function_grid(std::ostream &os) const {
       std::set<line_segment_type> line_segments;
-      std::for_each(m_value_function.begin(), m_value_function.end(), [this,&os,&line_segments](decltype(*m_value_function.begin()) &value) {
+      for(auto &value : m_value_function) {
         os << *value.first << ":" << std::endl;
-        const auto line_segments2 = this->generate_value_function_grid_sets(value.second);
-        this->merge_value_function_grid_sets(line_segments, line_segments2);
-        this->print_value_function_grid_set(os, line_segments2);
-      });
+        const auto line_segments2 = generate_value_function_grid_sets(value.second);
+        merge_value_function_grid_sets(line_segments, line_segments2);
+        print_value_function_grid_set(os, line_segments2);
+      }
       os << "all:" << std::endl;
       print_value_function_grid_set(os, line_segments);
     }
 
     void print_update_count_grid(std::ostream &os) const {
       std::map<line_segment_type, size_t> update_counts;
-      std::for_each(m_value_function.begin(), m_value_function.end(), [this,&os,&update_counts](decltype(*m_value_function.begin()) &value) {
+      for(auto &value : m_value_function) {
         os << *value.first << ":" << std::endl;
-        const auto update_counts2 = this->generate_update_count_maps(value.second);
-        this->merge_update_count_maps(update_counts, update_counts2);
-        this->print_update_count_map(os, update_counts2);
-      });
+        const auto update_counts2 = generate_update_count_maps(value.second);
+        merge_update_count_maps(update_counts, update_counts2);
+        print_update_count_map(os, update_counts2);
+      }
       os << "all:" << std::endl;
       print_update_count_map(os, update_counts);
     }
@@ -449,27 +447,23 @@ namespace Puddle_World {
     }
 
     void print_value_function_grid_set(std::ostream &os, const std::set<line_segment_type> &line_segments) const {
-      std::for_each(line_segments.begin(), line_segments.end(), [&os](const line_segment_type &line_segment) {
+      for(const line_segment_type &line_segment : line_segments)
         os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
-      });
     }
 
     void print_update_count_map(std::ostream &os, const std::map<line_segment_type, size_t> &update_counts) const {
-      std::for_each(update_counts.begin(), update_counts.end(), [&os](const std::pair<line_segment_type, size_t> &rect) {
+      for(const auto &rect : update_counts)
         os << rect.first.first.first << ',' << rect.first.first.second << '/' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
-      });
     }
 
     void merge_value_function_grid_sets(std::set<line_segment_type> &combination, const std::set<line_segment_type> &additions) const {
-      std::for_each(additions.begin(), additions.end(), [&combination](const line_segment_type &line_segment) {
+      for(const line_segment_type &line_segment : additions)
         combination.insert(line_segment);
-      });
     }
 
     void merge_update_count_maps(std::map<line_segment_type, size_t> &combination, const std::map<line_segment_type, size_t> &additions) const {
-      std::for_each(additions.begin(), additions.end(), [&combination](const std::pair<line_segment_type, size_t> &rect) {
+      for(const auto &rect : additions)
         combination[rect.first] += rect.second;
-      });
     }
 
     void generate_features() {
@@ -491,12 +485,12 @@ namespace Puddle_World {
         Feature::List * x_tail_next = nullptr;
         Feature::List * y_tail_next = nullptr;
 
-        std::for_each(tries.begin(), tries.end(), [this,&env,&x_tail,&y_tail,&x_tail_next,&y_tail_next](feature_trie &trie) {
+        for(feature_trie &trie : tries) {
           if(generate_feature_ranged(env, trie, x_tail, x_tail_next))
-            return;
+            continue;
           if(generate_feature_ranged(env, trie, y_tail, y_tail_next))
-            return;
-        });
+            continue;
+        }
 
         if(x_tail_next)
           x_tail = x_tail_next;

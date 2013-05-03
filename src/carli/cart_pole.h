@@ -357,18 +357,18 @@ namespace Cart_Pole {
         Feature::List * theta_tail_next = nullptr;
         Feature::List * theta_dot_tail_next = nullptr;
 
-        std::for_each(tries.begin(), tries.end(), [this,&env,&x_tail,&x_dot_tail,&theta_tail,&theta_dot_tail,&x_tail_next,&x_dot_tail_next,&theta_tail_next,&theta_dot_tail_next](feature_trie &trie) {
+        for(feature_trie &trie : tries) {
           if(!m_ignore_x) {
             if(generate_feature_ranged(env, trie, x_tail, x_tail_next))
-              return;
+              continue;
             if(generate_feature_ranged(env, trie, x_dot_tail, x_dot_tail_next))
-              return;
+              continue;
           }
           if(generate_feature_ranged(env, trie, theta_tail, theta_tail_next))
-            return;
+            continue;
           if(generate_feature_ranged(env, trie, theta_dot_tail, theta_dot_tail_next))
-            return;
-        });
+            continue;
+        }
 
         if(x_tail_next)
           x_tail = x_tail_next;

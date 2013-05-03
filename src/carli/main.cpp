@@ -483,14 +483,14 @@ int main2(int argc, char **argv) {
 //   values.push_back(m_random.rand_lt(42));
 //   values.push_back(m_random.rand_lt(42));
 //   values.push_back(m_random.rand_lt(42));
-//   for_each(values.begin(), values.end(), [&mean](Value &value) {
+//   for(auto &value : values) {
 //     mean.contribute(value);
 //     std::cout << "Adding " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << std::endl;
-//   });
-//   for_each(values.rbegin(), values.rend(), [&mean](Value &value) {
+//   }
+//   for(auto &value : values) {
 //     mean.uncontribute(value);
 //     std::cout << "Removing " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << std::endl;
-//   });
+//   }
 
 #ifdef TO_FILE
   std::cout.rdbuf(cout_bak);

@@ -479,10 +479,10 @@ public:
 
   void print_value_function(std::ostream &os) const {
     os << "  Value Function:";
-    std::for_each(m_value_function.begin(), m_value_function.end(), [this,&os](decltype(*m_value_function.begin()) &value) {
-      os << std::endl << "  " << *value.first << " : ";
-      this->print_value_function_trie(os, value.second);
-    });
+    for(auto &vf : m_value_function) {
+      os << std::endl << "  " << vf.first << " : ";
+      print_value_function_trie(os, vf.second);
+    }
     os << std::endl;
   }
 
@@ -490,16 +490,16 @@ public:
     return m_q_value_count;
 
 //     size_t size = 0lu;
-//     std::for_each(m_value_function.begin(), m_value_function.end(), [this,&size](const typename value_function_type::value_type &vf) {
-//       size += this->get_trie_size(vf.second);
-//     });
+//     for(const auto &vf : m_value_function) {
+//       size += get_trie_size(vf.second);
+//     }
 //     return size;
   }
 
-  void reset_update_counts() const {
-    std::for_each(m_value_function.begin(), m_value_function.end(), [this](const typename value_function_type::value_type &vf) {
+  void reset_update_counts() {
+    for(auto &vf : m_value_function) {
       reset_update_counts_for_trie(vf.second);
-    });
+    }
   }
 
 protected:

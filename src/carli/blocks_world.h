@@ -201,13 +201,11 @@ namespace Blocks_World {
 
     void print_impl(std::ostream &os) const {
       os << "Blocks World:" << std::endl;
-      std::for_each(m_blocks.begin(), m_blocks.end(), [&os](const Stack &stack) {
-        auto &os_ = os;
-        std::for_each(stack.rbegin(), stack.rend(), [&os_](const block_id &id) {
-          os_ << ' ' << id;
-        });
+      for(const Stack &stack : m_blocks) {
+        for(const block_id &id : stack)
+          os << ' ' << id;
         os << std::endl;
-      });
+      }
     }
 
     Stacks m_blocks;
@@ -250,7 +248,7 @@ namespace Blocks_World {
         }
       };
 
-      std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [this,&not_in_place,&is_on_top,&place_counter](const Environment::Stack &stack) {
+      for(const Environment::Stack &stack : env->get_blocks()) {
         auto it = stack.begin();
         auto itn = ++stack.begin();
         auto iend = stack.end();
@@ -265,22 +263,20 @@ namespace Blocks_World {
         is_on_top(*it, 0, 3);
 
         if(place_counter == *stack.rbegin()) {
-          const auto &this_ = this;
-          auto &place_counter_ = place_counter;
-          std::find_if(stack.rbegin(), stack.rend(), [this_,&place_counter_](const block_id &id)->bool{
-            if(place_counter_ != id)
+          std::find_if(stack.rbegin(), stack.rend(), [this,&place_counter](const block_id &id)->bool{
+            if(place_counter != id)
               return true;
 
             feature_type * in_place = new In_Place(id);
-            in_place->features.insert_in_order<feature_type::List::compare_default>(this_->m_features);
-            --place_counter_;
+            in_place->features.insert_in_order<feature_type::List::compare_default>(this->m_features);
+            --place_counter;
 
             return false;
           });
 
           not_in_place();
         }
-      });
+      }
 
       not_in_place();
 
@@ -296,21 +292,20 @@ namespace Blocks_World {
 
       assert(!m_candidates);
 
-      std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [this,&env](const Environment::Stack &stack_src) {
+      for(const Environment::Stack &stack_src : env->get_blocks()) {
         if(stack_src.size() != 1) {
           action_type * move = new Move(*stack_src.begin(), 0);
           move->candidates.insert_before(m_candidates);
         }
 
-        const auto &this_ = this;
-        std::for_each(env->get_blocks().begin(), env->get_blocks().end(), [this_,&stack_src](const Environment::Stack &stack_dest) {
+        for(const Environment::Stack &stack_dest : env->get_blocks()) {
           if(&stack_src == &stack_dest)
-            return;
+            continue;
 
           action_type * move = new Move(*stack_src.begin(), *stack_dest.begin());
-          move->candidates.insert_before(this_->m_candidates);
-        });
-      });
+          move->candidates.insert_before(m_candidates);
+        }
+      }
     }
 
     void update() {
