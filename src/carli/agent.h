@@ -116,7 +116,7 @@ enum class Credit_Assignment : char {ALL, SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_
 enum class Metastate : char {NON_TERMINAL, SUCCESS, FAILURE};
 
 template <typename FEATURE, typename ACTION>
-class Agent : public std::enable_shared_from_this<Agent<FEATURE, ACTION> > {
+class Agent : public std::enable_shared_from_this<Agent<FEATURE, ACTION>> {
   Agent(const Agent &) = delete;
   Agent & operator=(const Agent &) = delete;
 

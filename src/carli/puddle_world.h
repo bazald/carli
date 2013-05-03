@@ -112,22 +112,10 @@ namespace Puddle_World {
 
     Environment()
      : m_init_x(0.15, 0.45),
-     m_init_y(0.15, 0.45)
+     m_init_y(0.15, 0.45),
+     m_horizontal_puddles({{{0.1, 0.45, 0.75, 0.1}}}),
+     m_vertical_puddles({{{0.45, 0.4, 0.8, 0.1}}})
     {
-      Puddle puddle;
-
-      puddle[0] = 0.1;
-      puddle[1] = 0.45;
-      puddle[2] = 0.75;
-      puddle[3] = 0.1;
-      m_horizontal_puddles.push_back(puddle);
-
-      puddle[0] = 0.45;
-      puddle[1] = 0.4;
-      puddle[2] = 0.8;
-      puddle[3] = 0.1;
-      m_vertical_puddles.push_back(puddle);
-
       Environment::init_impl();
     }
 

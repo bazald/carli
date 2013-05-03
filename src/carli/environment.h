@@ -74,7 +74,7 @@ std::ostream & operator << (std::ostream &os, const Action<DERIVED, DERIVED2> &a
 }
 
 template <typename ACTION>
-class Environment : public std::enable_shared_from_this<Environment<ACTION> > {
+class Environment : public std::enable_shared_from_this<Environment<ACTION>> {
   Environment(const Environment &) = delete;
   Environment & operator=(const Environment &) = delete;
 

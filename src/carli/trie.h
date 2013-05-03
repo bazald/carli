@@ -6,11 +6,11 @@
 
 namespace Zeni {
 
-  template <typename KEY, typename TYPE, typename COMPARE = std::less<KEY> >
+  template <typename KEY, typename TYPE, typename COMPARE = std::less<KEY>>
   class Trie;
 
   template <typename KEY, typename TYPE, typename COMPARE>
-  class Trie : public Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>, public Zeni::Pool_Allocator<Trie<KEY, TYPE, COMPARE> > {
+  class Trie : public Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>, public Zeni::Pool_Allocator<Trie<KEY, TYPE, COMPARE>> {
     Trie(const Trie &) = delete;
     Trie operator=(const Trie &) = delete;
 
