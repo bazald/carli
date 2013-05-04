@@ -21,6 +21,13 @@
 #include <fstream>
 #endif
 
+using std::cerr;
+using std::cout;
+using std::dynamic_pointer_cast;
+using std::endl;
+using std::runtime_error;
+using std::vector;
+
 typedef std::string test_key;
 typedef Q_Value test_value;
 typedef Zeni::Trie<test_key, test_value> test_trie;
@@ -116,14 +123,14 @@ struct Arguments {
 Options generate_options() {
   Options options("carli");
 
-  options.add('h', "help", Options::Option([&options](const std::vector<const char *> &) {
-    options.print_help(std::cout);
+  options.add('h', "help", Options::Option([&options](const vector<const char *> &) {
+    options.print_help(cout);
     exit(0);
   }, 0), "");
-  options.add(     "contribute-update-count", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "contribute-update-count", Options::Option([](const vector<const char *> &args) {
     g_args.contribute_update_count = atoi(args.at(0));
   }, 1), "[0,inf)");
-  options.add('c', "credit-assignment", Options::Option([](const std::vector<const char *> &args) {
+  options.add('c', "credit-assignment", Options::Option([](const vector<const char *> &args) {
     if(!strcmp(args.at(0), "all"))
       g_args.credit_assignment = Credit_Assignment::ALL;
     else if(!strcmp(args.at(0), "specific"))
@@ -143,70 +150,70 @@ Options generate_options() {
     else if(!strcmp(args.at(0), "epsilon-even-depth"))
       g_args.credit_assignment = Credit_Assignment::EPSILON_EVEN_DEPTH;
     else {
-      std::cerr << "Illegal credit assignment selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal credit assignment selection.");
+      cerr << "Illegal credit assignment selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal credit assignment selection.");
     }
   }, 1), "all/specific/even/inv-update-count/inv-log-update-count/inv-root-update-count/inv-depth/epsilon-even-specific/epsilon-even-depth");
-  options.add('d', "discount-rate", Options::Option([](const std::vector<const char *> &args) {
+  options.add('d', "discount-rate", Options::Option([](const vector<const char *> &args) {
     g_args.discount_rate = atof(args.at(0));
     if(g_args.discount_rate < 0.0 || g_args.discount_rate > 1.0) {
-      std::cerr << "Illegal discount rate selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal discount rate selection.");
+      cerr << "Illegal discount rate selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal discount rate selection.");
     }
   }, 1), "[0,1]");
-  options.add(     "credit-assignment-epsilon", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "credit-assignment-epsilon", Options::Option([](const vector<const char *> &args) {
     g_args.credit_assignment_epsilon = atof(args.at(0));
     if(g_args.credit_assignment_epsilon < 0.0 || g_args.credit_assignment_epsilon > 1.0) {
-      std::cerr << "Illegal credit-assignment epsilon selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal credit-assignment epsilon selection.");
+      cerr << "Illegal credit-assignment epsilon selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal credit-assignment epsilon selection.");
     }
   }, 1), "[0,1]");
-  options.add(     "credit-assignment-log-base", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "credit-assignment-log-base", Options::Option([](const vector<const char *> &args) {
     g_args.credit_assignment_log_base = atof(args.at(0));
     if(g_args.credit_assignment_log_base <= 1.0) {
-      std::cerr << "Illegal credit-assignment log-base selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal credit-assignment log-base selection.");
+      cerr << "Illegal credit-assignment log-base selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal credit-assignment log-base selection.");
     }
   }, 1), "(1,inf)");
-  options.add(     "credit-assignment-root", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "credit-assignment-root", Options::Option([](const vector<const char *> &args) {
     g_args.credit_assignment_root = atof(args.at(0));
     if(g_args.credit_assignment_root <= 1.0) {
-      std::cerr << "Illegal credit-assignment root selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal credit-assignment root selection.");
+      cerr << "Illegal credit-assignment root selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal credit-assignment root selection.");
     }
   }, 1), "(1,inf)");
-  options.add(     "credit-assignment-normalize", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "credit-assignment-normalize", Options::Option([](const vector<const char *> &args) {
     if(!strcmp(args.at(0), "true"))
       g_args.credit_assignment_normalize = true;
     else if(!strcmp(args.at(0), "false"))
       g_args.credit_assignment_normalize = false;
     else {
-      std::cerr << "Illegal credit-assignment-normalize selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal credit-assignment-normalize selection.");
+      cerr << "Illegal credit-assignment-normalize selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal credit-assignment-normalize selection.");
     }
   }, 1), "true/false");
-  options.add(     "eligibility-trace-decay-rate", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "eligibility-trace-decay-rate", Options::Option([](const vector<const char *> &args) {
     g_args.eligibility_trace_decay_rate = atof(args.at(0));
     if(g_args.eligibility_trace_decay_rate < 0.0 || g_args.eligibility_trace_decay_rate > 1.0) {
-      std::cerr << "Illegal eligibility trace decay rate selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal eligibility trace decay rate selection.");
+      cerr << "Illegal eligibility trace decay rate selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal eligibility trace decay rate selection.");
     }
   }, 1), "[0,1]");
-  options.add(     "eligibility-trace-decay-threshold", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "eligibility-trace-decay-threshold", Options::Option([](const vector<const char *> &args) {
     g_args.eligibility_trace_decay_threshold = atof(args.at(0));
     if(g_args.eligibility_trace_decay_threshold < 0.0 || g_args.eligibility_trace_decay_threshold > 1.0) {
-      std::cerr << "Illegal eligibility trace decay threshold selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal eligibility trace decay threshold selection.");
+      cerr << "Illegal eligibility trace decay threshold selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal eligibility trace decay threshold selection.");
     }
   }, 1), "[0,1]");
-  options.add('g', "epsilon-greedy", Options::Option([](const std::vector<const char *> &args) {
+  options.add('g', "epsilon-greedy", Options::Option([](const vector<const char *> &args) {
     g_args.epsilon = atof(args.at(0));
     if(g_args.epsilon < 0.0 || g_args.epsilon > 1.0) {
-      std::cerr << "Illegal epsilon-greedy selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal epsilon-greedy selection.");
+      cerr << "Illegal epsilon-greedy selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal epsilon-greedy selection.");
     }
   }, 1), "[0,1]");
-  options.add('e', "environment", Options::Option([](const std::vector<const char *> &args) {
+  options.add('e', "environment", Options::Option([](const vector<const char *> &args) {
     if(!strcmp(args.at(0), "blocks-world"))
       g_args.environment = Arguments::Environment::BLOCKS_WORLD;
     else if(!strcmp(args.at(0), "cart-pole"))
@@ -216,57 +223,57 @@ Options generate_options() {
     else if(!strcmp(args.at(0), "puddle-world"))
       g_args.environment = Arguments::Environment::PUDDLE_WORLD;
     else {
-      std::cerr << "Illegal environment selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal environment selection.");
+      cerr << "Illegal environment selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal environment selection.");
     }
   }, 1), "blocks-world/cart-pole/mountain-car/puddle-world");
-  options.add(     "ignore-x", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "ignore-x", Options::Option([](const vector<const char *> &args) {
     if(!strcmp(args.at(0), "true"))
       g_args.ignore_x = true;
     else if(!strcmp(args.at(0), "false"))
       g_args.ignore_x = false;
     else {
-      std::cerr << "Illegal ignore-x selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal ignore-x selection.");
+      cerr << "Illegal ignore-x selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal ignore-x selection.");
     }
   }, 1), "true/false, applies only to cart-pole");
-  options.add('l', "learning-rate", Options::Option([](const std::vector<const char *> &args) {
+  options.add('l', "learning-rate", Options::Option([](const vector<const char *> &args) {
     g_args.learning_rate = atof(args.at(0));
     if(g_args.learning_rate <= 0.0 || g_args.learning_rate > 1.0) {
-      std::cerr << "Illegal learning rate selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal learning rate selection.");
+      cerr << "Illegal learning rate selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal learning rate selection.");
     }
   }, 1), "(0,1]");
-  options.add(     "mean-cabe-queue-size", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "mean-cabe-queue-size", Options::Option([](const vector<const char *> &args) {
     g_args.mean_cabe_queue_size = atoi(args.at(0));
   }, 1), "[0,inf)");
-  options.add(     "null-q-values", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "null-q-values", Options::Option([](const vector<const char *> &args) {
     if(!strcmp(args.at(0), "true"))
       g_args.null_q_values = true;
     else if(!strcmp(args.at(0), "false"))
       g_args.null_q_values = false;
     else {
-      std::cerr << "Illegal null-q-values selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal null-q-values selection.");
+      cerr << "Illegal null-q-values selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal null-q-values selection.");
     }
   }, 1), "true/false to enable null Q values leading up to the leaves");
-  options.add(     "num-episodes", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "num-episodes", Options::Option([](const vector<const char *> &args) {
     g_args.number_of_episodes = atoi(args.at(0));
     g_args.number_of_steps = 0;
     if(g_args.number_of_episodes < 1) {
-      std::cerr << "Illegal number of episodes selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal number of episodes selection.");
+      cerr << "Illegal number of episodes selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal number of episodes selection.");
     }
   }, 1), "[1,inf)");
-  options.add('n', "num-steps", Options::Option([](const std::vector<const char *> &args) {
+  options.add('n', "num-steps", Options::Option([](const vector<const char *> &args) {
     g_args.number_of_episodes = 0;
     g_args.number_of_steps = atoi(args.at(0));
     if(g_args.number_of_steps < 1) {
-      std::cerr << "Illegal number of steps selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal number of steps selection.");
+      cerr << "Illegal number of steps selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal number of steps selection.");
     }
   }, 1), "[1,inf)");
-  options.add('o', "output", Options::Option([](const std::vector<const char *> &args) {
+  options.add('o', "output", Options::Option([](const vector<const char *> &args) {
     if(!strcmp(args.at(0), "null"))
       g_args.output = Arguments::Output::NULL_OUTPUT;
     else if(!strcmp(args.at(0), "simple"))
@@ -274,96 +281,96 @@ Options generate_options() {
     else if(!strcmp(args.at(0), "experimental"))
       g_args.output = Arguments::Output::EXPERIMENTAL;
     else {
-      std::cerr << "Illegal output selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal output selection.");
+      cerr << "Illegal output selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal output selection.");
     }
   }, 1), "null/simple/experimental");
-  options.add(     "print-every", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "print-every", Options::Option([](const vector<const char *> &args) {
     g_args.print_every = atoi(args.at(0));
     if(g_args.print_every == 0) {
-      std::cerr << "Illegal print-every specification: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal print-every specification.");
+      cerr << "Illegal print-every specification: " << args.at(0) << endl;
+      throw runtime_error("Illegal print-every specification.");
     }
   }, 1), "[1,inf), applies only to experimental output");
-  options.add('p', "policy", Options::Option([](const std::vector<const char *> &args) {
+  options.add('p', "policy", Options::Option([](const vector<const char *> &args) {
     if(!strcmp(args.at(0), "on-policy"))
       g_args.on_policy = true;
     else if(!strcmp(args.at(0), "off-policy"))
       g_args.on_policy = false;
     else {
-      std::cerr << "Illegal policy selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal policy selection.");
+      cerr << "Illegal policy selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal policy selection.");
     }
   }, 1), "on-policy/off-policy");
-  options.add(     "random-start", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "random-start", Options::Option([](const vector<const char *> &args) {
     if(!strcmp(args.at(0), "true"))
       g_args.random_start = true;
     else if(!strcmp(args.at(0), "false"))
       g_args.random_start = false;
     else {
-      std::cerr << "Illegal random-start selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal random-start selection.");
+      cerr << "Illegal random-start selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal random-start selection.");
     }
   }, 1), "true/false, applies only to mountain-car and puddle-world");
-  options.add(     "reward-negative", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "reward-negative", Options::Option([](const vector<const char *> &args) {
     if(!strcmp(args.at(0), "true"))
       g_args.reward_negative = true;
     else if(!strcmp(args.at(0), "false"))
       g_args.reward_negative = false;
     else {
-      std::cerr << "Illegal reward-negative selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal reward-negative selection.");
+      cerr << "Illegal reward-negative selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal reward-negative selection.");
     }
   }, 1), "true/false, applies only to mountain-car");
-  options.add(     "reset-update-counts", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "reset-update-counts", Options::Option([](const vector<const char *> &args) {
     if(!strcmp(args.at(0), "true"))
       g_args.reset_update_counts = true;
     else if(!strcmp(args.at(0), "false"))
       g_args.reset_update_counts = false;
     else {
-      std::cerr << "Illegal reset-update-counts selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal reset-update-counts selection.");
+      cerr << "Illegal reset-update-counts selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal reset-update-counts selection.");
     }
   }, 1), "true/false, applies only when skip-steps > 0");
-  options.add(     "scenario", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "scenario", Options::Option([](const vector<const char *> &args) {
     g_args.scenario = atoi(args.at(0));
   }, 1), "[0,inf)");
-  options.add('s', "seed", Options::Option([](const std::vector<const char *> &args) {
+  options.add('s', "seed", Options::Option([](const vector<const char *> &args) {
     g_args.seed = atoi(args.at(0));
   }, 1), "[0,inf)");
-  options.add(     "skip-steps", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "skip-steps", Options::Option([](const vector<const char *> &args) {
     g_args.skip_steps = atoi(args.at(0));
   }, 1), "[-1,inf)");
-  options.add(     "split-cabe", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "split-cabe", Options::Option([](const vector<const char *> &args) {
     g_args.split_cabe = atof(args.at(0));
   }, 1), "[0,inf)");
-  options.add(     "split-cabe-qmult", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "split-cabe-qmult", Options::Option([](const vector<const char *> &args) {
     g_args.split_cabe_qmult = atof(args.at(0));
   }, 1), "[0,inf)");
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-  options.add(     "split-mabe", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "split-mabe", Options::Option([](const vector<const char *> &args) {
     g_args.split_mabe = atof(args.at(0));
   }, 1), "[0,inf)");
 #endif
-  options.add(     "split-max", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "split-max", Options::Option([](const vector<const char *> &args) {
     g_args.split_max = atoi(args.at(0));
   }, 1), "[0,inf)");
-  options.add(     "split-min", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "split-min", Options::Option([](const vector<const char *> &args) {
     g_args.split_min = atoi(args.at(0));
   }, 1), "[0,inf)");
-  options.add(     "split-pseudoepisodes", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "split-pseudoepisodes", Options::Option([](const vector<const char *> &args) {
     g_args.split_pseudoepisodes = atoi(args.at(0));
   }, 1), "[0,inf)");
-  options.add(     "split-update-count", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "split-update-count", Options::Option([](const vector<const char *> &args) {
     g_args.split_update_count = atoi(args.at(0));
   }, 1), "[0,inf)");
-  options.add('t', "pseudoepisode-threshold", Options::Option([](const std::vector<const char *> &args) {
+  options.add('t', "pseudoepisode-threshold", Options::Option([](const vector<const char *> &args) {
     g_args.pseudoepisode_threshold = atoi(args.at(0));
   }, 1), "[0,inf)");
-  options.add(     "value-function-cap", Options::Option([](const std::vector<const char *> &args) {
+  options.add(     "value-function-cap", Options::Option([](const vector<const char *> &args) {
     g_args.value_function_cap = atoi(args.at(0));
   }, 1), "[0,inf)");
-  options.add('w', "weight-assignment", Options::Option([](const std::vector<const char *> &args) {
+  options.add('w', "weight-assignment", Options::Option([](const vector<const char *> &args) {
     if(!strcmp(args.at(0), "all"))
       g_args.weight_assignment = Credit_Assignment::ALL;
     else if(!strcmp(args.at(0), "specific"))
@@ -383,8 +390,8 @@ Options generate_options() {
     else if(!strcmp(args.at(0), "epsilon-even-depth"))
       g_args.weight_assignment = Credit_Assignment::EPSILON_EVEN_DEPTH;
     else {
-      std::cerr << "Illegal weight assignment selection: " << args.at(0) << std::endl;
-      throw std::runtime_error("Illegal weight assignment selection.");
+      cerr << "Illegal weight assignment selection: " << args.at(0) << endl;
+      throw runtime_error("Illegal weight assignment selection.");
     }
   }, 1), "all/specific/even/inv-update-count/inv-log-update-count/inv-root-update-count/inv-depth/epsilon-even-specific/epsilon-even-depth");
 
@@ -393,41 +400,41 @@ Options generate_options() {
 
 int main2(int argc, char **argv) {
 #ifdef TO_FILE
-  auto cout_bak = std::cout.rdbuf();
-  auto cerr_bak = std::cerr.rdbuf();
+  auto cout_bak = cout.rdbuf();
+  auto cerr_bak = cerr.rdbuf();
   std::ofstream cout2file("dump.txt");
-  std::cout.rdbuf(cout2file.rdbuf());
-  std::cerr.rdbuf(cout2file.rdbuf());
+  cout.rdbuf(cout2file.rdbuf());
+  cerr.rdbuf(cout2file.rdbuf());
 #endif
 
-  std::cerr << std::fixed;
-  std::cout << std::fixed;
-  std::cerr.precision(9);
-  std::cout.precision(9);
+  cerr << std::fixed;
+  cout << std::fixed;
+  cerr.precision(9);
+  cout.precision(9);
 
   Zeni::register_new_handler();
 
-//   std::cerr << "sizeof(env) = " << sizeof(*env) << std::endl;
-//   std::cerr << "sizeof(agent) = " << sizeof(*agent) << std::endl;
-//   std::cerr << "sizeof(Blocks_World::Feature) = " << sizeof(Blocks_World::Feature) << std::endl;
-//   std::cerr << "sizeof(Blocks_World::In_Place) = " << sizeof(Blocks_World::In_Place) << std::endl;
-//   std::cerr << "sizeof(Blocks_World::On_Top) = " << sizeof(Blocks_World::On_Top) << std::endl;
-//   std::cerr << "sizeof(Blocks_World::Move) = " << sizeof(Blocks_World::Move) << std::endl;
-//   std::cerr << "sizeof(Puddle_World::Feature) = " << sizeof(Puddle_World::Feature) << std::endl;
-//   std::cerr << "sizeof(Puddle_World::Move) = " << sizeof(Puddle_World::Move) << std::endl;
-//   std::cerr << "sizeof(Q_Value) = " << sizeof(Q_Value) << std::endl;
-//   std::cerr << "sizeof(Trie) = " << sizeof(Blocks_World::Agent::feature_trie_type) << std::endl;
+//   cerr << "sizeof(env) = " << sizeof(*env) << endl;
+//   cerr << "sizeof(agent) = " << sizeof(*agent) << endl;
+//   cerr << "sizeof(Blocks_World::Feature) = " << sizeof(Blocks_World::Feature) << endl;
+//   cerr << "sizeof(Blocks_World::In_Place) = " << sizeof(Blocks_World::In_Place) << endl;
+//   cerr << "sizeof(Blocks_World::On_Top) = " << sizeof(Blocks_World::On_Top) << endl;
+//   cerr << "sizeof(Blocks_World::Move) = " << sizeof(Blocks_World::Move) << endl;
+//   cerr << "sizeof(Puddle_World::Feature) = " << sizeof(Puddle_World::Feature) << endl;
+//   cerr << "sizeof(Puddle_World::Move) = " << sizeof(Puddle_World::Move) << endl;
+//   cerr << "sizeof(Q_Value) = " << sizeof(Q_Value) << endl;
+//   cerr << "sizeof(Trie) = " << sizeof(Blocks_World::Agent::feature_trie_type) << endl;
 
   Options options = generate_options();
   options.get(argc, argv);
   if(options.optind < argc) {
-    std::cerr << "Unknown trailing arguments:";
+    cerr << "Unknown trailing arguments:";
     while(options.optind < argc)
-      std::cerr << ' ' << argv[options.optind++];
-    std::cerr << std::endl;
-    options.print_help(std::cerr);
-    std::cerr << std::endl;
-    throw std::runtime_error("Unknown trailing arguments.");
+      cerr << ' ' << argv[options.optind++];
+    cerr << endl;
+    options.print_help(cerr);
+    cerr << endl;
+    throw runtime_error("Unknown trailing arguments.");
   }
 
   switch(g_args.environment) {
@@ -448,7 +455,7 @@ int main2(int argc, char **argv) {
       break;
 
     default:
-      throw std::runtime_error("Internal error: g_args.environment");
+      throw runtime_error("Internal error: g_args.environment");
   }
 
 //   test_trie * trie = new test_trie;
@@ -468,7 +475,7 @@ int main2(int argc, char **argv) {
 //   (new test_trie("hi"))->list_insert_before(key);
 //   key = key->insert(trie, Q_Value::list_offset());
 //   for_each((*key)->list.begin(), (*key)->list.end(), [](const Q_Value &q) {
-//     std::cout << q << std::endl;
+//     cout << q << endl;
 //   });
 //   trie->destroy(trie);
 
@@ -487,16 +494,16 @@ int main2(int argc, char **argv) {
 //   values.push_back(m_random.rand_lt(42));
 //   for(auto &value : values) {
 //     mean.contribute(value);
-//     std::cout << "Adding " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << std::endl;
+//     cout << "Adding " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
 //   }
 //   for(auto &value : values) {
 //     mean.uncontribute(value);
-//     std::cout << "Removing " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << std::endl;
+//     cout << "Removing " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
 //   }
 
 #ifdef TO_FILE
-  std::cout.rdbuf(cout_bak);
-  std::cerr.rdbuf(cerr_bak);
+  cout.rdbuf(cout_bak);
+  cerr.rdbuf(cerr_bak);
 #endif
 
   return 0;
@@ -507,10 +514,10 @@ int main(int argc, char **argv) {
     return main2(argc, argv);
   }
   catch(std::exception &ex) {
-    std::cerr << "Exiting with exception: " << ex.what() << std::endl;
+    cerr << "Exiting with exception: " << ex.what() << endl;
   }
   catch(...) {
-    std::cerr << "Exiting with unknown exception." << std::endl;
+    cerr << "Exiting with unknown exception." << endl;
   }
 
   return -1;
@@ -519,7 +526,7 @@ int main(int argc, char **argv) {
 template <typename ENVIRONMENT, typename AGENT>
 void run_agent() {
   Zeni::Random::get().seed(uint32_t(g_args.seed));
-  std::cout << "SEED " << g_args.seed << std::endl;
+  cout << "SEED " << g_args.seed << endl;
 
   auto env = std::make_shared<ENVIRONMENT>();
   env->set_scenario(g_args.scenario);
@@ -535,20 +542,20 @@ void run_agent() {
   agent->set_eligibility_trace_decay_rate(g_args.eligibility_trace_decay_rate);
   agent->set_eligibility_trace_decay_threshold(g_args.eligibility_trace_decay_threshold);
   agent->set_epsilon(g_args.epsilon);
-  if(auto cart_pole = std::dynamic_pointer_cast<Cart_Pole::Environment>(env))
+  if(auto cart_pole = dynamic_pointer_cast<Cart_Pole::Environment>(env))
     cart_pole->set_ignore_x(g_args.ignore_x);
-  if(auto cart_pole = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent))
+  if(auto cart_pole = dynamic_pointer_cast<Cart_Pole::Agent>(agent))
     cart_pole->set_ignore_x(g_args.ignore_x);
   agent->set_learning_rate(g_args.learning_rate);
   agent->set_mean_cabe_queue_size(g_args.mean_cabe_queue_size);
   agent->set_null_q_values(g_args.null_q_values);
   agent->set_on_policy(g_args.on_policy);
   agent->set_pseudoepisode_threshold(g_args.pseudoepisode_threshold);
-  if(auto mountain_car = std::dynamic_pointer_cast<Mountain_Car::Environment>(env)) {
+  if(auto mountain_car = dynamic_pointer_cast<Mountain_Car::Environment>(env)) {
     mountain_car->set_random_start(g_args.random_start);
     mountain_car->set_reward_negative(g_args.reward_negative);
   };
-  if(auto puddle_world = std::dynamic_pointer_cast<Puddle_World::Environment>(env))
+  if(auto puddle_world = dynamic_pointer_cast<Puddle_World::Environment>(env))
     puddle_world->set_random_start(g_args.random_start);
   agent->set_split_min(g_args.split_min);
   agent->set_split_max(g_args.split_max);
@@ -580,7 +587,7 @@ void run_agent() {
     agent->init();
 
 #ifdef DEBUG_OUTPUT
-    std::cerr << *env << *agent;
+    cerr << *env << *agent;
 #endif
     bool done = false;
     do {
@@ -600,61 +607,61 @@ void run_agent() {
         experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, [&agent]()->size_t{return agent->get_value_function_size();});
 
 #ifdef DEBUG_OUTPUT
-      std::cerr << *env << *agent;
+      cerr << *env << *agent;
 #endif
     } while(!done);
 
     if(agent->get_metastate() == Metastate::SUCCESS) {
       if(g_args.output == Arguments::Output::SIMPLE)
-        std::cout << "SUCCESS";
+        cout << "SUCCESS";
       ++successes;
     }
     else {
       if(g_args.output == Arguments::Output::SIMPLE)
-        std::cout << "FAILURE";
+        cout << "FAILURE";
       ++failures;
     }
 
     if(g_args.output == Arguments::Output::SIMPLE)
-      std::cout << " in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << std::endl;
+      cout << " in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << endl;
   }
 
   if(g_args.output == Arguments::Output::SIMPLE) {
-    std::cout << successes << " SUCCESSes" << std::endl;
-    std::cout << failures << " FAILUREs" << std::endl;
-    std::cout << agent->get_value_function_size() << " Q-values" << std::endl;
+    cout << successes << " SUCCESSes" << endl;
+    cout << failures << " FAILUREs" << endl;
+    cout << agent->get_value_function_size() << " Q-values" << endl;
 
     if(g_args.environment == Arguments::Environment::CART_POLE) {
-      auto pwa = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent);
-      pwa->print_policy(std::cout, 32);
+      auto pwa = dynamic_pointer_cast<Cart_Pole::Agent>(agent);
+      pwa->print_policy(cout, 32);
     }
     else if(g_args.environment == Arguments::Environment::MOUNTAIN_CAR) {
-      auto pwa = std::dynamic_pointer_cast<Mountain_Car::Agent>(agent);
-      pwa->print_policy(std::cout, 32);
+      auto pwa = dynamic_pointer_cast<Mountain_Car::Agent>(agent);
+      pwa->print_policy(cout, 32);
     }
     else if(g_args.environment == Arguments::Environment::PUDDLE_WORLD) {
-      auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
-      pwa->print_policy(std::cout, 32);
+      auto pwa = dynamic_pointer_cast<Puddle_World::Agent>(agent);
+      pwa->print_policy(cout, 32);
     }
   }
   else if(g_args.output == Arguments::Output::EXPERIMENTAL) {
     if(g_args.environment == Arguments::Environment::CART_POLE) {
-      auto cpa = std::dynamic_pointer_cast<Cart_Pole::Agent>(agent);
-      cpa->print_policy(std::cerr, 32);
-      cpa->print_value_function_grid(std::cerr);
-      cpa->print_update_count_grid(std::cerr);
+      auto cpa = dynamic_pointer_cast<Cart_Pole::Agent>(agent);
+      cpa->print_policy(cerr, 32);
+      cpa->print_value_function_grid(cerr);
+      cpa->print_update_count_grid(cerr);
     }
     else if(g_args.environment == Arguments::Environment::MOUNTAIN_CAR) {
-      auto mca = std::dynamic_pointer_cast<Mountain_Car::Agent>(agent);
-      mca->print_policy(std::cerr, 32);
-      mca->print_value_function_grid(std::cerr);
-      mca->print_update_count_grid(std::cerr);
+      auto mca = dynamic_pointer_cast<Mountain_Car::Agent>(agent);
+      mca->print_policy(cerr, 32);
+      mca->print_value_function_grid(cerr);
+      mca->print_update_count_grid(cerr);
     }
     else if(g_args.environment == Arguments::Environment::PUDDLE_WORLD) {
-      auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
-      pwa->print_policy(std::cerr, 32);
-      pwa->print_value_function_grid(std::cerr);
-      pwa->print_update_count_grid(std::cerr);
+      auto pwa = dynamic_pointer_cast<Puddle_World::Agent>(agent);
+      pwa->print_policy(cerr, 32);
+      pwa->print_value_function_grid(cerr);
+      pwa->print_update_count_grid(cerr);
     }
   }
 }

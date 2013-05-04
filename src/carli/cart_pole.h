@@ -12,6 +12,15 @@
 
 namespace Cart_Pole {
 
+  using std::dynamic_pointer_cast;
+  using std::endl;
+  using std::make_pair;
+  using std::map;
+  using std::ostream;
+  using std::pair;
+  using std::set;
+  using std::shared_ptr;
+
   class Feature;
   class Feature : public ::Feature<Feature> {
     Feature & operator=(const Feature &) = delete;
@@ -53,7 +62,7 @@ namespace Cart_Pole {
       return new Feature(axis, bound_lower, bound_higher, depth);
     }
 
-    void print_impl(std::ostream &os) const {
+    void print_impl(ostream &os) const {
       switch(axis) {
         case X:         os << 'x';         break;
         case X_DOT:     os << "x-dot";     break;
@@ -94,7 +103,7 @@ namespace Cart_Pole {
       return direction - rhs.direction;
     }
 
-    void print_impl(std::ostream &os) const {
+    void print_impl(ostream &os) const {
       os << "move(";
 
       switch(direction) {
@@ -111,7 +120,7 @@ namespace Cart_Pole {
 
   class Environment : public ::Environment<action_type> {
   public:
-    typedef std::pair<double, double> double_pair;
+    typedef pair<double, double> double_pair;
 
     Environment() {
       Environment::init_impl();
@@ -155,9 +164,9 @@ namespace Cart_Pole {
       return failed() ? -1.0 : 0.0;
     }
 
-    void print_impl(std::ostream &os) const {
-      os << "Cart Pole:" << std::endl;
-      os << " (" << m_x << ", " << m_x_dot << ", " << m_theta << ", " << m_theta_dot << ')' << std::endl;
+    void print_impl(ostream &os) const {
+      os << "Cart Pole:" << endl;
+      os << " (" << m_x << ", " << m_x_dot << ", " << m_theta << ", " << m_theta_dot << ')' << endl;
     }
 
     static double prob_push_right(const double &s);
@@ -177,10 +186,10 @@ namespace Cart_Pole {
 
   class Agent : public ::Agent<feature_type, action_type> {
   public:
-    typedef std::pair<double, double> point_type;
-    typedef std::pair<point_type, point_type> line_segment_type;
+    typedef pair<double, double> point_type;
+    typedef pair<point_type, point_type> line_segment_type;
 
-    Agent(const std::shared_ptr<environment_type> &env)
+    Agent(const shared_ptr<environment_type> &env)
      : ::Agent<feature_type, action_type>(env),
      m_ignore_x(false)
     {
@@ -196,32 +205,32 @@ namespace Cart_Pole {
     bool is_ignoring_x() const {return m_ignore_x;}
     void set_ignore_x(const bool &ignore_x_) {m_ignore_x = ignore_x_;}
 
-    void print_value_function_grid(std::ostream &os) const {
-//       std::set<line_segment_type> line_segments;
+    void print_value_function_grid(ostream &os) const {
+//       set<line_segment_type> line_segments;
 //       std::for_each(m_value_function.begin(), m_value_function.end(), [this,&os,&line_segments](decltype(*m_value_function.begin()) &value) {
-//         os << *value.first << ":" << std::endl;
+//         os << *value.first << ":" << endl;
 //         const auto line_segments2 = this->generate_value_function_grid_sets(value.second);
 //         this->merge_value_function_grid_sets(line_segments, line_segments2);
 //         this->print_value_function_grid_set(os, line_segments2);
 //       });
-//       os << "all:" << std::endl;
+//       os << "all:" << endl;
 //       print_value_function_grid_set(os, line_segments);
     }
 
-    void print_update_count_grid(std::ostream &os) const {
-//       std::map<line_segment_type, size_t> update_counts;
+    void print_update_count_grid(ostream &os) const {
+//       map<line_segment_type, size_t> update_counts;
 //       std::for_each(m_value_function.begin(), m_value_function.end(), [this,&os,&update_counts](decltype(*m_value_function.begin()) &value) {
-//         os << *value.first << ":" << std::endl;
+//         os << *value.first << ":" << endl;
 //         const auto update_counts2 = this->generate_update_count_maps(value.second);
 //         this->merge_update_count_maps(update_counts, update_counts2);
 //         this->print_update_count_map(os, update_counts2);
 //       });
-//       os << "all:" << std::endl;
+//       os << "all:" << endl;
 //       print_update_count_map(os, update_counts);
     }
 
-    void print_policy(std::ostream &os, const size_t &granularity) {
-//       auto env = std::dynamic_pointer_cast<Environment>(get_env());
+    void print_policy(ostream &os, const size_t &granularity) {
+//       auto env = dynamic_pointer_cast<Environment>(get_env());
 //       const auto position = env->get_position();
 // 
 //       for(size_t y = granularity; y != 0lu; --y) {
@@ -237,7 +246,7 @@ namespace Cart_Pole {
 //             default: abort();
 //           }
 //         }
-//         os << std::endl;
+//         os << endl;
 //       }
 // 
 //       env->set_position(position);
@@ -245,8 +254,8 @@ namespace Cart_Pole {
     }
 
   private:
-//     std::set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0))) const {
-//       std::set<line_segment_type> line_segments;
+//     set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0))) const {
+//       set<line_segment_type> line_segments;
 //       if(trie) {
 //         std::for_each(trie->begin(trie), trie->end(trie), [this,&line_segments,&extents](const feature_trie_type &trie2) {
 //           auto new_extents = extents;
@@ -261,13 +270,13 @@ namespace Cart_Pole {
 //           }
 // 
 //           if(new_extents.first.first != extents.first.first)
-//             line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.first.second), std::make_pair(new_extents.first.first, new_extents.second.second)));
+//             line_segments.insert(make_pair(make_pair(new_extents.first.first, new_extents.first.second), make_pair(new_extents.first.first, new_extents.second.second)));
 //           if(new_extents.first.second != extents.first.second)
-//             line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.first.second), std::make_pair(new_extents.second.first, new_extents.first.second)));
+//             line_segments.insert(make_pair(make_pair(new_extents.first.first, new_extents.first.second), make_pair(new_extents.second.first, new_extents.first.second)));
 //           if(new_extents.second.first != extents.second.first)
-//             line_segments.insert(std::make_pair(std::make_pair(new_extents.second.first, new_extents.first.second), std::make_pair(new_extents.second.first, new_extents.second.second)));
+//             line_segments.insert(make_pair(make_pair(new_extents.second.first, new_extents.first.second), make_pair(new_extents.second.first, new_extents.second.second)));
 //           if(new_extents.second.second != extents.second.second)
-//             line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.second.second), std::make_pair(new_extents.second.first, new_extents.second.second)));
+//             line_segments.insert(make_pair(make_pair(new_extents.first.first, new_extents.second.second), make_pair(new_extents.second.first, new_extents.second.second)));
 // 
 //           if(trie2.get_deeper()) {
 //             const auto line_segments2 = this->generate_value_function_grid_sets(trie2.get_deeper(), new_extents);
@@ -278,8 +287,8 @@ namespace Cart_Pole {
 //       return line_segments;
 //     }
 // 
-//     std::map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0)), const size_t &update_count = 0) const {
-//       std::map<line_segment_type, size_t> update_counts;
+//     map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0)), const size_t &update_count = 0) const {
+//       map<line_segment_type, size_t> update_counts;
 //       if(trie) {
 //         std::for_each(trie->begin(trie), trie->end(trie), [this,&update_counts,&extents,&update_count](const feature_trie_type &trie2) {
 //           auto new_extents = extents;
@@ -306,32 +315,32 @@ namespace Cart_Pole {
 //       return update_counts;
 //     }
 // 
-//     void print_value_function_grid_set(std::ostream &os, const std::set<line_segment_type> &line_segments) const {
+//     void print_value_function_grid_set(ostream &os, const set<line_segment_type> &line_segments) const {
 //       std::for_each(line_segments.begin(), line_segments.end(), [&os](const line_segment_type &line_segment) {
-//         os << line_segment.first.first << ',' << line_segment.first.second << '-' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
+//         os << line_segment.first.first << ',' << line_segment.first.second << '-' << line_segment.second.first << ',' << line_segment.second.second << endl;
 //       });
 //     }
 // 
-//     void print_update_count_map(std::ostream &os, const std::map<line_segment_type, size_t> &update_counts) const {
-//       std::for_each(update_counts.begin(), update_counts.end(), [&os](const std::pair<line_segment_type, size_t> &rect) {
-//         os << rect.first.first.first << ',' << rect.first.first.second << '-' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
+//     void print_update_count_map(ostream &os, const map<line_segment_type, size_t> &update_counts) const {
+//       std::for_each(update_counts.begin(), update_counts.end(), [&os](const pair<line_segment_type, size_t> &rect) {
+//         os << rect.first.first.first << ',' << rect.first.first.second << '-' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << endl;
 //       });
 //     }
 // 
-//     void merge_value_function_grid_sets(std::set<line_segment_type> &combination, const std::set<line_segment_type> &additions) const {
+//     void merge_value_function_grid_sets(set<line_segment_type> &combination, const set<line_segment_type> &additions) const {
 //       std::for_each(additions.begin(), additions.end(), [&combination](const line_segment_type &line_segment) {
 //         combination.insert(line_segment);
 //       });
 //     }
 // 
-//     void merge_update_count_maps(std::map<line_segment_type, size_t> &combination, const std::map<line_segment_type, size_t> &additions) const {
-//       std::for_each(additions.begin(), additions.end(), [&combination](const std::pair<line_segment_type, size_t> &rect) {
+//     void merge_update_count_maps(map<line_segment_type, size_t> &combination, const map<line_segment_type, size_t> &additions) const {
+//       std::for_each(additions.begin(), additions.end(), [&combination](const pair<line_segment_type, size_t> &rect) {
 //         combination[rect.first] += rect.second;
 //       });
 //     }
 
     void generate_features() {
-      auto env = std::dynamic_pointer_cast<const Environment>(get_env());
+      auto env = dynamic_pointer_cast<const Environment>(get_env());
 
       assert(!m_features);
 
@@ -384,7 +393,7 @@ namespace Cart_Pole {
       }
     }
 
-    bool generate_feature_ranged(const std::shared_ptr<const Environment> &env, feature_trie &trie, const Feature::List * const &tail, Feature::List * &tail_next) {
+    bool generate_feature_ranged(const shared_ptr<const Environment> &env, feature_trie &trie, const Feature::List * const &tail, Feature::List * &tail_next) {
       auto match = std::find_if(trie->begin(), trie->end(), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
 
       if(match && match->get() && match->get()->type != Q_Value::Type::FRINGE) {
@@ -403,7 +412,7 @@ namespace Cart_Pole {
     }
 
     void generate_candidates() {
-      auto env = std::dynamic_pointer_cast<const Environment>(get_env());
+      auto env = dynamic_pointer_cast<const Environment>(get_env());
 
       assert(!m_candidates);
 
@@ -412,7 +421,7 @@ namespace Cart_Pole {
     }
 
     void update() {
-      auto env = std::dynamic_pointer_cast<const Environment>(get_env());
+      auto env = dynamic_pointer_cast<const Environment>(get_env());
 
       if(env->failed())
         m_metastate = Metastate::FAILURE;

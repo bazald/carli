@@ -13,6 +13,15 @@
 
 namespace Puddle_World {
 
+  using std::dynamic_pointer_cast;
+  using std::endl;
+  using std::make_pair;
+  using std::map;
+  using std::ostream;
+  using std::pair;
+  using std::set;
+  using std::shared_ptr;
+
   class Feature;
   class Feature : public ::Feature<Feature> {
     Feature & operator=(const Feature &) = delete;
@@ -54,7 +63,7 @@ namespace Puddle_World {
       return new Feature(axis, bound_lower, bound_higher, depth);
     }
 
-    void print_impl(std::ostream &os) const {
+    void print_impl(ostream &os) const {
       os << (axis == X ? 'x' : 'y') << '(' << bound_lower << ',' << bound_higher << ':' << depth << ')';
     }
 
@@ -87,7 +96,7 @@ namespace Puddle_World {
       return direction - rhs.direction;
     }
 
-    void print_impl(std::ostream &os) const {
+    void print_impl(ostream &os) const {
       os << "move(";
 
       switch(direction) {
@@ -108,7 +117,7 @@ namespace Puddle_World {
     typedef std::array<double, 4> Puddle;
 
   public:
-    typedef std::pair<double, double> double_pair;
+    typedef pair<double, double> double_pair;
 
     Environment()
      : m_init_x(0.15, 0.45),
@@ -161,31 +170,31 @@ namespace Puddle_World {
 //       m_vertical_puddles.at(0)[2] = 0.6;
 //       m_horizontal_puddles.push_back({{0.6, 0.75, 0.5, 0.1}});
 //       m_goal_dynamic = true;
-//       m_goal_x = std::make_pair(0.4, 0.5);
-//       m_goal_y = std::make_pair(0.7, 0.8);
+//       m_goal_x = make_pair(0.4, 0.5);
+//       m_goal_y = make_pair(0.7, 0.8);
 
       if(get_scenario() < 100)
         return;
 
       else if(get_scenario() < 110) {
         m_goal_dynamic = true;
-        m_goal_x = std::make_pair(0.8, 0.85);
-        m_goal_y = std::make_pair(0.9, 1.0);
+        m_goal_x = make_pair(0.8, 0.85);
+        m_goal_y = make_pair(0.9, 1.0);
       }
       else if(get_scenario() < 120) {
         m_goal_dynamic = true;
-        m_goal_x = std::make_pair(0.7, 0.75);
-        m_goal_y = std::make_pair(0.9, 1.0);
+        m_goal_x = make_pair(0.7, 0.75);
+        m_goal_y = make_pair(0.9, 1.0);
       }
       else if(get_scenario() < 130) {
         m_goal_dynamic = true;
-        m_goal_x = std::make_pair(0.5, 0.55);
-        m_goal_y = std::make_pair(0.9, 1.0);
+        m_goal_x = make_pair(0.5, 0.55);
+        m_goal_y = make_pair(0.9, 1.0);
       }
       else if(get_scenario() < 200) {
         m_goal_dynamic = true;
-        m_goal_x = std::make_pair(0.1, 0.15);
-        m_goal_y = std::make_pair(0.9, 1.0);
+        m_goal_x = make_pair(0.1, 0.15);
+        m_goal_y = make_pair(0.9, 1.0);
       }
 
       else if(get_scenario() < 210) {
@@ -281,9 +290,9 @@ namespace Puddle_World {
       return value * value;
     }
 
-    void print_impl(std::ostream &os) const {
-      os << "Puddle World:" << std::endl;
-      os << " (" << m_position.first << ", " << m_position.second << ')' << std::endl;
+    void print_impl(ostream &os) const {
+      os << "Puddle World:" << endl;
+      os << " (" << m_position.first << ", " << m_position.second << ')' << endl;
     }
 
     Zeni::Random m_random_init;
@@ -309,10 +318,10 @@ namespace Puddle_World {
 
   class Agent : public ::Agent<feature_type, action_type> {
   public:
-    typedef std::pair<double, double> point_type;
-    typedef std::pair<point_type, point_type> line_segment_type;
+    typedef pair<double, double> point_type;
+    typedef pair<point_type, point_type> line_segment_type;
 
-    Agent(const std::shared_ptr<environment_type> &env)
+    Agent(const shared_ptr<environment_type> &env)
      : ::Agent<feature_type, action_type>(env)
     {
       set_credit_assignment(Credit_Assignment::INV_LOG_UPDATE_COUNT);
@@ -324,32 +333,32 @@ namespace Puddle_World {
       m_features_complete = false;
     }
 
-    void print_value_function_grid(std::ostream &os) const {
-      std::set<line_segment_type> line_segments;
+    void print_value_function_grid(ostream &os) const {
+      set<line_segment_type> line_segments;
       for(auto &value : m_value_function) {
-        os << *value.first << ":" << std::endl;
+        os << *value.first << ":" << endl;
         const auto line_segments2 = generate_value_function_grid_sets(value.second);
         merge_value_function_grid_sets(line_segments, line_segments2);
         print_value_function_grid_set(os, line_segments2);
       }
-      os << "all:" << std::endl;
+      os << "all:" << endl;
       print_value_function_grid_set(os, line_segments);
     }
 
-    void print_update_count_grid(std::ostream &os) const {
-      std::map<line_segment_type, size_t> update_counts;
+    void print_update_count_grid(ostream &os) const {
+      map<line_segment_type, size_t> update_counts;
       for(auto &value : m_value_function) {
-        os << *value.first << ":" << std::endl;
+        os << *value.first << ":" << endl;
         const auto update_counts2 = generate_update_count_maps(value.second);
         merge_update_count_maps(update_counts, update_counts2);
         print_update_count_map(os, update_counts2);
       }
-      os << "all:" << std::endl;
+      os << "all:" << endl;
       print_update_count_map(os, update_counts);
     }
 
-    void print_policy(std::ostream &os, const size_t &granularity) {
-      auto env = std::dynamic_pointer_cast<Environment>(get_env());
+    void print_policy(ostream &os, const size_t &granularity) {
+      auto env = dynamic_pointer_cast<Environment>(get_env());
       const auto position = env->get_position();
 
       for(size_t y = granularity; y != 0lu; --y) {
@@ -365,7 +374,7 @@ namespace Puddle_World {
             default: abort();
           }
         }
-        os << std::endl;
+        os << endl;
       }
 
       env->set_position(position);
@@ -373,8 +382,8 @@ namespace Puddle_World {
     }
 
   private:
-    std::set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0))) const {
-      std::set<line_segment_type> line_segments;
+    set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0))) const {
+      set<line_segment_type> line_segments;
       if(trie) {
         for(const feature_trie_type &trie2 : *trie) {
           auto new_extents = extents;
@@ -389,13 +398,13 @@ namespace Puddle_World {
           }
 
           if(new_extents.first.first != extents.first.first)
-            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.first.second), std::make_pair(new_extents.first.first, new_extents.second.second)));
+            line_segments.insert(make_pair(make_pair(new_extents.first.first, new_extents.first.second), make_pair(new_extents.first.first, new_extents.second.second)));
           if(new_extents.first.second != extents.first.second)
-            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.first.second), std::make_pair(new_extents.second.first, new_extents.first.second)));
+            line_segments.insert(make_pair(make_pair(new_extents.first.first, new_extents.first.second), make_pair(new_extents.second.first, new_extents.first.second)));
           if(new_extents.second.first != extents.second.first)
-            line_segments.insert(std::make_pair(std::make_pair(new_extents.second.first, new_extents.first.second), std::make_pair(new_extents.second.first, new_extents.second.second)));
+            line_segments.insert(make_pair(make_pair(new_extents.second.first, new_extents.first.second), make_pair(new_extents.second.first, new_extents.second.second)));
           if(new_extents.second.second != extents.second.second)
-            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.second.second), std::make_pair(new_extents.second.first, new_extents.second.second)));
+            line_segments.insert(make_pair(make_pair(new_extents.first.first, new_extents.second.second), make_pair(new_extents.second.first, new_extents.second.second)));
 
           if(trie2.get_deeper()) {
             const auto line_segments2 = this->generate_value_function_grid_sets(trie2.get_deeper(), new_extents);
@@ -406,8 +415,8 @@ namespace Puddle_World {
       return line_segments;
     }
 
-    std::map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0)), const size_t &update_count = 0) const {
-      std::map<line_segment_type, size_t> update_counts;
+    map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0)), const size_t &update_count = 0) const {
+      map<line_segment_type, size_t> update_counts;
       if(trie) {
         for(const feature_trie_type &trie2 : *trie) {
           auto new_extents = extents;
@@ -434,28 +443,28 @@ namespace Puddle_World {
       return update_counts;
     }
 
-    void print_value_function_grid_set(std::ostream &os, const std::set<line_segment_type> &line_segments) const {
+    void print_value_function_grid_set(ostream &os, const set<line_segment_type> &line_segments) const {
       for(const line_segment_type &line_segment : line_segments)
-        os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
+        os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << endl;
     }
 
-    void print_update_count_map(std::ostream &os, const std::map<line_segment_type, size_t> &update_counts) const {
+    void print_update_count_map(ostream &os, const map<line_segment_type, size_t> &update_counts) const {
       for(const auto &rect : update_counts)
-        os << rect.first.first.first << ',' << rect.first.first.second << '/' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
+        os << rect.first.first.first << ',' << rect.first.first.second << '/' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << endl;
     }
 
-    void merge_value_function_grid_sets(std::set<line_segment_type> &combination, const std::set<line_segment_type> &additions) const {
+    void merge_value_function_grid_sets(set<line_segment_type> &combination, const set<line_segment_type> &additions) const {
       for(const line_segment_type &line_segment : additions)
         combination.insert(line_segment);
     }
 
-    void merge_update_count_maps(std::map<line_segment_type, size_t> &combination, const std::map<line_segment_type, size_t> &additions) const {
+    void merge_update_count_maps(map<line_segment_type, size_t> &combination, const map<line_segment_type, size_t> &additions) const {
       for(const auto &rect : additions)
         combination[rect.first] += rect.second;
     }
 
     void generate_features() {
-      auto env = std::dynamic_pointer_cast<const Environment>(get_env());
+      auto env = dynamic_pointer_cast<const Environment>(get_env());
 
       assert(!m_features);
 
@@ -490,7 +499,7 @@ namespace Puddle_World {
       }
     }
 
-    bool generate_feature_ranged(const std::shared_ptr<const Environment> &env, feature_trie &trie, const Feature::List * const &tail, Feature::List * &tail_next) {
+    bool generate_feature_ranged(const shared_ptr<const Environment> &env, feature_trie &trie, const Feature::List * const &tail, Feature::List * &tail_next) {
       auto match = std::find_if(trie->begin(), trie->end(), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
 
       if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
@@ -509,7 +518,7 @@ namespace Puddle_World {
     }
 
     void generate_candidates() {
-      auto env = std::dynamic_pointer_cast<const Environment>(get_env());
+      auto env = dynamic_pointer_cast<const Environment>(get_env());
 
       assert(!m_candidates);
 
@@ -520,7 +529,7 @@ namespace Puddle_World {
     }
 
     void update() {
-      auto env = std::dynamic_pointer_cast<const Environment>(get_env());
+      auto env = dynamic_pointer_cast<const Environment>(get_env());
 
       m_metastate = env->goal_reached() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
     }

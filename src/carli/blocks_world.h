@@ -9,6 +9,10 @@
 #include <stdexcept>
 
 namespace Blocks_World {
+
+  using std::dynamic_pointer_cast;
+  using std::endl;
+  using std::ostream;
   
   typedef int block_id;
 
@@ -53,7 +57,7 @@ namespace Blocks_World {
       return new In_Place(*this);
     }
 
-    void print_impl(std::ostream &os) const {
+    void print_impl(ostream &os) const {
       os << "in-place(" << block << ')';
     }
 
@@ -89,7 +93,7 @@ namespace Blocks_World {
       return new On_Top(*this);
     }
 
-    void print_impl(std::ostream &os) const {
+    void print_impl(ostream &os) const {
       os << "on-top(" << top << ',' << bottom << ')';
     }
 
@@ -132,7 +136,7 @@ namespace Blocks_World {
       return block != rhs.block ? block - rhs.block : dest - rhs.dest;
     }
 
-    void print_impl(std::ostream &os) const {
+    void print_impl(ostream &os) const {
       os << "move(" << block << ',' << dest << ')';
     }
 
@@ -199,12 +203,12 @@ namespace Blocks_World {
       return reward_type(-1);
     }
 
-    void print_impl(std::ostream &os) const {
-      os << "Blocks World:" << std::endl;
+    void print_impl(ostream &os) const {
+      os << "Blocks World:" << endl;
       for(const Stack &stack : m_blocks) {
         for(const block_id &id : stack)
           os << ' ' << id;
-        os << std::endl;
+        os << endl;
       }
     }
 
@@ -226,7 +230,7 @@ namespace Blocks_World {
 
   private:
     void generate_features() {
-      auto env = std::dynamic_pointer_cast<const Environment>(get_env());
+      auto env = dynamic_pointer_cast<const Environment>(get_env());
 
       assert(!m_features);
 
@@ -288,7 +292,7 @@ namespace Blocks_World {
     }
 
     void generate_candidates() {
-      auto env = std::dynamic_pointer_cast<const Environment>(get_env());
+      auto env = dynamic_pointer_cast<const Environment>(get_env());
 
       assert(!m_candidates);
 
@@ -309,7 +313,7 @@ namespace Blocks_World {
     }
 
     void update() {
-      auto env = std::dynamic_pointer_cast<const Environment>(get_env());
+      auto env = dynamic_pointer_cast<const Environment>(get_env());
 
       m_metastate = env->get_blocks() == env->get_goal() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
     }
