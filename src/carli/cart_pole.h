@@ -388,7 +388,7 @@ namespace Cart_Pole {
       auto match = std::find_if(trie->begin(trie), trie->end(trie), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
 
       if(match && match->get() && match->get()->type != Q_Value::Type::FRINGE) {
-        auto feature = match->get_key();
+        const auto &feature = match->get_key();
         const auto midpt = feature->midpt();
         if(env->get_value(feature->axis) < midpt)
           tail_next = &(new Feature(feature->axis, feature->bound_lower, midpt, feature->depth + 1))->features;

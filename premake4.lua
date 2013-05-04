@@ -1,12 +1,13 @@
 solution "carli"
   configurations { "Debug", "Release" }
 
+  premake.gcc.cc = "clang"
+  premake.gcc.cxx = "clang++"
+
   if os.get() == "windows" then
     defines { "_WINDOWS", "WIN32", "_CRT_SECURE_NO_DEPRECATE" }
     platforms { "x32", "x64" }
   elseif os.get() == "macosx" then
-    premake.gcc.cc = "clang"
-    premake.gcc.cxx = "clang++"
     defines { "_MACOSX" }
     platforms { "native", "universal" }
   else
@@ -15,6 +16,8 @@ solution "carli"
   end
 
   flags { "ExtraWarnings" }
+  buildoptions { "-std=c++11", "-pedantic" }
+  include "src/carli"
 
   configuration "Debug*"
     defines { "_DEBUG", "DEBUG" }
@@ -29,8 +32,3 @@ solution "carli"
     buildoptions { "-Qunused-arguments" }
     buildoptions { "-stdlib=libc++" }
     linkoptions { "-stdlib=libc++" }
-
-  configuration "linux or macosx"
-    buildoptions { "-std=c++0x", "-pedantic" }
-
-  include "src/carli"
