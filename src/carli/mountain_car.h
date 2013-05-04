@@ -249,7 +249,7 @@ namespace Mountain_Car {
     std::set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(-1.2, 0.6), point_type(-0.07, 0.07))) const {
       std::set<line_segment_type> line_segments;
       if(trie) {
-        std::for_each(trie->begin(trie), trie->end(trie), [this,&line_segments,&extents](const feature_trie_type &trie2) {
+        for(const feature_trie_type &trie2 : *trie) {
           auto new_extents = extents;
           const auto &key = trie2.get_key();
           if(key->axis == Feature::X) {
@@ -274,7 +274,7 @@ namespace Mountain_Car {
             const auto line_segments2 = this->generate_value_function_grid_sets(trie2.get_deeper(), new_extents);
             this->merge_value_function_grid_sets(line_segments, line_segments2);
           }
-        });
+        }
       }
       return line_segments;
     }
@@ -282,7 +282,7 @@ namespace Mountain_Car {
     std::map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(-1.2, 0.6), point_type(-0.07, 0.07)), const size_t &update_count = 0) const {
       std::map<line_segment_type, size_t> update_counts;
       if(trie) {
-        std::for_each(trie->begin(trie), trie->end(trie), [this,&update_counts,&extents,&update_count](const feature_trie_type &trie2) {
+        for(const feature_trie_type &trie2 : *trie) {
           auto new_extents = extents;
           const auto &key = trie2.get_key();
           if(key->axis == Feature::X) {
@@ -302,7 +302,7 @@ namespace Mountain_Car {
             const auto update_counts2 = this->generate_update_count_maps(trie2.get_deeper(), new_extents, update_count2);
             this->merge_update_count_maps(update_counts, update_counts2);
           }
-        });
+        }
       }
       return update_counts;
     }
@@ -363,7 +363,7 @@ namespace Mountain_Car {
     }
 
     bool generate_feature_ranged(const std::shared_ptr<const Environment> &env, feature_trie &trie, const Feature::List * const &tail, Feature::List * &tail_next) {
-      auto match = std::find_if(trie->begin(trie), trie->end(trie), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
+      auto match = std::find_if(trie->begin(), trie->end(), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
 
       if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
         auto feature = match->get_key();

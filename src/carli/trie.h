@@ -91,7 +91,24 @@ namespace Zeni {
     value_pointer_type operator->() {
       return m_value;
     }
-    
+
+    /// return an iterator_const pointing to this list entry; only the beginning if !prev()
+    typename list_value_type::iterator_const begin() const {
+      return this ? typename list_value_type::iterator_const(this) : typename list_value_type::iterator_const();
+    }
+    /// return an iterator pointing to this list entry; only the beginning if !prev()
+    typename list_value_type::iterator begin() {
+      return this ? typename list_value_type::iterator(const_cast<trie_pointer_type>(this)) : typename list_value_type::iterator();
+    }
+    /// return an iterator_const pointing to an empty list entry of the appropriate size
+    typename list_value_type::iterator_const end() const {
+      return this ? typename list_value_type::iterator_const(list_value_type::offset()) : typename list_value_type::iterator_const();
+    }
+    /// return an iterator pointing to an empty list entry of the appropriate size
+    typename list_value_type::iterator end() {
+      return this ? typename list_value_type::iterator(list_value_type::offset()) : typename list_value_type::iterator();
+    }
+
     const trie_value_type * get_deeper() const {return m_deeper;}
     trie_pointer_type & get_deeper() {return m_deeper;}
 

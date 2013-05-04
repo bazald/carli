@@ -271,26 +271,22 @@ namespace Zeni {
     Linked_List * next() const {
       return m_next;
     }
-    
+
     /// return an iterator_const pointing to this list entry; only the beginning if !prev()
-    template <typename DERIVED>
-    static iterator_const begin(const DERIVED * const &ptr) {
-      return ptr ? iterator_const(ptr) : iterator_const();
+    iterator_const begin() const {
+      return this ? iterator_const(this) : iterator_const();
     }
     /// return an iterator pointing to this list entry; only the beginning if !prev()
-    template <typename DERIVED>
-    static iterator begin(DERIVED * const &ptr) {
-      return ptr ? iterator(ptr) : iterator();
+    iterator begin() {
+      return this ? iterator(this) : iterator();
     }
     /// return an iterator_const pointing to an empty list entry of the appropriate size
-    template <typename DERIVED>
-    static iterator_const end(const DERIVED * const &ptr) {
-      return ptr ? iterator_const(ptr->offset()) : iterator_const();
+    iterator_const end() const {
+      return this ? iterator_const(offset()) : iterator_const();
     }
     /// return an iterator pointing to an empty list entry of the appropriate size
-    template <typename DERIVED>
-    static iterator end(DERIVED * const &ptr) {
-      return ptr ? iterator(ptr->offset()) : iterator();
+    iterator end() {
+      return this ? iterator(offset()) : iterator();
     }
 
     /// insert this list entry after ptr; requires this or ptr to have !next()
@@ -419,8 +415,8 @@ namespace Zeni {
     }
     template <typename DERIVED>
     static void destroy(DERIVED * &ptr_) {
-      auto it = begin(ptr_);
-      auto iend = end(ptr_);
+      auto it = ptr_->begin();
+      auto iend = ptr_->end();
       while(it != iend) {
         auto ptr = it.get();
         ++it;

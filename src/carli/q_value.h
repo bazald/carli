@@ -53,13 +53,6 @@ public:
   double minbe = DBL_MAX; ///< Minimum Bellman Error experienced
 #endif
 
-#ifdef TRACK_Q_VALUE_VARIANCE
-  double mean2 = 0.0;
-  double variance_0 = 0.0;
-  double variance_rest = 0.0;
-  Value variance_total;
-#endif
-
   double t0; ///< temp "register"
 
   List eligible;

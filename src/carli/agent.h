@@ -502,8 +502,8 @@ protected:
       try {
         feature_trie head = nullptr;
 
-        auto it = features->begin(features);
-        auto iend = features->end(features);
+        auto it = features->begin();
+        auto iend = features->end();
         if(it != iend) {
           head = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
           auto tail = head;
@@ -562,14 +562,14 @@ protected:
 
     double value = double();
     const action_type * action = nullptr;
-    std::for_each(m_candidates->begin(m_candidates), m_candidates->end(m_candidates), [this,&action,&value](const action_type &action_) {
+    for(const action_type &action_ : *m_candidates) {
       const double value_ = sum_value(&action_, this->get_value(m_features, action_, Q_Value::next_offset())->next);
 
       if(!action || value_ > value) {
         action = &action_;
         value = value_;
       }
-    });
+    }
 
     return action_ptruc(action->clone());
   }
@@ -580,17 +580,17 @@ protected:
 #endif
 
     int counter = 0;
-    std::for_each(m_candidates->begin(m_candidates), m_candidates->end(m_candidates), [this,&counter](const action_type &action_) {
+    for(const action_type &action_ : *m_candidates) {
       ++counter;
       this->get_value(m_features, action_, Q_Value::next_offset()); ///< Trigger additional feature generation, as needed
-    });
+    }
 
     counter = random.rand_lt(counter) + 1;
     const action_type * action = nullptr;
-    std::for_each(m_candidates->begin(m_candidates), m_candidates->end(m_candidates), [&counter,&action](const action_type &action_) {
+    for(const action_type &action_ : *m_candidates) {
       if(!--counter)
         action = &action_;
-    });
+    }
 
     return action_ptruc(action->clone());
   }
@@ -603,48 +603,31 @@ protected:
     const double target_value = reward + target_next;
 
     double q_old = double();
-    Q_Value * last = nullptr;
 #ifdef DEBUG_OUTPUT
     std::cerr << " current :";
 #endif
-    std::for_each(current->begin(current), current->end(current), [&q_old,&last](Q_Value &q) {
+    for(Q_Value &q : *current) {
       if(q.type != Q_Value::Type::FRINGE) {
         q_old += q.value * q.weight;
 #ifdef DEBUG_OUTPUT
         std::cerr << ' ' << &q;
 #endif
       }
-
-      last = &q;
-    });
+    }
 #ifdef DEBUG_OUTPUT
     std::cerr << std::endl;
     std::cerr << " next    :";
-    std::for_each(next->begin(next), next->end(next), [](const Q_Value &q) {
+    for(const Q_Value &q : *next) {
       if(q.type != Q_Value::Type::FRINGE)
         std::cerr << ' ' << &q;
-    });
-    std::cerr << std::endl;
-#endif
-
-#ifdef TRACK_Q_VALUE_VARIANCE
-    double variance_total_next = double();
-    if(next) {
-      std::for_each(next->begin(next), next->end(next), [&variance_total_next](const Q_Value &q) {
-        if(q.type != Q_Value::Type::FRINGE)
-          variance_total_next += q.variance_total;
-      });
     }
+    std::cerr << std::endl;
 #endif
 
     m_credit_assignment(current);
 
-    std::for_each(current->begin(current), current->end(current), [this](Q_Value &q) {
+    for(Q_Value &q : *current) {
       ++q.update_count;
-
-//     assert(last);
-//     {
-//       Q_Value &q = *last;
 
       const double credit = this->m_learning_rate * q.credit;
 //       const double credit_accum = credit + (q.eligibility < 0.0 ? 0.0 : q.eligibility);
@@ -658,8 +641,7 @@ protected:
         q.eligibility_init = true;
         q.eligibility = credit;
       }
-//     }
-    });
+    }
 
 #ifdef DEBUG_OUTPUT
     double q_new = 0.0;
@@ -668,10 +650,6 @@ protected:
     for(Q_Value::List * q_ptr = m_eligible; q_ptr; ) {
       Q_Value &q = **q_ptr;
       q_ptr = q.eligible.next();
-
-#ifdef TRACK_Q_VALUE_VARIANCE
-      const double local_old = q.value;
-#endif
       
       const double ldelta = m_weight_assignment_code != Credit_Assignment::ALL ? target_value - q.value : delta;
       const double edelta = q.eligibility * ldelta;
@@ -687,9 +665,6 @@ protected:
 #endif
         if(!m_mean_cabe_queue_size)
           this->m_mean_cabe.uncontribute(q.cabe);
-#ifdef TRACK_Q_VALUE_VARIANCE
-        this->m_mean_variance.uncontribute(q.variance_total);
-#endif
       }
       else if(q.type == Q_Value::Type::UNSPLIT) {
         const double abs_edelta = std::abs(edelta);
@@ -730,19 +705,6 @@ protected:
           this->m_mean_mabe.contribute(q.mabe);
 #endif
         }
-
-#ifdef TRACK_Q_VALUE_VARIANCE
-        if(q.update_count > 1) {
-          const double x = local_old + delta;
-          const double mdelta = (x - local_old) * (x - q.value);
-
-          q.mean2 += mdelta / q.credit; ///< divide by q.credit to prevent shrinking of estimated variance due to credit assignment
-          q.variance_0 = q.mean2 / (q.update_count - 1);
-          q.variance_rest += local_learning_rate * (q.credit * this->m_discount_rate * variance_total_next - q.variance_rest);
-          q.variance_total = q.variance_0 + q.variance_rest;
-          this->m_mean_variance.contribute(q.variance_total);
-        }
-#endif
       }
 
       assert(q.eligibility >= 0.0);
@@ -761,7 +723,7 @@ protected:
     std::cerr << "            " << delta << " = " << target_value << " - " << q_old << std::endl;
     std::cerr << "            " << q_new << std::endl;
 
-    std::for_each(current->begin(current), current->end(current), [this](const Q_Value &q) {
+    for(Q_Value &q : *current) {
       if(q.type == Q_Value::Type::UNSPLIT) {
         std::cerr << " updates:  " << q.update_count << std::endl;
         if(m_mean_cabe_queue_size)
@@ -771,19 +733,16 @@ protected:
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
         std::cerr << " mabe:     " << q.mabe << " of " << this->m_mean_mabe << ':' << this->m_mean_mabe.get_stddev() << std::endl;
 #endif
-#ifdef TRACK_Q_VALUE_VARIANCE
-        std::cerr << " variance: " << q.variance_total << " of " << this->m_mean_variance << ':' << this->m_mean_variance.get_stddev() << std::endl;
-#endif
       }
-    });
+    }
 #endif
   }
   
   void clear_eligibility_trace() {
-    std::for_each(m_eligible->begin(m_eligible), m_eligible->end(m_eligible), [this](Q_Value &q) {
+    for(Q_Value &q : *m_eligible) {
       q.eligibility_init = false;
       q.eligibility = -1.0;
-    });
+    }
 
     m_eligible = nullptr;
   }
@@ -791,9 +750,8 @@ protected:
   void assign_weight(Q_Value::List * const &value_list) {
     m_weight_assignment(value_list);
 
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [](Q_Value &q) {
+    for(Q_Value &q : *value_list)
       q.weight = q.type == Q_Value::Type::FRINGE ? 0.0 : q.credit;
-    });
   }
 
   void assign_credit_epsilon(Q_Value::List * const &value_list,
@@ -802,24 +760,22 @@ protected:
   {
     (this->*exploration)(value_list);
 
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [](Q_Value &q) {
+    for(Q_Value &q : *value_list)
       q.t0 = q.credit;
-    });
 
     (this->*target)(value_list);
 
     const double inverse = 1.0 - this->m_credit_assignment_epsilon;
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [this,&inverse](Q_Value &q) {
+    for(Q_Value &q : *value_list)
       q.credit = this->m_credit_assignment_epsilon * q.credit + inverse * q.t0;
-    });
   }
 
   void assign_credit_specific(Q_Value::List * const &value_list) {
     Q_Value * last = nullptr;
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&last](Q_Value &q) {
+    for(Q_Value &q : *value_list) {
       q.credit = q.type == Q_Value::Type::FRINGE ? 1.0 : 0.0;
       last = &q;
-    });
+    }
 
     if(last)
       last->credit = 1.0;
@@ -827,84 +783,82 @@ protected:
 
   void assign_credit_evenly(Q_Value::List * const &value_list) {
     double count = double();
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](const Q_Value &q) {
+    for(Q_Value &q : *value_list) {
       if(q.type != Q_Value::Type::FRINGE)
         ++count;
-    });
+    }
 
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&count](Q_Value &q) {
+    for(Q_Value &q : *value_list)
       q.credit = q.type == Q_Value::Type::FRINGE ? 1.0 : 1.0 / count;
-    });
   }
 
   void assign_credit_all(Q_Value::List * const &value_list) {
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [](Q_Value &q) {
+    for(Q_Value &q : *value_list)
       q.credit = 1.0;
-    });
   }
 
   void assign_credit_inv_update_count(Q_Value::List * const &value_list) {
     double sum = double();
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
+    for(Q_Value &q : *value_list) {
       if(q.type != Q_Value::Type::FRINGE) {
         q.credit = 1.0 / q.update_count;
         sum += q.credit;
       }
-    });
+    }
     
     assign_credit_normalize(value_list, sum);
   }
 
   void assign_credit_inv_log_update_count(Q_Value::List * const &value_list) {
     double sum = double();
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [this,&sum](Q_Value &q) {
+    for(Q_Value &q : *value_list) {
       if(q.type != Q_Value::Type::FRINGE) {
         q.credit = 1.0 / (std::log(double(q.update_count)) / this->m_credit_assignment_log_base_value + 1.0);
         sum += q.credit;
       }
-    });
+    }
     
     assign_credit_normalize(value_list, sum);
   }
 
   void assign_credit_inv_root_update_count(Q_Value::List * const &value_list) {
     double sum = double();
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [this,&sum](Q_Value &q) {
+    for(Q_Value &q : *value_list) {
       if(q.type != Q_Value::Type::FRINGE) {
         q.credit = 1.0 / std::pow(double(q.update_count), this->m_credit_assignment_root_value);
         sum += q.credit;
       }
-    });
+    }
     
     assign_credit_normalize(value_list, sum);
   }
 
   void assign_credit_inv_depth(Q_Value::List * const &value_list) {
     size_t depth = 0;
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&depth](Q_Value &q) {
+    for(Q_Value &q : *value_list) {
       if(q.type != Q_Value::Type::FRINGE)
         ++depth;
-    });
+    }
 
     double sum = double();
-    std::for_each(value_list->begin(value_list), value_list->end(value_list), [&depth,&sum](Q_Value &q) {
+    for(Q_Value &q : *value_list) {
       if(q.type != Q_Value::Type::FRINGE) {
         q.credit = 1.0 / std::pow(2.0, double(--depth));
         sum += q.credit;
       }
-    });
+    }
     
     assign_credit_normalize(value_list, sum);
   }
 
   void assign_credit_normalize(Q_Value::List * const &value_list, const double &sum) {
     if(m_credit_assignment_normalize || sum > 1.0) {
-      std::for_each(value_list->begin(value_list), value_list->end(value_list), [&sum](Q_Value &q) {
+      for(Q_Value &q : *value_list) {
         if(q.type == Q_Value::Type::FRINGE)
           q.credit = 1.0;
         else
           q.credit /= sum;
-      });
+      }
     }
   }
 
@@ -946,7 +900,7 @@ protected:
 #endif
 
     double sum = double();
-    std::for_each(value_list.begin(&value_list), value_list.end(&value_list), [&action,&sum](const Q_Value &q) {
+    for(const Q_Value &q : value_list) {
       if(q.type != Q_Value::Type::FRINGE) {
 #ifdef DEBUG_OUTPUT
         if(action)
@@ -955,7 +909,7 @@ protected:
 
         sum += q.value * q.weight;
       }
-    });
+    }
 
 #ifdef DEBUG_OUTPUT
     if(action)
@@ -970,9 +924,8 @@ protected:
   static void print_list(std::ostream &os, const std::string &head, const std::string &pre, const LIST &list) {
     if(list) {
       os << head;
-      std::for_each(list->begin(list), list->end(list), [&os,&pre](decltype(*list->begin(list)) &value) {
+      for(const auto &value : *list)
         os << pre << value;
-      });
       os << std::endl;
     }
   }
@@ -992,26 +945,26 @@ protected:
 private:
   static size_t get_trie_size(const feature_trie_type * const &trie) {
     size_t size = 0lu;
-    std::for_each(trie->begin(trie), trie->end(trie), [&size](const feature_trie_type &trie2) {
+    for(const feature_trie_type &trie2 : *trie) {
       if(trie2.get())
         ++size;
       size += get_trie_size(trie2.get_deeper());
-    });
+    }
     return size;
   }
 
   static void reset_update_counts_for_trie(const feature_trie_type * const &trie) {
-    std::for_each(trie->begin(trie), trie->end(trie), [](const feature_trie_type &trie2) {
+    for(const feature_trie_type &trie2 : *trie) {
       if(trie2.get())
         trie2.get()->update_count = 1;
       reset_update_counts_for_trie(trie2.get_deeper());
-    });
+    }
   }
 
   feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const double &value = 0.0) {
     /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
-    auto match = std::find_first_of(head->begin(head), head->end(head),
-                                    function->begin(function), function->end(function),
+    auto match = std::find_first_of(head->begin(), head->end(),
+                                    function->begin(), function->end(),
                                     [](const feature_trie_type &lhs, const feature_trie_type &rhs)->bool {
                                       return lhs.get_key()->compare_pi(*rhs.get_key()) == 0;
                                     });
@@ -1095,7 +1048,7 @@ private:
       auto next = static_cast<feature_trie>(head->next());
       head->erase();
 
-      auto predecessor = std::find_if(leaf_fringe->begin(leaf_fringe), leaf_fringe->end(leaf_fringe),
+      auto predecessor = std::find_if(leaf_fringe->begin(), leaf_fringe->end(),
                                       [&head](const feature_trie_type &existing)->bool {
                                         return existing.get_key()->precedes(*head->get_key());
                                       });
@@ -1144,20 +1097,18 @@ private:
 #endif
 
   static void print_value_function_trie(std::ostream &os, const feature_trie_type * const &trie) {
-    if(trie) {
-      for(auto tt = trie->begin(trie), tend = trie->end(trie); tt != tend; ++tt) {
-        os << '<' << *tt->get_key() << ',';
-        if(tt->get())
-          os << (*tt)->value;
-        else
-          os << "nullptr";
-        os << ',';
-        if(tt->get_deeper())
-          print_value_function_trie(os, tt->get_deeper());
-        else if(tt->get() && tt->get()->type == Q_Value::Type::FRINGE)
-          os << 'f';
-        os << '>';
-      }
+    for(const auto &tt : *trie) {
+      os << '<' << *tt.get_key() << ',';
+      if(tt.get())
+        os << tt->value;
+      else
+        os << "nullptr";
+      os << ',';
+      if(tt.get_deeper())
+        print_value_function_trie(os, tt.get_deeper());
+      else if(tt.get() && tt.get()->type == Q_Value::Type::FRINGE)
+        os << 'f';
+      os << '>';
     }
   }
 
@@ -1171,9 +1122,6 @@ private:
 
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   Mean m_mean_mabe;
-#endif
-#ifdef TRACK_Q_VALUE_VARIANCE
-  Mean m_mean_variance;
 #endif
 
 #ifdef WHITESON_ADAPTIVE_TILE
