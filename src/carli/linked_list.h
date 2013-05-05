@@ -38,14 +38,8 @@ namespace Zeni {
     public:
       typedef TYPE * pointer;
       typedef TYPE & reference;
-
-      iterator()
-        : m_offset(0),
-        m_pointer(nullptr)
-      {
-      }
       
-      iterator(const size_t &m_offset_)
+      iterator(const size_t &m_offset_ = 0lu)
         : m_offset(m_offset_),
         m_pointer(nullptr)
       {
@@ -136,14 +130,8 @@ namespace Zeni {
       typedef const value_type * value_pointer_type;
       typedef const value_type & value_reference_type;
       typedef const list_value_type * list_pointer_type;
-
-      iterator_const()
-        : m_offset(0),
-        m_pointer(nullptr)
-      {
-      }
       
-      iterator_const(const size_t &m_offset_)
+      iterator_const(const size_t &m_offset_ = 0lu)
         : m_offset(m_offset_),
         m_pointer(nullptr)
       {
