@@ -133,7 +133,6 @@ namespace Mountain_Car {
 
     void set_x(const float &x_) {m_x = x_;}
     void set_x_dot(const float &x_dot_) {m_x_dot = x_dot_;}
-    void set_reward_negative(const bool &reward_negative_) {m_reward_negative = reward_negative_;}
 
     bool success() const {
       return MCarAtGoal();
@@ -182,8 +181,8 @@ namespace Mountain_Car {
     double m_cart_force = 0.001;
     double m_grav_force = 0.0025;
 
-    bool m_random_start = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["random-start"]).get_value();
-    bool m_reward_negative = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["reward-negative"]).get_value();
+    const bool m_random_start = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["random-start"]).get_value();
+    const bool m_reward_negative = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["reward-negative"]).get_value();
   };
 
   class Agent : public ::Agent<feature_type, action_type> {

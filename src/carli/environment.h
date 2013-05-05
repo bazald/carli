@@ -115,7 +115,7 @@ private:
   virtual reward_type transition_impl(const action_type &action) = 0;
   virtual void print_impl(std::ostream &os) const = 0;
 
-  uint32_t m_scenario = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["scenario"]).get_value();
+  const uint32_t m_scenario = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["scenario"]).get_value();
   bool m_altered = false;
 };
 

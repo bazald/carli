@@ -303,7 +303,7 @@ namespace Puddle_World {
     double_pair m_goal_y;
 
     size_t m_step_count = 0lu;
-    bool m_random_start = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["random-start"]).get_value();
+    const bool m_random_start = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["random-start"]).get_value();
 
     std::vector<Puddle> m_horizontal_puddles;
     std::vector<Puddle> m_vertical_puddles;

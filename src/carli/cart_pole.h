@@ -180,7 +180,7 @@ namespace Cart_Pole {
     float m_x_dot = 0.0f;
     float m_theta = 0.0f;
     float m_theta_dot = 0.0f;
-    bool m_ignore_x = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["ignore-x"]).get_value();
+    const bool m_ignore_x = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["ignore-x"]).get_value();
   };
 
   class Agent : public ::Agent<feature_type, action_type> {
@@ -423,7 +423,7 @@ namespace Cart_Pole {
         m_metastate = Metastate::NON_TERMINAL;
     }
 
-    bool m_ignore_x = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["ignore-x"]).get_value();
+    const bool m_ignore_x = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["ignore-x"]).get_value();
   };
 
 }
