@@ -4,10 +4,35 @@
 #include <algorithm>
 #include <cstring>
 #include <iostream>
+#include <iomanip>
+#include <list>
 #include <map>
 #include <memory>
+#include <set>
 #include <sstream>
+#include <stdexcept>
 #include <vector>
+
+template <typename FLOAT>
+std::string pretty_print(const FLOAT &value) {
+  std::ostringstream oss;
+  oss << std::fixed;
+  oss.precision(9);
+  oss << value;
+  std::string pp = oss.str();
+
+  if(value == value && // NaN
+     value != -std::numeric_limits<FLOAT>::infinity() &&
+     value != std::numeric_limits<FLOAT>::infinity())
+  {
+    while(!pp.empty() && *pp.rbegin() == '0')
+      pp.pop_back();
+    if(!pp.empty() && *pp.rbegin() == '.')
+      pp.push_back('0');
+  }
+
+  return pp;
+}
 
 class Option : public std::enable_shared_from_this<Option> {
 public:
@@ -55,7 +80,7 @@ public:
     m_short_options[std::string(short_arg, 1)] = option;
 
     if(help)
-      m_help.push_back(std::string("  -") + short_arg + " --" + option->get_name() + ' ' + option->get_help() + help);
+      add_line(std::string("    -") + short_arg + " --" + option->get_name() + ' ' + option->get_help() + (*help ? " " : "") + help);
   }
 
   void add(const std::shared_ptr<Option> &option, const char * const help = nullptr) {
@@ -67,7 +92,11 @@ public:
     m_long_options[option->get_name()] = option;
 
     if(help)
-      m_help.push_back(std::string("     --") + option->get_name() + ' ' + option->get_help() + help);
+      add_line(std::string("       --") + option->get_name() + ' ' + option->get_help() + (*help ? " " : "") + help);
+  }
+
+  void add_line(const std::string &line) {
+    m_help.push_back(line);
   }
 
   void get(const int &argc, const char * const * const &argv) {
@@ -280,7 +309,7 @@ public:
                 const bool &inclusive_lower_bound_,
                 const TYPE &upper_bound_,
                 const bool &inclusive_upper_bound_,
-                const TYPE &default_value = TYPE())
+                const TYPE &default_value)
    : Option(name_, 1),
    value(default_value),
    lower_bound(lower_bound_),
@@ -342,5 +371,58 @@ private:
   bool inclusive_lower_bound;
   bool inclusive_upper_bound;
 };
+
+template <>
+inline std::string Option_Ranged<bool>::print() const {
+  std::ostringstream oss;
+  oss << get_name() << " = " << (value ? "true" : "false") << std::endl;
+  return oss.str();
+}
+
+template <>
+inline std::string Option_Ranged<float>::print() const {
+  std::ostringstream oss;
+  oss << get_name() << " = " << pretty_print(value) << std::endl;
+  return oss.str();
+}
+
+template <>
+inline std::string Option_Ranged<double>::print() const {
+  std::ostringstream oss;
+  oss << get_name() << " = " << pretty_print(value) << std::endl;
+  return oss.str();
+}
+
+template <>
+inline void Option_Ranged<bool>::operator()(const Arguments &args) {
+  std::string lower_case = args.at(0);
+  std::transform(lower_case.begin(), lower_case.end(), lower_case.begin(), ::tolower);
+  value = lower_case == "true" || atoi(args.at(0)) != 0;
+}
+
+template <>
+inline std::string Option_Ranged<bool>::get_range() const {
+  return "{false, true}";
+}
+
+template <>
+inline std::string Option_Ranged<float>::get_range() const {
+  std::ostringstream oss;
+
+  oss << (inclusive_lower_bound ? '[' : '(') << pretty_print(lower_bound) << ','
+      << pretty_print(upper_bound) << (inclusive_upper_bound ? ']' : ')');
+
+  return oss.str();
+}
+
+template <>
+inline std::string Option_Ranged<double>::get_range() const {
+  std::ostringstream oss;
+
+  oss << (inclusive_lower_bound ? '[' : '(') << pretty_print(lower_bound) << ','
+      << pretty_print(upper_bound) << (inclusive_upper_bound ? ']' : ')');
+
+  return oss.str();
+}
 
 #endif

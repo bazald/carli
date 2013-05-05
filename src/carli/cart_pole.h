@@ -137,7 +137,6 @@ namespace Cart_Pole {
     void set_x_dot(const float &x_dot_) {m_x = x_dot_;}
     void set_theta_dot(const float &theta_dot_) {m_theta = theta_dot_;}
     void set_theta(const float &theta_) {m_theta = theta_;}
-    void set_ignore_x(const bool &ignore_x_) {m_ignore_x = ignore_x_;}
 
     bool failed() const {
       return get_box(m_x, m_x_dot, m_theta, m_theta_dot) < 0;
@@ -181,7 +180,7 @@ namespace Cart_Pole {
     float m_x_dot = 0.0f;
     float m_theta = 0.0f;
     float m_theta_dot = 0.0f;
-    bool m_ignore_x = false;
+    bool m_ignore_x = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["ignore-x"]).get_value();
   };
 
   class Agent : public ::Agent<feature_type, action_type> {
@@ -193,17 +192,10 @@ namespace Cart_Pole {
      : ::Agent<feature_type, action_type>(env),
      m_ignore_x(false)
     {
-      set_credit_assignment(Credit_Assignment::INV_LOG_UPDATE_COUNT);
-      set_discount_rate(1.0);
-      set_learning_rate(0.3);
-      set_on_policy(false);
-      set_epsilon(0.1);
-      set_pseudoepisode_threshold(10);
       m_features_complete = false;
     }
 
     bool is_ignoring_x() const {return m_ignore_x;}
-    void set_ignore_x(const bool &ignore_x_) {m_ignore_x = ignore_x_;}
 
     void print_value_function_grid(ostream &os) const {
 //       set<line_segment_type> line_segments;
@@ -232,7 +224,7 @@ namespace Cart_Pole {
     void print_policy(ostream &os, const size_t &granularity) {
 //       auto env = dynamic_pointer_cast<Environment>(get_env());
 //       const auto position = env->get_position();
-// 
+//
 //       for(size_t y = granularity; y != 0lu; --y) {
 //         for(size_t x = 0lu; x != granularity; ++x) {
 //           env->set_position(Environment::double_pair((x + 0.5) / granularity, (y - 0.5) / granularity));
@@ -248,7 +240,7 @@ namespace Cart_Pole {
 //         }
 //         os << endl;
 //       }
-// 
+//
 //       env->set_position(position);
 //       regenerate_lists();
     }
@@ -268,7 +260,7 @@ namespace Cart_Pole {
 //             new_extents.first.second = key->bound_lower;
 //             new_extents.second.second = key->bound_higher;
 //           }
-// 
+//
 //           if(new_extents.first.first != extents.first.first)
 //             line_segments.insert(make_pair(make_pair(new_extents.first.first, new_extents.first.second), make_pair(new_extents.first.first, new_extents.second.second)));
 //           if(new_extents.first.second != extents.first.second)
@@ -277,7 +269,7 @@ namespace Cart_Pole {
 //             line_segments.insert(make_pair(make_pair(new_extents.second.first, new_extents.first.second), make_pair(new_extents.second.first, new_extents.second.second)));
 //           if(new_extents.second.second != extents.second.second)
 //             line_segments.insert(make_pair(make_pair(new_extents.first.first, new_extents.second.second), make_pair(new_extents.second.first, new_extents.second.second)));
-// 
+//
 //           if(trie2.get_deeper()) {
 //             const auto line_segments2 = this->generate_value_function_grid_sets(trie2.get_deeper(), new_extents);
 //             this->merge_value_function_grid_sets(line_segments, line_segments2);
@@ -286,7 +278,7 @@ namespace Cart_Pole {
 //       }
 //       return line_segments;
 //     }
-// 
+//
 //     map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0)), const size_t &update_count = 0) const {
 //       map<line_segment_type, size_t> update_counts;
 //       if(trie) {
@@ -301,11 +293,11 @@ namespace Cart_Pole {
 //             new_extents.first.second = key->bound_lower;
 //             new_extents.second.second = key->bound_higher;
 //           }
-// 
+//
 //           const auto update_count2 = update_count + (trie2.get() ? trie2->update_count : 0);
-// 
+//
 //           update_counts[new_extents] = update_count2;
-// 
+//
 //           if(trie2.get_deeper()) {
 //             const auto update_counts2 = this->generate_update_count_maps(trie2.get_deeper(), new_extents, update_count2);
 //             this->merge_update_count_maps(update_counts, update_counts2);
@@ -314,25 +306,25 @@ namespace Cart_Pole {
 //       }
 //       return update_counts;
 //     }
-// 
+//
 //     void print_value_function_grid_set(ostream &os, const set<line_segment_type> &line_segments) const {
 //       std::for_each(line_segments.begin(), line_segments.end(), [&os](const line_segment_type &line_segment) {
 //         os << line_segment.first.first << ',' << line_segment.first.second << '-' << line_segment.second.first << ',' << line_segment.second.second << endl;
 //       });
 //     }
-// 
+//
 //     void print_update_count_map(ostream &os, const map<line_segment_type, size_t> &update_counts) const {
 //       std::for_each(update_counts.begin(), update_counts.end(), [&os](const pair<line_segment_type, size_t> &rect) {
 //         os << rect.first.first.first << ',' << rect.first.first.second << '-' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << endl;
 //       });
 //     }
-// 
+//
 //     void merge_value_function_grid_sets(set<line_segment_type> &combination, const set<line_segment_type> &additions) const {
 //       std::for_each(additions.begin(), additions.end(), [&combination](const line_segment_type &line_segment) {
 //         combination.insert(line_segment);
 //       });
 //     }
-// 
+//
 //     void merge_update_count_maps(map<line_segment_type, size_t> &combination, const map<line_segment_type, size_t> &additions) const {
 //       std::for_each(additions.begin(), additions.end(), [&combination](const pair<line_segment_type, size_t> &rect) {
 //         combination[rect.first] += rect.second;
@@ -431,7 +423,7 @@ namespace Cart_Pole {
         m_metastate = Metastate::NON_TERMINAL;
     }
 
-    bool m_ignore_x;
+    bool m_ignore_x = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["ignore-x"]).get_value();
   };
 
 }

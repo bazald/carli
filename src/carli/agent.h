@@ -142,6 +142,48 @@ public:
     m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
     m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
     m_split_test = [this](Q_Value * const &q, const size_t &depth)->bool{return this->split_test(q, depth);};
+
+    if(m_credit_assignment_code == "all")
+      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_all(value_list);};
+    else if(m_credit_assignment_code == "specific")
+      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_specific(value_list);};
+    else if(m_credit_assignment_code == "even")
+      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
+    else if(m_credit_assignment_code == "inv-update-count")
+      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
+    else if(m_credit_assignment_code == "inv-log-update-count")
+      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
+    else if(m_credit_assignment_code == "inv-root-update-count")
+      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_root_update_count(value_list);};
+    else if(m_credit_assignment_code == "inv-depth")
+      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);};
+    else if(m_credit_assignment_code == "epsilon-even-specific")
+      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_specific);};
+    else if(m_credit_assignment_code == "epsilon-even-depth")
+      m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);};
+    else
+      abort();
+
+    if(m_weight_assignment_code == "all")
+      m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_all(value_list);};
+    else if(m_weight_assignment_code == "specific")
+      m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_specific(value_list);};
+    else if(m_weight_assignment_code == "even")
+      m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
+    else if(m_weight_assignment_code == "inv-update-count")
+      m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
+    else if(m_weight_assignment_code == "inv-log-update-count")
+      m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
+    else if(m_weight_assignment_code == "inv-root-update-count")
+      m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_root_update_count(value_list);};
+    else if(m_weight_assignment_code == "inv-depth")
+      m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);};
+    else if(m_weight_assignment_code == "epsilon-even-specific")
+      m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_specific);};
+    else if(m_weight_assignment_code == "epsilon-even-depth")
+      m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);};
+    else
+      abort();
   }
 
   virtual ~Agent() {
@@ -156,231 +198,28 @@ public:
   }
 
   bool is_null_q_values() const {return m_null_q_values;}
-  void set_null_q_values(const bool &null_q_values) {
-    m_null_q_values = null_q_values;
-  }
-
   double get_learning_rate() const {return m_learning_rate;}
-  void set_learning_rate(const double &learning_rate) {
-    if(learning_rate <= 0.0 || learning_rate > 1.0)
-      throw std::range_error("Illegal learning rate.");
-    m_learning_rate = learning_rate;
-  }
-
   double get_discount_rate() const {return m_discount_rate;}
-  void set_discount_rate(const double &discount_rate) {
-    if(discount_rate < 0.0 || discount_rate > 1.0)
-      throw std::range_error("Illegal discount rate.");
-    m_discount_rate = discount_rate;
-  }
-
   double get_eligibility_trace_decay_rate() const {return m_eligibility_trace_decay_rate;}
-  void set_eligibility_trace_decay_rate(const double &eligibility_trace_decay_rate) {
-    if(eligibility_trace_decay_rate < 0.0 || eligibility_trace_decay_rate > 1.0)
-      throw std::range_error("Illegal eligibility trace decay rate rate.");
-    m_eligibility_trace_decay_rate = eligibility_trace_decay_rate;
-  }
-
   double get_eligibility_trace_decay_threshold() const {return m_eligibility_trace_decay_threshold;}
-  void set_eligibility_trace_decay_threshold(const double &eligibility_trace_decay_threshold) {
-    if(eligibility_trace_decay_threshold < 0.0 || eligibility_trace_decay_threshold > 1.0)
-      throw std::range_error("Illegal eligibility trace decay threshold threshold.");
-    m_eligibility_trace_decay_threshold = eligibility_trace_decay_threshold;
-  }
-
   Credit_Assignment get_credit_assignment() const {return m_credit_assignment_code;}
-  void set_credit_assignment(const Credit_Assignment &credit_assignment) {
-    switch(credit_assignment) {
-      case Credit_Assignment::ALL:
-        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_all(value_list);};
-        break;
-
-      case Credit_Assignment::SPECIFIC:
-        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_specific(value_list);};
-        break;
-
-      case Credit_Assignment::EVEN:
-        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
-        break;
-
-      case Credit_Assignment::INV_UPDATE_COUNT:
-        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
-        break;
-  
-      case Credit_Assignment::INV_LOG_UPDATE_COUNT:
-        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
-        break;
-
-      case Credit_Assignment::INV_ROOT_UPDATE_COUNT:
-        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_root_update_count(value_list);};
-        break;
-  
-      case Credit_Assignment::INV_DEPTH:
-        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);};
-        break;
-
-      case Credit_Assignment::EPSILON_EVEN_SPECIFIC:
-        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_specific);};
-        break;
-
-      case Credit_Assignment::EPSILON_EVEN_DEPTH:
-        m_credit_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);};
-        break;
-
-      default:
-        abort();
-    }
-
-    m_credit_assignment_code = credit_assignment;
-  }
-
   double get_credit_assignment_epsilon() const {return m_credit_assignment_epsilon;}
-  void set_credit_assignment_epsilon(const double &credit_assignment_epsilon) {
-    if(credit_assignment_epsilon < 0.0 || credit_assignment_epsilon > 1.0)
-      throw std::range_error("Illegal credit-assignment epsilon.");
-    m_credit_assignment_epsilon = credit_assignment_epsilon;
-  }
-
   double get_credit_assignment_log_base() const {return m_credit_assignment_log_base;}
-  void set_credit_assignment_log_base(const double &credit_assignment_log_base) {
-    if(credit_assignment_log_base <= 1.0)
-      throw std::range_error("Illegal credit-assignment log_base.");
-    m_credit_assignment_log_base = credit_assignment_log_base;
-    m_credit_assignment_log_base_value = std::log(m_credit_assignment_log_base);
-  }
-
   double get_credit_assignment_root() const {return m_credit_assignment_root;}
-  void set_credit_assignment_root(const double &credit_assignment_root) {
-    if(credit_assignment_root <= 1.0)
-      throw std::range_error("Illegal credit-assignment root.");
-    m_credit_assignment_root = credit_assignment_root;
-    m_credit_assignment_root_value = 1.0 / m_credit_assignment_root;
-  }
-
   bool is_credit_assignment_normalize() const {return m_credit_assignment_normalize;}
-  void set_credit_assignment_normalize(const bool &credit_assignment_normalize) {
-    m_credit_assignment_normalize = credit_assignment_normalize;
-  }
-
   Credit_Assignment get_weight_assignment() const {return m_weight_assignment_code;}
-  void set_weight_assignment(const Credit_Assignment &weight_assignment) {
-    switch(weight_assignment) {
-      case Credit_Assignment::ALL:
-        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_all(value_list);};
-        break;
-
-      case Credit_Assignment::SPECIFIC:
-        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_specific(value_list);};
-        break;
-
-      case Credit_Assignment::EVEN:
-        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_evenly(value_list);};
-        break;
-
-      case Credit_Assignment::INV_UPDATE_COUNT:
-        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_update_count(value_list);};
-        break;
-  
-      case Credit_Assignment::INV_LOG_UPDATE_COUNT:
-        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_log_update_count(value_list);};
-        break;
-
-      case Credit_Assignment::INV_ROOT_UPDATE_COUNT:
-        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_root_update_count(value_list);};
-        break;
-  
-      case Credit_Assignment::INV_DEPTH:
-        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);};
-        break;
-
-      case Credit_Assignment::EPSILON_EVEN_SPECIFIC:
-        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_specific);};
-        break;
-
-      case Credit_Assignment::EPSILON_EVEN_DEPTH:
-        m_weight_assignment = [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);};
-        break;
-
-      default:
-        abort();
-    }
-
-    m_weight_assignment_code = weight_assignment;
-  }
-
   bool is_on_policy() const {return m_on_policy;}
-  void set_on_policy(const bool &on_policy) {
-    if(on_policy)
-      m_target_policy = [this]()->action_ptruc{return this->m_exploration_policy();};
-    else
-      m_target_policy = [this]()->action_ptruc{return this->choose_greedy();};
-
-    m_on_policy = on_policy;
-  }
-
   double get_epsilon() const {return m_epsilon;}
-  void set_epsilon(const double &epsilon) {
-    if(epsilon < 0.0 || epsilon > 1.0)
-      throw std::range_error("Illegal epsilon.");
-    m_epsilon = epsilon;
-  }
-
-  size_t get_pseudoepisode_threshold() const {return m_pseudoepisode_threshold;}
-  void set_pseudoepisode_threshold(const size_t &pseudoepisode_threshold) {
-    m_pseudoepisode_threshold = pseudoepisode_threshold;
-  }
-
   size_t get_split_min() const {return m_split_min;}
-  void set_split_min(const size_t &split_min) {
-    m_split_min = split_min;
-  }
-
   size_t get_split_max() const {return m_split_max;}
-  void set_split_max(const size_t &split_max) {
-    m_split_max = split_max;
-  }
-
-  size_t get_split_update_count() const {return m_split_update_count;}
-  void set_split_update_count(const size_t &split_update_count) {
-    m_split_update_count = split_update_count;
-  }
-
+  size_t get_pseudoepisode_threshold() const {return m_pseudoepisode_threshold;}
   size_t get_split_pseudoepisodes() const {return m_split_pseudoepisodes;}
-  void set_split_pseudoepisodes(const size_t &split_pseudoepisodes) {
-    m_split_pseudoepisodes = split_pseudoepisodes;
-  }
-
+  size_t get_split_update_count() const {return m_split_update_count;}
   double get_split_cabe() const {return m_split_cabe;}
-  void set_split_cabe(const double &split_cabe) {
-    m_split_cabe = split_cabe;
-  }
-
   double get_split_cabe_qmult() const {return m_split_cabe_qmult;}
-  void set_split_cabe_qmult(const double &split_cabe_qmult) {
-    m_split_cabe_qmult = split_cabe_qmult;
-  }
-
-#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-  double get_split_mabe() const {return m_split_mabe;}
-  void set_split_mabe(const double &split_mabe) {
-    m_split_mabe = split_mabe;
-  }
-#endif
-
   size_t get_contribute_update_count() const {return m_contribute_update_count;}
-  void set_contribute_update_count(const size_t &contribute_update_count) {
-    m_contribute_update_count = contribute_update_count;
-  }
-
   size_t get_value_function_cap() const {return m_value_function_cap;}
-  void set_value_function_cap(const size_t &value_function_cap) {
-    m_value_function_cap = value_function_cap;
-  }
-
   size_t get_mean_cabe_queue_size() const {return m_mean_cabe_queue_size;}
-  void set_mean_cabe_queue_size(const size_t &mean_cabe_queue_size) {
-    m_mean_cabe_queue_size = mean_cabe_queue_size;
-  }
 
   const std::shared_ptr<const environment_type> & get_env() const {return m_environment;}
   std::shared_ptr<environment_type> & get_env() {return m_environment;}
@@ -650,8 +489,8 @@ protected:
     for(Q_Value::List * q_ptr = m_eligible; q_ptr; ) {
       Q_Value &q = **q_ptr;
       q_ptr = q.eligible.next();
-      
-      const double ldelta = m_weight_assignment_code != Credit_Assignment::ALL ? target_value - q.value : delta;
+
+      const double ldelta = m_weight_assignment_code != "all" ? target_value - q.value : delta;
       const double edelta = q.eligibility * ldelta;
 
       q.value += edelta;
@@ -737,7 +576,7 @@ protected:
     }
 #endif
   }
-  
+
   void clear_eligibility_trace() {
     for(Q_Value &q : *m_eligible) {
       q.eligibility_init = false;
@@ -805,7 +644,7 @@ protected:
         sum += q.credit;
       }
     }
-    
+
     assign_credit_normalize(value_list, sum);
   }
 
@@ -817,7 +656,7 @@ protected:
         sum += q.credit;
       }
     }
-    
+
     assign_credit_normalize(value_list, sum);
   }
 
@@ -829,7 +668,7 @@ protected:
         sum += q.credit;
       }
     }
-    
+
     assign_credit_normalize(value_list, sum);
   }
 
@@ -847,7 +686,7 @@ protected:
         sum += q.credit;
       }
     }
-    
+
     assign_credit_normalize(value_list, sum);
   }
 
@@ -969,7 +808,7 @@ private:
                                       return lhs.get_key()->compare_pi(*rhs.get_key()) == 0;
                                     });
 
-    const bool use_value = m_weight_assignment_code != Credit_Assignment::ALL;
+    const bool use_value = m_weight_assignment_code != "all";
 
     if(match) {
       auto next = static_cast<feature_trie>(head == match ? head->next() : head);
@@ -1080,10 +919,10 @@ private:
       }
     }
   }
-  
+
   static void collapse_fringe(feature_trie &leaf_fringe, feature_trie head) {
 //     assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type != Q_Value::Type::FRINGE); ///< TODO: Convert FRINGE to UNSPLIT
-    
+
     if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::Type::FRINGE)
       leaf_fringe->destroy(leaf_fringe);
   }
@@ -1118,7 +957,7 @@ private:
 
   Mean m_mean_cabe;
   Value_Queue m_mean_cabe_queue;
-  size_t m_mean_cabe_queue_size = 0;
+  size_t m_mean_cabe_queue_size = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["mean-cabe-queue-size"]).get_value();
 
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   Mean m_mean_mabe;
@@ -1136,43 +975,42 @@ private:
   size_t m_step_count = 0;
   reward_type m_total_reward = 0.0;
 
-  bool m_null_q_values = false; ///< insert nullptr instead of new Q_Values until reaching the leaf
-  size_t m_value_function_cap = 0; ///< at this threshold, no more entries will be added to the value functions through refinement
+  bool m_null_q_values = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["null-q-values"]).get_value(); ///< insert nullptr instead of new Q_Values until reaching the leaf
+  size_t m_value_function_cap = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["value-function-cap"]).get_value(); ///< at this threshold, no more entries will be added to the value functions through refinement
 
-  double m_learning_rate = 0.3; ///< alpha
-  double m_discount_rate = 0.9; ///< gamma
-  double m_eligibility_trace_decay_rate = 0.0; ///< lambda
-  double m_eligibility_trace_decay_threshold = 0.0001;
+  double m_learning_rate = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["learning-rate"]).get_value(); ///< alpha
+  double m_discount_rate = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["discount-rate"]).get_value(); ///< gamma
+  double m_eligibility_trace_decay_rate = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["eligibility-trace-decay-rate"]).get_value(); ///< lambda
+  double m_eligibility_trace_decay_threshold = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["eligibility-trace-decay-threshold"]).get_value();
 
-  Credit_Assignment m_credit_assignment_code = Credit_Assignment::EVEN;
+  std::string m_credit_assignment_code = dynamic_cast<const Option_Itemized &>(Options::get_global()["credit-assignment"]).get_value();
   std::function<void (Q_Value::List * const &)> m_credit_assignment; ///< How to assign credit to multiple Q-values
-  double m_credit_assignment_epsilon = 0.5;
-  double m_credit_assignment_log_base = 2.71828182846;
+  double m_credit_assignment_epsilon = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["credit-assignment-epsilon"]).get_value();
+  double m_credit_assignment_log_base = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["credit-assignment-log-base"]).get_value();
   mutable double m_credit_assignment_log_base_value = std::log(m_credit_assignment_log_base);
-  double m_credit_assignment_root = 2.0;
+  double m_credit_assignment_root = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["credit-assignment-root"]).get_value();
   mutable double m_credit_assignment_root_value = 1.0 / m_credit_assignment_root;
-  bool m_credit_assignment_normalize = true;
+  bool m_credit_assignment_normalize = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["credit-assignment-normalize"]).get_value();
 
-  Credit_Assignment m_weight_assignment_code = Credit_Assignment::EVEN;
+  std::string m_weight_assignment_code = dynamic_cast<const Option_Itemized &>(Options::get_global()["weight-assignment"]).get_value();
   std::function<void (Q_Value::List * const &)> m_weight_assignment; ///< How to assign weight to multiple Q-values at summation time
 
-  bool m_on_policy = false; ///< for Sarsa/Q-learning selection
-  double m_epsilon = 0.1; ///< for epsilon-greedy decision-making
-  size_t m_pseudoepisode_threshold = 20; ///< For deciding how many steps indicates a pseudoepisode
+  bool m_on_policy = dynamic_cast<const Option_Itemized &>(Options::get_global()["policy"]).get_value() == "on-policy"; ///< for Sarsa/Q-learning selection
+  double m_epsilon = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["epsilon-greedy"]).get_value(); ///< for epsilon-greedy decision-making
 
-  size_t m_split_min = 0;
-  size_t m_split_max = size_t(-1);
-  size_t m_split_update_count = 0;
-  size_t m_split_pseudoepisodes = 0;
-  double m_split_cabe = 0.84155;
-  double m_split_cabe_qmult = 0.0;
-#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-  double m_split_mabe = 0.84155;
-#endif
-  size_t m_contribute_update_count = 0;
+  size_t m_split_min = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["split-min"]).get_value();
+  size_t m_split_max = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["split-max"]).get_value();
+  double m_split_cabe = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["split-cabe"]).get_value();
+  double m_split_cabe_qmult = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["split-cabe-qmult"]).get_value();
+
+  size_t m_pseudoepisode_threshold = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["pseudoepisode-threshold"]).get_value(); ///< For deciding how many steps indicates a pseudoepisode
+  size_t m_split_pseudoepisodes = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["split-pseudoepisodes"]).get_value();
+  size_t m_split_update_count = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["split-update-count"]).get_value();
+
+  size_t m_contribute_update_count = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["contribute-update-count"]).get_value();
 
   Q_Value::List * m_eligible = nullptr;
-  
+
   size_t m_q_value_count = 0;
 };
 

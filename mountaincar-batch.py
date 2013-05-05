@@ -178,7 +178,7 @@ class Experiment:
             '--mean-cabe-queue-size', str(self.mean_cabe_queue_size),
             '--scenario', str(self.scenario),
             '--skip-steps', str(self.skip_steps),
-            '--output', 'experimental']
+            '--output', 'experiment']
     return args
   
   def print_args(self):

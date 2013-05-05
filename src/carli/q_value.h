@@ -34,8 +34,8 @@ public:
 
   size_t last_episode_fired = size_t(-1);
   size_t last_step_fired = size_t(-1);
-
   size_t pseudoepisode_count = 0;
+
   size_t update_count = 1;
 
   Type type;
@@ -64,7 +64,7 @@ public:
       const List Q_Value:: * m;
       const char * c;
     } u;
-    
+
     u.c = nullptr;
     u.m = &Q_Value::eligible;
     return u.c - static_cast<char *>(nullptr);
@@ -75,7 +75,7 @@ public:
       const List Q_Value:: * m;
       const char * c;
     } u;
-    
+
     u.c = nullptr;
     u.m = &Q_Value::current;
     return u.c - static_cast<char *>(nullptr);
@@ -86,7 +86,7 @@ public:
       const List Q_Value:: * m;
       const char * c;
     } u;
-    
+
     u.c = nullptr;
     u.m = &Q_Value::next;
     return u.c - static_cast<char *>(nullptr);

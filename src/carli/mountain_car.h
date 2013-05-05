@@ -133,7 +133,6 @@ namespace Mountain_Car {
 
     void set_x(const float &x_) {m_x = x_;}
     void set_x_dot(const float &x_dot_) {m_x_dot = x_dot_;}
-    void set_random_start(const bool &random_start_) {m_random_start = random_start_;}
     void set_reward_negative(const bool &reward_negative_) {m_reward_negative = reward_negative_;}
 
     bool success() const {
@@ -183,8 +182,8 @@ namespace Mountain_Car {
     double m_cart_force = 0.001;
     double m_grav_force = 0.0025;
 
-    bool m_random_start = false;
-    bool m_reward_negative = true;
+    bool m_random_start = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["random-start"]).get_value();
+    bool m_reward_negative = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["reward-negative"]).get_value();
   };
 
   class Agent : public ::Agent<feature_type, action_type> {
@@ -195,12 +194,6 @@ namespace Mountain_Car {
     Agent(const shared_ptr<environment_type> &env)
      : ::Agent<feature_type, action_type>(env)
     {
-      set_credit_assignment(Credit_Assignment::INV_LOG_UPDATE_COUNT);
-      set_discount_rate(1.0);
-      set_learning_rate(0.3);
-      set_on_policy(false);
-      set_epsilon(0.1);
-      set_pseudoepisode_threshold(10);
       m_features_complete = false;
     }
 

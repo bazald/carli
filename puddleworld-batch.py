@@ -274,7 +274,7 @@ class Experiment:
             '--scenario', str(self.scenario),
             '--skip-steps', str(self.skip_steps),
             #'--value-function-cap', str(16 * 16 * 4),
-            '--output', 'experimental']
+            '--output', 'experiment']
     return args
   
   def print_args(self):

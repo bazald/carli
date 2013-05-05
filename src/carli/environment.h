@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include "clone.h"
+#include "getopt.h"
 #include "linked_list.h"
 #include "memory_pool.h"
 
@@ -81,7 +82,7 @@ class Environment : public std::enable_shared_from_this<Environment<ACTION>> {
 public:
   typedef ACTION action_type;
   typedef double reward_type;
-  
+
   Environment()
   {
   }
@@ -114,7 +115,7 @@ private:
   virtual reward_type transition_impl(const action_type &action) = 0;
   virtual void print_impl(std::ostream &os) const = 0;
 
-  uint32_t m_scenario = 0;
+  uint32_t m_scenario = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["scenario"]).get_value();
   bool m_altered = false;
 };
 

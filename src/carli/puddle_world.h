@@ -120,22 +120,9 @@ namespace Puddle_World {
     typedef pair<double, double> double_pair;
 
     Environment()
-     : m_init_x(0.15, 0.45),
-     m_init_y(0.15, 0.45),
-     m_horizontal_puddles({{{0.1, 0.45, 0.75, 0.1}}}),
+     : m_horizontal_puddles({{{0.1, 0.45, 0.75, 0.1}}}),
      m_vertical_puddles({{{0.45, 0.4, 0.8, 0.1}}})
     {
-      Environment::init_impl();
-    }
-
-    const double_pair & get_position() const {return m_position;}
-    const double & get_value(const Feature::Axis &index) const {return *(&m_position.first + index);}
-    bool is_random_start() const {return m_random_start;}
-
-    void set_position(const double_pair &position_) {m_position = position_;}
-    void set_random_start(const bool &random_start_) {
-      m_random_start = random_start_;
-
       if(m_random_start) {
         m_init_x = double_pair(0.0, 1.0);
         m_init_y = double_pair(0.0, 1.0);
@@ -144,7 +131,15 @@ namespace Puddle_World {
         m_init_x = double_pair(0.15, 0.45);
         m_init_y = double_pair(0.15, 0.45);
       }
+
+      Environment::init_impl();
     }
+
+    const double_pair & get_position() const {return m_position;}
+    const double & get_value(const Feature::Axis &index) const {return *(&m_position.first + index);}
+    bool is_random_start() const {return m_random_start;}
+
+    void set_position(const double_pair &position_) {m_position = position_;}
 
     bool goal_reached() const {
       if(m_goal_dynamic)
@@ -302,13 +297,13 @@ namespace Puddle_World {
 
     double_pair m_init_x;
     double_pair m_init_y;
-    
+
     bool m_goal_dynamic = false;
     double_pair m_goal_x;
     double_pair m_goal_y;
 
     size_t m_step_count = 0lu;
-    bool m_random_start = false;
+    bool m_random_start = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["random-start"]).get_value();
 
     std::vector<Puddle> m_horizontal_puddles;
     std::vector<Puddle> m_vertical_puddles;
@@ -324,12 +319,6 @@ namespace Puddle_World {
     Agent(const shared_ptr<environment_type> &env)
      : ::Agent<feature_type, action_type>(env)
     {
-      set_credit_assignment(Credit_Assignment::INV_LOG_UPDATE_COUNT);
-      set_discount_rate(1.0);
-      set_learning_rate(0.3);
-      set_on_policy(false);
-      set_epsilon(0.1);
-      set_pseudoepisode_threshold(10);
       m_features_complete = false;
     }
 

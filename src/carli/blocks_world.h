@@ -13,7 +13,7 @@ namespace Blocks_World {
   using std::dynamic_pointer_cast;
   using std::endl;
   using std::ostream;
-  
+
   typedef int block_id;
 
   class In_Place;
@@ -221,11 +221,7 @@ namespace Blocks_World {
     Agent(const std::shared_ptr<environment_type> &env)
      : ::Agent<feature_type, action_type>(env)
     {
-      set_learning_rate(1.0);
-      set_discount_rate(1.0);
-      set_on_policy(false);
-      set_epsilon(0.1);
-      set_pseudoepisode_threshold(5);
+      m_features_complete = true;
     }
 
   private:
