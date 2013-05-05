@@ -15,11 +15,11 @@ g_ep_tuples = []
 #g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 3, 13, 0, 0.5, 0.001, 0, 1000, 0, 0, 'false'))
 
 ## Experiment 0, non-hierarchical agents comparison
-#g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  5,  5, 0, 0.5, 0, 0, 0, 'false'))
-#g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  7,  7, 0, 0.5, 0, 0, 0, 'false'))
-#g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  9,  9, 0, 0.5, 0, 0, 0, 'false'))
-#g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0, 'false'))
-#g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 13, 13, 0, 0.5, 0, 0, 0, 'false'))
+#g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  5,  5, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
+#g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  7,  7, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
+#g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  9,  9, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
+#g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
+#g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 13, 13, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
 
 ## Experiment 1, hierarchical agents performance comparison - compare to 0
 ##g_ep_tuples.append(('puddle-world', 0, 'even', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  5,  5, 0, 0.5, 0, 0, 0, 1, 0, 'false'))

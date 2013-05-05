@@ -243,7 +243,7 @@ void run_agent() {
 
       done = agent->get_metastate() != Metastate::NON_TERMINAL /*|| agent->get_step_count() >= 5000*/ || (num_steps && total_steps > 0 && total_steps >= num_steps);
 
-      if(output == "experimental" && total_steps > -1)
+      if(output == "experiment" && total_steps > -1)
         experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, [&agent]()->size_t{return agent->get_value_function_size();});
 
 #ifdef DEBUG_OUTPUT
@@ -278,7 +278,7 @@ void run_agent() {
     else if(auto pwa = dynamic_pointer_cast<Puddle_World::Agent>(agent))
       pwa->print_policy(cout, 32);
   }
-  else if(output == "experimental") {
+  else if(output == "experiment") {
     if(auto cpa = dynamic_pointer_cast<Cart_Pole::Agent>(agent)) {
       cpa->print_policy(cerr, 32);
       cpa->print_value_function_grid(cerr);
