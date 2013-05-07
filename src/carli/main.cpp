@@ -3,7 +3,6 @@
 // #define WHITESON_ADAPTIVE_TILE
 // #define DEBUG_OUTPUT
 // #define DEBUG_OUTPUT_VALUE_FUNCTION
-// #define TO_FILE
 
 #include "blocks_world.h"
 #include "cart_pole.h"
@@ -14,12 +13,9 @@
 
 #include <cstring>
 #include <ctime>
+#include <fstream>
 #include <iostream>
 #include <memory>
-
-#ifdef TO_FILE
-#include <fstream>
-#endif
 
 using std::cerr;
 using std::cout;
@@ -36,13 +32,10 @@ template <typename ENVIRONMENT, typename AGENT>
 void run_agent();
 
 int main2(int argc, char **argv) {
-#ifdef TO_FILE
   auto cout_bak = cout.rdbuf();
   auto cerr_bak = cerr.rdbuf();
-  std::ofstream cout2file("dump.txt");
-  cout.rdbuf(cout2file.rdbuf());
-  cerr.rdbuf(cout2file.rdbuf());
-#endif
+  std::ofstream cerr2file;
+  std::ofstream cout2file;
 
   cerr << std::fixed;
   cout << std::fixed;
@@ -69,6 +62,14 @@ int main2(int argc, char **argv) {
   options.add('p', std::make_shared<Option_Ranged<int>>("print-every", 1, true, std::numeric_limits<int>::max(), true, 100), "How many steps per line of output.");
   options.add(     std::make_shared<Option_Ranged<int>>("scenario", 0, true, std::numeric_limits<int>::max(), true, 0), "Which experimental scenario should be run, environment specific.");
   options.add('s', std::make_shared<Option_Ranged<int>>("seed", 0, true, std::numeric_limits<int>::max(), true, uint32_t(time(0))), "Random seed.");
+  options.add(     std::make_shared<Option_Function>("stderr", 1, [&options,&cerr2file](const Option::Arguments &args){
+    cerr2file.open(args.at(0));
+    cerr.rdbuf(cerr2file.rdbuf());
+  }), "<file> Redirect stderr to <file>");
+  options.add(     std::make_shared<Option_Function>("stdout", 1, [&options,&cout2file](const Option::Arguments &args){
+    cout2file.open(args.at(0));
+    cout.rdbuf(cout2file.rdbuf());
+  }), "<file> Redirect stdout to <file>");
   options.add_line("\n  Environment Options:");
   options.add('e', std::make_shared<Option_Itemized>("environment", std::set<std::string>({"blocks-world", "cart-pole", "mountain-car", "puddle-world"}), "blocks-world"), "");
   options.add(     std::make_shared<Option_Ranged<bool>>("ignore-x", false, true, true, true, false), "Simplify cart-pole from 4D to 2D, eliminating x and x-dot.");
@@ -174,10 +175,8 @@ int main2(int argc, char **argv) {
 //     cout << "Removing " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
 //   }
 
-#ifdef TO_FILE
   cout.rdbuf(cout_bak);
   cerr.rdbuf(cerr_bak);
-#endif
 
   return 0;
 }

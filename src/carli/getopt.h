@@ -80,7 +80,7 @@ public:
     m_short_options[std::string(short_arg, 1)] = option;
 
     if(help)
-      add_line(std::string("    -") + short_arg + " --" + option->get_name() + ' ' + option->get_help() + (*help ? " " : "") + help);
+      add_line(std::string("    -") + short_arg + " --" + option->get_name() + (!option->get_help().empty() ? " " : "") + option->get_help() + (*help ? " " : "") + help);
   }
 
   void add(const std::shared_ptr<Option> &option, const char * const help = nullptr) {
@@ -92,7 +92,7 @@ public:
     m_long_options[option->get_name()] = option;
 
     if(help)
-      add_line(std::string("       --") + option->get_name() + ' ' + option->get_help() + (*help ? " " : "") + help);
+      add_line(std::string("       --") + option->get_name() + (!option->get_help().empty() ? " " : "") + option->get_help() + (*help ? " " : "") + help);
   }
 
   void add_line(const std::string &line) {
