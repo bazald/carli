@@ -768,6 +768,25 @@ protected:
   }
 #endif
 
+  template <typename ENVIRONMENT>
+  bool generate_feature_ranged(const std::shared_ptr<const ENVIRONMENT> &env, feature_trie &trie, const typename FEATURE::List * const &tail, typename FEATURE::List * &tail_next) {
+    auto match = std::find_if(trie->begin(), trie->end(), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
+
+    if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
+      auto feature = match->get_key();
+      const auto midpt = feature->midpt();
+      if(env->get_value(feature->axis) < midpt)
+        tail_next = &(new FEATURE(feature->axis, feature->bound_lower, midpt, feature->depth + 1))->features;
+      else
+        tail_next = &(new FEATURE(feature->axis, midpt, feature->bound_higher, feature->depth + 1))->features;
+      tail_next = tail_next->template insert_in_order<typename FEATURE::List::compare_default>(m_features, false);
+      trie = match->get_deeper();
+      return true;
+    }
+
+    return false;
+  }
+
   Metastate m_metastate = Metastate::NON_TERMINAL;
   feature_list m_features = nullptr;
   bool m_features_complete = true;

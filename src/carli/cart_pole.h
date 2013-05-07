@@ -385,24 +385,6 @@ namespace Cart_Pole {
       }
     }
 
-    bool generate_feature_ranged(const shared_ptr<const Environment> &env, feature_trie &trie, const Feature::List * const &tail, Feature::List * &tail_next) {
-      auto match = std::find_if(trie->begin(), trie->end(), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
-
-      if(match && match->get() && match->get()->type != Q_Value::Type::FRINGE) {
-        const auto &feature = match->get_key();
-        const auto midpt = feature->midpt();
-        if(env->get_value(feature->axis) < midpt)
-          tail_next = &(new Feature(feature->axis, feature->bound_lower, midpt, feature->depth + 1))->features;
-        else
-          tail_next = &(new Feature(feature->axis, midpt, feature->bound_higher, feature->depth + 1))->features;
-        tail_next = tail_next->insert_in_order<feature_type::List::compare_default>(m_features, false);
-        trie = match->get_deeper();
-        return true;
-      }
-
-      return false;
-    }
-
     void generate_candidates() {
       auto env = dynamic_pointer_cast<const Environment>(get_env());
 

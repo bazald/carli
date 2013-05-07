@@ -24,10 +24,6 @@ using std::endl;
 using std::runtime_error;
 using std::vector;
 
-typedef std::string test_key;
-typedef Q_Value test_value;
-typedef Zeni::Trie<test_key, test_value> test_trie;
-
 template <typename ENVIRONMENT, typename AGENT>
 void run_agent();
 
@@ -132,48 +128,72 @@ int main2(int argc, char **argv) {
   else
     throw runtime_error("Internal error: g_args.environment");
 
-//   test_trie * trie = new test_trie;
-//   test_trie * key = nullptr;
-//   (new test_trie("world"))->list_insert_before(key);
-//   (new test_trie("hello"))->list_insert_before(key);
-//   **key->insert(trie, Q_Value::list_offset()) = 1.0;
-//   key = nullptr;
-//   (new test_trie("world"))->list_insert_before(key);
-//   (new test_trie("hi"))->list_insert_before(key);
-//   **key->insert(trie, Q_Value::list_offset()) = 2.0;
-//   key = nullptr;
-//   (new test_trie("hi"))->list_insert_before(key);
-//   **key->insert(trie, Q_Value::list_offset()) = 3.0;
-//   key = nullptr;
-//   (new test_trie("world"))->list_insert_before(key);
-//   (new test_trie("hi"))->list_insert_before(key);
-//   key = key->insert(trie, Q_Value::list_offset());
-//   for_each((*key)->list.begin(), (*key)->list.end(), [](const Q_Value &q) {
-//     cout << q << endl;
-//   });
-//   trie->destroy(trie);
 
-//   Zeni::Random m_random;
-//   Mean mean;
-//   std::list<Value> values;
-//   values.push_back(m_random.rand_lt(42));
-//   values.push_back(m_random.rand_lt(42));
-//   values.push_back(m_random.rand_lt(42));
-//   values.push_back(m_random.rand_lt(42));
-//   values.push_back(m_random.rand_lt(42));
-//   values.push_back(m_random.rand_lt(42));
-//   values.push_back(m_random.rand_lt(42));
-//   values.push_back(m_random.rand_lt(42));
-//   values.push_back(m_random.rand_lt(42));
-//   values.push_back(m_random.rand_lt(42));
-//   for(auto &value : values) {
-//     mean.contribute(value);
-//     cout << "Adding " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
-//   }
-//   for(auto &value : values) {
-//     mean.uncontribute(value);
-//     cout << "Removing " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
-//   }
+//  typedef std::string test_key;
+//  typedef Q_Value test_value;
+//  typedef Zeni::Trie<test_key, test_value> test_trie;
+//
+//  test_trie * trie = new test_trie;
+//
+//  test_trie * key = nullptr;
+//  (new test_trie("world"))->list_insert_before(key);
+//  (new test_trie("hello"))->list_insert_before(key);
+//  key = key->insert(trie, Q_Value::eligible_offset());
+//  **key = 1.0;
+//  for(const Q_Value &q : (*key)->eligible)
+//    cout << q.value << ' ';
+//  cout << endl;
+//
+//  key = nullptr;
+//  (new test_trie("world"))->list_insert_before(key);
+//  (new test_trie("hi"))->list_insert_before(key);
+//  key = key->insert(trie, Q_Value::eligible_offset());
+//  **key = 2.0;
+//  for(const Q_Value &q : (*key)->eligible)
+//    cout << q.value << ' ';
+//  cout << endl;
+//
+//  key = nullptr;
+//  (new test_trie("hi"))->list_insert_before(key);
+//  key = key->insert(trie, Q_Value::eligible_offset());
+//  **key = 3.0;
+//  for(const Q_Value &q : (*key)->eligible)
+//    cout << q.value << ' ';
+//  cout << endl;
+//
+//  key = nullptr;
+//  (new test_trie("world"))->list_insert_before(key);
+//  (new test_trie("hi"))->list_insert_before(key);
+//  key = key->insert(trie, Q_Value::eligible_offset());
+//  for(const Q_Value &q : (*key)->eligible)
+//    cout << q.value << ' ';
+//  cout << endl;
+//
+//  trie->destroy(trie);
+
+
+//  Zeni::Random m_random;
+//  Mean mean;
+//  std::list<Value> values;
+//  values.push_back(m_random.rand_lt(42));
+//  values.push_back(m_random.rand_lt(42));
+//  values.push_back(m_random.rand_lt(42));
+//  values.push_back(m_random.rand_lt(42));
+//  values.push_back(m_random.rand_lt(42));
+//  values.push_back(m_random.rand_lt(42));
+//  values.push_back(m_random.rand_lt(42));
+//  values.push_back(m_random.rand_lt(42));
+//  values.push_back(m_random.rand_lt(42));
+//  values.push_back(m_random.rand_lt(42));
+//  for(auto &value : values) {
+//    mean.contribute(value);
+//    cout << "Adding " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
+//  }
+//  for(auto &value : values) {
+//    mean.uncontribute(value);
+//    cout << "Removing " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
+//  }
+
 
   cout.rdbuf(cout_bak);
   cerr.rdbuf(cerr_bak);
