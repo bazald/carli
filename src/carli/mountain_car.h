@@ -102,12 +102,19 @@ namespace Mountain_Car {
     void set_x_dot(const float &x_dot_) {m_x_dot = x_dot_;}
 
     bool success() const {
-      return MCarAtGoal();
+      return m_x >= m_goal_position;
     }
 
   private:
     void init_impl() {
-      MCarInit();
+      if(m_random_start) {
+        m_x = float(m_random_init.frand_lt() * (m_goal_position - m_min_position) + m_min_position);
+        m_x_dot = float(m_random_init.frand_lt() * (2 * m_max_velocity) - m_max_velocity);
+      }
+      else {
+        m_x = -0.5;
+        m_x_dot = 0.0;
+      }
     }
 
     void alter_impl() {
@@ -126,7 +133,18 @@ namespace Mountain_Car {
     }
 
     reward_type transition_impl(const action_type &action) {
-      MCarStep(int(dynamic_cast<const Move &>(action).direction));
+      const int a = int(dynamic_cast<const Move &>(action).direction);
+
+      assert(0 <= a && a <= 2);
+
+      m_x_dot += float((a - 1) * m_cart_force + cos(3 * m_x) * -m_grav_force);
+      m_x_dot = std::max(float(-m_max_velocity), std::min(float(m_max_velocity), m_x_dot));
+
+      m_x += float(m_x_dot);
+      m_x = std::max(float(m_min_position), std::min(float(m_max_position), m_x));
+
+      if(m_x == m_min_position && m_x_dot < 0)
+        m_x_dot = 0;
 
       return m_reward_negative ? -1 : success() ? 1 : 0;
     }
@@ -136,14 +154,15 @@ namespace Mountain_Car {
       os << " (" << m_x << ", " << m_x_dot << ')' << endl;
     }
 
-    void MCarInit();         ///< initialize car state
-    void MCarStep(int a);    ///< update car state for given action
-    bool MCarAtGoal() const; ///< is car at goal?
-
     Zeni::Random m_random_init;
 
     float m_x = 0.0f;
     float m_x_dot = 0.0f;
+
+    const double m_min_position = -1.2;
+    const double m_max_position = 0.6;
+    const double m_max_velocity = 0.07;
+    const double m_goal_position = 0.5;
 
     double m_cart_force = 0.001;
     double m_grav_force = 0.0025;

@@ -98,6 +98,11 @@ namespace Cart_Pole {
     const float & get_theta() const {return m_theta;}
     const float & get_theta_dot() const {return m_theta_dot;}
     const float & get_value(const Feature_Axis &index) const {return *(&m_x + index);}
+    const double & get_max_x() const {return m_max_x;}
+    const double & get_max_x_dot() const {return m_max_x_dot;}
+    const double & get_max_theta() const {return m_max_theta;}
+    const double & get_max_theta_dot() const {return m_max_theta_dot;}
+    bool has_goal() const {return m_has_goal;}
     bool is_ignoring_x() const {return m_ignore_x;}
 
     void set_x(const float &x_) {m_x = x_;}
@@ -105,8 +110,15 @@ namespace Cart_Pole {
     void set_theta_dot(const float &theta_dot_) {m_theta = theta_dot_;}
     void set_theta(const float &theta_) {m_theta = theta_;}
 
+    bool success() const {
+      return m_has_goal &&
+             (m_ignore_x || (m_x >= 4.1 && m_x <= 4.5)) &&
+             m_theta >= -0.06981317007 && m_theta <= 0.06981317007; ///< pi / 45.0
+    }
+
     bool failed() const {
-      return get_box(m_x, m_x_dot, m_theta, m_theta_dot) < 0;
+      return m_x < -m_max_x || m_x > m_max_x ||
+             m_theta < -m_max_theta || m_theta > m_max_theta;
     }
 
   private:
@@ -116,29 +128,54 @@ namespace Cart_Pole {
       m_theta = 0.0;
       m_theta_dot = 0.0;
 
+      if(m_has_goal) {
+        do {
+          if(!m_ignore_x) {
+            m_x = m_random_init.frand_lte() * (m_max_x - 0.2) - m_max_x / 2.0; ///< Inner half of range
+            if(m_x >= 4.1 && m_x <= 4.5)
+              m_x += 0.4;
+          }
+
+          m_theta = m_random_init.frand_lte() * (m_max_theta - 0.06981317007) - m_max_theta / 2.0; ///< Inner half of range
+          if(m_theta >= -0.06981317007 && m_theta <= 0.06981317007)
+            m_theta += 2 * 0.06981317007;
+        } while(success());
+      }
+
       m_random_motion = Zeni::Random(m_random_init.rand());
     }
 
     reward_type transition_impl(const action_type &action) {
-      cart_pole(dynamic_cast<const Move &>(action).direction == Move::RIGHT, &m_x, &m_x_dot, &m_theta, &m_theta_dot);
+      const bool move_right = dynamic_cast<const Move &>(action).direction == Move::RIGHT;
 
-      if(m_ignore_x) {
-        m_x = 0.0;
-        m_x_dot = 0.0;
+      const float force = float((move_right>0)? FORCE_MAG : -FORCE_MAG);
+      const float costheta = float(cos(double(m_theta)));
+      const float sintheta = float(sin(double(m_theta)));
+
+      const float temp = float((force + POLEMASS_LENGTH * m_theta_dot * m_theta_dot * sintheta)
+                                / TOTAL_MASS);
+
+      const float thetaacc = float((GRAVITY * sintheta - costheta* temp)
+                                   / (LENGTH * (FOURTHIRDS - MASSPOLE * costheta * costheta
+                                                / TOTAL_MASS)));
+
+      if(!m_ignore_x) {
+        const float xacc  = float(temp - POLEMASS_LENGTH * thetaacc* costheta / TOTAL_MASS);
+
+        m_x += float(TAU * m_x_dot);
+        m_x_dot += std::max(float(-m_max_x_dot), std::min(float(m_max_x_dot), m_x_dot + float(TAU * xacc)));
       }
 
-      return failed() ? -1.0 : 0.0;
+      m_theta += float(TAU * m_theta_dot);
+      m_theta_dot = std::max(float(-m_max_theta_dot), std::min(float(m_max_theta_dot), m_theta_dot + float(TAU * thetaacc)));
+
+      return success() ? 1.0 : failed() ? -1.0 : 0.0;
     }
 
     void print_impl(ostream &os) const {
       os << "Cart Pole:" << endl;
       os << " (" << m_x << ", " << m_x_dot << ", " << m_theta << ", " << m_theta_dot << ')' << endl;
     }
-
-    static double prob_push_right(const double &s);
-    float pole_random();
-    void cart_pole(int action, float *x, float *x_dot, float *theta, float *theta_dot);
-    static int get_box(float x, float x_dot, float theta, float theta_dot);
 
     Zeni::Random m_random_init;
     Zeni::Random m_random_motion;
@@ -147,7 +184,24 @@ namespace Cart_Pole {
     float m_x_dot = 0.0f;
     float m_theta = 0.0f;
     float m_theta_dot = 0.0f;
+
+    const double GRAVITY = 9.8;
+    const double MASSCART = 1.0;
+    const double MASSPOLE = 0.1;
+    const double TOTAL_MASS = MASSPOLE + MASSCART;
+    const double LENGTH = 0.5;      /* actually half the pole's length */
+    const double POLEMASS_LENGTH = MASSPOLE * LENGTH;
+    const double FORCE_MAG = 10.0;
+    const double TAU = 0.02;      /* seconds between state updates */
+    const double FOURTHIRDS = 1.3333333333333;
+
+    const bool m_has_goal = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["set-goal"]).get_value();
     const bool m_ignore_x = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["ignore-x"]).get_value();
+
+    const double m_max_x = m_has_goal ? 10.0 : 2.4;
+    const double m_max_x_dot = m_has_goal ? 4.0 : 10.0;
+    const double m_max_theta = m_has_goal ? 1.57079632679 : 0.2094384; ///< pi/2.0 : 12 degrees
+    const double m_max_theta_dot = m_has_goal ? 2.0 : 10.0;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {
@@ -178,14 +232,14 @@ namespace Cart_Pole {
       Feature::List * x_tail = nullptr;
       Feature::List * x_dot_tail = nullptr;
       if(!m_ignore_x) {
-        x_tail = &(new Feature(Feature::X, -2.4, 2.4, 0))->features;
+        x_tail = &(new Feature(Feature::X, -env->get_max_x(), env->get_max_x(), 0))->features;
         x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-        x_dot_tail = &(new Feature(Feature::X_DOT, -10, 10, 0))->features;
+        x_dot_tail = &(new Feature(Feature::X_DOT, -env->get_max_x_dot(), env->get_max_x_dot(), 0))->features;
         x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
       }
-      Feature::List * theta_tail = &(new Feature(Feature::THETA, -0.2094384, 0.2094384, 0))->features;
+      Feature::List * theta_tail = &(new Feature(Feature::THETA, -env->get_max_theta(), env->get_max_theta(), 0))->features;
       theta_tail = theta_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-      Feature::List * theta_dot_tail = &(new Feature(Feature::THETA_DOT, -10, 10, 0))->features;
+      Feature::List * theta_dot_tail = &(new Feature(Feature::THETA_DOT, -env->get_max_theta_dot(), env->get_max_theta_dot(), 0))->features;
       theta_dot_tail = theta_dot_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
 
       std::array<feature_trie, 2> tries = {{get_trie(Move(Move::LEFT)),
@@ -238,7 +292,7 @@ namespace Cart_Pole {
 
       if(env->failed())
         m_metastate = Metastate::FAILURE;
-      else if(get_step_count() > 9999)
+      else if(env->has_goal() ? env->success() : get_step_count() > 9999)
         m_metastate = Metastate::SUCCESS;
       else
         m_metastate = Metastate::NON_TERMINAL;

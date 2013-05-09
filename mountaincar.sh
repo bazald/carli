@@ -1,1 +1,1 @@
-SEED=$RANDOM; ./carli -s $SEED -e mountain-car -c inv-log-update-count --reward-negative true --eligibility-trace-decay-rate 0.3 -d 0.99 -g 0.01 -l 1 -p off-policy --split-min 3 -t 10 --num-steps 100000; echo $SEED
+SEED=$RANDOM; ./carli -s $SEED -e mountain-car -c inv-log-update-count --reward-negative true --eligibility-trace-decay-rate 0.3 -d 0.99 -g 0.01 -l 1 --policy off-policy --split-min 3 --pseudoepisode-threshold 10 --num-steps 100000; echo $SEED

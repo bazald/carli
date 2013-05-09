@@ -71,8 +71,9 @@ public:
 
   void add(const char &short_arg, const std::shared_ptr<Option> &option, const char * const help = nullptr) {
     if(m_short_options.find(std::string(short_arg, 1)) != m_short_options.end()) {
-      std::cerr << "Short option already exists: --" << option->get_name() << std::endl;
-      throw std::runtime_error("Short option already exists.");
+      std::ostringstream oss;
+      oss << "Short option already exists: --" << option->get_name() << std::endl;
+      throw std::runtime_error(oss.str());
     }
 
     add(option);
@@ -85,8 +86,9 @@ public:
 
   void add(const std::shared_ptr<Option> &option, const char * const help = nullptr) {
     if(m_long_options.find(option->get_name()) != m_long_options.end()) {
-      std::cerr << "Long option already exists: --" << option->get_name() << std::endl;
-      throw std::runtime_error("Long option already exists.");
+      std::ostringstream oss;
+      oss << "Long option already exists: --" << option->get_name() << std::endl;
+      throw std::runtime_error(oss.str());
     }
 
     m_long_options[option->get_name()] = option;
@@ -129,8 +131,9 @@ public:
   void handle_short(const int &argc, const char * const * const &argv) {
     auto opt = m_short_options.find(std::string(argv[optind][1], 1));
     if(opt == m_short_options.end()) {
-      std::cerr << "Unknown short option: " << argv[optind] << std::endl;
-      throw std::runtime_error("Unknown short option.");
+      std::ostringstream oss;
+      oss << "Unknown short option: " << argv[optind] << std::endl;
+      throw std::runtime_error(oss.str());
     }
 
     handle_arguments(argc, argv, opt->second);
@@ -139,8 +142,9 @@ public:
   void handle_long(const int &argc, const char * const * const &argv) {
     auto opt = m_long_options.find(argv[optind] + 2);
     if(opt == m_long_options.end()) {
-      std::cerr << "Unknown long option: " << argv[optind] << std::endl;
-      throw std::runtime_error("Unknown long option.");
+      std::ostringstream oss;
+      oss  << "Unknown long option: " << argv[optind] << std::endl;
+      throw std::runtime_error(oss.str());
     }
 
     handle_arguments(argc, argv, opt->second);
@@ -148,8 +152,9 @@ public:
 
   void handle_arguments(const int &argc, const char * const * const &argv, std::shared_ptr<Option> &opt) {
     if(opt->get_num_args() + 1 > argc - optind) {
-      std::cerr << "Insufficient arguments for option: " << argv[optind] << std::endl;
-      throw std::runtime_error("Insufficient arguments for option.");
+      std::ostringstream oss;
+      oss << "Insufficient arguments for option: " << argv[optind] << std::endl;
+      throw std::runtime_error(oss.str());
     }
 
     Option::Arguments arguments;
@@ -179,8 +184,9 @@ public:
   const Option & operator[](const char &short_arg) {
     auto opt = m_short_options.find(std::string(short_arg, 1));
     if(opt == m_short_options.end()) {
-      std::cerr << "Unknown short option: " << short_arg << std::endl;
-      throw std::runtime_error("Unknown short option.");
+      std::ostringstream oss;
+      oss << "Unknown short option: " << short_arg << std::endl;
+      throw std::runtime_error(oss.str());
     }
 
     return *opt->second;
@@ -189,8 +195,9 @@ public:
   const Option & operator[](const std::string &long_arg) {
     auto opt = m_long_options.find(long_arg);
     if(opt == m_long_options.end()) {
-      std::cerr << "Unknown long option: " << long_arg << std::endl;
-      throw std::runtime_error("Unknown long option.");
+      std::ostringstream oss;
+      oss << "Unknown long option: " << long_arg << std::endl;
+      throw std::runtime_error(oss.str());
     }
 
     return *opt->second;
@@ -272,9 +279,7 @@ private:
   void check(const std::string &item) {
     if(items.find(item) == items.end()) {
       std::ostringstream oss;
-      oss << "Argument '" << item << "' not in " << get_items();
-
-      std::cerr << oss.str() << std::endl;
+      oss << "Argument --" << get_name() << ' ' << item << " not in " << get_items();
       throw std::range_error(oss.str());
     }
   }
@@ -349,9 +354,7 @@ private:
        (inclusive_upper_bound ? value_ > upper_bound : value_ >= upper_bound))
     {
       std::ostringstream oss;
-      oss << "Argument '" << value_ << "' outside the range " << get_range();
-
-      std::cerr << oss.str() << std::endl;
+      oss << "Argument --" << get_name() << ' ' << value_ << " outside the range " << get_range();
       throw std::range_error(oss.str());
     }
   }
