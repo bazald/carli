@@ -131,7 +131,7 @@ public:
     return true;
   }
 
-  bool precedes(const Feature_Ranged &rhs) const {
+  bool precedes(const DERIVED &rhs) const {
     const auto mdpt = midpt();
     return axis == rhs.axis && (rhs.bound_lower == mdpt || rhs.bound_higher == mdpt);
   }
