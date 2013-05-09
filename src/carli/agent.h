@@ -240,7 +240,34 @@ public:
     }
   }
 
+  void print_value_function_grid(std::ostream &os) const {
+    std::set<line_segment_type> line_segments;
+    for(auto &value : m_value_function) {
+      os << *value.first << ":" << std::endl;
+      const auto line_segments2 = generate_value_function_grid_sets(value.second);
+      merge_value_function_grid_sets(line_segments, line_segments2);
+      print_value_function_grid_set(os, line_segments2);
+    }
+    os << "all:" << std::endl;
+    print_value_function_grid_set(os, line_segments);
+  }
+
+  void print_update_count_grid(std::ostream &os) const {
+    std::map<line_segment_type, size_t> update_counts;
+    for(auto &value : m_value_function) {
+      os << *value.first << ":" << std::endl;
+      const auto update_counts2 = generate_update_count_maps(value.second);
+      merge_update_count_maps(update_counts, update_counts2);
+      print_update_count_map(os, update_counts2);
+    }
+    os << "all:" << std::endl;
+    print_update_count_map(os, update_counts);
+  }
+
 protected:
+  typedef std::pair<double, double> point_type;
+  typedef std::pair<point_type, point_type> line_segment_type;
+
   Q_Value * get_value(const feature_list &features, const action_type &action, const size_t &offset, const size_t &depth = 0) {
     if(!features)
       return nullptr;
@@ -694,6 +721,101 @@ protected:
     }
 
     return false;
+  }
+
+  virtual std::set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie) const {
+    return {};
+  }
+
+  std::set<line_segment_type> generate_vfgs_for_axes(const feature_trie_type * const &trie, const Feature_Axis &axis_x, const Feature_Axis &axis_y, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0))) const {
+    std::set<line_segment_type> line_segments;
+
+    if(trie) {
+      for(const feature_trie_type &trie2 : *trie) {
+        auto new_extents = extents;
+        const auto &key = trie2.get_key();
+        if(key->axis == axis_x) {
+          new_extents.first.first = key->bound_lower;
+          new_extents.second.first = key->bound_higher;
+        }
+        else if(key->axis == axis_y) {
+          new_extents.first.second = key->bound_lower;
+          new_extents.second.second = key->bound_higher;
+        }
+
+        if(key->axis == axis_x || key->axis == axis_y) {
+          if(new_extents.first.first != extents.first.first)
+            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.first.second), std::make_pair(new_extents.first.first, new_extents.second.second)));
+          if(new_extents.first.second != extents.first.second)
+            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.first.second), std::make_pair(new_extents.second.first, new_extents.first.second)));
+          if(new_extents.second.first != extents.second.first)
+            line_segments.insert(std::make_pair(std::make_pair(new_extents.second.first, new_extents.first.second), std::make_pair(new_extents.second.first, new_extents.second.second)));
+          if(new_extents.second.second != extents.second.second)
+            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.second.second), std::make_pair(new_extents.second.first, new_extents.second.second)));
+        }
+
+        if(trie2.get_deeper()) {
+          const auto line_segments2 = this->generate_vfgs_for_axes(trie2.get_deeper(), axis_x, axis_y, new_extents);
+          this->merge_value_function_grid_sets(line_segments, line_segments2);
+        }
+      }
+    }
+
+    return line_segments;
+  }
+
+  virtual std::map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie) const {
+    return {};
+  }
+
+  std::map<line_segment_type, size_t> generate_ucm_for_axes(const feature_trie_type * const &trie, const Feature_Axis &axis_x, const Feature_Axis &axis_y, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0)), const size_t &update_count = 0) const {
+    std::map<line_segment_type, size_t> update_counts;
+
+    if(trie) {
+      for(const feature_trie_type &trie2 : *trie) {
+        auto new_extents = extents;
+        const auto &key = trie2.get_key();
+        if(key->axis == axis_x) {
+          new_extents.first.first = key->bound_lower;
+          new_extents.second.first = key->bound_higher;
+        }
+        else if(key->axis == axis_y) {
+          new_extents.first.second = key->bound_lower;
+          new_extents.second.second = key->bound_higher;
+        }
+
+        const auto update_count2 = update_count + (trie2.get() ? trie2->update_count : 0);
+
+        update_counts[new_extents] = update_count2;
+
+        if(trie2.get_deeper()) {
+          const auto update_counts2 = this->generate_ucm_for_axes(trie2.get_deeper(), axis_x, axis_y, new_extents, update_count2);
+          this->merge_update_count_maps(update_counts, update_counts2);
+        }
+      }
+    }
+
+    return update_counts;
+  }
+
+  void print_value_function_grid_set(std::ostream &os, const std::set<line_segment_type> &line_segments) const {
+    for(const line_segment_type &line_segment : line_segments)
+      os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
+  }
+
+  void print_update_count_map(std::ostream &os, const std::map<line_segment_type, size_t> &update_counts) const {
+    for(const auto &rect : update_counts)
+      os << rect.first.first.first << ',' << rect.first.first.second << '/' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
+  }
+
+  void merge_value_function_grid_sets(std::set<line_segment_type> &combination, const std::set<line_segment_type> &additions) const {
+    for(const line_segment_type &line_segment : additions)
+      combination.insert(line_segment);
+  }
+
+  void merge_update_count_maps(std::map<line_segment_type, size_t> &combination, const std::map<line_segment_type, size_t> &additions) const {
+    for(const auto &rect : additions)
+      combination[rect.first] += rect.second;
   }
 
   Metastate m_metastate = Metastate::NON_TERMINAL;

@@ -8,6 +8,8 @@
 #include <iostream>
 #include <memory>
 
+typedef int Feature_Axis;
+
 template <typename DERIVED, typename DERIVED2 = DERIVED>
 class Feature : public Zeni::Pool_Allocator<DERIVED2> {
   Feature(const Feature &) = delete;
@@ -99,9 +101,7 @@ public:
 template <typename DERIVED, typename DERIVED2 = DERIVED>
 class Feature_Ranged : public Feature<DERIVED, DERIVED2> {
 public:
-  typedef int Axis;
-
-  Feature_Ranged(const Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_)
+  Feature_Ranged(const Feature_Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_)
    : ::Feature<DERIVED, DERIVED2>(),
    axis(axis_),
    bound_lower(bound_lower_),
@@ -148,7 +148,7 @@ public:
     os << this->axis << '(' << bound_lower << ',' << bound_higher << ':' << depth << ')';
   }
 
-  Axis axis;
+  Feature_Axis axis;
 
   double bound_lower; ///< inclusive
   double bound_higher; ///< exclusive

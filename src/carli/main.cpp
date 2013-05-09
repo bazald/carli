@@ -290,16 +290,13 @@ void run_agent() {
     cout << failures << " FAILUREs" << endl;
     cout << agent->get_value_function_size() << " Q-values" << endl;
 
-    if(auto pwa = dynamic_pointer_cast<Cart_Pole::Agent>(agent))
-      pwa->print_policy(cout, 32);
-    else if(auto pwa = dynamic_pointer_cast<Mountain_Car::Agent>(agent))
+    if(auto pwa = dynamic_pointer_cast<Mountain_Car::Agent>(agent))
       pwa->print_policy(cout, 32);
     else if(auto pwa = dynamic_pointer_cast<Puddle_World::Agent>(agent))
       pwa->print_policy(cout, 32);
   }
   else if(output == "experiment") {
     if(auto cpa = dynamic_pointer_cast<Cart_Pole::Agent>(agent)) {
-      cpa->print_policy(cerr, 32);
       cpa->print_value_function_grid(cerr);
       cpa->print_update_count_grid(cerr);
     }
