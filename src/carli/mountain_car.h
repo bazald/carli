@@ -191,7 +191,7 @@ namespace Mountain_Car {
       return generate_vfgs_for_axes(trie, feature_type::Axis::X, feature_type::Axis::X_DOT);
     }
 
-    map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0)), const size_t &update_count = 0) const {
+    map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie) const {
       return generate_ucm_for_axes(trie, feature_type::Axis::X, feature_type::Axis::X_DOT);
     }
 
