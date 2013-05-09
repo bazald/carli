@@ -1,8 +1,8 @@
 #ifndef AGENT_H
 #define AGENT_H
 
-#include "clone.h"
 #include "environment.h"
+#include "feature.h"
 #include "trie.h"
 #include "q_value.h"
 #include "random.h"
@@ -15,96 +15,6 @@
 #include <string>
 
 #include <iostream>
-
-template <typename DERIVED, typename DERIVED2 = DERIVED>
-class Feature : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
-  Feature & operator=(const Feature &) = delete;
-
-public:
-  typedef typename Zeni::Linked_List<DERIVED> List;
-  typedef typename List::iterator iterator;
-
-  struct Compare {
-    bool operator()(const Feature &lhs, const Feature &rhs) const {
-      return lhs.compare(rhs) < 0;
-    }
-
-    bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {
-      return operator()(*lhs, *rhs);
-    }
-
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {
-      return operator()(*lhs, *rhs);
-    }
-
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {
-      return operator()(*lhs, *rhs);
-    }
-  };
-
-  struct Compare_PI {
-    bool operator()(const Feature &lhs, const Feature &rhs) const {
-      return lhs.compare_pi(rhs) < 0;
-    }
-
-    bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {
-      return operator()(*lhs, *rhs);
-    }
-
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {
-      return operator()(*lhs, *rhs);
-    }
-
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {
-      return operator()(*lhs, *rhs);
-    }
-  };
-
-  Feature(const bool &present_ = true)
-    : features(static_cast<DERIVED *>(this)),
-    present(present_)
-  {
-  }
-
-  Feature(const Feature &rhs)
-   : features(static_cast<DERIVED *>(this)),
-   present(rhs.present)
-  {
-  }
-
-  virtual ~Feature() {}
-
-  bool operator<(const Feature &rhs) const {return compare(rhs) < 0;}
-  bool operator<=(const Feature &rhs) const {return compare(rhs) <= 0;}
-  bool operator>(const Feature &rhs) const {return compare(rhs) > 0;}
-  bool operator>=(const Feature &rhs) const {return compare(rhs) >= 0;}
-  bool operator==(const Feature &rhs) const {return compare(rhs) == 0;}
-  bool operator!=(const Feature &rhs) const {return compare(rhs) != 0;}
-
-  void print(std::ostream &os) const {
-    if(!present)
-      os << '!';
-    print_impl(os);
-  }
-
-  int compare(const Feature &rhs) const {
-    return present ^ rhs.present ? rhs.present - present : compare_pi(rhs);
-  }
-
-  int compare_pi(const Feature &rhs) const {
-    return compare_pi(dynamic_cast<const DERIVED &>(rhs));
-  }
-
-  virtual int compare_pi(const DERIVED &rhs) const = 0;
-
-  virtual bool precedes(const DERIVED &rhs) const = 0;
-
-  virtual void print_impl(std::ostream &os) const = 0;
-
-  List features;
-
-  bool present;
-};
 
 template <typename DERIVED, typename DERIVED2>
 std::ostream & operator << (std::ostream &os, const Feature<DERIVED, DERIVED2> &feature) {
@@ -348,7 +258,6 @@ protected:
 
           while(it != iend) {
             auto ptr = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
-            assert(it->present == ptr->get_key()->present);
             ptr->list_insert_after(tail);
             tail = ptr;
             ++it;
@@ -776,9 +685,9 @@ protected:
       auto feature = match->get_key();
       const auto midpt = feature->midpt();
       if(env->get_value(feature->axis) < midpt)
-        tail_next = &(new FEATURE(feature->axis, feature->bound_lower, midpt, feature->depth + 1))->features;
+        tail_next = &(new FEATURE(typename FEATURE::Axis(feature->axis), feature->bound_lower, midpt, feature->depth + 1))->features;
       else
-        tail_next = &(new FEATURE(feature->axis, midpt, feature->bound_higher, feature->depth + 1))->features;
+        tail_next = &(new FEATURE(typename FEATURE::Axis(feature->axis), midpt, feature->bound_higher, feature->depth + 1))->features;
       tail_next = tail_next->template insert_in_order<typename FEATURE::List::compare_default>(m_features, false);
       trie = match->get_deeper();
       return true;
@@ -822,7 +731,7 @@ private:
     auto match = std::find_first_of(head->begin(), head->end(),
                                     function->begin(), function->end(),
                                     [](const feature_trie_type &lhs, const feature_trie_type &rhs)->bool {
-                                      return lhs.get_key()->compare_pi(*rhs.get_key()) == 0;
+                                      return lhs.get_key()->compare_axis(*rhs.get_key()) == 0;
                                     });
 
     const bool use_value = m_weight_assignment_code != "all";

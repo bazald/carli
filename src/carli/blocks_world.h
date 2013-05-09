@@ -20,55 +20,46 @@ namespace Blocks_World {
   class On_Top;
 
   class Feature;
-  class Feature : public ::Feature<Feature, On_Top> {
-    Feature & operator=(const Feature &) = delete;
-
+  class Feature : public Feature_Present<Feature, On_Top> {
   public:
-    Feature(const bool &present_ = true)
-     : ::Feature<Feature, On_Top>(present_)
+    Feature(const bool &present_)
+     : Feature_Present<Feature, On_Top>(present_)
     {
     }
 
-    virtual int compare_pi(const Feature &rhs) const = 0;
-    virtual int compare_pi(const In_Place &rhs) const = 0;
-    virtual int compare_pi(const On_Top &rhs) const = 0;
+    virtual Feature * clone() const = 0;
 
-    bool precedes(const Feature &) const {
-      return false;
-    }
+    virtual int compare_axis(const Feature &rhs) const = 0;
+    virtual int compare_axis(const In_Place &rhs) const = 0;
+    virtual int compare_axis(const On_Top &rhs) const = 0;
   };
 
   typedef Feature feature_type;
 
   class In_Place : public feature_type {
   public:
-    In_Place()
-     : block(block_id())
-    {
-    }
-
-    In_Place(const block_id &block_, const bool &present_ = true)
+    In_Place(const block_id &block_, const bool &present_)
      : feature_type(present_),
      block(block_)
     {
     }
 
     In_Place * clone() const {
-      return new In_Place(*this);
+      return new In_Place(block, this->present);
     }
 
-    void print_impl(ostream &os) const {
-      os << "in-place(" << block << ')';
+    int compare_axis(const Feature &rhs) const {
+      return -rhs.compare_axis(*this);
     }
-
-    int compare_pi(const Feature &rhs) const {
-      return -rhs.compare_pi(*this);
-    }
-    int compare_pi(const In_Place &rhs) const {
+    int compare_axis(const In_Place &rhs) const {
       return block - rhs.block;
     }
-    int compare_pi(const On_Top &) const {
+    int compare_axis(const On_Top &) const {
       return -1;
+    }
+
+    void print(ostream &os) const {
+      os << "in-place(" << block << ')';
     }
 
     block_id block;
@@ -76,13 +67,7 @@ namespace Blocks_World {
 
   class On_Top : public feature_type {
   public:
-    On_Top()
-     : top(block_id()),
-     bottom(block_id())
-    {
-    }
-
-    On_Top(const block_id &top_, const block_id &bottom_, const bool &present_ = true)
+    On_Top(const block_id &top_, const block_id &bottom_, const bool &present_)
      : feature_type(present_),
      top(top_),
      bottom(bottom_)
@@ -90,21 +75,21 @@ namespace Blocks_World {
     }
 
     On_Top * clone() const {
-      return new On_Top(*this);
+      return new On_Top(top, bottom, present);
     }
 
-    void print_impl(ostream &os) const {
-      os << "on-top(" << top << ',' << bottom << ')';
+    int compare_axis(const Feature &rhs) const {
+      return -rhs.compare_axis(*this);
     }
-
-    int compare_pi(const Feature &rhs) const {
-      return -rhs.compare_pi(*this);
-    }
-    int compare_pi(const In_Place &) const {
+    int compare_axis(const In_Place &) const {
       return 1;
     }
-    int compare_pi(const On_Top &rhs) const {
+    int compare_axis(const On_Top &rhs) const {
       return top != rhs.top ? top - rhs.top : bottom - rhs.bottom;
+    }
+
+    void print(ostream &os) const {
+      os << "on-top(" << top << ',' << bottom << ')';
     }
 
     block_id top;
@@ -267,7 +252,7 @@ namespace Blocks_World {
             if(place_counter != id)
               return true;
 
-            feature_type * in_place = new In_Place(id);
+            feature_type * in_place = new In_Place(id, true);
             in_place->features.insert_in_order<feature_type::List::compare_default>(this->m_features);
             --place_counter;
 

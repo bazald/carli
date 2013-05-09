@@ -23,55 +23,28 @@ namespace Puddle_World {
   using std::shared_ptr;
 
   class Feature;
-  class Feature : public ::Feature<Feature> {
-    Feature & operator=(const Feature &) = delete;
-
+  class Feature : public Feature_Ranged<Feature> {
   public:
-    enum Axis : char {X, Y};
-
-    Feature()
-     : ::Feature<Feature>(true)
-    {
-    }
+    enum Axis : int {X, Y};
 
     Feature(const Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_)
-     : ::Feature<Feature>(true),
-     axis(axis_),
-     bound_lower(bound_lower_),
-     bound_higher(bound_higher_),
-     depth(depth_)
+     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_higher_, depth_)
     {
-    }
-
-    int compare_pi(const Feature &rhs) const {
-      return depth != rhs.depth ? (depth < rhs.depth ? -1 : 1) :
-             axis != rhs.axis ? axis - rhs.axis :
-             bound_lower != rhs.bound_lower ? (bound_lower < rhs.bound_lower ? -1 : 1) :
-             (bound_higher == rhs.bound_higher ? 0 : bound_higher < rhs.bound_higher ? -1 : 1);
-    }
-
-    bool precedes(const Feature &rhs) const {
-      const auto mdpt = midpt();
-      return axis == rhs.axis && (rhs.bound_lower == mdpt || rhs.bound_higher == mdpt);
-    }
-
-    double midpt() const {
-      return (bound_lower + bound_higher) / 2.0;
     }
 
     Feature * clone() const {
-      return new Feature(axis, bound_lower, bound_higher, depth);
+      return new Feature(Axis(this->axis), this->bound_lower, this->bound_higher, this->depth);
     }
 
-    void print_impl(ostream &os) const {
-      os << (axis == X ? 'x' : 'y') << '(' << bound_lower << ',' << bound_higher << ':' << depth << ')';
+    void print(ostream &os) const {
+      switch(axis) {
+        case X: os << 'x'; break;
+        case Y: os << "y"; break;
+        default: abort();
+      }
+
+      os << '(' << bound_lower << ',' << bound_higher << ':' << depth << ')';
     }
-
-    Axis axis;
-    double bound_lower; ///< inclusive
-    double bound_higher; ///< exclusive
-
-    size_t depth; ///< 0 indicates unsplit
   };
 
   typedef Feature feature_type;
@@ -136,7 +109,7 @@ namespace Puddle_World {
     }
 
     const double_pair & get_position() const {return m_position;}
-    const double & get_value(const Feature::Axis &index) const {return *(&m_position.first + index);}
+    const double & get_value(const Feature_Ranged<Feature>::Axis &index) const {return *(&m_position.first + index);}
     bool is_random_start() const {return m_random_start;}
 
     void set_position(const double_pair &position_) {m_position = position_;}
