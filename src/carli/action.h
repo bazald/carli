@@ -54,7 +54,7 @@ public:
   }
 
   int compare(const Action &rhs) const {
-    return dynamic_cast<const DERIVED *>(this)->compare(dynamic_cast<const DERIVED &>(rhs));
+    return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs));
   }
 
   virtual void print_impl(std::ostream &os) const = 0;

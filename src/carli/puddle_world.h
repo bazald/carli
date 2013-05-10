@@ -39,7 +39,7 @@ namespace Puddle_World {
     void print(ostream &os) const {
       switch(axis) {
         case X: os << 'x'; break;
-        case Y: os << "y"; break;
+        case Y: os << 'y'; break;
         default: abort();
       }
 
@@ -193,7 +193,7 @@ namespace Puddle_World {
       const double shift = m_random_motion.frand_gaussian() * 0.01;
       const double step_size = shift + 0.05;
 
-      switch(dynamic_cast<const Move &>(action).direction) {
+      switch(static_cast<const Move &>(action).direction) {
         case Move::NORTH: m_position.second += step_size; break;
         case Move::SOUTH: m_position.second -= step_size; break;
         case Move::EAST:  m_position.first  += step_size; break;
@@ -301,7 +301,7 @@ namespace Puddle_World {
           env->set_position(Environment::double_pair((x + 0.5) / granularity, (y - 0.5) / granularity));
           regenerate_lists();
           auto action = choose_greedy();
-          switch(dynamic_cast<const Move &>(*action).direction) {
+          switch(static_cast<const Move &>(*action).direction) {
             case Move::NORTH: os << 'N'; break;
             case Move::SOUTH: os << 'S'; break;
             case Move::EAST:  os << 'E'; break;

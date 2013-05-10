@@ -32,7 +32,10 @@ solution "carli"
   configuration "macosx"
     buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
     linkoptions { "-stdlib=libc++" }
-  configuration { "linux", "Debug*" }
-    links { "tcmalloc_and_profiler" }
-  configuration { "linux", "Release*" }
-    links { "tcmalloc_minimal" }
+
+  if _ACTION == "gmake" then
+    configuration { "linux", "Debug*" }
+      links { "tcmalloc_and_profiler" }
+    configuration { "linux", "Release*" }
+      links { "tcmalloc_minimal" }
+  end

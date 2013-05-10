@@ -146,7 +146,7 @@ namespace Cart_Pole {
     }
 
     reward_type transition_impl(const action_type &action) {
-      const bool move_right = dynamic_cast<const Move &>(action).direction == Move::RIGHT;
+      const bool move_right = static_cast<const Move &>(action).direction == Move::RIGHT;
 
       const double force = move_right > 0 ? FORCE_MAG : -FORCE_MAG;
       const double costheta = cos(m_theta);

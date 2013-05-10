@@ -133,7 +133,7 @@ namespace Mountain_Car {
     }
 
     reward_type transition_impl(const action_type &action) {
-      const int a = int(dynamic_cast<const Move &>(action).direction);
+      const int a = int(static_cast<const Move &>(action).direction);
 
       assert(0 <= a && a <= 2);
 
@@ -190,7 +190,7 @@ namespace Mountain_Car {
           env->set_x(((x + 0.5) / granularity) * 1.8 - 1.2);
           regenerate_lists();
           auto action = choose_greedy();
-          switch(dynamic_cast<const Move &>(*action).direction) {
+          switch(static_cast<const Move &>(*action).direction) {
             case Move::LEFT:  os << '0'; break;
             case Move::IDLE:  os << '-'; break;
             case Move::RIGHT: os << '1'; break;

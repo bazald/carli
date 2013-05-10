@@ -272,6 +272,8 @@ protected:
     if(!features)
       return nullptr;
 
+    const bool use_value = m_weight_assignment_code != "all";
+
     for(;;) {
       try {
         feature_trie head = nullptr;
@@ -291,7 +293,7 @@ protected:
           }
         }
 
-        Q_Value * const rv = get_value_from_function(head, get_trie(action), offset, depth)->get();
+        Q_Value * const rv = get_value_from_function(head, get_trie(action), offset, depth, use_value)->get();
 
         assign_weight(value_to_Linked_List(rv, offset));
 
@@ -713,7 +715,7 @@ protected:
     auto match = std::find_if(trie->begin(), trie->end(), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
 
     if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
-      auto feature = match->get_key();
+      const auto &feature = match->get_key();
       const auto midpt = feature->midpt();
       if(env->get_value(feature->axis) < midpt)
         tail_next = &(new FEATURE(typename FEATURE::Axis(feature->axis), feature->bound_lower, midpt, feature->depth + 1))->features;
@@ -852,15 +854,13 @@ private:
     }
   }
 
-  feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const double &value = 0.0) {
+  feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const bool &use_value, const double &value = 0.0) {
     /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
     auto match = std::find_first_of(head->begin(), head->end(),
                                     function->begin(), function->end(),
                                     [](const feature_trie_type &lhs, const feature_trie_type &rhs)->bool {
                                       return lhs.get_key()->compare_axis(*rhs.get_key()) == 0;
                                     });
-
-    const bool use_value = m_weight_assignment_code != "all";
 
     if(match) {
       auto next = static_cast<feature_trie>(head == match ? head->next() : head);
@@ -879,7 +879,7 @@ private:
       feature_trie deeper = nullptr;
       if(next && m_split_test(match->get(), depth)) {
         collapse_fringe(match->get_deeper(), next);
-        deeper = get_value_from_function(next, match->get_deeper(), offset, depth + 1, value_next);
+        deeper = get_value_from_function(next, match->get_deeper(), offset, depth + 1, use_value, value_next);
       }
       else {
         try {

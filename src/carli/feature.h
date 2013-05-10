@@ -20,7 +20,7 @@ public:
 
   struct Compare {
     bool operator()(const Feature &lhs, const Feature &rhs) const {
-      return lhs.compare(rhs) < 0;
+      return static_cast<const DERIVED &>(lhs).compare(static_cast<const DERIVED &>(rhs)) < 0;
     }
 
     bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {
@@ -45,33 +45,21 @@ public:
 
   virtual Feature * clone() const = 0;
 
-  bool operator<(const Feature &rhs) const {return compare(rhs) < 0;}
-  bool operator<=(const Feature &rhs) const {return compare(rhs) <= 0;}
-  bool operator>(const Feature &rhs) const {return compare(rhs) > 0;}
-  bool operator>=(const Feature &rhs) const {return compare(rhs) >= 0;}
-  bool operator==(const Feature &rhs) const {return compare(rhs) == 0;}
-  bool operator!=(const Feature &rhs) const {return compare(rhs) != 0;}
+  bool operator<(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) < 0;}
+  bool operator<=(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) <= 0;}
+  bool operator>(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) > 0;}
+  bool operator>=(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) >= 0;}
+  bool operator==(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) == 0;}
+  bool operator!=(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) != 0;}
 
   int compare(const Feature &rhs) const {
-    return compare(dynamic_cast<const DERIVED &>(rhs));
+    return compare(static_cast<const DERIVED &>(rhs));
   }
 
-  virtual int compare(const DERIVED &rhs) const {
-    const int axis_comparison = compare_axis(rhs);
-    return axis_comparison ? axis_comparison : compare_value(rhs);
+  int compare(const DERIVED &rhs) const {
+    const int axis_comparison = static_cast<const DERIVED *>(this)->compare_axis(rhs);
+    return axis_comparison ? axis_comparison : static_cast<const DERIVED *>(this)->compare_value(rhs);
   }
-
-  int compare_axis(const Feature &rhs) const {
-    return compare_axis(dynamic_cast<const DERIVED &>(rhs));
-  }
-
-  virtual int compare_axis(const DERIVED &) const {return 0;}
-
-  int compare_value(const Feature &rhs) const {
-    return compare_value(dynamic_cast<const DERIVED &>(rhs));
-  }
-
-  virtual int compare_value(const DERIVED &rhs) const = 0;
 
   virtual bool refinable() const {return false;}
 
@@ -110,10 +98,11 @@ public:
   }
 
   int compare(const DERIVED &rhs) const {
-    return depth != rhs.depth ? (depth < rhs.depth ? -1 : 1) :
-           axis != rhs.axis ? (axis < rhs.axis ? -1 : 1) :
-           bound_lower != rhs.bound_lower ? (bound_lower < rhs.bound_lower ? -1 : 1) :
-           (bound_higher == rhs.bound_higher ? 0 : bound_higher < rhs.bound_higher ? -1 : 1);
+    return depth < rhs.depth ? -1 : depth > rhs.depth ? 1 :
+           axis < rhs.axis ? -1 : axis > rhs.axis ? 1 :
+           bound_lower < rhs.bound_lower ? -1 : bound_lower > rhs.bound_lower ? 1 :
+           bound_higher < rhs.bound_higher ? -1 : bound_higher > rhs.bound_higher ? 1 :
+           0;
   }
 
   int compare_axis(const DERIVED &rhs) const {
@@ -121,9 +110,10 @@ public:
   }
 
   int compare_value(const DERIVED &rhs) const {
-    return depth != rhs.depth ? (depth < rhs.depth ? -1 : 1) :
-           bound_lower != rhs.bound_lower ? (bound_lower < rhs.bound_lower ? -1 : 1) :
-           (bound_higher == rhs.bound_higher ? 0 : bound_higher < rhs.bound_higher ? -1 : 1);
+    return depth < rhs.depth ? -1 : depth > rhs.depth ? 1 :
+           bound_lower < rhs.bound_lower ? -1 : bound_lower > rhs.bound_lower ? 1 :
+           bound_higher < rhs.bound_higher ? -1 : bound_higher > rhs.bound_higher ? 1 :
+           0;
   }
 
   bool refinable() const {
