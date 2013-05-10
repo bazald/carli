@@ -65,7 +65,7 @@ public:
     return compare_axis(dynamic_cast<const DERIVED &>(rhs));
   }
 
-  virtual int compare_axis(const DERIVED &rhs) const {return 0;}
+  virtual int compare_axis(const DERIVED &) const {return 0;}
 
   int compare_value(const Feature &rhs) const {
     return compare_value(dynamic_cast<const DERIVED &>(rhs));

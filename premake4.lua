@@ -15,7 +15,7 @@ solution "carli"
   end
 
   flags { "ExtraWarnings" }
-  buildoptions { "-std=c++11", "-pedantic" }
+  buildoptions { "-Wextra", "-std=c++11", "-pedantic" }
   include "src/carli"
 
   configuration "Debug*"
@@ -32,3 +32,7 @@ solution "carli"
   configuration "macosx"
     buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
     linkoptions { "-stdlib=libc++" }
+  configuration { "linux", "Debug*" }
+    links { "tcmalloc_and_profiler" }
+  configuration { "linux", "Release*" }
+    links { "tcmalloc_minimal" }

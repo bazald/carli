@@ -666,7 +666,11 @@ protected:
       return false;
   }
 
-  static double sum_value(const action_type * const &action, const Q_Value::List &value_list) {
+  static double sum_value(const action_type * const &
+#ifdef DEBUG_OUTPUT
+                                                     action
+#endif
+                                                           , const Q_Value::List &value_list) {
 #ifdef DEBUG_OUTPUT
     if(action)
       std::cerr << "   sum_value(" << *action << ") = {";
@@ -723,7 +727,7 @@ protected:
     return false;
   }
 
-  virtual std::set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie) const {
+  virtual std::set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &) const {
     return {};
   }
 
@@ -764,7 +768,7 @@ protected:
     return line_segments;
   }
 
-  virtual std::map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie) const {
+  virtual std::map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &) const {
     return {};
   }
 

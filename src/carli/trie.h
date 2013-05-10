@@ -19,6 +19,7 @@ namespace Zeni {
     typedef KEY * key_pointer_type;
     typedef TYPE value_type;
     typedef TYPE * value_pointer_type;
+    typedef const TYPE * const_value_pointer_type;
     typedef TYPE & value_reference_type;
     typedef Trie<KEY, TYPE, COMPARE> trie_value_type;
     typedef trie_value_type * trie_pointer_type;
@@ -100,7 +101,7 @@ namespace Zeni {
     value_reference_type operator*() {
       return *m_value;
     }
-    const value_pointer_type operator->() const {
+    const_value_pointer_type operator->() const {
       return m_value;
     }
     value_pointer_type operator->() {

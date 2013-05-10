@@ -24,6 +24,7 @@
 *.psess
 *.rc
 *.res
+*.save
 *.sdf
 *.sln
 *.suo
