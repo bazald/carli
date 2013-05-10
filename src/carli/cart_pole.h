@@ -93,11 +93,11 @@ namespace Cart_Pole {
       Environment::init_impl();
     }
 
-    const float & get_x() const {return m_x;}
-    const float & get_x_dot() const {return m_x_dot;}
-    const float & get_theta() const {return m_theta;}
-    const float & get_theta_dot() const {return m_theta_dot;}
-    const float & get_value(const Feature_Axis &index) const {return *(&m_x + index);}
+    const double & get_x() const {return m_x;}
+    const double & get_x_dot() const {return m_x_dot;}
+    const double & get_theta() const {return m_theta;}
+    const double & get_theta_dot() const {return m_theta_dot;}
+    const double & get_value(const Feature_Axis &index) const {return *(&m_x + index);}
     const double & get_max_x() const {return m_max_x;}
     const double & get_max_x_dot() const {return m_max_x_dot;}
     const double & get_max_theta() const {return m_max_theta;}
@@ -105,10 +105,10 @@ namespace Cart_Pole {
     bool has_goal() const {return m_has_goal;}
     bool is_ignoring_x() const {return m_ignore_x;}
 
-    void set_x(const float &x_) {m_x = x_;}
-    void set_x_dot(const float &x_dot_) {m_x = x_dot_;}
-    void set_theta_dot(const float &theta_dot_) {m_theta = theta_dot_;}
-    void set_theta(const float &theta_) {m_theta = theta_;}
+    void set_x(const double &x_) {m_x = x_;}
+    void set_x_dot(const double &x_dot_) {m_x = x_dot_;}
+    void set_theta_dot(const double &theta_dot_) {m_theta = theta_dot_;}
+    void set_theta(const double &theta_) {m_theta = theta_;}
 
     bool success() const {
       return m_has_goal &&
@@ -148,26 +148,24 @@ namespace Cart_Pole {
     reward_type transition_impl(const action_type &action) {
       const bool move_right = dynamic_cast<const Move &>(action).direction == Move::RIGHT;
 
-      const float force = float((move_right>0)? FORCE_MAG : -FORCE_MAG);
-      const float costheta = float(cos(double(m_theta)));
-      const float sintheta = float(sin(double(m_theta)));
+      const double force = move_right > 0 ? FORCE_MAG : -FORCE_MAG;
+      const double costheta = cos(m_theta);
+      const double sintheta = sin(m_theta);
 
-      const float temp = float((force + POLEMASS_LENGTH * m_theta_dot * m_theta_dot * sintheta)
-                                / TOTAL_MASS);
+      const double temp = (force + POLEMASS_LENGTH * m_theta_dot * m_theta_dot * sintheta) / TOTAL_MASS;
 
-      const float thetaacc = float((GRAVITY * sintheta - costheta* temp)
-                                   / (LENGTH * (FOURTHIRDS - MASSPOLE * costheta * costheta
-                                                / TOTAL_MASS)));
+      const double thetaacc = (GRAVITY * sintheta - costheta* temp) /
+                               (LENGTH * (FOURTHIRDS - MASSPOLE * costheta * costheta / TOTAL_MASS));
 
       if(!m_ignore_x) {
-        const float xacc  = float(temp - POLEMASS_LENGTH * thetaacc* costheta / TOTAL_MASS);
+        const double xacc  = temp - POLEMASS_LENGTH * thetaacc* costheta / TOTAL_MASS;
 
-        m_x += float(TAU * m_x_dot);
-        m_x_dot += std::max(float(-m_max_x_dot), std::min(float(m_max_x_dot), m_x_dot + float(TAU * xacc)));
+        m_x += TAU * m_x_dot;
+        m_x_dot += std::max(-m_max_x_dot, std::min(m_max_x_dot, m_x_dot + TAU * xacc));
       }
 
-      m_theta += float(TAU * m_theta_dot);
-      m_theta_dot = std::max(float(-m_max_theta_dot), std::min(float(m_max_theta_dot), m_theta_dot + float(TAU * thetaacc)));
+      m_theta += TAU * m_theta_dot;
+      m_theta_dot = std::max(-m_max_theta_dot, std::min(m_max_theta_dot, m_theta_dot + TAU * thetaacc));
 
       return success() ? 1.0 : failed() ? -1.0 : 0.0;
     }
@@ -180,10 +178,10 @@ namespace Cart_Pole {
     Zeni::Random m_random_init;
     Zeni::Random m_random_motion;
 
-    float m_x = 0.0f;
-    float m_x_dot = 0.0f;
-    float m_theta = 0.0f;
-    float m_theta_dot = 0.0f;
+    double m_x = 0.0;
+    double m_x_dot = 0.0;
+    double m_theta = 0.0;
+    double m_theta_dot = 0.0;
 
     const double GRAVITY = 9.8;
     const double MASSCART = 1.0;

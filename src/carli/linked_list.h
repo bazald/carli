@@ -17,12 +17,6 @@ namespace Zeni {
   Linked_List<TYPE> * value_to_Linked_List(TYPE * const type, const size_t &offset);
 
   template <typename TYPE>
-  typename Linked_List<TYPE>::iterator_const begin(const TYPE * const type, const size_t &offset);
-
-  template <typename TYPE>
-  typename Linked_List<TYPE>::iterator begin(TYPE * const type, const size_t &offset);
-
-  template <typename TYPE>
   class Linked_List {
   public:
     typedef TYPE value_type;
@@ -38,7 +32,7 @@ namespace Zeni {
     public:
       typedef TYPE * pointer;
       typedef TYPE & reference;
-      
+
       iterator(const size_t &m_offset_ = 0lu)
         : m_offset(m_offset_),
         m_pointer(nullptr)
@@ -60,7 +54,7 @@ namespace Zeni {
       value_pointer_type operator->() const {
         return get();
       }
-      
+
       iterator prev() const {
         if(m_pointer->m_prev)
           return iterator(m_pointer->m_prev->get());
@@ -73,7 +67,7 @@ namespace Zeni {
         else
           return iterator();
       }
-      
+
       iterator operator--() {
         m_pointer = m_pointer->m_prev;
         return *this;
@@ -92,7 +86,7 @@ namespace Zeni {
         m_pointer = m_pointer->m_next;
         return rv;
       }
-      
+
       bool operator==(const typename Linked_List<value_type>::iterator &rhs) const {
         assert(m_offset == rhs.m_offset);
         return m_offset == rhs.m_offset &&
@@ -130,7 +124,7 @@ namespace Zeni {
       typedef const value_type * value_pointer_type;
       typedef const value_type & value_reference_type;
       typedef const list_value_type * list_pointer_type;
-      
+
       iterator_const(const size_t &m_offset_ = 0lu)
         : m_offset(m_offset_),
         m_pointer(nullptr)
@@ -164,7 +158,7 @@ namespace Zeni {
       value_pointer_type operator->() const {
         return get();
       }
-      
+
       iterator_const prev() const {
         if(m_pointer->m_prev)
           return iterator_const(m_pointer->m_prev->get());
@@ -177,7 +171,7 @@ namespace Zeni {
         else
           return iterator_const();
       }
-      
+
       iterator_const operator--() {
         m_pointer = m_pointer->m_prev;
         return *this;
@@ -196,7 +190,7 @@ namespace Zeni {
         m_pointer = m_pointer->m_next;
         return rv;
       }
-      
+
       bool operator==(const typename Linked_List<value_type>::iterator_const &rhs) const {
         assert(m_offset == rhs.m_offset);
         return m_offset == rhs.m_offset &&
@@ -338,7 +332,7 @@ namespace Zeni {
 
     /** insert this list entry into the list; requires this to have !prev() && !next()
      *  return same pointer if inserted, different pointer if already exists, duplicate == false, and deleted
-     */ 
+     */
     template <typename COMPARE>
     list_pointer_type insert_in_order(list_pointer_type &ptr, const bool &duplicate = true, const COMPARE &compare = COMPARE()) {
       assert(!m_prev && !m_next);
@@ -457,18 +451,6 @@ namespace Zeni {
   template <typename TYPE>
   Linked_List<TYPE> * value_to_Linked_List(TYPE * const type, const size_t &offset) {
     return type ? reinterpret_cast<Linked_List<TYPE> *>(reinterpret_cast<char *>(type) + offset) : nullptr;
-  }
-
-  template <typename TYPE>
-  typename Linked_List<TYPE>::iterator_const begin(const TYPE * const type, const size_t &offset) {
-    auto list = value_to_Linked_List(type, offset);
-    return list->begin(list);
-  }
-
-  template <typename TYPE>
-  typename Linked_List<TYPE>::iterator begin(TYPE * const type, const size_t &offset) {
-    auto list = value_to_Linked_List(type, offset);
-    return list->begin(list);
   }
 
 }

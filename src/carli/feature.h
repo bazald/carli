@@ -1,7 +1,6 @@
 #ifndef FEATURE_H
 #define FEATURE_H
 
-#include "clone.h"
 #include "linked_list.h"
 #include "memory_pool.h"
 

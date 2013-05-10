@@ -2,7 +2,6 @@
 #define Q_VALUE_H
 
 #include "memory_pool.h"
-#include "clone.h"
 #include "value.h"
 #include "linked_list.h"
 

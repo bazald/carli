@@ -3,12 +3,11 @@
 
 #include <memory>
 
-#include "clone.h"
 #include "linked_list.h"
 #include "memory_pool.h"
 
 template <typename DERIVED, typename DERIVED2 = DERIVED>
-class Action : public Zeni::Pool_Allocator<DERIVED2>, public Zeni::Cloneable<DERIVED> {
+class Action : public Zeni::Pool_Allocator<DERIVED2> {
   Action(const Action &) = delete;
   Action & operator=(const Action &) = delete;
 
@@ -40,6 +39,8 @@ public:
   }
 
   virtual ~Action() {}
+
+  virtual DERIVED * clone() const = 0;
 
   bool operator<(const Action &rhs) const {return compare(rhs) < 0;}
   bool operator<=(const Action &rhs) const {return compare(rhs) <= 0;}

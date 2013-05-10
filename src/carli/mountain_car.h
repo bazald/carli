@@ -92,14 +92,14 @@ namespace Mountain_Car {
       Environment::init_impl();
     }
 
-    const float & get_x() const {return m_x;}
-    const float & get_x_dot() const {return m_x_dot;}
-    const float & get_value(const Feature_Axis &index) const {return *(&m_x + index);}
+    const double & get_x() const {return m_x;}
+    const double & get_x_dot() const {return m_x_dot;}
+    const double & get_value(const Feature_Axis &index) const {return *(&m_x + index);}
     bool is_random_start() const {return m_random_start;}
     bool is_reward_negative() const {return m_reward_negative;}
 
-    void set_x(const float &x_) {m_x = x_;}
-    void set_x_dot(const float &x_dot_) {m_x_dot = x_dot_;}
+    void set_x(const double &x_) {m_x = x_;}
+    void set_x_dot(const double &x_dot_) {m_x_dot = x_dot_;}
 
     bool success() const {
       return m_x >= m_goal_position;
@@ -108,8 +108,8 @@ namespace Mountain_Car {
   private:
     void init_impl() {
       if(m_random_start) {
-        m_x = float(m_random_init.frand_lt() * (m_goal_position - m_min_position) + m_min_position);
-        m_x_dot = float(m_random_init.frand_lt() * (2 * m_max_velocity) - m_max_velocity);
+        m_x = m_random_init.frand_lt() * (m_goal_position - m_min_position) + m_min_position;
+        m_x_dot = m_random_init.frand_lt() * (2 * m_max_velocity) - m_max_velocity;
       }
       else {
         m_x = -0.5;
@@ -137,11 +137,11 @@ namespace Mountain_Car {
 
       assert(0 <= a && a <= 2);
 
-      m_x_dot += float((a - 1) * m_cart_force + cos(3 * m_x) * -m_grav_force);
-      m_x_dot = std::max(float(-m_max_velocity), std::min(float(m_max_velocity), m_x_dot));
+      m_x_dot += (a - 1) * m_cart_force + cos(3 * m_x) * -m_grav_force;
+      m_x_dot = std::max(-m_max_velocity, std::min(m_max_velocity, m_x_dot));
 
-      m_x += float(m_x_dot);
-      m_x = std::max(float(m_min_position), std::min(float(m_max_position), m_x));
+      m_x += m_x_dot;
+      m_x = std::max(m_min_position, std::min(m_max_position, m_x));
 
       if(m_x == m_min_position && m_x_dot < 0)
         m_x_dot = 0;
@@ -156,8 +156,8 @@ namespace Mountain_Car {
 
     Zeni::Random m_random_init;
 
-    float m_x = 0.0f;
-    float m_x_dot = 0.0f;
+    double m_x = 0.0;
+    double m_x_dot = 0.0;
 
     const double m_min_position = -1.2;
     const double m_max_position = 0.6;
@@ -185,9 +185,9 @@ namespace Mountain_Car {
       const auto x_dot_bak = env->get_x_dot();
 
       for(size_t x_dot = granularity; x_dot != 0lu; --x_dot) {
-        env->set_x_dot(float(((x_dot - 0.5) / granularity) * 0.14 - 0.07));
+        env->set_x_dot(((x_dot - 0.5) / granularity) * 0.14 - 0.07);
         for(size_t x = 0lu; x != granularity; ++x) {
-          env->set_x(float(((x + 0.5) / granularity) * 1.8 - 1.2));
+          env->set_x(((x + 0.5) / granularity) * 1.8 - 1.2);
           regenerate_lists();
           auto action = choose_greedy();
           switch(dynamic_cast<const Move &>(*action).direction) {

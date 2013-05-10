@@ -45,7 +45,7 @@ public:
 
     ++m_size;
   }
-  
+
   void pop() {
     if(m_value_list) {
       --m_size;
@@ -59,15 +59,15 @@ public:
 
       m_value_list = next;
       if(!m_value_list)
-        m_value_list_tail = nullptr;      
+        m_value_list_tail = nullptr;
     }
   }
-  
+
   size_t size() const {
     return m_size;
   }
 
-  Mean mean() const {
+  const Mean & mean() const {
     return m_mean;
   }
 

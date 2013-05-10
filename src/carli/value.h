@@ -4,15 +4,13 @@
 class Value {
   friend class Mean;
 
+  Value(const Value &) = delete;
+  Value operator=(const Value &) = delete;
+
 public:
   Value(const double &value_ = double())
     : value(value_)
   {
-  }
-
-  Value & operator=(const double &q_value_) {
-    value = q_value_;
-    return *this;
   }
 
   operator double () const {return value;}
@@ -28,7 +26,12 @@ private:
 };
 
 class Mean {
+  Mean(const Mean &) = delete;
+  Mean operator=(const Mean &) = delete;
+
 public:
+  Mean() {}
+
   double outlier_above(const Value &value, const double &z = 0.84155) const {
     return count > 1 && value > mean + z * stddev;
   }
