@@ -730,7 +730,7 @@ protected:
   }
 
   virtual std::set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &) const {
-    return {};
+    return std::set<line_segment_type>();
   }
 
   std::set<line_segment_type> generate_vfgs_for_axes(const feature_trie_type * const &trie, const Feature_Axis &axis_x, const Feature_Axis &axis_y, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0))) const {
@@ -771,7 +771,7 @@ protected:
   }
 
   virtual std::map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &) const {
-    return {};
+    return std::map<line_segment_type, size_t>();
   }
 
   std::map<line_segment_type, size_t> generate_ucm_for_axes(const feature_trie_type * const &trie, const Feature_Axis &axis_x, const Feature_Axis &axis_y, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0)), const size_t &update_count = 0) const {

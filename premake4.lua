@@ -1,5 +1,9 @@
 solution "carli"
-  configurations { "Debug", "Release" }
+  if _ACTION == "gmake" then
+    configurations { "Debug", "Release", "Debug_Clang", "Release_Clang" }
+  else
+    configurations { "Debug", "Release" }
+  end
 
   if os.get() == "windows" then
     defines { "_WINDOWS", "WIN32", "_CRT_SECURE_NO_DEPRECATE" }
@@ -36,6 +40,7 @@ solution "carli"
   if _ACTION == "gmake" then
     configuration { "linux", "Debug*" }
       links { "tcmalloc_and_profiler" }
-    configuration { "linux", "Release*" }
-      links { "tcmalloc_minimal" }
+    configuration { "linux", "*clang" }
+      buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
+      linkoptions { "-stdlib=libc++" }
   end

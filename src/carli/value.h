@@ -1,6 +1,8 @@
 #ifndef VALUE_H
 #define VALUE_H
 
+#include <cmath>
+
 class Value {
   friend class Mean;
 
