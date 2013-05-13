@@ -11,7 +11,7 @@
 #include "experimental_output.h"
 #include "getopt.h"
 
-#include "avl_tree.h"
+#include "rb_tree.h"
 
 #include <cstring>
 #include <ctime>
@@ -178,27 +178,22 @@ int main2(int argc, char **argv) {
 //  trie->destroy(trie);
 
 
-//  std::vector<int> indices;
-//  for(int i = 0; i != 1000; ++i)
-//    indices.push_back(i);
-//  std::set<int> unique_numbers;
-//  while(unique_numbers.size() < indices.size())
-//    unique_numbers.insert(rand());
-//  std::vector<int> numbers;
-//  numbers.resize(indices.size());
-//  for(std::set<int>::const_iterator it = unique_numbers.begin(); it != unique_numbers.end(); ++it) {
-//    const unsigned int index = rand() % indices.size();
-//    numbers[indices[index]] = *it;
-//    indices.erase(indices.begin() + index);
-//  }
+//  default_random_engine generator;
+//  generator.seed(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
+//  vector<int> numbers;
+//  for(int i = 0; i != dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-steps"]).get_value(); ++i)
+//    numbers.push_back(i);
+//  shuffle(numbers.begin(), numbers.end(), generator);
 //
-//  Node<int> * tree = nullptr;
+//  std::cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value();
+//
+//  RB_Tree<int> * tree = nullptr;
 //#ifndef NDEBUG
 //  std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
 //#endif
 //
 //  for(std::vector<int>::const_iterator it = numbers.begin(); it != numbers.end(); ++it) {
-//    (new Node<int>(*it))->insert_into(tree);
+//    (new RB_Tree<int>(*it))->insert_into(tree);
 //#ifndef NDEBUG
 //    std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
 //#endif
