@@ -11,6 +11,8 @@
 #include "experimental_output.h"
 #include "getopt.h"
 
+#include "avl_tree.h"
+
 #include <cstring>
 #include <ctime>
 #include <fstream>
@@ -174,6 +176,40 @@ int main2(int argc, char **argv) {
 //  cout << endl;
 //
 //  trie->destroy(trie);
+
+
+//  std::vector<int> indices;
+//  for(int i = 0; i != 1000; ++i)
+//    indices.push_back(i);
+//  std::set<int> unique_numbers;
+//  while(unique_numbers.size() < indices.size())
+//    unique_numbers.insert(rand());
+//  std::vector<int> numbers;
+//  numbers.resize(indices.size());
+//  for(std::set<int>::const_iterator it = unique_numbers.begin(); it != unique_numbers.end(); ++it) {
+//    const unsigned int index = rand() % indices.size();
+//    numbers[indices[index]] = *it;
+//    indices.erase(indices.begin() + index);
+//  }
+//
+//  Node<int> * tree = nullptr;
+//#ifndef NDEBUG
+//  std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+//#endif
+//
+//  for(std::vector<int>::const_iterator it = numbers.begin(); it != numbers.end(); ++it) {
+//    (new Node<int>(*it))->insert_into(tree);
+//#ifndef NDEBUG
+//    std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+//#endif
+//  }
+//
+//  for(std::vector<int>::const_iterator it = numbers.begin(); it != numbers.end(); ++it) {
+//    tree->find(*it)->remove_from(tree);
+//#ifndef NDEBUG
+//    std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+//#endif
+//  }
 
 
 //  Zeni::Random m_random;

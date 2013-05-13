@@ -68,7 +68,7 @@ namespace Zeni {
           return iterator();
       }
 
-      iterator operator--() {
+      iterator & operator--() {
         m_pointer = m_pointer->m_prev;
         return *this;
       }
@@ -77,7 +77,7 @@ namespace Zeni {
         m_pointer = m_pointer->m_prev;
         return rv;
       }
-      iterator operator++() {
+      iterator & operator++() {
         m_pointer = m_pointer->m_next;
         return *this;
       }
@@ -172,7 +172,7 @@ namespace Zeni {
           return iterator_const();
       }
 
-      iterator_const operator--() {
+      iterator_const & operator--() {
         m_pointer = m_pointer->m_prev;
         return *this;
       }
@@ -181,7 +181,7 @@ namespace Zeni {
         m_pointer = m_pointer->m_prev;
         return rv;
       }
-      iterator_const operator++() {
+      iterator_const & operator++() {
         m_pointer = m_pointer->m_next;
         return *this;
       }
