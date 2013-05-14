@@ -11,7 +11,7 @@
 #include "experimental_output.h"
 #include "getopt.h"
 
-#include "rb_tree.h"
+#include "splay_tree.h"
 
 #include <cstring>
 #include <ctime>
@@ -181,28 +181,32 @@ int main2(int argc, char **argv) {
 //  default_random_engine generator;
 //  generator.seed(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
 //  vector<int> numbers;
-//  for(int i = 0; i != dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-steps"]).get_value(); ++i)
+//  int i;
+//  for(i = 0; i != dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-steps"]).get_value(); ++i)
+////  for(i = 0; i != 1000000; ++i)
 //    numbers.push_back(i);
 //  shuffle(numbers.begin(), numbers.end(), generator);
 //
 //  std::cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value();
 //
-//  RB_Tree<int> * tree = nullptr;
+//  Splay_Tree<int> * tree = nullptr;
 //#ifndef NDEBUG
 //  std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
 //#endif
 //
-//  for(std::vector<int>::const_iterator it = numbers.begin(); it != numbers.end(); ++it) {
-//    (new RB_Tree<int>(*it))->insert_into(tree);
+//  i = 0;
+//  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
+//    (new Splay_Tree<int>(*it))->insert_into(tree);
 //#ifndef NDEBUG
-//    std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+//    std::cerr << "insertion=" << ++i << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
 //#endif
 //  }
 //
-//  for(std::vector<int>::const_iterator it = numbers.begin(); it != numbers.end(); ++it) {
-//    tree->find(*it)->remove_from(tree);
+//  i = 0;
+//  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
+//    Splay_Tree<int>::find_in(tree, *it)->remove_from(tree);
 //#ifndef NDEBUG
-//    std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+//    std::cerr << "deletion=" << ++i << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
 //#endif
 //  }
 

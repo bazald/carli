@@ -1,5 +1,5 @@
-#ifndef RB_TREE_H
-#define RB_TREE_H
+#ifndef SPLAY_TREE_H
+#define SPLAY_TREE_H
 
 #include <algorithm>
 #include <cassert>
@@ -13,11 +13,9 @@
 using namespace std;
 
 template <typename TYPE, typename COMPARE = std::less<TYPE>>
-class RB_Tree {
+class Splay_Tree {
 public:
-  enum class Color : char {RED, BLACK};
-
-  RB_Tree(const TYPE &value_)
+  Splay_Tree(const TYPE &value_)
     : value(value_)
   {
   }
@@ -26,19 +24,16 @@ public:
     return value;
   }
 
-  void insert_into(RB_Tree * &root) {
-    insert_case0(root, nullptr);
+  void insert_into(Splay_Tree * &root) {
+    insert_recursively(root, root, nullptr, COMPARE());
 
-    while(root->parent)
-      root = root->parent;
-
-    assert(root->verify());
+//    assert(root->verify());
   }
 
-  void remove_from(RB_Tree * &root) {
+  void remove_from(Splay_Tree * &root) {
     assert(this);
     if(!this)
-      throw::std::runtime_error("Attempt to remove null RB_Tree * from AVL tree.");
+      throw::std::runtime_error("Attempt to remove null Splay_Tree * from AVL tree.");
 
     assert(!root->parent);
 
@@ -60,24 +55,15 @@ public:
     }
 
 #ifndef NDEBUG
-    memset(this, 0xDEADBEEF, sizeof(RB_Tree));
+    memset(this, 0xDEADBEEF, sizeof(Splay_Tree));
 #endif
     delete this;
 
-    assert(root->verify());
+//    assert(root->verify());
   }
 
-  RB_Tree * find(const TYPE &value_) {
-    if(this) {
-      if(COMPARE()(value_, value))
-        return left->find(value_);
-      else if(COMPARE()(value, value_))
-        return right->find(value_);
-      else
-        return this;
-    }
-    else
-      return nullptr;
+  static Splay_Tree * find_in(Splay_Tree * &root, const TYPE &value_) {
+    return root->find_recursively(value_, root, nullptr, COMPARE());
   }
 
 #ifndef NDEBUG
@@ -91,79 +77,43 @@ public:
 #endif
 
 private:
-  void insert_case0(RB_Tree * &node, RB_Tree * const parent_) {
+  Splay_Tree * find_recursively(const TYPE &value_, Splay_Tree * &root, Splay_Tree * const parent_, const COMPARE &compare) {
+    if(this) {
+      if(compare(value_, value))
+        return left->find_recursively(value_, root, this, compare);
+      else if(compare(value, value_))
+        return right->find_recursively(value_, root, this, compare);
+      else {
+        splay(root);
+        return this;
+      }
+    }
+    else {
+      parent_->splay(root);
+      return nullptr;
+    }
+  }
+
+  void insert_recursively(Splay_Tree * &node, Splay_Tree * &root, Splay_Tree * const parent_, const COMPARE &compare) {
     if(node) {
-      if(COMPARE()(value, node->value))
-        insert_case0(node->left, node);
+      if(compare(value, node->value))
+        insert_recursively(node->left, root, node, compare);
       else
-        insert_case0(node->right, node);
+        insert_recursively(node->right, root, node, compare);
     }
     else {
       node = this;
       parent = parent_;
-      insert_case1();
+      splay(root);
     }
   }
 
-  void insert_case1() {
-    if(parent)
-      insert_case2();
-    else
-      color = Color::BLACK;
-  }
-
-  void insert_case2() {
-    if(parent->color == Color::RED)
-      insert_case3();
-  }
-
-  void insert_case3() {
-    assert(color == Color::RED);
-    assert(parent->color == Color::RED);
-
-    RB_Tree * const gp = grandparent();
-    RB_Tree * const un = uncle(gp);
-
-    if(un && un->color == Color::RED) {
-      parent->color = Color::BLACK;
-      un->color = Color::BLACK;
-      gp->color = Color::RED;
-      gp->insert_case1();
-    }
-    else
-      insert_case4(gp);
-  }
-
-  void insert_case4(RB_Tree * const &gp) {
-    if(parent->right == this && parent == gp->left) {
-      parent->rotate_left();
-      left->insert_case5();
-    }
-    else if(parent->left == this && parent == gp->right) {
-      parent->rotate_right();
-      right->insert_case5();
-    }
-  }
-
-  void insert_case5() {
-    assert(color == Color::RED);
-    assert(parent->color == Color::RED);
-
-    RB_Tree * const gp = grandparent();
-
-    parent->color = Color::BLACK;
-    gp->color = Color::RED;
-    if(parent->left == this)
-      gp->rotate_right();
-    else
-      gp->rotate_left();
-  }
-
-  void swap_remove_leftmost(RB_Tree * &node, RB_Tree * &root) {
+  void swap_remove_leftmost(Splay_Tree * &node, Splay_Tree * &root) {
     if(node->left)
       swap_remove_leftmost(node->left, root);
     else {
-      RB_Tree * const node_ = node;
+      Splay_Tree * const node_ = node;
+      Splay_Tree * const node_parent = node->parent != this ? node->parent : node;
 
       /// Disconnect node
       if(node->right)
@@ -171,14 +121,16 @@ private:
       node = node->right;
 
       replacement_node(node_, root);
+      node_parent->splay(root);
     }
   }
 
-  void swap_remove_rightmost(RB_Tree * &node, RB_Tree * &root) {
+  void swap_remove_rightmost(Splay_Tree * &node, Splay_Tree * &root) {
     if(node->right)
       swap_remove_rightmost(node->right, root);
     else {
-      RB_Tree * const node_ = node;
+      Splay_Tree * const node_ = node;
+      Splay_Tree * const node_parent = node->parent != this ? node->parent : node;
 
       /// Disconnect node
       if(node->left)
@@ -186,10 +138,11 @@ private:
       node = node->left;
 
       replacement_node(node_, root);
+      node_parent->splay(root);
     }
   }
 
-  void replacement_node(RB_Tree * const &node, RB_Tree * &root) {
+  void replacement_node(Splay_Tree * const &node, Splay_Tree * &root) {
     if(parent) {
       if(parent->left == this)
         parent->left = node;
@@ -207,17 +160,52 @@ private:
     if(right)
       right->parent = node;
     node->right = right;
-    node->color = color;
-
-    assert(root->verify());
   }
 
-  void rotate_left() {
-    assert(verify());
+  void splay(Splay_Tree * &root) {
+    if(this && parent) {
+      if(parent->parent) {
+        if(parent->parent->left == parent) {
+          if(parent->left == this) {
+            parent->parent->rotate_right(root);
+            parent->rotate_right(root);
+          }
+          else {
+            assert(parent->right == this);
+            parent->rotate_left(root);
+            parent->rotate_right(root);
+          }
+        }
+        else {
+          assert(parent->parent->right == parent);
+          if(parent->right == this) {
+            parent->parent->rotate_left(root);
+            parent->rotate_left(root);
+          }
+          else {
+            assert(parent->left == this);
+            parent->rotate_right(root);
+            parent->rotate_left(root);
+          }
+        }
 
-    RB_Tree * const grandparent = parent;
-    RB_Tree * const child = right;
-    RB_Tree * const grandchild = child->left;
+        parent->splay(root);
+      }
+      else {
+        if(parent->left == this)
+          parent->rotate_right(root);
+        else {
+          assert(parent->right == this);
+          parent->rotate_left(root);
+        }
+      }
+    }
+  }
+
+  void rotate_left(Splay_Tree * &root) {
+    Splay_Tree * const grandparent = parent;
+    Splay_Tree * const child = right;
+    Splay_Tree * const grandchild = child->left;
 
     parent = child;
     right = grandchild;
@@ -234,17 +222,14 @@ private:
         grandparent->right = child;
       }
     }
-
-    assert(child->verify());
-    assert(grandparent->verify());
+    else
+      root = child;
   }
 
-  void rotate_right() {
-    assert(verify());
-
-    RB_Tree * const grandparent = parent;
-    RB_Tree * const child = left;
-    RB_Tree * const grandchild = child->right;
+  void rotate_right(Splay_Tree * &root) {
+    Splay_Tree * const grandparent = parent;
+    Splay_Tree * const child = left;
+    Splay_Tree * const grandchild = child->right;
 
     parent = child;
     left = grandchild;
@@ -261,21 +246,8 @@ private:
         grandparent->right = child;
       }
     }
-
-    assert(child->verify());
-    assert(grandparent->verify());
-  }
-
-  RB_Tree * sibling() {
-    return parent->right == this ? parent->left : parent->right;
-  }
-
-  RB_Tree * uncle(const RB_Tree * const &gp) {
-    return gp ? (gp->right == parent ? gp->left : gp->right) : nullptr;
-  }
-
-  RB_Tree * grandparent() {
-    return parent ? parent->parent : nullptr;
+    else
+      root = child;
   }
 
 #ifndef NDEBUG
@@ -333,10 +305,9 @@ private:
 #endif
 
   TYPE value;
-  RB_Tree *parent = nullptr;
-  RB_Tree *left = nullptr;
-  RB_Tree *right = nullptr;
-  Color color = Color::RED;
+  Splay_Tree *parent = nullptr;
+  Splay_Tree *left = nullptr;
+  Splay_Tree *right = nullptr;
 };
 
 #endif
