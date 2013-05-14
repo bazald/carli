@@ -203,51 +203,49 @@ private:
   }
 
   void rotate_left(Splay_Tree * &root) {
-    Splay_Tree * const grandparent = parent;
     Splay_Tree * const child = right;
-    Splay_Tree * const grandchild = child->left;
 
-    parent = child;
-    right = grandchild;
-    if(grandchild)
-      grandchild->parent = this;
+    right = child->left;
+    if(child->left)
+      child->left->parent = this;
 
-    child->parent = grandparent;
+    child->parent = parent;
     child->left = this;
-    if(grandparent) {
-      if(grandparent->left == this)
-        grandparent->left = child;
+    if(parent) {
+      if(parent->left == this)
+        parent->left = child;
       else {
-        assert(grandparent->right == this);
-        grandparent->right = child;
+        assert(parent->right == this);
+        parent->right = child;
       }
     }
     else
       root = child;
+
+    parent = child;
   }
 
   void rotate_right(Splay_Tree * &root) {
-    Splay_Tree * const grandparent = parent;
     Splay_Tree * const child = left;
-    Splay_Tree * const grandchild = child->right;
 
-    parent = child;
-    left = grandchild;
-    if(grandchild)
-      grandchild->parent = this;
+    left = child->right;
+    if(child->right)
+      child->right->parent = this;
 
-    child->parent = grandparent;
+    child->parent = parent;
     child->right = this;
-    if(grandparent) {
-      if(grandparent->left == this)
-        grandparent->left = child;
+    if(parent) {
+      if(parent->left == this)
+        parent->left = child;
       else {
-        assert(grandparent->right == this);
-        grandparent->right = child;
+        assert(parent->right == this);
+        parent->right = child;
       }
     }
     else
       root = child;
+
+    parent = child;
   }
 
 #ifndef NDEBUG

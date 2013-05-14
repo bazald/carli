@@ -11,7 +11,7 @@
 #include "experimental_output.h"
 #include "getopt.h"
 
-#include "splay_tree.h"
+#include "rb_tree.h"
 
 #include <cstring>
 #include <ctime>
@@ -122,17 +122,17 @@ int main2(int argc, char **argv) {
 
   /// Run the simulation
 
-  const std::string env = dynamic_cast<const Option_Itemized &>(options["environment"]).get_value();
-  if(env == "blocks-world")
-    run_agent<Blocks_World::Environment, Blocks_World::Agent>();
-  else if(env == "cart-pole")
-    run_agent<Cart_Pole::Environment, Cart_Pole::Agent>();
-  else if(env == "mountain-car")
-    run_agent<Mountain_Car::Environment, Mountain_Car::Agent>();
-  else if(env == "puddle-world")
-    run_agent<Puddle_World::Environment, Puddle_World::Agent>();
-  else
-    throw runtime_error("Internal error: g_args.environment");
+//  const std::string env = dynamic_cast<const Option_Itemized &>(options["environment"]).get_value();
+//  if(env == "blocks-world")
+//    run_agent<Blocks_World::Environment, Blocks_World::Agent>();
+//  else if(env == "cart-pole")
+//    run_agent<Cart_Pole::Environment, Cart_Pole::Agent>();
+//  else if(env == "mountain-car")
+//    run_agent<Mountain_Car::Environment, Mountain_Car::Agent>();
+//  else if(env == "puddle-world")
+//    run_agent<Puddle_World::Environment, Puddle_World::Agent>();
+//  else
+//    throw runtime_error("Internal error: g_args.environment");
 
 
 //  typedef std::string test_key;
@@ -178,37 +178,37 @@ int main2(int argc, char **argv) {
 //  trie->destroy(trie);
 
 
-//  default_random_engine generator;
-//  generator.seed(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
-//  vector<int> numbers;
-//  int i;
-//  for(i = 0; i != dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-steps"]).get_value(); ++i)
-////  for(i = 0; i != 1000000; ++i)
-//    numbers.push_back(i);
-//  shuffle(numbers.begin(), numbers.end(), generator);
-//
-//  std::cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value();
-//
-//  Splay_Tree<int> * tree = nullptr;
-//#ifndef NDEBUG
-//  std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
-//#endif
-//
-//  i = 0;
-//  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
-//    (new Splay_Tree<int>(*it))->insert_into(tree);
-//#ifndef NDEBUG
-//    std::cerr << "insertion=" << ++i << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
-//#endif
-//  }
-//
-//  i = 0;
-//  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
-//    Splay_Tree<int>::find_in(tree, *it)->remove_from(tree);
-//#ifndef NDEBUG
-//    std::cerr << "deletion=" << ++i << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
-//#endif
-//  }
+  default_random_engine generator;
+  generator.seed(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
+  vector<int> numbers;
+  int i;
+  for(i = 0; i != dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-steps"]).get_value(); ++i)
+//  for(i = 0; i != 1000000; ++i)
+    numbers.push_back(i);
+  shuffle(numbers.begin(), numbers.end(), generator);
+
+  std::cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << std::endl;
+
+  RB_Tree<int> * tree = nullptr;
+#ifndef NDEBUG
+  std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+#endif
+
+  i = 0;
+  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
+    (new RB_Tree<int>(*it))->insert_into(tree);
+#ifndef NDEBUG
+    std::cerr << "insertion=" << ++i << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+#endif
+  }
+
+  i = 0;
+  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
+    tree->find(*it)->remove_from(tree);
+#ifndef NDEBUG
+    std::cerr << "deletion=" << ++i << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+#endif
+  }
 
 
 //  Zeni::Random m_random;
