@@ -231,38 +231,57 @@ private:
       return;
     }
 
+#ifndef NDEBUG
     root->debug_print(std::cerr) << "\033[39;49m" << std::endl;
 
     assert(root->verify(nullptr));
+#endif
   }
 
   void rebalance(RB_Tree * &root) {
     for(RB_Tree * node = this;; node = node->parent) {
       /// Case 1
-      if(!node->parent)
+      if(!node->parent) {
+#ifndef NDEBUG
+        std::cerr << "case1" << std::endl;
+#endif
         break;
+      }
 
       RB_Tree * si = node->sibling(node->parent);
 
       if(si) {
-        if(parent->color == Color::BLACK) {
-          /// Case 2
-          if(si->color == Color::RED) {
-            node->parent->color = Color::RED;
-            si->color = Color::BLACK;
-            if(node->parent->left == si)
-              node->parent->rotate_right(root);
-            else
-              node->parent->rotate_left(root);
-          }
-          /// Case 3
-          else if((!si->left || si->left->color == Color::BLACK) &&
-                  (!si->right || si->right->color == Color::BLACK))
-          {
-            si->color = Color::RED;
-            if(node->parent)
-              continue;
-          }
+        /// Case 2
+        if(node->parent->color == Color::BLACK &&
+           si->color == Color::RED)
+        {
+#ifndef NDEBUG
+          std::cerr << "case2" << std::endl;
+#endif
+          node->parent->color = Color::RED;
+          si->color = Color::BLACK;
+          if(node->parent->left == si)
+            node->parent->rotate_right(root);
+          else
+            node->parent->rotate_left(root);
+        }
+
+        si = node->sibling(node->parent);
+
+        /// Case 3
+        if(node->parent->color == Color::BLACK &&
+           si->color == Color::BLACK &&
+           (!si->left || si->left->color == Color::BLACK) &&
+           (!si->right || si->right->color == Color::BLACK))
+        {
+#ifndef NDEBUG
+          std::cerr << "case3" << std::endl;
+#endif
+          si->color = Color::RED;
+#ifndef NDEBUG
+          root->debug_print(std::cerr) << "\033[39;49m" << std::endl;
+#endif
+          continue;
         }
 
         si = node->sibling(node->parent);
@@ -273,6 +292,9 @@ private:
            (!si->left || si->left->color == Color::BLACK) &&
            (!si->right || si->right->color == Color::BLACK))
         {
+#ifndef NDEBUG
+          std::cerr << "case4" << std::endl;
+#endif
           si->parent->color = Color::BLACK;
           si->color = Color::RED;
           break;
@@ -284,6 +306,9 @@ private:
              (!si->right || si->right->color == Color::BLACK) &&
              (si->left && si->left->color == Color::RED))
           {
+#ifndef NDEBUG
+            std::cerr << "case5a" << std::endl;
+#endif
             si->color = Color::RED;
             si->left->color = Color::BLACK;
             si->rotate_right(root);
@@ -292,6 +317,9 @@ private:
                   (!si->left || si->left->color == Color::BLACK) &&
                   (si->right && si->right->color == Color::RED))
           {
+#ifndef NDEBUG
+            std::cerr << "case5b" << std::endl;
+#endif
             si->color = Color::RED;
             si->right->color = Color::BLACK;
             si->rotate_left(root);
@@ -301,6 +329,9 @@ private:
         si = node->sibling(node->parent);
 
         /// Case 6
+#ifndef NDEBUG
+        std::cerr << "case6" << std::endl;
+#endif
         si->color = node->parent->color;
         node->parent->color = Color::BLACK;
 
@@ -314,12 +345,14 @@ private:
             si->right->color = Color::BLACK;
           node->parent->rotate_left(root);
         }
-
-        break;
       }
+
+      break;
     }
 
+#ifndef NDEBUG
     root->debug_print(std::cerr) << "\033[39;49m" << std::endl;
+#endif
   }
 
   void disconnect_one_child(RB_Tree * &parent_) {
@@ -526,9 +559,9 @@ private:
 
 #ifndef NDEBUG
     value = node->value;
-#endif
 
     root->debug_print(std::cerr) << "\033[39;49m" << std::endl;
+#endif
   }
 
   void fixup_post_swap(RB_Tree * & root, RB_Tree * const &prev) {
@@ -572,7 +605,9 @@ private:
 
     parent = child;
 
+#ifndef NDEBUG
     root->debug_print(std::cerr) << "\033[39;49m" << std::endl;
+#endif
   }
 
   void rotate_right(RB_Tree * &root) {
@@ -597,7 +632,9 @@ private:
 
     parent = child;
 
+#ifndef NDEBUG
     root->debug_print(std::cerr) << "\033[39;49m" << std::endl;
+#endif
   }
 
   RB_Tree * sibling(const RB_Tree * const &parent_) {

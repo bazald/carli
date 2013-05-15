@@ -209,7 +209,7 @@ int main2(int argc, char **argv) {
 #ifndef NDEBUG
     std::cerr << "deletion(" << ++i << ")=" << *it << std::endl;
 #endif
-    if(i == 3)
+    if(i == 13)
       std::cerr << "";
     tree->find(*it)->remove_from(tree);
 #ifndef NDEBUG
