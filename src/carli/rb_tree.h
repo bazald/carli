@@ -8,6 +8,7 @@
 
 #ifndef NDEBUG
 #include <cstring>
+#include <iostream>
 #endif
 
 using namespace std;
@@ -29,7 +30,7 @@ public:
   void insert_into(RB_Tree * &root) {
     insert_case0(root, root, nullptr);
 
-    assert(root->verify());
+    assert(root->verify(nullptr));
   }
 
   void remove_from(RB_Tree * &root) {
@@ -39,37 +40,20 @@ public:
 
     assert(!root->parent);
 
-    RB_Tree * const root2 = root != this ? root : root->right ? root->right : root->left;
-
     if(left)
       swap_remove_rightmost(left, root);
     else if(right)
       swap_remove_leftmost(right, root);
     else {
-      if(parent) {
-        if(parent->left == this)
-          parent->left = nullptr;
-        else {
-          assert(parent->right == this);
-          parent->right = nullptr;
-        }
-      }
-      else
-        root = nullptr;
-    }
+      remove_child(root, nullptr);
 
-    if(root2) {
-      root = root2;
-      while(root->parent)
-        root = root->parent;
+      assert(root->verify(nullptr));
     }
 
 #ifndef NDEBUG
     memset(this, 0xDEADBEEF, sizeof(RB_Tree));
 #endif
     delete this;
-
-    assert(root->verify());
   }
 
   RB_Tree * find(const TYPE &value_) {
@@ -93,6 +77,28 @@ public:
   size_t debug_size() const {
     return this ? left->debug_size() + right->debug_size() + 1 : 0;
   }
+
+  std::ostream & debug_print(std::ostream &os) const {
+    /// vt100 stuff
+    const char * const white_on_red = "\033[37;41m";
+    const char * const black_on_white = "\033[30;47m";
+    const char * const default_on_default = "\033[39;49m";
+
+    if(this) {
+      os << (color == Color::RED ? white_on_red : black_on_white) << value;
+      if(left || right) {
+        os << default_on_default << '(';
+        left->debug_print(os);
+        os << default_on_default << ':';
+        right->debug_print(os);
+        os << default_on_default << ')';
+      }
+      else
+        os << default_on_default;
+    }
+
+    return os;
+  }
 #endif
 
 private:
@@ -109,7 +115,7 @@ private:
       insert_case1(root);
     }
 
-    assert(root->verify());
+    assert(root->verify(nullptr));
   }
 
   void insert_case1(RB_Tree * &root) {
@@ -118,14 +124,14 @@ private:
     else
       color = Color::BLACK;
 
-    assert(root->verify());
+    assert(root->verify(nullptr));
   }
 
   void insert_case2(RB_Tree * &root) {
     if(parent->color == Color::RED)
       insert_case3(root);
 
-    assert(root->verify());
+    assert(root->verify(nullptr));
   }
 
   void insert_case3(RB_Tree * &root) {
@@ -144,7 +150,7 @@ private:
     else
       insert_case4(root, gp);
 
-    assert(root->verify());
+    assert(root->verify(nullptr));
   }
 
   void insert_case4(RB_Tree * &root, RB_Tree * const &gp) {
@@ -159,7 +165,7 @@ private:
     else
       insert_case5(root);
 
-    assert(root->verify());
+    assert(root->verify(nullptr));
   }
 
   void insert_case5(RB_Tree * &root) {
@@ -175,110 +181,373 @@ private:
     else
       gp->rotate_left(root);
 
-    assert(root->verify());
+    assert(root->verify(nullptr));
   }
 
-  void swap_remove_leftmost(RB_Tree * &node, RB_Tree * &root) {
+  void swap_remove_leftmost(RB_Tree * const node, RB_Tree * &root) {
     if(node->left)
       swap_remove_leftmost(node->left, root);
-    else {
-      RB_Tree * const node_ = node;
-      RB_Tree * const node_parent = node->parent;
-
-      /// Disconnect node
-      if(node->right)
-        node->right->parent = node->parent;
-      node = node->right;
-
-      replacement_node(node_, root);
-      node_parent->delete_one_child(node_parent->right);
-    }
+    else
+      swap_remove_child(node, root, node->right);
   }
 
-  void swap_remove_rightmost(RB_Tree * &node, RB_Tree * &root) {
+  void swap_remove_rightmost(RB_Tree * const node, RB_Tree * &root) {
     if(node->right)
       swap_remove_rightmost(node->right, root);
+    else
+      swap_remove_child(node, root, node->left);
+  }
+
+  void swap_remove_child(RB_Tree * const node, RB_Tree * &root, RB_Tree * const child) {
+    assert(root->verify(nullptr));
+
+    swap_nodes(node, root);
+
+    assert(root->verify(nullptr));
+
+    remove_child(root, child);
+  }
+
+  void remove_child(RB_Tree * &root, RB_Tree * const child) {
+    /// Rebalance
+    if(child) {
+      disconnect_one_child(parent);
+
+      if(color == Color::BLACK) {
+        if(child->color == Color::BLACK)
+          rebalance(root);
+        else
+          child->color = Color::BLACK;
+      }
+    }
+    else if(root != this) {
+      if(color == Color::BLACK)
+        rebalance(root);
+
+      disconnect_one_child(parent ? parent : root);
+    }
     else {
-      RB_Tree * const node_ = node;
-      RB_Tree * const node_parent = node->parent;
-
-      /// Disconnect node
-      if(node->left)
-        node->left->parent = node->parent;
-      node = node->left;
-
-      replacement_node(node_, root);
-      node_parent->delete_one_child(node_parent->right);
+      root = nullptr;
+      return;
     }
+
+    root->debug_print(std::cerr) << "\033[39;49m" << std::endl;
+
+    assert(root->verify(nullptr));
   }
 
-  void delete_one_child(RB_Tree * const &child) {
-    if(color == Color::BLACK) {
-      if(child->get_color() == Color::BLACK)
-        child->delete_case1(this);
-      else
-        child->color = Color::BLACK;
-    }
-  }
+  void rebalance(RB_Tree * &root) {
+    for(RB_Tree * node = this;; node = node->parent) {
+      /// Case 1
+      if(!node->parent)
+        break;
 
-  void delete_case1(RB_Tree * const &parent_) {
-    if(parent_)
-      delete_case2(parent_);
-  }
+      RB_Tree * si = node->sibling(node->parent);
 
-  void delete_case2(RB_Tree * const &parent_) {
-    RB_Tree * const si = sibling(parent_);
+      if(si) {
+        if(parent->color == Color::BLACK) {
+          /// Case 2
+          if(si->color == Color::RED) {
+            node->parent->color = Color::RED;
+            si->color = Color::BLACK;
+            if(node->parent->left == si)
+              node->parent->rotate_right(root);
+            else
+              node->parent->rotate_left(root);
+          }
+          /// Case 3
+          else if((!si->left || si->left->color == Color::BLACK) &&
+                  (!si->right || si->right->color == Color::BLACK))
+          {
+            si->color = Color::RED;
+            if(node->parent)
+              continue;
+          }
+        }
 
-    if(si->get_color() == Color::RED) {
-      parent_->color = Color::RED;
-      si->color = Color::BLACK;
-      if(parent_->left == this)
-        parent_->rotate_left();
-      else {
-        assert(parent_->right == this);
-        parent_->rotate_right();
+        si = node->sibling(node->parent);
+
+        /// Case 4
+        if(si->parent->color == Color::RED &&
+           si->color == Color::BLACK &&
+           (!si->left || si->left->color == Color::BLACK) &&
+           (!si->right || si->right->color == Color::BLACK))
+        {
+          si->parent->color = Color::BLACK;
+          si->color = Color::RED;
+          break;
+        }
+
+        /// Case 5
+        if(si->color == Color::BLACK) {
+          if(node == node->parent->left &&
+             (!si->right || si->right->color == Color::BLACK) &&
+             (si->left && si->left->color == Color::RED))
+          {
+            si->color = Color::RED;
+            si->left->color = Color::BLACK;
+            si->rotate_right(root);
+          }
+          else if(node == node->parent->right &&
+                  (!si->left || si->left->color == Color::BLACK) &&
+                  (si->right && si->right->color == Color::RED))
+          {
+            si->color = Color::RED;
+            si->right->color = Color::BLACK;
+            si->rotate_left(root);
+          }
+        }
+
+        si = node->sibling(node->parent);
+
+        /// Case 6
+        si->color = node->parent->color;
+        node->parent->color = Color::BLACK;
+
+        if(node->parent->left == si) {
+          if(si->left)
+            si->left->color = Color::BLACK;
+          node->parent->rotate_right(root);
+        }
+        else {
+          if(si->right)
+            si->right->color = Color::BLACK;
+          node->parent->rotate_left(root);
+        }
+
+        break;
       }
     }
 
-    delete_case3(parent);
+    root->debug_print(std::cerr) << "\033[39;49m" << std::endl;
   }
 
-  void delete_case3(RB_Tree * const &parent_) {
+  void disconnect_one_child(RB_Tree * &parent_) {
+    if(parent_) {
+      if(parent_->left == this) {
+        parent_->left = left ? left : right;
+        if(parent_->left)
+          parent_->left->parent = parent_;
+      }
+      else {
+        assert(parent_->right == this);
+        parent_->right = left ? left : right;
+        if(parent_->right)
+          parent_->right->parent = parent_;
+      }
+    }
+  }
+
+//  void delete_one_child(RB_Tree * &root, RB_Tree * const child, RB_Tree * const removal_node) {
+//    if(color == Color::BLACK) {
+//      assert(child);
+//#ifndef NDEBUG
+//      std::cerr << "delete_one_child" << std::endl;
+//#endif
+//      if(child->color == Color::BLACK)
+//        child->delete_case1(this, root, this);
+//      else
+//        child->color = Color::BLACK;
+//    }
+//
+//    assert(root->verify(removal_node));
+//  }
+
+  void delete_case1(RB_Tree * const parent_, RB_Tree * &root, RB_Tree * const removal_node) {
+    if(parent_) {
+#ifndef NDEBUG
+      std::cerr << "delete_case1" << std::endl;
+#endif
+      delete_case2(parent_, root, removal_node);
+    }
+
+    assert(root->verify(removal_node));
+  }
+
+//  void delete_case2(RB_Tree * const parent_, RB_Tree * &root, RB_Tree * const removal_node) {
+//    RB_Tree * const si = sibling(parent_);
+//
+//    if(si->color == Color::RED) {
+//#ifndef NDEBUG
+//      std::cerr << "delete_case2" << std::endl;
+//#endif
+//      parent_->color = Color::RED;
+//      si->color = Color::BLACK;
+//      if(parent_->left == this)
+//        parent_->rotate_left(root);
+//      else {
+//        assert(parent_->right == this);
+//        parent_->rotate_right(root);
+//      }
+//    }
+//
+//    delete_case3(this ? parent : parent_, root, removal_node);
+//
+//    assert(root->verify(removal_node));
+//  }
+
+  void delete_case3(RB_Tree * const parent_, RB_Tree * &root, RB_Tree * const removal_node) {
     RB_Tree * const si = sibling(parent_);
 
     if(parent_->color == Color::BLACK &&
-       si->get_color() == Color::BLACK &&
-       si->left->color == Color::BLACK &&
-       si->right->color == Color::BLACK)
+       si->color == Color::BLACK &&
+       si->left->get_color() == Color::BLACK &&
+       si->right->get_color() == Color::BLACK)
     {
+#ifndef NDEBUG
+      std::cerr << "delete_case3" << std::endl;
+#endif
       si->color = Color::RED;
-      parent->delete_case1(parent->parent);
+      parent_->delete_case1(parent_->parent, root, removal_node);
     }
     else
-      ;//delete_case4(n);
+      delete_case4(parent_, root, removal_node, si);
+
+    assert(root->verify(removal_node));
   }
 
-  void replacement_node(RB_Tree * const &node, RB_Tree * &root) {
-    if(parent) {
-      if(parent->left == this)
-        parent->left = node;
+  void delete_case4(RB_Tree * const parent_, RB_Tree * &root, RB_Tree * const removal_node, RB_Tree * const &si) {
+    if(parent_->color == Color::RED &&
+       si->color == Color::BLACK &&
+       si->left->get_color() == Color::BLACK &&
+       si->right->get_color() == Color::BLACK)
+    {
+#ifndef NDEBUG
+      std::cerr << "delete_case4" << std::endl;
+#endif
+      si->color = Color::RED;
+      parent_->color = Color::BLACK;
+    }
+    else
+      delete_case5(parent_, root, removal_node, si);
+
+    assert(root->verify(removal_node));
+  }
+
+  void delete_case5(RB_Tree * const parent_, RB_Tree * &root, RB_Tree * const removal_node, RB_Tree * const &si) {
+    if(si->color == Color::BLACK) {
+      if(parent_->left == this &&
+         si->right->color == Color::BLACK &&
+         si->left->color == Color::RED)
+      {
+#ifndef NDEBUG
+        std::cerr << "delete_case5" << std::endl;
+#endif
+        si->color = Color::RED;
+        si->left->color = Color::BLACK;
+        si->rotate_right(root);
+      }
+      else if(parent_->right == this &&
+              si->left->color == Color::BLACK &&
+              si->right->color == Color::RED)
+      {
+#ifndef NDEBUG
+        std::cerr << "delete_case5" << std::endl;
+#endif
+        si->color = Color::RED;
+        si->right->color = Color::BLACK;
+        si->rotate_left(root);
+      }
+    }
+
+    delete_case6(parent_, root, removal_node);
+  }
+
+  void delete_case6(RB_Tree * const parent_, RB_Tree * &root, RB_Tree * const removal_node) {
+    RB_Tree * const si = sibling(parent_);
+
+    si->color = parent_->color;
+    parent_->color = Color::BLACK;
+
+#ifndef NDEBUG
+    std::cerr << "delete_case6" << std::endl;
+#endif
+
+    if(parent_->left == this) {
+      si->right->color = Color::BLACK;
+      parent->rotate_left(root);
+    }
+    else {
+      assert(parent_->right == this);
+      si->left->color = Color::BLACK;
+      parent->rotate_right(root);
+    }
+
+    assert(root->verify(removal_node));
+  }
+
+  void swap_nodes(RB_Tree * const node, RB_Tree * &root) {
+    if(node->parent != this) {
+      std::swap(parent, node->parent);
+      std::swap(left, node->left);
+      std::swap(right, node->right);
+
+      fixup_post_swap(root, node);
+      node->fixup_post_swap(root, this);
+    }
+    else {
+      if(parent) {
+        if(parent->left == this)
+          parent->left = node;
+        else {
+          assert(parent->right == this);
+          parent->right = node;
+        }
+      }
+      else
+        root = node;
+      node->parent = parent;
+      parent = node;
+
+      RB_Tree * const child = node->left ? node->left : node->right;
+      if(child)
+        child->parent = this;
+
+      if(left == node) {
+        node->left = this;
+        node->right = right;
+        if(right)
+          right->parent = node;
+        left = child;
+        right = nullptr;
+      }
       else {
-        assert(parent->right == this);
-        parent->right = node;
+        assert(right == node);
+        node->left = left;
+        node->right = this;
+        if(left)
+          right->parent = node;
+        left = nullptr;
+        right = child;
+      }
+    }
+
+    std::swap(color, node->color);
+
+#ifndef NDEBUG
+    value = node->value;
+#endif
+
+    root->debug_print(std::cerr) << "\033[39;49m" << std::endl;
+  }
+
+  void fixup_post_swap(RB_Tree * & root, RB_Tree * const &prev) {
+    if(parent) {
+      if(parent->left == prev)
+        parent->left = this;
+      else {
+        assert(parent->right == prev);
+        parent->right = this;
       }
     }
     else
-      root = node;
-    node->parent = parent;
-    if(left)
-      left->parent = node;
-    node->left = left;
-    if(right)
-      right->parent = node;
-    node->right = right;
-    node->color = color;
+      root = this;
 
-    assert(root->verify());
+    if(left)
+      left->parent = this;
+
+    if(right)
+      right->parent = this;
   }
 
   void rotate_left(RB_Tree * &root) {
@@ -302,6 +571,8 @@ private:
       root = child;
 
     parent = child;
+
+    root->debug_print(std::cerr) << "\033[39;49m" << std::endl;
   }
 
   void rotate_right(RB_Tree * &root) {
@@ -325,60 +596,8 @@ private:
       root = child;
 
     parent = child;
-  }
 
-  void rotate_left() {
-    assert(verify());
-
-    RB_Tree * const grandparent = parent;
-    RB_Tree * const child = right;
-    RB_Tree * const grandchild = child->left;
-
-    parent = child;
-    right = grandchild;
-    if(grandchild)
-      grandchild->parent = this;
-
-    child->parent = grandparent;
-    child->left = this;
-    if(grandparent) {
-      if(grandparent->left == this)
-        grandparent->left = child;
-      else {
-        assert(grandparent->right == this);
-        grandparent->right = child;
-      }
-    }
-
-    assert(child->verify());
-    assert(grandparent->verify());
-  }
-
-  void rotate_right() {
-    assert(verify());
-
-    RB_Tree * const grandparent = parent;
-    RB_Tree * const child = left;
-    RB_Tree * const grandchild = child->right;
-
-    parent = child;
-    left = grandchild;
-    if(grandchild)
-      grandchild->parent = this;
-
-    child->parent = grandparent;
-    child->right = this;
-    if(grandparent) {
-      if(grandparent->left == this)
-        grandparent->left = child;
-      else {
-        assert(grandparent->right == this);
-        grandparent->right = child;
-      }
-    }
-
-    assert(child->verify());
-    assert(grandparent->verify());
+    root->debug_print(std::cerr) << "\033[39;49m" << std::endl;
   }
 
   RB_Tree * sibling(const RB_Tree * const &parent_) {
@@ -398,76 +617,36 @@ private:
   }
 
 #ifndef NDEBUG
-  bool verify() const {
+  int verify(RB_Tree * const removal_node) const {
     if(this) {
       assert(parent != this);
-      if(!(parent != this))
-        return false;
-
+      assert(left != this);
+      assert(right != this);
+      assert(!parent || parent->left == this || parent->right == this);
       assert(parent || color == Color::BLACK);
-      if(!(parent || color == Color::BLACK))
-        return false;
-
       assert(!parent || parent->color == Color::BLACK || color == Color::BLACK);
-      if(!(!parent || parent->color == Color::BLACK || color == Color::BLACK))
-        return false;
+      assert(!left || left->value <= value || left == removal_node);
+      assert(!right || right->value >= value || right == removal_node);
 
-      if(left) {
-        assert(left != this);
-        if(!(left != this))
-          return false;
+//      std::cerr << '(' << value << ',' << (removal_node != this ? (color == Color::BLACK ? 1 : 0) : -1) << ',';
 
-        assert(left->parent == this);
-        if(!(left->parent == this))
-          return false;
+      const int bnc_left = left->verify(removal_node);
+//      std::cerr << ',';
 
-        assert(color == Color::BLACK || left->color == Color::BLACK);
-        if(!(color == Color::BLACK || left->color == Color::BLACK))
-          return false;
+      const int bnc_right = right->verify(removal_node);
+//      std::cerr << ')';
 
-        if(right) {
-          assert(right != this);
-          if(!(right != this))
-            return false;
+//      if(!parent)
+//        std::cerr << std::endl;
 
-          assert(right->parent == this);
-          if(!(right->parent == this))
-            return false;
+      assert(bnc_left == bnc_right);
 
-          assert(color == Color::BLACK || right->color == Color::BLACK);
-          if(!(color == Color::BLACK || right->color == Color::BLACK))
-            return false;
-
-          assert(right->verify());
-          if(!(right->verify()))
-            return false;
-        }
-        else
-
-        assert(left->verify());
-        if(!(left->verify()))
-          return false;
-      }
-      else if(right) {
-        assert(right != this);
-        if(!(right != this))
-          return false;
-
-        assert(right->parent == this);
-        if(!(right->parent == this))
-          return false;
-
-        assert(color == Color::BLACK || right->color == Color::BLACK);
-        if(!(color == Color::BLACK || right->color == Color::BLACK))
-          return false;
-
-        assert(right->verify());
-        if(!(right->verify()))
-          return false;
-      }
+      return bnc_left + (color == Color::BLACK && removal_node != this ? 1 : 0);
     }
-
-    return true;
+    else {
+//      std::cerr << 1;
+      return 1;
+    }
   }
 #endif
 

@@ -192,21 +192,29 @@ int main2(int argc, char **argv) {
   RB_Tree<int> * tree = nullptr;
 #ifndef NDEBUG
   std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+  tree->debug_print(std::cerr) << std::endl;
 #endif
 
   i = 0;
   for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
     (new RB_Tree<int>(*it))->insert_into(tree);
 #ifndef NDEBUG
-    std::cerr << "insertion=" << ++i << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+    std::cerr << "insertion(" << ++i << ")=" << *it << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+    tree->debug_print(std::cerr) << std::endl;
 #endif
   }
 
   i = 0;
   for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
+#ifndef NDEBUG
+    std::cerr << "deletion(" << ++i << ")=" << *it << std::endl;
+#endif
+    if(i == 3)
+      std::cerr << "";
     tree->find(*it)->remove_from(tree);
 #ifndef NDEBUG
-    std::cerr << "deletion=" << ++i << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+    tree->debug_print(std::cerr) << std::endl;
+    std::cerr << "deletion(" << i << ")=" << *it << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
 #endif
   }
 
