@@ -866,7 +866,7 @@ private:
       auto next = static_cast<feature_trie>(head == match ? head->next() : head);
       match->erase();
       feature_trie inserted = match.get();
-      match = match->map_insert(function);
+      match = match->list_insert_unique(function);
       if(match != inserted)
         inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
       if(!m_null_q_values && !match->get()) {

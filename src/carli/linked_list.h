@@ -321,13 +321,57 @@ namespace Zeni {
     }
 
     template <typename COMPARE>
-    list_pointer_type find(const value_type &value, const COMPARE &compare = COMPARE(), list_pointer_type * const &pptr = nullptr) {
+    list_pointer_type find_in_order(const value_type &value, const COMPARE &compare = COMPARE(), list_pointer_type * const &pptr = nullptr) {
       const list_pointer_type pp = find_gte(value, compare, pptr);
 
       if(pp && !compare(value, **pp))
         return pp;
 
       return nullptr;
+    }
+
+    template <typename COMPARE>
+    list_pointer_type find(const value_type &value, const COMPARE &compare = COMPARE()) {
+      if(this)
+        if(compare(value, **this) || compare(**this, value))
+          return m_next->find(value, compare);
+
+      return this;
+    }
+
+    /** insert this list entry into the list; requires this to have !prev() && !next()
+     *  return same pointer if inserted, different pointer (moved to front) if already exists, and deleted
+     */
+    template <typename COMPARE>
+    list_pointer_type insert_before_unique(list_pointer_type &ptr, const COMPARE &compare = COMPARE()) {
+      assert(!m_prev && !m_next);
+
+      if(ptr) {
+        assert(m_offset == ptr->m_offset);
+
+        const list_pointer_type pp = ptr->find(**this, compare);
+
+        if(pp && !compare(**this, **pp)) {
+          destroy(this);
+
+          if(pp->m_prev) {
+            pp->erase();
+            pp->m_next = ptr;
+            ptr->m_prev = pp;
+            ptr = pp;
+          }
+
+          return pp;
+        }
+        else {
+          m_next = ptr;
+          ptr->m_prev = this;
+        }
+      }
+
+      ptr = this;
+
+      return this;
     }
 
     /** insert this list entry into the list; requires this to have !prev() && !next()

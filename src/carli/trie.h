@@ -47,10 +47,10 @@ namespace Zeni {
       list_value_type::insert_before(lp);
       ptr = static_cast<trie_pointer_type>(lp);
     }
-    trie_pointer_type map_insert(trie_pointer_type &ptr) {
-      auto mp = static_cast<map_pointer_type>(ptr);
-      auto rv = map_value_type::insert(mp);
-      ptr = static_cast<trie_pointer_type>(mp);
+    trie_pointer_type list_insert_unique(trie_pointer_type &ptr) {
+      auto lp = static_cast<list_pointer_type>(ptr);
+      auto rv = list_value_type::insert_before_unique(lp, map_value_type::comparator());
+      ptr = static_cast<trie_pointer_type>(lp);
       return static_cast<trie_pointer_type>(rv);
     }
 
@@ -66,7 +66,7 @@ namespace Zeni {
       this->erase();
 
       trie_pointer_type inserted = this;
-      auto thisp = map_insert(ptr); ///< this possibly deleted
+      auto thisp = list_insert_unique(ptr); ///< this possibly deleted
       if(thisp != inserted)
         inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
 
@@ -82,7 +82,7 @@ namespace Zeni {
       this->erase();
 
       trie_pointer_type inserted = this;
-      auto thisp = map_insert(ptr); ///< this possibly deleted
+      auto thisp = list_insert_unique(ptr); ///< this possibly deleted
       if(thisp != inserted)
         inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
 

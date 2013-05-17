@@ -21,14 +21,17 @@ namespace Zeni {
     {
     }
 
-    map_pointer_type insert(map_pointer_type &ptr) {
-      return static_cast<map_pointer_type>(
-        this->insert_in_order(reinterpret_cast<Linked_List<TYPE> * &>(ptr), false, [this](const TYPE &lhs, const TYPE &rhs)->bool{
-          const Map<KEY, TYPE, COMPARE> * const lm = reinterpret_cast<const Map<KEY, TYPE, COMPARE> *>(reinterpret_cast<const char *>(&lhs) + this->offset());
-          const Map<KEY, TYPE, COMPARE> * const rm = reinterpret_cast<const Map<KEY, TYPE, COMPARE> *>(reinterpret_cast<const char *>(&rhs) + this->offset());
+    std::function<bool (const TYPE &, const TYPE &)> comparator() const {
+      return [this](const TYPE &lhs, const TYPE &rhs)->bool{
+        const Map<KEY, TYPE, COMPARE> * const lm = reinterpret_cast<const Map<KEY, TYPE, COMPARE> *>(reinterpret_cast<const char *>(&lhs) + this->offset());
+        const Map<KEY, TYPE, COMPARE> * const rm = reinterpret_cast<const Map<KEY, TYPE, COMPARE> *>(reinterpret_cast<const char *>(&rhs) + this->offset());
 
-          return COMPARE()(lm->key, rm->key);
-        }));
+        return COMPARE()(lm->key, rm->key);
+      };
+    }
+
+    map_pointer_type insert(map_pointer_type &ptr) {
+      return static_cast<map_pointer_type>(this->insert_in_order(reinterpret_cast<Linked_List<TYPE> * &>(ptr), false, comparator()));
     }
 
     const key_type & get_key() const {

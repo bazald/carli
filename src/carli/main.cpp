@@ -122,17 +122,17 @@ int main2(int argc, char **argv) {
 
   /// Run the simulation
 
-//  const std::string env = dynamic_cast<const Option_Itemized &>(options["environment"]).get_value();
-//  if(env == "blocks-world")
-//    run_agent<Blocks_World::Environment, Blocks_World::Agent>();
-//  else if(env == "cart-pole")
-//    run_agent<Cart_Pole::Environment, Cart_Pole::Agent>();
-//  else if(env == "mountain-car")
-//    run_agent<Mountain_Car::Environment, Mountain_Car::Agent>();
-//  else if(env == "puddle-world")
-//    run_agent<Puddle_World::Environment, Puddle_World::Agent>();
-//  else
-//    throw runtime_error("Internal error: g_args.environment");
+  const std::string env = dynamic_cast<const Option_Itemized &>(options["environment"]).get_value();
+  if(env == "blocks-world")
+    run_agent<Blocks_World::Environment, Blocks_World::Agent>();
+  else if(env == "cart-pole")
+    run_agent<Cart_Pole::Environment, Cart_Pole::Agent>();
+  else if(env == "mountain-car")
+    run_agent<Mountain_Car::Environment, Mountain_Car::Agent>();
+  else if(env == "puddle-world")
+    run_agent<Puddle_World::Environment, Puddle_World::Agent>();
+  else
+    throw runtime_error("Internal error: g_args.environment");
 
 
 //  typedef std::string test_key;
@@ -178,67 +178,92 @@ int main2(int argc, char **argv) {
 //  trie->destroy(trie);
 
 
-  default_random_engine generator;
-  generator.seed(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
-  vector<int> numbers;
-  int i;
-  for(i = 0; i != dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-steps"]).get_value(); ++i)
-//  for(i = 0; i != 1000000; ++i)
-    numbers.push_back(i);
-  shuffle(numbers.begin(), numbers.end(), generator);
+//  default_random_engine generator;
+//  generator.seed(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
+//  vector<int> numbers;
+//  int i;
+//  for(i = 0; i != dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-steps"]).get_value(); ++i)
+////  for(i = 0; i != 1000000; ++i)
+//    numbers.push_back(i);
+//  shuffle(numbers.begin(), numbers.end(), generator);
+//
+//  std::cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << std::endl;
+//
+//  RB_Tree<int> * tree = nullptr;
+//#ifndef NDEBUG
+//  std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+//  tree->debug_print(std::cerr) << std::endl;
+//#endif
+//
+//  i = 0;
+//  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
+//    (new RB_Tree<int>(*it))->insert_into(tree);
+//#ifndef NDEBUG
+//    std::cerr << "insertion(" << ++i << ")=" << *it << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+//    tree->debug_print(std::cerr) << std::endl;
+//#endif
+//  }
+//
+//  i = 0;
+//  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
+//#ifndef NDEBUG
+//    std::cerr << "deletion(" << ++i << ")=" << *it << std::endl;
+//#endif
+//    if(i == 13)
+//      std::cerr << "";
+//    tree->find(*it)->remove_from(tree);
+//#ifndef NDEBUG
+//    tree->debug_print(std::cerr) << std::endl;
+//    std::cerr << "deletion(" << i << ")=" << *it << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
+//#endif
+//  }
 
-  std::cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << std::endl;
 
-  RB_Tree<int> * tree = nullptr;
-#ifndef NDEBUG
-  std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
-  tree->debug_print(std::cerr) << std::endl;
-#endif
-
-  i = 0;
-  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
-    (new RB_Tree<int>(*it))->insert_into(tree);
-#ifndef NDEBUG
-    std::cerr << "insertion(" << ++i << ")=" << *it << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
-    tree->debug_print(std::cerr) << std::endl;
-#endif
-  }
-
-  i = 0;
-  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
-#ifndef NDEBUG
-    std::cerr << "deletion(" << ++i << ")=" << *it << std::endl;
-#endif
-    if(i == 13)
-      std::cerr << "";
-    tree->find(*it)->remove_from(tree);
-#ifndef NDEBUG
-    tree->debug_print(std::cerr) << std::endl;
-    std::cerr << "deletion(" << i << ")=" << *it << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
-#endif
-  }
-
-
-//  Zeni::Random m_random;
+//  Zeni::Random m_random(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
+//  std::cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << std::endl;
+//
 //  Mean mean;
-//  std::list<Value> values;
-//  values.push_back(m_random.rand_lt(42));
-//  values.push_back(m_random.rand_lt(42));
-//  values.push_back(m_random.rand_lt(42));
-//  values.push_back(m_random.rand_lt(42));
-//  values.push_back(m_random.rand_lt(42));
-//  values.push_back(m_random.rand_lt(42));
-//  values.push_back(m_random.rand_lt(42));
-//  values.push_back(m_random.rand_lt(42));
-//  values.push_back(m_random.rand_lt(42));
-//  values.push_back(m_random.rand_lt(42));
+//  std::list<std::shared_ptr<Value>> values;
+//  values.push_back(std::make_shared<Value>(m_random.rand_lt(42)));
+//  values.push_back(std::make_shared<Value>(m_random.rand_lt(42)));
+//  values.push_back(std::make_shared<Value>(m_random.rand_lt(42)));
+//  values.push_back(std::make_shared<Value>(m_random.rand_lt(42)));
+//  values.push_back(std::make_shared<Value>(m_random.rand_lt(42)));
+//  values.push_back(std::make_shared<Value>(m_random.rand_lt(42)));
+//  values.push_back(std::make_shared<Value>(m_random.rand_lt(42)));
+//  values.push_back(std::make_shared<Value>(m_random.rand_lt(42)));
+//  values.push_back(std::make_shared<Value>(m_random.rand_lt(42)));
+//  values.push_back(std::make_shared<Value>(m_random.rand_lt(42)));
 //  for(auto &value : values) {
-//    mean.contribute(value);
-//    cout << "Adding " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
+//    mean.contribute(*value);
+//    cout << "Adding " << *value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
 //  }
 //  for(auto &value : values) {
-//    mean.uncontribute(value);
-//    cout << "Removing " << value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
+//    mean.uncontribute(*value);
+//    cout << "Removing " << *value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
+//  }
+
+
+//  Zeni::Random m_random(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
+//  cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << endl;
+//
+//  Q_Value::List *q_values = nullptr;
+//  const auto comparator = [](const Q_Value &lhs, const Q_Value &rhs)->bool{
+//    return lhs.value < rhs.value;
+//  };
+//  for(int i = 0; i != 10; ++i) {
+//    auto val = m_random.rand_lt(42);
+//    cout << "Inserting: " << val << endl;
+//    (new Q_Value(val))->current.insert_before_unique(q_values, comparator);
+//  }
+//  for(auto &q : *q_values)
+//    cout << "Value: " << q.value << endl;
+//  while(q_values) {
+//    Q_Value::List * const next = q_values->next();
+//    cout << "Deleting: " << (*q_values)->value << endl;
+//    q_values->erase();
+//    delete q_values->get();
+//    q_values = next;
 //  }
 
 
