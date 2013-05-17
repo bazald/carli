@@ -109,20 +109,20 @@ namespace Zeni {
     }
 
     /// return an iterator_const pointing to this list entry; only the beginning if !prev()
-    typename list_value_type::iterator_const begin() const {
-      return this ? typename list_value_type::iterator_const(this) : typename list_value_type::iterator_const();
+    typename map_value_type::iterator_const begin() const {
+      return this ? typename map_value_type::iterator_const(this) : typename map_value_type::iterator_const();
     }
     /// return an iterator pointing to this list entry; only the beginning if !prev()
-    typename list_value_type::iterator begin() {
-      return this ? typename list_value_type::iterator(const_cast<trie_pointer_type>(this)) : typename list_value_type::iterator();
+    typename map_value_type::iterator begin() {
+      return this ? typename map_value_type::iterator(const_cast<trie_pointer_type>(this)) : typename map_value_type::iterator();
     }
     /// return an iterator_const pointing to an empty list entry of the appropriate size
-    typename list_value_type::iterator_const end() const {
-      return this ? typename list_value_type::iterator_const(list_value_type::offset()) : typename list_value_type::iterator_const();
+    typename map_value_type::iterator_const end() const {
+      return this ? typename map_value_type::iterator_const(map_value_type::offset()) : typename map_value_type::iterator_const();
     }
     /// return an iterator pointing to an empty list entry of the appropriate size
-    typename list_value_type::iterator end() {
-      return this ? typename list_value_type::iterator(list_value_type::offset()) : typename list_value_type::iterator();
+    typename map_value_type::iterator end() {
+      return this ? typename map_value_type::iterator(map_value_type::offset()) : typename map_value_type::iterator();
     }
 
     const trie_value_type * get_deeper() const {return m_deeper;}

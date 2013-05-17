@@ -59,13 +59,13 @@ namespace Zeni {
         if(m_pointer->m_prev)
           return iterator(m_pointer->m_prev->get());
         else
-          return iterator();
+          return iterator(m_offset);
       }
       iterator next() const {
         if(m_pointer->m_next)
           return iterator(m_pointer->m_prev->get());
         else
-          return iterator();
+          return iterator(m_offset);
       }
 
       iterator & operator--() {
@@ -163,13 +163,13 @@ namespace Zeni {
         if(m_pointer->m_prev)
           return iterator_const(m_pointer->m_prev->get());
         else
-          return iterator_const();
+          return iterator_const(m_offset);
       }
       iterator_const next() const {
         if(m_pointer->m_next)
           return iterator_const(m_pointer->m_prev->get());
         else
-          return iterator_const();
+          return iterator_const(m_offset);
       }
 
       iterator_const & operator--() {
@@ -479,6 +479,16 @@ namespace Zeni {
       }
 
       return jt != jend ? -1 : 0;
+    }
+
+  protected:
+    Linked_List * set_prev(Linked_List * const &prev_) {
+      assert(!prev_ || prev_->m_offset == m_offset);
+      m_prev = prev_;
+    }
+    Linked_List * set_next(Linked_List * const &next_) {
+      assert(!next_ || next_->m_offset == m_offset);
+      m_next = next_;
     }
 
   private:

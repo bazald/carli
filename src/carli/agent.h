@@ -295,7 +295,7 @@ protected:
 
         Q_Value * const rv = get_value_from_function(head, get_trie(action), offset, depth, use_value)->get();
 
-        assign_weight(value_to_Linked_List(rv, offset));
+        assign_weight(Zeni::value_to_Linked_List(rv, offset));
 
         return rv;
       }
