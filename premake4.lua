@@ -38,6 +38,14 @@ solution "carli"
     linkoptions { "-stdlib=libc++" }
 
   if _ACTION == "gmake" then
+    configuration "Debug*"
+      defines { "NDEBUG" }
+  else
+    configuration "Debug*"
+      defines { "_DEBUG", "DEBUG" }    
+  end
+
+  if _ACTION == "gmake" then
     configuration { "linux", "Debug*" }
       links { "tcmalloc_and_profiler" }
     configuration { "linux", "*clang" }

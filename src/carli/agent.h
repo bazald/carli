@@ -856,11 +856,18 @@ private:
 
   feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const bool &use_value, const double &value = 0.0) {
     /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
-    auto match = std::find_first_of(head->begin(), head->end(),
-                                    function->begin(), function->end(),
-                                    [](const feature_trie_type &lhs, const feature_trie_type &rhs)->bool {
-                                      return lhs.get_key()->compare_axis(*rhs.get_key()) == 0;
-                                    });
+    decltype(head->begin()) match;
+    {
+      auto jend = function->end();
+      auto mend = head->end();
+      for(auto jt = function->begin(); jt != jend; ++jt) {
+        for(match = head->begin(); match != mend; ++match) {
+          if(match->get_key()->compare_axis(*jt->get_key()) == 0)
+            goto MATCH_FOUND;
+        }
+      }
+    }
+    MATCH_FOUND:
 
     if(match) {
       auto next = static_cast<feature_trie>(head == match ? head->next() : head);
