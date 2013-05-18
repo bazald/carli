@@ -22,18 +22,72 @@ public:
     bool operator()(const Feature &lhs, const Feature &rhs) const {
       return static_cast<const DERIVED &>(lhs).compare(static_cast<const DERIVED &>(rhs)) < 0;
     }
+    bool operator()(const Feature &lhs, const Feature * const &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Feature &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Feature &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(lhs, *rhs);}
 
-    bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {
-      return operator()(*lhs, *rhs);
-    }
+    bool operator()(const Feature * const &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Feature * const &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Feature * const &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
 
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {
-      return operator()(*lhs, *rhs);
-    }
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
 
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {
-      return operator()(*lhs, *rhs);
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+  };
+
+  struct Compare_Axis {
+    bool operator()(const Feature &lhs, const Feature &rhs) const {
+      return static_cast<const DERIVED &>(lhs).compare_axis(static_cast<const DERIVED &>(rhs)) < 0;
     }
+    bool operator()(const Feature &lhs, const Feature * const &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Feature &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Feature &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(lhs, *rhs);}
+
+    bool operator()(const Feature * const &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Feature * const &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Feature * const &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+  };
+
+  struct Compare_Predecessor {
+    bool operator()(const Feature &lhs, const Feature &rhs) const {
+      return static_cast<const DERIVED &>(lhs).compare_predecessor(static_cast<const DERIVED &>(rhs)) < 0;
+    }
+    bool operator()(const Feature &lhs, const Feature * const &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Feature &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Feature &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(lhs, *rhs);}
+
+    bool operator()(const Feature * const &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Feature * const &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Feature * const &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
   };
 
   Feature()
@@ -61,9 +115,15 @@ public:
     return axis_comparison ? axis_comparison : static_cast<const DERIVED *>(this)->compare_value(rhs);
   }
 
-  virtual bool refinable() const {return false;}
+  int compare_predecessor(const Feature &rhs) const {
+    return compare_precedes(static_cast<const DERIVED &>(rhs));
+  }
 
-  virtual bool precedes(const DERIVED &) const {return false;}
+  int compare_predecessor(const DERIVED &rhs) const {
+    return static_cast<const DERIVED *>(this)->compare_precedes(rhs);
+  }
+
+  virtual bool refinable() const {return false;}
 
   virtual void print(std::ostream &os) const = 0;
 
@@ -109,6 +169,12 @@ public:
     return axis - rhs.axis;
   }
 
+  int compare_predecessor(const DERIVED &rhs) const {
+    return axis < rhs.axis ? -1 : axis > rhs.axis ? 1 :
+           depth < rhs.depth ? -1 : depth > rhs.depth ? 1 :
+           0;
+  }
+
   int compare_value(const DERIVED &rhs) const {
     return depth < rhs.depth ? -1 : depth > rhs.depth ? 1 :
            bound_lower < rhs.bound_lower ? -1 : bound_lower > rhs.bound_lower ? 1 :
@@ -118,11 +184,6 @@ public:
 
   bool refinable() const {
     return true;
-  }
-
-  bool precedes(const DERIVED &rhs) const {
-    const auto mdpt = midpt();
-    return axis == rhs.axis && (rhs.bound_lower == mdpt || rhs.bound_higher == mdpt);
   }
 
   double midpt() const {

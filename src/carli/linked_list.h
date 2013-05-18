@@ -441,14 +441,15 @@ namespace Zeni {
     }
     template <typename DERIVED>
     static void destroy(DERIVED * &ptr_) {
-      auto it = ptr_->begin();
-      auto iend = ptr_->end();
-      while(it != iend) {
-        auto ptr = it.get();
-        ++it;
-        delete ptr;
+      if(ptr_) {
+        list_pointer_type ptr = ptr_;
+        while(ptr) {
+          auto tptr = ptr->get();
+          ptr = ptr->m_next;
+          delete tptr;
+        }
+        ptr_ = nullptr;
       }
-      ptr_ = nullptr;
     }
 
     bool operator<(const Linked_List<TYPE> &rhs) const {return compare(rhs) < 0;}
@@ -482,11 +483,18 @@ namespace Zeni {
     }
 
   protected:
-    Linked_List * set_prev(Linked_List * const &prev_) {
+    list_pointer_type & get_prev() {
+      return m_prev;
+    }
+    list_pointer_type & get_next() {
+      return m_next;
+    }
+
+    void set_prev(const list_pointer_type &prev_) {
       assert(!prev_ || prev_->m_offset == m_offset);
       m_prev = prev_;
     }
-    Linked_List * set_next(Linked_List * const &next_) {
+    void set_next(const list_pointer_type &next_) {
       assert(!next_ || next_->m_offset == m_offset);
       m_next = next_;
     }

@@ -282,11 +282,11 @@ protected:
         auto iend = features->end();
         if(it != iend) {
           head = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
-          auto tail = head;
+          feature_trie tail = head;
           ++it;
 
           while(it != iend) {
-            auto ptr = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
+            feature_trie ptr = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
             ptr->list_insert_after(tail);
             tail = ptr;
             ++it;
@@ -712,7 +712,7 @@ protected:
 
   template <typename ENVIRONMENT>
   bool generate_feature_ranged(const std::shared_ptr<const ENVIRONMENT> &env, feature_trie &trie, const typename FEATURE::List * const &tail, typename FEATURE::List * &tail_next) {
-    auto match = std::find_if(trie->begin(), trie->end(), [&tail](const feature_trie_type &trie)->bool {return trie.get_key()->compare(**tail) == 0;});
+    auto match = trie->find(**tail, typename FEATURE::Compare_Axis());
 
     if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
       const auto &feature = match->get_key();
@@ -856,12 +856,10 @@ private:
 
   feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const bool &use_value, const double &value = 0.0) {
     /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
-    decltype(head->begin()) match;
+    feature_trie match;
     {
-      auto jend = function->end();
-      auto mend = head->end();
-      for(auto jt = function->begin(); jt != jend; ++jt) {
-        for(match = head->begin(); match != mend; ++match) {
+      for(match = head->first(); match; match = match->next()) {
+        for(feature_trie jt = function->first(); jt; jt = jt->next()) {
           if(match->get_key()->compare_axis(*jt->get_key()) == 0)
             goto MATCH_FOUND;
         }
@@ -870,12 +868,10 @@ private:
     MATCH_FOUND:
 
     if(match) {
-      auto next = static_cast<feature_trie>(head == match ? head->next() : head);
-      match->erase();
-      feature_trie inserted = match.get();
-      match = match->list_insert_unique(function);
-      if(match != inserted)
-        inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
+      feature_trie next = static_cast<feature_trie>(head == match ? head->next() : head);
+      match->list_erase();
+      feature_trie inserted = match;
+      match = match->insert(function); ///< May invalidate inserted if already present in the Map
       if(!m_null_q_values && !match->get()) {
         match->get() = new Q_Value(use_value ? value : 0.0);
         ++m_q_value_count;
@@ -890,7 +886,7 @@ private:
       }
       else {
         try {
-          generate_more_features(match->get(), depth, inserted != nullptr);
+          generate_more_features(match->get(), depth, match != inserted);
         }
         catch(Again &) {
           next->destroy(next);

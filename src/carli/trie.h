@@ -10,7 +10,9 @@ namespace Zeni {
   class Trie;
 
   template <typename KEY, typename TYPE, typename COMPARE>
-  class Trie : public Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>, public Zeni::Pool_Allocator<Trie<KEY, TYPE, COMPARE>> {
+  class Trie : private Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>, public Zeni::Pool_Allocator<Trie<KEY, TYPE, COMPARE>> {
+    friend Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>;
+
     Trie(const Trie &) = delete;
     Trie operator=(const Trie &) = delete;
 
@@ -35,23 +37,25 @@ namespace Zeni {
     }
 
     ~Trie() {
-      m_deeper->destroy(m_deeper);
       delete m_value;
     }
 
     void list_insert_after(const trie_pointer_type &ptr) {
-      list_value_type::insert_after(ptr);
+      map_value_type::list_insert_after(ptr);
     }
     void list_insert_before(trie_pointer_type &ptr) {
-      auto lp = static_cast<list_pointer_type>(ptr);
-      list_value_type::insert_before(lp);
+      auto lp = static_cast<map_pointer_type>(ptr);
+      map_value_type::list_insert_before(lp);
       ptr = static_cast<trie_pointer_type>(lp);
     }
-    trie_pointer_type list_insert_unique(trie_pointer_type &ptr) {
-      auto lp = static_cast<list_pointer_type>(ptr);
-      auto rv = list_value_type::insert_before_unique(lp, map_value_type::comparator());
-      ptr = static_cast<trie_pointer_type>(lp);
-      return static_cast<trie_pointer_type>(rv);
+//    trie_pointer_type list_insert_unique(trie_pointer_type &ptr) {
+//      auto lp = static_cast<map_value_type>(ptr);
+//      auto rv = map_value_type::list_insert_unique(lp);
+//      ptr = static_cast<trie_pointer_type>(lp);
+//      return static_cast<trie_pointer_type>(rv);
+//    }
+    void list_erase() {
+      map_value_type::list_erase();
     }
 
     /** Destroy a Trie-list, returning a pointer to the leaf if no offset is specified
@@ -62,15 +66,14 @@ namespace Zeni {
       if(!this)
         return ptr;
 
-      auto next = static_cast<trie_pointer_type>(this->next());
-      this->erase();
+      const trie_pointer_type next_ = next();
+      list_erase();
 
-      trie_pointer_type inserted = this;
-      auto thisp = list_insert_unique(ptr); ///< this possibly deleted
-      if(thisp != inserted)
-        inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
+      auto mp = static_cast<map_pointer_type>(ptr);
+      const trie_pointer_type thisp = static_cast<trie_pointer_type>(map_value_type::insert_into_unique(mp)); ///< this possibly deleted
+      ptr = static_cast<trie_pointer_type>(mp);
 
-      return thisp->finish_insert(next, offset);
+      return thisp->finish_insert(next_, offset);
     }
 
     template <typename DEPTH_TEST, typename TERMINAL_TEST, typename GENERATE_FRINGE, typename COLLAPSE_FRINGE>
@@ -78,15 +81,37 @@ namespace Zeni {
       if(!this)
         return ptr;
 
-      auto next = static_cast<trie_pointer_type>(this->next());
-      this->erase();
+      const trie_pointer_type next_ = next();
+      list_erase();
 
-      trie_pointer_type inserted = this;
-      auto thisp = list_insert_unique(ptr); ///< this possibly deleted
-      if(thisp != inserted)
-        inserted = nullptr; ///< now holds non-zero value if the match was actually inserted into the function
+      const trie_pointer_type inserted = this;
 
-      return thisp->finish_insert(null_q_values, depth_test, terminal_test, generate_fringe, collapse_fringe, offset, depth, value, use_value, value_count, inserted != nullptr, next);
+      auto mp = static_cast<map_pointer_type>(ptr);
+      const trie_pointer_type thisp = static_cast<trie_pointer_type>(map_value_type::insert_into_unique(mp)); ///< this possibly deleted
+      ptr = static_cast<trie_pointer_type>(mp);
+
+      return thisp->finish_insert(null_q_values, depth_test, terminal_test, generate_fringe, collapse_fringe, offset, depth, value, use_value, value_count, thisp == inserted, next_);
+    }
+
+    template <typename TYPE2, typename COMPARE2 = COMPARE>
+    trie_pointer_type find(const TYPE2 &value, const COMPARE2 &compare = COMPARE2()) {
+      return this ? static_cast<trie_pointer_type>(map_value_type::find(value, compare)) : nullptr;
+    }
+
+    const key_type & get_key() const {
+      return map_value_type::get_key();
+    }
+
+    static void destroy(const trie_pointer_type &ptr_) {
+      trie_pointer_type ptr = ptr_;
+      destroy(ptr);
+    }
+    static void destroy(trie_pointer_type &ptr_) {
+      if(ptr_) {
+        destroy(ptr_->m_deeper);
+        map_value_type::destroy(ptr_);
+        ptr_ = nullptr;
+      }
     }
 
     value_pointer_type get() const {
@@ -106,6 +131,17 @@ namespace Zeni {
     }
     value_pointer_type operator->() {
       return m_value;
+    }
+
+    trie_pointer_type prev() const {
+      return static_cast<trie_pointer_type>(map_value_type::prev());
+    }
+    trie_pointer_type next() const {
+      return static_cast<trie_pointer_type>(map_value_type::next());
+    }
+
+    trie_pointer_type first() const {
+      return this ? static_cast<trie_pointer_type>(map_value_type::first()) : nullptr;
     }
 
     /// return an iterator_const pointing to this list entry; only the beginning if !prev()

@@ -14,6 +14,7 @@ namespace Zeni {
     typedef value_type * value_pointer_type;
     typedef value_type & value_reference_type;
     typedef Linked_List<TYPE> list_value_type;
+    typedef list_value_type * list_pointer_type;
     typedef Map<KEY, TYPE, COMPARE> map_value_type;
     typedef map_value_type * map_pointer_type;
 
@@ -23,6 +24,24 @@ namespace Zeni {
     value_pointer_type operator->() const {return list_value_type::operator->();}
     value_pointer_type operator->() {return list_value_type::operator->();}
     size_t offset() const {return list_value_type::offset();}
+
+    void list_insert_after(const map_pointer_type &ptr) {
+      list_value_type::insert_after(ptr);
+    }
+    void list_insert_before(map_pointer_type &ptr) {
+      auto lp = static_cast<list_pointer_type>(ptr);
+      list_value_type::insert_before(lp);
+      ptr = static_cast<map_pointer_type>(lp);
+    }
+//    map_pointer_type list_insert_unique(map_pointer_type &ptr) {
+//      auto lp = static_cast<list_pointer_type>(ptr);
+//      auto rv = list_value_type::insert_before_unique(lp, map_value_type::comparator());
+//      ptr = static_cast<map_pointer_type>(lp);
+//      return static_cast<map_pointer_type>(rv);
+//    }
+    void list_erase() {
+      list_value_type::erase();
+    }
 
     class iterator : public std::iterator<std::bidirectional_iterator_tag, value_type> {
     public:
@@ -226,7 +245,15 @@ namespace Zeni {
     void insert_into(map_pointer_type &root) {
       insert_case0(root, root, nullptr);
 
-      assert(root->verify(nullptr));
+//      assert(root->verify(nullptr));
+    }
+
+    map_pointer_type insert_into_unique(map_pointer_type &root) {
+      const map_pointer_type rv = insert_case0_unique(root, root, nullptr);
+
+//      assert(root->verify(nullptr));
+
+      return rv;
     }
 
     void remove_from(map_pointer_type &root) {
@@ -243,18 +270,19 @@ namespace Zeni {
       else {
         remove_child(root, nullptr);
 
-        assert(root->verify(nullptr));
+//        assert(root->verify(nullptr));
       }
 
       delete this;
     }
 
-    map_pointer_type find(const TYPE &value_) {
+    template <typename TYPE2, typename COMPARE2 = COMPARE>
+    map_pointer_type find(const TYPE2 &key_, const COMPARE2 &compare = COMPARE2()) {
       if(this) {
-        if(COMPARE()(value_, *this))
-          return get_left()->find(value_);
-        else if(COMPARE()(*this, value_))
-          return get_right()->find(value_);
+        if(compare(key_, get_key()))
+          return get_left()->find(key_, compare);
+        else if(compare(get_key(), key_))
+          return get_right()->find(key_, compare);
         else
           return this;
       }
@@ -348,13 +376,46 @@ namespace Zeni {
       }
     }
 
-    template <typename DERIVED>
-    static void destroy(DERIVED * const &ptr_) {
-      map_pointer_type left = ptr_->get_left();
-      map_pointer_type right = ptr_->get_right();
-      delete ptr_->get();
-      left->destroy(left);
-      right->destroy(right);
+    /// return an iterator_const pointing to this list entry; only the beginning if !prev()
+    iterator_const begin() const {
+      return this ? iterator_const(this) : iterator_const();
+    }
+    /// return an iterator pointing to this list entry; only the beginning if !prev()
+    iterator begin() {
+      return this ? iterator(this) : iterator();
+    }
+    /// return an iterator_const pointing to an empty list entry of the appropriate size
+    iterator_const end() const {
+      return this ? iterator_const(offset()) : iterator_const();
+    }
+    /// return an iterator pointing to an empty list entry of the appropriate size
+    iterator end() {
+      return this ? iterator(offset()) : iterator();
+    }
+
+    map_pointer_type first() const {
+      map_pointer_type ptr = const_cast<map_pointer_type>(this);
+      if(ptr) {
+        while(ptr->get_left())
+          ptr = get_left();
+      }
+      return ptr;
+    }
+
+    static void destroy(const map_pointer_type &ptr_) {
+      map_pointer_type ptr = ptr_;
+      destroy(ptr);
+    }
+    static void destroy(map_pointer_type &ptr_) {
+      if(ptr_) {
+        map_pointer_type left = ptr_->get_left();
+        map_pointer_type right = ptr_->get_right();
+        ptr_->list_erase();
+        delete ptr_->get();
+        destroy(left);
+        destroy(right);
+        ptr_ = nullptr;
+      }
     }
 
 #ifndef NDEBUG
@@ -366,33 +427,33 @@ namespace Zeni {
       return this ? get_left()->debug_size() + get_right()->debug_size() + 1 : 0;
     }
 
-    std::ostream & debug_print(std::ostream &os) const {
-      /// vt100 stuff
-      const char * const white_on_red = "\033[37;41m";
-      const char * const black_on_white = "\033[30;47m";
-      const char * const default_on_default = "\033[39;49m";
-
-      if(this) {
-        os << (is_red() ? white_on_red : black_on_white) << *this;
-        if(get_left() || get_right()) {
-          os << default_on_default << '(';
-          get_left()->debug_print(os);
-          os << default_on_default << ':';
-          get_right()->debug_print(os);
-          os << default_on_default << ')';
-        }
-        else
-          os << default_on_default;
-      }
-
-      return os;
-    }
+//    std::ostream & debug_print(std::ostream &os) const {
+//      /// vt100 stuff
+//      const char * const white_on_red = "\033[37;41m";
+//      const char * const black_on_white = "\033[30;47m";
+//      const char * const default_on_default = "\033[39;49m";
+//
+//      if(this) {
+//        os << (is_red() ? white_on_red : black_on_white) << *this;
+//        if(get_left() || get_right()) {
+//          os << default_on_default << '(';
+//          get_left()->debug_print(os);
+//          os << default_on_default << ':';
+//          get_right()->debug_print(os);
+//          os << default_on_default << ')';
+//        }
+//        else
+//          os << default_on_default;
+//      }
+//
+//      return os;
+//    }
 #endif
 
   private:
     void insert_case0(map_pointer_type &node, map_pointer_type &root, map_pointer_type const parent) {
       if(node) {
-        if(COMPARE()(*this, *node))
+        if(COMPARE()(get_key(), node->get_key()))
           insert_case0(node->get_left(), root, node);
         else
           insert_case0(node->get_right(), root, node);
@@ -403,7 +464,29 @@ namespace Zeni {
         insert_case1(root, parent);
       }
 
-      assert(root->verify(nullptr));
+//      assert(root->verify(nullptr));
+    }
+
+    map_pointer_type insert_case0_unique(map_pointer_type &node, map_pointer_type &root, map_pointer_type const parent) {
+      if(node) {
+        if(COMPARE()(get_key(), node->get_key()))
+          insert_case0_unique(node->get_left(), root, node);
+        else if(COMPARE()(node->get_key(), get_key()))
+          insert_case0_unique(node->get_right(), root, node);
+        else {
+          destroy(this);
+          return node;
+        }
+      }
+      else {
+        node = this;
+        m_parent = parent;
+        insert_case1(root, parent);
+      }
+
+//      assert(root->verify(nullptr));
+
+      return this;
     }
 
     void insert_case1(map_pointer_type &root, map_pointer_type const parent) {
@@ -412,14 +495,14 @@ namespace Zeni {
       else
         set_black();
 
-      assert(root->verify(nullptr));
+//      assert(root->verify(nullptr));
     }
 
     void insert_case2(map_pointer_type &root, map_pointer_type const parent) {
       if(parent->is_red())
         insert_case3(root, parent);
 
-      assert(root->verify(nullptr));
+//      assert(root->verify(nullptr));
     }
 
     void insert_case3(map_pointer_type &root, map_pointer_type const parent) {
@@ -438,7 +521,7 @@ namespace Zeni {
       else
         insert_case4(root, parent, gp);
 
-      assert(root->verify(nullptr));
+//      assert(root->verify(nullptr));
     }
 
     void insert_case4(map_pointer_type &root, map_pointer_type const parent, map_pointer_type const gp) {
@@ -453,7 +536,7 @@ namespace Zeni {
       else
         insert_case5(root);
 
-      assert(root->verify(nullptr));
+//      assert(root->verify(nullptr));
     }
 
     void insert_case5(map_pointer_type &root) {
@@ -471,7 +554,7 @@ namespace Zeni {
       else
         gp->rotate_left(root);
 
-      assert(root->verify(nullptr));
+//      assert(root->verify(nullptr));
     }
 
     void swap_remove_leftmost(map_pointer_type const node, map_pointer_type &root) {
@@ -489,11 +572,11 @@ namespace Zeni {
     }
 
     void swap_remove_child(map_pointer_type const node, map_pointer_type &root, map_pointer_type const child) {
-      assert(root->verify(nullptr));
+//      assert(root->verify(nullptr));
 
       swap_nodes(node, root);
 
-      assert(root->verify(nullptr));
+//      assert(root->verify(nullptr));
 
       remove_child(root, child);
     }
@@ -524,18 +607,18 @@ namespace Zeni {
       }
 
 #ifndef NDEBUG
-      root->debug_print(std::cerr) << std::endl;
+//      root->debug_print(std::cerr) << std::endl;
 
-      assert(root->verify(nullptr));
+//      assert(root->verify(nullptr));
 #endif
     }
 
     void rebalance(map_pointer_type &root) {
       delete_case1(root);
 
-#ifndef NDEBUG
-      root->debug_print(std::cerr) << std::endl;
-#endif
+//#ifndef NDEBUG
+//      root->debug_print(std::cerr) << std::endl;
+//#endif
     }
 
     void disconnect_one_child(map_pointer_type const parent) {
@@ -601,9 +684,9 @@ namespace Zeni {
         std::cerr << "case3" << std::endl;
 #endif
         si->set_red();
-#ifndef NDEBUG
-        root->debug_print(std::cerr) << std::endl;
-#endif
+//#ifndef NDEBUG
+//        root->debug_print(std::cerr) << std::endl;
+//#endif
 
         parent->delete_case1(root);
       }
@@ -732,9 +815,9 @@ namespace Zeni {
         }
       }
 
-#ifndef NDEBUG
-      root->debug_print(std::cerr) << std::endl;
-#endif
+//#ifndef NDEBUG
+//      root->debug_print(std::cerr) << std::endl;
+//#endif
     }
 
     void fixup_post_swap(map_pointer_type & root, map_pointer_type const prev) {
@@ -781,9 +864,9 @@ namespace Zeni {
 
       set_parent(child);
 
-#ifndef NDEBUG
-      root->debug_print(std::cerr) << std::endl;
-#endif
+//#ifndef NDEBUG
+//      root->debug_print(std::cerr) << std::endl;
+//#endif
     }
 
     void rotate_right(map_pointer_type &root) {
@@ -809,9 +892,9 @@ namespace Zeni {
 
       set_parent(child);
 
-#ifndef NDEBUG
-      root->debug_print(std::cerr) << std::endl;
-#endif
+//#ifndef NDEBUG
+//      root->debug_print(std::cerr) << std::endl;
+//#endif
     }
 
     map_pointer_type sibling(map_pointer_type const parent) {
@@ -825,6 +908,9 @@ namespace Zeni {
     map_pointer_type get_left() const {
       return reinterpret_cast<map_pointer_type>(list_value_type::prev());
     }
+    map_pointer_type & get_left() {
+      return reinterpret_cast<map_pointer_type &>(list_value_type::get_prev());
+    }
 
     void set_left(const map_pointer_type &left_) {
       return list_value_type::set_prev(left_);
@@ -832,6 +918,9 @@ namespace Zeni {
 
     map_pointer_type get_right() const {
       return reinterpret_cast<map_pointer_type>(list_value_type::next());
+    }
+    map_pointer_type & get_right() {
+      return reinterpret_cast<map_pointer_type &>(list_value_type::get_next());
     }
 
     void set_right(const map_pointer_type &right_) {
@@ -879,32 +968,32 @@ namespace Zeni {
       return uintptr_t(-2);
     }
 
-#ifndef NDEBUG
-    int verify(map_pointer_type const removal_node) const {
-      if(this) {
-        const auto parent = get_parent();
-
-        assert(parent != this);
-        assert(get_left() != this);
-        assert(get_right() != this);
-        assert(!parent || parent->get_left() == this || parent->get_right() == this);
-        assert(parent || is_black());
-        assert(!parent || parent->is_black() || is_black());
-//        assert(!get_left() || get_left()->value <= value || get_left() == removal_node);
-//        assert(!get_right() || get_right()->value >= value || get_right() == removal_node);
-
-        const int bnc_left = get_left()->verify(removal_node);
-        const int bnc_right = get_right()->verify(removal_node);
-
-        assert(bnc_left == bnc_right);
-
-        return bnc_left + (is_black() && removal_node != this ? 1 : 0);
-      }
-      else {
-        return 1;
-      }
-    }
-#endif
+//#ifndef NDEBUG
+//    int verify(map_pointer_type const removal_node) const {
+//      if(this) {
+//        const auto parent = get_parent();
+//
+//        assert(parent != this);
+//        assert(get_left() != this);
+//        assert(get_right() != this);
+//        assert(!parent || parent->get_left() == this || parent->get_right() == this);
+//        assert(parent || is_black());
+//        assert(!parent || parent->is_black() || is_black());
+////        assert(!get_left() || get_left()->value <= value || get_left() == removal_node);
+////        assert(!get_right() || get_right()->value >= value || get_right() == removal_node);
+//
+//        const int bnc_left = get_left()->verify(removal_node);
+//        const int bnc_right = get_right()->verify(removal_node);
+//
+//        assert(bnc_left == bnc_right);
+//
+//        return bnc_left + (is_black() && removal_node != this ? 1 : 0);
+//      }
+//      else {
+//        return 1;
+//      }
+//    }
+//#endif
 
     key_type key;
     union {
