@@ -282,23 +282,16 @@ namespace Zeni {
 
     template <typename TYPE2, typename COMPARE2 = COMPARE>
     map_pointer_type find(const TYPE2 &key_, const COMPARE2 &compare = COMPARE2()) {
-      for(auto & it : *this) {
-        if(!compare(key_, get_key()) && !compare(get_key(), key_))
-          return &it;
+      if(this) {
+        if(compare(key_, key))
+          return get_left()->find(key_, compare);
+        else if(compare(key, key_))
+          return get_right()->find(key_, compare);
+        else
+          return this;
       }
-
-      return nullptr;
-
-//      if(this) {
-//        if(compare(key_, get_key()))
-//          return get_left()->find(key_, compare);
-//        else if(compare(get_key(), key_))
-//          return get_right()->find(key_, compare);
-//        else
-//          return this;
-//      }
-//      else
-//        return nullptr;
+      else
+        return nullptr;
     }
 
     const key_type & get_key() const {
@@ -426,7 +419,7 @@ namespace Zeni {
   private:
     void insert_case0(map_pointer_type &node, map_pointer_type &root, map_pointer_type const parent) {
       if(node) {
-        if(COMPARE()(get_key(), node->get_key()))
+        if(COMPARE()(key, node->key))
           insert_case0(node->get_left(), root, node);
         else
           insert_case0(node->get_right(), root, node);
@@ -442,10 +435,10 @@ namespace Zeni {
 
     map_pointer_type insert_case0_unique(map_pointer_type &node, map_pointer_type &root, map_pointer_type const parent) {
       if(node) {
-        if(COMPARE()(get_key(), node->get_key()))
-          insert_case0_unique(node->get_left(), root, node);
-        else if(COMPARE()(node->get_key(), get_key()))
-          insert_case0_unique(node->get_right(), root, node);
+        if(COMPARE()(key, node->key))
+          return insert_case0_unique(node->get_left(), root, node);
+        else if(COMPARE()(node->key, key))
+          return insert_case0_unique(node->get_right(), root, node);
         else {
           destroy(this);
           return node;
@@ -455,11 +448,8 @@ namespace Zeni {
         node = this;
         m_parent = parent;
         insert_case1(root, parent);
+        return this;
       }
-
-//      assert(root->verify(nullptr));
-
-      return this;
     }
 
     void insert_case1(map_pointer_type &root, map_pointer_type const parent) {

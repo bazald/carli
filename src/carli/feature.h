@@ -116,11 +116,11 @@ public:
   }
 
   int compare_predecessor(const Feature &rhs) const {
-    return compare_precedes(static_cast<const DERIVED &>(rhs));
+    return static_cast<const DERIVED *>(this)->compare_predecessor(static_cast<const DERIVED &>(rhs));
   }
 
-  int compare_predecessor(const DERIVED &rhs) const {
-    return static_cast<const DERIVED *>(this)->compare_precedes(rhs);
+  int compare_predecessor(const DERIVED &) const {
+    return false;
   }
 
   virtual bool refinable() const {return false;}
