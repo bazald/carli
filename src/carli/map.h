@@ -234,12 +234,14 @@ namespace Zeni {
      : Linked_List<TYPE>(value),
      key(key_)
     {
+      m_parent = nullptr;
     }
 
     Map(value_pointer_type value, key_type &&key_ = key_type())
      : Linked_List<TYPE>(value),
      key(std::forward<key_type>(key_))
     {
+      m_parent = nullptr;
     }
 
     std::function<bool (const TYPE &, const TYPE &)> comparator() const {

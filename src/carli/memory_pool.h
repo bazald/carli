@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdlib>
+#include <cstring>
 #include <map>
 
 namespace Zeni {
@@ -55,6 +56,9 @@ namespace Zeni {
 
     /// return a memory block to be cached (and eventually freed)
     void give(void * const &ptr_) throw() {
+#ifndef NDEBUG
+      memset(ptr_, 0xDEADBEEF, sizeof(ptr_) - sizeof(size_t));
+#endif
       *reinterpret_cast<void **>(ptr_) = available;
       available = reinterpret_cast<size_t *>(ptr_) - 1;
     }
@@ -132,7 +136,7 @@ namespace Zeni {
      * if this fails, clear every Pool and try again;
      * if it fails again, throw std::bad_alloc;
      */
-    void * operator new(size_t sz_) {
+    static void * operator new(size_t sz_) {
       Pool &p = pool->size_gte(sz_) ? *pool : pool_map->get_Pool(sz_);
 
       void * ptr = p.get();
@@ -149,7 +153,7 @@ namespace Zeni {
     }
 
     /// return a memory block to the appropriate memory Pool
-    void operator delete(void * ptr_) throw() {
+    static void operator delete(void * ptr_) throw() {
       Pool &p = pool->size_gte(ptr_) ? *pool : pool_map->get_Pool(ptr_);
 
       p.give(ptr_);

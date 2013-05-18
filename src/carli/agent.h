@@ -38,7 +38,7 @@ public:
   typedef ACTION action_type;
   typedef typename ACTION::List * action_list;
   typedef std::unique_ptr<const action_type> action_ptruc;
-  typedef Zeni::Trie<std::shared_ptr<feature_type>, Q_Value, typename feature_type::Compare> feature_trie_type;
+  typedef Zeni::Trie<std::unique_ptr<feature_type>, Q_Value, typename feature_type::Compare> feature_trie_type;
   typedef feature_trie_type * feature_trie;
   typedef Environment<action_type> environment_type;
   typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
@@ -281,12 +281,12 @@ protected:
         auto it = features->begin();
         auto iend = features->end();
         if(it != iend) {
-          head = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
+          head = new feature_trie_type(std::unique_ptr<feature_type>(it->clone()));
           feature_trie tail = head;
           ++it;
 
           while(it != iend) {
-            feature_trie ptr = new feature_trie_type(std::shared_ptr<feature_type>(it->clone()));
+            feature_trie ptr = new feature_trie_type(std::unique_ptr<feature_type>(it->clone()));
             ptr->list_insert_after(tail);
             tail = ptr;
             ++it;
