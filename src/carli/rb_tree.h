@@ -22,6 +22,7 @@ public:
   RB_Tree(const TYPE &value_)
     : value(value_)
   {
+    m_parent = nullptr;
   }
 
   const TYPE & get_value() const {
