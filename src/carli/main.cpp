@@ -1,8 +1,8 @@
 // #define TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
 // #define ENABLE_FRINGE
 // #define WHITESON_ADAPTIVE_TILE
-#define DEBUG_OUTPUT
-#define DEBUG_OUTPUT_VALUE_FUNCTION
+// #define DEBUG_OUTPUT
+// #define DEBUG_OUTPUT_VALUE_FUNCTION
 
 #include "blocks_world.h"
 #include "cart_pole.h"

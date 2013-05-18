@@ -46,14 +46,15 @@ namespace Zeni {
       map_value_type::list_insert_before(lp);
       ptr = static_cast<trie_pointer_type>(lp);
     }
-//    trie_pointer_type list_insert_unique(trie_pointer_type &ptr) {
-//      auto lp = static_cast<map_value_type>(ptr);
-//      auto rv = map_value_type::list_insert_unique(lp);
-//      ptr = static_cast<trie_pointer_type>(lp);
-//      return static_cast<trie_pointer_type>(rv);
-//    }
     void list_erase() {
       map_value_type::list_erase();
+    }
+
+    trie_pointer_type map_insert_into_unique(trie_pointer_type &root) {
+      map_pointer_type mp = static_cast<map_pointer_type>(root);
+      const map_pointer_type rv = map_value_type::insert_into_unique(mp);
+      root = static_cast<trie_pointer_type>(mp);
+      return static_cast<trie_pointer_type>(rv);
     }
 
     Trie(const key_type &key_ = key_type())
@@ -147,11 +148,11 @@ namespace Zeni {
 
     /// return an iterator_const pointing to this list entry; only the beginning if !prev()
     typename map_value_type::iterator_const begin() const {
-      return this ? typename map_value_type::iterator_const(this) : typename map_value_type::iterator_const();
+      return this ? typename map_value_type::iterator_const(first()) : typename map_value_type::iterator_const();
     }
     /// return an iterator pointing to this list entry; only the beginning if !prev()
     typename map_value_type::iterator begin() {
-      return this ? typename map_value_type::iterator(const_cast<trie_pointer_type>(this)) : typename map_value_type::iterator();
+      return this ? typename map_value_type::iterator(const_cast<trie_pointer_type>(first())) : typename map_value_type::iterator();
     }
     /// return an iterator_const pointing to an empty list entry of the appropriate size
     typename map_value_type::iterator_const end() const {

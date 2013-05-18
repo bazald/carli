@@ -39,12 +39,6 @@ namespace Zeni {
       list_value_type::insert_before(lp);
       ptr = static_cast<map_pointer_type>(lp);
     }
-//    map_pointer_type list_insert_unique(map_pointer_type &ptr) {
-//      auto lp = static_cast<list_pointer_type>(ptr);
-//      auto rv = list_value_type::insert_before_unique(lp, map_value_type::comparator());
-//      ptr = static_cast<map_pointer_type>(lp);
-//      return static_cast<map_pointer_type>(rv);
-//    }
     void list_erase() {
       list_value_type::erase();
     }

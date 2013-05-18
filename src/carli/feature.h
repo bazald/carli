@@ -139,7 +139,7 @@ public:
   }
 
   int compare_value(const DERIVED &rhs) const {
-    return rhs.present - present;
+    return present - rhs.present;
   }
 
   bool present;

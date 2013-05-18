@@ -864,11 +864,10 @@ private:
     }
 
     if(match) {
-      std::cerr << "Match found!" << std::endl;
       feature_trie next = static_cast<feature_trie>(head == match ? head->next() : head);
       match->list_erase();
       feature_trie inserted = match;
-      match = match->insert(function); ///< May invalidate inserted if already present in the Map
+      match = match->map_insert_into_unique(function);
       if(!m_null_q_values && !match->get()) {
         match->get() = new Q_Value(use_value ? value : 0.0);
         ++m_q_value_count;
@@ -905,7 +904,6 @@ private:
       return rv;
     }
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
-    std::cerr << "Match not found!" << std::endl;
 
     auto rv = head->insert(function, m_null_q_values, m_split_test, [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);}, generate_fringe, collapse_fringe, offset, depth, value, use_value, m_q_value_count);
     assert(rv);
