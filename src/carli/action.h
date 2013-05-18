@@ -20,23 +20,23 @@ public:
       return lhs < rhs;
     }
     bool operator()(const Action &lhs, const Action * const &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const Action &lhs, const std::shared_ptr<const Action> &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const Action &lhs, const std::unique_ptr<const Action> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Action &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Action &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(lhs, *rhs);}
 
     bool operator()(const Action * const &lhs, const Action &rhs) const {return operator()(*lhs, rhs);}
     bool operator()(const Action * const &lhs, const Action * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const Action * const &lhs, const std::shared_ptr<const Action> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const Action * const &lhs, const std::unique_ptr<const Action> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Action * const &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Action * const &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
 
-    bool operator()(const std::shared_ptr<const Action> &lhs, const Action &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::shared_ptr<const Action> &lhs, const Action * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<const Action> &lhs, const std::shared_ptr<const Action> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<const Action> &lhs, const std::unique_ptr<const Action> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const Action &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const Action * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
 
-    bool operator()(const std::unique_ptr<const Action> &lhs, const Action &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::unique_ptr<const Action> &lhs, const Action * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<const Action> &lhs, const std::shared_ptr<const Action> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<const Action> &lhs, const std::unique_ptr<const Action> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const Action &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const Action * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
   };
 
   Action()

@@ -23,23 +23,23 @@ public:
       return static_cast<const DERIVED &>(lhs).compare(static_cast<const DERIVED &>(rhs)) < 0;
     }
     bool operator()(const Feature &lhs, const Feature * const &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const Feature &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const Feature &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Feature &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Feature &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(lhs, *rhs);}
 
     bool operator()(const Feature * const &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
     bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const Feature * const &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const Feature * const &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Feature * const &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Feature * const &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
 
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
 
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
   };
 
   struct Compare_Axis {
@@ -47,23 +47,23 @@ public:
       return static_cast<const DERIVED &>(lhs).compare_axis(static_cast<const DERIVED &>(rhs)) < 0;
     }
     bool operator()(const Feature &lhs, const Feature * const &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const Feature &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const Feature &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Feature &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Feature &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(lhs, *rhs);}
 
     bool operator()(const Feature * const &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
     bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const Feature * const &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const Feature * const &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Feature * const &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Feature * const &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
 
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
 
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
   };
 
   struct Compare_Predecessor {
@@ -71,23 +71,23 @@ public:
       return static_cast<const DERIVED &>(lhs).compare_predecessor(static_cast<const DERIVED &>(rhs)) < 0;
     }
     bool operator()(const Feature &lhs, const Feature * const &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const Feature &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const Feature &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Feature &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const Feature &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(lhs, *rhs);}
 
     bool operator()(const Feature * const &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
     bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const Feature * const &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const Feature * const &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Feature * const &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const Feature * const &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
 
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
 
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::shared_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<const Feature> &lhs, const std::unique_ptr<const Feature> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
   };
 
   Feature()

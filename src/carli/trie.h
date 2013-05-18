@@ -3,6 +3,7 @@
 
 #include "map.h"
 #include "memory_pool.h"
+#include <utility>
 
 namespace Zeni {
 
@@ -59,6 +60,11 @@ namespace Zeni {
 
     Trie(const key_type &key_ = key_type())
      : Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>(this, key_)
+    {
+    }
+
+    Trie(key_type &&key_ = key_type())
+     : Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>(this, std::forward<key_type>(key_))
     {
     }
 

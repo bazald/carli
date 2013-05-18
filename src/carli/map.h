@@ -9,6 +9,9 @@ namespace Zeni {
   template <typename KEY, typename TYPE, typename COMPARE = std::less<KEY>>
   class Map : private Linked_List<TYPE> {
   public:
+    Map(const Map &) = delete;
+    Map operator=(const Map &) = delete;
+
     typedef KEY key_type;
     typedef TYPE value_type;
     typedef value_type * value_pointer_type;
@@ -233,6 +236,12 @@ namespace Zeni {
     {
     }
 
+    Map(value_pointer_type value, key_type &&key_ = key_type())
+     : Linked_List<TYPE>(value),
+     key(std::forward<key_type>(key_))
+    {
+    }
+
     std::function<bool (const TYPE &, const TYPE &)> comparator() const {
       return [this](const TYPE &lhs, const TYPE &rhs)->bool{
         const Map<KEY, TYPE, COMPARE> * const lm = reinterpret_cast<const Map<KEY, TYPE, COMPARE> *>(reinterpret_cast<const char *>(&lhs) + this->offset());
@@ -298,6 +307,14 @@ namespace Zeni {
       if(get_right() && COMPARE()(static_cast<map_pointer_type>(get_right())->key, key_))
         throw std::runtime_error("Illegal key modification in Zeni::Map::set_key.");
       key = key_;
+    }
+
+    void set_key(key_type &&key_) {
+      if(get_left() && COMPARE()(key_, static_cast<map_pointer_type>(get_left())->key))
+        throw std::runtime_error("Illegal key modification in Zeni::Map::set_key.");
+      if(get_right() && COMPARE()(static_cast<map_pointer_type>(get_right())->key, key_))
+        throw std::runtime_error("Illegal key modification in Zeni::Map::set_key.");
+      key = std::forward(key_);
     }
 
     map_pointer_type prev() const {

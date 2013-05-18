@@ -15,6 +15,9 @@ using namespace std;
 
 template <typename TYPE, typename COMPARE = std::less<TYPE>>
 class RB_Tree {
+  RB_Tree(const RB_Tree &) = delete;
+  RB_Tree operator=(const RB_Tree &) = delete;
+
 public:
   RB_Tree(const TYPE &value_)
     : value(value_)

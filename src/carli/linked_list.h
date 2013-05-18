@@ -18,6 +18,9 @@ namespace Zeni {
 
   template <typename TYPE>
   class Linked_List {
+    Linked_List(const Linked_List &) = delete;
+    Linked_List operator=(const Linked_List &) = delete;
+
   public:
     typedef TYPE value_type;
     typedef value_type * value_pointer_type;
