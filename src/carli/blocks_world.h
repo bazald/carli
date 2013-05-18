@@ -59,6 +59,8 @@ namespace Blocks_World {
     }
 
     void print(ostream &os) const {
+      if(!present)
+        os << '!';
       os << "in-place(" << block << ')';
     }
 
@@ -89,6 +91,8 @@ namespace Blocks_World {
     }
 
     void print(ostream &os) const {
+      if(!present)
+        os << '!';
       os << "on-top(" << top << ',' << bottom << ')';
     }
 

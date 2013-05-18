@@ -23,7 +23,7 @@ solution "carli"
   include "src/carli"
 
   configuration "Debug*"
-    defines { "_DEBUG", "DEBUG" }
+    defines { "_DEBUG", "DEBUG" }    
     flags { "Symbols" }
     targetsuffix "_d"
   configuration "Release*"
@@ -36,14 +36,6 @@ solution "carli"
   configuration "macosx"
     buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
     linkoptions { "-stdlib=libc++" }
-
-  if _ACTION == "gmake" then
-    configuration "Debug*"
-      defines { "NDEBUG" }
-  else
-    configuration "Debug*"
-      defines { "_DEBUG", "DEBUG" }    
-  end
 
   if _ACTION == "gmake" then
     configuration { "linux", "Debug*" }

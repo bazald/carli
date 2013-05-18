@@ -1,8 +1,8 @@
 // #define TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
 // #define ENABLE_FRINGE
 // #define WHITESON_ADAPTIVE_TILE
-// #define DEBUG_OUTPUT
-// #define DEBUG_OUTPUT_VALUE_FUNCTION
+#define DEBUG_OUTPUT
+#define DEBUG_OUTPUT_VALUE_FUNCTION
 
 #include "blocks_world.h"
 #include "cart_pole.h"
@@ -178,29 +178,31 @@ int main2(int argc, char **argv) {
 //  trie->destroy(trie);
 
 
+//  typedef Zeni::Map<int, int> map_type;
 //  default_random_engine generator;
 //  generator.seed(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
 //  vector<int> numbers;
 //  int i;
 //  for(i = 0; i != dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-steps"]).get_value(); ++i)
-////  for(i = 0; i != 1000000; ++i)
 //    numbers.push_back(i);
 //  shuffle(numbers.begin(), numbers.end(), generator);
 //
 //  std::cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << std::endl;
 //
-//  RB_Tree<int> * tree = nullptr;
+//  map_type * tree = nullptr;
+////  RB_Tree<int> * tree = nullptr;
 //#ifndef NDEBUG
 //  std::cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
-//  tree->debug_print(std::cerr) << std::endl;
+////  tree->debug_print(std::cerr) << std::endl;
 //#endif
 //
 //  i = 0;
 //  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
-//    (new RB_Tree<int>(*it))->insert_into(tree);
+//    (new map_type(nullptr, *it))->insert_into(tree);
+////    (new RB_Tree<int>(*it))->insert_into(tree);
 //#ifndef NDEBUG
 //    std::cerr << "insertion(" << ++i << ")=" << *it << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
-//    tree->debug_print(std::cerr) << std::endl;
+////    tree->debug_print(std::cerr) << std::endl;
 //#endif
 //  }
 //
@@ -213,7 +215,7 @@ int main2(int argc, char **argv) {
 //      std::cerr << "";
 //    tree->find(*it)->remove_from(tree);
 //#ifndef NDEBUG
-//    tree->debug_print(std::cerr) << std::endl;
+////    tree->debug_print(std::cerr) << std::endl;
 //    std::cerr << "deletion(" << i << ")=" << *it << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << std::endl;
 //#endif
 //  }

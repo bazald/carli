@@ -25,6 +25,12 @@ namespace Zeni {
     value_pointer_type operator->() {return list_value_type::operator->();}
     size_t offset() const {return list_value_type::offset();}
 
+    map_pointer_type list_prev() const {
+      return static_cast<map_pointer_type>(list_value_type::prev());
+    }
+    map_pointer_type list_next() const {
+      return static_cast<map_pointer_type>(list_value_type::next());
+    }
     void list_insert_after(const map_pointer_type &ptr) {
       list_value_type::insert_after(ptr);
     }
@@ -272,22 +278,27 @@ namespace Zeni {
 
 //        assert(root->verify(nullptr));
       }
-
-      delete this;
     }
 
     template <typename TYPE2, typename COMPARE2 = COMPARE>
     map_pointer_type find(const TYPE2 &key_, const COMPARE2 &compare = COMPARE2()) {
-      if(this) {
-        if(compare(key_, get_key()))
-          return get_left()->find(key_, compare);
-        else if(compare(get_key(), key_))
-          return get_right()->find(key_, compare);
-        else
-          return this;
+      for(auto & it : *this) {
+        if(!compare(key_, get_key()) && !compare(get_key(), key_))
+          return &it;
       }
-      else
-        return nullptr;
+
+      return nullptr;
+
+//      if(this) {
+//        if(compare(key_, get_key()))
+//          return get_left()->find(key_, compare);
+//        else if(compare(get_key(), key_))
+//          return get_right()->find(key_, compare);
+//        else
+//          return this;
+//      }
+//      else
+//        return nullptr;
     }
 
     const key_type & get_key() const {
@@ -295,9 +306,9 @@ namespace Zeni {
     }
 
     void set_key(const key_type &key_) {
-      if(this->prev() && COMPARE()(key_, static_cast<map_pointer_type>(this->prev())->key))
+      if(get_left() && COMPARE()(key_, static_cast<map_pointer_type>(get_left())->key))
         throw std::runtime_error("Illegal key modification in Zeni::Map::set_key.");
-      if(this->next() && COMPARE()(static_cast<map_pointer_type>(this->next())->key, key_))
+      if(get_right() && COMPARE()(static_cast<map_pointer_type>(get_right())->key, key_))
         throw std::runtime_error("Illegal key modification in Zeni::Map::set_key.");
       key = key_;
     }
@@ -311,31 +322,12 @@ namespace Zeni {
         map_pointer_type ptr = const_cast<map_pointer_type>(this);
         map_pointer_type parent = ptr->get_parent();
 
-        if(parent->get_left() == ptr) {
-          do {
-            ptr = parent;
-            parent = ptr->get_parent();
-          } while(parent && parent->get_left() == ptr);
-          return parent;
+        while(parent && parent->get_left() == ptr) {
+          ptr = parent;
+          parent = parent->get_parent();
         }
-        else {
-          assert(parent->get_right() == ptr);
 
-          do {
-            ptr = parent;
-            parent = ptr->get_parent();
-          } while(parent && parent->get_right() == ptr);
-          if(!parent)
-            return nullptr;
-
-          ptr = parent->get_left();
-          if(!ptr)
-            return nullptr;
-
-          while(ptr->get_right())
-            ptr = ptr->get_right();
-          return ptr;
-        }
+        return parent;
       }
     }
 
@@ -348,41 +340,22 @@ namespace Zeni {
         map_pointer_type ptr = const_cast<map_pointer_type>(this);
         map_pointer_type parent = ptr->get_parent();
 
-        if(parent->get_left() == ptr) {
-          do {
-            ptr = parent;
-            parent = ptr->get_parent();
-          } while(parent && parent->get_left() == ptr);
-          if(!parent)
-            return nullptr;
-
-          ptr = parent->get_right();
-          if(!ptr)
-            return nullptr;
-
-          while(ptr->get_left())
-            ptr = ptr->get_left();
-          return ptr;
+        while(parent && parent->get_right() == ptr) {
+          ptr = parent;
+          parent = parent->get_parent();
         }
-        else {
-          assert(parent->get_right() == ptr);
 
-          do {
-            ptr = parent;
-            parent = ptr->get_parent();
-          } while(parent && parent->get_right() == ptr);
-          return parent;
-        }
+        return parent;
       }
     }
 
     /// return an iterator_const pointing to this list entry; only the beginning if !prev()
     iterator_const begin() const {
-      return this ? iterator_const(this) : iterator_const();
+      return this ? iterator_const(first()) : iterator_const();
     }
     /// return an iterator pointing to this list entry; only the beginning if !prev()
     iterator begin() {
-      return this ? iterator(this) : iterator();
+      return this ? iterator(first()) : iterator();
     }
     /// return an iterator_const pointing to an empty list entry of the appropriate size
     iterator_const end() const {
@@ -624,13 +597,13 @@ namespace Zeni {
     void disconnect_one_child(map_pointer_type const parent) {
       if(parent) {
         if(parent->get_left() == this) {
-          parent->get_left() = get_left() ? get_left() : get_right();
+          parent->set_left(get_left() ? get_left() : get_right());
           if(parent->get_left())
             parent->get_left()->set_parent(parent);
         }
         else {
           assert(parent->get_right() == this);
-          parent->get_right() = get_left() ? get_left() : get_right();
+          parent->set_right(get_left() ? get_left() : get_right());
           if(parent->get_right())
             parent->get_right()->set_parent(parent);
         }
@@ -780,10 +753,10 @@ namespace Zeni {
 
         if(parent) {
           if(parent->get_left() == this)
-            parent->get_left() = node;
+            parent->set_left(node);
           else {
             assert(parent->get_right() == this);
-            parent->get_right() = node;
+            parent->set_right(node);
           }
         }
         else
@@ -797,21 +770,21 @@ namespace Zeni {
           child->set_parent(this);
 
         if(get_left() == node) {
-          node->get_left() = this;
-          node->get_right() = get_right();
+          node->set_left(this);
+          node->set_right(get_right());
           if(get_right())
             get_right()->set_parent(node);
-          get_left() = child;
-          get_right() = nullptr;
+          set_left(child);
+          set_right(nullptr);
         }
         else {
           assert(get_right() == node);
-          node->get_left() = get_left();
-          node->get_right() = this;
+          node->set_left(get_left());
+          node->set_right(this);
           if(get_left())
             get_right()->set_parent(node);
-          get_left() = nullptr;
-          get_right() = child;
+          set_left(nullptr);
+          set_right(child);
         }
       }
 
@@ -825,10 +798,10 @@ namespace Zeni {
 
       if(parent) {
         if(parent->get_left() == prev)
-          parent->get_left() = this;
+          parent->set_left(this);
         else {
           assert(parent->get_right() == prev);
-          parent->get_right() = this;
+          parent->set_right(this);
         }
       }
       else
@@ -845,18 +818,18 @@ namespace Zeni {
       map_pointer_type const parent = get_parent();
       map_pointer_type const child = get_right();
 
-      get_right() = child->get_left();
+      set_right(child->get_left());
       if(child->get_left())
         child->get_left()->set_parent(this);
 
       child->set_parent(parent);
-      child->get_left() = this;
+      child->set_left(this);
       if(parent) {
         if(parent->get_left() == this)
-          parent->get_left() = child;
+          parent->set_left(child);
         else {
           assert(parent->get_right() == this);
-          parent->get_right() = child;
+          parent->set_right(child);
         }
       }
       else
@@ -873,18 +846,18 @@ namespace Zeni {
       map_pointer_type const parent = get_parent();
       map_pointer_type const child = get_left();
 
-      get_left() = child->get_right();
+      set_left(child->get_right());
       if(child->get_right())
         child->get_right()->set_parent(this);
 
       child->set_parent(parent);
-      child->get_right() = this;
+      child->set_right(this);
       if(parent) {
         if(parent->get_left() == this)
-          parent->get_left() = child;
+          parent->set_left(child);
         else {
           assert(parent->get_right() == this);
-          parent->get_right() = child;
+          parent->set_right(child);
         }
       }
       else

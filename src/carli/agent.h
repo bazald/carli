@@ -712,7 +712,7 @@ protected:
 
   template <typename ENVIRONMENT>
   bool generate_feature_ranged(const std::shared_ptr<const ENVIRONMENT> &env, feature_trie &trie, const typename FEATURE::List * const &tail, typename FEATURE::List * &tail_next) {
-    auto match = trie->find(**tail, typename FEATURE::Compare_Axis());
+    auto match = trie->find(**tail);
 
     if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
       const auto &feature = match->get_key();
@@ -857,17 +857,14 @@ private:
   feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const bool &use_value, const double &value = 0.0) {
     /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
     feature_trie match;
-    {
-      for(match = head->first(); match; match = match->next()) {
-        for(feature_trie jt = function->first(); jt; jt = jt->next()) {
-          if(match->get_key()->compare_axis(*jt->get_key()) == 0)
-            goto MATCH_FOUND;
-        }
-      }
+    for(match = head->first(); match; match = match->next()) {
+      feature_trie found = function->find(match->get_key(), typename feature_type::Compare_Axis());
+      if(found)
+        break;
     }
-    MATCH_FOUND:
 
     if(match) {
+      std::cerr << "Match found!" << std::endl;
       feature_trie next = static_cast<feature_trie>(head == match ? head->next() : head);
       match->list_erase();
       feature_trie inserted = match;
@@ -886,7 +883,7 @@ private:
       }
       else {
         try {
-          generate_more_features(match->get(), depth, match != inserted);
+          generate_more_features(match->get(), depth, match == inserted);
         }
         catch(Again &) {
           next->destroy(next);
@@ -908,6 +905,7 @@ private:
       return rv;
     }
     /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
+    std::cerr << "Match not found!" << std::endl;
 
     auto rv = head->insert(function, m_null_q_values, m_split_test, [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);}, generate_fringe, collapse_fringe, offset, depth, value, use_value, m_q_value_count);
     assert(rv);

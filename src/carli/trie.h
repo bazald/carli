@@ -31,13 +31,11 @@ namespace Zeni {
     typedef list_value_type * list_pointer_type;
 
   public:
-    Trie(const key_type &key_ = key_type())
-     : Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>(this, key_)
-    {
+    trie_pointer_type list_prev() const {
+      return static_cast<trie_pointer_type>(map_value_type::prev());
     }
-
-    ~Trie() {
-      delete m_value;
+    trie_pointer_type list_next() const {
+      return static_cast<trie_pointer_type>(map_value_type::next());
     }
 
     void list_insert_after(const trie_pointer_type &ptr) {
@@ -58,15 +56,21 @@ namespace Zeni {
       map_value_type::list_erase();
     }
 
+    Trie(const key_type &key_ = key_type())
+     : Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>(this, key_)
+    {
+    }
+
+    ~Trie() {
+      delete m_value;
+    }
+
     /** Destroy a Trie-list, returning a pointer to the leaf if no offset is specified
      *  If an offset is specified, return a pointer to the most general match with a value first,
      *    and treat the value+offset as a Linked_List, stringing together general-to-specific values.
      */
     trie_pointer_type insert(trie_pointer_type &ptr, const size_t &offset = size_t(-1)) {
-      if(!this)
-        return ptr;
-
-      const trie_pointer_type next_ = next();
+      const trie_pointer_type next_ = list_next();
       list_erase();
 
       auto mp = static_cast<map_pointer_type>(ptr);
@@ -78,10 +82,7 @@ namespace Zeni {
 
     template <typename DEPTH_TEST, typename TERMINAL_TEST, typename GENERATE_FRINGE, typename COLLAPSE_FRINGE>
     trie_pointer_type insert(trie_pointer_type &ptr, const bool &null_q_values, const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const size_t &offset, const size_t &depth, const double &value, const bool &use_value, size_t &value_count) {
-      if(!this)
-        return ptr;
-
-      const trie_pointer_type next_ = next();
+      const trie_pointer_type next_ = list_next();
       list_erase();
 
       const trie_pointer_type inserted = this;

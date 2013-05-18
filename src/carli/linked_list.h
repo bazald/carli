@@ -225,7 +225,7 @@ namespace Zeni {
       m_prev(nullptr),
       m_next(nullptr)
     {
-      assert(m_offset < sizeof(value_type));
+//      assert(m_offset < sizeof(value_type));
     }
 
     value_pointer_type get() const {
@@ -491,11 +491,11 @@ namespace Zeni {
     }
 
     void set_prev(const list_pointer_type &prev_) {
-      assert(!prev_ || prev_->m_offset == m_offset);
+//      assert(!prev_ || prev_->m_offset == m_offset);
       m_prev = prev_;
     }
     void set_next(const list_pointer_type &next_) {
-      assert(!next_ || next_->m_offset == m_offset);
+//      assert(!next_ || next_->m_offset == m_offset);
       m_next = next_;
     }
 
