@@ -11,8 +11,6 @@
 #include "experimental_output.h"
 #include "getopt.h"
 
-#include "rb_tree.h"
-
 #include <cstring>
 #include <ctime>
 #include <fstream>
