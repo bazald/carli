@@ -418,32 +418,20 @@ namespace Zeni {
       if(m_next)
         m_next->m_prev = m_prev;
 
-      m_prev = nullptr;
-      m_next = nullptr;
+      erase_hard();
     }
 
-    void erase_prev() {
-      if(m_prev)
-        m_prev->m_next = m_next;
-
+    void erase_hard() {
       m_prev = nullptr;
-    }
-
-    void erase_next() {
-      if(m_next)
-        m_next->m_prev = m_prev;
-
       m_next = nullptr;
     }
 
     /// delete every entry in the list between begin() and end(), inclusive
-    template <typename DERIVED>
-    static void destroy(DERIVED * const &ptr_) {
+    static void destroy(list_pointer_type const &ptr_) {
       auto ptr = ptr_;
       destroy(ptr);
     }
-    template <typename DERIVED>
-    static void destroy(DERIVED * &ptr_) {
+    static void destroy(list_pointer_type &ptr_) {
       if(ptr_) {
         list_pointer_type ptr = ptr_;
         while(ptr) {

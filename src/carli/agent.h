@@ -218,7 +218,7 @@ public:
   void print_value_function(std::ostream &os) const {
     os << "  Value Function:";
     for(auto &vf : m_value_function) {
-      os << std::endl << "  " << vf.first << " : ";
+      os << std::endl << "  " << *vf.first << " : ";
       print_value_function_trie(os, vf.second);
     }
     os << std::endl;
@@ -422,11 +422,12 @@ protected:
     double q_new = 0.0;
 #endif
     const double delta = target_value - q_old;
+    const bool weight_assignment_all = m_weight_assignment_code == "all";
     for(Q_Value::List * q_ptr = m_eligible; q_ptr; ) {
       Q_Value &q = **q_ptr;
       q_ptr = q.eligible.next();
 
-      const double ldelta = m_weight_assignment_code != "all" ? target_value - q.value : delta;
+      const double ldelta = weight_assignment_all && q.type != Q_Value::Type::FRINGE ? delta : target_value - q.value;
       const double edelta = q.eligibility * ldelta;
 
       q.value += edelta;
@@ -465,7 +466,7 @@ protected:
 
         q.cabe += abs_edelta;
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-        q.mabe = q.cabe / q.update_count;
+        q.mabe.set_value(q.cabe / q.update_count);
 #endif
         if(q.update_count > m_contribute_update_count) {
           if(m_mean_cabe_queue_size) {
@@ -856,14 +857,16 @@ private:
 
   feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const bool &use_value, const double &value = 0.0) {
     /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
-    feature_trie match;
+    feature_trie match, found;
     for(match = head->first(); match; match = match->next()) {
-      feature_trie found = function->find(match->get_key(), typename feature_type::Compare_Axis());
+      found = function->find(match->get_key(), typename feature_type::Compare_Axis());
       if(found)
         break;
     }
 
     if(match) {
+      assert(found->get()->type != Q_Value::Type::FRINGE);
+
       feature_trie next = static_cast<feature_trie>(head == match ? head->next() : head);
       match->list_erase();
       feature_trie inserted = match;
@@ -881,24 +884,29 @@ private:
         deeper = get_value_from_function(next, match->get_deeper(), offset, depth + 1, use_value, value_next);
       }
       else {
-        try {
-          generate_more_features(match->get(), depth, match == inserted);
-        }
-        catch(Again &) {
-          next->destroy(next);
-          throw;
-        }
+        if(found->get()->type != Q_Value::Type::FRINGE) {
+          try {
+            generate_more_features(match->get(), depth, match == inserted);
+          }
+          catch(Again &) {
+            next->list_destroy(next);
+            throw;
+          }
 
-        generate_fringe(match->get_deeper(), next, offset, value_next);
+          if(m_null_q_values && !match->get()) {
+            match->get() = new Q_Value(use_value ? value : 0.0);
+            ++m_q_value_count;
+          }
+
+          generate_fringe(match->get_deeper(), next, offset, value_next);
+        }
+        else
+          next->list_destroy(next);
+
         deeper = match->get_deeper();
-
-        if(m_null_q_values && !match->get()) {
-          match->get() = new Q_Value(use_value ? value : 0.0);
-          ++m_q_value_count;
-        }
       }
 
-      match->offset_erase(offset);
+      match->offset_erase_hard(offset);
       auto rv = match->offset_insert_before(offset, deeper);
       assert(rv);
       return rv;
@@ -936,17 +944,14 @@ private:
 
     while(head) {
       auto next = static_cast<feature_trie>(head->next());
-      head->erase();
+      head->list_erase();
 
-      auto predecessor = std::find_if(leaf_fringe->begin(), leaf_fringe->end(),
-                                      [&head](const feature_trie_type &existing)->bool {
-                                        return existing.get_key()->precedes(*head->get_key());
-                                      });
+      feature_trie predecessor = leaf_fringe->find(*head->get_key(), typename feature_type::Compare_Predecessor());
 
       if(predecessor)
         delete head;
       else {
-        auto inserted = head->map_insert(leaf_fringe);
+        auto inserted = head->map_insert_into_unique(leaf_fringe);
         if(!inserted->get())
           inserted->get() = new Q_Value(value, Q_Value::Type::FRINGE);
       }
@@ -955,18 +960,13 @@ private:
     }
 
     if(leaf_fringe) {
-      leaf_fringe->offset_erase(offset);
+      typename feature_trie_type::iterator ft = leaf_fringe->begin(), fnext = ft;
+      ft->offset_erase_hard(offset);
+      ++fnext;
 
-      feature_trie fringe = leaf_fringe;
-      for(;;) {
-        auto next = static_cast<feature_trie>(fringe->next());
-        if(next) {
-          next->offset_erase(offset);
-          fringe->offset_insert_before(offset, next);
-          fringe = next;
-        }
-        else
-          break;
+      for(typename feature_trie_type::iterator fend = leaf_fringe->end(); fnext != fend; ft = fnext, ++fnext) {
+        fnext->offset_erase_hard(offset);
+        ft->offset_insert_before(offset, fnext.get());
       }
     }
   }
@@ -974,12 +974,12 @@ private:
   static void collapse_fringe(feature_trie &leaf_fringe, feature_trie head) {
 //     assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type != Q_Value::Type::FRINGE); ///< TODO: Convert FRINGE to UNSPLIT
 
-    if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::Type::FRINGE)
+    if(leaf_fringe && leaf_fringe->get()->type == Q_Value::Type::FRINGE)
       leaf_fringe->destroy(leaf_fringe);
   }
 #else
   static void generate_fringe(feature_trie &, feature_trie head, const size_t &, const double &) {
-    head->destroy(head); ///< Destroy the rest of the features instead of generating a fringe
+    head->list_destroy(head); ///< Destroy the rest of the features instead of generating a fringe
   }
 
   static void collapse_fringe(feature_trie &, feature_trie) {

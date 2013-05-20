@@ -42,8 +42,20 @@ namespace Zeni {
       list_value_type::insert_before(lp);
       ptr = static_cast<map_pointer_type>(lp);
     }
+    void list_destroy(const map_pointer_type &ptr_) {
+      map_pointer_type ptr = ptr_;
+      list_destroy(ptr);
+    }
+    void list_destroy(map_pointer_type &ptr) {
+      auto lp = static_cast<list_pointer_type>(ptr);
+      list_value_type::destroy(lp);
+      ptr = static_cast<map_pointer_type>(lp);
+    }
     void list_erase() {
       list_value_type::erase();
+    }
+    void list_erase_hard() {
+      list_value_type::erase_hard();
     }
 
     class iterator : public std::iterator<std::bidirectional_iterator_tag, value_type> {
@@ -254,12 +266,20 @@ namespace Zeni {
     }
 
     void insert_into(map_pointer_type &root) {
+      assert(!m_parent);
+      assert(!get_left());
+      assert(!get_right());
+
       insert_case0(root, root, nullptr);
 
 //      assert(root->verify(nullptr));
     }
 
     map_pointer_type insert_into_unique(map_pointer_type &root) {
+      assert(!m_parent);
+      assert(!get_left());
+      assert(!get_right());
+
       const map_pointer_type rv = insert_case0_unique(root, root, nullptr);
 
 //      assert(root->verify(nullptr));
@@ -376,7 +396,7 @@ namespace Zeni {
       map_pointer_type ptr = const_cast<map_pointer_type>(this);
       if(ptr) {
         while(ptr->get_left())
-          ptr = get_left();
+          ptr = ptr->get_left();
       }
       return ptr;
     }
@@ -387,13 +407,14 @@ namespace Zeni {
     }
     static void destroy(map_pointer_type &ptr_) {
       if(ptr_) {
-        map_pointer_type left = ptr_->get_left();
+        assert(!ptr_->get_left() || ptr_->get_left()->get_right() != ptr_);
+        assert(!ptr_->get_right() || ptr_->get_right()->get_left() != ptr_);
+
+        destroy(ptr_->get_left());
         map_pointer_type right = ptr_->get_right();
-        ptr_->list_erase();
         delete ptr_->get();
-        destroy(left);
-        destroy(right);
         ptr_ = nullptr;
+        destroy(right);
       }
     }
 

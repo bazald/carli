@@ -30,8 +30,9 @@ namespace Zeni {
     typedef map_value_type * map_pointer_type;
     typedef Linked_List<trie_value_type> list_value_type;
     typedef list_value_type * list_pointer_type;
+    typedef typename map_value_type::iterator_const iterator_const;
+    typedef typename map_value_type::iterator iterator;
 
-  public:
     trie_pointer_type list_prev() const {
       return static_cast<trie_pointer_type>(map_value_type::prev());
     }
@@ -43,12 +44,24 @@ namespace Zeni {
       map_value_type::list_insert_after(ptr);
     }
     void list_insert_before(trie_pointer_type &ptr) {
-      auto lp = static_cast<map_pointer_type>(ptr);
-      map_value_type::list_insert_before(lp);
-      ptr = static_cast<trie_pointer_type>(lp);
+      auto mp = static_cast<map_pointer_type>(ptr);
+      map_value_type::list_insert_before(mp);
+      ptr = static_cast<trie_pointer_type>(mp);
+    }
+    void list_destroy(const trie_pointer_type &ptr_) {
+      trie_pointer_type ptr = ptr_;
+      list_destroy(ptr);
+    }
+    void list_destroy(trie_pointer_type &ptr) {
+      auto mp = static_cast<map_pointer_type>(ptr);
+      map_value_type::list_destroy(mp);
+      ptr = static_cast<trie_pointer_type>(mp);
     }
     void list_erase() {
       map_value_type::list_erase();
+    }
+    void list_erase_hard() {
+      map_value_type::list_erase_hard();
     }
 
     trie_pointer_type map_insert_into_unique(trie_pointer_type &root) {
@@ -153,26 +166,26 @@ namespace Zeni {
     }
 
     /// return an iterator_const pointing to this list entry; only the beginning if !prev()
-    typename map_value_type::iterator_const begin() const {
-      return this ? typename map_value_type::iterator_const(first()) : typename map_value_type::iterator_const();
+    iterator_const begin() const {
+      return this ? iterator_const(first()) : iterator_const();
     }
     /// return an iterator pointing to this list entry; only the beginning if !prev()
-    typename map_value_type::iterator begin() {
-      return this ? typename map_value_type::iterator(const_cast<trie_pointer_type>(first())) : typename map_value_type::iterator();
+    iterator begin() {
+      return this ? iterator(const_cast<trie_pointer_type>(first())) : iterator();
     }
     /// return an iterator_const pointing to an empty list entry of the appropriate size
-    typename map_value_type::iterator_const end() const {
-      return this ? typename map_value_type::iterator_const(map_value_type::offset()) : typename map_value_type::iterator_const();
+    iterator_const end() const {
+      return this ? iterator_const(map_value_type::offset()) : iterator_const();
     }
     /// return an iterator pointing to an empty list entry of the appropriate size
-    typename map_value_type::iterator end() {
-      return this ? typename map_value_type::iterator(map_value_type::offset()) : typename map_value_type::iterator();
+    iterator end() {
+      return this ? iterator(map_value_type::offset()) : iterator();
     }
 
     const trie_value_type * get_deeper() const {return m_deeper;}
     trie_pointer_type & get_deeper() {return m_deeper;}
 
-    trie_pointer_type offset_insert_before(const size_t &offset, trie_pointer_type &rhs_) {
+    trie_pointer_type offset_insert_before(const size_t &offset, const trie_pointer_type &rhs_) {
       const bool rhs_check = rhs_ && rhs_->m_value && offset != size_t(-1);
       if(m_value) {
         if(rhs_check) {
@@ -198,9 +211,17 @@ namespace Zeni {
       }
     }
 
+    void offset_erase_hard(const size_t &offset) {
+      if(m_value && offset != size_t(-1)) {
+        auto lhs = value_to_Linked_List(m_value, offset);
+        assert(lhs->offset() == offset);
+        lhs->erase_hard();
+      }
+    }
+
   private:
     trie_pointer_type finish_insert(const trie_pointer_type &next, const size_t &offset) {
-      offset_erase(offset);
+      offset_erase_hard(offset);
 
       if(next) {
         static_cast<trie_pointer_type>(next)->insert(m_deeper, offset);
@@ -215,7 +236,7 @@ namespace Zeni {
 
     template <typename DEPTH_TEST, typename TERMINAL_TEST, typename GENERATE_FRINGE, typename COLLAPSE_FRINGE>
     trie_pointer_type finish_insert(const bool &null_q_values, const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const size_t &offset, const size_t &depth, const double &value, const bool &use_value, size_t &value_count, const bool &force, const trie_pointer_type &next) {
-      offset_erase(offset);
+      offset_erase_hard(offset);
 
       if(!null_q_values && !m_value) {
         m_value = new value_type(use_value ? value : 0.0);
@@ -236,7 +257,7 @@ namespace Zeni {
         }
         catch(/*Again &*/...) {
           if(!dtr)
-            next->destroy(next);
+            next->list_destroy(next);
           throw;
         }
 

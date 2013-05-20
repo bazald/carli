@@ -3,7 +3,6 @@
 
 #include <cstddef>
 #include <cstdlib>
-#include <cstring>
 #include <map>
 
 namespace Zeni {
@@ -57,7 +56,18 @@ namespace Zeni {
     /// return a memory block to be cached (and eventually freed)
     void give(void * const &ptr_) throw() {
 #ifndef NDEBUG
-      memset(ptr_, 0xDEADBEEF, sizeof(ptr_) - sizeof(size_t));
+      for(char * pp = reinterpret_cast<char *>(ptr_), * pend = pp + size_of(ptr_); pp != pend; ++pp) {
+        *pp = 0xEF;
+        if(++pp == pend)
+          break;
+        *pp = 0xBE;
+        if(++pp == pend)
+          break;
+        *pp = 0xAD;
+        if(++pp == pend)
+          break;
+        *pp = 0xDE;
+      }
 #endif
       *reinterpret_cast<void **>(ptr_) = available;
       available = reinterpret_cast<size_t *>(ptr_) - 1;

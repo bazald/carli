@@ -7,12 +7,15 @@ class Value {
   friend class Mean;
 
   Value(const Value &) = delete;
-  Value operator=(const Value &) = delete;
 
 public:
   Value(const double &value_ = double())
     : value(value_)
   {
+  }
+
+  void set_value(const double &rhs) {
+    value = rhs;
   }
 
   operator double () const {return value;}

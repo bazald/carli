@@ -119,8 +119,8 @@ public:
     return static_cast<const DERIVED *>(this)->compare_predecessor(static_cast<const DERIVED &>(rhs));
   }
 
-  int compare_predecessor(const DERIVED &) const {
-    return false;
+  int compare_predecessor(const DERIVED &rhs) const {
+    return static_cast<const DERIVED *>(this)->compare_axis(rhs);
   }
 
   virtual bool refinable() const {return false;}
@@ -158,8 +158,8 @@ public:
   }
 
   int compare(const DERIVED &rhs) const {
-    return depth < rhs.depth ? -1 : depth > rhs.depth ? 1 :
-           axis < rhs.axis ? -1 : axis > rhs.axis ? 1 :
+    return depth != rhs.depth ? depth - rhs.depth :
+           axis != rhs.axis ? axis - rhs.axis :
            bound_lower < rhs.bound_lower ? -1 : bound_lower > rhs.bound_lower ? 1 :
            bound_higher < rhs.bound_higher ? -1 : bound_higher > rhs.bound_higher ? 1 :
            0;
@@ -170,13 +170,13 @@ public:
   }
 
   int compare_predecessor(const DERIVED &rhs) const {
-    return axis < rhs.axis ? -1 : axis > rhs.axis ? 1 :
-           depth < rhs.depth ? -1 : depth > rhs.depth ? 1 :
-           0;
+    return axis != rhs.axis ? axis - rhs.axis :
+           depth + 1 == rhs.depth || depth - 1 == rhs.depth ? 0 :
+           depth < rhs.depth ? -1 : 1;
   }
 
   int compare_value(const DERIVED &rhs) const {
-    return depth < rhs.depth ? -1 : depth > rhs.depth ? 1 :
+    return depth != rhs.depth ? depth - rhs.depth :
            bound_lower < rhs.bound_lower ? -1 : bound_lower > rhs.bound_lower ? 1 :
            bound_higher < rhs.bound_higher ? -1 : bound_higher > rhs.bound_higher ? 1 :
            0;
