@@ -10,6 +10,7 @@
 #include "puddle_world.h"
 #include "experimental_output.h"
 #include "getopt.h"
+#include "git.h"
 
 #include <cstring>
 #include <ctime>
@@ -44,6 +45,10 @@ int main2(int argc, char **argv) {
 
   Options &options = Options::get_global();
 
+  if(GIT_MODIFIED)
+    options.add_line("\n  Built from revision " GIT_REVISION " (" GIT_MODIFIED_STR " modified files) on " __DATE__ " at " __TIME__ ".");
+  else
+    options.add_line("\n  Built from revision " GIT_REVISION " (clean) on " __DATE__ " at " __TIME__ ".");
   options.add_line("\n  Print Help:");
   options.add('h', std::make_shared<Option_Function>("help", 0, [&options](const Option::Arguments &){
     options.print_help(cout);

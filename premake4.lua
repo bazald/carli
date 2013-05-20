@@ -37,6 +37,21 @@ solution "carli"
     buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
     linkoptions { "-stdlib=libc++" }
 
+  configuration "*"
+    if _ACTION == "gmake" then
+        prebuildcommands { [[$(shell echo "#ifndef GIT_H" > git.h)]],
+                           [[$(shell echo "#define GIT_MODIFIED $$(git status | grep -c modified)" >> git.h)]],
+                           [[$(shell echo "#define GIT_MODIFIED_STR \"$$(git status | grep -c modified)\"" >> git.h)]],
+                           [[$(shell echo "#define GIT_REVISION \"$$(git log -n 1 | head -n 1 | sed 's/commit //')\"" >> git.h)]],
+                           [[$(shell echo "#endif" >> git.h)]] }
+    else
+        prebuildcommands { [[echo "#ifndef GIT_H" > git.h]],
+                           [[echo "#define GIT_MODIFIED $$(git status | grep -c modified)" >> git.h]],
+                           [[echo "#define GIT_MODIFIED_STR \\\"$$(git status | grep -c modified)\\\"" >> git.h]],
+                           [[echo "#define GIT_REVISION \\\"$$(git log -n 1 | head -n 1 | sed \'s/commit \/\/\')\\\"" >> git.h]],
+                           [[echo "#endif" >> git.h]] }
+    end
+
   if _ACTION == "gmake" then
     configuration { "linux", "Debug*" }
       links { "tcmalloc_and_profiler" }

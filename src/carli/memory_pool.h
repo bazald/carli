@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdlib>
+#include <inttypes.h>
 #include <map>
 
 namespace Zeni {
@@ -39,6 +40,9 @@ namespace Zeni {
       if(available) {
         void * const ptr = available;
         available = *reinterpret_cast<void **>(reinterpret_cast<size_t *>(available) + 1);
+#ifndef NDEBUG
+        fill(reinterpret_cast<size_t *>(ptr) + 1, 0xFA57F00D);
+#endif
         return reinterpret_cast<size_t *>(ptr) + 1;
       }
       else {
@@ -46,6 +50,9 @@ namespace Zeni {
 
         if(ptr) {
           *reinterpret_cast<size_t *>(ptr) = size;
+#ifndef NDEBUG
+          fill(reinterpret_cast<size_t *>(ptr) + 1, 0xED1B13BF);
+#endif
           return reinterpret_cast<size_t *>(ptr) + 1;
         }
 
@@ -56,18 +63,7 @@ namespace Zeni {
     /// return a memory block to be cached (and eventually freed)
     void give(void * const &ptr_) throw() {
 #ifndef NDEBUG
-      for(unsigned char * pp = reinterpret_cast<unsigned char *>(ptr_), * pend = pp + size_of(ptr_); pp != pend; ++pp) {
-        *pp = 0xEF;
-        if(++pp == pend)
-          break;
-        *pp = 0xBE;
-        if(++pp == pend)
-          break;
-        *pp = 0xAD;
-        if(++pp == pend)
-          break;
-        *pp = 0xDE;
-      }
+      fill(ptr_, 0xDEADBEEF);
 #endif
       *reinterpret_cast<void **>(ptr_) = available;
       available = reinterpret_cast<size_t *>(ptr_) - 1;
@@ -89,6 +85,27 @@ namespace Zeni {
     }
 
   private:
+#ifndef NDEBUG
+    void fill(void * const dest, const uint32_t pattern) {
+      unsigned char * dd = reinterpret_cast<unsigned char *>(dest);
+      const unsigned char * const dend = dd + size_of(dest);
+
+      while(dend - dd > 3) {
+        *reinterpret_cast<uint32_t *>(dd) = pattern;
+        dd += 4;
+      }
+      if(dd == dend)
+        return;
+      *dd = reinterpret_cast<const unsigned char *>(pattern)[3];
+      if(++dd == dend)
+        return;
+      *dd = reinterpret_cast<const unsigned char *>(pattern)[2];
+      if(++dd == dend)
+        return;
+      *dd = reinterpret_cast<const unsigned char *>(pattern)[1];
+    }
+#endif
+
     size_t size;
     void * available;
   };
