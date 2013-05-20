@@ -38,18 +38,31 @@ solution "carli"
     linkoptions { "-stdlib=libc++" }
 
   configuration "*"
-    if _ACTION == "gmake" then
+    if os.get() == "windows" then
+      prebuildcommands { [[cmd /c echo #ifndef GIT_H> git.h]],
+                         [[cmd /c echo #define GIT_MODIFIED \>> git.h]],
+                         [[cmd /c git status | grep -c modified >> git.h]],
+                         [[cmd /c echo #define GIT_REVISION \>> git.h]],
+                         [[cmd /c git log -n 1 | head -n 1 | sed "s/commit //">> git.h]],
+                         [[cmd /c echo #define GIT_STR_STR(x) #x>> git.h]],
+                         [[cmd /c echo #define GIT_STR(x) GIT_STR_STR(x)>> git.h]],
+                         [[cmd /c echo #define GIT_MODIFIED_STR GIT_STR(GIT_MODIFIED)>> git.h]],
+                         [[cmd /c echo #define GIT_REVISION_STR GIT_STR(GIT_REVISION)>> git.h]],
+                         [[cmd /c echo #endif >>git.h]] }
+    else
+      if _ACTION == "gmake" then
         prebuildcommands { [[$(shell echo "#ifndef GIT_H" > git.h)]],
                            [[$(shell echo "#define GIT_MODIFIED $$(git status | grep -c modified)" >> git.h)]],
                            [[$(shell echo "#define GIT_MODIFIED_STR \"$$(git status | grep -c modified)\"" >> git.h)]],
-                           [[$(shell echo "#define GIT_REVISION \"$$(git log -n 1 | head -n 1 | sed 's/commit //')\"" >> git.h)]],
+                           [[$(shell echo "#define GIT_REVISION_STR \"$$(git log -n 1 | head -n 1 | sed 's/commit //')\"" >> git.h)]],
                            [[$(shell echo "#endif" >> git.h)]] }
-    else
+      elseif _ACTION == "codeblocks" then
         prebuildcommands { [[echo "#ifndef GIT_H" > git.h]],
                            [[echo "#define GIT_MODIFIED $$(git status | grep -c modified)" >> git.h]],
                            [[echo "#define GIT_MODIFIED_STR \\\"$$(git status | grep -c modified)\\\"" >> git.h]],
-                           [[echo "#define GIT_REVISION \\\"$$(git log -n 1 | head -n 1 | sed \'s/commit \/\/\')\\\"" >> git.h]],
+                           [[echo "#define GIT_REVISION_STR \\\"$$(git log -n 1 | head -n 1 | sed \'s/commit \/\/\')\\\"" >> git.h]],
                            [[echo "#endif" >> git.h]] }
+      end
     end
 
   if _ACTION == "gmake" then
