@@ -56,7 +56,7 @@ namespace Zeni {
     /// return a memory block to be cached (and eventually freed)
     void give(void * const &ptr_) throw() {
 #ifndef NDEBUG
-      for(char * pp = reinterpret_cast<char *>(ptr_), * pend = pp + size_of(ptr_); pp != pend; ++pp) {
+      for(unsigned char * pp = reinterpret_cast<unsigned char *>(ptr_), * pend = pp + size_of(ptr_); pp != pend; ++pp) {
         *pp = 0xEF;
         if(++pp == pend)
           break;
