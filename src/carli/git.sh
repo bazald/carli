@@ -1,7 +1,10 @@
+#!/bin/bash
+
 echo "#ifndef GIT_H" > git.h~ || exit 1
-echo "#define GIT_MODIFIED \\\\" >> git.h~ || exit 2
-git status | grep -c modified >> git.h~ || exit 3
-echo "#define GIT_REVISION \\\\" >> git.h~ || exit 4 
+echo "#define GIT_MODIFIED \\" >> git.h~ || exit 2
+git status | grep -c modified >> git.h~
+if [ $? -ne 0 ]; then exit 3; fi
+echo "#define GIT_REVISION \\" >> git.h~ || exit 4 
 git log -n 1 | head -n 1 | sed 's/commit //' >> git.h~ || exit 5
 echo "#define GIT_STR_STR(x) #x" >> git.h~ || exit 6
 echo "#define GIT_STR(x) GIT_STR_STR(x)" >> git.h~ || exit 7
