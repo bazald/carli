@@ -23,7 +23,7 @@ solution "carli"
   include "src/carli"
 
   configuration "Debug*"
-    defines { "_DEBUG", "DEBUG" }    
+    defines { "_DEBUG", "DEBUG" }
     flags { "Symbols" }
     targetsuffix "_d"
   configuration "Release*"
@@ -43,7 +43,7 @@ solution "carli"
                          [[cmd /c echo #define GIT_MODIFIED \>> git.h]],
                          [[cmd /c git status | grep -c modified >> git.h]],
                          [[cmd /c echo #define GIT_REVISION \>> git.h]],
-                         [[cmd /c git log -n 1 | head -n 1 | sed "s/commit //">> git.h]],
+                         [[cmd /c git log -n 1 | head -n 1 | sed "s/commit //" >> git.h]],
                          [[cmd /c echo #define GIT_STR_STR(x) #x>> git.h]],
                          [[cmd /c echo #define GIT_STR(x) GIT_STR_STR(x)>> git.h]],
                          [[cmd /c echo #define GIT_MODIFIED_STR GIT_STR(GIT_MODIFIED)>> git.h]],
