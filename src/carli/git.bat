@@ -4,8 +4,11 @@ echo #ifndef GIT_H>git.h~
 if ERRORLEVEL 1 exit /B 1
 echo #define GIT_MODIFIED \>>git.h~
 if ERRORLEVEL 1 exit /B 2
+
 "C:\Program Files (x86)\Git\bin\git.exe" status | grep -c modified>>git.h~
 REM if ERRORLEVEL 1 exit /B 3
+ver > nul
+
 echo #define GIT_REVISION \>>git.h~
 if ERRORLEVEL 1 exit /B 4
 "C:\Program Files (x86)\Git\bin\git.exe" log -n 1 | head -n 1 | sed "s/commit //">>git.h~
