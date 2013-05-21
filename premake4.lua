@@ -51,27 +51,29 @@ solution "carli"
                          [[cmd /c echo #endif >>git.h]] }
     else
       if _ACTION == "gmake" then
-        prebuildcommands { [[$(shell echo "#ifndef GIT_H" > git.h)]],
-                           [[$(shell echo "#define GIT_MODIFIED \\\\" >>git.h)]],
-                           [[$(shell git status | grep -c modified >> git.h)]],
-                           [[$(shell echo "#define GIT_REVISION \\\\" >> git.h)]],
-                           [[$(shell git log -n 1 | head -n 1 | sed 's/commit //' >> git.h)]],
-                           [[$(shell echo "#define GIT_STR_STR(x) #x" >> git.h)]],
-                           [[$(shell echo "#define GIT_STR(x) GIT_STR_STR(x)" >> git.h)]],
-                           [[$(shell echo "#define GIT_MODIFIED_STR GIT_STR(GIT_MODIFIED)" >> git.h)]],
-                           [[$(shell echo "#define GIT_REVISION_STR GIT_STR(GIT_REVISION)" >> git.h)]],
-                           [[$(shell echo "#endif" >> git.h)]] }
+        prebuildcommands { [[$(shell echo "#ifndef GIT_H" > git.h~)]],
+                           [[$(shell echo "#define GIT_MODIFIED \\\\" >>git.h~)]],
+                           [[$(shell git status | grep -c modified >> git.h~)]],
+                           [[$(shell echo "#define GIT_REVISION \\\\" >> git.h~)]],
+                           [[$(shell git log -n 1 | head -n 1 | sed 's/commit //' >> git.h~)]],
+                           [[$(shell echo "#define GIT_STR_STR(x) #x" >> git.h~)]],
+                           [[$(shell echo "#define GIT_STR(x) GIT_STR_STR(x)" >> git.h~)]],
+                           [[$(shell echo "#define GIT_MODIFIED_STR GIT_STR(GIT_MODIFIED)" >> git.h~)]],
+                           [[$(shell echo "#define GIT_REVISION_STR GIT_STR(GIT_REVISION)" >> git.h~)]],
+                           [[$(shell echo "#endif" >> git.h~)]],
+                           [[$(shell bash -c 'diff git.h git.h~ > /dev/null; if [ $$? -ne 0 ]; then cp git.h~ git.h; fi')]]}
       elseif _ACTION == "codeblocks" then
-        prebuildcommands { [[echo "#ifndef GIT_H" > git.h]],
-                           [[echo "#define GIT_MODIFIED \\\\" >>git.h]],
-                           [[git status | grep -c modified >> git.h]],
-                           [[echo "#define GIT_REVISION \\\\" >> git.h]],
-                           [[git log -n 1 | head -n 1 | sed \'s\/commit \/\/\' >> git.h]],
-                           [[echo "#define GIT_STR_STR(x) #x" >> git.h]],
-                           [[echo "#define GIT_STR(x) GIT_STR_STR(x)" >> git.h]],
-                           [[echo "#define GIT_MODIFIED_STR GIT_STR(GIT_MODIFIED)" >> git.h]],
-                           [[echo "#define GIT_REVISION_STR GIT_STR(GIT_REVISION)" >> git.h]],
-                           [[echo "#endif" >> git.h]] }
+        prebuildcommands { [[echo "#ifndef GIT_H" > git.h~]],
+                           [[echo "#define GIT_MODIFIED \\\\" >>git.h~]],
+                           [[git status | grep -c modified >> git.h~]],
+                           [[echo "#define GIT_REVISION \\\\" >> git.h~]],
+                           [[git log -n 1 | head -n 1 | sed \'s/commit //\' >> git.h~]],
+                           [[echo "#define GIT_STR_STR(x) #x" >> git.h~]],
+                           [[echo "#define GIT_STR(x) GIT_STR_STR(x)" >> git.h~]],
+                           [[echo "#define GIT_MODIFIED_STR GIT_STR(GIT_MODIFIED)" >> git.h~]],
+                           [[echo "#define GIT_REVISION_STR GIT_STR(GIT_REVISION)" >> git.h~]],
+                           [[echo "#endif" >> git.h~]],
+                           [[bash -c \'diff git.h git.h~ > /dev/null; if [ $$? -ne 0 ]; then cp git.h~ git.h; fi\']]}
       end
     end
 
