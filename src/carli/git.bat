@@ -5,7 +5,7 @@ if ERRORLEVEL 1 exit /B 1
 echo #define GIT_MODIFIED \>>git.h~
 if ERRORLEVEL 1 exit /B 2
 "C:\Program Files (x86)\Git\bin\git.exe" status | grep -c modified>>git.h~
-if ERRORLEVEL 1 exit /B 3
+REM if ERRORLEVEL 1 exit /B 3
 echo #define GIT_REVISION \>>git.h~
 if ERRORLEVEL 1 exit /B 4
 "C:\Program Files (x86)\Git\bin\git.exe" log -n 1 | head -n 1 | sed "s/commit //">>git.h~
@@ -20,5 +20,5 @@ echo #define GIT_REVISION_STR GIT_STR(GIT_REVISION)>>git.h~
 if ERRORLEVEL 1 exit /B 9
 echo #endif>>git.h~
 if ERRORLEVEL 1 exit /B 10
-diff git.h git.h~||cp git.h~ git.h
+diff git.h git.h~ > nul || cp git.h~ git.h
 if ERRORLEVEL 1 exit /B 11
