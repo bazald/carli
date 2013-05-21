@@ -4,5 +4,10 @@ project "carli"
 
   targetdir "../.."
 
-  configuration "*"
-    files { "**.h", "**.cpp" }
+  files { "**.h", "**.cpp" }
+
+  if os.get() == "windows" then
+    prebuildcommands { [[git.bat]] }
+  else
+    prebuildcommands { [[./git.sh]] }
+  end
