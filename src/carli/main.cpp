@@ -10,7 +10,6 @@
 #include "puddle_world.h"
 #include "experimental_output.h"
 #include "getopt.h"
-#include "git.h"
 
 #include <cstring>
 #include <ctime>
@@ -24,6 +23,11 @@ using std::dynamic_pointer_cast;
 using std::endl;
 using std::runtime_error;
 using std::vector;
+
+/// From git.cpp
+int git_modified();
+std::string git_modified_string();
+std::string git_revision_string();
 
 template <typename ENVIRONMENT, typename AGENT>
 void run_agent();
@@ -45,10 +49,10 @@ int main2(int argc, char **argv) {
 
   Options &options = Options::get_global();
 
-  if(GIT_MODIFIED)
-    options.add_line("\n  Built from revision " GIT_REVISION_STR " (" GIT_MODIFIED_STR " modified files) on " __DATE__ " at " __TIME__ ".");
+  if(git_modified())
+    options.add_line(std::string("\n  Built from revision ") + git_revision_string() + " (" + git_modified_string() + " modified files) on " __DATE__ " at " __TIME__ ".");
   else
-    options.add_line("\n  Built from revision " GIT_REVISION_STR " (clean) on " __DATE__ " at " __TIME__ ".");
+    options.add_line(std::string("\n  Built from revision ") + git_revision_string() + " (clean) on " __DATE__ " at " __TIME__ ".");
   options.add_line("\n  Print Help:");
   options.add('h', std::make_shared<Option_Function>("help", 0, [&options](const Option::Arguments &){
     options.print_help(cout);

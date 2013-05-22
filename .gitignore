@@ -6,6 +6,7 @@
 *.bbl
 *.blg
 *.cache
+*.cbTemp
 *.d
 *.depend
 *.dvi
