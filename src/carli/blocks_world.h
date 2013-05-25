@@ -189,7 +189,7 @@ namespace Blocks_World {
       if(src->empty())
         m_blocks.erase(src);
 
-      return reward_type(-1);
+      return -1.0;
     }
 
     void print_impl(ostream &os) const {

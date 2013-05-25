@@ -6,6 +6,7 @@
 #include "linked_list.h"
 
 #include <cfloat>
+#include <limits>
 
 class Q_Value;
 class Q_Value : public Zeni::Pool_Allocator<Q_Value> {
@@ -31,8 +32,8 @@ public:
     return *this;
   }
 
-  size_t last_episode_fired = size_t(-1);
-  size_t last_step_fired = size_t(-1);
+  size_t last_episode_fired = std::numeric_limits<size_t>::max();
+  size_t last_step_fired = std::numeric_limits<size_t>::max();
   size_t pseudoepisode_count = 0;
 
   size_t update_count = 1;
@@ -42,7 +43,7 @@ public:
   bool eligibility_init = false;
   double eligibility = -1.0;
   double credit = 1.0;
-  double weight = 0.0;
+  double weight = 1.0;
 
   double value;
   Value cabe; ///< Cumulative Absolute Bellman Error

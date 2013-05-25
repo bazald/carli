@@ -69,7 +69,9 @@ public:
       m_credit_assignment_code == "epsilon-even-depth" ?
         [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);} :
       std::function<void (Q_Value::List * const &)>()
-    ),
+    )
+#ifdef ENABLE_WEIGHT
+     ,
     m_weight_assignment(
       m_weight_assignment_code == "all" ?
         [this](Q_Value::List * const &value_list){return this->assign_credit_all(value_list);} :
@@ -91,6 +93,7 @@ public:
         [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);} :
       std::function<void (Q_Value::List * const &)>()
     )
+#endif
   {
   }
 
@@ -115,7 +118,9 @@ public:
   double get_credit_assignment_log_base() const {return m_credit_assignment_log_base;}
   double get_credit_assignment_root() const {return m_credit_assignment_root;}
   bool is_credit_assignment_normalize() const {return m_credit_assignment_normalize;}
+#ifdef ENABLE_WEIGHT
   Credit_Assignment get_weight_assignment() const {return m_weight_assignment_code;}
+#endif
   bool is_on_policy() const {return m_on_policy;}
   double get_epsilon() const {return m_epsilon;}
   size_t get_split_min() const {return m_split_min;}
@@ -272,7 +277,11 @@ protected:
     if(!features)
       return nullptr;
 
+#ifdef ENABLE_WEIGHT
     const bool use_value = m_weight_assignment_code != "all";
+#else
+    const bool use_value = false;
+#endif
 
     for(;;) {
       try {
@@ -295,7 +304,9 @@ protected:
 
         Q_Value * const rv = get_value_from_function(head, get_trie(action), offset, depth, use_value)->get();
 
+#ifdef ENABLE_WEIGHT
         assign_weight(Zeni::value_to_Linked_List(rv, offset));
+#endif
 
         return rv;
       }
@@ -422,7 +433,11 @@ protected:
     double q_new = 0.0;
 #endif
     const double delta = target_value - q_old;
+#ifdef ENABLE_WEIGHT
     const bool weight_assignment_all = m_weight_assignment_code == "all";
+#else
+    const bool weight_assignment_all = true;
+#endif
     for(Q_Value::List * q_ptr = m_eligible; q_ptr; ) {
       Q_Value &q = **q_ptr;
       q_ptr = q.eligible.next();
@@ -523,12 +538,14 @@ protected:
     m_eligible = nullptr;
   }
 
+#ifdef ENABLE_WEIGHT
   void assign_weight(Q_Value::List * const &value_list) {
     m_weight_assignment(value_list);
 
     for(Q_Value &q : *value_list)
       q.weight = q.type == Q_Value::Type::FRINGE ? 0.0 : q.credit;
   }
+#endif
 
   void assign_credit_epsilon(Q_Value::List * const &value_list,
                              void (Agent::*exploration)(Q_Value::List * const &),
@@ -1043,8 +1060,10 @@ private:
   const double m_credit_assignment_root_value = 1.0 / m_credit_assignment_root;
   const bool m_credit_assignment_normalize = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["credit-assignment-normalize"]).get_value();
 
+#ifdef ENABLE_WEIGHT
   const std::string m_weight_assignment_code = dynamic_cast<const Option_Itemized &>(Options::get_global()["weight-assignment"]).get_value();
   const std::function<void (Q_Value::List * const &)> m_weight_assignment; ///< How to assign weight to multiple Q-values at summation time
+#endif
 
   const bool m_on_policy = dynamic_cast<const Option_Itemized &>(Options::get_global()["policy"]).get_value() == "on-policy"; ///< for Sarsa/Q-learning selection
   const double m_epsilon = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["epsilon-greedy"]).get_value(); ///< for epsilon-greedy decision-making

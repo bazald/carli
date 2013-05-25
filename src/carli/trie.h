@@ -3,6 +3,8 @@
 
 #include "map.h"
 #include "memory_pool.h"
+
+#include <limits>
 #include <utility>
 
 namespace Zeni {
@@ -89,7 +91,7 @@ namespace Zeni {
      *  If an offset is specified, return a pointer to the most general match with a value first,
      *    and treat the value+offset as a Linked_List, stringing together general-to-specific values.
      */
-    trie_pointer_type insert(trie_pointer_type &ptr, const size_t &offset = size_t(-1)) {
+    trie_pointer_type insert(trie_pointer_type &ptr, const ptrdiff_t &offset = std::numeric_limits<ptrdiff_t>::max()) {
       const trie_pointer_type next_ = list_next();
       list_erase();
 
@@ -101,7 +103,7 @@ namespace Zeni {
     }
 
     template <typename DEPTH_TEST, typename TERMINAL_TEST, typename GENERATE_FRINGE, typename COLLAPSE_FRINGE>
-    trie_pointer_type insert(trie_pointer_type &ptr, const bool &null_q_values, const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const size_t &offset, const size_t &depth, const double &value, const bool &use_value, size_t &value_count) {
+    trie_pointer_type insert(trie_pointer_type &ptr, const bool &null_q_values, const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const ptrdiff_t &offset, const size_t &depth, const double &value, const bool &use_value, size_t &value_count) {
       const trie_pointer_type next_ = list_next();
       list_erase();
 
@@ -185,8 +187,8 @@ namespace Zeni {
     const trie_value_type * get_deeper() const {return m_deeper;}
     trie_pointer_type & get_deeper() {return m_deeper;}
 
-    trie_pointer_type offset_insert_before(const size_t &offset, const trie_pointer_type &rhs_) {
-      const bool rhs_check = rhs_ && rhs_->m_value && offset != size_t(-1);
+    trie_pointer_type offset_insert_before(const ptrdiff_t &offset, const trie_pointer_type &rhs_) {
+      const bool rhs_check = rhs_ && rhs_->m_value && offset != std::numeric_limits<ptrdiff_t>::max();
       if(m_value) {
         if(rhs_check) {
           auto lhs = value_to_Linked_List(m_value, offset);
@@ -203,16 +205,16 @@ namespace Zeni {
         return rhs_check ? rhs_ : nullptr;
     }
 
-    void offset_erase(const size_t &offset) {
-      if(m_value && offset != size_t(-1)) {
+    void offset_erase(const ptrdiff_t &offset) {
+      if(m_value && offset != std::numeric_limits<ptrdiff_t>::max()) {
         auto lhs = value_to_Linked_List(m_value, offset);
         assert(lhs->offset() == offset);
         lhs->erase();
       }
     }
 
-    void offset_erase_hard(const size_t &offset) {
-      if(m_value && offset != size_t(-1)) {
+    void offset_erase_hard(const ptrdiff_t &offset) {
+      if(m_value && offset != std::numeric_limits<ptrdiff_t>::max()) {
         auto lhs = value_to_Linked_List(m_value, offset);
         assert(lhs->offset() == offset);
         lhs->erase_hard();
@@ -220,7 +222,7 @@ namespace Zeni {
     }
 
   private:
-    trie_pointer_type finish_insert(const trie_pointer_type &next, const size_t &offset) {
+    trie_pointer_type finish_insert(const trie_pointer_type &next, const ptrdiff_t &offset) {
       offset_erase_hard(offset);
 
       if(next) {
@@ -235,7 +237,7 @@ namespace Zeni {
     }
 
     template <typename DEPTH_TEST, typename TERMINAL_TEST, typename GENERATE_FRINGE, typename COLLAPSE_FRINGE>
-    trie_pointer_type finish_insert(const bool &null_q_values, const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const size_t &offset, const size_t &depth, const double &value, const bool &use_value, size_t &value_count, const bool &force, const trie_pointer_type &next) {
+    trie_pointer_type finish_insert(const bool &null_q_values, const DEPTH_TEST &depth_test, const TERMINAL_TEST &terminal_test, const GENERATE_FRINGE &generate_fringe, const COLLAPSE_FRINGE &collapse_fringe, const ptrdiff_t &offset, const size_t &depth, const double &value, const bool &use_value, size_t &value_count, const bool &force, const trie_pointer_type &next) {
       offset_erase_hard(offset);
 
       if(!null_q_values && !m_value) {

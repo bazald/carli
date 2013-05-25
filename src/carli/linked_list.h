@@ -2,6 +2,7 @@
 #define ZENI_LINKED_LIST_H
 
 #include <cassert>
+#include <cstddef>
 #include <algorithm>
 #include <functional>
 
@@ -11,10 +12,10 @@ namespace Zeni {
   class Linked_List;
 
   template <typename TYPE>
-  Linked_List<const TYPE> * value_to_Linked_List(const TYPE * const type, const size_t &offset);
+  Linked_List<const TYPE> * value_to_Linked_List(const TYPE * const type, const ptrdiff_t &offset);
 
   template <typename TYPE>
-  Linked_List<TYPE> * value_to_Linked_List(TYPE * const type, const size_t &offset);
+  Linked_List<TYPE> * value_to_Linked_List(TYPE * const type, const ptrdiff_t &offset);
 
   template <typename TYPE>
   class Linked_List {
@@ -36,7 +37,7 @@ namespace Zeni {
       typedef TYPE * pointer;
       typedef TYPE & reference;
 
-      iterator(const size_t &m_offset_ = 0lu)
+      iterator(const ptrdiff_t &m_offset_ = 0lu)
         : m_offset(m_offset_),
         m_pointer(nullptr)
       {
@@ -115,7 +116,7 @@ namespace Zeni {
       }
 
     private:
-      size_t m_offset;
+      ptrdiff_t m_offset;
       list_pointer_type m_pointer;
     };
 
@@ -128,7 +129,7 @@ namespace Zeni {
       typedef const value_type & value_reference_type;
       typedef const list_value_type * list_pointer_type;
 
-      iterator_const(const size_t &m_offset_ = 0lu)
+      iterator_const(const ptrdiff_t &m_offset_ = 0lu)
         : m_offset(m_offset_),
         m_pointer(nullptr)
       {
@@ -219,7 +220,7 @@ namespace Zeni {
       }
 
     private:
-      size_t m_offset;
+      ptrdiff_t m_offset;
       list_pointer_type m_pointer;
     };
 
@@ -247,7 +248,7 @@ namespace Zeni {
       return get();
     }
 
-    size_t offset() const {
+    ptrdiff_t offset() const {
       return m_offset;
     }
     Linked_List * prev() const {
@@ -491,18 +492,18 @@ namespace Zeni {
     }
 
   private:
-    size_t m_offset;
+    ptrdiff_t m_offset;
     list_pointer_type m_prev;
     list_pointer_type m_next;
   };
 
   template <typename TYPE>
-  Linked_List<const TYPE> * value_to_Linked_List(const TYPE * const type, const size_t &offset) {
+  Linked_List<const TYPE> * value_to_Linked_List(const TYPE * const type, const ptrdiff_t &offset) {
     return type ? reinterpret_cast<Linked_List<const TYPE> *>(reinterpret_cast<char *>(type) + offset) : nullptr;
   }
 
   template <typename TYPE>
-  Linked_List<TYPE> * value_to_Linked_List(TYPE * const type, const size_t &offset) {
+  Linked_List<TYPE> * value_to_Linked_List(TYPE * const type, const ptrdiff_t &offset) {
     return type ? reinterpret_cast<Linked_List<TYPE> *>(reinterpret_cast<char *>(type) + offset) : nullptr;
   }
 

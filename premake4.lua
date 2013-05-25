@@ -1,8 +1,8 @@
 solution "carli"
   if _ACTION == "gmake" then
-    configurations { "Debug", "Release", "Debug_Clang", "Release_Clang" }
+    configurations { "Debug", "Profiling", "Release", "Debug_Clang", "Profiling_Clang", "Release_Clang" }
   else
-    configurations { "Debug", "Release" }
+    configurations { "Debug", "Profiling", "Release" }
   end
 
   if os.get() == "windows" then
@@ -26,6 +26,10 @@ solution "carli"
     defines { "_DEBUG", "DEBUG" }
     flags { "Symbols" }
     targetsuffix "_d"
+  configuration "Profiling*"
+    defines { "NDEBUG" }
+    flags { "Symbols" }
+    targetsuffix "_p"
   configuration "Release*"
     defines { "NDEBUG" }
     flags { "Optimize" }
@@ -39,6 +43,8 @@ solution "carli"
 
   if _ACTION == "gmake" then
     configuration { "linux", "Debug*" }
+      links { "tcmalloc" }
+    configuration { "linux", "Profiling*" }
       links { "tcmalloc_and_profiler" }
     configuration { "linux", "*clang" }
       buildoptions { "-stdlib=libc++", "-Qunused-arguments" }

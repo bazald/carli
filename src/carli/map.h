@@ -2,6 +2,7 @@
 #define ZENI_MAP_H
 
 #include "linked_list.h"
+
 #include <stdexcept>
 
 namespace Zeni {
@@ -26,7 +27,7 @@ namespace Zeni {
     value_reference_type operator*() {return list_value_type::operator*();}
     value_pointer_type operator->() const {return list_value_type::operator->();}
     value_pointer_type operator->() {return list_value_type::operator->();}
-    size_t offset() const {return list_value_type::offset();}
+    ptrdiff_t offset() const {return list_value_type::offset();}
 
     map_pointer_type list_prev() const {
       return static_cast<map_pointer_type>(list_value_type::prev());
@@ -63,7 +64,7 @@ namespace Zeni {
       typedef TYPE * pointer;
       typedef TYPE & reference;
 
-      iterator(const size_t &m_offset_ = 0lu)
+      iterator(const ptrdiff_t &m_offset_ = 0lu)
         : m_offset(m_offset_),
         m_pointer(nullptr)
       {
@@ -138,7 +139,7 @@ namespace Zeni {
       }
 
     private:
-      size_t m_offset;
+      ptrdiff_t m_offset;
       map_pointer_type m_pointer;
     };
 
@@ -151,7 +152,7 @@ namespace Zeni {
       typedef const value_type & value_reference_type;
       typedef const map_value_type * map_pointer_type;
 
-      iterator_const(const size_t &m_offset_ = 0lu)
+      iterator_const(const ptrdiff_t &m_offset_ = 0lu)
         : m_offset(m_offset_),
         m_pointer(nullptr)
       {
@@ -238,7 +239,7 @@ namespace Zeni {
       }
 
     private:
-      size_t m_offset;
+      ptrdiff_t m_offset;
       map_pointer_type m_pointer;
     };
 
