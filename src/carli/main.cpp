@@ -46,19 +46,26 @@ int main2(int argc, char **argv) {
 
   Zeni::register_new_handler();
 
+  std::string version_str;
+  if(git_modified())
+    version_str = std::string("Built from revision ") + git_revision_string() + " (" + git_modified_string() + " modified files) on " __DATE__ " at " __TIME__ ".";
+  else
+    version_str = std::string("Built from revision ") + git_revision_string() + " (clean) on " __DATE__ " at " __TIME__ ".";
+
   /// Handle arguments
 
   Options &options = Options::get_global();
 
-  if(git_modified())
-    options.add_line(std::string("\n  Built from revision ") + git_revision_string() + " (" + git_modified_string() + " modified files) on " __DATE__ " at " __TIME__ ".");
-  else
-    options.add_line(std::string("\n  Built from revision ") + git_revision_string() + " (clean) on " __DATE__ " at " __TIME__ ".");
-  options.add_line("\n  Print Help:");
+  options.add_line("\n  " + version_str);
+  options.add_line("\n  Print Information:");
   options.add('h', std::make_shared<Option_Function>("help", 0, [&options](const Option::Arguments &){
     options.print_help(cout);
     cout << endl;
     options.print(cout);
+    exit(0);
+  }), "");
+  options.add('v', std::make_shared<Option_Function>("version", 0, [&version_str](const Option::Arguments &){
+    cout << version_str << endl;
     exit(0);
   }), "");
   options.add_line("\n  Experiment Options:");
