@@ -33,6 +33,8 @@ solution "carli"
   configuration "Release*"
     defines { "NDEBUG" }
     flags { "Optimize" }
+--    buildoptions { "-flto" }
+--    linkoptions { "-flto" }
 
   configuration "windows"
     flags { "StaticRuntime" }
