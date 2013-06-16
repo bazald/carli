@@ -729,16 +729,16 @@ protected:
 #endif
 
   template <typename ENVIRONMENT>
-  bool generate_feature_ranged(const std::shared_ptr<const ENVIRONMENT> &env, feature_trie &trie, const typename FEATURE::List * const &tail, typename FEATURE::List * &tail_next) {
+  bool generate_feature_ranged(const std::shared_ptr<const ENVIRONMENT> &env, feature_trie &trie, const typename FEATURE::List * const &tail, typename FEATURE::List * &tail_next, const double &midpt_) {
     auto match = trie->find(**tail);
 
     if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
       const auto &feature = match->get_key();
-      const auto midpt = feature->midpt();
+      const auto midpt = feature->midpt;
       if(env->get_value(feature->axis) < midpt)
-        tail_next = &(new FEATURE(typename FEATURE::Axis(feature->axis), feature->bound_lower, midpt, feature->depth + 1))->features;
+        tail_next = &(new FEATURE(typename FEATURE::Axis(feature->axis), feature->bound_lower, midpt, feature->depth + 1, midpt_))->features;
       else
-        tail_next = &(new FEATURE(typename FEATURE::Axis(feature->axis), midpt, feature->bound_higher, feature->depth + 1))->features;
+        tail_next = &(new FEATURE(typename FEATURE::Axis(feature->axis), midpt, feature->bound_higher, feature->depth + 1, midpt_))->features;
       tail_next = tail_next->template insert_in_order<typename FEATURE::List::compare_default>(m_features, false);
       trie = match->get_deeper();
       return true;
@@ -884,9 +884,14 @@ private:
     if(match) {
       assert(found->get()->type != Q_Value::Type::FRINGE);
 
+      const feature_trie inserted = match;
+      const auto ranged = dynamic_cast<Feature_Ranged_Data *>(inserted->get());
+      size_t inserted_midpt;
+      if(ranged)
+        inserted_midpt = ranged->midpt;
+
       feature_trie next = static_cast<feature_trie>(head == match ? head->next() : head);
       match->list_erase();
-      feature_trie inserted = match;
       match = match->map_insert_into_unique(function);
       if(!m_null_q_values && !match->get()) {
         match->get() = new Q_Value(use_value ? value : 0.0);

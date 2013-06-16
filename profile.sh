@@ -1,7 +1,7 @@
 #!/bin/bash
 
-make config=profiling clean
-make config=profiling
+make config=profiling_clang clean
+make config=profiling_clang
 
 RV=$?
 if [ $RV -ne 0 ]; then

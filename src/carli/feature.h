@@ -132,6 +132,9 @@ public:
 
 template <typename DERIVED, typename DERIVED2 = DERIVED>
 class Feature_Present : public Feature<DERIVED, DERIVED2> {
+  Feature_Present(const Feature_Present &) = delete;
+  Feature_Present & operator=(const Feature_Present &) = delete;
+
 public:
   Feature_Present(const bool &present_)
    : present(present_)
@@ -145,19 +148,21 @@ public:
   bool present;
 };
 
-template <typename DERIVED, typename DERIVED2 = DERIVED>
-class Feature_Ranged : public Feature<DERIVED, DERIVED2> {
+class Feature_Ranged_Data {
 public:
-  Feature_Ranged(const Feature_Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_)
-   : ::Feature<DERIVED, DERIVED2>(),
-   axis(axis_),
+  Feature_Ranged_Data(const Feature_Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_, const double &midpt_, const size_t &midpt_update_count_ = 1u)
+   : axis(axis_),
    bound_lower(bound_lower_),
    bound_higher(bound_higher_),
-   depth(depth_)
+   midpt(midpt_),
+   depth(depth_),
+   midpt_update_count(midpt_update_count_)
   {
+    assert(bound_lower <= midpt && midpt <= bound_higher);
+    midpt = (bound_lower + bound_higher) / 2.0;
   }
 
-  int compare(const DERIVED &rhs) const {
+  int compare(const Feature_Ranged_Data &rhs) const {
     return depth != rhs.depth ? depth - rhs.depth :
            axis != rhs.axis ? axis - rhs.axis :
            bound_lower < rhs.bound_lower ? -1 : bound_lower > rhs.bound_lower ? 1 :
@@ -165,33 +170,21 @@ public:
            0;
   }
 
-  int compare_axis(const DERIVED &rhs) const {
+  int compare_axis(const Feature_Ranged_Data &rhs) const {
     return axis - rhs.axis;
   }
 
-  int compare_predecessor(const DERIVED &rhs) const {
+  int compare_predecessor(const Feature_Ranged_Data &rhs) const {
     return axis != rhs.axis ? axis - rhs.axis :
            depth + 1 == rhs.depth || depth - 1 == rhs.depth ? 0 :
            depth < rhs.depth ? -1 : 1;
   }
 
-  int compare_value(const DERIVED &rhs) const {
+  int compare_value(const Feature_Ranged_Data &rhs) const {
     return depth != rhs.depth ? depth - rhs.depth :
            bound_lower < rhs.bound_lower ? -1 : bound_lower > rhs.bound_lower ? 1 :
            bound_higher < rhs.bound_higher ? -1 : bound_higher > rhs.bound_higher ? 1 :
            0;
-  }
-
-  bool refinable() const {
-    return true;
-  }
-
-  double midpt() const {
-    return (bound_lower + bound_higher) / 2.0;
-  }
-
-  Feature_Ranged * clone() const {
-    return new Feature_Ranged(this->axis, bound_lower, bound_higher, depth);
   }
 
   void print(std::ostream &os) const {
@@ -202,8 +195,51 @@ public:
 
   double bound_lower; ///< inclusive
   double bound_higher; ///< exclusive
+  double midpt; ///< A point in (bound_lower, bound_higher)
 
   size_t depth; ///< 0 indicates unsplit
+  size_t midpt_update_count; ///< Number of times the midpt has been modified
+};
+
+template <typename DERIVED, typename DERIVED2 = DERIVED>
+class Feature_Ranged : public Feature<DERIVED, DERIVED2>, public Feature_Ranged_Data {
+  Feature_Ranged(const Feature_Ranged &) = delete;
+  Feature_Ranged & operator=(const Feature_Ranged &) = delete;
+
+public:
+  Feature_Ranged(const Feature_Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_, const double &midpt_, const size_t &midpt_update_count_ = 1u)
+   : ::Feature<DERIVED, DERIVED2>(),
+   Feature_Ranged_Data(axis_, bound_lower_, bound_higher_, depth_, midpt_, midpt_update_count_)
+  {
+  }
+
+  int compare(const DERIVED &rhs) const {
+    return Feature_Ranged_Data::compare(rhs);
+  }
+
+  int compare_axis(const DERIVED &rhs) const {
+    return Feature_Ranged_Data::compare_axis(rhs);
+  }
+
+  int compare_predecessor(const DERIVED &rhs) const {
+    return Feature_Ranged_Data::compare_predecessor(rhs);
+  }
+
+  int compare_value(const DERIVED &rhs) const {
+    return Feature_Ranged_Data::compare_value(rhs);
+  }
+
+  bool refinable() const {
+    return true;
+  }
+
+  Feature_Ranged * clone() const {
+    return new Feature_Ranged(axis, bound_lower, bound_higher, depth, midpt, midpt_update_count);
+  }
+
+  void print(std::ostream &os) const {
+    Feature_Ranged_Data::print(os);
+  }
 };
 
 #endif

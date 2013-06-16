@@ -27,13 +27,13 @@ namespace Puddle_World {
   public:
     enum Axis : int {X, Y};
 
-    Feature(const Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_)
-     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_higher_, depth_)
+    Feature(const Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_, const double &midpt_, const size_t &midpt_update_count_ = 1u)
+     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_higher_, depth_, midpt_, midpt_update_count_)
     {
     }
 
     Feature * clone() const {
-      return new Feature(Axis(this->axis), this->bound_lower, this->bound_higher, this->depth);
+      return new Feature(Axis(this->axis), this->bound_lower, this->bound_higher, this->depth, this->midpt, this->midpt_update_count);
     }
 
     void print(ostream &os) const {
@@ -330,9 +330,9 @@ namespace Puddle_World {
 
       assert(!m_features);
 
-      Feature::List * x_tail = &(new Feature(Feature::X, 0.0, 1.0, 0))->features;
+      Feature::List * x_tail = &(new Feature(Feature::X, 0.0, 1.0, 0, env->get_position().first))->features;
       x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-      Feature::List * y_tail = &(new Feature(Feature::Y, 0.0, 1.0, 0))->features;
+      Feature::List * y_tail = &(new Feature(Feature::Y, 0.0, 1.0, 0, env->get_position().second))->features;
       y_tail = y_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
 
       std::array<feature_trie, 4> tries = {{get_trie(Move(Move::NORTH)),
@@ -345,9 +345,9 @@ namespace Puddle_World {
         Feature::List * y_tail_next = nullptr;
 
         for(feature_trie &trie : tries) {
-          if(generate_feature_ranged(env, trie, x_tail, x_tail_next))
+          if(generate_feature_ranged(env, trie, x_tail, x_tail_next, env->get_position().first))
             continue;
-          if(generate_feature_ranged(env, trie, y_tail, y_tail_next))
+          if(generate_feature_ranged(env, trie, y_tail, y_tail_next, env->get_position().second))
             continue;
         }
 

@@ -26,13 +26,13 @@ namespace Cart_Pole {
   public:
     enum Axis : int {X, X_DOT, THETA, THETA_DOT};
 
-    Feature(const Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_)
-     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_higher_, depth_)
+    Feature(const Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_, const double &midpt_, const size_t &midpt_update_count_ = 1u)
+     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_higher_, depth_, midpt_, midpt_update_count_)
     {
     }
 
     Feature * clone() const {
-      return new Feature(Axis(this->axis), this->bound_lower, this->bound_higher, this->depth);
+      return new Feature(Axis(this->axis), this->bound_lower, this->bound_higher, this->depth, this->midpt, this->midpt_update_count);
     }
 
     void print(ostream &os) const {
@@ -230,14 +230,14 @@ namespace Cart_Pole {
       Feature::List * x_tail = nullptr;
       Feature::List * x_dot_tail = nullptr;
       if(!m_ignore_x) {
-        x_tail = &(new Feature(Feature::X, -env->get_max_x(), env->get_max_x(), 0))->features;
+        x_tail = &(new Feature(Feature::X, -env->get_max_x(), env->get_max_x(), 0, env->get_x()))->features;
         x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-        x_dot_tail = &(new Feature(Feature::X_DOT, -env->get_max_x_dot(), env->get_max_x_dot(), 0))->features;
+        x_dot_tail = &(new Feature(Feature::X_DOT, -env->get_max_x_dot(), env->get_max_x_dot(), 0, env->get_x_dot()))->features;
         x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
       }
-      Feature::List * theta_tail = &(new Feature(Feature::THETA, -env->get_max_theta(), env->get_max_theta(), 0))->features;
+      Feature::List * theta_tail = &(new Feature(Feature::THETA, -env->get_max_theta(), env->get_max_theta(), 0, env->get_theta()))->features;
       theta_tail = theta_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-      Feature::List * theta_dot_tail = &(new Feature(Feature::THETA_DOT, -env->get_max_theta_dot(), env->get_max_theta_dot(), 0))->features;
+      Feature::List * theta_dot_tail = &(new Feature(Feature::THETA_DOT, -env->get_max_theta_dot(), env->get_max_theta_dot(), 0, env->get_theta_dot()))->features;
       theta_dot_tail = theta_dot_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
 
       std::array<feature_trie, 2> tries = {{get_trie(Move(Move::LEFT)),
@@ -251,14 +251,14 @@ namespace Cart_Pole {
 
         for(feature_trie &trie : tries) {
           if(!m_ignore_x) {
-            if(generate_feature_ranged(env, trie, x_tail, x_tail_next))
+            if(generate_feature_ranged(env, trie, x_tail, x_tail_next, env->get_x()))
               continue;
-            if(generate_feature_ranged(env, trie, x_dot_tail, x_dot_tail_next))
+            if(generate_feature_ranged(env, trie, x_dot_tail, x_dot_tail_next, env->get_x_dot()))
               continue;
           }
-          if(generate_feature_ranged(env, trie, theta_tail, theta_tail_next))
+          if(generate_feature_ranged(env, trie, theta_tail, theta_tail_next, env->get_theta()))
             continue;
-          if(generate_feature_ranged(env, trie, theta_dot_tail, theta_dot_tail_next))
+          if(generate_feature_ranged(env, trie, theta_dot_tail, theta_dot_tail_next, env->get_theta_dot()))
             continue;
         }
 
