@@ -217,63 +217,60 @@ namespace Blocks_World {
     void generate_features() {
       auto env = dynamic_pointer_cast<const Environment>(get_env());
 
-      assert(!m_features);
+      for(const action_type &action_ : *m_candidates) {
+        auto &features = get_feature_list(action_);
+        assert(!features);
 
-      block_id place_counter = 3;
+        block_id place_counter = 3;
 
-      auto not_in_place = [this,&place_counter]() {
-        while(place_counter) {
-          feature_type * out_place = new In_Place(place_counter, false);
-          out_place->features.insert_in_order<feature_type::List::compare_default>(m_features);
-          --place_counter;
-        }
-      };
-      auto is_on_top = [this](const block_id &top, const block_id &bottom, const block_id &num_blocks) {
-        for(block_id non_bottom = 1; non_bottom <= num_blocks; ++non_bottom) {
-          if(top != non_bottom) {
-            feature_type * on_top = new On_Top(top, non_bottom, bottom == non_bottom);
-            on_top->features.insert_in_order<feature_type::List::compare_default>(m_features);
+        auto not_in_place = [&features,&place_counter]() {
+          while(place_counter) {
+            feature_type * out_place = new In_Place(place_counter, false);
+            out_place->features.insert_in_order<feature_type::List::compare_default>(features);
+            --place_counter;
+          }
+        };
+        auto is_on_top = [&features](const block_id &top, const block_id &bottom, const block_id &num_blocks) {
+          for(block_id non_bottom = 1; non_bottom <= num_blocks; ++non_bottom) {
+            if(top != non_bottom) {
+              feature_type * on_top = new On_Top(top, non_bottom, bottom == non_bottom);
+              on_top->features.insert_in_order<feature_type::List::compare_default>(features);
+            }
+          }
+        };
+
+        for(const Environment::Stack &stack : env->get_blocks()) {
+          auto it = stack.begin();
+          auto itn = ++stack.begin();
+          auto iend = stack.end();
+
+          while(itn != iend) {
+            is_on_top(*it, *itn, 3);
+
+            it = itn;
+            ++itn;
+          }
+
+          is_on_top(*it, 0, 3);
+
+          if(place_counter == *stack.rbegin()) {
+            std::find_if(stack.rbegin(), stack.rend(), [&features,&place_counter](const block_id &id)->bool{
+              if(place_counter != id)
+                return true;
+
+              feature_type * in_place = new In_Place(id, true);
+              in_place->features.insert_in_order<feature_type::List::compare_default>(features);
+              --place_counter;
+
+              return false;
+            });
+
+            not_in_place();
           }
         }
-      };
 
-      for(const Environment::Stack &stack : env->get_blocks()) {
-        auto it = stack.begin();
-        auto itn = ++stack.begin();
-        auto iend = stack.end();
-
-        while(itn != iend) {
-          is_on_top(*it, *itn, 3);
-
-          it = itn;
-          ++itn;
-        }
-
-        is_on_top(*it, 0, 3);
-
-        if(place_counter == *stack.rbegin()) {
-          std::find_if(stack.rbegin(), stack.rend(), [this,&place_counter](const block_id &id)->bool{
-            if(place_counter != id)
-              return true;
-
-            feature_type * in_place = new In_Place(id, true);
-            in_place->features.insert_in_order<feature_type::List::compare_default>(this->m_features);
-            --place_counter;
-
-            return false;
-          });
-
-          not_in_place();
-        }
+        not_in_place();
       }
-
-      not_in_place();
-
-//       if(m_features) {
-//         auto next = m_features->next();
-//         m_features->erase_next();
-//         next->destroy();
-//       }
     }
 
     void generate_candidates() {

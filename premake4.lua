@@ -45,7 +45,8 @@ solution "carli"
 
   if _ACTION == "gmake" then
     configuration { "linux" }
-      linkoptions { "-Wl,-rpath,/home/bazald/Software/gperftools/lib", "-Wl,-rpath-link,/home/bazald/Software/gperftools/lib" }
+      linkoptions { "-Wl,-rpath,/home/bazald/Software/gperftools/lib",
+                    "-Wl,-rpath-link,/home/bazald/Software/gperftools/lib" }
     configuration { "linux", "Debug*" }
       links { "tcmalloc" }
     configuration { "linux", "Profiling*" }

@@ -41,6 +41,7 @@ public:
   typedef Zeni::Trie<std::unique_ptr<feature_type>, Q_Value, typename feature_type::Compare> feature_trie_type;
   typedef feature_trie_type * feature_trie;
   typedef Environment<action_type> environment_type;
+  typedef std::map<action_type *, feature_list, typename action_type::Compare> feature_list_type;
   typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
 
@@ -169,7 +170,7 @@ public:
   reward_type act() {
     m_current = std::move(m_next);
 
-    Q_Value * const value_current = get_value(m_features, *m_current, Q_Value::current_offset());
+    Q_Value * const value_current = get_value(*m_current, Q_Value::current_offset());
 
     const reward_type reward = m_environment->transition(*m_current);
 
@@ -182,14 +183,14 @@ public:
 #ifdef DEBUG_OUTPUT
       std::cerr << "   " << *m_next << " is next." << std::endl;
 #endif
-      Q_Value * const value_best = get_value(m_features, *m_next, Q_Value::next_offset());
+      Q_Value * const value_best = get_value(*m_next, Q_Value::next_offset());
       td_update(&value_current->current, reward, &value_best->next);
 
       if(!m_on_policy) {
         std::unique_ptr<const action_type> next = m_exploration_policy();
 
         if(*m_next != *next) {
-          if(sum_value(nullptr, get_value(m_features, *next, Q_Value::current_offset())->current) < sum_value(nullptr, value_best->next))
+          if(sum_value(nullptr, get_value(*next, Q_Value::current_offset())->current) < sum_value(nullptr, value_best->next))
             clear_eligibility_trace();
           m_next = std::move(next);
         }
@@ -213,11 +214,20 @@ public:
 
   void print(std::ostream &os) const {
     os << " Agent:\n";
-    print_list(os, "  Features:\n  ", " ", m_features);
+    print_feature_lists(os);
     print_list(os, "  Candidates:\n  ", " ", m_candidates);
 #if defined(DEBUG_OUTPUT) && defined(DEBUG_OUTPUT_VALUE_FUNCTION)
     print_value_function(os);
 #endif
+  }
+
+  void print_feature_lists(std::ostream &os) const {
+    os << "  Features:" << std::endl;
+    for(auto &fl : m_feature_lists) {
+      os << "  " << *fl.first << " : ";
+      print_list(os, "", " ", fl.second);
+    }
+//    print_list(os, "  Features:", " ", m_features);
   }
 
   void print_value_function(std::ostream &os) const {
@@ -273,9 +283,9 @@ protected:
   typedef std::pair<double, double> point_type;
   typedef std::pair<point_type, point_type> line_segment_type;
 
-  Q_Value * get_value(const feature_list &features, const action_type &action, const size_t &offset, const size_t &depth = 0) {
-    if(!features)
-      return nullptr;
+  Q_Value * get_value(const action_type &action, const size_t &offset, const size_t &depth = 0) {
+    const feature_list &features = get_feature_list(action);
+    assert(features);
 
 #ifdef ENABLE_WEIGHT
     const bool use_value = m_weight_assignment_code != "all";
@@ -311,8 +321,19 @@ protected:
         return rv;
       }
       catch(Again &) {
+#ifdef DEBUG_OUTPUT
+        std::cerr << "Again: " << action << std::endl << *this;
+#endif
       }
     }
+  }
+
+  feature_list & get_feature_list(const action_type &action) {
+    auto vf = m_feature_lists.find(const_cast<action_type *>(&action));
+    if(vf == m_feature_lists.end())
+      vf = m_feature_lists.insert(typename feature_list_type::value_type(action.clone(), nullptr)).first;
+    return vf->second;
+//    return m_features;
   }
 
   feature_trie & get_trie(const action_type &action) {
@@ -325,13 +346,23 @@ protected:
   void regenerate_lists() {
     destroy_lists();
 
-    generate_features();
     generate_candidates();
+    generate_features();
   }
 
   void destroy_lists() {
-    m_features->destroy(m_features);
+    destroy_features();
     m_candidates->destroy(m_candidates);
+  }
+
+  void destroy_features() {
+    for(typename feature_list_type::iterator ft = m_feature_lists.begin(), fend = m_feature_lists.end(); ft != fend; ) {
+      auto ptr = ft->first;
+      ft->second->destroy(ft->second);
+      m_feature_lists.erase(ft++);
+      delete ptr;
+    }
+//    m_features->destroy(m_features);
   }
 
   action_ptruc choose_epsilon_greedy(const double &epsilon) {
@@ -349,7 +380,7 @@ protected:
     double value = double();
     const action_type * action = nullptr;
     for(const action_type &action_ : *m_candidates) {
-      const double value_ = sum_value(&action_, this->get_value(m_features, action_, Q_Value::next_offset())->next);
+      const double value_ = sum_value(&action_, this->get_value(action_, Q_Value::next_offset())->next);
 
       if(!action || value_ > value) {
         action = &action_;
@@ -368,7 +399,7 @@ protected:
     int counter = 0;
     for(const action_type &action_ : *m_candidates) {
       ++counter;
-      this->get_value(m_features, action_, Q_Value::next_offset()); ///< Trigger additional feature generation, as needed
+      this->get_value(action_, Q_Value::next_offset()); ///< Trigger additional feature generation, as needed
     }
 
     counter = random.rand_lt(counter) + 1;
@@ -696,6 +727,8 @@ protected:
       std::cerr << "   sum_value(" << *action << ") = {";
 #endif
 
+    assert((&value_list - static_cast<Q_Value::List *>(nullptr)) > ptrdiff_t(sizeof(Q_Value)));
+
     double sum = double();
     for(const Q_Value &q : value_list) {
       if(q.type != Q_Value::Type::FRINGE) {
@@ -729,17 +762,17 @@ protected:
 #endif
 
   template <typename ENVIRONMENT>
-  bool generate_feature_ranged(const std::shared_ptr<const ENVIRONMENT> &env, feature_trie &trie, const typename FEATURE::List * const &tail, typename FEATURE::List * &tail_next, const double &midpt_) {
+  bool generate_feature_ranged(const std::shared_ptr<const ENVIRONMENT> &env, feature_list &list, feature_trie &trie, feature_list &tail, const double &midpt_) {
     auto match = trie->find(**tail);
 
     if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
       const auto &feature = match->get_key();
       const auto midpt = feature->midpt;
       if(env->get_value(feature->axis) < midpt)
-        tail_next = &(new FEATURE(typename FEATURE::Axis(feature->axis), feature->bound_lower, midpt, feature->depth + 1, midpt_))->features;
+        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), feature->bound_lower, midpt, feature->depth + 1, midpt_))->features;
       else
-        tail_next = &(new FEATURE(typename FEATURE::Axis(feature->axis), midpt, feature->bound_higher, feature->depth + 1, midpt_))->features;
-      tail_next = tail_next->template insert_in_order<typename FEATURE::List::compare_default>(m_features, false);
+        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), midpt, feature->bound_higher, feature->depth + 1, midpt_))->features;
+      tail = tail->template insert_in_order<typename FEATURE::List::compare_default>(list, false);
       trie = match->get_deeper();
       return true;
     }
@@ -843,7 +876,8 @@ protected:
   }
 
   Metastate m_metastate = Metastate::NON_TERMINAL;
-  feature_list m_features = nullptr;
+  feature_list_type m_feature_lists;
+//  feature_list m_features;
   bool m_features_complete = true;
   action_list m_candidates = nullptr;
   value_function_type m_value_function;
@@ -885,8 +919,8 @@ private:
       assert(found->get()->type != Q_Value::Type::FRINGE);
 
       const feature_trie inserted = match;
-      const auto ranged = dynamic_cast<Feature_Ranged_Data *>(inserted->get());
-      size_t inserted_midpt;
+      Feature_Ranged_Data * ranged = dynamic_cast<Feature_Ranged_Data *>(inserted->get());
+      double inserted_midpt;
       if(ranged)
         inserted_midpt = ranged->midpt;
 
@@ -928,6 +962,14 @@ private:
         deeper = match->get_deeper();
       }
 
+      if(m_dynamic_midpoint && offset == Q_Value::current_offset() && ranged && !deeper && inserted != match) {
+        ranged = dynamic_cast<Feature_Ranged_Data *>(match->get());
+        const size_t next_update_count = ranged->midpt_update_count + 1;
+        const double next_update_count_d = double(next_update_count);
+        ranged->midpt = ranged->midpt * (ranged->midpt_update_count / next_update_count_d) + inserted_midpt / next_update_count_d;
+        ranged->midpt_update_count = next_update_count;
+      }
+
       match->offset_erase_hard(offset);
       auto rv = match->offset_insert_before(offset, deeper);
       assert(rv);
@@ -949,12 +991,10 @@ private:
 #ifdef ENABLE_FRINGE
                                 force ||
 #endif
-                                         m_split_test(q, depth))) {
-      m_features->destroy(m_features);
+                                         m_split_test(q, depth)))
+    {
+      destroy_features();
       generate_features();
-#ifdef DEBUG_OUTPUT
-      std::cerr << "Again:" << std::endl << *this;
-#endif
       throw Again();
     }
   }
@@ -1083,6 +1123,7 @@ private:
   const size_t m_split_update_count = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["split-update-count"]).get_value();
 
   const size_t m_contribute_update_count = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["contribute-update-count"]).get_value();
+  const bool m_dynamic_midpoint = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["dynamic-midpoint"]).get_value();
 
   Q_Value::List * m_eligible = nullptr;
 

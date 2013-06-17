@@ -225,54 +225,39 @@ namespace Cart_Pole {
     void generate_features() {
       auto env = dynamic_pointer_cast<const Environment>(get_env());
 
-      assert(!m_features);
+      for(const action_type &action_ : *m_candidates) {
+        auto &features = get_feature_list(action_);
+        assert(!features);
 
-      Feature::List * x_tail = nullptr;
-      Feature::List * x_dot_tail = nullptr;
-      if(!m_ignore_x) {
-        x_tail = &(new Feature(Feature::X, -env->get_max_x(), env->get_max_x(), 0, env->get_x()))->features;
-        x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-        x_dot_tail = &(new Feature(Feature::X_DOT, -env->get_max_x_dot(), env->get_max_x_dot(), 0, env->get_x_dot()))->features;
-        x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-      }
-      Feature::List * theta_tail = &(new Feature(Feature::THETA, -env->get_max_theta(), env->get_max_theta(), 0, env->get_theta()))->features;
-      theta_tail = theta_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-      Feature::List * theta_dot_tail = &(new Feature(Feature::THETA_DOT, -env->get_max_theta_dot(), env->get_max_theta_dot(), 0, env->get_theta_dot()))->features;
-      theta_dot_tail = theta_dot_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+        Feature::List * x_tail = nullptr;
+        Feature::List * x_dot_tail = nullptr;
+        if(!m_ignore_x) {
+          x_tail = &(new Feature(Feature::X, -env->get_max_x(), env->get_max_x(), 0, env->get_x()))->features;
+          x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(features, false);
+          x_dot_tail = &(new Feature(Feature::X_DOT, -env->get_max_x_dot(), env->get_max_x_dot(), 0, env->get_x_dot()))->features;
+          x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(features, false);
+        }
+        Feature::List * theta_tail = &(new Feature(Feature::THETA, -env->get_max_theta(), env->get_max_theta(), 0, env->get_theta()))->features;
+        theta_tail = theta_tail->insert_in_order<feature_type::List::compare_default>(features, false);
+        Feature::List * theta_dot_tail = &(new Feature(Feature::THETA_DOT, -env->get_max_theta_dot(), env->get_max_theta_dot(), 0, env->get_theta_dot()))->features;
+        theta_dot_tail = theta_dot_tail->insert_in_order<feature_type::List::compare_default>(features, false);
 
-      std::array<feature_trie, 2> tries = {{get_trie(Move(Move::LEFT)),
-                                            get_trie(Move(Move::RIGHT))}};
+        feature_trie trie = get_trie(action_);
 
-      for(;;) {
-        Feature::List * x_tail_next = nullptr;
-        Feature::List * x_dot_tail_next = nullptr;
-        Feature::List * theta_tail_next = nullptr;
-        Feature::List * theta_dot_tail_next = nullptr;
-
-        for(feature_trie &trie : tries) {
+        for(;;) {
           if(!m_ignore_x) {
-            if(generate_feature_ranged(env, trie, x_tail, x_tail_next, env->get_x()))
+            if(generate_feature_ranged(env, features, trie, x_tail, env->get_x()))
               continue;
-            if(generate_feature_ranged(env, trie, x_dot_tail, x_dot_tail_next, env->get_x_dot()))
+            if(generate_feature_ranged(env, features, trie, x_dot_tail, env->get_x_dot()))
               continue;
           }
-          if(generate_feature_ranged(env, trie, theta_tail, theta_tail_next, env->get_theta()))
+          if(generate_feature_ranged(env, features, trie, theta_tail, env->get_theta()))
             continue;
-          if(generate_feature_ranged(env, trie, theta_dot_tail, theta_dot_tail_next, env->get_theta_dot()))
+          if(generate_feature_ranged(env, features, trie, theta_dot_tail, env->get_theta_dot()))
             continue;
-        }
 
-        if(x_tail_next)
-          x_tail = x_tail_next;
-        if(x_dot_tail_next)
-          x_dot_tail = x_dot_tail_next;
-        if(theta_dot_tail_next)
-          theta_dot_tail = theta_dot_tail_next;
-        if(theta_tail_next)
-          theta_tail = theta_tail_next;
-
-        if(!x_tail_next && !x_dot_tail_next && !theta_tail_next && !theta_dot_tail_next)
           break;
+        }
       }
     }
 

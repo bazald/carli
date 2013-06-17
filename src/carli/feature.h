@@ -158,8 +158,12 @@ public:
    depth(depth_),
    midpt_update_count(midpt_update_count_)
   {
+    static const bool dynamic_midpoint = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["dynamic-midpoint"]).get_value();
+
     assert(bound_lower <= midpt && midpt <= bound_higher);
-    midpt = (bound_lower + bound_higher) / 2.0;
+
+    if(!dynamic_midpoint)
+      midpt = (bound_lower + bound_higher) / 2.0;
   }
 
   int compare(const Feature_Ranged_Data &rhs) const {

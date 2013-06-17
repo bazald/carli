@@ -328,36 +328,25 @@ namespace Puddle_World {
     void generate_features() {
       auto env = dynamic_pointer_cast<const Environment>(get_env());
 
-      assert(!m_features);
+      for(const action_type &action_ : *m_candidates) {
+        auto &features = get_feature_list(action_);
+        assert(!features);
 
-      Feature::List * x_tail = &(new Feature(Feature::X, 0.0, 1.0, 0, env->get_position().first))->features;
-      x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
-      Feature::List * y_tail = &(new Feature(Feature::Y, 0.0, 1.0, 0, env->get_position().second))->features;
-      y_tail = y_tail->insert_in_order<feature_type::List::compare_default>(m_features, false);
+        Feature::List * x_tail = &(new Feature(Feature::X, 0.0, 1.0, 0, env->get_position().first))->features;
+        x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(features, false);
+        Feature::List * y_tail = &(new Feature(Feature::Y, 0.0, 1.0, 0, env->get_position().second))->features;
+        y_tail = y_tail->insert_in_order<feature_type::List::compare_default>(features, false);
 
-      std::array<feature_trie, 4> tries = {{get_trie(Move(Move::NORTH)),
-                                            get_trie(Move(Move::SOUTH)),
-                                            get_trie(Move(Move::EAST)),
-                                            get_trie(Move(Move::WEST))}};
+        feature_trie trie = get_trie(action_);
 
-      for(;;) {
-        Feature::List * x_tail_next = nullptr;
-        Feature::List * y_tail_next = nullptr;
-
-        for(feature_trie &trie : tries) {
-          if(generate_feature_ranged(env, trie, x_tail, x_tail_next, env->get_position().first))
+        for(;;) {
+          if(generate_feature_ranged(env, features, trie, x_tail, env->get_position().first))
             continue;
-          if(generate_feature_ranged(env, trie, y_tail, y_tail_next, env->get_position().second))
+          if(generate_feature_ranged(env, features, trie, y_tail, env->get_position().second))
             continue;
-        }
 
-        if(x_tail_next)
-          x_tail = x_tail_next;
-        if(y_tail_next)
-          y_tail = y_tail_next;
-
-        if(!x_tail_next && !y_tail_next)
           break;
+        }
       }
     }
 
