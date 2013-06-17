@@ -762,16 +762,16 @@ protected:
 #endif
 
   template <typename ENVIRONMENT>
-  bool generate_feature_ranged(const std::shared_ptr<const ENVIRONMENT> &env, feature_list &list, feature_trie &trie, feature_list &tail, const double &midpt_) {
+  bool generate_feature_ranged(const std::shared_ptr<const ENVIRONMENT> &env, feature_list &list, feature_trie &trie, feature_list &tail, const double &value) {
     auto match = trie->find(**tail);
 
     if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
       const auto &feature = match->get_key();
       const auto midpt = feature->midpt;
-      if(env->get_value(feature->axis) < midpt)
-        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), feature->bound_lower, midpt, feature->depth + 1, midpt_))->features;
+      if(env->get_value(feature->axis) < *midpt)
+        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), feature->bound_lower, midpt, feature->depth + 1, false, std::make_shared<double>(value)))->features;
       else
-        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), midpt, feature->bound_higher, feature->depth + 1, midpt_))->features;
+        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), midpt, feature->bound_upper, feature->depth + 1, true, std::make_shared<double>(value)))->features;
       tail = tail->template insert_in_order<typename FEATURE::List::compare_default>(list, false);
       trie = match->get_deeper();
       return true;
@@ -792,12 +792,12 @@ protected:
         auto new_extents = extents;
         const auto &key = trie2.get_key();
         if(key->axis == axis_x) {
-          new_extents.first.first = key->bound_lower;
-          new_extents.second.first = key->bound_higher;
+          new_extents.first.first = *key->bound_lower;
+          new_extents.second.first = *key->bound_upper;
         }
         else if(key->axis == axis_y) {
-          new_extents.first.second = key->bound_lower;
-          new_extents.second.second = key->bound_higher;
+          new_extents.first.second = *key->bound_lower;
+          new_extents.second.second = *key->bound_upper;
         }
 
         if(key->axis == axis_x || key->axis == axis_y) {
@@ -833,12 +833,12 @@ protected:
         auto new_extents = extents;
         const auto &key = trie2.get_key();
         if(key->axis == axis_x) {
-          new_extents.first.first = key->bound_lower;
-          new_extents.second.first = key->bound_higher;
+          new_extents.first.first = *key->bound_lower;
+          new_extents.second.first = *key->bound_upper;
         }
         else if(key->axis == axis_y) {
-          new_extents.first.second = key->bound_lower;
-          new_extents.second.second = key->bound_higher;
+          new_extents.first.second = *key->bound_lower;
+          new_extents.second.second = *key->bound_upper;
         }
 
         const auto update_count2 = update_count + (trie2.get() ? trie2->update_count : 0);
@@ -918,12 +918,14 @@ private:
     if(match) {
       assert(found->get()->type != Q_Value::Type::FRINGE);
 
+      /// Dynamic midpoint part 1 of 3
       const feature_trie inserted = match;
       Feature_Ranged_Data * ranged = dynamic_cast<Feature_Ranged_Data *>(inserted->get());
       double inserted_midpt;
       if(ranged)
-        inserted_midpt = ranged->midpt;
+        inserted_midpt = *ranged->midpt;
 
+      /// Insertion
       feature_trie next = static_cast<feature_trie>(head == match ? head->next() : head);
       match->list_erase();
       match = match->map_insert_into_unique(function);
@@ -932,14 +934,25 @@ private:
         ++m_q_value_count;
       }
 
+      /// Dynamic midpoint part 2 of 3
+      if(m_dynamic_midpoint && ranged && inserted == match) {
+        Feature_Ranged_Data * const ranged_other = dynamic_cast<Feature_Ranged_Data *>(found->get());
+        if(ranged->upper)
+          ranged->bound_lower = ranged_other->bound_upper;
+        else
+          ranged->bound_upper = ranged_other->bound_lower;
+      }
+
       const double value_next = value + (match->get() ? match->get()->value * match->get()->weight : 0.0);
 
       feature_trie deeper = nullptr;
       if(next && m_split_test(match->get(), depth)) {
+        /// Recursion
         collapse_fringe(match->get_deeper(), next);
         deeper = get_value_from_function(next, match->get_deeper(), offset, depth + 1, use_value, value_next);
       }
       else {
+        /// Done; repeat as needed
         if(found->get()->type != Q_Value::Type::FRINGE) {
           try {
             generate_more_features(match->get(), depth, match == inserted);
@@ -962,14 +975,19 @@ private:
         deeper = match->get_deeper();
       }
 
-      if(m_dynamic_midpoint && offset == Q_Value::current_offset() && ranged && !deeper && inserted != match) {
+      /// Dynamic midpoint part 3 of 3
+      if(m_dynamic_midpoint && offset == Q_Value::current_offset() && ranged && inserted != match) {
         ranged = dynamic_cast<Feature_Ranged_Data *>(match->get());
         const size_t next_update_count = ranged->midpt_update_count + 1;
         const double next_update_count_d = double(next_update_count);
-        ranged->midpt = ranged->midpt * (ranged->midpt_update_count / next_update_count_d) + inserted_midpt / next_update_count_d;
+        *ranged->midpt = *ranged->midpt * (ranged->midpt_update_count / next_update_count_d) + inserted_midpt / next_update_count_d;
         ranged->midpt_update_count = next_update_count;
+
+        assert(*ranged->midpt <= *ranged->bound_upper);
+        assert(*ranged->midpt >= *ranged->bound_lower);
       }
 
+      /// Stitch together Q-Values and return
       match->offset_erase_hard(offset);
       auto rv = match->offset_insert_before(offset, deeper);
       assert(rv);

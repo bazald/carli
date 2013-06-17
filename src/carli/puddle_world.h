@@ -27,13 +27,13 @@ namespace Puddle_World {
   public:
     enum Axis : int {X, Y};
 
-    Feature(const Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_, const double &midpt_, const size_t &midpt_update_count_ = 1u)
-     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_higher_, depth_, midpt_, midpt_update_count_)
+    Feature(const Axis &axis_, const std::shared_ptr<double> &bound_lower_, const std::shared_ptr<double> &bound_upper_, const size_t &depth_, const bool &upper_, const std::shared_ptr<double> &midpt_, const size_t &midpt_update_count_ = 1u)
+     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_upper_, depth_, upper_, midpt_, midpt_update_count_)
     {
     }
 
     Feature * clone() const {
-      return new Feature(Axis(this->axis), this->bound_lower, this->bound_higher, this->depth, this->midpt, this->midpt_update_count);
+      return new Feature(Axis(this->axis), this->bound_lower, this->bound_upper, this->depth, this->upper, this->midpt, this->midpt_update_count);
     }
 
     void print(ostream &os) const {
@@ -43,7 +43,7 @@ namespace Puddle_World {
         default: abort();
       }
 
-      os << '(' << bound_lower << ',' << bound_higher << ':' << depth << ')';
+      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
     }
   };
 
@@ -287,7 +287,11 @@ namespace Puddle_World {
   class Agent : public ::Agent<feature_type, action_type> {
   public:
     Agent(const shared_ptr<environment_type> &env)
-     : ::Agent<feature_type, action_type>(env)
+     : ::Agent<feature_type, action_type>(env),
+     m_min_x(std::make_shared<double>(0.0)),
+     m_max_x(std::make_shared<double>(1.0)),
+     m_min_y(std::make_shared<double>(0.0)),
+     m_max_y(std::make_shared<double>(1.0))
     {
       m_features_complete = false;
     }
@@ -332,9 +336,9 @@ namespace Puddle_World {
         auto &features = get_feature_list(action_);
         assert(!features);
 
-        Feature::List * x_tail = &(new Feature(Feature::X, 0.0, 1.0, 0, env->get_position().first))->features;
+        Feature::List * x_tail = &(new Feature(Feature::X, m_min_x, m_max_x, 0, false, std::make_shared<double>(env->get_position().first)))->features;
         x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-        Feature::List * y_tail = &(new Feature(Feature::Y, 0.0, 1.0, 0, env->get_position().second))->features;
+        Feature::List * y_tail = &(new Feature(Feature::Y, m_min_y, m_max_y, 0, false, std::make_shared<double>(env->get_position().second)))->features;
         y_tail = y_tail->insert_in_order<feature_type::List::compare_default>(features, false);
 
         feature_trie trie = get_trie(action_);
@@ -366,6 +370,11 @@ namespace Puddle_World {
 
       m_metastate = env->goal_reached() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
     }
+
+    std::shared_ptr<double> m_min_x;
+    std::shared_ptr<double> m_max_x;
+    std::shared_ptr<double> m_min_y;
+    std::shared_ptr<double> m_max_y;
   };
 
 }

@@ -150,27 +150,28 @@ public:
 
 class Feature_Ranged_Data {
 public:
-  Feature_Ranged_Data(const Feature_Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_, const double &midpt_, const size_t &midpt_update_count_ = 1u)
+  Feature_Ranged_Data(const Feature_Axis &axis_, const std::shared_ptr<double> &bound_lower_, const std::shared_ptr<double> &bound_upper_, const size_t &depth_, const bool &upper_, const std::shared_ptr<double> &midpt_, const size_t &midpt_update_count_ = 1u)
    : axis(axis_),
    bound_lower(bound_lower_),
-   bound_higher(bound_higher_),
+   bound_upper(bound_upper_),
    midpt(midpt_),
    depth(depth_),
-   midpt_update_count(midpt_update_count_)
+   midpt_update_count(midpt_update_count_),
+   upper(upper_)
   {
     static const bool dynamic_midpoint = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["dynamic-midpoint"]).get_value();
 
-    assert(bound_lower <= midpt && midpt <= bound_higher);
+    assert(*bound_lower <= *midpt && *midpt <= *bound_upper);
 
     if(!dynamic_midpoint)
-      midpt = (bound_lower + bound_higher) / 2.0;
+      midpt = std::make_shared<double>((*bound_lower + *bound_upper) / 2.0);
   }
 
   int compare(const Feature_Ranged_Data &rhs) const {
     return depth != rhs.depth ? depth - rhs.depth :
            axis != rhs.axis ? axis - rhs.axis :
-           bound_lower < rhs.bound_lower ? -1 : bound_lower > rhs.bound_lower ? 1 :
-           bound_higher < rhs.bound_higher ? -1 : bound_higher > rhs.bound_higher ? 1 :
+           *bound_lower < *rhs.bound_lower ? -1 : *bound_lower > *rhs.bound_lower ? 1 :
+           *bound_upper < *rhs.bound_upper ? -1 : *bound_upper > *rhs.bound_upper ? 1 :
            0;
   }
 
@@ -186,23 +187,25 @@ public:
 
   int compare_value(const Feature_Ranged_Data &rhs) const {
     return depth != rhs.depth ? depth - rhs.depth :
-           bound_lower < rhs.bound_lower ? -1 : bound_lower > rhs.bound_lower ? 1 :
-           bound_higher < rhs.bound_higher ? -1 : bound_higher > rhs.bound_higher ? 1 :
+           *bound_lower < *rhs.bound_lower ? -1 : *bound_lower > *rhs.bound_lower ? 1 :
+           *bound_upper < *rhs.bound_upper ? -1 : *bound_upper > *rhs.bound_upper ? 1 :
            0;
   }
 
   void print(std::ostream &os) const {
-    os << this->axis << '(' << bound_lower << ',' << bound_higher << ':' << depth << ')';
+    os << this->axis << '(' << *bound_lower << ',' << *bound_upper << ':' << depth << ')';
   }
 
   Feature_Axis axis;
 
-  double bound_lower; ///< inclusive
-  double bound_higher; ///< exclusive
-  double midpt; ///< A point in (bound_lower, bound_higher)
+  std::shared_ptr<double> bound_lower; ///< inclusive
+  std::shared_ptr<double> bound_upper; ///< exclusive
+  std::shared_ptr<double> midpt; ///< A point in (bound_lower, bound_upper)
 
   size_t depth; ///< 0 indicates unsplit
   size_t midpt_update_count; ///< Number of times the midpt has been modified
+
+  bool upper; ///< Is this the upper half (same bound_upper) or lower half (same bound_lower) of a split?
 };
 
 template <typename DERIVED, typename DERIVED2 = DERIVED>
@@ -211,9 +214,9 @@ class Feature_Ranged : public Feature<DERIVED, DERIVED2>, public Feature_Ranged_
   Feature_Ranged & operator=(const Feature_Ranged &) = delete;
 
 public:
-  Feature_Ranged(const Feature_Axis &axis_, const double &bound_lower_, const double &bound_higher_, const size_t &depth_, const double &midpt_, const size_t &midpt_update_count_ = 1u)
+  Feature_Ranged(const Feature_Axis &axis_, const std::shared_ptr<double> &bound_lower_, const std::shared_ptr<double> &bound_upper_, const size_t &depth_, const bool &upper_, const std::shared_ptr<double> &midpt_, const size_t &midpt_update_count_ = 1u)
    : ::Feature<DERIVED, DERIVED2>(),
-   Feature_Ranged_Data(axis_, bound_lower_, bound_higher_, depth_, midpt_, midpt_update_count_)
+   Feature_Ranged_Data(axis_, bound_lower_, bound_upper_, depth_, upper_, midpt_, midpt_update_count_)
   {
   }
 
@@ -238,7 +241,7 @@ public:
   }
 
   Feature_Ranged * clone() const {
-    return new Feature_Ranged(axis, bound_lower, bound_higher, depth, midpt, midpt_update_count);
+    return new Feature_Ranged(axis, bound_lower, bound_upper, depth, upper, midpt, midpt_update_count);
   }
 
   void print(std::ostream &os) const {
