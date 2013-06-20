@@ -222,12 +222,16 @@ public:
   }
 
   void print_feature_lists(std::ostream &os) const {
+    os << std::defaultfloat;
+
     os << "  Features:" << std::endl;
     for(auto &fl : m_feature_lists) {
-      os << "  " << *fl.first << " : ";
+      os << "  " << *fl.first << " :";
       print_list(os, "", " ", fl.second);
     }
 //    print_list(os, "  Features:", " ", m_features);
+
+    os << std::fixed;
   }
 
   void print_value_function(std::ostream &os) const {
@@ -541,9 +545,11 @@ protected:
     }
 
 #ifdef DEBUG_OUTPUT
+    std::cerr << std::defaultfloat;
     std::cerr << " td_update: " << q_old << " <" << m_learning_rate << "= " << reward << " + " << m_discount_rate << " * " << target_next << std::endl;
     std::cerr << "            " << delta << " = " << target_value << " - " << q_old << std::endl;
     std::cerr << "            " << q_new << std::endl;
+    std::cerr << std::fixed;
 
     for(Q_Value &q : *current) {
       if(q.type == Q_Value::Type::UNSPLIT) {
@@ -724,7 +730,7 @@ protected:
                                                            , const Q_Value::List &value_list) {
 #ifdef DEBUG_OUTPUT
     if(action)
-      std::cerr << "   sum_value(" << *action << ") = {";
+      std::cerr << std::defaultfloat << "   sum_value(" << *action << ") = {";
 #endif
 
     assert((&value_list - static_cast<Q_Value::List *>(nullptr)) > ptrdiff_t(sizeof(Q_Value)));
@@ -743,7 +749,7 @@ protected:
 
 #ifdef DEBUG_OUTPUT
     if(action)
-      std::cerr << " } = " << sum << std::endl;
+      std::cerr << " } = " << sum << std::fixed << std::endl;
 #endif
 
     return sum;
@@ -769,9 +775,9 @@ protected:
       const auto &feature = match->get_key();
       const auto midpt = feature->midpt;
       if(env->get_value(feature->axis) < *midpt)
-        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), feature->bound_lower, midpt, feature->depth + 1, false, std::make_shared<double>(value)))->features;
+        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), feature->bound_lower, midpt, feature->depth + 1, false, value, true))->features;
       else
-        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), midpt, feature->bound_upper, feature->depth + 1, true, std::make_shared<double>(value)))->features;
+        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), midpt, feature->bound_upper, feature->depth + 1, true, value, true))->features;
       tail = tail->template insert_in_order<typename FEATURE::List::compare_default>(list, false);
       trie = match->get_deeper();
       return true;
@@ -920,10 +926,10 @@ private:
 
       /// Dynamic midpoint part 1 of 3
       const feature_trie inserted = match;
-      Feature_Ranged_Data * ranged = dynamic_cast<Feature_Ranged_Data *>(inserted->get());
+      Feature_Ranged_Data * ranged = dynamic_cast<Feature_Ranged_Data *>(inserted->get_key().get());
       double inserted_midpt;
       if(ranged)
-        inserted_midpt = *ranged->midpt;
+        inserted_midpt = ranged->midpt_raw;
 
       /// Insertion
       feature_trie next = static_cast<feature_trie>(head == match ? head->next() : head);
@@ -935,13 +941,13 @@ private:
       }
 
       /// Dynamic midpoint part 2 of 3
-      if(m_dynamic_midpoint && ranged && inserted == match) {
-        Feature_Ranged_Data * const ranged_other = dynamic_cast<Feature_Ranged_Data *>(found->get());
-        if(ranged->upper)
-          ranged->bound_lower = ranged_other->bound_upper;
-        else
-          ranged->bound_upper = ranged_other->bound_lower;
-      }
+//      if(m_dynamic_midpoint && ranged && inserted == match) {
+//        Feature_Ranged_Data * const ranged_other = dynamic_cast<Feature_Ranged_Data *>(found->get_key().get());
+//        if(ranged->upper)
+//          ranged->bound_lower = ranged_other->bound_upper;
+//        else
+//          ranged->bound_upper = ranged_other->bound_lower;
+//      }
 
       const double value_next = value + (match->get() ? match->get()->value * match->get()->weight : 0.0);
 
@@ -977,14 +983,31 @@ private:
 
       /// Dynamic midpoint part 3 of 3
       if(m_dynamic_midpoint && offset == Q_Value::current_offset() && ranged && inserted != match) {
-        ranged = dynamic_cast<Feature_Ranged_Data *>(match->get());
+        ranged = dynamic_cast<Feature_Ranged_Data *>(match->get_key().get());
         const size_t next_update_count = ranged->midpt_update_count + 1;
         const double next_update_count_d = double(next_update_count);
-        *ranged->midpt = *ranged->midpt * (ranged->midpt_update_count / next_update_count_d) + inserted_midpt / next_update_count_d;
+
+        assert(ranged->midpt_raw >= 0.0);
+        assert(ranged->midpt_raw <= 1.0);
+        assert(inserted_midpt >= 0.0);
+        assert(inserted_midpt <= 1.0);
+        ranged->midpt_raw = ranged->midpt_raw * (ranged->midpt_update_count / next_update_count_d) + inserted_midpt / next_update_count_d;
+
         ranged->midpt_update_count = next_update_count;
 
-        assert(*ranged->midpt <= *ranged->bound_upper);
-        assert(*ranged->midpt >= *ranged->bound_lower);
+        if(!deeper || deeper->get()->type == Q_Value::Type::FRINGE) {
+          double ranged_amt;
+          if(ranged->midpt_update_count < 10) { ///< 10 is a temporary magic number
+            ranged_amt = ranged->midpt_update_count / 10.0;
+            ranged_amt = ranged->midpt_raw * ranged_amt + 0.5 * (1.0 - ranged_amt);
+          }
+          else
+            ranged_amt = ranged->midpt_raw;
+          *ranged->midpt = *ranged->bound_lower + ranged_amt * (*ranged->bound_upper - *ranged->bound_lower);
+
+          assert(*ranged->midpt <= *ranged->bound_upper);
+          assert(*ranged->midpt >= *ranged->bound_lower);
+        }
       }
 
       /// Stitch together Q-Values and return

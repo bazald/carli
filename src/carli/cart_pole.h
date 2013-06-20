@@ -26,13 +26,13 @@ namespace Cart_Pole {
   public:
     enum Axis : int {X, X_DOT, THETA, THETA_DOT};
 
-    Feature(const Axis &axis_, const std::shared_ptr<double> &bound_lower_, const std::shared_ptr<double> &bound_upper_, const size_t &depth_, const bool &upper_, const std::shared_ptr<double> &midpt_, const size_t &midpt_update_count_ = 1u)
-     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_upper_, depth_, upper_, midpt_, midpt_update_count_)
+    Feature(const Axis &axis_, const std::shared_ptr<double> &bound_lower_, const std::shared_ptr<double> &bound_upper_, const size_t &depth_, const bool &upper_, const double &midpt_, const bool &midpt_raw_, const size_t &midpt_update_count_ = 1u)
+     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_upper_, depth_, upper_, midpt_, midpt_raw_, midpt_update_count_)
     {
     }
 
     Feature * clone() const {
-      return new Feature(Axis(this->axis), this->bound_lower, this->bound_upper, this->depth, this->upper, this->midpt, this->midpt_update_count);
+      return new Feature(Axis(this->axis), this->bound_lower, this->bound_upper, this->depth, this->upper, this->midpt_raw, false, this->midpt_update_count);
     }
 
     void print(ostream &os) const {
@@ -44,7 +44,7 @@ namespace Cart_Pole {
         default: abort();
       }
 
-      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+      os << '(' << *bound_lower << ',' << *bound_upper << ':' << depth << ')';
     }
   };
 
@@ -240,14 +240,14 @@ namespace Cart_Pole {
         Feature::List * x_tail = nullptr;
         Feature::List * x_dot_tail = nullptr;
         if(!m_ignore_x) {
-          x_tail = &(new Feature(Feature::X, m_min_x, m_max_x, 0, false, std::make_shared<double>(env->get_x())))->features;
+          x_tail = &(new Feature(Feature::X, m_min_x, m_max_x, 0, false, env->get_x(), true))->features;
           x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-          x_dot_tail = &(new Feature(Feature::X_DOT, m_min_x_dot, m_max_x_dot, 0, false, std::make_shared<double>(env->get_x_dot())))->features;
+          x_dot_tail = &(new Feature(Feature::X_DOT, m_min_x_dot, m_max_x_dot, 0, false, env->get_x_dot(), true))->features;
           x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(features, false);
         }
-        Feature::List * theta_tail = &(new Feature(Feature::THETA, m_min_theta, m_max_theta, 0, false, std::make_shared<double>(env->get_theta())))->features;
+        Feature::List * theta_tail = &(new Feature(Feature::THETA, m_min_theta, m_max_theta, 0, false, env->get_theta(), true))->features;
         theta_tail = theta_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-        Feature::List * theta_dot_tail = &(new Feature(Feature::THETA_DOT, m_min_theta_dot, m_max_theta_dot, 0, false, std::make_shared<double>(env->get_theta_dot())))->features;
+        Feature::List * theta_dot_tail = &(new Feature(Feature::THETA_DOT, m_min_theta_dot, m_max_theta_dot, 0, false, env->get_theta_dot(), true))->features;
         theta_dot_tail = theta_dot_tail->insert_in_order<feature_type::List::compare_default>(features, false);
 
         feature_trie trie = get_trie(action_);

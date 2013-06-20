@@ -26,13 +26,13 @@ namespace Mountain_Car {
   public:
     enum Axis : int {X, X_DOT};
 
-    Feature(const Axis &axis_, const std::shared_ptr<double> &bound_lower_, const std::shared_ptr<double> &bound_upper_, const size_t &depth_, const bool &upper_, const std::shared_ptr<double> &midpt_, const size_t &midpt_update_count_ = 1u)
-     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_upper_, depth_, upper_, midpt_, midpt_update_count_)
+    Feature(const Axis &axis_, const std::shared_ptr<double> &bound_lower_, const std::shared_ptr<double> &bound_upper_, const size_t &depth_, const bool &upper_, const double &midpt_, const bool &midpt_raw_, const size_t &midpt_update_count_ = 1u)
+     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_upper_, depth_, upper_, midpt_, midpt_raw_, midpt_update_count_)
     {
     }
 
     Feature * clone() const {
-      return new Feature(Axis(this->axis), this->bound_lower, this->bound_upper, this->depth, this->upper, this->midpt, this->midpt_update_count);
+      return new Feature(Axis(this->axis), this->bound_lower, this->bound_upper, this->depth, this->upper, this->midpt_raw, false, this->midpt_update_count);
     }
 
     void print(ostream &os) const {
@@ -42,7 +42,7 @@ namespace Mountain_Car {
         default: abort();
       }
 
-      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+      os << '(' << *bound_lower << ',' << *bound_upper << ':' << depth << ')';
     }
   };
 
@@ -195,9 +195,9 @@ namespace Mountain_Car {
           regenerate_lists();
           auto action = choose_greedy();
           switch(static_cast<const Move &>(*action).direction) {
-            case Move::LEFT:  os << '0'; break;
-            case Move::IDLE:  os << '-'; break;
-            case Move::RIGHT: os << '1'; break;
+            case Move::LEFT:  os << '-'; break;
+            case Move::IDLE:  os << '0'; break;
+            case Move::RIGHT: os << '+'; break;
             default: abort();
           }
         }
@@ -225,9 +225,9 @@ namespace Mountain_Car {
         auto &features = get_feature_list(action_);
         assert(!features);
 
-        Feature::List * x_tail = &(new Feature(Feature::X, m_min_x, m_max_x, 0, false, std::make_shared<double>(env->get_x())))->features;
+        Feature::List * x_tail = &(new Feature(Feature::X, m_min_x, m_max_x, 0, false, env->get_x(), true))->features;
         x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-        Feature::List * x_dot_tail = &(new Feature(Feature::X_DOT, m_min_x_dot, m_max_x_dot, 0, false, std::make_shared<double>(env->get_x_dot())))->features;
+        Feature::List * x_dot_tail = &(new Feature(Feature::X_DOT, m_min_x_dot, m_max_x_dot, 0, false, env->get_x_dot(), true))->features;
         x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(features, false);
 
         feature_trie trie = get_trie(action_);
