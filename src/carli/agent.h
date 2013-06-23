@@ -935,7 +935,7 @@ private:
     }
 
     if(match) {
-      assert(found->get()->type != Q_Value::Type::FRINGE);
+      assert(!found->get() || found->get()->type != Q_Value::Type::FRINGE);
 
       /// Dynamic midpoint part 1 of 3
       const feature_trie inserted = match;
@@ -972,7 +972,7 @@ private:
       }
       else {
         /// Done; repeat as needed
-        if(found->get()->type != Q_Value::Type::FRINGE) {
+        if(!found->get() || found->get()->type != Q_Value::Type::FRINGE) {
           try {
             generate_more_features(match->get(), depth, match == inserted);
           }
@@ -1101,13 +1101,14 @@ private:
 
   static void collapse_fringe(feature_trie &leaf_fringe, feature_trie head) {
 //     assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type != Q_Value::Type::FRINGE); ///< TODO: Convert FRINGE to UNSPLIT
+    feature_trie choice = nullptr;
 
-    if(leaf_fringe && leaf_fringe->get()->type == Q_Value::Type::FRINGE) {
+    if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::Type::FRINGE) {
 #ifdef DEBUG_OUTPUT
       std::cerr.unsetf(std::ios_base::floatfield);
       std::cerr << " Collapsing fringe:" << std::endl;
       for(feature_trie_type &node : *leaf_fringe) {
-        std::cerr << "  " << node.get() << ' ' << *node.get_key() << " = " << node->value;
+        std::cerr << "         " << node.get() << ' ' << *node.get_key() << " = " << node->value;
         std::cerr << "; update_count = " << node->update_count;
         std::cerr << "; cabe = " << node->cabe;
         std::cerr << "; mabe = " << node->cabe / node->update_count;
@@ -1115,10 +1116,91 @@ private:
           std::cerr << "; split = " << fabs(ranged->midpt_raw - 0.5);
         std::cerr << std::endl;
       }
+#endif
+
+      feature_trie_type * prev = nullptr;
+      Feature_Ranged_Data * ranged_prev = nullptr;
+//      size_t choice_update_count_min = 0u;
+//      size_t ranged_update_count_min = 0u;
+//      size_t choice_axis_in_a_row = 0u;
+//      size_t axis_in_a_row = 0u;
+      double choice_delta = 0.0;
+      size_t choice_depth = 0;
+      for(feature_trie_type &node : *leaf_fringe) {
+        const auto feature = node.get_key().get();
+        const auto ranged = dynamic_cast<Feature_Ranged_Data *>(feature);
+
+//        if(!choice) {
+//          choice = &node;
+//          choice_update_count_min = ranged ? ranged->midpt_update_count : 0u;
+//          choice_axis_in_a_row = ranged ? 1u : 0u;
+//        }
+
+        if(ranged_prev) {
+          if(ranged && ranged_prev && ranged->axis == ranged_prev->axis &&
+             ranged->midpt_update_count && ranged_prev->midpt_update_count)
+          {
+            const double delta = fabs(prev->get()->value - node.get()->value);
+            if(delta > choice_delta) {
+              choice_delta = delta;
+              choice_depth = ranged->depth;
+              choice = &node;
+            }
+          }
+
+//          if(!ranged || ranged->axis != ranged_prev->axis) {
+//            if(axis_in_a_row >  choice_axis_in_a_row ||
+//              (axis_in_a_row == choice_axis_in_a_row && ranged_update_count_min > choice_update_count_min)) {
+//              choice = prev;
+//              choice_update_count_min = ranged_update_count_min;
+//            }
+//
+//            if(ranged) {
+//              ranged_update_count_min = ranged->midpt_update_count;
+//              axis_in_a_row = 1u;
+//            }
+//          }
+//          else {
+//            ranged_update_count_min = std::min(ranged_update_count_min, ranged->midpt_update_count);
+//            ++axis_in_a_row;
+//          }
+        }
+//        else if(ranged) {
+//          ranged_update_count_min = ranged->midpt_update_count;
+//          axis_in_a_row = 1u;
+//        }
+
+        prev = &node;
+        ranged_prev = ranged;
+      }
+//      if(axis_in_a_row >  choice_axis_in_a_row ||
+//        (axis_in_a_row == choice_axis_in_a_row && ranged_update_count_min > choice_update_count_min)) {
+//        choice = prev;
+//        choice_update_count_min = ranged_update_count_min;
+//      }
+
+      if(choice) {
+        for(feature_trie_type &node : *leaf_fringe) {
+          auto ranged = dynamic_cast<Feature_Ranged_Data *>(node.get_key().get());
+          if(ranged && ranged->depth < choice_depth) {
+            choice = &node;
+            choice_depth = ranged->depth;
+          }
+        }
+      }
+
+#ifdef DEBUG_OUTPUT
+      std::cerr << "  Choice " << *choice->get_key() << std::endl;
       std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
 #endif
 
+      if(choice)
+        choice = new feature_trie_type(std::unique_ptr<feature_type>(choice->get_key()->clone()));
+
       leaf_fringe->destroy(leaf_fringe);
+
+      if(choice)
+        choice->map_insert_into_unique(leaf_fringe);
     }
   }
 #else
