@@ -1,5 +1,5 @@
 //#define TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-//#define ENABLE_FRINGE
+//#define DISABLE_FRINGE
 //#define ENABLE_WEIGHT
 //#define WHITESON_ADAPTIVE_TILE
 
@@ -42,8 +42,8 @@ int main2(int argc, char **argv) {
   std::ofstream cerr2file;
   std::ofstream cout2file;
 
-  cerr << std::fixed;
-  cout << std::fixed;
+  cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
+  cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
   cerr.precision(9);
   cout.precision(9);
 

@@ -341,11 +341,15 @@ namespace Zeni {
     }
 
     map_pointer_type prev() const {
-      if(get_left())
-        return get_left();
-      else if(!get_parent())
-        return nullptr;
-      else {
+      if(get_left()) {
+        map_pointer_type ptr = get_left();
+
+        while(ptr->get_right())
+          ptr = ptr->get_right();
+
+        return ptr;
+      }
+      else if(get_parent()) {
         map_pointer_type ptr = const_cast<map_pointer_type>(this);
         map_pointer_type parent = ptr->get_parent();
 
@@ -356,14 +360,20 @@ namespace Zeni {
 
         return parent;
       }
+      else
+        return nullptr;
     }
 
     map_pointer_type next() const {
-      if(get_right())
-        return get_right();
-      else if(!get_parent())
-        return nullptr;
-      else {
+      if(get_right()) {
+        map_pointer_type ptr = get_right();
+
+        while(ptr->get_left())
+          ptr = ptr->get_left();
+
+        return ptr;
+      }
+      else if(get_parent()) {
         map_pointer_type ptr = const_cast<map_pointer_type>(this);
         map_pointer_type parent = ptr->get_parent();
 
@@ -374,6 +384,8 @@ namespace Zeni {
 
         return parent;
       }
+      else
+        return nullptr;
     }
 
     /// return an iterator_const pointing to this list entry; only the beginning if !prev()
@@ -449,6 +461,23 @@ namespace Zeni {
 //
 //      return os;
 //    }
+
+    template <typename VISITOR>
+    VISITOR debug_print_visit(std::ostream &os, VISITOR visitor) const {
+      if(this) {
+        visitor(get()->get());
+        if(get_left() || get_right()) {
+          os << '(';
+          VISITOR v2(get_left()->debug_print_visit(os, visitor));
+          os << ':';
+          VISITOR v3(get_right()->debug_print_visit(os, v2));
+          os << ')';
+          return v3;
+        }
+      }
+
+      return visitor;
+    }
 #endif
 
   private:

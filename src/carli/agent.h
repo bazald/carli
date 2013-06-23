@@ -222,7 +222,7 @@ public:
   }
 
   void print_feature_lists(std::ostream &os) const {
-    os << std::defaultfloat;
+    os.unsetf(std::ios_base::floatfield);
 
     os << "  Features:" << std::endl;
     for(auto &fl : m_feature_lists) {
@@ -231,7 +231,7 @@ public:
     }
 //    print_list(os, "  Features:", " ", m_features);
 
-    os << std::fixed;
+    os.setf(std::ios_base::fixed, std::ios_base::floatfield);
   }
 
   void print_value_function(std::ostream &os) const {
@@ -428,6 +428,8 @@ protected:
     std::cerr << " current :";
 #endif
     for(Q_Value &q : *current) {
+      ++q.update_count;
+
       if(q.type != Q_Value::Type::FRINGE) {
         q_old += q.value * q.weight;
 #ifdef DEBUG_OUTPUT
@@ -436,6 +438,12 @@ protected:
       }
     }
 #ifdef DEBUG_OUTPUT
+    std::cerr << std::endl;
+    std::cerr << " fringe  :";
+    for(const Q_Value &q : *current) {
+      if(q.type == Q_Value::Type::FRINGE)
+        std::cerr << ' ' << &q;
+    }
     std::cerr << std::endl;
     std::cerr << " next    :";
     for(const Q_Value &q : *next) {
@@ -448,8 +456,6 @@ protected:
     m_credit_assignment(current);
 
     for(Q_Value &q : *current) {
-      ++q.update_count;
-
       const double credit = this->m_learning_rate * q.credit;
 //       const double credit_accum = credit + (q.eligibility < 0.0 ? 0.0 : q.eligibility);
 
@@ -492,7 +498,7 @@ protected:
         if(!m_mean_cabe_queue_size)
           this->m_mean_cabe.uncontribute(q.cabe);
       }
-      else if(q.type == Q_Value::Type::UNSPLIT) {
+      else {
         const double abs_edelta = std::abs(edelta);
 
         if(q.eligibility_init) {
@@ -505,12 +511,14 @@ protected:
           q.last_step_fired = this->m_step_count;
 
 #ifdef WHITESON_ADAPTIVE_TILE
-          if(abs_edelta < q.minbe) {
-            q.minbe = abs_edelta;
-            this->m_steps_since_minbe = 0;
+          if(q.type == Q_Value::Type::UNSPLIT) {
+            if(abs_edelta < q.minbe) {
+              q.minbe = abs_edelta;
+              this->m_steps_since_minbe = 0;
+            }
+            else
+              ++this->m_steps_since_minbe;
           }
-          else
-            ++this->m_steps_since_minbe;
 #endif
         }
 
@@ -518,7 +526,8 @@ protected:
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
         q.mabe.set_value(q.cabe / q.update_count);
 #endif
-        if(q.update_count > m_contribute_update_count) {
+
+        if(q.type == Q_Value::Type::UNSPLIT && q.update_count > m_contribute_update_count) {
           if(m_mean_cabe_queue_size) {
             if(this->m_mean_cabe_queue.size() == m_mean_cabe_queue_size)
               this->m_mean_cabe_queue.pop();
@@ -545,11 +554,11 @@ protected:
     }
 
 #ifdef DEBUG_OUTPUT
-    std::cerr << std::defaultfloat;
+    std::cerr.unsetf(std::ios_base::floatfield);
     std::cerr << " td_update: " << q_old << " <" << m_learning_rate << "= " << reward << " + " << m_discount_rate << " * " << target_next << std::endl;
     std::cerr << "            " << delta << " = " << target_value << " - " << q_old << std::endl;
     std::cerr << "            " << q_new << std::endl;
-    std::cerr << std::fixed;
+    std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
 
     for(Q_Value &q : *current) {
       if(q.type == Q_Value::Type::UNSPLIT) {
@@ -729,8 +738,10 @@ protected:
 #endif
                                                            , const Q_Value::List &value_list) {
 #ifdef DEBUG_OUTPUT
-    if(action)
-      std::cerr << std::defaultfloat << "   sum_value(" << *action << ") = {";
+    if(action) {
+      std::cerr.unsetf(std::ios_base::floatfield);
+      std::cerr << "   sum_value(" << *action << ") = {";
+    }
 #endif
 
     assert((&value_list - static_cast<Q_Value::List *>(nullptr)) > ptrdiff_t(sizeof(Q_Value)));
@@ -748,8 +759,10 @@ protected:
     }
 
 #ifdef DEBUG_OUTPUT
-    if(action)
-      std::cerr << " } = " << sum << std::fixed << std::endl;
+    if(action) {
+      std::cerr << " } = " << sum << std::endl;
+      std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    }
 #endif
 
     return sum;
@@ -907,7 +920,7 @@ private:
   static void reset_update_counts_for_trie(const feature_trie_type * const &trie) {
     for(const feature_trie_type &trie2 : *trie) {
       if(trie2.get())
-        trie2.get()->update_count = 1;
+        trie2.get()->update_count = 0;
       reset_update_counts_for_trie(trie2.get_deeper());
     }
   }
@@ -915,7 +928,7 @@ private:
   feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const bool &use_value, const double &value = 0.0) {
     /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
     feature_trie match, found;
-    for(match = head->first(); match; match = match->next()) {
+    for(match = head; match; match = match->list_next()) {
       found = function->find(match->get_key(), typename feature_type::Compare_Axis());
       if(found)
         break;
@@ -932,7 +945,7 @@ private:
         inserted_midpt = ranged->midpt_raw;
 
       /// Insertion
-      feature_trie next = static_cast<feature_trie>(head == match ? head->next() : head);
+      feature_trie next = static_cast<feature_trie>(head == match ? head->list_next() : head);
       match->list_erase();
       match = match->map_insert_into_unique(function);
       if(!m_null_q_values && !match->get()) {
@@ -973,12 +986,10 @@ private:
             ++m_q_value_count;
           }
 
-          generate_fringe(match->get_deeper(), next, offset, value_next);
+          deeper = generate_fringe(match->get_deeper(), next, offset, value_next);
         }
         else
           next->list_destroy(next);
-
-        deeper = match->get_deeper();
       }
 
       /// Dynamic midpoint part 3 of 3
@@ -995,19 +1006,19 @@ private:
 
         ranged->midpt_update_count = next_update_count;
 
-        if(!deeper || deeper->get()->type == Q_Value::Type::FRINGE) {
-          double ranged_amt;
-          if(ranged->midpt_update_count < 10) { ///< 10 is a temporary magic number
-            ranged_amt = ranged->midpt_update_count / 10.0;
-            ranged_amt = ranged->midpt_raw * ranged_amt + 0.5 * (1.0 - ranged_amt);
-          }
-          else
-            ranged_amt = ranged->midpt_raw;
-          *ranged->midpt = *ranged->bound_lower + ranged_amt * (*ranged->bound_upper - *ranged->bound_lower);
-
-          assert(*ranged->midpt <= *ranged->bound_upper);
-          assert(*ranged->midpt >= *ranged->bound_lower);
-        }
+//        if(!deeper || deeper->get()->type == Q_Value::Type::FRINGE) {
+//          double ranged_amt;
+//          if(ranged->midpt_update_count < 10) { ///< 10 is a temporary magic number
+//            ranged_amt = ranged->midpt_update_count / 10.0;
+//            ranged_amt = ranged->midpt_raw * ranged_amt + 0.5 * (1.0 - ranged_amt);
+//          }
+//          else
+//            ranged_amt = ranged->midpt_raw;
+//          *ranged->midpt = *ranged->bound_lower + ranged_amt * (*ranged->bound_upper - *ranged->bound_lower);
+//
+//          assert(*ranged->midpt <= *ranged->bound_upper);
+//          assert(*ranged->midpt >= *ranged->bound_lower);
+//        }
       }
 
       /// Stitch together Q-Values and return
@@ -1024,12 +1035,12 @@ private:
   }
 
   void generate_more_features(Q_Value * const &q, const size_t &depth, const bool &
-#ifdef ENABLE_FRINGE
+#ifndef DISABLE_FRINGE
                                                                                    force
 #endif
   ) {
     if(!m_features_complete && (
-#ifdef ENABLE_FRINGE
+#ifndef DISABLE_FRINGE
                                 force ||
 #endif
                                          m_split_test(q, depth)))
@@ -1040,49 +1051,80 @@ private:
     }
   }
 
-#ifdef ENABLE_FRINGE
+#ifndef DISABLE_FRINGE
   /// Use up the rest of the features to generate a fringe
-  static void generate_fringe(feature_trie &leaf_fringe, feature_trie head, const size_t &offset, const double &value) {
+  static feature_trie generate_fringe(feature_trie &leaf_fringe, feature_trie head, const size_t &offset, const double &value) {
     assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type == Q_Value::Type::FRINGE);
 
+//#ifdef DEBUG_OUTPUT
+//    std::cerr.unsetf(std::ios_base::floatfield);
+//    std::cerr << "   Current fringe:" << std::endl;
+//#endif
+
+    feature_trie fringe_head = nullptr;
     while(head) {
-      auto next = static_cast<feature_trie>(head->next());
-      head->list_erase();
+      auto next = static_cast<feature_trie>(head->list_next());
+      head->list_erase_hard();
 
-      feature_trie predecessor = leaf_fringe->find(*head->get_key(), typename feature_type::Compare_Predecessor());
+      auto inserted = head->map_insert_into_unique(leaf_fringe);
+      if(!inserted->get())
+        inserted->get() = new Q_Value(value, Q_Value::Type::FRINGE);
 
-      if(predecessor)
-        delete head;
-      else {
-        auto inserted = head->map_insert_into_unique(leaf_fringe);
-        if(!inserted->get())
-          inserted->get() = new Q_Value(value, Q_Value::Type::FRINGE);
-      }
+//#ifdef DEBUG_OUTPUT
+//      std::cerr << "    " << inserted->get() << " from " << *inserted->get_key() << std::endl;
+//#endif
+
+      inserted->offset_erase_hard(offset);
+      fringe_head = inserted->offset_insert_before(offset, fringe_head);
 
       head = next;
     }
 
-    if(leaf_fringe) {
-      typename feature_trie_type::iterator ft = leaf_fringe->begin(), fnext = ft;
-      ft->offset_erase_hard(offset);
-      ++fnext;
+//#ifdef DEBUG_OUTPUT
+//    leaf_fringe->map_debug_print_visit(std::cerr, [](const Q_Value * const q){std::cerr << q;});
+//    std::cerr << std::endl;
+//
+//    for(feature_trie_type &node : *leaf_fringe) {
+//      std::cerr << "    " << node.get() << ' ' << *node.get_key() << " = " << node->value;
+//      std::cerr << "; update_count = " << node->update_count;
+//      std::cerr << "; cabe = " << node->cabe;
+//      std::cerr << "; mabe = " << node->cabe / node->update_count;
+//      if(auto ranged = dynamic_cast<Feature_Ranged_Data *>(node.get_key().get()))
+//        std::cerr << "; split = " << fabs(ranged->midpt_raw - 0.5);
+//      std::cerr << std::endl;
+//    }
+//    std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
+//#endif
 
-      for(typename feature_trie_type::iterator fend = leaf_fringe->end(); fnext != fend; ft = fnext, ++fnext) {
-        fnext->offset_erase_hard(offset);
-        ft->offset_insert_before(offset, fnext.get());
-      }
-    }
+    return fringe_head;
   }
 
   static void collapse_fringe(feature_trie &leaf_fringe, feature_trie head) {
 //     assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type != Q_Value::Type::FRINGE); ///< TODO: Convert FRINGE to UNSPLIT
 
-    if(leaf_fringe && leaf_fringe->get()->type == Q_Value::Type::FRINGE)
+    if(leaf_fringe && leaf_fringe->get()->type == Q_Value::Type::FRINGE) {
+#ifdef DEBUG_OUTPUT
+      std::cerr.unsetf(std::ios_base::floatfield);
+      std::cerr << " Collapsing fringe:" << std::endl;
+      for(feature_trie_type &node : *leaf_fringe) {
+        std::cerr << "  " << node.get() << ' ' << *node.get_key() << " = " << node->value;
+        std::cerr << "; update_count = " << node->update_count;
+        std::cerr << "; cabe = " << node->cabe;
+        std::cerr << "; mabe = " << node->cabe / node->update_count;
+        if(auto ranged = dynamic_cast<Feature_Ranged_Data *>(node.get_key().get()))
+          std::cerr << "; split = " << fabs(ranged->midpt_raw - 0.5);
+        std::cerr << std::endl;
+      }
+      std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
+#endif
+
       leaf_fringe->destroy(leaf_fringe);
+    }
   }
 #else
-  static void generate_fringe(feature_trie &, feature_trie head, const size_t &, const double &) {
+  static feature_trie generate_fringe(feature_trie &, feature_trie head, const size_t &, const double &) {
     head->list_destroy(head); ///< Destroy the rest of the features instead of generating a fringe
+    return nullptr;
   }
 
   static void collapse_fringe(feature_trie &, feature_trie) {

@@ -66,30 +66,6 @@ public:
     bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
   };
 
-  struct Compare_Predecessor {
-    bool operator()(const Feature &lhs, const Feature &rhs) const {
-      return static_cast<const DERIVED &>(lhs).compare_predecessor(static_cast<const DERIVED &>(rhs)) < 0;
-    }
-    bool operator()(const Feature &lhs, const Feature * const &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const Feature &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const Feature &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(lhs, *rhs);}
-
-    bool operator()(const Feature * const &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const Feature * const &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const Feature * const &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const Feature * const &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
-
-    bool operator()(const std::shared_ptr<DERIVED> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::shared_ptr<DERIVED> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<DERIVED> &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
-
-    bool operator()(const std::unique_ptr<DERIVED> &lhs, const Feature &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::unique_ptr<DERIVED> &lhs, const Feature * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
-  };
-
   Feature()
     : features(static_cast<DERIVED *>(this))
   {
@@ -113,14 +89,6 @@ public:
   int compare(const DERIVED &rhs) const {
     const int axis_comparison = static_cast<const DERIVED *>(this)->compare_axis(rhs);
     return axis_comparison ? axis_comparison : static_cast<const DERIVED *>(this)->compare_value(rhs);
-  }
-
-  int compare_predecessor(const Feature &rhs) const {
-    return static_cast<const DERIVED *>(this)->compare_predecessor(static_cast<const DERIVED &>(rhs));
-  }
-
-  int compare_predecessor(const DERIVED &rhs) const {
-    return static_cast<const DERIVED *>(this)->compare_axis(rhs);
   }
 
   virtual bool refinable() const {return false;}
@@ -172,12 +140,6 @@ public:
     return axis - rhs.axis;
   }
 
-  int compare_predecessor(const Feature_Ranged_Data &rhs) const {
-    return axis != rhs.axis ? axis - rhs.axis :
-           depth + 1 == rhs.depth || depth - 1 == rhs.depth ? 0 :
-           depth < rhs.depth ? -1 : 1;
-  }
-
   int compare_value(const Feature_Ranged_Data &rhs) const {
     return depth != rhs.depth ? depth - rhs.depth :
            upper - rhs.upper;
@@ -218,10 +180,6 @@ public:
 
   int compare_axis(const DERIVED &rhs) const {
     return Feature_Ranged_Data::compare_axis(rhs);
-  }
-
-  int compare_predecessor(const DERIVED &rhs) const {
-    return Feature_Ranged_Data::compare_predecessor(rhs);
   }
 
   int compare_value(const DERIVED &rhs) const {

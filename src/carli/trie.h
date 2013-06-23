@@ -36,10 +36,10 @@ namespace Zeni {
     typedef typename map_value_type::iterator iterator;
 
     trie_pointer_type list_prev() const {
-      return static_cast<trie_pointer_type>(map_value_type::prev());
+      return static_cast<trie_pointer_type>(map_value_type::list_prev());
     }
     trie_pointer_type list_next() const {
-      return static_cast<trie_pointer_type>(map_value_type::next());
+      return static_cast<trie_pointer_type>(map_value_type::list_next());
     }
 
     void list_insert_after(const trie_pointer_type &ptr) {
@@ -72,6 +72,13 @@ namespace Zeni {
       root = static_cast<trie_pointer_type>(mp);
       return static_cast<trie_pointer_type>(rv);
     }
+
+#ifndef NDEBUG
+    template <typename VISITOR>
+    VISITOR map_debug_print_visit(std::ostream &os, VISITOR visitor) const {
+      return map_value_type::debug_print_visit(os, visitor);
+    }
+#endif
 
     Trie(const key_type &key_ = key_type())
      : Map<KEY, Trie<KEY, TYPE, COMPARE>, COMPARE>(this, key_)
@@ -269,8 +276,8 @@ namespace Zeni {
         }
 
         if(!dtr) {
-          generate_fringe(m_deeper, next, offset, value_next);
-          return offset_insert_before(offset, m_deeper);
+          auto deeper = generate_fringe(m_deeper, next, offset, value_next);
+          return offset_insert_before(offset, deeper);
         }
 
         return this;

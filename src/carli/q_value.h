@@ -36,7 +36,7 @@ public:
   size_t last_step_fired = std::numeric_limits<size_t>::max();
   size_t pseudoepisode_count = 0;
 
-  size_t update_count = 1;
+  size_t update_count = 0;
 
   Type type;
 

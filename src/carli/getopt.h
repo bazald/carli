@@ -17,7 +17,7 @@
 template <typename FLOAT>
 std::string pretty_print(const FLOAT &value) {
   std::ostringstream oss;
-  oss << std::fixed;
+  oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
   oss.precision(9);
   oss << value;
   std::string pp = oss.str();
