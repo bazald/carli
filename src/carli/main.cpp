@@ -1,5 +1,4 @@
 //#define TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-//#define DISABLE_FRINGE
 //#define ENABLE_WEIGHT
 //#define WHITESON_ADAPTIVE_TILE
 
@@ -117,6 +116,7 @@ int main2(int argc, char **argv) {
   options.add_line("\n  Unusual Options:");
   options.add(     std::make_shared<Option_Ranged<int>>("contribute-update-count", 0, true, std::numeric_limits<int>::max(), true, 0), "Require 1 more update than this to count toward means and variances.");
   options.add(     std::make_shared<Option_Ranged<bool>>("dynamic-midpoint", false, true, true, true, false), "Dynamically modify midpoint values for features to better balance refinements.");
+  options.add(     std::make_shared<Option_Ranged<bool>>("fringe", false, true, true, true, false), "Store and use a fringe to make refinement decisions.");
   options.add(     std::make_shared<Option_Ranged<int>>("mean-cabe-queue-size", 0, true, std::numeric_limits<int>::max(), true, 0), "How large of a working set to use for means and variances; 0 disables.");
   options.add(     std::make_shared<Option_Ranged<bool>>("null-q-values", false, true, true, true, false), "Set Q-values preceding the minimum depth to nullptr.");
   options.add(     std::make_shared<Option_Ranged<int>>("value-function-cap", 0, true, std::numeric_limits<int>::max(), true, 0), "The maximum number of weights allowed in the value functions; 0 disables.");
