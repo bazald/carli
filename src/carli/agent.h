@@ -1102,6 +1102,8 @@ private:
 
   void collapse_fringe(feature_trie &leaf_fringe, feature_trie head) {
     if(m_fringe) {
+      purge_from_eligibility_trace(leaf_fringe);
+
       feature_trie choice = nullptr;
 
       if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::Type::FRINGE) {
@@ -1202,6 +1204,21 @@ private:
 
         if(choice)
           choice->map_insert_into_unique(leaf_fringe);
+      }
+    }
+    /// Only necessary when lesioning codebase for debugging purposes (i.e. disabling previous block of code)
+    else if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::Type::FRINGE) {
+      purge_from_eligibility_trace(leaf_fringe);
+      leaf_fringe->destroy(leaf_fringe);
+    }
+  }
+
+  void purge_from_eligibility_trace(const feature_trie leaf_fringe) {
+    for(feature_trie_type &node : *leaf_fringe) {
+      if(Q_Value * const q = node.get()) {
+        if(&q->eligible == m_eligible && m_eligible->next())
+          m_eligible = m_eligible->next();
+        q->eligible.erase();
       }
     }
   }
