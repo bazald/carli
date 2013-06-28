@@ -461,7 +461,7 @@ protected:
 
       if(credit >= q.eligibility) {
         if(q.eligibility < 0.0) {
-          q.eligible.erase();
+          q.eligible.erase_hard();
           q.eligible.insert_before(this->m_eligible);
         }
 
@@ -1218,6 +1218,10 @@ private:
       if(Q_Value * const q = node.get()) {
         if(&q->eligible == m_eligible && m_eligible->next())
           m_eligible = m_eligible->next();
+
+        q->eligibility_init = false;
+        q->eligibility = -1.0;
+
         q->eligible.erase();
       }
     }
