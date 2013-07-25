@@ -1,0 +1,72 @@
+#ifndef UTILITY_H
+#define UTILITY_H
+
+#include <array>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+template <typename T>
+class compare_deref {
+public:
+  template <typename Ptr1, typename Ptr2>
+  size_t operator()(const Ptr1 &lhs, const Ptr2 &rhs) const {
+    return *lhs == *rhs;
+  }
+};
+
+inline size_t hash_combine(const size_t &prev_h, const size_t &new_val) {
+  return prev_h * 31 + new_val;
+}
+
+template <typename CONTAINER, typename HASHER>
+size_t hash_container(const CONTAINER &container, HASHER &hasher) {
+  size_t h = 0;
+  for(const auto &entry : container)
+    h = hash_combine(h, hasher(entry));
+  return h;
+}
+
+template <typename T>
+class hash_deref {
+public:
+  template <typename Ptr>
+  size_t operator()(const Ptr &ptr) const {
+    return std::hash<T>()(*ptr);
+  }
+};
+
+namespace std {
+  template <typename T, size_t N>
+  struct hash<array<T, N>> {
+    size_t operator()(const array<T, N> &a) const {
+      hash<T> hasher;
+      return hash_container(a, hasher);
+    }
+  };
+
+  template <typename T1, typename T2>
+  struct hash<pair<T1, T2>> {
+    size_t operator()(const pair<T1, T2> &p) const {
+      return hash_combine(hash<T1>()(p.first), hash<T2>()(p.second));
+    }
+  };
+
+  template <typename Key, typename Hash, typename Pred, typename Alloc>
+  struct hash<unordered_set<Key, Hash, Pred, Alloc>> {
+    size_t operator()(const unordered_set<Key, Hash, Pred, Alloc> &us) const {
+      hash<Key> hasher;
+      return hash_container(us, hasher);
+    }
+  };
+
+  template <typename T, typename Alloc>
+  struct hash<vector<T, Alloc>> {
+    size_t operator()(const vector<T, Alloc> &v) const {
+      hash<T> hasher;
+      return hash_container(v, hasher);
+    }
+  };
+}
+
+#endif

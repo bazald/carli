@@ -612,8 +612,12 @@ protected:
   void assign_credit_specific(Q_Value::List * const &value_list) {
     Q_Value * last = nullptr;
     for(Q_Value &q : *value_list) {
-      q.credit = q.type == Q_Value::Type::FRINGE ? 1.0 : 0.0;
-      last = &q;
+      if(q.type != Q_Value::Type::FRINGE) {
+        q.credit = 0.0;
+        last = &q;
+      }
+      else
+        q.credit = m_fringe_learning_scale;
     }
 
     if(last)
@@ -628,12 +632,16 @@ protected:
     }
 
     for(Q_Value &q : *value_list)
-      q.credit = q.type == Q_Value::Type::FRINGE ? 1.0 : 1.0 / count;
+      q.credit = q.type == Q_Value::Type::FRINGE ? m_fringe_learning_scale : 1.0 / count;
   }
 
   void assign_credit_all(Q_Value::List * const &value_list) {
-    for(Q_Value &q : *value_list)
-      q.credit = 1.0;
+    for(Q_Value &q : *value_list) {
+      if(q.type != Q_Value::Type::FRINGE)
+        q.credit = 1.0;
+      else
+        q.credit = m_fringe_learning_scale;
+    }
   }
 
   void assign_credit_inv_update_count(Q_Value::List * const &value_list) {
@@ -694,7 +702,7 @@ protected:
     if(m_credit_assignment_normalize || sum > 1.0) {
       for(Q_Value &q : *value_list) {
         if(q.type == Q_Value::Type::FRINGE)
-          q.credit = 1.0;
+          q.credit = m_fringe_learning_scale;
         else
           q.credit /= sum;
       }
@@ -1121,6 +1129,14 @@ private:
         }
 #endif
 
+        size_t min_depth = std::numeric_limits<size_t>::max();
+        for(feature_trie_type &node : *leaf_fringe) {
+          const auto feature = node.get_key().get();
+          const auto ranged = dynamic_cast<Feature_Ranged_Data *>(feature);
+          if(ranged->depth < min_depth)
+            min_depth = ranged->depth;
+        }
+
         feature_trie_type * prev = nullptr;
         Feature_Ranged_Data * ranged_prev = nullptr;
 //        size_t choice_update_count_min = 0u;
@@ -1128,7 +1144,7 @@ private:
 //        size_t choice_axis_in_a_row = 0u;
 //        size_t axis_in_a_row = 0u;
         double choice_delta = 0.0;
-        size_t choice_depth = 0;
+//        size_t choice_depth = 0;
         for(feature_trie_type &node : *leaf_fringe) {
           const auto feature = node.get_key().get();
           const auto ranged = dynamic_cast<Feature_Ranged_Data *>(feature);
@@ -1139,14 +1155,14 @@ private:
 //            choice_axis_in_a_row = ranged ? 1u : 0u;
 //          }
 
-          if(ranged_prev) {
+          if(ranged_prev && ranged_prev->depth == min_depth) {
             if(ranged && ranged_prev && ranged->axis == ranged_prev->axis &&
                ranged->midpt_update_count && ranged_prev->midpt_update_count)
             {
               const double delta = fabs(prev->get()->value - node.get()->value);
               if(delta > choice_delta) {
                 choice_delta = delta;
-                choice_depth = ranged->depth;
+//                choice_depth = ranged->depth;
                 choice = &node;
               }
             }
@@ -1181,16 +1197,6 @@ private:
 //          choice = prev;
 //          choice_update_count_min = ranged_update_count_min;
 //        }
-
-        if(choice) {
-          for(feature_trie_type &node : *leaf_fringe) {
-            auto ranged = dynamic_cast<Feature_Ranged_Data *>(node.get_key().get());
-            if(ranged && ranged->depth < choice_depth) {
-              choice = &node;
-              choice_depth = ranged->depth;
-            }
-          }
-        }
 
 #ifdef DEBUG_OUTPUT
         std::cerr << "  Choice " << *choice->get_key() << std::endl;
@@ -1304,6 +1310,7 @@ private:
   const size_t m_contribute_update_count = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["contribute-update-count"]).get_value();
   const bool m_dynamic_midpoint = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["dynamic-midpoint"]).get_value();
   const bool m_fringe = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["fringe"]).get_value();
+  const double m_fringe_learning_scale = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["fringe-learning-scale"]).get_value();
 
   Q_Value::List * m_eligible = nullptr;
 
