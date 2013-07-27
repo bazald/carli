@@ -287,83 +287,115 @@ namespace Puddle_World {
   class Agent : public ::Agent<feature_type, action_type> {
   public:
     Agent(const shared_ptr<environment_type> &env)
-     : ::Agent<feature_type, action_type>(env),
-     m_min_x(std::make_shared<double>(0.0)),
-     m_max_x(std::make_shared<double>(1.0)),
-     m_min_y(std::make_shared<double>(0.0)),
-     m_max_y(std::make_shared<double>(1.0))
+     : ::Agent<feature_type, action_type>(env)
     {
-      m_features_complete = false;
-    }
+      auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
+      auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
+      auto y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
 
-    void print_policy(ostream &os, const size_t &granularity) {
-      auto env = dynamic_pointer_cast<Environment>(get_env());
-      const auto position = env->get_position();
+      Rete::WME_Bindings state_bindings;
+      state_bindings.insert(Rete::WME_Binding(Rete::WME_Vector_Index(0, 0), Rete::WME_Vector_Index(0, 0)));
+      auto x = make_filter(Rete::WME(m_first_var, x_attr, m_third_var));
+      auto y = make_filter(Rete::WME(m_first_var, y_attr, m_third_var));
+      auto xy = make_join(state_bindings, x, y);
+      for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
+        auto rl = std::make_shared<RL>(1);
+        rl->q_value = new Q_Value();
+        rl->fringe_values = new RL::Fringe_Values;
+        (*rl->fringe_values)[m_x_value] = std::make_pair(0.0, 1.0);
+        (*rl->fringe_values)[m_y_value] = std::make_pair(0.0, 1.0);
 
-      for(size_t y = granularity; y != 0lu; --y) {
-        for(size_t x = 0lu; x != granularity; ++x) {
-          env->set_position(Environment::double_pair((x + 0.5) / granularity, (y - 0.5) / granularity));
-          regenerate_lists();
-          auto action = choose_greedy();
-          switch(static_cast<const Move &>(*action).direction) {
-            case Move::NORTH: os << 'N'; break;
-            case Move::SOUTH: os << 'S'; break;
-            case Move::EAST:  os << 'E'; break;
-            case Move::WEST:  os << 'W'; break;
-            default: abort();
-          }
-        }
-        os << endl;
+        ++this->m_q_value_count;
+
+        auto xy_action = make_action_retraction(
+          [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Vector &wme_vector) {
+            const auto &x = std::dynamic_pointer_cast<const Rete::Symbol_Constant_Float>(wme_vector.wmes[0].symbols[2])->value;
+            const auto &y = std::dynamic_pointer_cast<const Rete::Symbol_Constant_Float>(wme_vector.wmes[1].symbols[2])->value;
+
+            /// TODO: Action insert Q_Values into the list
+            rl->q_value->next.erase_hard();
+            rl->q_value->next.insert_before(this->m_next_q_values[action]);
+
+#ifdef DEBUG_OUTPUT
+            std::cerr << "Position(" << x << ", " << y << "), Depth(" << rl->depth << "), Action(" << *action << ") = "
+                      << &rl->q_value->next << std::endl;
+#endif
+
+            if(rl->fringe_values && this->split_test(rl->q_value, rl->depth)) {
+              /// TODO: destroy fringe and create new filters+joins for next features
+              abort();
+            }
+          }, [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+          }, xy);
+
+        std::ostringstream oss;
+        oss << *action;
+        source_rule(oss.str(), xy_action);
       }
 
-      env->set_position(position);
-      regenerate_lists();
+      m_x_wme = Rete::WME(s_id, x_attr, m_x_value);
+      m_y_wme = Rete::WME(s_id, y_attr, m_y_value);
+      insert_wme(m_x_wme);
+      insert_wme(m_y_wme);
     }
+
+//    void print_policy(ostream &os, const size_t &granularity) {
+//      auto env = dynamic_pointer_cast<Environment>(get_env());
+//      const auto position = env->get_position();
+//
+//      for(size_t y = granularity; y != 0lu; --y) {
+//        for(size_t x = 0lu; x != granularity; ++x) {
+//          env->set_position(Environment::double_pair((x + 0.5) / granularity, (y - 0.5) / granularity));
+//          regenerate_lists();
+//          auto action = choose_greedy();
+//          switch(static_cast<const Move &>(*action).direction) {
+//            case Move::NORTH: os << 'N'; break;
+//            case Move::SOUTH: os << 'S'; break;
+//            case Move::EAST:  os << 'E'; break;
+//            case Move::WEST:  os << 'W'; break;
+//            default: abort();
+//          }
+//        }
+//        os << endl;
+//      }
+//
+//      env->set_position(position);
+//      regenerate_lists();
+//    }
 
   private:
-    set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie) const {
-      return generate_vfgs_for_axes(trie, feature_type::Axis::X, feature_type::Axis::Y);
-    }
+//    set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie) const {
+//      return generate_vfgs_for_axes(trie, feature_type::Axis::X, feature_type::Axis::Y);
+//    }
 
-    map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie) const {
-      return generate_ucm_for_axes(trie, feature_type::Axis::X, feature_type::Axis::Y);
-    }
+//    map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie) const {
+//      return generate_ucm_for_axes(trie, feature_type::Axis::X, feature_type::Axis::Y);
+//    }
 
     void generate_features() {
       auto env = dynamic_pointer_cast<const Environment>(get_env());
+      const auto pos = env->get_position();
 
-      for(const action_type &action_ : *m_candidates) {
-        auto &features = get_feature_list(action_);
-        assert(!features);
+      m_next_q_values.clear();
 
-        Feature::List * x_tail = &(new Feature(Feature::X, m_min_x, m_max_x, 0, false, env->get_position().first, true))->features;
-        x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-        Feature::List * y_tail = &(new Feature(Feature::Y, m_min_y, m_max_y, 0, false, env->get_position().second, true))->features;
-        y_tail = y_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-
-        feature_trie trie = get_trie(action_);
-
-        for(;;) {
-          if(generate_feature_ranged(env, features, trie, x_tail, env->get_position().first))
-            continue;
-          if(generate_feature_ranged(env, features, trie, y_tail, env->get_position().second))
-            continue;
-
-          break;
-        }
-      }
+      remove_wme(m_x_wme);
+      remove_wme(m_y_wme);
+      m_x_value->value = pos.first;
+      m_y_value->value = pos.second;
+      insert_wme(m_x_wme);
+      insert_wme(m_y_wme);
     }
 
-    void generate_candidates() {
-      auto env = dynamic_pointer_cast<const Environment>(get_env());
-
-      assert(!m_candidates);
-
-      (new Move(Move::NORTH))->candidates.insert_before(m_candidates);
-      (new Move(Move::SOUTH))->candidates.insert_before(m_candidates);
-      (new Move(Move::EAST))->candidates.insert_before(m_candidates);
-      (new Move(Move::WEST))->candidates.insert_before(m_candidates);
-    }
+//    void generate_candidates() {
+//      auto env = dynamic_pointer_cast<const Environment>(get_env());
+//
+//      assert(!m_candidates);
+//
+//      (new Move(Move::NORTH))->candidates.insert_before(m_candidates);
+//      (new Move(Move::SOUTH))->candidates.insert_before(m_candidates);
+//      (new Move(Move::EAST))->candidates.insert_before(m_candidates);
+//      (new Move(Move::WEST))->candidates.insert_before(m_candidates);
+//    }
 
     void update() {
       auto env = dynamic_pointer_cast<const Environment>(get_env());
@@ -371,10 +403,27 @@ namespace Puddle_World {
       m_metastate = env->goal_reached() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
     }
 
-    std::shared_ptr<double> m_min_x;
-    std::shared_ptr<double> m_max_x;
-    std::shared_ptr<double> m_min_y;
-    std::shared_ptr<double> m_max_y;
+    std::shared_ptr<double> m_min_x = std::make_shared<double>(0.0);
+    std::shared_ptr<double> m_max_x = std::make_shared<double>(1.0);
+    std::shared_ptr<double> m_min_y = std::make_shared<double>(0.0);
+    std::shared_ptr<double> m_max_y = std::make_shared<double>(1.0);
+
+    Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
+    Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
+
+    Rete::Symbol_Identifier_Ptr_C m_s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
+    Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
+    Rete::Symbol_Constant_String_Ptr_C m_y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
+    Rete::Symbol_Constant_Float_Ptr m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_position().first);
+    Rete::Symbol_Constant_Float_Ptr m_y_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_position().second);
+
+    Rete::WME m_x_wme;
+    Rete::WME m_y_wme;
+
+    std::array<std::shared_ptr<action_type::derived_type>, 4> m_action = {{std::make_shared<Move>(Move::NORTH),
+                                                                           std::make_shared<Move>(Move::SOUTH),
+                                                                           std::make_shared<Move>(Move::EAST),
+                                                                           std::make_shared<Move>(Move::WEST)}};
   };
 
 }

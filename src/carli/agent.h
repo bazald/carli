@@ -8,6 +8,8 @@
 #include "random.h"
 #include "value_queue.h"
 
+#include "rete/agent.h"
+
 #include <functional>
 #include <map>
 #include <set>
@@ -26,28 +28,50 @@ enum class Credit_Assignment : char {ALL, SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_
 enum class Metastate : char {NON_TERMINAL, SUCCESS, FAILURE};
 
 template <typename FEATURE, typename ACTION>
-class Agent : public std::enable_shared_from_this<Agent<FEATURE, ACTION>> {
+class Agent : public std::enable_shared_from_this<Agent<FEATURE, ACTION>>, public Rete::Agent {
   Agent(const Agent &) = delete;
   Agent & operator=(const Agent &) = delete;
-
-  class Again {};
 
 public:
   typedef FEATURE feature_type;
   typedef typename FEATURE::List * feature_list;
   typedef ACTION action_type;
   typedef typename ACTION::List * action_list;
-  typedef std::unique_ptr<const action_type> action_ptruc;
+  typedef std::shared_ptr<const typename action_type::derived_type> action_ptrsc;
   typedef Zeni::Trie<std::unique_ptr<feature_type>, Q_Value, typename feature_type::Compare> feature_trie_type;
   typedef feature_trie_type * feature_trie;
   typedef Environment<action_type> environment_type;
-  typedef std::map<action_type *, feature_list, typename action_type::Compare> feature_list_type;
-  typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
+//  typedef std::map<action_type *, feature_list, typename action_type::Compare> feature_list_type;
+//  typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
 
+  class RL {
+    RL(const RL &) = delete;
+    RL & operator=(const RL &) = delete;
+
+  public:
+    typedef std::unordered_map<Rete::Symbol_Constant_Ptr_C, std::pair<double, double>>  Fringe_Values;
+
+    RL(const size_t &depth_)
+     : depth(depth_),
+     q_value(nullptr),
+     fringe_values(nullptr)
+    {
+    }
+
+    ~RL() {
+      delete q_value;
+      delete fringe_values;
+    }
+
+    size_t depth;
+    Q_Value * q_value;
+    Fringe_Values * fringe_values;
+  };
+
   Agent(const std::shared_ptr<environment_type> &environment)
-    : m_target_policy([this]()->action_ptruc{return this->choose_greedy();}),
-    m_exploration_policy([this]()->action_ptruc{return this->choose_epsilon_greedy(m_epsilon);}),
+    : m_target_policy([this]()->action_ptrsc{return this->choose_greedy();}),
+    m_exploration_policy([this]()->action_ptrsc{return this->choose_epsilon_greedy(m_epsilon);}),
     m_split_test([this](Q_Value * const &q, const size_t &depth)->bool{return this->split_test(q, depth);}),
     m_environment(environment),
     m_credit_assignment(
@@ -96,17 +120,17 @@ public:
     )
 #endif
   {
+    if(m_on_policy)
+      m_target_policy = m_exploration_policy;
   }
 
   virtual ~Agent() {
-    destroy_lists();
-
-    for(typename value_function_type::iterator vt = m_value_function.begin(), vend = m_value_function.end(); vt != vend; ) {
-      auto ptr = vt->first;
-      vt->second->destroy(vt->second);
-      m_value_function.erase(vt++);
-      delete ptr;
-    }
+//    for(typename value_function_type::iterator vt = m_value_function.begin(), vend = m_value_function.end(); vt != vend; ) {
+//      auto ptr = vt->first;
+//      vt->second->destroy(vt->second);
+//      m_value_function.erase(vt++);
+//      delete ptr;
+//    }
   }
 
   bool is_null_q_values() const {return m_null_q_values;}
@@ -161,38 +185,42 @@ public:
 
     clear_eligibility_trace();
 
-    regenerate_lists();
+    generate_features();
 
     if(m_metastate == Metastate::NON_TERMINAL)
       m_next = m_exploration_policy();
+
+    m_current = m_next;
+    next_q_to_current_q();
   }
 
   reward_type act() {
-    m_current = std::move(m_next);
-
-    Q_Value * const value_current = get_value(*m_current, Q_Value::current_offset());
+    m_current = m_next;
+    next_q_to_current_q();
 
     const reward_type reward = m_environment->transition(*m_current);
 
     update();
 
     if(m_metastate == Metastate::NON_TERMINAL) {
-      regenerate_lists();
+      generate_features();
 
       m_next = m_target_policy();
 #ifdef DEBUG_OUTPUT
+//      for(auto &next_q : m_next_q_values)
+//        std::cerr << "   " << *next_q.first << " is an option." << std::endl;
       std::cerr << "   " << *m_next << " is next." << std::endl;
 #endif
-      Q_Value * const value_best = get_value(*m_next, Q_Value::next_offset());
-      td_update(&value_current->current, reward, &value_best->next);
+      Q_Value * const value_best = get_value(m_next, Q_Value::next_offset());
+      td_update(m_current_q_value, reward, &value_best->next);
 
       if(!m_on_policy) {
-        std::unique_ptr<const action_type> next = m_exploration_policy();
+        action_ptrsc next = m_exploration_policy();
 
         if(*m_next != *next) {
-          if(sum_value(nullptr, get_value(*next, Q_Value::current_offset())->current) < sum_value(nullptr, value_best->next))
+          if(sum_value(nullptr, get_value(next, Q_Value::current_offset())->current) < sum_value(nullptr, value_best->next))
             clear_eligibility_trace();
-          m_next = std::move(next);
+          m_next = next;
         }
 
 #ifdef DEBUG_OUTPUT
@@ -201,9 +229,7 @@ public:
       }
     }
     else {
-      destroy_lists();
-
-      td_update(&value_current->current, reward, nullptr);
+      td_update(m_current_q_value, reward, nullptr);
     }
 
     m_total_reward += reward;
@@ -214,206 +240,156 @@ public:
 
   void print(std::ostream &os) const {
     os << " Agent:\n";
-    print_feature_lists(os);
-    print_list(os, "  Candidates:\n  ", " ", m_candidates);
-#if defined(DEBUG_OUTPUT) && defined(DEBUG_OUTPUT_VALUE_FUNCTION)
-    print_value_function(os);
-#endif
+//    print_feature_lists(os);
+//    print_list(os, "  Candidates:\n  ", " ", m_candidates);
+//#if defined(DEBUG_OUTPUT) && defined(DEBUG_OUTPUT_VALUE_FUNCTION)
+//    print_value_function(os);
+//#endif
   }
 
-  void print_feature_lists(std::ostream &os) const {
-    os.unsetf(std::ios_base::floatfield);
+//  void print_feature_lists(std::ostream &os) const {
+//    os.unsetf(std::ios_base::floatfield);
+//
+//    os << "  Features:" << std::endl;
+//    for(auto &fl : m_feature_lists) {
+//      os << "  " << *fl.first << " :";
+//      print_list(os, "", " ", fl.second);
+//    }
+//
+//    os.setf(std::ios_base::fixed, std::ios_base::floatfield);
+//  }
 
-    os << "  Features:" << std::endl;
-    for(auto &fl : m_feature_lists) {
-      os << "  " << *fl.first << " :";
-      print_list(os, "", " ", fl.second);
-    }
-//    print_list(os, "  Features:", " ", m_features);
-
-    os.setf(std::ios_base::fixed, std::ios_base::floatfield);
-  }
-
-  void print_value_function(std::ostream &os) const {
-    os << "  Value Function:";
-    for(auto &vf : m_value_function) {
-      os << std::endl << "  " << *vf.first << " : ";
-      print_value_function_trie(os, vf.second);
-    }
-    os << std::endl;
-  }
+//  void print_value_function(std::ostream &os) const {
+//    os << "  Value Function:";
+//    for(auto &vf : m_value_function) {
+//      os << std::endl << "  " << *vf.first << " : ";
+//      print_value_function_trie(os, vf.second);
+//    }
+//    os << std::endl;
+//  }
 
   size_t get_value_function_size() const {
     return m_q_value_count;
 
-//     size_t size = 0lu;
-//     for(const auto &vf : m_value_function) {
-//       size += get_trie_size(vf.second);
-//     }
-//     return size;
+//    size_t size = 0lu;
+//    for(const auto &vf : m_value_function) {
+//      size += get_trie_size(vf.second);
+//    }
+//    return size;
   }
 
   void reset_update_counts() {
-    for(auto &vf : m_value_function) {
-      reset_update_counts_for_trie(vf.second);
-    }
+//    for(auto &vf : m_value_function) {
+//      reset_update_counts_for_trie(vf.second);
+//    }
   }
 
-  void print_value_function_grid(std::ostream &os) const {
-    std::set<line_segment_type> line_segments;
-    for(auto &value : m_value_function) {
-      os << *value.first << ":" << std::endl;
-      const auto line_segments2 = generate_value_function_grid_sets(value.second);
-      merge_value_function_grid_sets(line_segments, line_segments2);
-      print_value_function_grid_set(os, line_segments2);
-    }
-    os << "all:" << std::endl;
-    print_value_function_grid_set(os, line_segments);
-  }
+//  void print_value_function_grid(std::ostream &os) const {
+//    std::set<line_segment_type> line_segments;
+//    for(auto &value : m_value_function) {
+//      os << *value.first << ":" << std::endl;
+//      const auto line_segments2 = generate_value_function_grid_sets(value.second);
+//      merge_value_function_grid_sets(line_segments, line_segments2);
+//      print_value_function_grid_set(os, line_segments2);
+//    }
+//    os << "all:" << std::endl;
+//    print_value_function_grid_set(os, line_segments);
+//  }
 
-  void print_update_count_grid(std::ostream &os) const {
-    std::map<line_segment_type, size_t> update_counts;
-    for(auto &value : m_value_function) {
-      os << *value.first << ":" << std::endl;
-      const auto update_counts2 = generate_update_count_maps(value.second);
-      merge_update_count_maps(update_counts, update_counts2);
-      print_update_count_map(os, update_counts2);
-    }
-    os << "all:" << std::endl;
-    print_update_count_map(os, update_counts);
-  }
+//  void print_update_count_grid(std::ostream &os) const {
+//    std::map<line_segment_type, size_t> update_counts;
+//    for(auto &value : m_value_function) {
+//      os << *value.first << ":" << std::endl;
+//      const auto update_counts2 = generate_update_count_maps(value.second);
+//      merge_update_count_maps(update_counts, update_counts2);
+//      print_update_count_map(os, update_counts2);
+//    }
+//    os << "all:" << std::endl;
+//    print_update_count_map(os, update_counts);
+//  }
 
 protected:
   typedef std::pair<double, double> point_type;
   typedef std::pair<point_type, point_type> line_segment_type;
 
-  Q_Value * get_value(const action_type &action, const size_t &offset, const size_t &depth = 0) {
-    const feature_list &features = get_feature_list(action);
-    assert(features);
-
+  Q_Value * get_value(const action_ptrsc &action, const size_t &offset, const size_t &depth = 0) {
 #ifdef ENABLE_WEIGHT
     const bool use_value = m_weight_assignment_code != "all";
 #else
     const bool use_value = false;
 #endif
 
-    for(;;) {
-      try {
-        feature_trie head = nullptr;
-
-        auto it = features->begin();
-        auto iend = features->end();
-        if(it != iend) {
-          head = new feature_trie_type(std::unique_ptr<feature_type>(it->clone()));
-          feature_trie tail = head;
-          ++it;
-
-          while(it != iend) {
-            feature_trie ptr = new feature_trie_type(std::unique_ptr<feature_type>(it->clone()));
-            ptr->list_insert_after(tail);
-            tail = ptr;
-            ++it;
-          }
-        }
-
-        Q_Value * const rv = get_value_from_function(head, get_trie(action), offset, depth, use_value)->get();
+    Q_Value * rv = nullptr; //= get_value_from_function(head, get_trie(action), offset, depth, use_value)->get();
+    if(offset == Q_Value::current_offset()) {
+      assert(*action == *m_current);
+      rv = m_current_q_value->get();
+    }
+    else
+      rv = m_next_q_values[action]->get();
 
 #ifdef ENABLE_WEIGHT
-        assign_weight(Zeni::value_to_Linked_List(rv, offset));
+    assign_weight(Zeni::value_to_Linked_List(rv, offset));
 #endif
 
-        return rv;
-      }
-      catch(Again &) {
-#ifdef DEBUG_OUTPUT
-        std::cerr << "Again: " << action << std::endl << *this;
-#endif
-      }
+    return rv;
+  }
+
+  void next_q_to_current_q() {
+    m_current_q_value = m_next_q_values[m_current];
+    Q_Value::List * tail = nullptr;
+
+    for(auto &q : *m_next_q_values[m_current]) {
+      q.next.erase_hard();
+      q.next.insert_after(tail);
+      tail = &q.next;
     }
   }
 
-  feature_list & get_feature_list(const action_type &action) {
-    auto vf = m_feature_lists.find(const_cast<action_type *>(&action));
-    if(vf == m_feature_lists.end())
-      vf = m_feature_lists.insert(typename feature_list_type::value_type(action.clone(), nullptr)).first;
-    return vf->second;
-//    return m_features;
-  }
-
-  feature_trie & get_trie(const action_type &action) {
-    auto vf = m_value_function.find(const_cast<action_type *>(&action));
-    if(vf == m_value_function.end())
-      vf = m_value_function.insert(typename value_function_type::value_type(action.clone(), nullptr)).first;
-    return vf->second;
-  }
-
-  void regenerate_lists() {
-    destroy_lists();
-
-    generate_candidates();
-    generate_features();
-  }
-
-  void destroy_lists() {
-    destroy_features();
-    m_candidates->destroy(m_candidates);
-  }
-
-  void destroy_features() {
-    for(typename feature_list_type::iterator ft = m_feature_lists.begin(), fend = m_feature_lists.end(); ft != fend; ) {
-      auto ptr = ft->first;
-      ft->second->destroy(ft->second);
-      m_feature_lists.erase(ft++);
-      delete ptr;
-    }
-//    m_features->destroy(m_features);
-  }
-
-  action_ptruc choose_epsilon_greedy(const double &epsilon) {
+  action_ptrsc choose_epsilon_greedy(const double &epsilon) {
     if(random.frand_lt() < epsilon)
       return choose_randomly();
     else
       return choose_greedy();
   }
 
-  action_ptruc choose_greedy() {
+  action_ptrsc choose_greedy() {
 #ifdef DEBUG_OUTPUT
     std::cerr << "  choose_greedy" << std::endl;
 #endif
 
     double value = double();
-    const action_type * action = nullptr;
-    for(const action_type &action_ : *m_candidates) {
-      const double value_ = sum_value(&action_, this->get_value(action_, Q_Value::next_offset())->next);
+    action_ptrsc action;
+    for(const auto &action_q : m_next_q_values) {
+      const double value_ = sum_value(action_q.first.get(), *action_q.second);
 
       if(!action || value_ > value) {
-        action = &action_;
+        action = action_q.first;
         value = value_;
       }
     }
 
-    return action_ptruc(action->clone());
+    return action;
   }
 
-  action_ptruc choose_randomly() {
+  action_ptrsc choose_randomly() {
 #ifdef DEBUG_OUTPUT
     std::cerr << "  choose_randomly" << std::endl;
 #endif
 
     int counter = 0;
-    for(const action_type &action_ : *m_candidates) {
+    for(const auto &action_q : m_next_q_values) {
       ++counter;
-      this->get_value(action_, Q_Value::next_offset()); ///< Trigger additional feature generation, as needed
+//      this->get_value(action_, Q_Value::next_offset()); ///< Trigger additional feature generation, as needed
     }
 
     counter = random.rand_lt(counter) + 1;
-    const action_type * action = nullptr;
-    for(const action_type &action_ : *m_candidates) {
+    action_ptrsc action;
+    for(const auto &action_q : m_next_q_values) {
       if(!--counter)
-        action = &action_;
+        action = action_q.first;
     }
 
-    return action_ptruc(action->clone());
+    return action;
   }
 
   void td_update(Q_Value::List * const &current, const reward_type &reward, const Q_Value::List * const &next) {
@@ -752,7 +728,9 @@ protected:
     }
 #endif
 
-    assert((&value_list - static_cast<Q_Value::List *>(nullptr)) > ptrdiff_t(sizeof(Q_Value)));
+//    assert((&value_list - static_cast<Q_Value::List *>(nullptr)) > ptrdiff_t(sizeof(Q_Value)));
+    if((&value_list - static_cast<Q_Value::List *>(nullptr)) <= ptrdiff_t(sizeof(Q_Value)))
+      return double();
 
     double sum = double();
     for(const Q_Value &q : value_list) {
@@ -903,16 +881,15 @@ protected:
   }
 
   Metastate m_metastate = Metastate::NON_TERMINAL;
-  feature_list_type m_feature_lists;
-//  feature_list m_features;
-  bool m_features_complete = true;
-  action_list m_candidates = nullptr;
-  value_function_type m_value_function;
-  std::unique_ptr<const action_type> m_current;
-  std::unique_ptr<const action_type> m_next;
-  std::function<action_ptruc ()> m_target_policy; ///< Sarsa/Q-Learning selector
-  std::function<action_ptruc ()> m_exploration_policy; ///< Exploration policy
+  action_ptrsc m_current;
+  Q_Value::List * m_current_q_value = nullptr;
+  action_ptrsc m_next;
+  std::map<action_ptrsc, Q_Value::List *, typename action_type::Compare> m_next_q_values;
+  std::function<action_ptrsc ()> m_target_policy; ///< Sarsa/Q-Learning selector
+  std::function<action_ptrsc ()> m_exploration_policy; ///< Exploration policy
   std::function<bool (Q_Value * const &, const size_t &)> m_split_test; ///< true if too general, false if sufficiently general
+  size_t m_q_value_count = 0;
+
 
 private:
   static size_t get_trie_size(const feature_trie_type * const &trie) {
@@ -933,324 +910,323 @@ private:
     }
   }
 
-  feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const bool &use_value, const double &value = 0.0) {
-    /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
-    feature_trie match, found;
-    for(match = head; match; match = match->list_next()) {
-      found = function->find(match->get_key(), typename feature_type::Compare_Axis());
-      if(found)
-        break;
-    }
-
-    if(match) {
-      assert(!found->get() || found->get()->type != Q_Value::Type::FRINGE);
-
-      /// Dynamic midpoint part 1 of 3
-      const feature_trie inserted = match;
-      Feature_Ranged_Data * ranged = dynamic_cast<Feature_Ranged_Data *>(inserted->get_key().get());
-      double inserted_midpt;
-      if(ranged)
-        inserted_midpt = ranged->midpt_raw;
-
-      /// Insertion
-      feature_trie next = static_cast<feature_trie>(head == match ? head->list_next() : head);
-      match->list_erase();
-      match = match->map_insert_into_unique(function);
-      if(!m_null_q_values && !match->get()) {
-        match->get() = new Q_Value(use_value ? value : 0.0);
-        ++m_q_value_count;
-      }
-
-      /// Dynamic midpoint part 2 of 3
-//      if(m_dynamic_midpoint && ranged && inserted == match) {
-//        Feature_Ranged_Data * const ranged_other = dynamic_cast<Feature_Ranged_Data *>(found->get_key().get());
-//        if(ranged->upper)
-//          ranged->bound_lower = ranged_other->bound_upper;
+//  feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const bool &use_value, const double &value = 0.0) {
+//    /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
+//    feature_trie match, found;
+//    for(match = head; match; match = match->list_next()) {
+//      found = function->find(match->get_key(), typename feature_type::Compare_Axis());
+//      if(found)
+//        break;
+//    }
+//
+//    if(match) {
+//      assert(!found->get() || found->get()->type != Q_Value::Type::FRINGE);
+//
+//      /// Dynamic midpoint part 1 of 3
+//      const feature_trie inserted = match;
+//      Feature_Ranged_Data * ranged = dynamic_cast<Feature_Ranged_Data *>(inserted->get_key().get());
+//      double inserted_midpt;
+//      if(ranged)
+//        inserted_midpt = ranged->midpt_raw;
+//
+//      /// Insertion
+//      feature_trie next = static_cast<feature_trie>(head == match ? head->list_next() : head);
+//      match->list_erase();
+//      match = match->map_insert_into_unique(function);
+//      if(!m_null_q_values && !match->get()) {
+//        match->get() = new Q_Value(use_value ? value : 0.0);
+//        ++m_q_value_count;
+//      }
+//
+//      /// Dynamic midpoint part 2 of 3
+////      if(m_dynamic_midpoint && ranged && inserted == match) {
+////        Feature_Ranged_Data * const ranged_other = dynamic_cast<Feature_Ranged_Data *>(found->get_key().get());
+////        if(ranged->upper)
+////          ranged->bound_lower = ranged_other->bound_upper;
+////        else
+////          ranged->bound_upper = ranged_other->bound_lower;
+////      }
+//
+//      const double value_next = value + (match->get() ? match->get()->value * match->get()->weight : 0.0);
+//
+//      feature_trie deeper = nullptr;
+//      if(next && m_split_test(match->get(), depth)) {
+//        /// Recursion
+//        collapse_fringe(match->get_deeper(), next);
+//        deeper = get_value_from_function(next, match->get_deeper(), offset, depth + 1, use_value, value_next);
+//      }
+//      else {
+//        /// Done; repeat as needed
+//        if(!found->get() || found->get()->type != Q_Value::Type::FRINGE) {
+//          try {
+//            generate_more_features(match->get(), depth, match == inserted);
+//          }
+//          catch(Again &) {
+//            next->list_destroy(next);
+//            throw;
+//          }
+//
+//          if(m_null_q_values && !match->get()) {
+//            match->get() = new Q_Value(use_value ? value : 0.0);
+//            ++m_q_value_count;
+//          }
+//
+//          deeper = generate_fringe(match->get_deeper(), next, offset, value_next);
+//        }
 //        else
-//          ranged->bound_upper = ranged_other->bound_lower;
+//          next->list_destroy(next);
 //      }
-
-      const double value_next = value + (match->get() ? match->get()->value * match->get()->weight : 0.0);
-
-      feature_trie deeper = nullptr;
-      if(next && m_split_test(match->get(), depth)) {
-        /// Recursion
-        collapse_fringe(match->get_deeper(), next);
-        deeper = get_value_from_function(next, match->get_deeper(), offset, depth + 1, use_value, value_next);
-      }
-      else {
-        /// Done; repeat as needed
-        if(!found->get() || found->get()->type != Q_Value::Type::FRINGE) {
-          try {
-            generate_more_features(match->get(), depth, match == inserted);
-          }
-          catch(Again &) {
-            next->list_destroy(next);
-            throw;
-          }
-
-          if(m_null_q_values && !match->get()) {
-            match->get() = new Q_Value(use_value ? value : 0.0);
-            ++m_q_value_count;
-          }
-
-          deeper = generate_fringe(match->get_deeper(), next, offset, value_next);
-        }
-        else
-          next->list_destroy(next);
-      }
-
-      /// Dynamic midpoint part 3 of 3
-      if(m_dynamic_midpoint && offset == Q_Value::current_offset() && ranged && inserted != match) {
-        ranged = dynamic_cast<Feature_Ranged_Data *>(match->get_key().get());
-        const size_t next_update_count = ranged->midpt_update_count + 1;
-        const double next_update_count_d = double(next_update_count);
-
-        assert(ranged->midpt_raw >= 0.0);
-        assert(ranged->midpt_raw <= 1.0);
-        assert(inserted_midpt >= 0.0);
-        assert(inserted_midpt <= 1.0);
-        ranged->midpt_raw = ranged->midpt_raw * (ranged->midpt_update_count / next_update_count_d) + inserted_midpt / next_update_count_d;
-
-        ranged->midpt_update_count = next_update_count;
-
-//        if(!deeper || deeper->get()->type == Q_Value::Type::FRINGE) {
-//          double ranged_amt;
-//          if(ranged->midpt_update_count < 10) { ///< 10 is a temporary magic number
-//            ranged_amt = ranged->midpt_update_count / 10.0;
-//            ranged_amt = ranged->midpt_raw * ranged_amt + 0.5 * (1.0 - ranged_amt);
-//          }
-//          else
-//            ranged_amt = ranged->midpt_raw;
-//          *ranged->midpt = *ranged->bound_lower + ranged_amt * (*ranged->bound_upper - *ranged->bound_lower);
 //
-//          assert(*ranged->midpt <= *ranged->bound_upper);
-//          assert(*ranged->midpt >= *ranged->bound_lower);
+//      /// Dynamic midpoint part 3 of 3
+//      if(m_dynamic_midpoint && offset == Q_Value::current_offset() && ranged && inserted != match) {
+//        ranged = dynamic_cast<Feature_Ranged_Data *>(match->get_key().get());
+//        const size_t next_update_count = ranged->midpt_update_count + 1;
+//        const double next_update_count_d = double(next_update_count);
+//
+//        assert(ranged->midpt_raw >= 0.0);
+//        assert(ranged->midpt_raw <= 1.0);
+//        assert(inserted_midpt >= 0.0);
+//        assert(inserted_midpt <= 1.0);
+//        ranged->midpt_raw = ranged->midpt_raw * (ranged->midpt_update_count / next_update_count_d) + inserted_midpt / next_update_count_d;
+//
+//        ranged->midpt_update_count = next_update_count;
+//
+////        if(!deeper || deeper->get()->type == Q_Value::Type::FRINGE) {
+////          double ranged_amt;
+////          if(ranged->midpt_update_count < 10) { ///< 10 is a temporary magic number
+////            ranged_amt = ranged->midpt_update_count / 10.0;
+////            ranged_amt = ranged->midpt_raw * ranged_amt + 0.5 * (1.0 - ranged_amt);
+////          }
+////          else
+////            ranged_amt = ranged->midpt_raw;
+////          *ranged->midpt = *ranged->bound_lower + ranged_amt * (*ranged->bound_upper - *ranged->bound_lower);
+////
+////          assert(*ranged->midpt <= *ranged->bound_upper);
+////          assert(*ranged->midpt >= *ranged->bound_lower);
+////        }
+//      }
+//
+//      /// Stitch together Q-Values and return
+//      match->offset_erase_hard(offset);
+//      auto rv = match->offset_insert_before(offset, deeper);
+//      assert(rv);
+//      return rv;
+//    }
+//    /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
+//
+//    auto rv = head->insert(function, m_null_q_values, m_split_test,
+//                           [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);},
+//                           [this](feature_trie &leaf_fringe, feature_trie head, const size_t &offset, const double &value)->feature_trie{return this->generate_fringe(leaf_fringe, head, offset, value);},
+//                           [this](feature_trie &leaf_fringe, feature_trie head){this->collapse_fringe(leaf_fringe, head);},
+//                           offset, depth, value, use_value, m_q_value_count);
+//    assert(rv);
+//    return rv;
+//  }
+
+//  void generate_more_features(Q_Value * const &q, const size_t &depth, const bool &force) {
+//    if(!m_features_complete && (force || m_split_test(q, depth)))
+//    {
+//      destroy_features();
+//      generate_features();
+//      throw Again();
+//    }
+//  }
+
+//  /// Use up the rest of the features to generate a fringe
+//  feature_trie generate_fringe(feature_trie &leaf_fringe, feature_trie head, const size_t &offset, const double &value) {
+//    if(m_fringe) {
+//      assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type == Q_Value::Type::FRINGE);
+//
+////  #ifdef DEBUG_OUTPUT
+////      std::cerr.unsetf(std::ios_base::floatfield);
+////      std::cerr << "   Current fringe:" << std::endl;
+////  #endif
+//
+//      feature_trie fringe_head = nullptr;
+//      while(head) {
+//        auto next = static_cast<feature_trie>(head->list_next());
+//        head->list_erase_hard();
+//
+//        auto inserted = head->map_insert_into_unique(leaf_fringe);
+//        if(!inserted->get())
+//          inserted->get() = new Q_Value(value, Q_Value::Type::FRINGE);
+//
+////  #ifdef DEBUG_OUTPUT
+////        std::cerr << "    " << inserted->get() << " from " << *inserted->get_key() << std::endl;
+////  #endif
+//
+//        inserted->offset_erase_hard(offset);
+//        fringe_head = inserted->offset_insert_before(offset, fringe_head);
+//
+//        head = next;
+//      }
+//
+////  #ifdef DEBUG_OUTPUT
+////      leaf_fringe->map_debug_print_visit(std::cerr, [](const Q_Value * const q){std::cerr << q;});
+////      std::cerr << std::endl;
+////
+////      for(feature_trie_type &node : *leaf_fringe) {
+////        std::cerr << "    " << node.get() << ' ' << *node.get_key() << " = " << node->value;
+////        std::cerr << "; update_count = " << node->update_count;
+////        std::cerr << "; cabe = " << node->cabe;
+////        std::cerr << "; mabe = " << node->cabe / node->update_count;
+////        if(auto ranged = dynamic_cast<Feature_Ranged_Data *>(node.get_key().get()))
+////          std::cerr << "; split = " << fabs(ranged->midpt_raw - 0.5);
+////        std::cerr << std::endl;
+////      }
+////      std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
+////  #endif
+//
+//      return fringe_head;
+//    }
+//    else {
+//      head->list_destroy(head); ///< Destroy the rest of the features instead of generating a fringe
+//      return nullptr;
+//    }
+//  }
+
+//  void collapse_fringe(feature_trie &leaf_fringe, feature_trie head) {
+//    if(m_fringe) {
+//      purge_from_eligibility_trace(leaf_fringe);
+//
+//      feature_trie choice = nullptr;
+//
+//      if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::Type::FRINGE) {
+//#ifdef DEBUG_OUTPUT
+//        std::cerr.unsetf(std::ios_base::floatfield);
+//        std::cerr << " Collapsing fringe:" << std::endl;
+//        for(feature_trie_type &node : *leaf_fringe) {
+//          std::cerr << "         " << node.get() << ' ' << *node.get_key() << " = " << node->value;
+//          std::cerr << "; update_count = " << node->update_count;
+//          std::cerr << "; cabe = " << node->cabe;
+//          std::cerr << "; mabe = " << node->cabe / node->update_count;
+//          if(auto ranged = dynamic_cast<Feature_Ranged_Data *>(node.get_key().get()))
+//            std::cerr << "; split = " << fabs(ranged->midpt_raw - 0.5);
+//          std::cerr << std::endl;
 //        }
-      }
-
-      /// Stitch together Q-Values and return
-      match->offset_erase_hard(offset);
-      auto rv = match->offset_insert_before(offset, deeper);
-      assert(rv);
-      return rv;
-    }
-    /** End logic to ensure that features enter the trie in the same order, regardless of current ordering. **/
-
-    auto rv = head->insert(function, m_null_q_values, m_split_test,
-                           [this](Q_Value * const &q, const size_t &depth, const bool &force){this->generate_more_features(q, depth, force);},
-                           [this](feature_trie &leaf_fringe, feature_trie head, const size_t &offset, const double &value)->feature_trie{return this->generate_fringe(leaf_fringe, head, offset, value);},
-                           [this](feature_trie &leaf_fringe, feature_trie head){this->collapse_fringe(leaf_fringe, head);},
-                           offset, depth, value, use_value, m_q_value_count);
-    assert(rv);
-    return rv;
-  }
-
-  void generate_more_features(Q_Value * const &q, const size_t &depth, const bool &force) {
-    if(!m_features_complete && (force || m_split_test(q, depth)))
-    {
-      destroy_features();
-      generate_features();
-      throw Again();
-    }
-  }
-
-  /// Use up the rest of the features to generate a fringe
-  feature_trie generate_fringe(feature_trie &leaf_fringe, feature_trie head, const size_t &offset, const double &value) {
-    if(m_fringe) {
-      assert(!leaf_fringe || !leaf_fringe->get() || leaf_fringe->get()->type == Q_Value::Type::FRINGE);
-
-//  #ifdef DEBUG_OUTPUT
-//      std::cerr.unsetf(std::ios_base::floatfield);
-//      std::cerr << "   Current fringe:" << std::endl;
-//  #endif
-
-      feature_trie fringe_head = nullptr;
-      while(head) {
-        auto next = static_cast<feature_trie>(head->list_next());
-        head->list_erase_hard();
-
-        auto inserted = head->map_insert_into_unique(leaf_fringe);
-        if(!inserted->get())
-          inserted->get() = new Q_Value(value, Q_Value::Type::FRINGE);
-
-//  #ifdef DEBUG_OUTPUT
-//        std::cerr << "    " << inserted->get() << " from " << *inserted->get_key() << std::endl;
-//  #endif
-
-        inserted->offset_erase_hard(offset);
-        fringe_head = inserted->offset_insert_before(offset, fringe_head);
-
-        head = next;
-      }
-
-//  #ifdef DEBUG_OUTPUT
-//      leaf_fringe->map_debug_print_visit(std::cerr, [](const Q_Value * const q){std::cerr << q;});
-//      std::cerr << std::endl;
+//#endif
 //
-//      for(feature_trie_type &node : *leaf_fringe) {
-//        std::cerr << "    " << node.get() << ' ' << *node.get_key() << " = " << node->value;
-//        std::cerr << "; update_count = " << node->update_count;
-//        std::cerr << "; cabe = " << node->cabe;
-//        std::cerr << "; mabe = " << node->cabe / node->update_count;
-//        if(auto ranged = dynamic_cast<Feature_Ranged_Data *>(node.get_key().get()))
-//          std::cerr << "; split = " << fabs(ranged->midpt_raw - 0.5);
-//        std::cerr << std::endl;
-//      }
-//      std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
-//  #endif
-
-      return fringe_head;
-    }
-    else {
-      head->list_destroy(head); ///< Destroy the rest of the features instead of generating a fringe
-      return nullptr;
-    }
-  }
-
-  void collapse_fringe(feature_trie &leaf_fringe, feature_trie head) {
-    if(m_fringe) {
-      purge_from_eligibility_trace(leaf_fringe);
-
-      feature_trie choice = nullptr;
-
-      if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::Type::FRINGE) {
-#ifdef DEBUG_OUTPUT
-        std::cerr.unsetf(std::ios_base::floatfield);
-        std::cerr << " Collapsing fringe:" << std::endl;
-        for(feature_trie_type &node : *leaf_fringe) {
-          std::cerr << "         " << node.get() << ' ' << *node.get_key() << " = " << node->value;
-          std::cerr << "; update_count = " << node->update_count;
-          std::cerr << "; cabe = " << node->cabe;
-          std::cerr << "; mabe = " << node->cabe / node->update_count;
-          if(auto ranged = dynamic_cast<Feature_Ranged_Data *>(node.get_key().get()))
-            std::cerr << "; split = " << fabs(ranged->midpt_raw - 0.5);
-          std::cerr << std::endl;
-        }
-#endif
-
-        size_t min_depth = std::numeric_limits<size_t>::max();
-        for(feature_trie_type &node : *leaf_fringe) {
-          const auto feature = node.get_key().get();
-          const auto ranged = dynamic_cast<Feature_Ranged_Data *>(feature);
-          if(ranged->depth < min_depth)
-            min_depth = ranged->depth;
-        }
-
-        feature_trie_type * prev = nullptr;
-        Feature_Ranged_Data * ranged_prev = nullptr;
-//        size_t choice_update_count_min = 0u;
-//        size_t ranged_update_count_min = 0u;
-//        size_t choice_axis_in_a_row = 0u;
-//        size_t axis_in_a_row = 0u;
-        double choice_delta = 0.0;
-//        size_t choice_depth = 0;
-        for(feature_trie_type &node : *leaf_fringe) {
-          const auto feature = node.get_key().get();
-          const auto ranged = dynamic_cast<Feature_Ranged_Data *>(feature);
-
-//          if(!choice) {
-//            choice = &node;
-//            choice_update_count_min = ranged ? ranged->midpt_update_count : 0u;
-//            choice_axis_in_a_row = ranged ? 1u : 0u;
-//          }
-
-          if(ranged_prev && ranged_prev->depth == min_depth) {
-            if(ranged && ranged_prev && ranged->axis == ranged_prev->axis &&
-               ranged->midpt_update_count && ranged_prev->midpt_update_count)
-            {
-              const double delta = fabs(prev->get()->value - node.get()->value);
-              if(delta > choice_delta) {
-                choice_delta = delta;
-//                choice_depth = ranged->depth;
-                choice = &node;
-              }
-            }
-
-//            if(!ranged || ranged->axis != ranged_prev->axis) {
-//              if(axis_in_a_row >  choice_axis_in_a_row ||
-//                (axis_in_a_row == choice_axis_in_a_row && ranged_update_count_min > choice_update_count_min)) {
-//                choice = prev;
-//                choice_update_count_min = ranged_update_count_min;
-//              }
+//        size_t min_depth = std::numeric_limits<size_t>::max();
+//        for(feature_trie_type &node : *leaf_fringe) {
+//          const auto feature = node.get_key().get();
+//          const auto ranged = dynamic_cast<Feature_Ranged_Data *>(feature);
+//          if(ranged->depth < min_depth)
+//            min_depth = ranged->depth;
+//        }
 //
-//              if(ranged) {
-//                ranged_update_count_min = ranged->midpt_update_count;
-//                axis_in_a_row = 1u;
+//        feature_trie_type * prev = nullptr;
+//        Feature_Ranged_Data * ranged_prev = nullptr;
+////        size_t choice_update_count_min = 0u;
+////        size_t ranged_update_count_min = 0u;
+////        size_t choice_axis_in_a_row = 0u;
+////        size_t axis_in_a_row = 0u;
+//        double choice_delta = 0.0;
+////        size_t choice_depth = 0;
+//        for(feature_trie_type &node : *leaf_fringe) {
+//          const auto feature = node.get_key().get();
+//          const auto ranged = dynamic_cast<Feature_Ranged_Data *>(feature);
+//
+////          if(!choice) {
+////            choice = &node;
+////            choice_update_count_min = ranged ? ranged->midpt_update_count : 0u;
+////            choice_axis_in_a_row = ranged ? 1u : 0u;
+////          }
+//
+//          if(ranged_prev && ranged_prev->depth == min_depth) {
+//            if(ranged && ranged_prev && ranged->axis == ranged_prev->axis &&
+//               ranged->midpt_update_count && ranged_prev->midpt_update_count)
+//            {
+//              const double delta = fabs(prev->get()->value - node.get()->value);
+//              if(delta > choice_delta) {
+//                choice_delta = delta;
+////                choice_depth = ranged->depth;
+//                choice = &node;
 //              }
 //            }
-//            else {
-//              ranged_update_count_min = std::min(ranged_update_count_min, ranged->midpt_update_count);
-//              ++axis_in_a_row;
-//            }
-          }
-//          else if(ranged) {
-//            ranged_update_count_min = ranged->midpt_update_count;
-//            axis_in_a_row = 1u;
+//
+////            if(!ranged || ranged->axis != ranged_prev->axis) {
+////              if(axis_in_a_row >  choice_axis_in_a_row ||
+////                (axis_in_a_row == choice_axis_in_a_row && ranged_update_count_min > choice_update_count_min)) {
+////                choice = prev;
+////                choice_update_count_min = ranged_update_count_min;
+////              }
+////
+////              if(ranged) {
+////                ranged_update_count_min = ranged->midpt_update_count;
+////                axis_in_a_row = 1u;
+////              }
+////            }
+////            else {
+////              ranged_update_count_min = std::min(ranged_update_count_min, ranged->midpt_update_count);
+////              ++axis_in_a_row;
+////            }
 //          }
-
-          prev = &node;
-          ranged_prev = ranged;
-        }
-//        if(axis_in_a_row >  choice_axis_in_a_row ||
-//          (axis_in_a_row == choice_axis_in_a_row && ranged_update_count_min > choice_update_count_min)) {
-//          choice = prev;
-//          choice_update_count_min = ranged_update_count_min;
+////          else if(ranged) {
+////            ranged_update_count_min = ranged->midpt_update_count;
+////            axis_in_a_row = 1u;
+////          }
+//
+//          prev = &node;
+//          ranged_prev = ranged;
 //        }
+////        if(axis_in_a_row >  choice_axis_in_a_row ||
+////          (axis_in_a_row == choice_axis_in_a_row && ranged_update_count_min > choice_update_count_min)) {
+////          choice = prev;
+////          choice_update_count_min = ranged_update_count_min;
+////        }
+//
+//#ifdef DEBUG_OUTPUT
+//        std::cerr << "  Choice " << *choice->get_key() << std::endl;
+//        std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
+//#endif
+//
+//        if(choice)
+//          choice = new feature_trie_type(std::unique_ptr<feature_type>(choice->get_key()->clone()));
+//
+//        leaf_fringe->destroy(leaf_fringe);
+//
+//        if(choice)
+//          choice->map_insert_into_unique(leaf_fringe);
+//      }
+//    }
+//    /// Only necessary when lesioning codebase for debugging purposes (i.e. disabling previous block of code)
+//    else if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::Type::FRINGE) {
+//      purge_from_eligibility_trace(leaf_fringe);
+//      leaf_fringe->destroy(leaf_fringe);
+//    }
+//  }
 
-#ifdef DEBUG_OUTPUT
-        std::cerr << "  Choice " << *choice->get_key() << std::endl;
-        std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
-#endif
+//  void purge_from_eligibility_trace(const feature_trie leaf_fringe) {
+//    for(feature_trie_type &node : *leaf_fringe) {
+//      if(Q_Value * const q = node.get()) {
+//        if(&q->eligible == m_eligible && m_eligible->next())
+//          m_eligible = m_eligible->next();
+//
+//        q->eligibility_init = false;
+//        q->eligibility = -1.0;
+//
+//        q->eligible.erase();
+//      }
+//    }
+//  }
 
-        if(choice)
-          choice = new feature_trie_type(std::unique_ptr<feature_type>(choice->get_key()->clone()));
-
-        leaf_fringe->destroy(leaf_fringe);
-
-        if(choice)
-          choice->map_insert_into_unique(leaf_fringe);
-      }
-    }
-    /// Only necessary when lesioning codebase for debugging purposes (i.e. disabling previous block of code)
-    else if(leaf_fringe && leaf_fringe->get() && leaf_fringe->get()->type == Q_Value::Type::FRINGE) {
-      purge_from_eligibility_trace(leaf_fringe);
-      leaf_fringe->destroy(leaf_fringe);
-    }
-  }
-
-  void purge_from_eligibility_trace(const feature_trie leaf_fringe) {
-    for(feature_trie_type &node : *leaf_fringe) {
-      if(Q_Value * const q = node.get()) {
-        if(&q->eligible == m_eligible && m_eligible->next())
-          m_eligible = m_eligible->next();
-
-        q->eligibility_init = false;
-        q->eligibility = -1.0;
-
-        q->eligible.erase();
-      }
-    }
-  }
-
-  static void print_value_function_trie(std::ostream &os, const feature_trie_type * const &trie) {
-    for(const auto &tt : *trie) {
-      os << '<' << *tt.get_key() << ',';
-      if(tt.get())
-        os << tt->value;
-      else
-        os << "nullptr";
-      os << ',';
-      if(tt.get_deeper())
-        print_value_function_trie(os, tt.get_deeper());
-      else if(tt.get() && tt.get()->type == Q_Value::Type::FRINGE)
-        os << 'f';
-      os << '>';
-    }
-  }
+//  static void print_value_function_trie(std::ostream &os, const feature_trie_type * const &trie) {
+//    for(const auto &tt : *trie) {
+//      os << '<' << *tt.get_key() << ',';
+//      if(tt.get())
+//        os << tt->value;
+//      else
+//        os << "nullptr";
+//      os << ',';
+//      if(tt.get_deeper())
+//        print_value_function_trie(os, tt.get_deeper());
+//      else if(tt.get() && tt.get()->type == Q_Value::Type::FRINGE)
+//        os << 'f';
+//      os << '>';
+//    }
+//  }
 
   virtual void generate_features() = 0;
-  virtual void generate_candidates() = 0;
   virtual void update() = 0;
 
   Mean m_mean_cabe;
@@ -1313,8 +1289,6 @@ private:
   const double m_fringe_learning_scale = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["fringe-learning-scale"]).get_value();
 
   Q_Value::List * m_eligible = nullptr;
-
-  size_t m_q_value_count = 0;
 };
 
 template <typename FEATURE, typename ACTION>

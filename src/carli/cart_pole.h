@@ -216,67 +216,67 @@ namespace Cart_Pole {
      m_min_theta_dot(std::make_shared<double>(-dynamic_pointer_cast<const Environment>(env)->get_max_theta_dot())),
      m_max_theta_dot(std::make_shared<double>(dynamic_pointer_cast<const Environment>(env)->get_max_theta_dot()))
     {
-      m_features_complete = false;
+//      m_features_complete = false;
     }
 
     bool is_ignoring_x() const {return m_ignore_x;}
 
   private:
-    set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie) const {
-      return generate_vfgs_for_axes(trie, feature_type::Axis::THETA, feature_type::Axis::THETA_DOT);
-    }
+//    set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie) const {
+//      return generate_vfgs_for_axes(trie, feature_type::Axis::THETA, feature_type::Axis::THETA_DOT);
+//    }
 
-    map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie) const {
-      return generate_ucm_for_axes(trie, feature_type::Axis::THETA, feature_type::Axis::THETA_DOT);
-    }
+//    map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie) const {
+//      return generate_ucm_for_axes(trie, feature_type::Axis::THETA, feature_type::Axis::THETA_DOT);
+//    }
 
     void generate_features() {
-      auto env = dynamic_pointer_cast<const Environment>(get_env());
-
-      for(const action_type &action_ : *m_candidates) {
-        auto &features = get_feature_list(action_);
-        assert(!features);
-
-        Feature::List * x_tail = nullptr;
-        Feature::List * x_dot_tail = nullptr;
-        if(!m_ignore_x) {
-          x_tail = &(new Feature(Feature::X, m_min_x, m_max_x, 0, false, env->get_x(), true))->features;
-          x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-          x_dot_tail = &(new Feature(Feature::X_DOT, m_min_x_dot, m_max_x_dot, 0, false, env->get_x_dot(), true))->features;
-          x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-        }
-        Feature::List * theta_tail = &(new Feature(Feature::THETA, m_min_theta, m_max_theta, 0, false, env->get_theta(), true))->features;
-        theta_tail = theta_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-        Feature::List * theta_dot_tail = &(new Feature(Feature::THETA_DOT, m_min_theta_dot, m_max_theta_dot, 0, false, env->get_theta_dot(), true))->features;
-        theta_dot_tail = theta_dot_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-
-        feature_trie trie = get_trie(action_);
-
-        for(;;) {
-          if(!m_ignore_x) {
-            if(generate_feature_ranged(env, features, trie, x_tail, env->get_x()))
-              continue;
-            if(generate_feature_ranged(env, features, trie, x_dot_tail, env->get_x_dot()))
-              continue;
-          }
-          if(generate_feature_ranged(env, features, trie, theta_tail, env->get_theta()))
-            continue;
-          if(generate_feature_ranged(env, features, trie, theta_dot_tail, env->get_theta_dot()))
-            continue;
-
-          break;
-        }
-      }
+//      auto env = dynamic_pointer_cast<const Environment>(get_env());
+//
+//      for(const action_type &action_ : *m_candidates) {
+//        auto &features = get_feature_list(action_);
+//        assert(!features);
+//
+//        Feature::List * x_tail = nullptr;
+//        Feature::List * x_dot_tail = nullptr;
+//        if(!m_ignore_x) {
+//          x_tail = &(new Feature(Feature::X, m_min_x, m_max_x, 0, false, env->get_x(), true))->features;
+//          x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(features, false);
+//          x_dot_tail = &(new Feature(Feature::X_DOT, m_min_x_dot, m_max_x_dot, 0, false, env->get_x_dot(), true))->features;
+//          x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(features, false);
+//        }
+//        Feature::List * theta_tail = &(new Feature(Feature::THETA, m_min_theta, m_max_theta, 0, false, env->get_theta(), true))->features;
+//        theta_tail = theta_tail->insert_in_order<feature_type::List::compare_default>(features, false);
+//        Feature::List * theta_dot_tail = &(new Feature(Feature::THETA_DOT, m_min_theta_dot, m_max_theta_dot, 0, false, env->get_theta_dot(), true))->features;
+//        theta_dot_tail = theta_dot_tail->insert_in_order<feature_type::List::compare_default>(features, false);
+//
+//        feature_trie trie = get_trie(action_);
+//
+//        for(;;) {
+//          if(!m_ignore_x) {
+//            if(generate_feature_ranged(env, features, trie, x_tail, env->get_x()))
+//              continue;
+//            if(generate_feature_ranged(env, features, trie, x_dot_tail, env->get_x_dot()))
+//              continue;
+//          }
+//          if(generate_feature_ranged(env, features, trie, theta_tail, env->get_theta()))
+//            continue;
+//          if(generate_feature_ranged(env, features, trie, theta_dot_tail, env->get_theta_dot()))
+//            continue;
+//
+//          break;
+//        }
+//      }
     }
 
-    void generate_candidates() {
-      auto env = dynamic_pointer_cast<const Environment>(get_env());
-
-      assert(!m_candidates);
-
-      (new Move(Move::LEFT))->candidates.insert_before(m_candidates);
-      (new Move(Move::RIGHT))->candidates.insert_before(m_candidates);
-    }
+//    void generate_candidates() {
+//      auto env = dynamic_pointer_cast<const Environment>(get_env());
+//
+//      assert(!m_candidates);
+//
+//      (new Move(Move::LEFT))->candidates.insert_before(m_candidates);
+//      (new Move(Move::RIGHT))->candidates.insert_before(m_candidates);
+//    }
 
     void update() {
       auto env = dynamic_pointer_cast<const Environment>(get_env());

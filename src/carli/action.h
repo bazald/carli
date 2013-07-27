@@ -14,29 +14,30 @@ class Action : public Zeni::Pool_Allocator<DERIVED2> {
 public:
   typedef typename Zeni::Linked_List<Action> List;
   typedef typename List::iterator iterator;
+  typedef DERIVED derived_type;
 
   struct Compare {
-    bool operator()(const Action &lhs, const Action &rhs) const {
+    bool operator()(const derived_type &lhs, const derived_type &rhs) const {
       return lhs < rhs;
     }
-    bool operator()(const Action &lhs, const Action * const &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const Action &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const Action &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const derived_type &lhs, const derived_type * const &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const derived_type &lhs, const std::shared_ptr<const derived_type> &rhs) const {return operator()(lhs, *rhs);}
+    bool operator()(const derived_type &lhs, const std::unique_ptr<const derived_type> &rhs) const {return operator()(lhs, *rhs);}
 
-    bool operator()(const Action * const &lhs, const Action &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const Action * const &lhs, const Action * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const Action * const &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const Action * const &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const derived_type * const &lhs, const derived_type &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const derived_type * const &lhs, const derived_type * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const derived_type * const &lhs, const std::shared_ptr<const derived_type> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const derived_type * const &lhs, const std::unique_ptr<const derived_type> &rhs) const {return operator()(*lhs, *rhs);}
 
-    bool operator()(const std::shared_ptr<DERIVED> &lhs, const Action &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::shared_ptr<DERIVED> &lhs, const Action * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<DERIVED> &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<const derived_type> &lhs, const derived_type &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::shared_ptr<const derived_type> &lhs, const derived_type * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<const derived_type> &lhs, const std::shared_ptr<const derived_type> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::shared_ptr<const derived_type> &lhs, const std::unique_ptr<const derived_type> &rhs) const {return operator()(*lhs, *rhs);}
 
-    bool operator()(const std::unique_ptr<DERIVED> &lhs, const Action &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::unique_ptr<DERIVED> &lhs, const Action * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::shared_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<DERIVED> &lhs, const std::unique_ptr<DERIVED> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<const derived_type> &lhs, const derived_type &rhs) const {return operator()(*lhs, rhs);}
+    bool operator()(const std::unique_ptr<const derived_type> &lhs, const derived_type * const &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<const derived_type> &lhs, const std::shared_ptr<const derived_type> &rhs) const {return operator()(*lhs, *rhs);}
+    bool operator()(const std::unique_ptr<const derived_type> &lhs, const std::unique_ptr<const derived_type> &rhs) const {return operator()(*lhs, *rhs);}
   };
 
   Action()

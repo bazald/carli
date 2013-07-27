@@ -1526,9 +1526,9 @@ yyreduce:
 /* Line 1806 of yacc.c  */
 #line 84 "rules.y"
     { string name = *(yyvsp[(1) - (4)].sval);
-                                    auto node = agent.make_action_retraction([name](const WME_Vector &wme_vector) {
+                                    auto node = agent.make_action_retraction([name](const Rete_Action &, const WME_Vector &wme_vector) {
                                                                                cout << wme_vector << "->" << name << endl;
-                                                                             }, [name](const WME_Vector &wme_vector) {
+                                                                             }, [name](const Rete_Action &, const WME_Vector &wme_vector) {
                                                                                   cout << wme_vector << "<-" << name << endl;
                                                                                 }, (yyvsp[(3) - (4)].rete_node_ptr)->first);
                                     agent.source_rule(name, node);

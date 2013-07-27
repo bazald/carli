@@ -9,7 +9,7 @@ namespace Rete {
   class Rete_Negation_Join : public Rete_Node {
     Rete_Negation_Join(const Rete_Negation_Join &);
     Rete_Negation_Join & operator=(const Rete_Negation_Join &);
-  
+
     friend void bind_to_negation_join(const Rete_Negation_Join_Ptr &negation_join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
   public:
@@ -25,7 +25,7 @@ namespace Rete {
           i1->destroy(filters, shared());
       }
     }
-  
+
     void insert_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
       assert(from == input0.lock() || from == input1.lock());
 
@@ -129,16 +129,16 @@ namespace Rete {
     WME_Bindings bindings;
     std::weak_ptr<Rete_Node> input0;
     std::weak_ptr<Rete_Node> input1;
-    std::unordered_map<WME_Vector_Ptr_C, size_t, hash_deref<WME_Vector>, compare_deref<WME_Vector>> input0_tokens;
-    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref<WME_Vector>> input1_tokens;
-    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref<WME_Vector>> output_tokens;
+    std::unordered_map<WME_Vector_Ptr_C, size_t, hash_deref<WME_Vector>, compare_deref> input0_tokens;
+    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref> input1_tokens;
+    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref> output_tokens;
   };
 
   inline void bind_to_negation_join(const Rete_Negation_Join_Ptr &existential_join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
     assert(existential_join && !existential_join->input0.lock() && !existential_join->input1.lock());
     existential_join->input0 = out0;
     existential_join->input1 = out1;
-  
+
     out0->outputs.insert(existential_join);
     out1->outputs.insert(existential_join);
     out0->pass_tokens(existential_join);

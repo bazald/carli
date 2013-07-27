@@ -3,8 +3,7 @@
 //#define WHITESON_ADAPTIVE_TILE
 
 #ifndef NDEBUG
-//#define DEBUG_OUTPUT
-//#define DEBUG_OUTPUT_VALUE_FUNCTION
+#define DEBUG_OUTPUT
 #endif
 
 #include "blocks_world.h"
@@ -148,16 +147,16 @@ int main2(int argc, char **argv) {
   /// Run the simulation
 
   const std::string env = dynamic_cast<const Option_Itemized &>(options["environment"]).get_value();
-  if(env == "blocks-world")
-    run_agent<Blocks_World::Environment, Blocks_World::Agent>();
-  else if(env == "cart-pole")
-    run_agent<Cart_Pole::Environment, Cart_Pole::Agent>();
-  else if(env == "mountain-car")
-    run_agent<Mountain_Car::Environment, Mountain_Car::Agent>();
-  else if(env == "puddle-world")
+//  if(env == "blocks-world")
+//    run_agent<Blocks_World::Environment, Blocks_World::Agent>();
+//  else if(env == "cart-pole")
+//    run_agent<Cart_Pole::Environment, Cart_Pole::Agent>();
+//  else if(env == "mountain-car")
+//    run_agent<Mountain_Car::Environment, Mountain_Car::Agent>();
+//  else if(env == "puddle-world")
     run_agent<Puddle_World::Environment, Puddle_World::Agent>();
-  else
-    throw runtime_error("Internal error: g_args.environment");
+//  else
+//    throw runtime_error("Internal error: g_args.environment");
 
 
 //  typedef std::string test_key;
@@ -389,25 +388,25 @@ void run_agent() {
     cout << failures << " FAILUREs" << endl;
     cout << agent->get_value_function_size() << " Q-values" << endl;
 
-    if(auto pwa = dynamic_pointer_cast<Mountain_Car::Agent>(agent))
-      pwa->print_policy(cout, 32);
-    else if(auto pwa = dynamic_pointer_cast<Puddle_World::Agent>(agent))
-      pwa->print_policy(cout, 32);
+//    if(auto pwa = dynamic_pointer_cast<Mountain_Car::Agent>(agent))
+//      pwa->print_policy(cout, 32);
+//    else if(auto pwa = dynamic_pointer_cast<Puddle_World::Agent>(agent))
+//      pwa->print_policy(cout, 32);
   }
-  else if(output == "experiment") {
-    if(auto cpa = dynamic_pointer_cast<Cart_Pole::Agent>(agent)) {
-      cpa->print_value_function_grid(cerr);
-      cpa->print_update_count_grid(cerr);
-    }
-    else if(auto mca = dynamic_pointer_cast<Mountain_Car::Agent>(agent)) {
-      mca->print_policy(cerr, 32);
-      mca->print_value_function_grid(cerr);
-      mca->print_update_count_grid(cerr);
-    }
-    else if(auto pwa = dynamic_pointer_cast<Puddle_World::Agent>(agent)) {
-      pwa->print_policy(cerr, 32);
-      pwa->print_value_function_grid(cerr);
-      pwa->print_update_count_grid(cerr);
-    }
-  }
+//  else if(output == "experiment") {
+//    if(auto cpa = dynamic_pointer_cast<Cart_Pole::Agent>(agent)) {
+//      cpa->print_value_function_grid(cerr);
+//      cpa->print_update_count_grid(cerr);
+//    }
+//    else if(auto mca = dynamic_pointer_cast<Mountain_Car::Agent>(agent)) {
+//      mca->print_policy(cerr, 32);
+//      mca->print_value_function_grid(cerr);
+//      mca->print_update_count_grid(cerr);
+//    }
+//    else if(auto pwa = dynamic_pointer_cast<Puddle_World::Agent>(agent)) {
+//      pwa->print_policy(cerr, 32);
+//      pwa->print_value_function_grid(cerr);
+//      pwa->print_update_count_grid(cerr);
+//    }
+//  }
 }

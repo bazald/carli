@@ -180,78 +180,78 @@ namespace Mountain_Car {
      m_min_x_dot(std::make_shared<double>(-0.07)),
      m_max_x_dot(std::make_shared<double>(0.07))
     {
-      m_features_complete = false;
+//      m_features_complete = false;
     }
 
-    void print_policy(ostream &os, const size_t &granularity) {
-      auto env = dynamic_pointer_cast<Environment>(get_env());
-      const auto x_bak = env->get_x();
-      const auto x_dot_bak = env->get_x_dot();
-
-      for(size_t x_dot = granularity; x_dot != 0lu; --x_dot) {
-        env->set_x_dot(((x_dot - 0.5) / granularity) * 0.14 - 0.07);
-        for(size_t x = 0lu; x != granularity; ++x) {
-          env->set_x(((x + 0.5) / granularity) * 1.8 - 1.2);
-          regenerate_lists();
-          auto action = choose_greedy();
-          switch(static_cast<const Move &>(*action).direction) {
-            case Move::LEFT:  os << '-'; break;
-            case Move::IDLE:  os << '0'; break;
-            case Move::RIGHT: os << '+'; break;
-            default: abort();
-          }
-        }
-        os << endl;
-      }
-
-      env->set_x(x_bak);
-      env->set_x_dot(x_dot_bak);
-      regenerate_lists();
-    }
+//    void print_policy(ostream &os, const size_t &granularity) {
+//      auto env = dynamic_pointer_cast<Environment>(get_env());
+//      const auto x_bak = env->get_x();
+//      const auto x_dot_bak = env->get_x_dot();
+//
+//      for(size_t x_dot = granularity; x_dot != 0lu; --x_dot) {
+//        env->set_x_dot(((x_dot - 0.5) / granularity) * 0.14 - 0.07);
+//        for(size_t x = 0lu; x != granularity; ++x) {
+//          env->set_x(((x + 0.5) / granularity) * 1.8 - 1.2);
+//          regenerate_lists();
+//          auto action = choose_greedy();
+//          switch(static_cast<const Move &>(*action).direction) {
+//            case Move::LEFT:  os << '-'; break;
+//            case Move::IDLE:  os << '0'; break;
+//            case Move::RIGHT: os << '+'; break;
+//            default: abort();
+//          }
+//        }
+//        os << endl;
+//      }
+//
+//      env->set_x(x_bak);
+//      env->set_x_dot(x_dot_bak);
+//      regenerate_lists();
+//    }
 
   private:
-    set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie) const {
-      return generate_vfgs_for_axes(trie, feature_type::Axis::X, feature_type::Axis::X_DOT);
-    }
+//    set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie) const {
+//      return generate_vfgs_for_axes(trie, feature_type::Axis::X, feature_type::Axis::X_DOT);
+//    }
 
-    map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie) const {
-      return generate_ucm_for_axes(trie, feature_type::Axis::X, feature_type::Axis::X_DOT);
-    }
+//    map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &trie) const {
+//      return generate_ucm_for_axes(trie, feature_type::Axis::X, feature_type::Axis::X_DOT);
+//    }
 
     void generate_features() {
-      auto env = dynamic_pointer_cast<const Environment>(get_env());
-
-      for(const action_type &action_ : *m_candidates) {
-        auto &features = get_feature_list(action_);
-        assert(!features);
-
-        Feature::List * x_tail = &(new Feature(Feature::X, m_min_x, m_max_x, 0, false, env->get_x(), true))->features;
-        x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-        Feature::List * x_dot_tail = &(new Feature(Feature::X_DOT, m_min_x_dot, m_max_x_dot, 0, false, env->get_x_dot(), true))->features;
-        x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-
-        feature_trie trie = get_trie(action_);
-
-        for(;;) {
-          if(generate_feature_ranged(env, features, trie, x_tail, env->get_x()))
-            continue;
-          if(generate_feature_ranged(env, features, trie, x_dot_tail, env->get_x_dot()))
-            continue;
-
-          break;
-        }
-      }
+//      auto env = dynamic_pointer_cast<const Environment>(get_env());
+//
+//      for(const action_type &action_ : *m_candidates) {
+//        auto &features = get_feature_list(action_);
+//        assert(!features);
+//
+//        Feature::List * x_tail = &(new Feature(Feature::X, m_min_x, m_max_x, 0, false, env->get_x(), true))->features;
+//        x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(features, false);
+//        Feature::List * x_dot_tail = &(new Feature(Feature::X_DOT, m_min_x_dot, m_max_x_dot, 0, false, env->get_x_dot(), true))->features;
+//        x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(features, false);
+//
+//        feature_trie trie = get_trie(action_);
+//
+//        for(;;) {
+//          if(generate_feature_ranged(env, features, trie, x_tail, env->get_x()))
+//            continue;
+//          if(generate_feature_ranged(env, features, trie, x_dot_tail, env->get_x_dot()))
+//            continue;
+//
+//          break;
+//        }
+//      }
     }
 
-    void generate_candidates() {
-      auto env = dynamic_pointer_cast<const Environment>(get_env());
-
-      assert(!m_candidates);
-
-      (new Move(Move::LEFT))->candidates.insert_before(m_candidates);
-      (new Move(Move::IDLE))->candidates.insert_before(m_candidates);
-      (new Move(Move::RIGHT))->candidates.insert_before(m_candidates);
-    }
+//    void generate_candidates() {
+//      auto env = dynamic_pointer_cast<const Environment>(get_env());
+//
+//      assert(!m_candidates);
+//
+//      (new Move(Move::LEFT))->candidates.insert_before(m_candidates);
+//      (new Move(Move::IDLE))->candidates.insert_before(m_candidates);
+//      (new Move(Move::RIGHT))->candidates.insert_before(m_candidates);
+//    }
 
     void update() {
       auto env = dynamic_pointer_cast<const Environment>(get_env());

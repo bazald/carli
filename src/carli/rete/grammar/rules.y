@@ -82,9 +82,9 @@ rules:
   ;
 rule:
   STRING '{' final_conditions '}' { string name = *$1;
-                                    auto node = agent.make_action_retraction([name](const WME_Vector &wme_vector) {
+                                    auto node = agent.make_action_retraction([name](const Rete_Action &, const WME_Vector &wme_vector) {
                                                                                cout << wme_vector << "->" << name << endl;
-                                                                             }, [name](const WME_Vector &wme_vector) {
+                                                                             }, [name](const Rete_Action &, const WME_Vector &wme_vector) {
                                                                                   cout << wme_vector << "<-" << name << endl;
                                                                                 }, $3->first);
                                     agent.source_rule(name, node);

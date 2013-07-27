@@ -12,10 +12,10 @@ namespace Rete {
     friend void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
 
   public:
-    typedef std::function<void (const WME_Vector &wme_vector)> Action;
+    typedef std::function<void (const Rete_Action &rete_action, const WME_Vector &wme_vector)> Action;
 
-    Rete_Action(const Action &action_ = [](const WME_Vector &){},
-                const Action &retraction_ = [](const WME_Vector &){})
+    Rete_Action(const Action &action_ = [](const Rete_Action &, const WME_Vector &){},
+                const Action &retraction_ = [](const Rete_Action &, const WME_Vector &){})
       : action(action_), retraction(retraction_)
     {
     }
@@ -23,7 +23,7 @@ namespace Rete {
     void destroy(std::unordered_set<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output = Rete_Node_Ptr()) {
       assert(!output);
       for(auto &wme_vector : input_tokens)
-        retraction(*wme_vector);
+        retraction(*this, *wme_vector);
       input.lock()->destroy(filters, shared());
     }
 
@@ -32,7 +32,7 @@ namespace Rete {
 
       input_tokens.insert(wme_vector);
 
-      action(*wme_vector);
+      action(*this, *wme_vector);
     }
 
     void remove_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
@@ -43,7 +43,7 @@ namespace Rete {
       // TODO: change from the 'if' to the 'assert', ensuring that we're not wasting time on non-existent removals
       //assert(found != input_tokens.end());
       {
-        retraction(*wme_vector);
+        retraction(*this, *wme_vector);
 
         input_tokens.erase(found);
       }
@@ -72,7 +72,7 @@ namespace Rete {
 
   private:
     std::weak_ptr<Rete_Node> input;
-    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref<WME_Vector>> input_tokens;
+    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref> input_tokens;
     Action action;
     Action retraction;
   };
@@ -80,7 +80,7 @@ namespace Rete {
   inline void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out) {
     assert(action && !action->input.lock());
     action->input = out;
-  
+
     out->outputs.insert(action);
     out->pass_tokens(action);
   }

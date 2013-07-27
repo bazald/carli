@@ -66,14 +66,14 @@ namespace Rete {
 
   private:
     std::weak_ptr<Rete_Node> input;
-    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref<WME_Vector>> input_tokens;
+    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref> input_tokens;
     WME_Vector_Ptr_C output_token;
   };
 
   inline void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out) {
     assert(existential);
     existential->input = out;
-  
+
     out->outputs.insert(existential);
     out->pass_tokens(existential);
   }

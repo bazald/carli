@@ -1,5 +1,5 @@
-#ifndef SYMBOL_H
-#define SYMBOL_H
+#ifndef RETE_SYMBOL_H
+#define RETE_SYMBOL_H
 
 #include <iostream>
 #include <memory>
@@ -37,7 +37,7 @@ namespace Rete {
   public:
     Symbol() {}
     virtual ~Symbol() {}
-  
+
     virtual bool operator==(const Symbol &rhs) const = 0;
     virtual bool operator!=(const Symbol &rhs) const = 0;
     virtual bool operator<(const Symbol &rhs) const = 0;
@@ -266,7 +266,7 @@ namespace Rete {
 
   public:
     Symbol_Identifier(const std::string &value_) : value(value_) {}
-  
+
     bool operator==(const Symbol &rhs) const {
       if(auto rhs_ptr = dynamic_cast<const Symbol_Identifier *>(&rhs))
         return value == rhs_ptr->value;
@@ -322,7 +322,7 @@ namespace Rete {
     enum Variable {First, Second, Third};
 
     Symbol_Variable(const Variable &value_) : value(value_) {}
-  
+
     bool operator==(const Symbol &rhs) const {
       if(auto rhs_ptr = dynamic_cast<const Symbol_Variable *>(&rhs))
         return value == rhs_ptr->value;

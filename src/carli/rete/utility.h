@@ -1,12 +1,11 @@
-#ifndef UTILITY_H
-#define UTILITY_H
+#ifndef RETE_UTILITY_H
+#define RETE_UTILITY_H
 
 #include <array>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
-template <typename T>
 class compare_deref {
 public:
   template <typename Ptr1, typename Ptr2>

@@ -1,5 +1,5 @@
-#ifndef AGENT_H
-#define AGENT_H
+#ifndef RETE_AGENT_H
+#define RETE_AGENT_H
 
 #include "rete.h"
 #include "wme_set.h"
@@ -11,8 +11,8 @@ namespace Rete {
     Agent & operator=(Agent &);
 
   public:
-    const std::function<Rete_Action_Ptr (std::function<void (const WME_Vector &wme_vector)> action, const Rete_Node_Ptr &out)> make_action;
-    const std::function<Rete_Action_Ptr (std::function<void (const WME_Vector &wme_vector)> action, std::function<void (const WME_Vector &wme_vector)> retraction, const Rete_Node_Ptr &out)> make_action_retraction;
+    const std::function<Rete_Action_Ptr (const Rete_Action::Action &action, const Rete_Node_Ptr &out)> make_action;
+    const std::function<Rete_Action_Ptr (const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out)> make_action_retraction;
     const std::function<Rete_Existential_Ptr (const Rete_Node_Ptr &out)> make_existential;
     const std::function<Rete_Existential_Join_Ptr (const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1)> make_existential_join;
     const std::function<Rete_Filter_Ptr (const WME &wme)> make_filter;
@@ -23,14 +23,14 @@ namespace Rete {
     const std::function<Rete_Predicate_Ptr (const Rete_Predicate::Predicate &predicate, const WME_Vector_Index &lhs_index, const WME_Vector_Index &rhs_index, const Rete_Node_Ptr &out)> make_predicate_vv;
 
     Agent()
-      : make_action([](const std::function<void (const WME_Vector &wme_vector)> &action, const Rete_Node_Ptr &out)->Rete_Action_Ptr {
-          if(auto existing = Rete_Action::find_existing(action, [](const WME_Vector &){}, out))
+      : make_action([](const Rete_Action::Action &action, const Rete_Node_Ptr &out)->Rete_Action_Ptr {
+          if(auto existing = Rete_Action::find_existing(action, [](const Rete_Action &, const WME_Vector &){}, out))
             return existing;
           auto action_fun = std::make_shared<Rete_Action>(action);
           bind_to_action(action_fun, out);
           return action_fun;
       }),
-      make_action_retraction([](const std::function<void (const WME_Vector &wme_vector)> &action, const std::function<void (const WME_Vector &wme_vector)> &retraction, const Rete_Node_Ptr &out)->Rete_Action_Ptr {
+      make_action_retraction([](const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out)->Rete_Action_Ptr {
         if(auto existing = Rete_Action::find_existing(action, retraction, out))
           return existing;
         auto action_fun = std::make_shared<Rete_Action>(action, retraction);
@@ -114,7 +114,7 @@ namespace Rete {
         found->second = action;
       }
     }
-    
+
     void excise_rule(const std::string &name) {
       auto found = rules.find(name);
       if(found == rules.end()) {
