@@ -27,13 +27,13 @@ namespace Puddle_World {
   public:
     enum Axis : int {X, Y};
 
-    Feature(const Axis &axis_, const std::shared_ptr<double> &bound_lower_, const std::shared_ptr<double> &bound_upper_, const size_t &depth_, const bool &upper_, const double &midpt_, const bool &midpt_raw_, const size_t &midpt_update_count_ = 1u)
-     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_upper_, depth_, upper_, midpt_, midpt_raw_, midpt_update_count_)
+    Feature(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_upper_, depth_, upper_)
     {
     }
 
     Feature * clone() const {
-      return new Feature(Axis(this->axis), this->bound_lower, this->bound_upper, this->depth, this->upper, this->midpt_raw, false, this->midpt_update_count);
+      return new Feature(Axis(this->axis), this->bound_lower, this->bound_upper, this->depth, this->upper);
     }
 
     void print(ostream &os) const {
@@ -43,7 +43,7 @@ namespace Puddle_World {
         default: abort();
       }
 
-      os << '(' << *bound_lower << ',' << *bound_upper << ':' << depth << ')';
+      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
     }
   };
 
@@ -301,36 +301,64 @@ namespace Puddle_World {
       for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
         auto rl = std::make_shared<RL>(1);
         rl->q_value = new Q_Value();
-        rl->fringe_values = new RL::Fringe_Values;
-        (*rl->fringe_values)[m_x_value] = std::make_pair(0.0, 1.0);
-        (*rl->fringe_values)[m_y_value] = std::make_pair(0.0, 1.0);
-
         ++this->m_q_value_count;
+        rl->fringe_values = new RL::Fringe_Values;
+        rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+          this->specialize(action, *rl);
+          this->m_next_q_values[action].push_back(rl->q_value);
+        }, xy);
 
-        auto xy_action = make_action_retraction(
-          [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Vector &wme_vector) {
-            const auto &x = std::dynamic_pointer_cast<const Rete::Symbol_Constant_Float>(wme_vector.wmes[0].symbols[2])->value;
-            const auto &y = std::dynamic_pointer_cast<const Rete::Symbol_Constant_Float>(wme_vector.wmes[1].symbols[2])->value;
+        {
+          const Rete::WME_Vector_Index index(0, 2);
+          auto rlf = std::make_shared<RL>(2);
+          rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
+          rlf->feature = new Feature(Feature::X, 0.0, 0.5, 2, false);
+          auto predicate = make_predicate_vc(rlf->feature->predicate(), index, rlf->feature->symbol_constant(), rl->action.lock()->parent());
+          rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+            this->specialize(action, *rlf);
+            this->m_next_q_values[action].push_back(rlf->q_value);
+          }, predicate);
+          rl->fringe_values->insert(std::make_pair(index, rlf));
+        }
 
-            /// TODO: Action insert Q_Values into the list
-            rl->q_value->next.erase_hard();
-            rl->q_value->next.insert_before(this->m_next_q_values[action]);
+        {
+          const Rete::WME_Vector_Index index(0, 2);
+          auto rlf = std::make_shared<RL>(2);
+          rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
+          rlf->feature = new Feature(Feature::X, 0.5, 1.0, 2, true);
+          auto predicate = make_predicate_vc(rlf->feature->predicate(), index, rlf->feature->symbol_constant(), rl->action.lock()->parent());
+          rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+            this->specialize(action, *rlf);
+            this->m_next_q_values[action].push_back(rlf->q_value);
+          }, predicate);
+          rl->fringe_values->insert(std::make_pair(index, rlf));
+        }
 
-#ifdef DEBUG_OUTPUT
-            std::cerr << "Position(" << x << ", " << y << "), Depth(" << rl->depth << "), Action(" << *action << ") = "
-                      << &rl->q_value->next << std::endl;
-#endif
+        {
+          const Rete::WME_Vector_Index index(1, 2);
+          auto rlf = std::make_shared<RL>(2);
+          rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
+          rlf->feature = new Feature(Feature::Y, 0.0, 0.5, 2, false);
+          auto predicate = make_predicate_vc(rlf->feature->predicate(), index, rlf->feature->symbol_constant(), rl->action.lock()->parent());
+          rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+            this->specialize(action, *rlf);
+            this->m_next_q_values[action].push_back(rlf->q_value);
+          }, predicate);
+          rl->fringe_values->insert(std::make_pair(index, rlf));
+        }
 
-            if(rl->fringe_values && this->split_test(rl->q_value, rl->depth)) {
-              /// TODO: destroy fringe and create new filters+joins for next features
-              abort();
-            }
-          }, [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Vector &) {
-          }, xy);
-
-        std::ostringstream oss;
-        oss << *action;
-        source_rule(oss.str(), xy_action);
+        {
+          const Rete::WME_Vector_Index index(1, 2);
+          auto rlf = std::make_shared<RL>(2);
+          rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
+          rlf->feature = new Feature(Feature::Y, 0.5, 1.0, 2, true);
+          auto predicate = make_predicate_vc(rlf->feature->predicate(), index, rlf->feature->symbol_constant(), rl->action.lock()->parent());
+          rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+            this->specialize(action, *rlf);
+            this->m_next_q_values[action].push_back(rlf->q_value);
+          }, predicate);
+          rl->fringe_values->insert(std::make_pair(index, rlf));
+        }
       }
 
       m_x_wme = Rete::WME(s_id, x_attr, m_x_value);

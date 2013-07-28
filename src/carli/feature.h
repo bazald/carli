@@ -3,6 +3,7 @@
 
 #include "linked_list.h"
 #include "memory_pool.h"
+#include "rete/rete.h"
 
 #include <iostream>
 #include <memory>
@@ -73,7 +74,7 @@ public:
 
   virtual ~Feature() {}
 
-  virtual Feature * clone() const = 0;
+  virtual DERIVED * clone() const = 0;
 
   bool operator<(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) < 0;}
   bool operator<=(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) <= 0;}
@@ -91,7 +92,9 @@ public:
     return axis_comparison ? axis_comparison : static_cast<const DERIVED *>(this)->compare_value(rhs);
   }
 
-  virtual bool refinable() const {return false;}
+  virtual std::vector<DERIVED *> refined() const {return std::vector<DERIVED *>();}
+  virtual Rete::Rete_Predicate::Predicate predicate() const = 0;
+  virtual Rete::Symbol_Ptr_C symbol_constant() const = 0;
 
   virtual void print(std::ostream &os) const = 0;
 
@@ -113,21 +116,26 @@ public:
     return present - rhs.present;
   }
 
+  Rete::Rete_Predicate::Predicate predicate() const {
+    return Rete::Rete_Predicate::EQ;
+  }
+
   bool present;
 };
 
 class Feature_Ranged_Data {
 public:
-  Feature_Ranged_Data(const Feature_Axis &axis_, const std::shared_ptr<double> &bound_lower_, const std::shared_ptr<double> &bound_upper_, const size_t &depth_, const bool &upper_, const double &midpt_, const bool &midpt_raw_, const size_t &midpt_update_count_ = 1u)
+  Feature_Ranged_Data(const Feature_Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
    : axis(axis_),
    bound_lower(bound_lower_),
    bound_upper(bound_upper_),
-   midpt(std::make_shared<double>((*bound_lower + *bound_upper) / 2.0)),
    depth(depth_),
-   midpt_update_count(midpt_update_count_),
-   midpt_raw(midpt_raw_ ? (midpt_ - *bound_lower) / (*bound_upper - *bound_lower) : midpt_),
    upper(upper_)
   {
+  }
+
+  double midpt() const {
+    return (bound_lower + bound_upper) / 2.0;
   }
 
   int compare(const Feature_Ranged_Data &rhs) const {
@@ -146,18 +154,15 @@ public:
   }
 
   void print(std::ostream &os) const {
-    os << this->axis << '(' << *bound_lower << ',' << *bound_upper << ':' << depth << ')';
+    os << this->axis << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
   }
 
   Feature_Axis axis;
 
-  std::shared_ptr<double> bound_lower; ///< inclusive
-  std::shared_ptr<double> bound_upper; ///< exclusive
-  std::shared_ptr<double> midpt; ///< A point in (bound_lower, bound_upper)
+  double bound_lower; ///< inclusive
+  double bound_upper; ///< exclusive
 
   size_t depth; ///< 0 indicates unsplit
-  size_t midpt_update_count; ///< Number of times the midpt has been modified
-  double midpt_raw; ///< Raw, unmodified midpt data
 
   bool upper; ///< Is this the upper half (same bound_upper) or lower half (same bound_lower) of a split?
 };
@@ -168,9 +173,9 @@ class Feature_Ranged : public Feature<DERIVED, DERIVED2>, public Feature_Ranged_
   Feature_Ranged & operator=(const Feature_Ranged &) = delete;
 
 public:
-  Feature_Ranged(const Feature_Axis &axis_, const std::shared_ptr<double> &bound_lower_, const std::shared_ptr<double> &bound_upper_, const size_t &depth_, const bool &upper_, const double &midpt_, const bool &midpt_raw_, const size_t &midpt_update_count_ = 1u)
+  Feature_Ranged(const Feature_Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
    : ::Feature<DERIVED, DERIVED2>(),
-   Feature_Ranged_Data(axis_, bound_lower_, bound_upper_, depth_, upper_, midpt_, midpt_raw_, midpt_update_count_)
+   Feature_Ranged_Data(axis_, bound_lower_, bound_upper_, depth_, upper_)
   {
   }
 
@@ -186,16 +191,36 @@ public:
     return Feature_Ranged_Data::compare_value(rhs);
   }
 
-  bool refinable() const {
-    return true;
+  std::vector<DERIVED *> refined() const {
+    std::vector<DERIVED *> refined_features;
+
+    auto refined_feature = clone();
+    refined_feature->bound_upper = refined_feature->midpt();
+    ++refined_feature->depth;
+    refined_feature->upper = false;
+    refined_features.push_back(refined_feature);
+
+    refined_feature = clone();
+    refined_feature->bound_lower = refined_feature->midpt();
+    ++refined_feature->depth;
+    refined_feature->upper = true;
+    refined_features.push_back(refined_feature);
+
+    return refined_features;
   }
 
-  Feature_Ranged * clone() const {
-    return new Feature_Ranged(axis, bound_lower, bound_upper, depth, upper, midpt_raw, midpt_update_count);
-  }
+  virtual DERIVED * clone() const = 0;
 
   void print(std::ostream &os) const {
     Feature_Ranged_Data::print(os);
+  }
+
+  Rete::Rete_Predicate::Predicate predicate() const {
+    return upper ? Rete::Rete_Predicate::GTE : Rete::Rete_Predicate::LT;
+  }
+
+  Rete::Symbol_Ptr_C symbol_constant() const {
+    return std::make_shared<Rete::Symbol_Constant_Float>(upper ? bound_lower : bound_upper);
   }
 };
 

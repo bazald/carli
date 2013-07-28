@@ -120,12 +120,12 @@ int main2(int argc, char **argv) {
   options.add(     std::make_shared<Option_Ranged<int>>("mean-cabe-queue-size", 0, true, std::numeric_limits<int>::max(), true, 0), "How large of a working set to use for means and variances; 0 disables.");
   options.add(     std::make_shared<Option_Ranged<bool>>("null-q-values", false, true, true, true, false), "Set Q-values preceding the minimum depth to nullptr.");
   options.add(     std::make_shared<Option_Ranged<int>>("value-function-cap", 0, true, std::numeric_limits<int>::max(), true, 0), "The maximum number of weights allowed in the value functions; 0 disables.");
-  options.add(     std::make_shared<Option_Itemized>("weight-assignment", std::set<std::string>({"all", "specific", "even", "inv-update-count", "inv-log-update-count", "inv-root-update-count", "inv-depth", "epsilon-even-specific", "epsilon-even-depth"}), "all"),
-#ifdef ENABLE_WEIGHT
-              "How to scale weights before summing them.");
-#else
-              "Option disabled at compile-time.");
-#endif
+//  options.add(     std::make_shared<Option_Itemized>("weight-assignment", std::set<std::string>({"all", "specific", "even", "inv-update-count", "inv-log-update-count", "inv-root-update-count", "inv-depth", "epsilon-even-specific", "epsilon-even-depth"}), "all"),
+//#ifdef ENABLE_WEIGHT
+//              "How to scale weights before summing them.");
+//#else
+//              "Option disabled at compile-time.");
+//#endif
   options.add_line("\n  For Transfer Experiments:");
   options.add(     std::make_shared<Option_Ranged<int>>("skip-steps", -1, true, std::numeric_limits<int>::max(), true, 0), "How many steps to run before counting them and generating output; 0 disables, -1 alters immediately.");
   options.add(     std::make_shared<Option_Ranged<bool>>("reset-update-counts", false, true, true, true, false), "Reset update counts after skip-steps.");

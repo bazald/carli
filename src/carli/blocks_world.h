@@ -64,6 +64,10 @@ namespace Blocks_World {
       os << "in-place(" << block << ')';
     }
 
+    Rete::Symbol_Ptr_C symbol_constant() const {
+      abort();
+    }
+
     block_id block;
   };
 
@@ -94,6 +98,10 @@ namespace Blocks_World {
       if(!present)
         os << '!';
       os << "on-top(" << top << ',' << bottom << ')';
+    }
+
+    Rete::Symbol_Ptr_C symbol_constant() const {
+      abort();
     }
 
     block_id top;

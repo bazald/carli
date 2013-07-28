@@ -25,9 +25,9 @@ public:
   typedef T element_type;
   typedef Deleter deleter_type;
   typedef element_type * pointer;
-  
+
   tracked_ptr(const pointer ptr_ = nullptr);
-  
+
   ~tracked_ptr() {
 #ifndef NDEBUG
     zero();
@@ -51,15 +51,15 @@ public:
   pointer get() const {return ptr;}
   deleter_type get_deleter() const {return deleter_type();}
   operator bool() const {return ptr != nullptr;}
-  
+
   element_type & operator*() const {return *ptr;}
-  element_type & operator->() const {return *ptr;}
+  element_type * operator->() const {return ptr;}
 
   template <typename INT>
   element_type & operator[](const INT &index) const {
     return ptr[index];
   }
-  
+
   bool operator==(const tracked_ptr<T, Deleter> &rhs) const {return ptr == rhs.ptr;}
   bool operator!=(const tracked_ptr<T, Deleter> &rhs) const {return ptr != rhs.ptr;}
   bool operator<(const tracked_ptr<T, Deleter> &rhs) const {return ptr < rhs.ptr;}
@@ -126,10 +126,12 @@ tracked_ptr<T, Deleter> & tracked_ptr<T, Deleter>::operator=(const tracked_ptr<T
 #endif
   {
     pointer_tracker::clear_pointer(ptr, this);
-    assert(pointer_tracker::count(ptr) != 0);
+    assert(!ptr || pointer_tracker::count(ptr) != 0);
     ptr = rhs.ptr;
     pointer_tracker::set_pointer(ptr, this);
   }
+
+  return *this;
 }
 
 template <typename T, typename Deleter>
@@ -155,6 +157,11 @@ void tracked_ptr<T, Deleter>::zero() {
     assert(pointer_tracker::count(ptr) != 0);
     ptr = nullptr;
   }
+}
+
+template <typename T, typename Deleter>
+std::ostream & operator<<(std::ostream &os, const tracked_ptr<T, Deleter> &ptr) {
+  return os << ptr.get();
 }
 
 #endif

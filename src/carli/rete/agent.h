@@ -127,6 +127,10 @@ namespace Rete {
       }
     }
 
+    void excise_rule(const Rete_Action_Ptr &action) {
+      action->destroy(filters);
+    }
+
     void insert_wme(const WME &wme) {
       assert(working_memory.wmes.find(wme) == working_memory.wmes.end());
       working_memory.wmes.insert(wme);

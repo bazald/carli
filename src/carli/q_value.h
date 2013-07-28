@@ -21,9 +21,7 @@ public:
   Q_Value(const double &q_value_ = double(), const Type &type_ = Type::UNSPLIT)
    : type(type_),
    value(q_value_),
-   eligible(this),
-   current(this),
-   next(this)
+   eligible(this)
   {
   }
 
@@ -43,7 +41,7 @@ public:
   bool eligibility_init = false;
   double eligibility = -1.0;
   double credit = 1.0;
-  double weight = 1.0;
+//  double weight = 1.0;
 
   double value;
   Value cabe; ///< Cumulative Absolute Bellman Error
@@ -56,8 +54,6 @@ public:
   double t0; ///< temp "register"
 
   List eligible;
-  List current;
-  List next;
 
   static size_t eligible_offset() {
     union {
@@ -67,28 +63,6 @@ public:
 
     u.c = nullptr;
     u.m = &Q_Value::eligible;
-    return u.c - static_cast<char *>(nullptr);
-  }
-
-  static size_t current_offset() {
-    union {
-      const List Q_Value:: * m;
-      const char * c;
-    } u;
-
-    u.c = nullptr;
-    u.m = &Q_Value::current;
-    return u.c - static_cast<char *>(nullptr);
-  }
-
-  static size_t next_offset() {
-    union {
-      const List Q_Value:: * m;
-      const char * c;
-    } u;
-
-    u.c = nullptr;
-    u.m = &Q_Value::next;
     return u.c - static_cast<char *>(nullptr);
   }
 };
