@@ -46,7 +46,7 @@ public:
 //  typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
 
-  class RL {
+  class RL : public std::enable_shared_from_this<RL> {
     RL(const RL &) = delete;
     RL & operator=(const RL &) = delete;
 

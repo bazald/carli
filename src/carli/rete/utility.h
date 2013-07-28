@@ -6,7 +6,15 @@
 #include <utility>
 #include <vector>
 
-class compare_deref {
+class compare_deref_eq {
+public:
+  template <typename Ptr1, typename Ptr2>
+  size_t operator()(const Ptr1 &lhs, const Ptr2 &rhs) const {
+    return *lhs == *rhs;
+  }
+};
+
+class compare_deref_lt {
 public:
   template <typename Ptr1, typename Ptr2>
   size_t operator()(const Ptr1 &lhs, const Ptr2 &rhs) const {

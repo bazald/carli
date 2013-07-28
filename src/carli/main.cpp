@@ -3,7 +3,7 @@
 //#define WHITESON_ADAPTIVE_TILE
 
 #ifndef NDEBUG
-#define DEBUG_OUTPUT
+//#define DEBUG_OUTPUT
 #endif
 
 #include "blocks_world.h"

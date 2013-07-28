@@ -127,7 +127,7 @@ namespace Rete {
     WME_Vector_Index m_rhs_index;
     Symbol_Ptr_C m_rhs;
     std::weak_ptr<Rete_Node> input;
-    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref> tokens;
+    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref_eq> tokens;
   };
 
   inline void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out) {

@@ -3,10 +3,12 @@
 
 #include "wme.h"
 #include "utility.h"
+#include "../memory_pool.h"
 
 namespace Rete {
 
-  class WME_Vector {
+  class WME_Vector;
+  class WME_Vector : public Zeni::Pool_Allocator<WME_Vector> {
   public:
     std::vector<WME> wmes;
 

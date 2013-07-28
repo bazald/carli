@@ -38,7 +38,7 @@ namespace Rete {
   typedef std::shared_ptr<Rete_Node> Rete_Node_Ptr;
   typedef std::shared_ptr<Rete_Predicate> Rete_Predicate_Ptr;
 
-  class Rete_Node : public std::enable_shared_from_this<Rete_Node> {
+  class Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<Rete_Existential_Join> {
     Rete_Node(const Rete_Node &);
     Rete_Node & operator=(const Rete_Node &);
 
@@ -54,16 +54,16 @@ namespace Rete {
   public:
     Rete_Node() {}
     virtual ~Rete_Node() {}
-    
+
     virtual void destroy(std::unordered_set<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) = 0;
-  
+
     std::shared_ptr<const Rete_Node> shared() const {
       return shared_from_this();
     }
     std::shared_ptr<Rete_Node> shared() {
       return shared_from_this();
     }
-    
+
     const std::unordered_set<Rete_Node_Ptr> & get_outputs() const {
       return outputs;
     }

@@ -1,6 +1,7 @@
 #ifndef RETE_SYMBOL_H
 #define RETE_SYMBOL_H
 
+#include "../memory_pool.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -30,7 +31,7 @@ namespace Rete {
   typedef std::shared_ptr<Symbol_Identifier> Symbol_Identifier_Ptr;
   typedef std::shared_ptr<Symbol_Variable> Symbol_Variable_Ptr;
 
-  class Symbol {
+  class Symbol : public Zeni::Pool_Allocator<Symbol_Constant_String> {
     Symbol(const Symbol &);
     Symbol & operator=(const Symbol &);
 
