@@ -374,6 +374,15 @@ namespace Rete {
     Variable value;
   };
 
+  inline void __symbol_size_check() {
+    typedef Symbol_Constant_String Pool;
+    static_assert(sizeof(Pool) >= sizeof(Symbol_Constant_Float), "Pool size suboptimal.");
+    static_assert(sizeof(Pool) >= sizeof(Symbol_Constant_Int), "Pool size suboptimal.");
+    static_assert(sizeof(Pool) >= sizeof(Symbol_Constant_String), "Pool size suboptimal.");
+    static_assert(sizeof(Pool) >= sizeof(Symbol_Identifier), "Pool size suboptimal.");
+    static_assert(sizeof(Pool) >= sizeof(Symbol_Variable), "Pool size suboptimal.");
+  }
+
 }
 
 namespace std {

@@ -15,7 +15,7 @@ namespace Rete {
     Rete_Negation() : output_token(std::make_shared<WME_Vector>()) {}
 
     void destroy(std::unordered_set<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
-      outputs.erase(output);
+      erase_output(output);
       if(outputs.empty())
         input.lock()->destroy(filters, shared());
     }
@@ -75,7 +75,7 @@ namespace Rete {
     assert(negation);
     negation->input = out;
 
-    out->outputs.insert(negation);
+    out->outputs.push_back(negation);
     out->pass_tokens(negation);
   }
 

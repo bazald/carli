@@ -18,20 +18,20 @@ namespace Rete {
       for(int i = 0; i != 3; ++i)
         m_variable[i] = std::dynamic_pointer_cast<const Symbol_Variable>(m_wme.symbols[i]);
     }
-    
+
     const WME & get_wme() const {
       return m_wme;
     }
 
     void destroy(std::unordered_set<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
-      outputs.erase(output);
+      erase_output(output);
       if(outputs.empty())
         filters.erase(std::static_pointer_cast<Rete_Filter>(shared()));
     }
-    
+
     void insert_wme(const WME &wme, const Rete_Node_Ptr_C &from = nullptr) {
       assert(from == input.lock());
-      
+
       for(int i = 0; i != 3; ++i)
         if(!m_variable[i] && *m_wme.symbols[i] != *wme.symbols[i])
           return;
@@ -44,7 +44,7 @@ namespace Rete {
         return;
 
       tokens.insert(wme);
-    
+
       for(auto &output : outputs)
         output->insert_wme(wme, shared());
     }
@@ -105,7 +105,7 @@ namespace Rete {
     assert(filter);
     filter->input = out;
 
-    out->outputs.insert(filter);
+    out->outputs.push_back(filter);
     out->pass_tokens(filter);
   }
 

@@ -29,7 +29,7 @@ namespace Rete {
     }
 
     void destroy(std::unordered_set<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
-      outputs.erase(output);
+      erase_output(output);
       if(outputs.empty())
         input.lock()->destroy(filters, shared());
     }
@@ -134,7 +134,7 @@ namespace Rete {
     assert(predicate);
     predicate->input = out;
 
-    out->outputs.insert(predicate);
+    out->outputs.push_back(predicate);
     out->pass_tokens(predicate);
   }
 

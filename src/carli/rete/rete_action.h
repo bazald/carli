@@ -84,7 +84,7 @@ namespace Rete {
     assert(action && !action->input.lock());
     action->input = out;
 
-    out->outputs.insert(action);
+    out->outputs.push_back(action);
     out->pass_tokens(action);
   }
 

@@ -15,7 +15,7 @@ namespace Rete {
     Rete_Join(WME_Bindings bindings_) : bindings(bindings_) {}
 
     void destroy(std::unordered_set<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
-      outputs.erase(output);
+      erase_output(output);
       if(outputs.empty()) {
         auto i0 = input0.lock();
         auto i1 = input1.lock();
@@ -82,7 +82,7 @@ namespace Rete {
     static Rete_Join_Ptr find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
       for(auto &o0 : out0->get_outputs()) {
         if(auto existing_join = std::dynamic_pointer_cast<Rete_Join>(o0)) {
-          if(out1->get_outputs().find(o0) != out1->get_outputs().end()) {
+          if(std::find(out1->get_outputs().begin(), out1->get_outputs().end(), o0) != out1->get_outputs().end()) {
             if(bindings == existing_join->bindings)
               return existing_join;
           }
@@ -129,8 +129,8 @@ namespace Rete {
     join->input0 = out0;
     join->input1 = out1;
 
-    out0->outputs.insert(join);
-    out1->outputs.insert(join);
+    out0->outputs.push_back(join);
+    out1->outputs.push_back(join);
     out0->pass_tokens(join);
     out1->pass_tokens(join);
   }

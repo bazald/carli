@@ -3,8 +3,10 @@
 
 #include "wme_vector.h"
 
+#include <algorithm>
 #include <cassert>
 #include <functional>
+#include <list>
 
 namespace Rete {
 
@@ -64,7 +66,7 @@ namespace Rete {
       return shared_from_this();
     }
 
-    const std::unordered_set<Rete_Node_Ptr> & get_outputs() const {
+    const std::list<Rete_Node_Ptr> & get_outputs() const {
       return outputs;
     }
 
@@ -88,7 +90,11 @@ namespace Rete {
     virtual bool operator==(const Rete_Node &rhs) const = 0;
 
   protected:
-    std::unordered_set<Rete_Node_Ptr> outputs;
+    void erase_output(const Rete_Node_Ptr &output) {
+      outputs.erase(std::find(outputs.begin(), outputs.end(), output));
+    }
+
+    std::list<Rete_Node_Ptr> outputs;
   };
 
 }
