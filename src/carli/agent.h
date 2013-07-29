@@ -282,12 +282,12 @@ public:
     if(m_metastate == Metastate::NON_TERMINAL)
       m_next = m_exploration_policy();
 
-    m_current = m_next;
-    m_current_q_value = m_next_q_values[m_next];
+//    m_current = m_next;
+//    m_current_q_value = m_next_q_values[m_next];
   }
 
   reward_type act() {
-    generate_features();
+//    generate_features();
 
     m_current = m_next;
     m_current_q_value = m_next_q_values[m_next];
