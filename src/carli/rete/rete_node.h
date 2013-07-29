@@ -40,7 +40,7 @@ namespace Rete {
   typedef std::shared_ptr<Rete_Node> Rete_Node_Ptr;
   typedef std::shared_ptr<Rete_Predicate> Rete_Predicate_Ptr;
 
-  class Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<Rete_Existential_Join> {
+  class Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<Rete_Filter> {
     Rete_Node(const Rete_Node &);
     Rete_Node & operator=(const Rete_Node &);
 
@@ -83,14 +83,20 @@ namespace Rete {
 
     template<typename CONTAINER>
     typename CONTAINER::iterator find(CONTAINER &tokens, const WME_Token_Ptr_C &token) {
-      return tokens.find(token);
-//      return std::find(tokens.begin(), tokens.end(), token);
+//      return tokens.find(token);
+      return std::find(tokens.begin(), tokens.end(), token);
     }
 
     template<typename CONTAINER>
     typename CONTAINER::iterator find_deref(CONTAINER &tokens, const WME_Token_Ptr_C &token) {
-      return tokens.find(token);
-//      return std::find_if(tokens.begin(), tokens.end(), [&token](const WME_Token_Ptr_C &tok){return *tok == *token;});
+//      return tokens.find(token);
+      return std::find_if(tokens.begin(), tokens.end(), [&token](const WME_Token_Ptr_C &tok){return *tok == *token;});
+    }
+
+    template<typename CONTAINER>
+    typename CONTAINER::iterator find_key(CONTAINER &tokens, const WME_Token_Ptr_C &token) {
+//      return tokens.find(token);
+      return std::find_if(tokens.begin(), tokens.end(), [&token](const typename CONTAINER::value_type &tok){return tok.first == token;});
     }
 
     std::list<Rete_Node_Ptr> outputs;

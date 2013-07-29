@@ -12,7 +12,7 @@
 
 namespace Rete {
   inline void __rete_node_size_check() {
-    typedef Rete_Existential_Join Pool;
+    typedef Rete_Filter Pool;
     static_assert(sizeof(Pool) >= sizeof(Rete_Action), "Pool size suboptimal.");
     static_assert(sizeof(Pool) >= sizeof(Rete_Existential), "Pool size suboptimal.");
     static_assert(sizeof(Pool) >= sizeof(Rete_Existential_Join), "Pool size suboptimal.");

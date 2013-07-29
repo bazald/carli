@@ -29,13 +29,13 @@ namespace Rete {
       assert(from == input0.lock() || from == input1.lock());
 
       if(from == input0.lock()) {
-        input0_tokens.insert(wme_token);
+        input0_tokens.push_back(wme_token);
 
         for(const auto &other : input1_tokens)
           join_tokens(wme_token, other);
       }
       if(from == input1.lock()) {
-        input1_tokens.insert(wme_token);
+        input1_tokens.push_back(wme_token);
 
         for(const auto &other : input0_tokens)
           join_tokens(other, wme_token);
@@ -100,7 +100,7 @@ namespace Rete {
       }
 
       const WME_Token_Ptr_C wme_token_merge = join_wme_tokens(lhs, rhs);
-      output_tokens.insert(wme_token_merge);
+      output_tokens.push_back(wme_token_merge);
       for(auto &output : outputs)
         output->insert_wme_token(wme_token_merge, shared());
     }
@@ -117,9 +117,9 @@ namespace Rete {
     WME_Bindings bindings;
     std::weak_ptr<Rete_Node> input0;
     std::weak_ptr<Rete_Node> input1;
-    std::unordered_set<WME_Token_Ptr_C> input0_tokens;
-    std::unordered_set<WME_Token_Ptr_C> input1_tokens;
-    std::unordered_set<WME_Token_Ptr_C, hash_deref<WME_Token>, compare_deref_eq> output_tokens;
+    std::list<WME_Token_Ptr_C> input0_tokens;
+    std::list<WME_Token_Ptr_C> input1_tokens;
+    std::list<WME_Token_Ptr_C> output_tokens;
   };
 
   inline void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {

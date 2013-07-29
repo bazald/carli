@@ -27,7 +27,7 @@ namespace Rete {
                                                                                        ) {
       assert(from == input.lock());
 
-      input_tokens.insert(wme_token);
+      input_tokens.push_back(wme_token);
 
       if(input_tokens.size() == 1) {
         for(auto &output : outputs)
@@ -75,7 +75,7 @@ namespace Rete {
 
   private:
     std::weak_ptr<Rete_Node> input;
-    std::unordered_set<WME_Token_Ptr_C> input_tokens;
+    std::list<WME_Token_Ptr_C> input_tokens;
     WME_Token_Ptr_C output_token;
   };
 

@@ -46,6 +46,41 @@ namespace Rete {
     virtual bool operator>(const Symbol &rhs) const = 0;
     virtual bool operator>=(const Symbol &rhs) const = 0;
 
+    virtual bool operator==(const Symbol_Constant_Float &) const {return false;}
+    virtual bool operator!=(const Symbol_Constant_Float &) const {return true;}
+    virtual bool operator<(const Symbol_Constant_Float &) const {return false;}
+    virtual bool operator<=(const Symbol_Constant_Float &) const {return false;}
+    virtual bool operator>(const Symbol_Constant_Float &) const {return false;}
+    virtual bool operator>=(const Symbol_Constant_Float &) const {return false;}
+
+    virtual bool operator==(const Symbol_Constant_Int &) const {return false;}
+    virtual bool operator!=(const Symbol_Constant_Int &) const {return true;}
+    virtual bool operator<(const Symbol_Constant_Int &) const {return false;}
+    virtual bool operator<=(const Symbol_Constant_Int &) const {return false;}
+    virtual bool operator>(const Symbol_Constant_Int &) const {return false;}
+    virtual bool operator>=(const Symbol_Constant_Int &) const {return false;}
+
+    virtual bool operator==(const Symbol_Constant_String &) const {return false;}
+    virtual bool operator!=(const Symbol_Constant_String &) const {return true;}
+    virtual bool operator<(const Symbol_Constant_String &) const {return false;}
+    virtual bool operator<=(const Symbol_Constant_String &) const {return false;}
+    virtual bool operator>(const Symbol_Constant_String &) const {return false;}
+    virtual bool operator>=(const Symbol_Constant_String &) const {return false;}
+
+    virtual bool operator==(const Symbol_Identifier &) const {return false;}
+    virtual bool operator!=(const Symbol_Identifier &) const {return true;}
+    virtual bool operator<(const Symbol_Identifier &) const {return false;}
+    virtual bool operator<=(const Symbol_Identifier &) const {return false;}
+    virtual bool operator>(const Symbol_Identifier &) const {return false;}
+    virtual bool operator>=(const Symbol_Identifier &) const {return false;}
+
+    virtual bool operator==(const Symbol_Variable &) const {return false;}
+    virtual bool operator!=(const Symbol_Variable &) const {return true;}
+    virtual bool operator<(const Symbol_Variable &) const {return false;}
+    virtual bool operator<=(const Symbol_Variable &) const {return false;}
+    virtual bool operator>(const Symbol_Variable &) const {return false;}
+    virtual bool operator>=(const Symbol_Variable &) const {return false;}
+
     virtual size_t hash() const = 0;
     virtual std::ostream & print(std::ostream &os) const = 0;
   };
@@ -62,30 +97,6 @@ namespace Rete {
     Symbol_Constant() {}
   };
 
-  class Symbol_Constant_Int : public Symbol_Constant {
-    Symbol_Constant_Int(const Symbol_Constant_Int &);
-    Symbol_Constant_Int & operator=(const Symbol_Constant_Int &);
-
-  public:
-    Symbol_Constant_Int(const int64_t &value_) : value(value_) {}
-
-    inline bool operator==(const Symbol &rhs) const;
-    inline bool operator!=(const Symbol &rhs) const;
-    inline bool operator>(const Symbol &rhs) const;
-    inline bool operator>=(const Symbol &rhs) const;
-    inline bool operator<(const Symbol &rhs) const;
-    inline bool operator<=(const Symbol &rhs) const;
-
-    size_t hash() const {
-      return std::hash<int64_t>()(value);
-    }
-
-    virtual std::ostream & print(std::ostream &os) const {
-      return os << value;
-    }
-
-    int64_t value;
-  };
   class Symbol_Constant_Float : public Symbol_Constant {
     Symbol_Constant_Float(const Symbol_Constant_Float &);
     Symbol_Constant_Float & operator=(const Symbol_Constant_Float &);
@@ -93,12 +104,26 @@ namespace Rete {
   public:
     Symbol_Constant_Float(const double &value_) : value(value_) {}
 
-    inline bool operator==(const Symbol &rhs) const;
-    inline bool operator!=(const Symbol &rhs) const;
-    inline bool operator>(const Symbol &rhs) const;
-    inline bool operator>=(const Symbol &rhs) const;
-    inline bool operator<(const Symbol &rhs) const;
-    inline bool operator<=(const Symbol &rhs) const;
+    bool operator==(const Symbol &rhs) const {return rhs == *this;}
+    bool operator!=(const Symbol &rhs) const {return rhs != *this;}
+    bool operator>(const Symbol &rhs) const {return rhs <= *this;}
+    bool operator>=(const Symbol &rhs) const {return rhs < *this;}
+    bool operator<(const Symbol &rhs) const {return rhs >= *this;}
+    bool operator<=(const Symbol &rhs) const {return rhs > *this;}
+
+    bool operator==(const Symbol_Constant_Float &rhs) const {return value == rhs.value;}
+    bool operator!=(const Symbol_Constant_Float &rhs) const {return value != rhs.value;}
+    bool operator<(const Symbol_Constant_Float &rhs) const {return value < rhs.value;}
+    bool operator<=(const Symbol_Constant_Float &rhs) const {return value <= rhs.value;}
+    bool operator>(const Symbol_Constant_Float &rhs) const {return value > rhs.value;}
+    bool operator>=(const Symbol_Constant_Float &rhs) const {return value >= rhs.value;}
+
+    inline bool operator==(const Symbol_Constant_Int &rhs) const;
+    inline bool operator!=(const Symbol_Constant_Int &rhs) const;
+    inline bool operator<(const Symbol_Constant_Int &rhs) const;
+    inline bool operator<=(const Symbol_Constant_Int &rhs) const;
+    inline bool operator>(const Symbol_Constant_Int &rhs) const;
+    inline bool operator>=(const Symbol_Constant_Int &rhs) const;
 
     size_t hash() const {
       return std::hash<double>()(value);
@@ -111,101 +136,51 @@ namespace Rete {
     double value;
   };
 
-  bool Symbol_Constant_Float::operator==(const Symbol &rhs) const {
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Float *>(&rhs))
-      return value == rhs_ptr->value;
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Int *>(&rhs))
-      return value == rhs_ptr->value;
-    return false;
-  }
+  class Symbol_Constant_Int : public Symbol_Constant {
+    Symbol_Constant_Int(const Symbol_Constant_Int &);
+    Symbol_Constant_Int & operator=(const Symbol_Constant_Int &);
 
-  bool Symbol_Constant_Float::operator!=(const Symbol &rhs) const {
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Float *>(&rhs))
-      return value != rhs_ptr->value;
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Int *>(&rhs))
-      return value != rhs_ptr->value;
-    return true;
-  }
+  public:
+    Symbol_Constant_Int(const int64_t &value_) : value(value_) {}
 
-  bool Symbol_Constant_Float::operator>(const Symbol &rhs) const {
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Float *>(&rhs))
-      return value > rhs_ptr->value;
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Int *>(&rhs))
-      return value > rhs_ptr->value;
-    return false;
-  }
+    bool operator==(const Symbol &rhs) const {return rhs == *this;}
+    bool operator!=(const Symbol &rhs) const {return rhs != *this;}
+    bool operator>(const Symbol &rhs) const {return rhs <= *this;}
+    bool operator>=(const Symbol &rhs) const {return rhs < *this;}
+    bool operator<(const Symbol &rhs) const {return rhs >= *this;}
+    bool operator<=(const Symbol &rhs) const {return rhs > *this;}
 
-  bool Symbol_Constant_Float::operator>=(const Symbol &rhs) const {
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Float *>(&rhs))
-      return value >= rhs_ptr->value;
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Int *>(&rhs))
-      return value >= rhs_ptr->value;
-    return false;
-  }
+    bool operator==(const Symbol_Constant_Float &rhs) const {return value == rhs.value;}
+    bool operator!=(const Symbol_Constant_Float &rhs) const {return value != rhs.value;}
+    bool operator<(const Symbol_Constant_Float &rhs) const {return value < rhs.value;}
+    bool operator<=(const Symbol_Constant_Float &rhs) const {return value <= rhs.value;}
+    bool operator>(const Symbol_Constant_Float &rhs) const {return value > rhs.value;}
+    bool operator>=(const Symbol_Constant_Float &rhs) const {return value >= rhs.value;}
 
-  bool Symbol_Constant_Float::operator<(const Symbol &rhs) const {
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Float *>(&rhs))
-      return value < rhs_ptr->value;
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Int *>(&rhs))
-      return value < rhs_ptr->value;
-    return false;
-  }
+    bool operator==(const Symbol_Constant_Int &rhs) const {return value == rhs.value;}
+    bool operator!=(const Symbol_Constant_Int &rhs) const {return value != rhs.value;}
+    bool operator<(const Symbol_Constant_Int &rhs) const {return value < rhs.value;}
+    bool operator<=(const Symbol_Constant_Int &rhs) const {return value <= rhs.value;}
+    bool operator>(const Symbol_Constant_Int &rhs) const {return value > rhs.value;}
+    bool operator>=(const Symbol_Constant_Int &rhs) const {return value >= rhs.value;}
 
-  bool Symbol_Constant_Float::operator<=(const Symbol &rhs) const {
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Float *>(&rhs))
-      return value <= rhs_ptr->value;
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Int *>(&rhs))
-      return value <= rhs_ptr->value;
-    return false;
-  }
+    size_t hash() const {
+      return std::hash<int64_t>()(value);
+    }
 
-  bool Symbol_Constant_Int::operator==(const Symbol &rhs) const {
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Float *>(&rhs))
-      return value == rhs_ptr->value;
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Int *>(&rhs))
-      return value == rhs_ptr->value;
-    return false;
-  }
+    virtual std::ostream & print(std::ostream &os) const {
+      return os << value;
+    }
 
-  bool Symbol_Constant_Int::operator!=(const Symbol &rhs) const {
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Float *>(&rhs))
-      return value != rhs_ptr->value;
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Int *>(&rhs))
-      return value != rhs_ptr->value;
-    return true;
-  }
+    int64_t value;
+  };
 
-  bool Symbol_Constant_Int::operator>(const Symbol &rhs) const {
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Float *>(&rhs))
-      return value > rhs_ptr->value;
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Int *>(&rhs))
-      return value > rhs_ptr->value;
-    return false;
-  }
-
-  bool Symbol_Constant_Int::operator>=(const Symbol &rhs) const {
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Float *>(&rhs))
-      return value >= rhs_ptr->value;
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Int *>(&rhs))
-      return value >= rhs_ptr->value;
-    return false;
-  }
-
-  bool Symbol_Constant_Int::operator<(const Symbol &rhs) const {
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Float *>(&rhs))
-      return value < rhs_ptr->value;
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Int *>(&rhs))
-      return value < rhs_ptr->value;
-    return false;
-  }
-
-  bool Symbol_Constant_Int::operator<=(const Symbol &rhs) const {
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Float *>(&rhs))
-      return value <= rhs_ptr->value;
-    if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_Int *>(&rhs))
-      return value <= rhs_ptr->value;
-    return false;
-  }
+  bool Symbol_Constant_Float::operator==(const Symbol_Constant_Int &rhs) const {return value == rhs.value;}
+  bool Symbol_Constant_Float::operator!=(const Symbol_Constant_Int &rhs) const {return value != rhs.value;}
+  bool Symbol_Constant_Float::operator<(const Symbol_Constant_Int &rhs) const {return value < rhs.value;}
+  bool Symbol_Constant_Float::operator<=(const Symbol_Constant_Int &rhs) const {return value <= rhs.value;}
+  bool Symbol_Constant_Float::operator>(const Symbol_Constant_Int &rhs) const {return value > rhs.value;}
+  bool Symbol_Constant_Float::operator>=(const Symbol_Constant_Int &rhs) const {return value >= rhs.value;}
 
   class Symbol_Constant_String : public Symbol_Constant {
     Symbol_Constant_String(const Symbol_Constant_String &);
@@ -214,41 +189,19 @@ namespace Rete {
   public:
     Symbol_Constant_String(const std::string &value_) : value(value_) {}
 
-    bool operator==(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_String *>(&rhs))
-        return value == rhs_ptr->value;
-      return false;
-    }
+    bool operator==(const Symbol &rhs) const {return rhs == *this;}
+    bool operator!=(const Symbol &rhs) const {return rhs != *this;}
+    bool operator>(const Symbol &rhs) const {return rhs <= *this;}
+    bool operator>=(const Symbol &rhs) const {return rhs < *this;}
+    bool operator<(const Symbol &rhs) const {return rhs >= *this;}
+    bool operator<=(const Symbol &rhs) const {return rhs > *this;}
 
-    bool operator!=(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_String *>(&rhs))
-        return value != rhs_ptr->value;
-      return true;
-    }
-
-    bool operator>(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_String *>(&rhs))
-        return value > rhs_ptr->value;
-      return false;
-    }
-
-    bool operator>=(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_String *>(&rhs))
-        return value >= rhs_ptr->value;
-      return false;
-    }
-
-    bool operator<(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_String *>(&rhs))
-        return value < rhs_ptr->value;
-      return false;
-    }
-
-    bool operator<=(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Constant_String *>(&rhs))
-        return value <= rhs_ptr->value;
-      return false;
-    }
+    bool operator==(const Symbol_Constant_String &rhs) const {return value == rhs.value;}
+    bool operator!=(const Symbol_Constant_String &rhs) const {return value != rhs.value;}
+    bool operator<(const Symbol_Constant_String &rhs) const {return value < rhs.value;}
+    bool operator<=(const Symbol_Constant_String &rhs) const {return value <= rhs.value;}
+    bool operator>(const Symbol_Constant_String &rhs) const {return value > rhs.value;}
+    bool operator>=(const Symbol_Constant_String &rhs) const {return value >= rhs.value;}
 
     size_t hash() const {
       return std::hash<std::string>()(value);
@@ -268,41 +221,19 @@ namespace Rete {
   public:
     Symbol_Identifier(const std::string &value_) : value(value_) {}
 
-    bool operator==(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Identifier *>(&rhs))
-        return value == rhs_ptr->value;
-      return false;
-    }
+    bool operator==(const Symbol &rhs) const {return rhs == *this;}
+    bool operator!=(const Symbol &rhs) const {return rhs != *this;}
+    bool operator>(const Symbol &rhs) const {return rhs <= *this;}
+    bool operator>=(const Symbol &rhs) const {return rhs < *this;}
+    bool operator<(const Symbol &rhs) const {return rhs >= *this;}
+    bool operator<=(const Symbol &rhs) const {return rhs > *this;}
 
-    bool operator!=(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Identifier *>(&rhs))
-        return value != rhs_ptr->value;
-      return true;
-    }
-
-    bool operator>(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Identifier *>(&rhs))
-        return value > rhs_ptr->value;
-      return false;
-    }
-
-    bool operator>=(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Identifier *>(&rhs))
-        return value >= rhs_ptr->value;
-      return false;
-    }
-
-    bool operator<(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Identifier *>(&rhs))
-        return value < rhs_ptr->value;
-      return false;
-    }
-
-    bool operator<=(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Identifier *>(&rhs))
-        return value <= rhs_ptr->value;
-      return false;
-    }
+    bool operator==(const Symbol_Identifier &rhs) const {return value == rhs.value;}
+    bool operator!=(const Symbol_Identifier &rhs) const {return value != rhs.value;}
+    bool operator<(const Symbol_Identifier &rhs) const {return value < rhs.value;}
+    bool operator<=(const Symbol_Identifier &rhs) const {return value <= rhs.value;}
+    bool operator>(const Symbol_Identifier &rhs) const {return value > rhs.value;}
+    bool operator>=(const Symbol_Identifier &rhs) const {return value >= rhs.value;}
 
     size_t hash() const {
       return std::hash<std::string>()(value);
@@ -324,41 +255,19 @@ namespace Rete {
 
     Symbol_Variable(const Variable &value_) : value(value_) {}
 
-    bool operator==(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Variable *>(&rhs))
-        return value == rhs_ptr->value;
-      return false;
-    }
+    bool operator==(const Symbol &rhs) const {return rhs == *this;}
+    bool operator!=(const Symbol &rhs) const {return rhs != *this;}
+    bool operator>(const Symbol &rhs) const {return rhs <= *this;}
+    bool operator>=(const Symbol &rhs) const {return rhs < *this;}
+    bool operator<(const Symbol &rhs) const {return rhs >= *this;}
+    bool operator<=(const Symbol &rhs) const {return rhs > *this;}
 
-    bool operator!=(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Variable *>(&rhs))
-        return value != rhs_ptr->value;
-      return true;
-    }
-
-    bool operator>(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Variable *>(&rhs))
-        return value > rhs_ptr->value;
-      return false;
-    }
-
-    bool operator>=(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Variable *>(&rhs))
-        return value >= rhs_ptr->value;
-      return false;
-    }
-
-    bool operator<(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Variable *>(&rhs))
-        return value < rhs_ptr->value;
-      return false;
-    }
-
-    bool operator<=(const Symbol &rhs) const {
-      if(auto rhs_ptr = dynamic_cast<const Symbol_Variable *>(&rhs))
-        return value <= rhs_ptr->value;
-      return false;
-    }
+    bool operator==(const Symbol_Variable &rhs) const {return value == rhs.value;}
+    bool operator!=(const Symbol_Variable &rhs) const {return value != rhs.value;}
+    bool operator<(const Symbol_Variable &rhs) const {return value < rhs.value;}
+    bool operator<=(const Symbol_Variable &rhs) const {return value <= rhs.value;}
+    bool operator>(const Symbol_Variable &rhs) const {return value > rhs.value;}
+    bool operator>=(const Symbol_Variable &rhs) const {return value >= rhs.value;}
 
     size_t hash() const {
       return std::hash<size_t>()(value);

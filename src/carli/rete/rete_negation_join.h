@@ -31,8 +31,8 @@ namespace Rete {
 
       if(from == input0.lock()) {
         bool fresh;
-        if(find(input0_tokens, wme_token) == input0_tokens.end()) {
-          input0_tokens[wme_token] = 0u;
+        if(find_key(input0_tokens, wme_token) == input0_tokens.end()) {
+          input0_tokens.push_back(std::make_pair(wme_token, 0lu));
           fresh = true;
         }
         else
@@ -41,14 +41,14 @@ namespace Rete {
         for(const auto &other : input1_tokens)
           join_tokens(wme_token, other);
 
-        if(fresh && input0_tokens[wme_token] == 0) {
-          output_tokens.insert(wme_token);
+        if(fresh && find_key(input0_tokens, wme_token)->second == 0) {
+          output_tokens.push_back(wme_token);
           for(auto &output : outputs)
             output->insert_wme_token(wme_token, shared());
         }
       }
       if(from == input1.lock()) {
-        input1_tokens.insert(wme_token);
+        input1_tokens.push_back(wme_token);
 
         for(const auto &other : input0_tokens)
           join_tokens(other.first, wme_token);
@@ -59,13 +59,13 @@ namespace Rete {
       assert(from == input0.lock() || from == input1.lock());
 
       if(from == input0.lock()) {
-        auto found = find(input0_tokens, wme_token);
+        auto found = find_key(input0_tokens, wme_token);
         if(found != input0_tokens.end()) {
           // TODO: Avoid looping through non-existent pairs?
           input0_tokens.erase(found);
-          output_tokens.erase(wme_token);
           for(auto &output : outputs)
             output->remove_wme_token(wme_token, shared());
+          output_tokens.erase(find(output_tokens, wme_token));
         }
       }
       if(from == input1.lock()) {
@@ -78,8 +78,8 @@ namespace Rete {
               if(*(*other.first)[binding.first] != *(*wme_token)[binding.second])
                 continue;
             }
-            if(--input0_tokens[other.first] == 0) {
-              output_tokens.insert(other.first);
+            if(--find_key(input0_tokens, other.first)->second == 0) {
+              output_tokens.push_back(other.first);
               for(auto &output : outputs)
                 output->insert_wme_token(other.first, shared());
             }
@@ -114,10 +114,10 @@ namespace Rete {
           return;
       }
 
-      if(++input0_tokens[lhs] == 1) {
-        output_tokens.erase(lhs);
+      if(++find_key(input0_tokens, lhs)->second == 1) {
         for(auto &output : outputs)
           output->remove_wme_token(lhs, shared());
+        output_tokens.erase(find(output_tokens, lhs));
       }
     }
 
@@ -129,9 +129,9 @@ namespace Rete {
     WME_Bindings bindings;
     std::weak_ptr<Rete_Node> input0;
     std::weak_ptr<Rete_Node> input1;
-    std::unordered_map<WME_Token_Ptr_C, size_t> input0_tokens;
-    std::unordered_set<WME_Token_Ptr_C> input1_tokens;
-    std::unordered_set<WME_Token_Ptr_C> output_tokens;
+    std::list<std::pair<WME_Token_Ptr_C, size_t>> input0_tokens;
+    std::list<WME_Token_Ptr_C> input1_tokens;
+    std::list<WME_Token_Ptr_C> output_tokens;
   };
 
   inline void bind_to_negation_join(const Rete_Negation_Join_Ptr &existential_join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {

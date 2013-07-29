@@ -50,7 +50,7 @@ namespace Rete {
           return;
       }
 
-      tokens.insert(wme_token);
+      tokens.push_back(wme_token);
 
       for(auto &output : outputs)
         output->insert_wme_token(wme_token, shared());
@@ -135,7 +135,7 @@ namespace Rete {
     WME_Token_Index m_rhs_index;
     Symbol_Ptr_C m_rhs;
     std::weak_ptr<Rete_Node> input;
-    std::unordered_set<WME_Token_Ptr_C> tokens;
+    std::list<WME_Token_Ptr_C> tokens;
   };
 
   inline void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out) {
