@@ -19,12 +19,12 @@ namespace Rete {
     const std::function<Rete_Join_Ptr (const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1)> make_join;
     const std::function<Rete_Negation_Ptr (const Rete_Node_Ptr &out)> make_negation;
     const std::function<Rete_Negation_Join_Ptr (const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1)> make_negation_join;
-    const std::function<Rete_Predicate_Ptr (const Rete_Predicate::Predicate &predicate, const WME_Vector_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out)> make_predicate_vc;
-    const std::function<Rete_Predicate_Ptr (const Rete_Predicate::Predicate &predicate, const WME_Vector_Index &lhs_index, const WME_Vector_Index &rhs_index, const Rete_Node_Ptr &out)> make_predicate_vv;
+    const std::function<Rete_Predicate_Ptr (const Rete_Predicate::Predicate &predicate, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out)> make_predicate_vc;
+    const std::function<Rete_Predicate_Ptr (const Rete_Predicate::Predicate &predicate, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out)> make_predicate_vv;
 
     Agent()
       : make_action([](const Rete_Action::Action &action, const Rete_Node_Ptr &out)->Rete_Action_Ptr {
-          if(auto existing = Rete_Action::find_existing(action, [](const Rete_Action &, const WME_Vector &){}, out))
+          if(auto existing = Rete_Action::find_existing(action, [](const Rete_Action &, const WME_Token &){}, out))
             return existing;
           auto action_fun = std::make_shared<Rete_Action>(action);
           bind_to_action(action_fun, out);
@@ -85,14 +85,14 @@ namespace Rete {
         bind_to_negation_join(negation_join, out0, out1);
         return negation_join;
       }),
-      make_predicate_vc([](const Rete_Predicate::Predicate &pred, const WME_Vector_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out)->Rete_Predicate_Ptr {
+      make_predicate_vc([](const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out)->Rete_Predicate_Ptr {
         if(auto existing = Rete_Predicate::find_existing(pred, lhs_index, rhs, out))
           return existing;
         auto predicate = std::make_shared<Rete_Predicate>(pred, lhs_index, rhs);
         bind_to_predicate(predicate, out);
         return predicate;
       }),
-      make_predicate_vv([](const Rete_Predicate::Predicate &pred, const WME_Vector_Index &lhs_index, const WME_Vector_Index &rhs_index, const Rete_Node_Ptr &out)->Rete_Predicate_Ptr {
+      make_predicate_vv([](const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out)->Rete_Predicate_Ptr {
         if(auto existing = Rete_Predicate::find_existing(pred, lhs_index, rhs_index, out))
           return existing;
         auto predicate = std::make_shared<Rete_Predicate>(pred, lhs_index, rhs_index);
@@ -141,7 +141,7 @@ namespace Rete {
     void remove_wme(const WME_Ptr_C &wme) {
       auto found = working_memory.wmes.find(wme);
       assert(found != working_memory.wmes.end());
-      working_memory.wmes.erase(wme);
+      working_memory.wmes.erase(found);
       for(auto &filter : filters)
         filter->remove_wme(wme);
     }

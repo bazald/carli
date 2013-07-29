@@ -14,14 +14,14 @@ namespace Rete {
   public:
     enum Predicate {EQ, NEQ, GT, GTE, LT, LTE};
 
-    Rete_Predicate(const Predicate &predicate_, const WME_Vector_Index lhs_index_, const WME_Vector_Index rhs_index_)
+    Rete_Predicate(const Predicate &predicate_, const WME_Token_Index lhs_index_, const WME_Token_Index rhs_index_)
      : m_predicate(predicate_),
      m_lhs_index(lhs_index_),
      m_rhs_index(rhs_index_)
     {
     }
 
-    Rete_Predicate(const Predicate &predicate_, const WME_Vector_Index lhs_index_, const Symbol_Ptr_C &rhs_)
+    Rete_Predicate(const Predicate &predicate_, const WME_Token_Index lhs_index_, const Symbol_Ptr_C &rhs_)
      : m_predicate(predicate_),
      m_lhs_index(lhs_index_),
      m_rhs(rhs_)
@@ -34,38 +34,46 @@ namespace Rete {
         input.lock()->destroy(filters, shared());
     }
 
-    void insert_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
+    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
+#ifndef NDEBUG
+                                                                                   from
+#endif
+                                                                                       ) {
       assert(from == input.lock());
 
       if(m_rhs) {
-        if(!test_predicate(wme_vector->wmes[m_lhs_index.first]->symbols[m_lhs_index.second], m_rhs))
+        if(!test_predicate((*wme_token)[m_lhs_index], m_rhs))
           return;
       }
       else {
-        if(!test_predicate(wme_vector->wmes[m_lhs_index.first]->symbols[m_lhs_index.second], wme_vector->wmes[m_rhs_index.first]->symbols[m_rhs_index.second]))
+        if(!test_predicate((*wme_token)[m_lhs_index], (*wme_token)[m_rhs_index]))
           return;
       }
 
-      tokens.insert(wme_vector);
+      tokens.insert(wme_token);
 
       for(auto &output : outputs)
-        output->insert_wme_vector(wme_vector, shared());
+        output->insert_wme_token(wme_token, shared());
     }
 
-    void remove_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
+    void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
+#ifndef NDEBUG
+                                                                                   from
+#endif
+                                                                                       ) {
       assert(from == input.lock());
 
-      auto found = find(tokens, wme_vector);
+      auto found = find(tokens, wme_token);
       if(found != tokens.end()) {
         tokens.erase(found);
         for(auto &output : outputs)
-          output->remove_wme_vector(wme_vector, shared());
+          output->remove_wme_token(wme_token, shared());
       }
     }
 
     void pass_tokens(const Rete_Node_Ptr &output) {
-      for(auto &wme_vector : tokens)
-        output->insert_wme_vector(wme_vector, shared());
+      for(auto &wme_token : tokens)
+        output->insert_wme_token(wme_token, shared());
     }
 
     bool operator==(const Rete_Node &rhs) const {
@@ -79,7 +87,7 @@ namespace Rete {
       return false;
     }
 
-    static Rete_Predicate_Ptr find_existing(const Predicate &predicate, const WME_Vector_Index &lhs_index, const WME_Vector_Index &rhs_index, const Rete_Node_Ptr &out) {
+    static Rete_Predicate_Ptr find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out) {
       for(auto &o : out->get_outputs()) {
         if(auto existing_predicate = std::dynamic_pointer_cast<Rete_Predicate>(o)) {
           if(predicate == existing_predicate->m_predicate &&
@@ -94,7 +102,7 @@ namespace Rete {
       return nullptr;
     }
 
-    static Rete_Predicate_Ptr find_existing(const Predicate &predicate, const WME_Vector_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out) {
+    static Rete_Predicate_Ptr find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out) {
       for(auto &o : out->get_outputs()) {
         if(auto existing_predicate = std::dynamic_pointer_cast<Rete_Predicate>(o)) {
           if(predicate == existing_predicate->m_predicate &&
@@ -123,11 +131,11 @@ namespace Rete {
     }
 
     Predicate m_predicate;
-    WME_Vector_Index m_lhs_index;
-    WME_Vector_Index m_rhs_index;
+    WME_Token_Index m_lhs_index;
+    WME_Token_Index m_rhs_index;
     Symbol_Ptr_C m_rhs;
     std::weak_ptr<Rete_Node> input;
-    std::unordered_set<WME_Vector_Ptr_C> tokens;
+    std::unordered_set<WME_Token_Ptr_C> tokens;
   };
 
   inline void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out) {

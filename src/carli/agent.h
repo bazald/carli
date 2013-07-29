@@ -51,7 +51,7 @@ public:
     RL & operator=(const RL &) = delete;
 
   public:
-    typedef std::unordered_multimap<Rete::WME_Vector_Index, std::shared_ptr<RL>> Fringe_Values;
+    typedef std::unordered_multimap<Rete::WME_Token_Index, std::shared_ptr<RL>> Fringe_Values;
 
     RL(const size_t &depth_)
      : depth(depth_)
@@ -82,7 +82,7 @@ public:
     }
   }
 
-  void generate_fringe(const std::shared_ptr<typename action_type::derived_type> &action, RL &general, const Rete::WME_Vector_Index &specialization) {
+  void generate_fringe(const std::shared_ptr<typename action_type::derived_type> &action, RL &general, const Rete::WME_Token_Index &specialization) {
     assert(general.fringe_values);
 
     auto nexts = general.fringe_values->equal_range(specialization);
@@ -120,7 +120,7 @@ public:
         rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
         rl->feature = refined_feature;
         auto predicate = make_predicate_vc(refined_feature->predicate(), leaf.first, refined_feature->symbol_constant(), leaf_rl.action.lock()->parent());
-        rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+        rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->specialize(action, *rl);
           this->m_next_q_values[action].push_back(rl->q_value);
         }, predicate);
@@ -136,7 +136,7 @@ public:
         rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
         rl->feature = fringe_rl.feature->clone();
         auto predicate = make_predicate_vc(rl->feature->predicate(), fringe.first, rl->feature->symbol_constant(), leaf_rl.action.lock()->parent());
-        rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+        rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->specialize(action, *rl);
           this->m_next_q_values[action].push_back(rl->q_value);
         }, predicate);

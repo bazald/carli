@@ -294,7 +294,7 @@ namespace Puddle_World {
       auto y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
 
       Rete::WME_Bindings state_bindings;
-      state_bindings.insert(Rete::WME_Binding(Rete::WME_Vector_Index(0, 0), Rete::WME_Vector_Index(0, 0)));
+      state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
       auto x = make_filter(Rete::WME(m_first_var, x_attr, m_third_var));
       auto y = make_filter(Rete::WME(m_first_var, y_attr, m_third_var));
       auto xy = make_join(state_bindings, x, y);
@@ -303,18 +303,18 @@ namespace Puddle_World {
         rl->q_value = new Q_Value();
         ++this->m_q_value_count;
         rl->fringe_values = new RL::Fringe_Values;
-        rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+        rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->specialize(action, *rl);
           this->m_next_q_values[action].push_back(rl->q_value);
         }, xy);
 
         {
-          const Rete::WME_Vector_Index index(0, 2);
+          const Rete::WME_Token_Index index(0, 2);
           auto rlf = std::make_shared<RL>(2);
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
           rlf->feature = new Feature(Feature::X, 0.0, 0.5, 2, false);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), index, rlf->feature->symbol_constant(), rl->action.lock()->parent());
-          rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+          rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
@@ -322,12 +322,12 @@ namespace Puddle_World {
         }
 
         {
-          const Rete::WME_Vector_Index index(0, 2);
+          const Rete::WME_Token_Index index(0, 2);
           auto rlf = std::make_shared<RL>(2);
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
           rlf->feature = new Feature(Feature::X, 0.5, 1.0, 2, true);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), index, rlf->feature->symbol_constant(), rl->action.lock()->parent());
-          rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+          rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
@@ -335,12 +335,12 @@ namespace Puddle_World {
         }
 
         {
-          const Rete::WME_Vector_Index index(1, 2);
+          const Rete::WME_Token_Index index(1, 2);
           auto rlf = std::make_shared<RL>(2);
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
           rlf->feature = new Feature(Feature::Y, 0.0, 0.5, 2, false);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), index, rlf->feature->symbol_constant(), rl->action.lock()->parent());
-          rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+          rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
@@ -348,12 +348,12 @@ namespace Puddle_World {
         }
 
         {
-          const Rete::WME_Vector_Index index(1, 2);
+          const Rete::WME_Token_Index index(1, 2);
           auto rlf = std::make_shared<RL>(2);
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
           rlf->feature = new Feature(Feature::Y, 0.5, 1.0, 2, true);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), index, rlf->feature->symbol_constant(), rl->action.lock()->parent());
-          rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Vector &) {
+          rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);

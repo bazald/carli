@@ -9,8 +9,6 @@ namespace Rete {
     Rete_Filter(const Rete_Filter &);
     Rete_Filter & operator=(const Rete_Filter &);
 
-    friend void bind_to_filter(const Rete_Filter_Ptr &filter, const Rete_Filter_Ptr &out);
-
   public:
     Rete_Filter(const WME &wme_)
       : m_wme(wme_)
@@ -29,9 +27,7 @@ namespace Rete {
         filters.erase(std::static_pointer_cast<Rete_Filter>(shared()));
     }
 
-    void insert_wme(const WME_Ptr_C &wme, const Rete_Node_Ptr_C &from = nullptr) {
-      assert(from == input.lock());
-
+    void insert_wme(const WME_Ptr_C &wme) {
       for(int i = 0; i != 3; ++i)
         if(!m_variable[i] && *m_wme.symbols[i] != *wme->symbols[i])
           return;
@@ -44,36 +40,32 @@ namespace Rete {
         return;
 
       if(tokens.find(wme) == tokens.end()) {
-        auto wme_vector = std::make_shared<WME_Vector>();
-        wme_vector->wmes.push_back(wme);
-        tokens[wme] = wme_vector;
+        auto wme_token = tokens[wme] = std::make_shared<WME_Token>(wme);
         for(auto &output : outputs)
-          output->insert_wme_vector(wme_vector, shared());
+          output->insert_wme_token(wme_token, shared());
       }
     }
 
-    void remove_wme(const WME_Ptr_C &wme, const Rete_Node_Ptr_C &from = nullptr) {
-      assert(from == input.lock());
-
+    void remove_wme(const WME_Ptr_C &wme) {
       auto found = tokens.find(wme);
       if(found != tokens.end()) {
         for(auto &output : outputs)
-          output->remove_wme_vector(found->second, shared());
+          output->remove_wme_token(found->second, shared());
         tokens.erase(found);
       }
     }
 
-    void insert_wme_vector(const WME_Vector_Ptr_C &, const Rete_Node_Ptr_C &) {
+    void insert_wme_token(const WME_Token_Ptr_C &, const Rete_Node_Ptr_C &) {
       abort();
     }
 
-    void remove_wme_vector(const WME_Vector_Ptr_C &, const Rete_Node_Ptr_C &) {
+    void remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node_Ptr_C &) {
       abort();
     }
 
     void pass_tokens(const Rete_Node_Ptr &output) {
       for(auto &token : tokens)
-        output->insert_wme_vector(token.second, shared());
+        output->insert_wme_token(token.second, shared());
     }
 
     bool operator==(const Rete_Node &rhs) const {
@@ -101,16 +93,8 @@ namespace Rete {
     WME m_wme;
     std::array<Symbol_Variable_Ptr_C, 3> m_variable;
     std::weak_ptr<Rete_Node> input;
-    std::unordered_map<WME_Ptr_C, WME_Vector_Ptr_C> tokens;
+    std::unordered_map<WME_Ptr_C, WME_Token_Ptr_C> tokens;
   };
-
-  inline void bind_to_filter(const Rete_Filter_Ptr &filter, const Rete_Filter_Ptr &out) {
-    assert(filter);
-    filter->input = out;
-
-    out->outputs.push_back(filter);
-    out->pass_tokens(filter);
-  }
 
 }
 

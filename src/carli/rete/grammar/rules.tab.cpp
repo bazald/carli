@@ -1,19 +1,19 @@
 /* A Bison parser, made by GNU Bison 2.5.  */
 
 /* Bison implementation for Yacc-like parsers in C
-   
+
       Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
-   
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -26,7 +26,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -109,14 +109,14 @@ Rete_Node_Ptr_and_Variables(const Rete_Node_Ptr &rete_node, const vector<array<s
   return new pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>(rete_node, variables);
 }
 
-static WME_Vector_Index find_index(const std::vector<std::array<std::string, 3>> &variables, const std::string &variable) {
+static WME_Token_Index find_index(const std::vector<std::array<std::string, 3>> &variables, const std::string &variable) {
   for(size_t i = 0; i != variables.size(); ++i) {
     for(uint8_t ii = 0; ii != 3; ++ii) {
       if(variables[i][ii] == variable)
-        return WME_Vector_Index(i, ii);
+        return WME_Token_Index(i, ii);
     }
   }
-  return WME_Vector_Index(size_t(-1), uint8_t(-1));
+  return WME_Token_Index(size_t(-1), uint8_t(-1));
 }
 
 static void rete_error(Agent &agent, const char *s);
@@ -1526,10 +1526,10 @@ yyreduce:
 /* Line 1806 of yacc.c  */
 #line 84 "rules.y"
     { string name = *(yyvsp[(1) - (4)].sval);
-                                    auto node = agent.make_action_retraction([name](const Rete_Action &, const WME_Vector &wme_vector) {
-                                                                               cout << wme_vector << "->" << name << endl;
-                                                                             }, [name](const Rete_Action &, const WME_Vector &wme_vector) {
-                                                                                  cout << wme_vector << "<-" << name << endl;
+                                    auto node = agent.make_action_retraction([name](const Rete_Action &, const WME_Token &wme_token) {
+                                                                               cout << wme_token << "->" << name << endl;
+                                                                             }, [name](const Rete_Action &, const WME_Token &wme_token) {
+                                                                                  cout << wme_token << "<-" << name << endl;
                                                                                 }, (yyvsp[(3) - (4)].rete_node_ptr)->first);
                                     agent.source_rule(name, node);
                                     delete (yyvsp[(1) - (4)].sval);
@@ -1569,7 +1569,7 @@ yyreduce:
                                                 for(size_t j = 0; j != (yyvsp[(3) - (3)].rete_node_ptr)->second.size(); ++j) {
                                                   for(uint8_t jj = 0; jj != 3; ++jj) {
                                                     if((yyvsp[(1) - (3)].rete_node_ptr)->second[i][ii] == (yyvsp[(3) - (3)].rete_node_ptr)->second[j][jj]) {
-                                                      bindings.insert(WME_Binding(WME_Vector_Index(i, ii), WME_Vector_Index(j, jj)));
+                                                      bindings.insert(WME_Binding(WME_Token_Index(i, ii), WME_Token_Index(j, jj)));
                                                       joined.insert((yyvsp[(1) - (3)].rete_node_ptr)->second[i][ii]);
                                                       goto DONE_EXISTENTIAL_JOINING;
                                                     }
@@ -1597,7 +1597,7 @@ yyreduce:
                                                 for(size_t j = 0; j != (yyvsp[(3) - (3)].rete_node_ptr)->second.size(); ++j) {
                                                   for(uint8_t jj = 0; jj != 3; ++jj) {
                                                     if((yyvsp[(1) - (3)].rete_node_ptr)->second[i][ii] == (yyvsp[(3) - (3)].rete_node_ptr)->second[j][jj]) {
-                                                      bindings.insert(WME_Binding(WME_Vector_Index(i, ii), WME_Vector_Index(j, jj)));
+                                                      bindings.insert(WME_Binding(WME_Token_Index(i, ii), WME_Token_Index(j, jj)));
                                                       joined.insert((yyvsp[(1) - (3)].rete_node_ptr)->second[i][ii]);
                                                       goto DONE_NEGATION_JOINING;
                                                     }
@@ -1625,7 +1625,7 @@ yyreduce:
                                     for(size_t j = 0; j != (yyvsp[(2) - (2)].rete_node_ptr)->second.size(); ++j) {
                                       for(uint8_t jj = 0; jj != 3; ++jj) {
                                         if((yyvsp[(1) - (2)].rete_node_ptr)->second[i][ii] == (yyvsp[(2) - (2)].rete_node_ptr)->second[j][jj]) {
-                                          bindings.insert(WME_Binding(WME_Vector_Index(i, ii), WME_Vector_Index(j, jj)));
+                                          bindings.insert(WME_Binding(WME_Token_Index(i, ii), WME_Token_Index(j, jj)));
                                           joined.insert((yyvsp[(1) - (2)].rete_node_ptr)->second[i][ii]);
                                           goto DONE_JOINING;
                                         }

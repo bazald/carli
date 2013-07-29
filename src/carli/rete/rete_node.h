@@ -1,7 +1,7 @@
 #ifndef RETE_NODE_H
 #define RETE_NODE_H
 
-#include "wme_vector.h"
+#include "wme_token.h"
 
 #include <algorithm>
 #include <cassert>
@@ -47,7 +47,6 @@ namespace Rete {
     friend void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
     friend void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out);
     friend void bind_to_existential_join(const Rete_Existential_Join_Ptr &existential_join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
-    friend void bind_to_filter(const Rete_Filter_Ptr &filter, const Rete_Filter_Ptr &out);
     friend void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
     friend void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
     friend void bind_to_negation_join(const Rete_Negation_Join_Ptr &negation_join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
@@ -70,8 +69,8 @@ namespace Rete {
       return outputs;
     }
 
-    virtual void insert_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) = 0;
-    virtual void remove_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) = 0;
+    virtual void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) = 0;
+    virtual void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) = 0;
 
     virtual void pass_tokens(const Rete_Node_Ptr &output) = 0;
 
@@ -83,15 +82,15 @@ namespace Rete {
     }
 
     template<typename CONTAINER>
-    typename CONTAINER::iterator find(CONTAINER &tokens, const WME_Vector_Ptr_C &token) {
+    typename CONTAINER::iterator find(CONTAINER &tokens, const WME_Token_Ptr_C &token) {
       return tokens.find(token);
 //      return std::find(tokens.begin(), tokens.end(), token);
     }
 
     template<typename CONTAINER>
-    typename CONTAINER::iterator find_deref(CONTAINER &tokens, const WME_Vector_Ptr_C &token) {
+    typename CONTAINER::iterator find_deref(CONTAINER &tokens, const WME_Token_Ptr_C &token) {
       return tokens.find(token);
-//      return std::find_if(tokens.begin(), tokens.end(), [&token](const WME_Vector_Ptr_C &tok){return *tok == *token;});
+//      return std::find_if(tokens.begin(), tokens.end(), [&token](const WME_Token_Ptr_C &tok){return *tok == *token;});
     }
 
     std::list<Rete_Node_Ptr> outputs;

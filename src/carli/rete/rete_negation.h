@@ -12,7 +12,7 @@ namespace Rete {
     friend void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
 
   public:
-    Rete_Negation() : output_token(std::make_shared<WME_Vector>()) {}
+    Rete_Negation() : output_token(std::make_shared<WME_Token>()) {}
 
     void destroy(std::unordered_set<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
       erase_output(output);
@@ -20,33 +20,41 @@ namespace Rete {
         input.lock()->destroy(filters, shared());
     }
 
-    void insert_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
+    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
+#ifndef NDEBUG
+                                                                                   from
+#endif
+                                                                                       ) {
       assert(from == input.lock());
 
-      input_tokens.insert(wme_vector);
+      input_tokens.insert(wme_token);
 
       if(input_tokens.size() == 1) {
         for(auto &output : outputs)
-          output->remove_wme_vector(output_token, shared());
+          output->remove_wme_token(output_token, shared());
       }
     }
 
-    void remove_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
+    void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
+#ifndef NDEBUG
+                                                                                   from
+#endif
+                                                                                       ) {
       assert(from == input.lock());
 
-      auto found = find(input_tokens, wme_vector);
+      auto found = find(input_tokens, wme_token);
       if(found != input_tokens.end()) {
         input_tokens.erase(found);
         if(input_tokens.empty()) {
           for(auto &output : outputs)
-            output->insert_wme_vector(output_token, shared());
+            output->insert_wme_token(output_token, shared());
         }
       }
     }
 
     void pass_tokens(const Rete_Node_Ptr &output) {
       if(input_tokens.empty()) {
-        output->insert_wme_vector(output_token, shared());
+        output->insert_wme_token(output_token, shared());
       }
     }
 
@@ -67,8 +75,8 @@ namespace Rete {
 
   private:
     std::weak_ptr<Rete_Node> input;
-    std::unordered_set<WME_Vector_Ptr_C> input_tokens;
-    WME_Vector_Ptr_C output_token;
+    std::unordered_set<WME_Token_Ptr_C> input_tokens;
+    WME_Token_Ptr_C output_token;
   };
 
   inline void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out) {

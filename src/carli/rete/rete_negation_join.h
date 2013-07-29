@@ -26,62 +26,62 @@ namespace Rete {
       }
     }
 
-    void insert_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
+    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) {
       assert(from == input0.lock() || from == input1.lock());
 
       if(from == input0.lock()) {
         bool fresh;
-        if(find(input0_tokens, wme_vector) == input0_tokens.end()) {
-          input0_tokens[wme_vector] = 0u;
+        if(find(input0_tokens, wme_token) == input0_tokens.end()) {
+          input0_tokens[wme_token] = 0u;
           fresh = true;
         }
         else
           fresh = false;
 
         for(const auto &other : input1_tokens)
-          join_tokens(wme_vector, other);
+          join_tokens(wme_token, other);
 
-        if(fresh && input0_tokens[wme_vector] == 0) {
-          output_tokens.insert(wme_vector);
+        if(fresh && input0_tokens[wme_token] == 0) {
+          output_tokens.insert(wme_token);
           for(auto &output : outputs)
-            output->insert_wme_vector(wme_vector, shared());
+            output->insert_wme_token(wme_token, shared());
         }
       }
       if(from == input1.lock()) {
-        input1_tokens.insert(wme_vector);
+        input1_tokens.insert(wme_token);
 
         for(const auto &other : input0_tokens)
-          join_tokens(other.first, wme_vector);
+          join_tokens(other.first, wme_token);
       }
     }
 
-    void remove_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
+    void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) {
       assert(from == input0.lock() || from == input1.lock());
 
       if(from == input0.lock()) {
-        auto found = find(input0_tokens, wme_vector);
+        auto found = find(input0_tokens, wme_token);
         if(found != input0_tokens.end()) {
           // TODO: Avoid looping through non-existent pairs?
           input0_tokens.erase(found);
-          output_tokens.erase(wme_vector);
+          output_tokens.erase(wme_token);
           for(auto &output : outputs)
-            output->remove_wme_vector(wme_vector, shared());
+            output->remove_wme_token(wme_token, shared());
         }
       }
       if(from == input1.lock()) {
-        auto found = find(input1_tokens, wme_vector);
+        auto found = find(input1_tokens, wme_token);
         if(found != input1_tokens.end()) {
           // TODO: Avoid looping through non-existent pairs?
           input1_tokens.erase(found);
           for(const auto &other : input0_tokens) {
             for(auto &binding : bindings) {
-              if(*other.first->wmes[binding.first.first]->symbols[binding.first.second] != *wme_vector->wmes[binding.second.first]->symbols[binding.second.second])
+              if(*(*other.first)[binding.first] != *(*wme_token)[binding.second])
                 continue;
             }
             if(--input0_tokens[other.first] == 0) {
               output_tokens.insert(other.first);
               for(auto &output : outputs)
-                output->insert_wme_vector(other.first, shared());
+                output->insert_wme_token(other.first, shared());
             }
           }
         }
@@ -108,30 +108,30 @@ namespace Rete {
     }
 
   private:
-    void join_tokens(const WME_Vector_Ptr_C &lhs, const WME_Vector_Ptr_C &rhs) {
+    void join_tokens(const WME_Token_Ptr_C &lhs, const WME_Token_Ptr_C &rhs) {
       for(auto &binding : bindings) {
-        if(*lhs->wmes[binding.first.first]->symbols[binding.first.second] != *rhs->wmes[binding.second.first]->symbols[binding.second.second])
+        if(*(*lhs)[binding.first] != *(*rhs)[binding.second])
           return;
       }
 
       if(++input0_tokens[lhs] == 1) {
         output_tokens.erase(lhs);
         for(auto &output : outputs)
-          output->remove_wme_vector(lhs, shared());
+          output->remove_wme_token(lhs, shared());
       }
     }
 
     void pass_tokens(const Rete_Node_Ptr &output) {
-      for(auto &wme_vector : output_tokens)
-        output->insert_wme_vector(wme_vector, shared());
+      for(auto &wme_token : output_tokens)
+        output->insert_wme_token(wme_token, shared());
     }
 
     WME_Bindings bindings;
     std::weak_ptr<Rete_Node> input0;
     std::weak_ptr<Rete_Node> input1;
-    std::unordered_map<WME_Vector_Ptr_C, size_t> input0_tokens;
-    std::unordered_set<WME_Vector_Ptr_C> input1_tokens;
-    std::unordered_set<WME_Vector_Ptr_C> output_tokens;
+    std::unordered_map<WME_Token_Ptr_C, size_t> input0_tokens;
+    std::unordered_set<WME_Token_Ptr_C> input1_tokens;
+    std::unordered_set<WME_Token_Ptr_C> output_tokens;
   };
 
   inline void bind_to_negation_join(const Rete_Negation_Join_Ptr &existential_join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {

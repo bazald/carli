@@ -25,48 +25,48 @@ namespace Rete {
       }
     }
 
-    void insert_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
+    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) {
       assert(from == input0.lock() || from == input1.lock());
 
       if(from == input0.lock()) {
-        input0_tokens.insert(wme_vector);
+        input0_tokens.insert(wme_token);
 
         for(const auto &other : input1_tokens)
-          join_tokens(wme_vector, other);
+          join_tokens(wme_token, other);
       }
       if(from == input1.lock()) {
-        input1_tokens.insert(wme_vector);
+        input1_tokens.insert(wme_token);
 
         for(const auto &other : input0_tokens)
-          join_tokens(other, wme_vector);
+          join_tokens(other, wme_token);
       }
     }
 
-    void remove_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
+    void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) {
       assert(from == input0.lock() || from == input1.lock());
 
       if(from == input0.lock()) {
-        auto found = find(input0_tokens, wme_vector);
+        auto found = find(input0_tokens, wme_token);
         if(found != input0_tokens.end()) {
           // TODO: Avoid looping through non-existent pairs?
           input0_tokens.erase(found);
           for(const auto &other : input1_tokens) {
-            auto found_output = find_deref(output_tokens, join_wme_vectors(wme_vector, other));
+            auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
             for(auto &output : outputs)
-              output->remove_wme_vector(*found_output, shared());
+              output->remove_wme_token(*found_output, shared());
             output_tokens.erase(found_output);
           }
         }
       }
       if(from == input1.lock()) {
-        auto found = find(input1_tokens, wme_vector);
+        auto found = find(input1_tokens, wme_token);
         if(found != input1_tokens.end()) {
           // TODO: Avoid looping through non-existent pairs?
           input1_tokens.erase(found);
           for(const auto &other : input0_tokens) {
-            auto found_output = find_deref(output_tokens, join_wme_vectors(other, wme_vector));
+            auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
             for(auto &output : outputs)
-              output->remove_wme_vector(*found_output, shared());
+              output->remove_wme_token(*found_output, shared());
             output_tokens.erase(found_output);
           }
         }
@@ -93,35 +93,33 @@ namespace Rete {
     }
 
   private:
-    void join_tokens(const WME_Vector_Ptr_C &lhs, const WME_Vector_Ptr_C &rhs) {
+    void join_tokens(const WME_Token_Ptr_C &lhs, const WME_Token_Ptr_C &rhs) {
       for(auto &binding : bindings) {
-        if(*lhs->wmes[binding.first.first]->symbols[binding.first.second] != *rhs->wmes[binding.second.first]->symbols[binding.second.second])
+        if(*(*lhs)[binding.first] != *(*rhs)[binding.second])
           return;
       }
 
-      const WME_Vector_Ptr_C wme_vector_merge = join_wme_vectors(lhs, rhs);
-      output_tokens.insert(wme_vector_merge);
+      const WME_Token_Ptr_C wme_token_merge = join_wme_tokens(lhs, rhs);
+      output_tokens.insert(wme_token_merge);
       for(auto &output : outputs)
-        output->insert_wme_vector(wme_vector_merge, shared());
+        output->insert_wme_token(wme_token_merge, shared());
     }
 
-    WME_Vector_Ptr_C join_wme_vectors(const WME_Vector_Ptr_C lhs, const WME_Vector_Ptr_C &rhs) {
-      auto wme_vector_merge = std::make_shared<WME_Vector>(*lhs);
-      wme_vector_merge->wmes.insert(wme_vector_merge->wmes.end(), rhs->wmes.begin(), rhs->wmes.end());
-      return wme_vector_merge;
+    WME_Token_Ptr_C join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs) {
+      return std::make_shared<WME_Token>(lhs, rhs);
     }
 
     void pass_tokens(const Rete_Node_Ptr &output) {
-      for(auto &wme_vector : output_tokens)
-        output->insert_wme_vector(wme_vector, shared());
+      for(auto &wme_token : output_tokens)
+        output->insert_wme_token(wme_token, shared());
     }
 
     WME_Bindings bindings;
     std::weak_ptr<Rete_Node> input0;
     std::weak_ptr<Rete_Node> input1;
-    std::unordered_set<WME_Vector_Ptr_C> input0_tokens;
-    std::unordered_set<WME_Vector_Ptr_C> input1_tokens;
-    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref_eq> output_tokens;
+    std::unordered_set<WME_Token_Ptr_C> input0_tokens;
+    std::unordered_set<WME_Token_Ptr_C> input1_tokens;
+    std::unordered_set<WME_Token_Ptr_C, hash_deref<WME_Token>, compare_deref_eq> output_tokens;
   };
 
   inline void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
