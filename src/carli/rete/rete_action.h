@@ -41,7 +41,7 @@ namespace Rete {
     void remove_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
       assert(from == input.lock());
 
-      auto found = input_tokens.find(wme_vector);
+      auto found = find(input_tokens, wme_vector);
       if(found != input_tokens.end())
       // TODO: change from the 'if' to the 'assert', ensuring that we're not wasting time on non-existent removals
       //assert(found != input_tokens.end());
@@ -75,7 +75,7 @@ namespace Rete {
 
   private:
     std::weak_ptr<Rete_Node> input;
-    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref_eq> input_tokens;
+    std::unordered_set<WME_Vector_Ptr_C> input_tokens;
     Action action;
     Action retraction;
   };

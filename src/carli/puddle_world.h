@@ -361,8 +361,8 @@ namespace Puddle_World {
         }
       }
 
-      m_x_wme = Rete::WME(s_id, x_attr, m_x_value);
-      m_y_wme = Rete::WME(s_id, y_attr, m_y_value);
+      m_x_wme = std::make_shared<Rete::WME>(s_id, x_attr, m_x_value);
+      m_y_wme = std::make_shared<Rete::WME>(s_id, y_attr, m_y_value);
       insert_wme(m_x_wme);
       insert_wme(m_y_wme);
     }
@@ -445,8 +445,8 @@ namespace Puddle_World {
     Rete::Symbol_Constant_Float_Ptr m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_position().first);
     Rete::Symbol_Constant_Float_Ptr m_y_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_position().second);
 
-    Rete::WME m_x_wme;
-    Rete::WME m_y_wme;
+    Rete::WME_Ptr_C m_x_wme;
+    Rete::WME_Ptr_C m_y_wme;
 
     std::array<std::shared_ptr<action_type::derived_type>, 4> m_action = {{std::make_shared<Move>(Move::NORTH),
                                                                            std::make_shared<Move>(Move::SOUTH),

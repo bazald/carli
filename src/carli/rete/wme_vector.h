@@ -10,7 +10,7 @@ namespace Rete {
   class WME_Vector;
   class WME_Vector : public Zeni::Pool_Allocator<WME_Vector> {
   public:
-    std::vector<WME> wmes;
+    std::vector<WME_Ptr_C> wmes;
 
     bool operator==(const WME_Vector &rhs) const {
       return wmes == rhs.wmes;
@@ -25,8 +25,8 @@ namespace Rete {
 
   inline std::ostream & operator<<(std::ostream &os, const WME_Vector &wme_vector) {
     os << '{' << std::endl;
-    for(const WME &wme : wme_vector.wmes)
-      os << "  " << wme << std::endl;
+    for(const auto &wme : wme_vector.wmes)
+      os << "  " << *wme << std::endl;
     os << '}';
     return os;
   }
@@ -36,7 +36,7 @@ namespace Rete {
 namespace std {
   template <> struct hash<Rete::WME_Vector> {
     size_t operator()(const Rete::WME_Vector &wme_vector) const {
-      return hash<std::vector<Rete::WME>>()(wme_vector.wmes);
+      return hash<std::vector<Rete::WME_Ptr_C>>()(wme_vector.wmes);
     }
   };
 }

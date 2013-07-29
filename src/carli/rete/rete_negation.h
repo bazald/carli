@@ -34,7 +34,7 @@ namespace Rete {
     void remove_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
       assert(from == input.lock());
 
-      auto found = input_tokens.find(wme_vector);
+      auto found = find(input_tokens, wme_vector);
       if(found != input_tokens.end()) {
         input_tokens.erase(found);
         if(input_tokens.empty()) {
@@ -67,7 +67,7 @@ namespace Rete {
 
   private:
     std::weak_ptr<Rete_Node> input;
-    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref_eq> input_tokens;
+    std::unordered_set<WME_Vector_Ptr_C> input_tokens;
     WME_Vector_Ptr_C output_token;
   };
 

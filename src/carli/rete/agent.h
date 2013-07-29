@@ -131,14 +131,14 @@ namespace Rete {
       action->destroy(filters);
     }
 
-    void insert_wme(const WME &wme) {
+    void insert_wme(const WME_Ptr_C &wme) {
       assert(working_memory.wmes.find(wme) == working_memory.wmes.end());
       working_memory.wmes.insert(wme);
       for(auto &filter : filters)
         filter->insert_wme(wme);
     }
 
-    void remove_wme(const WME &wme) {
+    void remove_wme(const WME_Ptr_C &wme) {
       auto found = working_memory.wmes.find(wme);
       assert(found != working_memory.wmes.end());
       working_memory.wmes.erase(wme);

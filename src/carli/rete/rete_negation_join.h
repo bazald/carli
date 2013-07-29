@@ -31,7 +31,7 @@ namespace Rete {
 
       if(from == input0.lock()) {
         bool fresh;
-        if(input0_tokens.find(wme_vector) == input0_tokens.end()) {
+        if(find(input0_tokens, wme_vector) == input0_tokens.end()) {
           input0_tokens[wme_vector] = 0u;
           fresh = true;
         }
@@ -59,7 +59,7 @@ namespace Rete {
       assert(from == input0.lock() || from == input1.lock());
 
       if(from == input0.lock()) {
-        auto found = input0_tokens.find(wme_vector);
+        auto found = find(input0_tokens, wme_vector);
         if(found != input0_tokens.end()) {
           // TODO: Avoid looping through non-existent pairs?
           input0_tokens.erase(found);
@@ -69,13 +69,13 @@ namespace Rete {
         }
       }
       if(from == input1.lock()) {
-        auto found = input1_tokens.find(wme_vector);
+        auto found = find(input1_tokens, wme_vector);
         if(found != input1_tokens.end()) {
           // TODO: Avoid looping through non-existent pairs?
           input1_tokens.erase(found);
           for(const auto &other : input0_tokens) {
             for(auto &binding : bindings) {
-              if(*other.first->wmes[binding.first.first].symbols[binding.first.second] != *wme_vector->wmes[binding.second.first].symbols[binding.second.second])
+              if(*other.first->wmes[binding.first.first]->symbols[binding.first.second] != *wme_vector->wmes[binding.second.first]->symbols[binding.second.second])
                 continue;
             }
             if(--input0_tokens[other.first] == 0) {
@@ -110,7 +110,7 @@ namespace Rete {
   private:
     void join_tokens(const WME_Vector_Ptr_C &lhs, const WME_Vector_Ptr_C &rhs) {
       for(auto &binding : bindings) {
-        if(*lhs->wmes[binding.first.first].symbols[binding.first.second] != *rhs->wmes[binding.second.first].symbols[binding.second.second])
+        if(*lhs->wmes[binding.first.first]->symbols[binding.first.second] != *rhs->wmes[binding.second.first]->symbols[binding.second.second])
           return;
       }
 
@@ -129,9 +129,9 @@ namespace Rete {
     WME_Bindings bindings;
     std::weak_ptr<Rete_Node> input0;
     std::weak_ptr<Rete_Node> input1;
-    std::unordered_map<WME_Vector_Ptr_C, size_t, hash_deref<WME_Vector>, compare_deref_eq> input0_tokens;
-    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref_eq> input1_tokens;
-    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref_eq> output_tokens;
+    std::unordered_map<WME_Vector_Ptr_C, size_t> input0_tokens;
+    std::unordered_set<WME_Vector_Ptr_C> input1_tokens;
+    std::unordered_set<WME_Vector_Ptr_C> output_tokens;
   };
 
   inline void bind_to_negation_join(const Rete_Negation_Join_Ptr &existential_join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {

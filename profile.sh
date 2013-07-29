@@ -9,7 +9,7 @@ if [ $RV -ne 0 ]; then
 fi
 
 SEED=$RANDOM
-CMD="./carli_p -o null -s $SEED -e puddle-world --split-min 3"
+CMD="./carli_p -o null -s $SEED -e puddle-world --split-min 5"
 #HEAPCHECK=normal         $CMD -n 1000   "$@"
 #HEAPPROFILE=carli_p.heap $CMD -n 1000   "$@"
 CPUPROFILE=carli_p.prof  $CMD -n 100000 "$@"

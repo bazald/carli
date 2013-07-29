@@ -70,18 +70,6 @@ namespace Rete {
       return outputs;
     }
 
-    virtual void insert_wme(const WME &wme, const Rete_Node_Ptr_C &from = nullptr) {
-      auto wme_vector = std::make_shared<WME_Vector>();
-      wme_vector->wmes.push_back(wme);
-      insert_wme_vector(wme_vector, from);
-    }
-
-    virtual void remove_wme(const WME &wme, const Rete_Node_Ptr_C &from = nullptr) {
-      auto wme_vector = std::make_shared<WME_Vector>();
-      wme_vector->wmes.push_back(wme);
-      remove_wme_vector(wme_vector, from);
-    }
-
     virtual void insert_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) = 0;
     virtual void remove_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) = 0;
 
@@ -92,6 +80,18 @@ namespace Rete {
   protected:
     void erase_output(const Rete_Node_Ptr &output) {
       outputs.erase(std::find(outputs.begin(), outputs.end(), output));
+    }
+
+    template<typename CONTAINER>
+    typename CONTAINER::iterator find(CONTAINER &tokens, const WME_Vector_Ptr_C &token) {
+      return tokens.find(token);
+//      return std::find(tokens.begin(), tokens.end(), token);
+    }
+
+    template<typename CONTAINER>
+    typename CONTAINER::iterator find_deref(CONTAINER &tokens, const WME_Vector_Ptr_C &token) {
+      return tokens.find(token);
+//      return std::find_if(tokens.begin(), tokens.end(), [&token](const WME_Vector_Ptr_C &tok){return *tok == *token;});
     }
 
     std::list<Rete_Node_Ptr> outputs;

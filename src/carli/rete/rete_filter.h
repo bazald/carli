@@ -29,34 +29,37 @@ namespace Rete {
         filters.erase(std::static_pointer_cast<Rete_Filter>(shared()));
     }
 
-    void insert_wme(const WME &wme, const Rete_Node_Ptr_C &from = nullptr) {
+    void insert_wme(const WME_Ptr_C &wme, const Rete_Node_Ptr_C &from = nullptr) {
       assert(from == input.lock());
 
       for(int i = 0; i != 3; ++i)
-        if(!m_variable[i] && *m_wme.symbols[i] != *wme.symbols[i])
+        if(!m_variable[i] && *m_wme.symbols[i] != *wme->symbols[i])
           return;
 
-      if(m_variable[0] && m_variable[1] && *m_variable[0] == *m_variable[1] && *wme.symbols[0] != *wme.symbols[1])
+      if(m_variable[0] && m_variable[1] && *m_variable[0] == *m_variable[1] && *wme->symbols[0] != *wme->symbols[1])
         return;
-      if(m_variable[0] && m_variable[2] && *m_variable[0] == *m_variable[2] && *wme.symbols[0] != *wme.symbols[2])
+      if(m_variable[0] && m_variable[2] && *m_variable[0] == *m_variable[2] && *wme->symbols[0] != *wme->symbols[2])
         return;
-      if(m_variable[1] && m_variable[2] && *m_variable[1] == *m_variable[2] && *wme.symbols[1] != *wme.symbols[2])
+      if(m_variable[1] && m_variable[2] && *m_variable[1] == *m_variable[2] && *wme->symbols[1] != *wme->symbols[2])
         return;
 
-      tokens.insert(wme);
-
-      for(auto &output : outputs)
-        output->insert_wme(wme, shared());
+      if(tokens.find(wme) == tokens.end()) {
+        auto wme_vector = std::make_shared<WME_Vector>();
+        wme_vector->wmes.push_back(wme);
+        tokens[wme] = wme_vector;
+        for(auto &output : outputs)
+          output->insert_wme_vector(wme_vector, shared());
+      }
     }
 
-    void remove_wme(const WME &wme, const Rete_Node_Ptr_C &from = nullptr) {
+    void remove_wme(const WME_Ptr_C &wme, const Rete_Node_Ptr_C &from = nullptr) {
       assert(from == input.lock());
 
       auto found = tokens.find(wme);
       if(found != tokens.end()) {
-        tokens.erase(found);
         for(auto &output : outputs)
-          output->remove_wme(wme, shared());
+          output->remove_wme_vector(found->second, shared());
+        tokens.erase(found);
       }
     }
 
@@ -69,8 +72,8 @@ namespace Rete {
     }
 
     void pass_tokens(const Rete_Node_Ptr &output) {
-      for(auto &wme : tokens)
-        output->insert_wme(wme, shared());
+      for(auto &token : tokens)
+        output->insert_wme_vector(token.second, shared());
     }
 
     bool operator==(const Rete_Node &rhs) const {
@@ -98,7 +101,7 @@ namespace Rete {
     WME m_wme;
     std::array<Symbol_Variable_Ptr_C, 3> m_variable;
     std::weak_ptr<Rete_Node> input;
-    std::unordered_set<WME> tokens;
+    std::unordered_map<WME_Ptr_C, WME_Vector_Ptr_C> tokens;
   };
 
   inline void bind_to_filter(const Rete_Filter_Ptr &filter, const Rete_Filter_Ptr &out) {

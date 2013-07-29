@@ -8,13 +8,13 @@ namespace Rete {
 
   class WME_Set {
   public:
-    std::unordered_set<WME> wmes;
+    std::unordered_set<WME_Ptr_C> wmes;
   };
 
   inline std::ostream & operator<<(std::ostream &os, const WME_Set &wme_set) {
     os << '{' << std::endl;
-    for(const WME &wme : wme_set.wmes)
-      os << "  " << wme << std::endl;
+    for(const auto &wme : wme_set.wmes)
+      os << "  " << *wme << std::endl;
     os << '}';
     return os;
   }
@@ -24,7 +24,7 @@ namespace Rete {
 namespace std {
   template <> struct hash<Rete::WME_Set> {
     size_t operator()(const Rete::WME_Set &wme_set) const {
-      return hash<std::unordered_set<Rete::WME>>()(wme_set.wmes);
+      return hash<std::unordered_set<Rete::WME_Ptr_C>>()(wme_set.wmes);
     }
   };
 }

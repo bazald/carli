@@ -24,6 +24,9 @@ namespace Rete {
     WME_Symbols symbols;
   };
 
+  typedef std::shared_ptr<const WME> WME_Ptr_C;
+  typedef std::shared_ptr<WME> WME_Ptr;
+
   inline std::ostream & operator<<(std::ostream &os, const WME &wme) {
     return os << '(' << *wme.symbols[0] << " ^" << *wme.symbols[1] << ' ' << *wme.symbols[2] << ')';
   }

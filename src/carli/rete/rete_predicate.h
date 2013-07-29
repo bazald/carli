@@ -38,11 +38,11 @@ namespace Rete {
       assert(from == input.lock());
 
       if(m_rhs) {
-        if(!test_predicate(wme_vector->wmes[m_lhs_index.first].symbols[m_lhs_index.second], m_rhs))
+        if(!test_predicate(wme_vector->wmes[m_lhs_index.first]->symbols[m_lhs_index.second], m_rhs))
           return;
       }
       else {
-        if(!test_predicate(wme_vector->wmes[m_lhs_index.first].symbols[m_lhs_index.second], wme_vector->wmes[m_rhs_index.first].symbols[m_rhs_index.second]))
+        if(!test_predicate(wme_vector->wmes[m_lhs_index.first]->symbols[m_lhs_index.second], wme_vector->wmes[m_rhs_index.first]->symbols[m_rhs_index.second]))
           return;
       }
 
@@ -55,7 +55,7 @@ namespace Rete {
     void remove_wme_vector(const WME_Vector_Ptr_C &wme_vector, const Rete_Node_Ptr_C &from) {
       assert(from == input.lock());
 
-      auto found = tokens.find(wme_vector);
+      auto found = find(tokens, wme_vector);
       if(found != tokens.end()) {
         tokens.erase(found);
         for(auto &output : outputs)
@@ -127,7 +127,7 @@ namespace Rete {
     WME_Vector_Index m_rhs_index;
     Symbol_Ptr_C m_rhs;
     std::weak_ptr<Rete_Node> input;
-    std::unordered_set<WME_Vector_Ptr_C, hash_deref<WME_Vector>, compare_deref_eq> tokens;
+    std::unordered_set<WME_Vector_Ptr_C> tokens;
   };
 
   inline void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out) {
