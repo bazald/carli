@@ -28,7 +28,7 @@ namespace Rete {
     {
     }
 
-    void destroy(std::unordered_set<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
+    void destroy(std::list<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
       erase_output(output);
       if(outputs.empty())
         input.lock()->destroy(filters, shared());

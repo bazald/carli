@@ -59,7 +59,7 @@ namespace Rete {
             return existing_filter;
         }
 
-        this->filters.insert(filter);
+        this->filters.push_back(filter);
         for(auto &wme : this->working_memory.wmes)
           filter->insert_wme(wme);
         return filter;
@@ -160,7 +160,7 @@ namespace Rete {
     }
 
   private:
-    std::unordered_set<Rete_Filter_Ptr> filters;
+    std::list<Rete_Filter_Ptr> filters;
     std::unordered_map<std::string, Rete_Action_Ptr> rules;
     WME_Set working_memory;
   };

@@ -84,13 +84,17 @@ namespace Rete {
     WME_Ptr_C m_wme;
   };
 
-  inline std::ostream & operator<<(std::ostream &os, const WME_Token &wme_token) {
-    os << '{' << std::endl;
-    wme_token.print(os);
-    os << '}';
-    return os;
-  }
+}
 
+inline std::ostream & operator<<(std::ostream &os, const Rete::WME_Token_Index &index) {
+  return os << '(' << index.first << ',' << int(index.second) << ')';
+}
+
+inline std::ostream & operator<<(std::ostream &os, const Rete::WME_Token &wme_token) {
+  os << '{' << std::endl;
+  wme_token.print(os);
+  os << '}';
+  return os;
 }
 
 namespace std {

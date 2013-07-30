@@ -318,7 +318,7 @@ namespace Puddle_World {
             this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
-          rl->fringe_values->insert(std::make_pair(index, rlf));
+          rl->fringe_values->push_back(std::make_pair(index, rlf));
         }
 
         {
@@ -331,7 +331,7 @@ namespace Puddle_World {
             this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
-          rl->fringe_values->insert(std::make_pair(index, rlf));
+          rl->fringe_values->push_back(std::make_pair(index, rlf));
         }
 
         {
@@ -344,7 +344,7 @@ namespace Puddle_World {
             this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
-          rl->fringe_values->insert(std::make_pair(index, rlf));
+          rl->fringe_values->push_back(std::make_pair(index, rlf));
         }
 
         {
@@ -357,7 +357,7 @@ namespace Puddle_World {
             this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
-          rl->fringe_values->insert(std::make_pair(index, rlf));
+          rl->fringe_values->push_back(std::make_pair(index, rlf));
         }
       }
 

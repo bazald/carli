@@ -23,7 +23,7 @@ namespace Rete {
     Rete_Node_Ptr_C parent() const {return input.lock();}
     Rete_Node_Ptr parent() {return input.lock();}
 
-    void destroy(std::unordered_set<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &
+    void destroy(std::list<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &
 #ifndef NDEBUG
                                                                                     output
 #endif

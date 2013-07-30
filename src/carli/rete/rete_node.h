@@ -40,7 +40,7 @@ namespace Rete {
   typedef std::shared_ptr<Rete_Node> Rete_Node_Ptr;
   typedef std::shared_ptr<Rete_Predicate> Rete_Predicate_Ptr;
 
-  class Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<Rete_Filter> {
+  class Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<Rete_Existential_Join> {
     Rete_Node(const Rete_Node &);
     Rete_Node & operator=(const Rete_Node &);
 
@@ -56,7 +56,7 @@ namespace Rete {
     Rete_Node() {}
     virtual ~Rete_Node() {}
 
-    virtual void destroy(std::unordered_set<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) = 0;
+    virtual void destroy(std::list<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) = 0;
 
     std::shared_ptr<const Rete_Node> shared() const {
       return shared_from_this();
@@ -81,20 +81,20 @@ namespace Rete {
       outputs.erase(std::find(outputs.begin(), outputs.end(), output));
     }
 
-    template<typename CONTAINER>
-    typename CONTAINER::iterator find(CONTAINER &tokens, const WME_Token_Ptr_C &token) {
+    template<typename CONTAINER, typename KEY>
+    typename CONTAINER::iterator find(CONTAINER &tokens, const KEY &token) {
 //      return tokens.find(token);
       return std::find(tokens.begin(), tokens.end(), token);
     }
 
-    template<typename CONTAINER>
-    typename CONTAINER::iterator find_deref(CONTAINER &tokens, const WME_Token_Ptr_C &token) {
+    template<typename CONTAINER, typename KEY>
+    typename CONTAINER::iterator find_deref(CONTAINER &tokens, const KEY &token) {
 //      return tokens.find(token);
       return std::find_if(tokens.begin(), tokens.end(), [&token](const WME_Token_Ptr_C &tok){return *tok == *token;});
     }
 
-    template<typename CONTAINER>
-    typename CONTAINER::iterator find_key(CONTAINER &tokens, const WME_Token_Ptr_C &token) {
+    template<typename CONTAINER, typename KEY>
+    typename CONTAINER::iterator find_key(CONTAINER &tokens, const KEY &token) {
 //      return tokens.find(token);
       return std::find_if(tokens.begin(), tokens.end(), [&token](const typename CONTAINER::value_type &tok){return tok.first == token;});
     }

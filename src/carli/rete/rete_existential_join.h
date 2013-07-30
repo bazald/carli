@@ -15,7 +15,7 @@ namespace Rete {
   public:
     Rete_Existential_Join(WME_Bindings bindings_) : bindings(bindings_) {}
 
-    void destroy(std::unordered_set<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
+    void destroy(std::list<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
       erase_output(output);
       if(outputs.empty()) {
         auto i0 = input0.lock();

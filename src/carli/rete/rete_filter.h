@@ -21,10 +21,10 @@ namespace Rete {
       return m_wme;
     }
 
-    void destroy(std::unordered_set<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
+    void destroy(std::list<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
       erase_output(output);
       if(outputs.empty())
-        filters.erase(std::static_pointer_cast<Rete_Filter>(shared()));
+        filters.erase(std::find(filters.begin(), filters.end(), std::static_pointer_cast<Rete_Filter>(shared())));
     }
 
     void insert_wme(const WME_Ptr_C &wme) {
@@ -39,15 +39,16 @@ namespace Rete {
       if(m_variable[1] && m_variable[2] && *m_variable[1] == *m_variable[2] && *wme->symbols[1] != *wme->symbols[2])
         return;
 
-      if(tokens.find(wme) == tokens.end()) {
-        auto wme_token = tokens[wme] = std::make_shared<WME_Token>(wme);
+      if(find_key(tokens, wme) == tokens.end()) {
+        auto wme_token = std::make_pair(wme, std::make_shared<WME_Token>(wme));
+        tokens.push_back(wme_token);
         for(auto &output : outputs)
-          output->insert_wme_token(wme_token, shared());
+          output->insert_wme_token(wme_token.second, shared());
       }
     }
 
     void remove_wme(const WME_Ptr_C &wme) {
-      auto found = tokens.find(wme);
+      auto found = find_key(tokens, wme);
       if(found != tokens.end()) {
         for(auto &output : outputs)
           output->remove_wme_token(found->second, shared());
@@ -93,7 +94,7 @@ namespace Rete {
     WME m_wme;
     std::array<Symbol_Variable_Ptr_C, 3> m_variable;
     std::weak_ptr<Rete_Node> input;
-    std::unordered_map<WME_Ptr_C, WME_Token_Ptr_C> tokens;
+    std::list<std::pair<WME_Ptr_C, WME_Token_Ptr_C>> tokens;
   };
 
 }

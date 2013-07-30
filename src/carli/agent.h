@@ -51,7 +51,7 @@ public:
     RL & operator=(const RL &) = delete;
 
   public:
-    typedef std::unordered_multimap<Rete::WME_Token_Index, std::shared_ptr<RL>> Fringe_Values;
+    typedef std::list<std::pair<Rete::WME_Token_Index, std::shared_ptr<RL>>> Fringe_Values;
 
     RL(const size_t &depth_)
      : depth(depth_)
@@ -78,18 +78,27 @@ public:
   void specialize(const std::shared_ptr<typename action_type::derived_type> &action, RL &general) {
     if(general.fringe_values && split_test(general.q_value, general.depth)) {
       /// TODO: choose intelligently again
-      generate_fringe(action, general, general.fringe_values->begin()->first);
+      auto gen = general.fringe_values->begin();
+      for(auto count = random.rand_lt(general.fringe_values->size()); count; --count)
+        ++gen;
+
+//      std::cerr << "Refining : " << gen->first << std::endl;
+
+      generate_fringe(action, general, gen->first);
     }
   }
 
   void generate_fringe(const std::shared_ptr<typename action_type::derived_type> &action, RL &general, const Rete::WME_Token_Index &specialization) {
     assert(general.fringe_values);
 
-    auto nexts = general.fringe_values->equal_range(specialization);
     typename RL::Fringe_Values leaves;
-    while(nexts.first != nexts.second) {
-      leaves.insert(*nexts.first);
-      general.fringe_values->erase(nexts.first++);
+    for(auto fringe = general.fringe_values->begin(), fend = general.fringe_values->end(); fringe != fend; ) {
+      if(fringe->first == specialization) {
+        leaves.push_back(*fringe);
+        general.fringe_values->erase(fringe++);
+      }
+      else
+        ++fringe;
     }
 
     for(auto &leaf : leaves) {
@@ -125,7 +134,7 @@ public:
           this->m_next_q_values[action].push_back(rl->q_value);
         }, predicate);
 
-        leaf_rl.fringe_values->insert(std::make_pair(leaf.first, rl));
+        leaf_rl.fringe_values->push_back(std::make_pair(leaf.first, rl));
       }
       leaf_rl.feature.delete_and_zero();
 
@@ -141,7 +150,7 @@ public:
           this->m_next_q_values[action].push_back(rl->q_value);
         }, predicate);
 
-        leaf_rl.fringe_values->insert(std::make_pair(fringe.first, rl));
+        leaf_rl.fringe_values->push_back(std::make_pair(fringe.first, rl));
       }
 
       if(leaf_rl.fringe_values->empty())
