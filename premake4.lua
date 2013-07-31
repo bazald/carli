@@ -41,7 +41,10 @@ solution "carli"
     linkoptions { "-static-libgcc ", "-static-libstdc++" }
   configuration "macosx"
     buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
+    buildoptions { "-Wno-deprecated-register", "-Wno-null-conversion", "-Wno-parentheses-equality", "-Wno-unneeded-internal-declaration" }
     linkoptions { "-stdlib=libc++" }
+  configuration "*"
+    buildoptions { "-Wno-unused-function" }
 
   if _ACTION == "gmake" then
     configuration { "linux" }
@@ -53,6 +56,7 @@ solution "carli"
       links { "tcmalloc_and_profiler" }
     configuration { "linux", "*clang" }
       buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
+      buildoptions { "-Wno-deprecated-register", "-Wno-null-conversion", "-Wno-parentheses-equality", "-Wno-unneeded-internal-declaration" }
       linkoptions { "-stdlib=libc++", "-nodefaultlibs" }
       links { "c++", "c++abi", "m", "c", "gcc_s", "gcc" }
   end
