@@ -3,6 +3,7 @@
 
 #include "rete.h"
 #include "wme_set.h"
+#include <unordered_map>
 
 namespace Rete {
 
@@ -14,11 +15,11 @@ namespace Rete {
     const std::function<Rete_Action_Ptr (const Rete_Action::Action &action, const Rete_Node_Ptr &out)> make_action;
     const std::function<Rete_Action_Ptr (const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out)> make_action_retraction;
     const std::function<Rete_Existential_Ptr (const Rete_Node_Ptr &out)> make_existential;
-    const std::function<Rete_Existential_Join_Ptr (const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1)> make_existential_join;
+    const std::function<Rete_Join_Ptr (const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1)> make_existential_join;
     const std::function<Rete_Filter_Ptr (const WME &wme)> make_filter;
     const std::function<Rete_Join_Ptr (const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1)> make_join;
     const std::function<Rete_Negation_Ptr (const Rete_Node_Ptr &out)> make_negation;
-    const std::function<Rete_Negation_Join_Ptr (const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1)> make_negation_join;
+    const std::function<Rete_Join_Ptr (const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1)> make_negation_join;
     const std::function<Rete_Predicate_Ptr (const Rete_Predicate::Predicate &predicate, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out)> make_predicate_vc;
     const std::function<Rete_Predicate_Ptr (const Rete_Predicate::Predicate &predicate, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out)> make_predicate_vv;
 
@@ -44,12 +45,17 @@ namespace Rete {
         bind_to_existential(existential, out);
         return existential;
       }),
-      make_existential_join([](const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1)->Rete_Existential_Join_Ptr {
-        if(auto existing = Rete_Existential_Join::find_existing(bindings, out0, out1))
-          return existing;
-        auto existential_join = std::make_shared<Rete_Existential_Join>(bindings);
-        bind_to_existential_join(existential_join, out0, out1);
-        return existential_join;
+      make_existential_join([this](const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1)->Rete_Join_Ptr {
+        auto join0 = Rete_Join::find_existing(bindings, out0, out1);
+        if(!join0)
+          join0 = this->make_join(bindings, out0, out1);
+        auto existential = Rete_Existential::find_existing(join0);
+        if(!existential)
+          existential = this->make_existential(join0);
+        auto join1 = Rete_Join::find_existing(WME_Bindings(), out0, existential);
+        if(!join1)
+          join1 = this->make_join(WME_Bindings(), out0, existential);
+        return join1;
       }),
       make_filter([this](const WME &wme)->Rete_Filter_Ptr {
         auto filter = std::make_shared<Rete_Filter>(wme);
@@ -78,12 +84,17 @@ namespace Rete {
         bind_to_negation(negation, out);
         return negation;
       }),
-      make_negation_join([](const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1)->Rete_Negation_Join_Ptr {
-        if(auto existing = Rete_Negation_Join::find_existing(bindings, out0, out1))
-          return existing;
-        auto negation_join = std::make_shared<Rete_Negation_Join>(bindings);
-        bind_to_negation_join(negation_join, out0, out1);
-        return negation_join;
+      make_negation_join([this](const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1)->Rete_Join_Ptr {
+        auto join0 = Rete_Join::find_existing(bindings, out0, out1);
+        if(!join0)
+          join0 = this->make_join(bindings, out0, out1);
+        auto negation = Rete_Negation::find_existing(join0);
+        if(!negation)
+          negation = this->make_negation(join0);
+        auto join1 = Rete_Join::find_existing(WME_Bindings(), out0, negation);
+        if(!join1)
+          join1 = this->make_join(WME_Bindings(), out0, negation);
+        return join1;
       }),
       make_predicate_vc([](const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out)->Rete_Predicate_Ptr {
         if(auto existing = Rete_Predicate::find_existing(pred, lhs_index, rhs, out))

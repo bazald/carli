@@ -32,6 +32,11 @@ namespace Rete {
      : m_wme_token(first, second),
      m_size(first->m_size + second->m_size)
     {
+      if(m_size == 1) {
+        m_wme = m_wme_token.first->m_wme;
+        m_wme_token.first.reset();
+        m_wme_token.second.reset();
+      }
     }
 
     bool operator==(const WME_Token &rhs) const {
@@ -49,9 +54,13 @@ namespace Rete {
     }
 
     std::ostream & print(std::ostream &os) const {
-      if(m_wme)
+      if(m_size == 1) {
+        assert(m_wme);
         os << *m_wme;
-      else {
+      }
+      else if(m_size > 1){
+        assert(m_wme_token.first);
+        assert(m_wme_token.second);
         m_wme_token.first->print(os);
         m_wme_token.second->print(os);
       }
@@ -91,7 +100,7 @@ inline std::ostream & operator<<(std::ostream &os, const Rete::WME_Token_Index &
 }
 
 inline std::ostream & operator<<(std::ostream &os, const Rete::WME_Token &wme_token) {
-  os << '{' << std::endl;
+  os << '{';
   wme_token.print(os);
   os << '}';
   return os;

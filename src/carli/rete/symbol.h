@@ -106,10 +106,10 @@ namespace Rete {
 
     bool operator==(const Symbol &rhs) const {return rhs == *this;}
     bool operator!=(const Symbol &rhs) const {return rhs != *this;}
-    bool operator>(const Symbol &rhs) const {return rhs <= *this;}
-    bool operator>=(const Symbol &rhs) const {return rhs < *this;}
-    bool operator<(const Symbol &rhs) const {return rhs >= *this;}
-    bool operator<=(const Symbol &rhs) const {return rhs > *this;}
+    bool operator>(const Symbol &rhs) const {return rhs < *this;}
+    bool operator>=(const Symbol &rhs) const {return rhs <= *this;}
+    bool operator<(const Symbol &rhs) const {return rhs > *this;}
+    bool operator<=(const Symbol &rhs) const {return rhs >= *this;}
 
     bool operator==(const Symbol_Constant_Float &rhs) const {return value == rhs.value;}
     bool operator!=(const Symbol_Constant_Float &rhs) const {return value != rhs.value;}
@@ -145,10 +145,10 @@ namespace Rete {
 
     bool operator==(const Symbol &rhs) const {return rhs == *this;}
     bool operator!=(const Symbol &rhs) const {return rhs != *this;}
-    bool operator>(const Symbol &rhs) const {return rhs <= *this;}
-    bool operator>=(const Symbol &rhs) const {return rhs < *this;}
-    bool operator<(const Symbol &rhs) const {return rhs >= *this;}
-    bool operator<=(const Symbol &rhs) const {return rhs > *this;}
+    bool operator>(const Symbol &rhs) const {return rhs < *this;}
+    bool operator>=(const Symbol &rhs) const {return rhs <= *this;}
+    bool operator<(const Symbol &rhs) const {return rhs > *this;}
+    bool operator<=(const Symbol &rhs) const {return rhs >= *this;}
 
     bool operator==(const Symbol_Constant_Float &rhs) const {return value == rhs.value;}
     bool operator!=(const Symbol_Constant_Float &rhs) const {return value != rhs.value;}
@@ -191,10 +191,10 @@ namespace Rete {
 
     bool operator==(const Symbol &rhs) const {return rhs == *this;}
     bool operator!=(const Symbol &rhs) const {return rhs != *this;}
-    bool operator>(const Symbol &rhs) const {return rhs <= *this;}
-    bool operator>=(const Symbol &rhs) const {return rhs < *this;}
-    bool operator<(const Symbol &rhs) const {return rhs >= *this;}
-    bool operator<=(const Symbol &rhs) const {return rhs > *this;}
+    bool operator>(const Symbol &rhs) const {return rhs < *this;}
+    bool operator>=(const Symbol &rhs) const {return rhs <= *this;}
+    bool operator<(const Symbol &rhs) const {return rhs > *this;}
+    bool operator<=(const Symbol &rhs) const {return rhs >= *this;}
 
     bool operator==(const Symbol_Constant_String &rhs) const {return value == rhs.value;}
     bool operator!=(const Symbol_Constant_String &rhs) const {return value != rhs.value;}
@@ -223,10 +223,10 @@ namespace Rete {
 
     bool operator==(const Symbol &rhs) const {return rhs == *this;}
     bool operator!=(const Symbol &rhs) const {return rhs != *this;}
-    bool operator>(const Symbol &rhs) const {return rhs <= *this;}
-    bool operator>=(const Symbol &rhs) const {return rhs < *this;}
-    bool operator<(const Symbol &rhs) const {return rhs >= *this;}
-    bool operator<=(const Symbol &rhs) const {return rhs > *this;}
+    bool operator>(const Symbol &rhs) const {return rhs < *this;}
+    bool operator>=(const Symbol &rhs) const {return rhs <= *this;}
+    bool operator<(const Symbol &rhs) const {return rhs > *this;}
+    bool operator<=(const Symbol &rhs) const {return rhs >= *this;}
 
     bool operator==(const Symbol_Identifier &rhs) const {return value == rhs.value;}
     bool operator!=(const Symbol_Identifier &rhs) const {return value != rhs.value;}
@@ -257,10 +257,10 @@ namespace Rete {
 
     bool operator==(const Symbol &rhs) const {return rhs == *this;}
     bool operator!=(const Symbol &rhs) const {return rhs != *this;}
-    bool operator>(const Symbol &rhs) const {return rhs <= *this;}
-    bool operator>=(const Symbol &rhs) const {return rhs < *this;}
-    bool operator<(const Symbol &rhs) const {return rhs >= *this;}
-    bool operator<=(const Symbol &rhs) const {return rhs > *this;}
+    bool operator>(const Symbol &rhs) const {return rhs < *this;}
+    bool operator>=(const Symbol &rhs) const {return rhs <= *this;}
+    bool operator<(const Symbol &rhs) const {return rhs > *this;}
+    bool operator<=(const Symbol &rhs) const {return rhs >= *this;}
 
     bool operator==(const Symbol_Variable &rhs) const {return value == rhs.value;}
     bool operator!=(const Symbol_Variable &rhs) const {return value != rhs.value;}

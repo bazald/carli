@@ -52,9 +52,11 @@ namespace Rete {
           input0_tokens.erase(found);
           for(const auto &other : input1_tokens) {
             auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
-            for(auto &output : outputs)
-              output->remove_wme_token(*found_output, shared());
-            output_tokens.erase(found_output);
+            if(found_output != output_tokens.end()) {
+              for(auto &output : outputs)
+                output->remove_wme_token(*found_output, shared());
+              output_tokens.erase(found_output);
+            }
           }
         }
       }
@@ -65,9 +67,11 @@ namespace Rete {
           input1_tokens.erase(found);
           for(const auto &other : input0_tokens) {
             auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
-            for(auto &output : outputs)
-              output->remove_wme_token(*found_output, shared());
-            output_tokens.erase(found_output);
+            if(found_output != output_tokens.end()) {
+              for(auto &output : outputs)
+                output->remove_wme_token(*found_output, shared());
+              output_tokens.erase(found_output);
+            }
           }
         }
       }
