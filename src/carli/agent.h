@@ -88,7 +88,7 @@ public:
     }
   }
 
-  void generate_fringe(const std::shared_ptr<typename action_type::derived_type> &action, RL &general, const Rete::WME_Token_Index &specialization) {
+  void generate_fringe(const std::shared_ptr<typename action_type::derived_type> &action, RL &general, const Rete::WME_Token_Index specialization) {
     assert(general.fringe_values);
 
     typename RL::Fringe_Values leaves;
