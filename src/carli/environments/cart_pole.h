@@ -1,8 +1,8 @@
 #ifndef CART_POLE_H
 #define CART_POLE_H
 
-#include "agent.h"
-#include "environment.h"
+#include "../agent.h"
+#include "../environment.h"
 
 #include <algorithm>
 #include <array>

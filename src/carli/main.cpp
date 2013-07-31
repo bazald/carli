@@ -6,10 +6,11 @@
 //#define DEBUG_OUTPUT
 #endif
 
-#include "blocks_world.h"
-#include "cart_pole.h"
-#include "mountain_car.h"
-#include "puddle_world.h"
+#include "environments/blocks_world.h"
+#include "environments/cart_pole.h"
+#include "environments/mountain_car.h"
+#include "environments/puddle_world.h"
+
 #include "experimental_output.h"
 #include "getopt.h"
 

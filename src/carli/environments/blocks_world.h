@@ -1,8 +1,8 @@
 #ifndef BLOCKS_WORLD_H
 #define BLOCKS_WORLD_H
 
-#include "agent.h"
-#include "environment.h"
+#include "../agent.h"
+#include "../environment.h"
 
 #include <algorithm>
 #include <list>

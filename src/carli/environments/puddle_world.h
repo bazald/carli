@@ -1,8 +1,8 @@
 #ifndef PUDDLE_WORLD_H
 #define PUDDLE_WORLD_H
 
-#include "agent.h"
-#include "environment.h"
+#include "../agent.h"
+#include "../environment.h"
 
 #include <algorithm>
 #include <array>
