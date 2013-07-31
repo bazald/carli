@@ -155,6 +155,8 @@ namespace Zeni {
   template <typename TYPE>
   class Pool_Allocator {
   public:
+    typedef TYPE pool_allocator_type;
+
     virtual ~Pool_Allocator() {}
 
     /**

@@ -31,7 +31,13 @@ namespace Rete {
   typedef std::shared_ptr<Symbol_Identifier> Symbol_Identifier_Ptr;
   typedef std::shared_ptr<Symbol_Variable> Symbol_Variable_Ptr;
 
-  class Symbol : public Zeni::Pool_Allocator<Symbol_Constant_String> {
+  class Symbol :
+#if __WORDSIZE == 64
+                 public Zeni::Pool_Allocator<Symbol_Constant_String>
+#else
+                 public Zeni::Pool_Allocator<Symbol_Constant_Float>
+#endif
+  {
     Symbol(const Symbol &);
     Symbol & operator=(const Symbol &);
 
@@ -284,12 +290,12 @@ namespace Rete {
   };
 
   inline void __symbol_size_check() {
-    typedef Symbol_Constant_String Pool;
-    static_assert(sizeof(Pool) >= sizeof(Symbol_Constant_Float), "Pool size suboptimal.");
-    static_assert(sizeof(Pool) >= sizeof(Symbol_Constant_Int), "Pool size suboptimal.");
-    static_assert(sizeof(Pool) >= sizeof(Symbol_Constant_String), "Pool size suboptimal.");
-    static_assert(sizeof(Pool) >= sizeof(Symbol_Identifier), "Pool size suboptimal.");
-    static_assert(sizeof(Pool) >= sizeof(Symbol_Variable), "Pool size suboptimal.");
+    typedef typename Symbol::pool_allocator_type pool_allocator_type;
+    static_assert(sizeof(pool_allocator_type) >= sizeof(Symbol_Constant_Float), "Pool size suboptimal.");
+    static_assert(sizeof(pool_allocator_type) >= sizeof(Symbol_Constant_Int), "Pool size suboptimal.");
+    static_assert(sizeof(pool_allocator_type) >= sizeof(Symbol_Constant_String), "Pool size suboptimal.");
+    static_assert(sizeof(pool_allocator_type) >= sizeof(Symbol_Identifier), "Pool size suboptimal.");
+    static_assert(sizeof(pool_allocator_type) >= sizeof(Symbol_Variable), "Pool size suboptimal.");
   }
 
 }
