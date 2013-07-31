@@ -1,12 +1,18 @@
 #ifndef WME_H
 #define WME_H
 
+#include "../utility/memory_pool.h"
+
 #include "symbol.h"
 #include "utility.h"
 
 namespace Rete {
 
-  class WME {
+  class WME;
+  typedef std::shared_ptr<const WME> WME_Ptr_C;
+  typedef std::shared_ptr<WME> WME_Ptr;
+
+  class WME : public Zeni::Pool_Allocator<WME> {
   public:
     typedef std::array<Symbol_Ptr_C, 3> WME_Symbols;
 
@@ -23,9 +29,6 @@ namespace Rete {
 
     WME_Symbols symbols;
   };
-
-  typedef std::shared_ptr<const WME> WME_Ptr_C;
-  typedef std::shared_ptr<WME> WME_Ptr;
 
   inline std::ostream & operator<<(std::ostream &os, const WME &wme) {
     return os << '(' << *wme.symbols[0] << " ^" << *wme.symbols[1] << ' ' << *wme.symbols[2] << ')';

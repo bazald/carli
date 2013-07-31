@@ -3,6 +3,7 @@
 
 #include "linked_list.h"
 
+#include <iostream>
 #include <stdexcept>
 
 namespace Zeni {

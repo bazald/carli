@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <inttypes.h>
-#include <map>
+#include <unordered_map>
 
 namespace Zeni {
 
@@ -129,7 +129,7 @@ namespace Zeni {
     /// free memory blocks from every Pool; return a count of all freed blocks
     size_t clear() throw() {
       size_t count = 0;
-      for(std::map<size_t, Pool *>::iterator it = m_pools.begin(), iend = m_pools.end(); it != iend; ++it)
+      for(std::unordered_map<size_t, Pool *>::iterator it = m_pools.begin(), iend = m_pools.end(); it != iend; ++it)
         count += it->second->clear();
       return count;
     }
@@ -149,7 +149,7 @@ namespace Zeni {
     }
 
   private:
-    std::map<size_t, Pool *> m_pools;
+    std::unordered_map<size_t, Pool *> m_pools;
   };
 
   template <typename TYPE>

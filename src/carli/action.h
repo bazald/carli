@@ -1,10 +1,10 @@
 #ifndef ACTION_H
 #define ACTION_H
 
-#include <memory>
+#include "utility/linked_list.h"
+#include "utility/memory_pool.h"
 
-#include "linked_list.h"
-#include "memory_pool.h"
+#include <memory>
 
 template <typename DERIVED, typename DERIVED2 = DERIVED>
 class Action : public Zeni::Pool_Allocator<DERIVED2> {

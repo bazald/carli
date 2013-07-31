@@ -1,9 +1,10 @@
 #ifndef Q_VALUE_H
 #define Q_VALUE_H
 
-#include "memory_pool.h"
+#include "utility/memory_pool.h"
+#include "utility/linked_list.h"
+
 #include "value.h"
-#include "linked_list.h"
 
 #include <cfloat>
 #include <limits>

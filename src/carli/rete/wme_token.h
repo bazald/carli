@@ -3,7 +3,6 @@
 
 #include "wme.h"
 #include "utility.h"
-#include "../memory_pool.h"
 #include <cassert>
 
 namespace Rete {

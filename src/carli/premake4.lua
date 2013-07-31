@@ -13,7 +13,7 @@ project "carli"
 --    end
 --  end
 
-  files { "**.h", "**.hpp", "**.cpp" }
+  files { "**.h", "**.hpp", "**.cpp", "**.l", "**.y" }
 
   if os.get() == "windows" then
     prebuildcommands { [[git.bat]] }

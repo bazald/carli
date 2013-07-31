@@ -1,7 +1,8 @@
 #ifndef RETE_SYMBOL_H
 #define RETE_SYMBOL_H
 
-#include "../memory_pool.h"
+#include "../utility/memory_pool.h"
+
 #include <iostream>
 #include <memory>
 #include <string>

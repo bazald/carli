@@ -1,15 +1,17 @@
 #ifndef AGENT_H
 #define AGENT_H
 
-#include "environment.h"
-#include "feature.h"
-#include "tracked_ptr.h"
-#include "trie.h"
-#include "q_value.h"
-#include "random.h"
-#include "value_queue.h"
+#include "utility/getopt.h"
+#include "utility/tracked_ptr.h"
+#include "utility/trie.h"
+#include "utility/random.h"
 
 #include "rete/agent.h"
+
+#include "environment.h"
+#include "feature.h"
+#include "q_value.h"
+#include "value_queue.h"
 
 #include <functional>
 #include <map>

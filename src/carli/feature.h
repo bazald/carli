@@ -1,8 +1,9 @@
 #ifndef FEATURE_H
 #define FEATURE_H
 
-#include "linked_list.h"
-#include "memory_pool.h"
+#include "utility/linked_list.h"
+#include "utility/memory_pool.h"
+
 #include "rete/rete.h"
 
 #include <iostream>
