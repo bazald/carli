@@ -32,11 +32,12 @@ namespace Rete {
      : m_wme_token(first, second),
      m_size(first->m_size + second->m_size)
     {
-      if(m_size == 1) {
-        m_wme = m_wme_token.first->m_wme;
-        m_wme_token.first.reset();
-        m_wme_token.second.reset();
-      }
+      assert(first->m_size);
+      assert(second->m_size);
+    }
+
+    size_t size() const {
+      return m_size;
     }
 
     bool operator==(const WME_Token &rhs) const {

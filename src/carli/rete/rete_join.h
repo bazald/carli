@@ -110,7 +110,10 @@ namespace Rete {
     }
 
     WME_Token_Ptr_C join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs) {
-      return std::make_shared<WME_Token>(lhs, rhs);
+      if(rhs->size())
+        return std::make_shared<WME_Token>(lhs, rhs);
+      else
+        return lhs;
     }
 
     void pass_tokens(const Rete_Node_Ptr &output) {
@@ -128,6 +131,8 @@ namespace Rete {
 
   inline void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
     assert(join && !join->input0.lock() && !join->input1.lock());
+    assert(!std::dynamic_pointer_cast<Rete_Existential>(out0));
+    assert(!std::dynamic_pointer_cast<Rete_Negation>(out0));
     join->input0 = out0;
     join->input1 = out1;
 
