@@ -53,7 +53,7 @@ public:
     RL & operator=(const RL &) = delete;
 
   public:
-    typedef std::list<std::pair<Rete::WME_Token_Index, std::shared_ptr<RL>>> Fringe_Values;
+    typedef std::list<std::shared_ptr<RL>> Fringe_Values;
 
     RL(const size_t &depth_)
      : depth(depth_)
@@ -86,7 +86,7 @@ public:
 
 //      std::cerr << "Refining : " << gen->first << std::endl;
 
-      generate_fringe(action, general, gen->first);
+      generate_fringe(action, general, (*gen)->feature->axis);
     }
   }
 
@@ -95,7 +95,7 @@ public:
 
     typename RL::Fringe_Values leaves;
     for(auto fringe = general.fringe_values->begin(), fend = general.fringe_values->end(); fringe != fend; ) {
-      if(fringe->first == specialization) {
+      if((*fringe)->feature->axis == specialization) {
         leaves.push_back(*fringe);
         general.fringe_values->erase(fringe++);
       }
@@ -104,70 +104,66 @@ public:
     }
 
     for(auto &leaf : leaves) {
-      auto &leaf_rl = *leaf.second;
-
-      leaf_rl.q_value->eligible.erase();
-      auto found = std::find(m_current_q_value.begin(), m_current_q_value.end(), leaf_rl.q_value);
+      leaf->q_value->eligible.erase();
+      auto found = std::find(m_current_q_value.begin(), m_current_q_value.end(), leaf->q_value);
       if(found != m_current_q_value.end())
         m_current_q_value.erase(found);
-      found = std::find(m_next_q_values[action].begin(), m_next_q_values[action].end(), leaf_rl.q_value);
+      found = std::find(m_next_q_values[action].begin(), m_next_q_values[action].end(), leaf->q_value);
       if(found != m_next_q_values[action].end())
         m_next_q_values[action].erase(found);
 //#ifdef DEBUG_OUTPUT
-//      std::cerr << " delete  : " << leaf_rl.q_value << std::endl;
+//      std::cerr << " delete  : " << leaf.q_value << std::endl;
 //#endif
-      leaf_rl.q_value.delete_and_zero();
-      leaf_rl.q_value = new Q_Value();
+      leaf->q_value.delete_and_zero();
+      leaf->q_value = new Q_Value();
 //#ifdef DEBUG_OUTPUT
-//      std::cerr << " create  : " << leaf_rl.q_value << std::endl;
+//      std::cerr << " create  : " << leaf.q_value << std::endl;
 //#endif
       ++m_q_value_count;
 
-      leaf_rl.fringe_values = new typename RL::Fringe_Values;
+      leaf->fringe_values = new typename RL::Fringe_Values;
 
-      auto refined = leaf_rl.feature->refined();
+      auto refined = leaf->feature->refined();
       for(auto &refined_feature : refined) {
-        auto rl = std::make_shared<RL>(leaf_rl.depth + 1);
+        auto rl = std::make_shared<RL>(leaf->depth + 1);
         rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
         rl->feature = refined_feature;
-        auto predicate = make_predicate_vc(refined_feature->predicate(), leaf.first, refined_feature->symbol_constant(), leaf_rl.action.lock()->parent());
+        auto predicate = make_predicate_vc(refined_feature->predicate(), leaf->feature->axis, refined_feature->symbol_constant(), leaf->action.lock()->parent());
         rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->specialize(action, *rl);
           this->m_next_q_values[action].push_back(rl->q_value);
         }, predicate);
 
-        leaf_rl.fringe_values->push_back(std::make_pair(leaf.first, rl));
+        leaf->fringe_values->push_back(rl);
       }
-      leaf_rl.feature.delete_and_zero();
+      leaf->feature.delete_and_zero();
 
       for(auto &fringe : *general.fringe_values) {
-        auto &fringe_rl = *fringe.second;
-
-        auto rl = std::make_shared<RL>(leaf_rl.depth + 1);
+        auto rl = std::make_shared<RL>(leaf->depth + 1);
         rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
-        rl->feature = fringe_rl.feature->clone();
-        auto predicate = make_predicate_vc(rl->feature->predicate(), fringe.first, rl->feature->symbol_constant(), leaf_rl.action.lock()->parent());
+        rl->feature = fringe->feature->clone();
+        auto predicate = make_predicate_vc(rl->feature->predicate(), fringe->feature->axis, rl->feature->symbol_constant(), leaf->action.lock()->parent());
         rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->specialize(action, *rl);
           this->m_next_q_values[action].push_back(rl->q_value);
         }, predicate);
 
-        leaf_rl.fringe_values->push_back(std::make_pair(fringe.first, rl));
+        leaf->fringe_values->push_back(rl);
       }
 
-      if(leaf_rl.fringe_values->empty())
-        leaf_rl.fringe_values.delete_and_zero();
+      if(leaf->fringe_values->empty())
+        leaf->fringe_values.delete_and_zero();
     }
 
     for(auto &fringe : *general.fringe_values) {
-      auto found = std::find(m_current_q_value.begin(), m_current_q_value.end(), fringe.second->q_value);
+      auto found = std::find(m_current_q_value.begin(), m_current_q_value.end(), fringe->q_value);
       if(found != m_current_q_value.end())
         m_current_q_value.erase(found);
-      found = std::find(m_next_q_values[action].begin(), m_next_q_values[action].end(), fringe.second->q_value);
+      found = std::find(m_next_q_values[action].begin(), m_next_q_values[action].end(), fringe->q_value);
       if(found != m_next_q_values[action].end())
         m_next_q_values[action].erase(found);
-      fringe.second->q_value.delete_and_zero();
-      excise_rule(fringe.second->action.lock());
+      fringe->q_value.delete_and_zero();
+      excise_rule(fringe->action.lock());
     }
     general.fringe_values.delete_and_zero();
   }
@@ -857,119 +853,119 @@ protected:
   }
 #endif
 
-  template <typename ENVIRONMENT>
-  bool generate_feature_ranged(const std::shared_ptr<const ENVIRONMENT> &env, feature_list &list, feature_trie &trie, feature_list &tail, const double &value) {
-    auto match = trie->find(**tail);
+//  template <typename ENVIRONMENT>
+//  bool generate_feature_ranged(const std::shared_ptr<const ENVIRONMENT> &env, feature_list &list, feature_trie &trie, feature_list &tail, const double &value) {
+//    auto match = trie->find(**tail);
+//
+//    if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
+//      const auto &feature = match->get_key();
+//      const auto midpt = feature->midpt;
+//      if(env->get_value(feature->axis) < *midpt)
+//        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), feature->bound_lower, midpt, feature->depth + 1, false, value, true))->features;
+//      else
+//        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), midpt, feature->bound_upper, feature->depth + 1, true, value, true))->features;
+//      tail = tail->template insert_in_order<typename FEATURE::List::compare_default>(list, false);
+//      trie = match->get_deeper();
+//      return true;
+//    }
+//
+//    return false;
+//  }
 
-    if(match && (!match->get() || match->get()->type != Q_Value::Type::FRINGE)) {
-      const auto &feature = match->get_key();
-      const auto midpt = feature->midpt;
-      if(env->get_value(feature->axis) < *midpt)
-        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), feature->bound_lower, midpt, feature->depth + 1, false, value, true))->features;
-      else
-        tail = &(new FEATURE(typename FEATURE::Axis(feature->axis), midpt, feature->bound_upper, feature->depth + 1, true, value, true))->features;
-      tail = tail->template insert_in_order<typename FEATURE::List::compare_default>(list, false);
-      trie = match->get_deeper();
-      return true;
-    }
+//  virtual std::set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &) const {
+//    return std::set<line_segment_type>();
+//  }
 
-    return false;
-  }
+//  std::set<line_segment_type> generate_vfgs_for_axes(const feature_trie_type * const &trie, const Feature_Axis &axis_x, const Feature_Axis &axis_y, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0))) const {
+//    std::set<line_segment_type> line_segments;
+//
+//    if(trie) {
+//      for(const feature_trie_type &trie2 : *trie) {
+//        auto new_extents = extents;
+//        const auto &key = trie2.get_key();
+//        if(key->axis == axis_x) {
+//          new_extents.first.first = *key->bound_lower;
+//          new_extents.second.first = *key->bound_upper;
+//        }
+//        else if(key->axis == axis_y) {
+//          new_extents.first.second = *key->bound_lower;
+//          new_extents.second.second = *key->bound_upper;
+//        }
+//
+//        if(key->axis == axis_x || key->axis == axis_y) {
+//          if(new_extents.first.first != extents.first.first)
+//            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.first.second), std::make_pair(new_extents.first.first, new_extents.second.second)));
+//          if(new_extents.first.second != extents.first.second)
+//            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.first.second), std::make_pair(new_extents.second.first, new_extents.first.second)));
+//          if(new_extents.second.first != extents.second.first)
+//            line_segments.insert(std::make_pair(std::make_pair(new_extents.second.first, new_extents.first.second), std::make_pair(new_extents.second.first, new_extents.second.second)));
+//          if(new_extents.second.second != extents.second.second)
+//            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.second.second), std::make_pair(new_extents.second.first, new_extents.second.second)));
+//        }
+//
+//        if(trie2.get_deeper()) {
+//          const auto line_segments2 = this->generate_vfgs_for_axes(trie2.get_deeper(), axis_x, axis_y, new_extents);
+//          this->merge_value_function_grid_sets(line_segments, line_segments2);
+//        }
+//      }
+//    }
+//
+//    return line_segments;
+//  }
 
-  virtual std::set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &) const {
-    return std::set<line_segment_type>();
-  }
+//  virtual std::map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &) const {
+//    return std::map<line_segment_type, size_t>();
+//  }
 
-  std::set<line_segment_type> generate_vfgs_for_axes(const feature_trie_type * const &trie, const Feature_Axis &axis_x, const Feature_Axis &axis_y, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0))) const {
-    std::set<line_segment_type> line_segments;
+//  std::map<line_segment_type, size_t> generate_ucm_for_axes(const feature_trie_type * const &trie, const Feature_Axis &axis_x, const Feature_Axis &axis_y, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0)), const size_t &update_count = 0) const {
+//    std::map<line_segment_type, size_t> update_counts;
+//
+//    if(trie) {
+//      for(const feature_trie_type &trie2 : *trie) {
+//        auto new_extents = extents;
+//        const auto &key = trie2.get_key();
+//        if(key->axis == axis_x) {
+//          new_extents.first.first = *key->bound_lower;
+//          new_extents.second.first = *key->bound_upper;
+//        }
+//        else if(key->axis == axis_y) {
+//          new_extents.first.second = *key->bound_lower;
+//          new_extents.second.second = *key->bound_upper;
+//        }
+//
+//        const auto update_count2 = update_count + (trie2.get() ? trie2->update_count : 0);
+//
+//        update_counts[new_extents] = update_count2;
+//
+//        if(trie2.get_deeper()) {
+//          const auto update_counts2 = this->generate_ucm_for_axes(trie2.get_deeper(), axis_x, axis_y, new_extents, update_count2);
+//          this->merge_update_count_maps(update_counts, update_counts2);
+//        }
+//      }
+//    }
+//
+//    return update_counts;
+//  }
 
-    if(trie) {
-      for(const feature_trie_type &trie2 : *trie) {
-        auto new_extents = extents;
-        const auto &key = trie2.get_key();
-        if(key->axis == axis_x) {
-          new_extents.first.first = *key->bound_lower;
-          new_extents.second.first = *key->bound_upper;
-        }
-        else if(key->axis == axis_y) {
-          new_extents.first.second = *key->bound_lower;
-          new_extents.second.second = *key->bound_upper;
-        }
+//  void print_value_function_grid_set(std::ostream &os, const std::set<line_segment_type> &line_segments) const {
+//    for(const line_segment_type &line_segment : line_segments)
+//      os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
+//  }
 
-        if(key->axis == axis_x || key->axis == axis_y) {
-          if(new_extents.first.first != extents.first.first)
-            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.first.second), std::make_pair(new_extents.first.first, new_extents.second.second)));
-          if(new_extents.first.second != extents.first.second)
-            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.first.second), std::make_pair(new_extents.second.first, new_extents.first.second)));
-          if(new_extents.second.first != extents.second.first)
-            line_segments.insert(std::make_pair(std::make_pair(new_extents.second.first, new_extents.first.second), std::make_pair(new_extents.second.first, new_extents.second.second)));
-          if(new_extents.second.second != extents.second.second)
-            line_segments.insert(std::make_pair(std::make_pair(new_extents.first.first, new_extents.second.second), std::make_pair(new_extents.second.first, new_extents.second.second)));
-        }
+//  void print_update_count_map(std::ostream &os, const std::map<line_segment_type, size_t> &update_counts) const {
+//    for(const auto &rect : update_counts)
+//      os << rect.first.first.first << ',' << rect.first.first.second << '/' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
+//  }
 
-        if(trie2.get_deeper()) {
-          const auto line_segments2 = this->generate_vfgs_for_axes(trie2.get_deeper(), axis_x, axis_y, new_extents);
-          this->merge_value_function_grid_sets(line_segments, line_segments2);
-        }
-      }
-    }
+//  void merge_value_function_grid_sets(std::set<line_segment_type> &combination, const std::set<line_segment_type> &additions) const {
+//    for(const line_segment_type &line_segment : additions)
+//      combination.insert(line_segment);
+//  }
 
-    return line_segments;
-  }
-
-  virtual std::map<line_segment_type, size_t> generate_update_count_maps(const feature_trie_type * const &) const {
-    return std::map<line_segment_type, size_t>();
-  }
-
-  std::map<line_segment_type, size_t> generate_ucm_for_axes(const feature_trie_type * const &trie, const Feature_Axis &axis_x, const Feature_Axis &axis_y, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0)), const size_t &update_count = 0) const {
-    std::map<line_segment_type, size_t> update_counts;
-
-    if(trie) {
-      for(const feature_trie_type &trie2 : *trie) {
-        auto new_extents = extents;
-        const auto &key = trie2.get_key();
-        if(key->axis == axis_x) {
-          new_extents.first.first = *key->bound_lower;
-          new_extents.second.first = *key->bound_upper;
-        }
-        else if(key->axis == axis_y) {
-          new_extents.first.second = *key->bound_lower;
-          new_extents.second.second = *key->bound_upper;
-        }
-
-        const auto update_count2 = update_count + (trie2.get() ? trie2->update_count : 0);
-
-        update_counts[new_extents] = update_count2;
-
-        if(trie2.get_deeper()) {
-          const auto update_counts2 = this->generate_ucm_for_axes(trie2.get_deeper(), axis_x, axis_y, new_extents, update_count2);
-          this->merge_update_count_maps(update_counts, update_counts2);
-        }
-      }
-    }
-
-    return update_counts;
-  }
-
-  void print_value_function_grid_set(std::ostream &os, const std::set<line_segment_type> &line_segments) const {
-    for(const line_segment_type &line_segment : line_segments)
-      os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
-  }
-
-  void print_update_count_map(std::ostream &os, const std::map<line_segment_type, size_t> &update_counts) const {
-    for(const auto &rect : update_counts)
-      os << rect.first.first.first << ',' << rect.first.first.second << '/' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
-  }
-
-  void merge_value_function_grid_sets(std::set<line_segment_type> &combination, const std::set<line_segment_type> &additions) const {
-    for(const line_segment_type &line_segment : additions)
-      combination.insert(line_segment);
-  }
-
-  void merge_update_count_maps(std::map<line_segment_type, size_t> &combination, const std::map<line_segment_type, size_t> &additions) const {
-    for(const auto &rect : additions)
-      combination[rect.first] += rect.second;
-  }
+//  void merge_update_count_maps(std::map<line_segment_type, size_t> &combination, const std::map<line_segment_type, size_t> &additions) const {
+//    for(const auto &rect : additions)
+//      combination[rect.first] += rect.second;
+//  }
 
   Metastate m_metastate = Metastate::NON_TERMINAL;
   action_ptrsc m_current;

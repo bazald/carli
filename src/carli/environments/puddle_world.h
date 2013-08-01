@@ -25,19 +25,19 @@ namespace Puddle_World {
   class Feature;
   class Feature : public Feature_Ranged<Feature> {
   public:
-    enum Axis : int {X, Y};
+    enum Axis : size_t {X = 0, Y = 1};
 
     Feature(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_upper_, depth_, upper_)
+     : Feature_Ranged<Feature>(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
     {
     }
 
     Feature * clone() const {
-      return new Feature(Axis(this->axis), this->bound_lower, this->bound_upper, this->depth, this->upper);
+      return new Feature(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
     void print(ostream &os) const {
-      switch(axis) {
+      switch(axis.first) {
         case X: os << 'x'; break;
         case Y: os << 'y'; break;
         default: abort();
@@ -109,7 +109,7 @@ namespace Puddle_World {
     }
 
     const double_pair & get_position() const {return m_position;}
-    const double & get_value(const Feature_Axis &index) const {return *(&m_position.first + index);}
+//    const double & get_value(const Feature_Axis &index) const {return *(&m_position.first + index);}
     bool is_random_start() const {return m_random_start;}
 
     void set_position(const double_pair &position_) {m_position = position_;}
@@ -309,55 +309,51 @@ namespace Puddle_World {
         }, xy);
 
         {
-          const Rete::WME_Token_Index index(0, 2);
           auto rlf = std::make_shared<RL>(2);
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
           rlf->feature = new Feature(Feature::X, 0.0, 0.5, 2, false);
-          auto predicate = make_predicate_vc(rlf->feature->predicate(), index, rlf->feature->symbol_constant(), rl->action.lock()->parent());
+          auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
           rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
-          rl->fringe_values->push_back(std::make_pair(index, rlf));
+          rl->fringe_values->push_back(rlf);
         }
 
         {
-          const Rete::WME_Token_Index index(0, 2);
           auto rlf = std::make_shared<RL>(2);
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
           rlf->feature = new Feature(Feature::X, 0.5, 1.0, 2, true);
-          auto predicate = make_predicate_vc(rlf->feature->predicate(), index, rlf->feature->symbol_constant(), rl->action.lock()->parent());
+          auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
           rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
-          rl->fringe_values->push_back(std::make_pair(index, rlf));
+          rl->fringe_values->push_back(rlf);
         }
 
         {
-          const Rete::WME_Token_Index index(1, 2);
           auto rlf = std::make_shared<RL>(2);
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
           rlf->feature = new Feature(Feature::Y, 0.0, 0.5, 2, false);
-          auto predicate = make_predicate_vc(rlf->feature->predicate(), index, rlf->feature->symbol_constant(), rl->action.lock()->parent());
+          auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
           rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
-          rl->fringe_values->push_back(std::make_pair(index, rlf));
+          rl->fringe_values->push_back(rlf);
         }
 
         {
-          const Rete::WME_Token_Index index(1, 2);
           auto rlf = std::make_shared<RL>(2);
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
           rlf->feature = new Feature(Feature::Y, 0.5, 1.0, 2, true);
-          auto predicate = make_predicate_vc(rlf->feature->predicate(), index, rlf->feature->symbol_constant(), rl->action.lock()->parent());
+          auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
           rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
-          rl->fringe_values->push_back(std::make_pair(index, rlf));
+          rl->fringe_values->push_back(rlf);
         }
       }
 

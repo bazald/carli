@@ -24,19 +24,19 @@ namespace Mountain_Car {
   class Feature;
   class Feature : public Feature_Ranged<Feature> {
   public:
-    enum Axis : int {X, X_DOT};
+    enum Axis : size_t {X = 0, X_DOT = 1};
 
     Feature(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_upper_, depth_, upper_)
+     : Feature_Ranged<Feature>(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
     {
     }
 
     Feature * clone() const {
-      return new Feature(Axis(this->axis), this->bound_lower, this->bound_upper, this->depth, this->upper);
+      return new Feature(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
     void print(ostream &os) const {
-      switch(axis) {
+      switch(axis.first) {
         case X:     os << 'x';     break;
         case X_DOT: os << "x-dot"; break;
         default: abort();
@@ -94,7 +94,7 @@ namespace Mountain_Car {
 
     const double & get_x() const {return m_x;}
     const double & get_x_dot() const {return m_x_dot;}
-    const double & get_value(const Feature_Axis &index) const {return *(&m_x + index);}
+//    const double & get_value(const Feature_Axis &index) const {return *(&m_x + index);}
     bool is_random_start() const {return m_random_start;}
     bool is_reward_negative() const {return m_reward_negative;}
 

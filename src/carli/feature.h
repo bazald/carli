@@ -9,8 +9,6 @@
 #include <iostream>
 #include <memory>
 
-typedef int Feature_Axis;
-
 template <typename DERIVED, typename DERIVED2 = DERIVED>
 class Feature : public Zeni::Pool_Allocator<DERIVED2> {
   Feature(const Feature &) = delete;
@@ -126,7 +124,7 @@ public:
 
 class Feature_Ranged_Data {
 public:
-  Feature_Ranged_Data(const Feature_Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+  Feature_Ranged_Data(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
    : axis(axis_),
    bound_lower(bound_lower_),
    bound_upper(bound_upper_),
@@ -141,12 +139,13 @@ public:
 
   int compare(const Feature_Ranged_Data &rhs) const {
     return depth != rhs.depth ? depth - rhs.depth :
-           axis != rhs.axis ? axis - rhs.axis :
+           axis.first != rhs.axis.first ? int(axis.first) - int(rhs.axis.first) :
+           axis.second != rhs.axis.second ? int(axis.second) - int(rhs.axis.second) :
            upper - rhs.upper;
   }
 
   int compare_axis(const Feature_Ranged_Data &rhs) const {
-    return axis - rhs.axis;
+    return axis.first != rhs.axis.first ? int(axis.first) - int(rhs.axis.first) : int(axis.second) - int(rhs.axis.second);
   }
 
   int compare_value(const Feature_Ranged_Data &rhs) const {
@@ -155,10 +154,10 @@ public:
   }
 
   void print(std::ostream &os) const {
-    os << this->axis << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+    os << axis << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
   }
 
-  Feature_Axis axis;
+  Rete::WME_Token_Index axis;
 
   double bound_lower; ///< inclusive
   double bound_upper; ///< exclusive
@@ -174,7 +173,7 @@ class Feature_Ranged : public Feature<DERIVED, DERIVED2>, public Feature_Ranged_
   Feature_Ranged & operator=(const Feature_Ranged &) = delete;
 
 public:
-  Feature_Ranged(const Feature_Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+  Feature_Ranged(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
    : ::Feature<DERIVED, DERIVED2>(),
    Feature_Ranged_Data(axis_, bound_lower_, bound_upper_, depth_, upper_)
   {

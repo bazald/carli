@@ -24,19 +24,19 @@ namespace Cart_Pole {
   class Feature;
   class Feature : public Feature_Ranged<Feature> {
   public:
-    enum Axis : int {X, X_DOT, THETA, THETA_DOT};
+    enum Axis : size_t {THETA = 0, THETA_DOT = 1, X = 2, X_DOT = 3};
 
     Feature(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-     : Feature_Ranged<Feature>(axis_, bound_lower_, bound_upper_, depth_, upper_)
+     : Feature_Ranged<Feature>(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
     {
     }
 
     Feature * clone() const {
-      return new Feature(Axis(this->axis), this->bound_lower, this->bound_upper, this->depth, this->upper);
+      return new Feature(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
     void print(ostream &os) const {
-      switch(axis) {
+      switch(axis.first) {
         case X:         os << 'x';         break;
         case X_DOT:     os << "x-dot";     break;
         case THETA:     os << "theta";     break;
@@ -93,22 +93,22 @@ namespace Cart_Pole {
       Environment::init_impl();
     }
 
-    const double & get_x() const {return m_x;}
-    const double & get_x_dot() const {return m_x_dot;}
     const double & get_theta() const {return m_theta;}
     const double & get_theta_dot() const {return m_theta_dot;}
-    const double & get_value(const Feature_Axis &index) const {return *(&m_x + index);}
-    const double & get_max_x() const {return m_max_x;}
-    const double & get_max_x_dot() const {return m_max_x_dot;}
+    const double & get_x() const {return m_x;}
+    const double & get_x_dot() const {return m_x_dot;}
+//    const double & get_value(const Feature_Axis &index) const {return *(&m_x + index);}
     const double & get_max_theta() const {return m_max_theta;}
     const double & get_max_theta_dot() const {return m_max_theta_dot;}
+    const double & get_max_x() const {return m_max_x;}
+    const double & get_max_x_dot() const {return m_max_x_dot;}
     bool has_goal() const {return m_has_goal;}
     bool is_ignoring_x() const {return m_ignore_x;}
 
-    void set_x(const double &x_) {m_x = x_;}
-    void set_x_dot(const double &x_dot_) {m_x = x_dot_;}
     void set_theta_dot(const double &theta_dot_) {m_theta = theta_dot_;}
     void set_theta(const double &theta_) {m_theta = theta_;}
+    void set_x(const double &x_) {m_x = x_;}
+    void set_x_dot(const double &x_dot_) {m_x = x_dot_;}
 
     bool success() const {
       return m_has_goal &&
@@ -123,10 +123,10 @@ namespace Cart_Pole {
 
   private:
     void init_impl() {
-      m_x = 0.0;
-      m_x_dot = 0.0;
       m_theta = 0.0;
       m_theta_dot = 0.0;
+      m_x = 0.0;
+      m_x_dot = 0.0;
 
       if(m_has_goal) {
         do {
@@ -178,10 +178,10 @@ namespace Cart_Pole {
     Zeni::Random m_random_init;
     Zeni::Random m_random_motion;
 
-    double m_x = 0.0;
-    double m_x_dot = 0.0;
     double m_theta = 0.0;
     double m_theta_dot = 0.0;
+    double m_x = 0.0;
+    double m_x_dot = 0.0;
 
     const double GRAVITY = 9.8;
     const double MASSCART = 1.0;
@@ -196,10 +196,10 @@ namespace Cart_Pole {
     const bool m_has_goal = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["set-goal"]).get_value();
     const bool m_ignore_x = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["ignore-x"]).get_value();
 
-    const double m_max_x = m_has_goal ? 10.0 : 2.4;
-    const double m_max_x_dot = m_has_goal ? 4.0 : 10.0;
     const double m_max_theta = m_has_goal ? 1.57079632679 : 0.2094384; ///< pi/2.0 : 12 degrees
     const double m_max_theta_dot = m_has_goal ? 2.0 : 10.0;
+    const double m_max_x = m_has_goal ? 10.0 : 2.4;
+    const double m_max_x_dot = m_has_goal ? 4.0 : 10.0;
   };
 
   class Agent : public ::Agent<feature_type, action_type> {
