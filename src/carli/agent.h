@@ -83,10 +83,17 @@ public:
       auto gen = general.fringe_values->begin();
       for(auto count = random.rand_lt(general.fringe_values->size()); count; --count)
         ++gen;
+      auto chosen = *gen;
+
+      for(auto &fringe : *general.fringe_values) {
+        if(fringe->feature->depth < chosen->feature->depth) {
+          chosen = fringe;
+        }
+      }
 
 //      std::cerr << "Refining : " << gen->first << std::endl;
 
-      generate_fringe(action, general, (*gen)->feature->axis);
+      generate_fringe(action, general, chosen->feature->axis);
     }
   }
 
@@ -115,7 +122,7 @@ public:
 //      std::cerr << " delete  : " << leaf.q_value << std::endl;
 //#endif
       leaf->q_value.delete_and_zero();
-      leaf->q_value = new Q_Value();
+      leaf->q_value = new Q_Value(0.0f, Q_Value::Type::UNSPLIT, leaf->depth);
 //#ifdef DEBUG_OUTPUT
 //      std::cerr << " create  : " << leaf.q_value << std::endl;
 //#endif
@@ -126,7 +133,7 @@ public:
       auto refined = leaf->feature->refined();
       for(auto &refined_feature : refined) {
         auto rl = std::make_shared<RL>(leaf->depth + 1);
-        rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
+        rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
         rl->feature = refined_feature;
         auto predicate = make_predicate_vc(refined_feature->predicate(), leaf->feature->axis, refined_feature->symbol_constant(), leaf->action.lock()->parent());
         rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
@@ -140,7 +147,7 @@ public:
 
       for(auto &fringe : *general.fringe_values) {
         auto rl = std::make_shared<RL>(leaf->depth + 1);
-        rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE);
+        rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
         rl->feature = fringe->feature->clone();
         auto predicate = make_predicate_vc(rl->feature->predicate(), fringe->feature->axis, rl->feature->symbol_constant(), leaf->action.lock()->parent());
         rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
@@ -298,6 +305,7 @@ public:
 
     m_current = m_next;
     m_current_q_value = m_next_q_values[m_next];
+    m_current_q_value.sort([](const tracked_ptr<Q_Value> &lhs, const tracked_ptr<Q_Value> &rhs)->bool{return lhs->depth < rhs->depth;});
 
     const reward_type reward = m_environment->transition(*m_current);
 
