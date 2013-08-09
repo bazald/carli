@@ -27,7 +27,7 @@ std::ostream & operator << (std::ostream &os, const Feature<DERIVED, DERIVED2> &
   return os;
 }
 
-enum class Credit_Assignment : char {ALL, SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_ROOT_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_SPECIFIC, EPSILON_EVEN_DEPTH};
+enum class Credit_Assignment : char {ALL, RANDOM, SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_ROOT_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_SPECIFIC, EPSILON_EVEN_DEPTH};
 enum class Metastate : char {NON_TERMINAL, SUCCESS, FAILURE};
 
 template <typename FEATURE, typename ACTION>
@@ -183,6 +183,8 @@ public:
     m_credit_assignment(
       m_credit_assignment_code == "all" ?
         [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_all(value_list);} :
+      m_credit_assignment_code == "random" ?
+        [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_random(value_list);} :
       m_credit_assignment_code == "specific" ?
         [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_specific(value_list);} :
       m_credit_assignment_code == "even" ?
@@ -206,6 +208,8 @@ public:
 //    m_weight_assignment(
 //      m_weight_assignment_code == "all" ?
 //        [this](Q_Value::List * const &value_list){return this->assign_credit_all(value_list);} :
+//      m_weight_assignment_code == "random" ?
+//        [this](Q_Value::List * const &value_list){return this->assign_credit_random(value_list);} :
 //      m_weight_assignment_code == "specific" ?
 //        [this](Q_Value::List * const &value_list){return this->assign_credit_specific(value_list);} :
 //      m_weight_assignment_code == "even" ?
@@ -678,6 +682,23 @@ protected:
     const double inverse = 1.0 - this->m_credit_assignment_epsilon;
     for(const auto &q : value_list)
       q->credit = this->m_credit_assignment_epsilon * q->credit + inverse * q->t0;
+  }
+
+  void assign_credit_random(const std::list<tracked_ptr<Q_Value>> &value_list) {
+    size_t count = double();
+    for(const auto &q : value_list) {
+      if(q->type != Q_Value::Type::FRINGE)
+        ++count;
+    }
+
+    count = random.rand_lt(count) + 1;
+
+    for(const auto &q : value_list) {
+      if(q->type != Q_Value::Type::FRINGE)
+        q->credit = --count ? 0.0 : 1.0;
+      else
+        q->credit = m_fringe_learning_scale;
+    }
   }
 
   void assign_credit_specific(const std::list<tracked_ptr<Q_Value>> &value_list) {

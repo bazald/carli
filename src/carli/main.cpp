@@ -99,7 +99,7 @@ int main2(int argc, char **argv) {
   options.add('l', std::make_shared<Option_Ranged<double>>("learning-rate", 0.0, false, 1.0, true, 1.0), "");
   options.add(     std::make_shared<Option_Itemized>("policy", std::set<std::string>({"on-policy", "off-policy"}), "on-policy"), "Learn about greedy or optimal policy.");
   options.add_line("\n  Credit Assignment:");
-  options.add('c', std::make_shared<Option_Itemized>("credit-assignment", std::set<std::string>({"all", "specific", "even", "inv-update-count", "inv-log-update-count", "inv-root-update-count", "inv-depth", "epsilon-even-specific", "epsilon-even-depth"}), "even"), "How to split credit between weights.");
+  options.add('c', std::make_shared<Option_Itemized>("credit-assignment", std::set<std::string>({"all", "random", "specific", "even", "inv-update-count", "inv-log-update-count", "inv-root-update-count", "inv-depth", "epsilon-even-specific", "epsilon-even-depth"}), "even"), "How to split credit between weights.");
   options.add(     std::make_shared<Option_Ranged<double>>("credit-assignment-epsilon", 0.0, true, 1.0, true, 0.5), "How to split credit assignment strategies for epsilon-*.");
   options.add(     std::make_shared<Option_Ranged<double>>("credit-assignment-log-base", 0.0, false, std::numeric_limits<double>::infinity(), false, 2.71828182846), "Which log to perform for inv-log-update-count.");
   options.add(     std::make_shared<Option_Ranged<double>>("credit-assignment-root", 1.0, false, std::numeric_limits<double>::infinity(), false, 2.0), "Which root to perform for inv-root-update-count.");
