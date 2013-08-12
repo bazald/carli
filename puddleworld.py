@@ -98,7 +98,7 @@ def main():
   # 3: ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out
   # 4: ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/even_*_3/*.out
   # 5: ./puddleworld.py experiment-pw/*_3/*.out
-  scenario = 0
+  scenario = 3
   
   #two_sided_plot = scenario == 4
   two_sided_plot = False
@@ -245,12 +245,17 @@ def main():
           labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
       
       remap_names = {}
-      remap_names['specific\\_4x4\\_4x4\\_0'] = '4x4'
-      remap_names['specific\\_8x8\\_8x8\\_0'] = '8x8'
-      remap_names['specific\\_16x16\\_16x16\\_0'] = '16x16'
-      remap_names['specific\\_32x32\\_32x32\\_0'] = '32x32'
-      remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
-      remap_names['even\\_64x64\\_64x64\\_1'] = '1-64 static even'
+      remap_names['specific\\_4x4\\_4x4\\_0.5\\_0\\_0\\_0'] = '4x4'
+      remap_names['specific\\_8x8\\_8x8\\_0.5\\_0\\_0\\_0'] = '8x8'
+      remap_names['specific\\_16x16\\_16x16\\_0.5\\_0\\_0\\_0'] = '16x16'
+      remap_names['specific\\_32x32\\_32x32\\_0.5\\_0\\_0\\_0'] = '32x32'
+      remap_names['specific\\_64x64\\_64x64\\_0.5\\_0\\_0\\_0'] = '64x64'
+      remap_names['random\\_4x4\\_4x4\\_0.5\\_0\\_0\\_2'] = '1-4 static random'
+      remap_names['random\\_8x8\\_8x8\\_0.5\\_0\\_0\\_2'] = '1-8 static random'
+      remap_names['random\\_16x16\\_16x16\\_0.5\\_0\\_0\\_2'] = '1-16 static random'
+      remap_names['random\\_32x32\\_32x32\\_0.5\\_0\\_0\\_2'] = '1-32 static random'
+      remap_names['random\\_64x64\\_64x64\\_0.5\\_0\\_0\\_2'] = '1-64 static random'
+      remap_names['even\\_64x64\\_64x64\\_0.5\\_0\\_0\\_1'] = '1-64 static even'
       remap_names['inv-log-update-count\\_64x64\\_64x64\\_1'] = '1-64 static $1/\ln$'
       remap_names['inv-root-update-count\\_64x64\\_64x64\\_1'] = '1-64 static $1/\sqrt{~~~}$'
       remap_names['even\\_2x2\\_64x64\\_3'] = '1-64 incremental even'
@@ -263,30 +268,46 @@ def main():
       elif scenario == 2:
         agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0']
       elif scenario == 3:
-        agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'even\\_64x64\\_64x64\\_1']
+        agent_list = ['specific\\_4x4\\_4x4\\_0.5\\_0\\_0\\_0', 'specific\\_8x8\\_8x8\\_0.5\\_0\\_0\\_0', 'specific\\_16x16\\_16x16\\_0.5\\_0\\_0\\_0',
+                      'even\\_64x64\\_64x64\\_0.5\\_0\\_0\\_1']
       if scenario > 0 and scenario < 4:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
           yss.append(smith[agent])
           
-          if agent is 'specific\\_4x4\\_4x4\\_0':
+          if agent is 'specific\\_4x4\\_4x4\\_0.5\\_0\\_0\\_0':
             color = 'grey'
             linestyle = '-'
-          elif agent is 'specific\\_8x8\\_8x8\\_0':
+          elif agent is 'specific\\_8x8\\_8x8\\_0.5\\_0\\_0\\_0':
             color = 'red'
-            linestyle = '-.'
-          elif agent is 'specific\\_16x16\\_16x16\\_0':
+            linestyle = '-'
+          elif agent is 'specific\\_16x16\\_16x16\\_0.5\\_0\\_0\\_0':
             color = 'blue'
-            linestyle = ':'
-          elif agent is 'specific\\_32x32\\_32x32\\_0':
+            linestyle = '-'
+          elif agent is 'specific\\_32x32\\_32x32\\_0.5\\_0\\_0\\_0':
             color = 'black'
             linestyle = '-'
-          elif agent is 'specific\\_64x64\\_64x64\\_0':
+          elif agent is 'specific\\_64x64\\_64x64\\_0.5\\_0\\_0\\_0':
             color = 'green'
             linestyle = '-'
-          elif agent is 'even\\_64x64\\_64x64\\_1':
+          elif agent is 'random\\_4x4\\_4x4\\_0.5\\_0\\_0\\_2':
+            color = 'grey'
+            linestyle = ':'
+          elif agent is 'random\\_8x8\\_8x8\\_0.5\\_0\\_0\\_2':
+            color = 'red'
+            linestyle = ':'
+          elif agent is 'random\\_16x16\\_16x16\\_0.5\\_0\\_0\\_2':
+            color = 'blue'
+            linestyle = ':'
+          elif agent is 'random\\_32x32\\_32x32\\_0.5\\_0\\_0\\_2':
+            color = 'black'
+            linestyle = ':'
+          elif agent is 'random\\_64x64\\_64x64\\_0.5\\_0\\_0\\_2':
+            color = 'green'
+            linestyle = ':'
+          elif agent is 'even\\_64x64\\_64x64\\_0.5\\_0\\_0\\_1':
             color = 'brown'
-            linestyle = '-'
+            linestyle = '-.'
           
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
       

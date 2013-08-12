@@ -24,17 +24,19 @@ namespace Rete {
     const std::function<Rete_Predicate_Ptr (const Rete_Predicate::Predicate &predicate, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out)> make_predicate_vv;
 
     Agent()
-      : make_action([](const Rete_Action::Action &action, const Rete_Node_Ptr &out)->Rete_Action_Ptr {
+      : make_action([this](const Rete_Action::Action &action, const Rete_Node_Ptr &out)->Rete_Action_Ptr {
           if(auto existing = Rete_Action::find_existing(action, [](const Rete_Action &, const WME_Token &){}, out))
             return existing;
-          auto action_fun = std::make_shared<Rete_Action>(action);
+//          std::cerr << "DEBUG: make_action" << std::endl;
+          auto action_fun = std::make_shared<Rete_Action>(this->actions, this->retractions, action);
           bind_to_action(action_fun, out);
+//          std::cerr << "END: make_action" << std::endl;
           return action_fun;
       }),
-      make_action_retraction([](const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out)->Rete_Action_Ptr {
+      make_action_retraction([this](const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out)->Rete_Action_Ptr {
         if(auto existing = Rete_Action::find_existing(action, retraction, out))
           return existing;
-        auto action_fun = std::make_shared<Rete_Action>(action, retraction);
+        auto action_fun = std::make_shared<Rete_Action>(this->actions, this->retractions, action, retraction);
         bind_to_action(action_fun, out);
         return action_fun;
       }),
@@ -109,7 +111,8 @@ namespace Rete {
         auto predicate = std::make_shared<Rete_Predicate>(pred, lhs_index, rhs_index);
         bind_to_predicate(predicate, out);
         return predicate;
-      })
+      }),
+      actions(&retractions)
     {
     }
 
@@ -136,6 +139,7 @@ namespace Rete {
         found->second->destroy(filters);
         rules.erase(found);
       }
+      finish_agenda();
     }
 
     void excise_rule(const Rete_Action_Ptr &action) {
@@ -147,6 +151,7 @@ namespace Rete {
       working_memory.wmes.insert(wme);
       for(auto &filter : filters)
         filter->insert_wme(wme);
+      finish_agenda();
     }
 
     void remove_wme(const WME_Ptr_C &wme) {
@@ -155,6 +160,7 @@ namespace Rete {
       working_memory.wmes.erase(found);
       for(auto &filter : filters)
         filter->remove_wme(wme);
+      finish_agenda();
     }
 
     size_t rete_size() const {
@@ -171,9 +177,18 @@ namespace Rete {
     }
 
   private:
+    void finish_agenda() {
+      for(;;) {
+        if(!retractions.run() && !actions.run())
+          break;
+      }
+    }
+
     std::list<Rete_Filter_Ptr> filters;
     std::unordered_map<std::string, Rete_Action_Ptr> rules;
     WME_Set working_memory;
+    Agenda retractions;
+    Agenda actions;
   };
 
 }

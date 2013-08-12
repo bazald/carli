@@ -304,7 +304,7 @@ namespace Puddle_World {
         ++this->m_q_value_count;
         rl->fringe_values = new RL::Fringe_Values;
         rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->specialize(action, *rl);
+          this->specialize(action, rl);
           this->m_next_q_values[action].push_back(rl->q_value);
         }, xy);
 
@@ -314,7 +314,6 @@ namespace Puddle_World {
           rlf->feature = new Feature(Feature::X, 0.0, 0.5, 2, false);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
           rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-            this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
           rl->fringe_values->push_back(rlf);
@@ -326,7 +325,6 @@ namespace Puddle_World {
           rlf->feature = new Feature(Feature::X, 0.5, 1.0, 2, true);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
           rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-            this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
           rl->fringe_values->push_back(rlf);
@@ -338,7 +336,6 @@ namespace Puddle_World {
           rlf->feature = new Feature(Feature::Y, 0.0, 0.5, 2, false);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
           rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-            this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
           rl->fringe_values->push_back(rlf);
@@ -350,7 +347,6 @@ namespace Puddle_World {
           rlf->feature = new Feature(Feature::Y, 0.5, 1.0, 2, true);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
           rlf->action = make_action([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-            this->specialize(action, *rlf);
             this->m_next_q_values[action].push_back(rlf->q_value);
           }, predicate);
           rl->fringe_values->push_back(rlf);

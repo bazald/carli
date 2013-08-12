@@ -307,6 +307,32 @@ namespace Blocks_World {
 
       m_metastate = env->get_blocks() == env->get_goal() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
     }
+
+    Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
+    Rete::Symbol_Variable_Ptr_C m_second_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Second);
+    Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
+
+    Rete::Symbol_Identifier_Ptr_C m_s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
+    Rete::Symbol_Constant_String_Ptr_C m_clear_attr = std::make_shared<Rete::Symbol_Constant_String>("clear");
+    Rete::Symbol_Constant_String_Ptr_C m_in_place_attr = std::make_shared<Rete::Symbol_Constant_String>("in-place");
+    Rete::Symbol_Constant_String_Ptr_C m_on_top_attr = std::make_shared<Rete::Symbol_Constant_String>("on-top");
+    Rete::Symbol_Constant_String_Ptr_C m_name_attr = std::make_shared<Rete::Symbol_Constant_String>("name");
+    Rete::Symbol_Constant_String_Ptr_C m_a_value = std::make_shared<Rete::Symbol_Constant_String>("a");
+    Rete::Symbol_Constant_String_Ptr_C m_b_value = std::make_shared<Rete::Symbol_Constant_String>("b");
+    Rete::Symbol_Constant_String_Ptr_C m_c_value = std::make_shared<Rete::Symbol_Constant_String>("c");
+
+    Rete::WME_Ptr_C m_x_wme;
+    Rete::WME_Ptr_C m_y_wme;
+
+    std::array<std::shared_ptr<action_type::derived_type>, 9> m_action = {{std::make_shared<Move>(1, 0),
+                                                                           std::make_shared<Move>(1, 2),
+                                                                           std::make_shared<Move>(1, 3),
+                                                                           std::make_shared<Move>(2, 0),
+                                                                           std::make_shared<Move>(2, 1),
+                                                                           std::make_shared<Move>(2, 3),
+                                                                           std::make_shared<Move>(3, 0),
+                                                                           std::make_shared<Move>(3, 1),
+                                                                           std::make_shared<Move>(3, 2),}};
   };
 
 }

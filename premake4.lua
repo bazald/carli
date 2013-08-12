@@ -1,9 +1,15 @@
 solution "carli"
-  if _ACTION == "gmake" then
-    configurations { "Debug", "Profiling", "Release", "Debug_Clang", "Profiling_Clang", "Release_Clang" }
-  else
-    configurations { "Debug", "Profiling", "Release" }
-  end
+  configurations { "Debug", "Profiling", "Release"}
+
+  newoption {
+    trigger     = "scu",
+    value       = "false",
+    description = "Build using the single compilation unit / unity build pattern",
+    allowed = {
+      { "false", "Normal build" },
+      { "true",  "SCU/Unity build" },
+    }
+  }
 
   if os.get() == "windows" then
     defines { "_WINDOWS", "WIN32", "_CRT_SECURE_NO_DEPRECATE" }
@@ -16,21 +22,35 @@ solution "carli"
   else
     defines { "_LINUX" }
     platforms { "native" }
+
+    newoption {
+      trigger     = "clang",
+      value       = "false",
+      description = "Build using clang++ instead of g++",
+      allowed = {
+        { "false", "g++" },
+        { "true",  "clang++" },
+      }
+    }
+    if _OPTIONS["clang"] == "true" then
+      premake.gcc.cc = "clang"
+      premake.gcc.cxx = "clang++"
+    end
   end
 
   flags { "ExtraWarnings" }
   buildoptions { "-Wextra", "-std=c++11", "-pedantic" }
   include "src/carli"
 
-  configuration "Debug*"
+  configuration "Debug"
     defines { "_DEBUG", "DEBUG" }
     flags { "Symbols" }
     targetsuffix "_d"
-  configuration "Profiling*"
+  configuration "Profiling"
     defines { "NDEBUG" }
-    flags { "Symbols" }
+    flags { "Symbols", "Optimize" }
     targetsuffix "_p"
-  configuration "Release*"
+  configuration "Release"
     defines { "NDEBUG" }
     flags { "Optimize" }
 --    buildoptions { "-flto" }
@@ -50,13 +70,15 @@ solution "carli"
     configuration { "linux" }
       linkoptions { "-Wl,-rpath,/home/bazald/Software/gperftools/lib",
                     "-Wl,-rpath-link,/home/bazald/Software/gperftools/lib" }
-    configuration { "linux", "Debug*" }
+    configuration { "linux", "Debug" }
       links { "tcmalloc" }
-    configuration { "linux", "Profiling*" }
+    configuration { "linux", "Profiling" }
       links { "tcmalloc_and_profiler" }
-    configuration { "linux", "*clang" }
-      buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
-      buildoptions { "-Wno-deprecated-register", "-Wno-null-conversion", "-Wno-parentheses-equality", "-Wno-unneeded-internal-declaration" }
-      linkoptions { "-stdlib=libc++", "-nodefaultlibs" }
-      links { "c++", "c++abi", "m", "c", "gcc_s", "gcc" }
+    if _OPTIONS["clang"] == "true" then
+      configuration "linux"
+        buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
+        buildoptions { "-Wno-deprecated-register", "-Wno-null-conversion", "-Wno-parentheses-equality", "-Wno-unneeded-internal-declaration" }
+        linkoptions { "-stdlib=libc++", "-nodefaultlibs" }
+        links { "c++", "c++abi", "m", "c", "gcc_s", "gcc" }
+    end
   end

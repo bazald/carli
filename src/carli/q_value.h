@@ -8,9 +8,10 @@
 
 #include <cfloat>
 #include <limits>
+#include <memory>
 
 class Q_Value;
-class Q_Value : public Zeni::Pool_Allocator<Q_Value> {
+class Q_Value : public Zeni::Pool_Allocator<Q_Value>, public std::enable_shared_from_this<Q_Value> {
   Q_Value(const Q_Value &) = delete;
   Q_Value & operator=(const Q_Value &) = delete;
 

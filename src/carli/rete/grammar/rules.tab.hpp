@@ -54,7 +54,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 53 "rules.y"
+#line 52 "rules.y"
 
   char cval;
   double fval;

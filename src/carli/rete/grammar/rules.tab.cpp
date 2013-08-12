@@ -1,19 +1,19 @@
 /* A Bison parser, made by GNU Bison 2.5.  */
 
 /* Bison implementation for Yacc-like parsers in C
-
+   
       Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
-
+   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -26,7 +26,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -82,7 +82,6 @@
 #define YYDEBUG 1
 
 using namespace std;
-using namespace Rete;
 
 int rete_lex();
 int rete_parse();
@@ -105,26 +104,26 @@ static vector<array<string, 3>> Variables(const array<string, 3> &variable) {
   return rv;
 }
 static pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>> *
-Rete_Node_Ptr_and_Variables(const Rete_Node_Ptr &rete_node, const vector<array<string, 3>> &variables) {
+Rete_Node_Ptr_and_Variables(const Rete::Rete_Node_Ptr &rete_node, const vector<array<string, 3>> &variables) {
   return new pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>(rete_node, variables);
 }
 
-static WME_Token_Index find_index(const std::vector<std::array<std::string, 3>> &variables, const std::string &variable) {
+static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string, 3>> &variables, const std::string &variable) {
   for(size_t i = 0; i != variables.size(); ++i) {
     for(uint8_t ii = 0; ii != 3; ++ii) {
       if(variables[i][ii] == variable)
-        return WME_Token_Index(i, ii);
+        return Rete::WME_Token_Index(i, ii);
     }
   }
-  return WME_Token_Index(size_t(-1), uint8_t(-1));
+  return Rete::WME_Token_Index(size_t(-1), uint8_t(-1));
 }
 
-static void rete_error(Agent &agent, const char *s);
+static void rete_error(Rete::Agent &agent, const char *s);
 
 
 
 /* Line 268 of yacc.c  */
-#line 128 "rules.tab.cpp"
+#line 127 "rules.tab.cpp"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -168,7 +167,7 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 53 "rules.y"
+#line 52 "rules.y"
 
   char cval;
   double fval;
@@ -181,7 +180,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 185 "rules.tab.cpp"
+#line 184 "rules.tab.cpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -206,7 +205,7 @@ typedef struct YYLTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 210 "rules.tab.cpp"
+#line 209 "rules.tab.cpp"
 
 #ifdef short
 # undef short
@@ -507,10 +506,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    80,    80,    81,    84,    95,    96,    97,    98,   120,
-     143,   167,   174,   182,   185,   188,   189,   191,   192,   193,
-     194,   197,   198,   199,   201,   202,   205,   208,   209,   210,
-     211
+       0,    79,    79,    80,    83,    94,    95,    96,    97,   119,
+     142,   166,   173,   181,   184,   187,   188,   190,   191,   192,
+     193,   196,   197,   198,   200,   201,   204,   207,   208,   209,
+     210
 };
 #endif
 
@@ -772,7 +771,7 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, Agent &agent)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, Rete::Agent &agent)
 #else
 static void
 yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, agent)
@@ -780,7 +779,7 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, agent)
     int yytype;
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
-    Agent &agent;
+    Rete::Agent &agent;
 #endif
 {
   if (!yyvaluep)
@@ -808,7 +807,7 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, agent)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, Agent &agent)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, Rete::Agent &agent)
 #else
 static void
 yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, agent)
@@ -816,7 +815,7 @@ yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, agent)
     int yytype;
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
-    Agent &agent;
+    Rete::Agent &agent;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -869,14 +868,14 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, Agent &agent)
+yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, Rete::Agent &agent)
 #else
 static void
 yy_reduce_print (yyvsp, yylsp, yyrule, agent)
     YYSTYPE *yyvsp;
     YYLTYPE *yylsp;
     int yyrule;
-    Agent &agent;
+    Rete::Agent &agent;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -1175,7 +1174,7 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, Agent &agent)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, Rete::Agent &agent)
 #else
 static void
 yydestruct (yymsg, yytype, yyvaluep, yylocationp, agent)
@@ -1183,7 +1182,7 @@ yydestruct (yymsg, yytype, yyvaluep, yylocationp, agent)
     int yytype;
     YYSTYPE *yyvaluep;
     YYLTYPE *yylocationp;
-    Agent &agent;
+    Rete::Agent &agent;
 #endif
 {
   YYUSE (yyvaluep);
@@ -1212,7 +1211,7 @@ int yyparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int yyparse (Agent &agent);
+int yyparse (Rete::Agent &agent);
 #else
 int yyparse ();
 #endif
@@ -1250,11 +1249,11 @@ yyparse (YYPARSE_PARAM)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 int
-yyparse (Agent &agent)
+yyparse (Rete::Agent &agent)
 #else
 int
 yyparse (agent)
-    Agent &agent;
+    Rete::Agent &agent;
 #endif
 #endif
 {
@@ -1524,12 +1523,12 @@ yyreduce:
         case 4:
 
 /* Line 1806 of yacc.c  */
-#line 84 "rules.y"
+#line 83 "rules.y"
     { string name = *(yyvsp[(1) - (4)].sval);
-                                    auto node = agent.make_action_retraction([name](const Rete_Action &, const WME_Token &wme_token) {
-                                                                               cout << wme_token << "->" << name << endl;
-                                                                             }, [name](const Rete_Action &, const WME_Token &wme_token) {
-                                                                                  cout << wme_token << "<-" << name << endl;
+                                    auto node = agent.make_action_retraction([name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
+                                                                               cout << wme_vector << "->" << name << endl;
+                                                                             }, [name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
+                                                                                  cout << wme_vector << "<-" << name << endl;
                                                                                 }, (yyvsp[(3) - (4)].rete_node_ptr)->first);
                                     agent.source_rule(name, node);
                                     delete (yyvsp[(1) - (4)].sval);
@@ -1539,29 +1538,29 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 95 "rules.y"
+#line 94 "rules.y"
     { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
     break;
 
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 96 "rules.y"
-    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_existential((yyvsp[(2) - (2)].rete_node_ptr)->first)), Variables()); delete (yyvsp[(2) - (2)].rete_node_ptr); }
+#line 95 "rules.y"
+    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential((yyvsp[(2) - (2)].rete_node_ptr)->first)), Variables()); delete (yyvsp[(2) - (2)].rete_node_ptr); }
     break;
 
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 97 "rules.y"
-    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_negation((yyvsp[(2) - (2)].rete_node_ptr)->first)), Variables()); delete (yyvsp[(2) - (2)].rete_node_ptr); }
+#line 96 "rules.y"
+    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation((yyvsp[(2) - (2)].rete_node_ptr)->first)), Variables()); delete (yyvsp[(2) - (2)].rete_node_ptr); }
     break;
 
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 98 "rules.y"
-    { WME_Bindings bindings;
+#line 97 "rules.y"
+    { Rete::WME_Bindings bindings;
                                           unordered_set<string> joined;
                                           for(size_t i = 0; i != (yyvsp[(1) - (3)].rete_node_ptr)->second.size(); ++i) {
                                             for(uint8_t ii = 0; ii != 3; ++ii) {
@@ -1569,7 +1568,7 @@ yyreduce:
                                                 for(size_t j = 0; j != (yyvsp[(3) - (3)].rete_node_ptr)->second.size(); ++j) {
                                                   for(uint8_t jj = 0; jj != 3; ++jj) {
                                                     if((yyvsp[(1) - (3)].rete_node_ptr)->second[i][ii] == (yyvsp[(3) - (3)].rete_node_ptr)->second[j][jj]) {
-                                                      bindings.insert(WME_Binding(WME_Token_Index(i, ii), WME_Token_Index(j, jj)));
+                                                      bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
                                                       joined.insert((yyvsp[(1) - (3)].rete_node_ptr)->second[i][ii]);
                                                       goto DONE_EXISTENTIAL_JOINING;
                                                     }
@@ -1580,7 +1579,7 @@ yyreduce:
                                                 ;
                                             }
                                           }
-                                          (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_existential_join(bindings, (yyvsp[(1) - (3)].rete_node_ptr)->first, (yyvsp[(3) - (3)].rete_node_ptr)->first)), (yyvsp[(1) - (3)].rete_node_ptr)->second);
+                                          (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(bindings, (yyvsp[(1) - (3)].rete_node_ptr)->first, (yyvsp[(3) - (3)].rete_node_ptr)->first)), (yyvsp[(1) - (3)].rete_node_ptr)->second);
                                           delete (yyvsp[(1) - (3)].rete_node_ptr);
                                           delete (yyvsp[(3) - (3)].rete_node_ptr); }
     break;
@@ -1588,8 +1587,8 @@ yyreduce:
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 120 "rules.y"
-    { WME_Bindings bindings;
+#line 119 "rules.y"
+    { Rete::WME_Bindings bindings;
                                           unordered_set<string> joined;
                                           for(size_t i = 0; i != (yyvsp[(1) - (3)].rete_node_ptr)->second.size(); ++i) {
                                             for(uint8_t ii = 0; ii != 3; ++ii) {
@@ -1597,7 +1596,7 @@ yyreduce:
                                                 for(size_t j = 0; j != (yyvsp[(3) - (3)].rete_node_ptr)->second.size(); ++j) {
                                                   for(uint8_t jj = 0; jj != 3; ++jj) {
                                                     if((yyvsp[(1) - (3)].rete_node_ptr)->second[i][ii] == (yyvsp[(3) - (3)].rete_node_ptr)->second[j][jj]) {
-                                                      bindings.insert(WME_Binding(WME_Token_Index(i, ii), WME_Token_Index(j, jj)));
+                                                      bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
                                                       joined.insert((yyvsp[(1) - (3)].rete_node_ptr)->second[i][ii]);
                                                       goto DONE_NEGATION_JOINING;
                                                     }
@@ -1608,7 +1607,7 @@ yyreduce:
                                                 ;
                                             }
                                           }
-                                          (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_negation_join(bindings, (yyvsp[(1) - (3)].rete_node_ptr)->first, (yyvsp[(3) - (3)].rete_node_ptr)->first)), (yyvsp[(1) - (3)].rete_node_ptr)->second);
+                                          (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(bindings, (yyvsp[(1) - (3)].rete_node_ptr)->first, (yyvsp[(3) - (3)].rete_node_ptr)->first)), (yyvsp[(1) - (3)].rete_node_ptr)->second);
                                           delete (yyvsp[(1) - (3)].rete_node_ptr);
                                           delete (yyvsp[(3) - (3)].rete_node_ptr); }
     break;
@@ -1616,8 +1615,8 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 143 "rules.y"
-    { WME_Bindings bindings;
+#line 142 "rules.y"
+    { Rete::WME_Bindings bindings;
                               unordered_set<string> joined;
                               for(size_t i = 0; i != (yyvsp[(1) - (2)].rete_node_ptr)->second.size(); ++i) {
                                 for(uint8_t ii = 0; ii != 3; ++ii) {
@@ -1625,7 +1624,7 @@ yyreduce:
                                     for(size_t j = 0; j != (yyvsp[(2) - (2)].rete_node_ptr)->second.size(); ++j) {
                                       for(uint8_t jj = 0; jj != 3; ++jj) {
                                         if((yyvsp[(1) - (2)].rete_node_ptr)->second[i][ii] == (yyvsp[(2) - (2)].rete_node_ptr)->second[j][jj]) {
-                                          bindings.insert(WME_Binding(WME_Token_Index(i, ii), WME_Token_Index(j, jj)));
+                                          bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
                                           joined.insert((yyvsp[(1) - (2)].rete_node_ptr)->second[i][ii]);
                                           goto DONE_JOINING;
                                         }
@@ -1638,7 +1637,7 @@ yyreduce:
                               }
                               vector<array<string, 3>> variables((yyvsp[(1) - (2)].rete_node_ptr)->second);
                               variables.insert(variables.end(), (yyvsp[(2) - (2)].rete_node_ptr)->second.begin(), (yyvsp[(2) - (2)].rete_node_ptr)->second.end());
-                              (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_join(bindings, (yyvsp[(1) - (2)].rete_node_ptr)->first, (yyvsp[(2) - (2)].rete_node_ptr)->first)), variables);
+                              (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(bindings, (yyvsp[(1) - (2)].rete_node_ptr)->first, (yyvsp[(2) - (2)].rete_node_ptr)->first)), variables);
                               delete (yyvsp[(1) - (2)].rete_node_ptr);
                               delete (yyvsp[(2) - (2)].rete_node_ptr); }
     break;
@@ -1646,11 +1645,11 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 167 "rules.y"
+#line 166 "rules.y"
     { auto lhs_index = find_index((yyvsp[(1) - (6)].rete_node_ptr)->second, *(yyvsp[(3) - (6)].sval));
                                                             if(lhs_index.second > 2)
                                                               rete_error(agent, "Unbound variable tested by predicate.");
-                                                            (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_predicate_vc((yyvsp[(4) - (6)].predicate), lhs_index, *(yyvsp[(5) - (6)].symbol_ptr), (yyvsp[(1) - (6)].rete_node_ptr)->first)), (yyvsp[(1) - (6)].rete_node_ptr)->second);
+                                                            (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vc((yyvsp[(4) - (6)].predicate), lhs_index, *(yyvsp[(5) - (6)].symbol_ptr), (yyvsp[(1) - (6)].rete_node_ptr)->first)), (yyvsp[(1) - (6)].rete_node_ptr)->second);
                                                             delete (yyvsp[(1) - (6)].rete_node_ptr);
                                                             delete (yyvsp[(3) - (6)].sval);
                                                             delete (yyvsp[(5) - (6)].symbol_ptr); }
@@ -1659,12 +1658,12 @@ yyreduce:
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 174 "rules.y"
+#line 173 "rules.y"
     { auto lhs_index = find_index((yyvsp[(1) - (6)].rete_node_ptr)->second, *(yyvsp[(3) - (6)].sval));
                                                      auto rhs_index = find_index((yyvsp[(1) - (6)].rete_node_ptr)->second, *(yyvsp[(5) - (6)].sval));
                                                      if(lhs_index.second > 2 || rhs_index.second > 2)
                                                        rete_error(agent, "Unbound variable tested by predicate.");
-                                                     (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_predicate_vv((yyvsp[(4) - (6)].predicate), lhs_index, rhs_index, (yyvsp[(1) - (6)].rete_node_ptr)->first)), (yyvsp[(1) - (6)].rete_node_ptr)->second);
+                                                     (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vv((yyvsp[(4) - (6)].predicate), lhs_index, rhs_index, (yyvsp[(1) - (6)].rete_node_ptr)->first)), (yyvsp[(1) - (6)].rete_node_ptr)->second);
                                                      delete (yyvsp[(1) - (6)].rete_node_ptr);
                                                      delete (yyvsp[(3) - (6)].sval);
                                                      delete (yyvsp[(5) - (6)].sval); }
@@ -1673,133 +1672,133 @@ yyreduce:
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 182 "rules.y"
+#line 181 "rules.y"
     { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
     break;
 
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 185 "rules.y"
+#line 184 "rules.y"
     { (yyval.rete_node_ptr) = (yyvsp[(2) - (3)].rete_node_ptr); }
     break;
 
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 188 "rules.y"
+#line 187 "rules.y"
     { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 189 "rules.y"
+#line 188 "rules.y"
     { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
     break;
 
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 191 "rules.y"
-    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_filter(WME(make_shared<Symbol_Variable>(Symbol_Variable::First), *(yyvsp[(4) - (6)].symbol_ptr), *(yyvsp[(5) - (6)].symbol_ptr)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), "", ""))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].symbol_ptr); delete (yyvsp[(5) - (6)].symbol_ptr); }
+#line 190 "rules.y"
+    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *(yyvsp[(4) - (6)].symbol_ptr), *(yyvsp[(5) - (6)].symbol_ptr)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), "", ""))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].symbol_ptr); delete (yyvsp[(5) - (6)].symbol_ptr); }
     break;
 
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 192 "rules.y"
-    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_filter(WME(make_shared<Symbol_Variable>(Symbol_Variable::First), *(yyvsp[(4) - (6)].symbol_ptr), make_shared<Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Symbol_Variable::First : Symbol_Variable::Third)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), "", *(yyvsp[(5) - (6)].sval)))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].symbol_ptr); delete (yyvsp[(5) - (6)].sval); }
+#line 191 "rules.y"
+    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *(yyvsp[(4) - (6)].symbol_ptr), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Third)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), "", *(yyvsp[(5) - (6)].sval)))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].symbol_ptr); delete (yyvsp[(5) - (6)].sval); }
     break;
 
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 193 "rules.y"
-    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_filter(WME(make_shared<Symbol_Variable>(Symbol_Variable::First), make_shared<Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(4) - (6)].sval) ? Symbol_Variable::First : Symbol_Variable::Second), *(yyvsp[(5) - (6)].symbol_ptr)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), *(yyvsp[(4) - (6)].sval), ""))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].sval); delete (yyvsp[(5) - (6)].symbol_ptr); }
+#line 192 "rules.y"
+    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(4) - (6)].sval) ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), *(yyvsp[(5) - (6)].symbol_ptr)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), *(yyvsp[(4) - (6)].sval), ""))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].sval); delete (yyvsp[(5) - (6)].symbol_ptr); }
     break;
 
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 194 "rules.y"
-    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_filter(WME(make_shared<Symbol_Variable>(Symbol_Variable::First), make_shared<Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(4) - (6)].sval) ? Symbol_Variable::First : Symbol_Variable::Second), make_shared<Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Symbol_Variable::First : *(yyvsp[(4) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Symbol_Variable::Second : Symbol_Variable::Third)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), *(yyvsp[(4) - (6)].sval), *(yyvsp[(5) - (6)].sval)))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].sval); delete (yyvsp[(5) - (6)].sval); }
+#line 193 "rules.y"
+    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(4) - (6)].sval) ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Rete::Symbol_Variable::First : *(yyvsp[(4) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Rete::Symbol_Variable::Second : Rete::Symbol_Variable::Third)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), *(yyvsp[(4) - (6)].sval), *(yyvsp[(5) - (6)].sval)))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].sval); delete (yyvsp[(5) - (6)].sval); }
     break;
 
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 197 "rules.y"
-    { (yyval.symbol_ptr) = new Symbol_Ptr_C(make_shared<Symbol_Constant_Float>((yyvsp[(1) - (1)].fval))); }
+#line 196 "rules.y"
+    { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Float>((yyvsp[(1) - (1)].fval))); }
     break;
 
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 198 "rules.y"
-    { (yyval.symbol_ptr) = new Symbol_Ptr_C(make_shared<Symbol_Constant_Int>((yyvsp[(1) - (1)].ival))); }
+#line 197 "rules.y"
+    { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Int>((yyvsp[(1) - (1)].ival))); }
     break;
 
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 199 "rules.y"
-    { (yyval.symbol_ptr) = new Symbol_Ptr_C(make_shared<Symbol_Constant_String>(*(yyvsp[(1) - (1)].sval))); delete (yyvsp[(1) - (1)].sval); }
+#line 198 "rules.y"
+    { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_String>(*(yyvsp[(1) - (1)].sval))); delete (yyvsp[(1) - (1)].sval); }
     break;
 
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 201 "rules.y"
+#line 200 "rules.y"
     { (yyval.sval) = (yyvsp[(1) - (1)].sval); }
     break;
 
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 202 "rules.y"
+#line 201 "rules.y"
     { (yyval.sval) = (yyvsp[(1) - (1)].sval); }
     break;
 
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 205 "rules.y"
+#line 204 "rules.y"
     { (yyval.sval) = (yyvsp[(2) - (3)].sval); }
     break;
 
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 208 "rules.y"
+#line 207 "rules.y"
     { (yyval.sval) = (yyvsp[(1) - (2)].sval); *(yyval.sval) += (yyvsp[(2) - (2)].cval); }
     break;
 
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 209 "rules.y"
+#line 208 "rules.y"
     { (yyval.sval) = (yyvsp[(1) - (2)].sval); *(yyval.sval) += *(yyvsp[(2) - (2)].sval); delete (yyvsp[(2) - (2)].sval); }
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 210 "rules.y"
+#line 209 "rules.y"
     { (yyval.sval) = new string; *(yyval.sval) += (yyvsp[(1) - (1)].cval); }
     break;
 
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 211 "rules.y"
+#line 210 "rules.y"
     { (yyval.sval) = (yyvsp[(1) - (1)].sval); }
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 1803 "rules.tab.cpp"
+#line 1802 "rules.tab.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2037,17 +2036,17 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 214 "rules.y"
+#line 213 "rules.y"
 
 
 extern size_t g_line_number;
 
-static void rete_error(Agent &, const char *s) {
+static void rete_error(Rete::Agent &, const char *s) {
   cout << "Parse error, line " << g_line_number << ": " << s << endl;
   exit(-1);
 }
 
-void rete_parse_file(Agent &agent, const string &filename) {
+void rete_parse_file(Rete::Agent &agent, const string &filename) {
   FILE * file = fopen(filename.c_str(), "r");
   if(!file)
     abort();

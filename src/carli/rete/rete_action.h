@@ -1,6 +1,7 @@
 #ifndef RETE_ACTION_H
 #define RETE_ACTION_H
 
+#include "agenda.h"
 #include "rete_node.h"
 
 namespace Rete {
@@ -14,10 +15,30 @@ namespace Rete {
   public:
     typedef std::function<void (const Rete_Action &rete_action, const WME_Token &wme_token)> Action;
 
-    Rete_Action(const Action &action_ = [](const Rete_Action &, const WME_Token &){},
+    Rete_Action(
+#ifdef USE_AGENDA
+                Agenda &actions_,
+                Agenda &retractions_,
+#else
+                Agenda &,
+                Agenda &,
+#endif
+                const Action &action_ = [](const Rete_Action &, const WME_Token &){},
                 const Action &retraction_ = [](const Rete_Action &, const WME_Token &){})
-      : action(action_), retraction(retraction_)
+      : action(action_),
+      retraction(retraction_)
+#ifdef USE_AGENDA
+      ,
+      actions(actions_),
+      retractions(retractions_)
+#endif
     {
+    }
+
+    ~Rete_Action() {
+#ifdef USE_AGENDA
+      actions.remove(this);
+#endif
     }
 
     Rete_Node_Ptr_C parent() const {return input.lock();}
@@ -29,8 +50,7 @@ namespace Rete {
 #endif
                                                                                            = Rete_Node_Ptr()) {
       assert(!output);
-      for(auto &wme_token : input_tokens)
-        retraction(*this, *wme_token);
+      detach();
       input.lock()->destroy(filters, shared());
     }
 
@@ -43,7 +63,11 @@ namespace Rete {
 
       input_tokens.push_back(wme_token);
 
+#ifdef USE_AGENDA
+      actions.insert(this, [this,&wme_token](){action(*this, *wme_token);});
+#else
       action(*this, *wme_token);
+#endif
     }
 
     void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
@@ -58,7 +82,11 @@ namespace Rete {
       // TODO: change from the 'if' to the 'assert', ensuring that we're not wasting time on non-existent removals
       //assert(found != input_tokens.end());
       {
+#ifdef USE_AGENDA
+        retractions.insert(this, [this,&wme_token](){retraction(*this, *wme_token);});
+#else
         retraction(*this, *wme_token);
+#endif
 
         input_tokens.erase(found);
       }
@@ -85,11 +113,48 @@ namespace Rete {
       return nullptr;
     }
 
+    void blink() {
+      detach();
+      reattach();
+    }
+
+    void set_action(const Action &action_) {
+      action = action_;
+    }
+
+    void set_retraction(const Action &retraction_) {
+      retraction = retraction_;
+    }
+
   private:
+    void detach() {
+      for(auto &wme_token : input_tokens) {
+#ifdef USE_AGENDA
+        retractions.insert(this, [this,&wme_token](){retraction(*this, *wme_token);});
+#else
+        retraction(*this, *wme_token);
+#endif
+      }
+    }
+
+    void reattach() {
+      for(auto &wme_token : input_tokens) {
+#ifdef USE_AGENDA
+        actions.insert(this, [this,&wme_token](){action(*this, *wme_token);});
+#else
+        action(*this, *wme_token);
+#endif
+      }
+    }
+
     std::weak_ptr<Rete_Node> input;
     std::list<WME_Token_Ptr_C> input_tokens;
     Action action;
     Action retraction;
+#ifdef USE_AGENDA
+    Agenda &actions;
+    Agenda &retractions;
+#endif
   };
 
   inline void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out) {

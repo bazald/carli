@@ -9,7 +9,6 @@
 #define YYDEBUG 1
 
 using namespace std;
-using namespace Rete;
 
 int rete_lex();
 int rete_parse();
@@ -32,21 +31,21 @@ static vector<array<string, 3>> Variables(const array<string, 3> &variable) {
   return rv;
 }
 static pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>> *
-Rete_Node_Ptr_and_Variables(const Rete_Node_Ptr &rete_node, const vector<array<string, 3>> &variables) {
+Rete_Node_Ptr_and_Variables(const Rete::Rete_Node_Ptr &rete_node, const vector<array<string, 3>> &variables) {
   return new pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>(rete_node, variables);
 }
 
-static WME_Vector_Index find_index(const std::vector<std::array<std::string, 3>> &variables, const std::string &variable) {
+static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string, 3>> &variables, const std::string &variable) {
   for(size_t i = 0; i != variables.size(); ++i) {
     for(uint8_t ii = 0; ii != 3; ++ii) {
       if(variables[i][ii] == variable)
-        return WME_Vector_Index(i, ii);
+        return Rete::WME_Token_Index(i, ii);
     }
   }
-  return WME_Vector_Index(size_t(-1), uint8_t(-1));
+  return Rete::WME_Token_Index(size_t(-1), uint8_t(-1));
 }
 
-static void rete_error(Agent &agent, const char *s);
+static void rete_error(Rete::Agent &agent, const char *s);
 
 %}
 
@@ -72,7 +71,7 @@ static void rete_error(Agent &agent, const char *s);
 %type <symbol_ptr> symbol_constant
 %type <sval> string_or_literal literal literal_parts
 
-%parse-param {Agent &agent}
+%parse-param {Rete::Agent &agent}
 
 %%
 
@@ -82,9 +81,9 @@ rules:
   ;
 rule:
   STRING '{' final_conditions '}' { string name = *$1;
-                                    auto node = agent.make_action_retraction([name](const Rete_Action &, const WME_Vector &wme_vector) {
+                                    auto node = agent.make_action_retraction([name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
                                                                                cout << wme_vector << "->" << name << endl;
-                                                                             }, [name](const Rete_Action &, const WME_Vector &wme_vector) {
+                                                                             }, [name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
                                                                                   cout << wme_vector << "<-" << name << endl;
                                                                                 }, $3->first);
                                     agent.source_rule(name, node);
@@ -93,9 +92,9 @@ rule:
   ;
 final_conditions:
   conditions { $$ = $1; }
-  | '+' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_existential($2->first)), Variables()); delete $2; }
-  | '-' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_negation($2->first)), Variables()); delete $2; }
-  | final_conditions '+' condition_type { WME_Bindings bindings;
+  | '+' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential($2->first)), Variables()); delete $2; }
+  | '-' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation($2->first)), Variables()); delete $2; }
+  | final_conditions '+' condition_type { Rete::WME_Bindings bindings;
                                           unordered_set<string> joined;
                                           for(size_t i = 0; i != $1->second.size(); ++i) {
                                             for(uint8_t ii = 0; ii != 3; ++ii) {
@@ -103,7 +102,7 @@ final_conditions:
                                                 for(size_t j = 0; j != $3->second.size(); ++j) {
                                                   for(uint8_t jj = 0; jj != 3; ++jj) {
                                                     if($1->second[i][ii] == $3->second[j][jj]) {
-                                                      bindings.insert(WME_Binding(WME_Vector_Index(i, ii), WME_Vector_Index(j, jj)));
+                                                      bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
                                                       joined.insert($1->second[i][ii]);
                                                       goto DONE_EXISTENTIAL_JOINING;
                                                     }
@@ -114,10 +113,10 @@ final_conditions:
                                                 ;
                                             }
                                           }
-                                          $$ = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_existential_join(bindings, $1->first, $3->first)), $1->second);
+                                          $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(bindings, $1->first, $3->first)), $1->second);
                                           delete $1;
                                           delete $3; }
-  | final_conditions '-' condition_type { WME_Bindings bindings;
+  | final_conditions '-' condition_type { Rete::WME_Bindings bindings;
                                           unordered_set<string> joined;
                                           for(size_t i = 0; i != $1->second.size(); ++i) {
                                             for(uint8_t ii = 0; ii != 3; ++ii) {
@@ -125,7 +124,7 @@ final_conditions:
                                                 for(size_t j = 0; j != $3->second.size(); ++j) {
                                                   for(uint8_t jj = 0; jj != 3; ++jj) {
                                                     if($1->second[i][ii] == $3->second[j][jj]) {
-                                                      bindings.insert(WME_Binding(WME_Vector_Index(i, ii), WME_Vector_Index(j, jj)));
+                                                      bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
                                                       joined.insert($1->second[i][ii]);
                                                       goto DONE_NEGATION_JOINING;
                                                     }
@@ -136,11 +135,11 @@ final_conditions:
                                                 ;
                                             }
                                           }
-                                          $$ = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_negation_join(bindings, $1->first, $3->first)), $1->second);
+                                          $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(bindings, $1->first, $3->first)), $1->second);
                                           delete $1;
                                           delete $3; }
 conditions:
-  conditions condition_type { WME_Bindings bindings;
+  conditions condition_type { Rete::WME_Bindings bindings;
                               unordered_set<string> joined;
                               for(size_t i = 0; i != $1->second.size(); ++i) {
                                 for(uint8_t ii = 0; ii != 3; ++ii) {
@@ -148,7 +147,7 @@ conditions:
                                     for(size_t j = 0; j != $2->second.size(); ++j) {
                                       for(uint8_t jj = 0; jj != 3; ++jj) {
                                         if($1->second[i][ii] == $2->second[j][jj]) {
-                                          bindings.insert(WME_Binding(WME_Vector_Index(i, ii), WME_Vector_Index(j, jj)));
+                                          bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
                                           joined.insert($1->second[i][ii]);
                                           goto DONE_JOINING;
                                         }
@@ -161,13 +160,13 @@ conditions:
                               }
                               vector<array<string, 3>> variables($1->second);
                               variables.insert(variables.end(), $2->second.begin(), $2->second.end());
-                              $$ = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_join(bindings, $1->first, $2->first)), variables);
+                              $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(bindings, $1->first, $2->first)), variables);
                               delete $1;
                               delete $2; }
   | conditions '(' VARIABLE PREDICATE symbol_constant ')' { auto lhs_index = find_index($1->second, *$3);
                                                             if(lhs_index.second > 2)
                                                               rete_error(agent, "Unbound variable tested by predicate.");
-                                                            $$ = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_predicate_vc($4, lhs_index, *$5, $1->first)), $1->second);
+                                                            $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vc($4, lhs_index, *$5, $1->first)), $1->second);
                                                             delete $1;
                                                             delete $3;
                                                             delete $5; }
@@ -175,7 +174,7 @@ conditions:
                                                      auto rhs_index = find_index($1->second, *$5);
                                                      if(lhs_index.second > 2 || rhs_index.second > 2)
                                                        rete_error(agent, "Unbound variable tested by predicate.");
-                                                     $$ = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_predicate_vv($4, lhs_index, rhs_index, $1->first)), $1->second);
+                                                     $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vv($4, lhs_index, rhs_index, $1->first)), $1->second);
                                                      delete $1;
                                                      delete $3;
                                                      delete $5; }
@@ -188,15 +187,15 @@ condition_type:
   condition { $$ = $1; }
   | condition_group { $$ = $1; }
 condition:
-  '(' VARIABLE '^' symbol_constant symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_filter(WME(make_shared<Symbol_Variable>(Symbol_Variable::First), *$4, *$5))), Variables(Variable(*$2, "", ""))); delete $2; delete $4; delete $5; }
-  | '(' VARIABLE '^' symbol_constant VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_filter(WME(make_shared<Symbol_Variable>(Symbol_Variable::First), *$4, make_shared<Symbol_Variable>(*$2 == *$5 ? Symbol_Variable::First : Symbol_Variable::Third)))), Variables(Variable(*$2, "", *$5))); delete $2; delete $4; delete $5; }
-  | '(' VARIABLE '^' VARIABLE symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_filter(WME(make_shared<Symbol_Variable>(Symbol_Variable::First), make_shared<Symbol_Variable>(*$2 == *$4 ? Symbol_Variable::First : Symbol_Variable::Second), *$5))), Variables(Variable(*$2, *$4, ""))); delete $2; delete $4; delete $5; }
-  | '(' VARIABLE '^' VARIABLE VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete_Node_Ptr(agent.make_filter(WME(make_shared<Symbol_Variable>(Symbol_Variable::First), make_shared<Symbol_Variable>(*$2 == *$4 ? Symbol_Variable::First : Symbol_Variable::Second), make_shared<Symbol_Variable>(*$2 == *$5 ? Symbol_Variable::First : *$4 == *$5 ? Symbol_Variable::Second : Symbol_Variable::Third)))), Variables(Variable(*$2, *$4, *$5))); delete $2; delete $4; delete $5; }
+  '(' VARIABLE '^' symbol_constant symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *$4, *$5))), Variables(Variable(*$2, "", ""))); delete $2; delete $4; delete $5; }
+  | '(' VARIABLE '^' symbol_constant VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *$4, make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Third)))), Variables(Variable(*$2, "", *$5))); delete $2; delete $4; delete $5; }
+  | '(' VARIABLE '^' VARIABLE symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), *$5))), Variables(Variable(*$2, *$4, ""))); delete $2; delete $4; delete $5; }
+  | '(' VARIABLE '^' VARIABLE VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : *$4 == *$5 ? Rete::Symbol_Variable::Second : Rete::Symbol_Variable::Third)))), Variables(Variable(*$2, *$4, *$5))); delete $2; delete $4; delete $5; }
   ;
 symbol_constant:
-  FLOAT { $$ = new Symbol_Ptr_C(make_shared<Symbol_Constant_Float>($1)); }
-  | INT { $$ = new Symbol_Ptr_C(make_shared<Symbol_Constant_Int>($1)); }
-  | string_or_literal { $$ = new Symbol_Ptr_C(make_shared<Symbol_Constant_String>(*$1)); delete $1; }
+  FLOAT { $$ = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Float>($1)); }
+  | INT { $$ = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Int>($1)); }
+  | string_or_literal { $$ = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_String>(*$1)); delete $1; }
 string_or_literal:
   STRING { $$ = $1; }
   | literal { $$ = $1; }
@@ -215,12 +214,12 @@ literal_parts:
 
 extern size_t g_line_number;
 
-static void rete_error(Agent &, const char *s) {
+static void rete_error(Rete::Agent &, const char *s) {
   cout << "Parse error, line " << g_line_number << ": " << s << endl;
   exit(-1);
 }
 
-void rete_parse_file(Agent &agent, const string &filename) {
+void rete_parse_file(Rete::Agent &agent, const string &filename) {
   FILE * file = fopen(filename.c_str(), "r");
   if(!file)
     abort();

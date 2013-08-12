@@ -3,7 +3,7 @@
 //#define WHITESON_ADAPTIVE_TILE
 
 #ifndef NDEBUG
-//#define DEBUG_OUTPUT
+#define DEBUG_OUTPUT
 #endif
 
 #include "environments/blocks_world.h"
@@ -113,6 +113,11 @@ int main2(int argc, char **argv) {
   options.add(     std::make_shared<Option_Ranged<int>>("pseudoepisode-threshold", 0, true, std::numeric_limits<int>::max(), true, 20), "How any steps must separate updates for it to count as a pseudoepisode.");
   options.add(     std::make_shared<Option_Ranged<int>>("split-pseudoepisodes", 0, true, std::numeric_limits<int>::max(), true, 0), "Require 1 more pseudoepisode than this to allow refinement.");
   options.add(     std::make_shared<Option_Ranged<int>>("split-update-count", 0, true, std::numeric_limits<int>::max(), true, 0), "Require 1 more update than this to allow refinement.");
+  options.add_line("\n  CMAC Options:");
+  options.add(     std::make_shared<Option_Ranged<bool>>("cmac", false, true, true, true, false), "Implement a CMAC for the domain instead.");
+  options.add(     std::make_shared<Option_Ranged<int>>("cmac-tilings", 1, true, std::numeric_limits<int>::max(), true, 10), "The number of tile codings in the CMAC.");
+  options.add(     std::make_shared<Option_Ranged<int>>("cmac-resolution", 1, true, std::numeric_limits<int>::max(), true, 16), "The number of tile codings in the CMAC.");
+  options.add(     std::make_shared<Option_Ranged<double>>("cmac-offset", 0.0, true, 1.0, false, 0.5), "How far back to offset the first coding.");
   options.add_line("\n  Unusual Options:");
   options.add(     std::make_shared<Option_Ranged<int>>("contribute-update-count", 0, true, std::numeric_limits<int>::max(), true, 0), "Require 1 more update than this to count toward means and variances.");
   options.add(     std::make_shared<Option_Ranged<bool>>("dynamic-midpoint", false, true, true, true, false), "Dynamically modify midpoint values for features to better balance refinements.");

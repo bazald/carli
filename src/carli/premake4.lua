@@ -13,7 +13,22 @@ project "carli"
 --    end
 --  end
 
-  files { "**.h", "**.hpp", "**.cpp", "**.l", "**.y" }
+  if _OPTIONS["scu"] == "true" then
+    matches = os.matchfiles("**.cpp")
+    os.mkdir("obj")
+    local f = assert(io.open("obj/scu.cpp", "w"))
+    for i, filename in ipairs(matches) do
+      if filename ~= "git.cpp" and filename ~= "obj/scu.cpp" then
+        f:write("#include \"../"..filename.."\"\n")
+      end
+    end
+    f:close()
+
+    files { "git.cpp", "obj/scu.cpp" }
+  else
+    files { "**.h", "**.hpp", "**.cpp", "**.l", "**.y" }
+    excludes { "obj/scu.cpp" }
+  end
 
   if os.get() == "windows" then
     prebuildcommands { [[git.bat]] }

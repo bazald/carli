@@ -10,6 +10,7 @@
 
 namespace Rete {
 
+  class Agenda;
   class Rete_Action;
   class Rete_Existential;
   class Rete_Filter;
@@ -36,9 +37,9 @@ namespace Rete {
 
   class Rete_Node : public std::enable_shared_from_this<Rete_Node>,
 #if __WORDSIZE == 64
-                                                                    public Zeni::Pool_Allocator<Rete_Join>
+                                                                    public Zeni::Pool_Allocator<Rete_Action>
 #else
-                                                                    public Zeni::Pool_Allocator<Rete_Filter>
+                                                                    public Zeni::Pool_Allocator<Rete_Action>
 #endif
   {
     Rete_Node(const Rete_Node &);

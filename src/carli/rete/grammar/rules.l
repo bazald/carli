@@ -15,7 +15,6 @@ struct Rule;
 #define YY_DECL int rete_lex()
 
 using namespace std;
-using namespace Rete;
 
 size_t g_line_number = 1u;
 %}
@@ -34,12 +33,12 @@ size_t g_line_number = 1u;
 [a-zA-Z0-9]+                              { rete_lval.sval = new string(rete_text); return STRING; }
 [a-zA-Z0-9]+[a-zA-Z0-9\-*]*[a-zA-Z0-9]+   { rete_lval.sval = new string(rete_text); return STRING; }
 [\^\(\)\{\}+-]                            { return rete_text[0]; }
-==                                        { rete_lval.predicate = Rete_Predicate::EQ; return PREDICATE; }
-!=                                        { rete_lval.predicate = Rete_Predicate::NEQ; return PREDICATE; }
->                                         { rete_lval.predicate = Rete_Predicate::GT; return PREDICATE; }
->=                                        { rete_lval.predicate = Rete_Predicate::GTE; return PREDICATE; }
-\<                                        { rete_lval.predicate = Rete_Predicate::LT; return PREDICATE; }
-\<=                                       { rete_lval.predicate = Rete_Predicate::LTE; return PREDICATE; }
+==                                        { rete_lval.predicate = Rete::Rete_Predicate::EQ; return PREDICATE; }
+!=                                        { rete_lval.predicate = Rete::Rete_Predicate::NEQ; return PREDICATE; }
+>                                         { rete_lval.predicate = Rete::Rete_Predicate::GT; return PREDICATE; }
+>=                                        { rete_lval.predicate = Rete::Rete_Predicate::GTE; return PREDICATE; }
+\<                                        { rete_lval.predicate = Rete::Rete_Predicate::LT; return PREDICATE; }
+\<=                                       { rete_lval.predicate = Rete::Rete_Predicate::LTE; return PREDICATE; }
 \|                                        { BEGIN(READ_STRING); return '|'; }
 <READ_STRING>\\\|                         { rete_lval.sval = new string("\\|"); return STRING_PART_S; }
 <READ_STRING>\\t                          { rete_lval.sval = new string("\\t"); return STRING_PART_S; }
