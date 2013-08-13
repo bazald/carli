@@ -21,7 +21,7 @@ namespace Rete {
       return m_wme;
     }
 
-    void destroy(std::list<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
+    void destroy(Filters &filters, const Rete_Node_Ptr &output) {
       erase_output(output);
       if(outputs.empty())
         filters.erase(std::find(filters.begin(), filters.end(), std::static_pointer_cast<Rete_Filter>(shared())));

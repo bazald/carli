@@ -7,6 +7,7 @@
 #include <cassert>
 #include <functional>
 #include <list>
+#include <unordered_set>
 
 namespace Rete {
 
@@ -52,10 +53,13 @@ namespace Rete {
     friend void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out);
 
   public:
+    typedef std::list<Rete_Filter_Ptr> Filters;
+    typedef std::list<Rete_Node_Ptr> Outputs;
+
     Rete_Node() {}
     virtual ~Rete_Node() {}
 
-    virtual void destroy(std::list<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) = 0;
+    virtual void destroy(Filters &filters, const Rete_Node_Ptr &output) = 0;
 
     std::shared_ptr<const Rete_Node> shared() const {
       return shared_from_this();
@@ -64,7 +68,7 @@ namespace Rete {
       return shared_from_this();
     }
 
-    const std::list<Rete_Node_Ptr> & get_outputs() const {
+    const Outputs & get_outputs() const {
       return outputs;
     }
 
@@ -76,7 +80,13 @@ namespace Rete {
     virtual bool operator==(const Rete_Node &rhs) const = 0;
 
   protected:
+    void insert_output(const Rete_Node_Ptr &output) {
+//      outputs.insert(output);
+      outputs.push_back(output);
+    }
+
     void erase_output(const Rete_Node_Ptr &output) {
+//      outputs.erase(output);
       outputs.erase(std::find(outputs.begin(), outputs.end(), output));
     }
 
@@ -98,7 +108,7 @@ namespace Rete {
       return std::find_if(tokens.begin(), tokens.end(), [&token](const typename CONTAINER::value_type &tok){return tok.first == token;});
     }
 
-    std::list<Rete_Node_Ptr> outputs;
+    Outputs outputs;
   };
 
 }

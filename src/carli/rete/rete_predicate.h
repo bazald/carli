@@ -28,7 +28,7 @@ namespace Rete {
     {
     }
 
-    void destroy(std::list<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
+    void destroy(Filters &filters, const Rete_Node_Ptr &output) {
       erase_output(output);
       if(outputs.empty())
         input.lock()->destroy(filters, shared());
@@ -142,7 +142,7 @@ namespace Rete {
     assert(predicate);
     predicate->input = out;
 
-    out->outputs.push_back(predicate);
+    out->insert_output(predicate);
     out->pass_tokens(predicate);
   }
 

@@ -44,11 +44,11 @@ namespace Rete {
     Rete_Node_Ptr_C parent() const {return input.lock();}
     Rete_Node_Ptr parent() {return input.lock();}
 
-    void destroy(std::list<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &
+    void destroy(Filters &filters, const Rete_Node_Ptr &
 #ifndef NDEBUG
-                                                                                    output
+                                                        output
 #endif
-                                                                                           = Rete_Node_Ptr()) {
+                                                               = Rete_Node_Ptr()) {
       assert(!output);
       detach();
       input.lock()->destroy(filters, shared());
@@ -161,7 +161,7 @@ namespace Rete {
     assert(action && !action->input.lock());
     action->input = out;
 
-    out->outputs.push_back(action);
+    out->insert_output(action);
     out->pass_tokens(action);
   }
 

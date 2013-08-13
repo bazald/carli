@@ -14,7 +14,7 @@ namespace Rete {
   public:
     Rete_Join(WME_Bindings bindings_) : bindings(bindings_) {}
 
-    void destroy(std::list<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
+    void destroy(Filters &filters, const Rete_Node_Ptr &output) {
       erase_output(output);
       if(outputs.empty()) {
         auto i0 = input0.lock();
@@ -136,8 +136,8 @@ namespace Rete {
     join->input0 = out0;
     join->input1 = out1;
 
-    out0->outputs.push_back(join);
-    out1->outputs.push_back(join);
+    out0->insert_output(join);
+    out1->insert_output(join);
     out0->pass_tokens(join);
     out1->pass_tokens(join);
   }

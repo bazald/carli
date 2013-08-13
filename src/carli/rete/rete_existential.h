@@ -14,7 +14,7 @@ namespace Rete {
   public:
     Rete_Existential() : output_token(std::make_shared<WME_Token>()) {}
 
-    void destroy(std::list<Rete_Filter_Ptr> &filters, const Rete_Node_Ptr &output) {
+    void destroy(Filters &filters, const Rete_Node_Ptr &output) {
       erase_output(output);
       if(outputs.empty())
         input.lock()->destroy(filters, shared());
@@ -82,7 +82,7 @@ namespace Rete {
     assert(existential);
     existential->input = out;
 
-    out->outputs.push_back(existential);
+    out->insert_output(existential);
     out->pass_tokens(existential);
   }
 
