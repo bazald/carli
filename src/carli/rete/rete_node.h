@@ -37,9 +37,9 @@ namespace Rete {
 
   class Rete_Node : public std::enable_shared_from_this<Rete_Node>,
 #if __WORDSIZE == 64
-                                                                    public Zeni::Pool_Allocator<Rete_Action>
+                                                                    public Zeni::Pool_Allocator<std::array<char, 192>>
 #else
-                                                                    public Zeni::Pool_Allocator<Rete_Action>
+                                                                    public Zeni::Pool_Allocator<std::array<char, 192>>
 #endif
   {
     Rete_Node(const Rete_Node &);

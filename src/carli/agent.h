@@ -77,28 +77,31 @@ public:
     tracked_ptr<feature_type> feature;
   };
 
-  void specialize(const std::shared_ptr<typename action_type::derived_type> &action, const std::shared_ptr<RL> &general) {
-    if(general->fringe_values && split_test(general->q_value, general->depth)) {
-      /// TODO: choose intelligently again
-      auto gen = general->fringe_values->begin();
-      for(auto count = random.rand_lt(general->fringe_values->size()); count; --count)
-        ++gen;
-      auto chosen = *gen;
+  bool specialize(const std::shared_ptr<typename action_type::derived_type> &action, const std::shared_ptr<RL> &general) {
+    if(!general->fringe_values || !split_test(general->q_value, general->depth))
+      return false;
 
-      for(auto &fringe : *general->fringe_values) {
-        if(fringe->feature->depth < chosen->feature->depth) {
-          chosen = fringe;
-        }
+    /// TODO: choose intelligently again
+    auto gen = general->fringe_values->begin();
+    for(auto count = random.rand_lt(general->fringe_values->size()); count; --count)
+      ++gen;
+    auto chosen = *gen;
+
+    for(auto &fringe : *general->fringe_values) {
+      if(fringe->feature->depth < chosen->feature->depth) {
+        chosen = fringe;
       }
+    }
 
 //      std::cerr << "Refining : " << gen->first << std::endl;
 
-      generate_fringe(action, general, chosen->feature->axis);
+    generate_fringe(action, general, chosen->feature->axis);
 
-      general->action.lock()->set_action([this,&action,general](const Rete::Rete_Action &, const Rete::WME_Token &) {
-        this->m_next_q_values[action].push_back(general->q_value);
-      });
-    }
+    general->action.lock()->set_action([this,&action,general](const Rete::Rete_Action &, const Rete::WME_Token &) {
+      this->m_next_q_values[action].push_back(general->q_value);
+    });
+
+    return true;
   }
 
   void generate_fringe(const std::shared_ptr<typename action_type::derived_type> &action, const std::shared_ptr<RL> &general, const Rete::WME_Token_Index specialization) {
@@ -131,8 +134,8 @@ public:
       assert(leaf->depth <= m_split_max);
       if(leaf->depth < m_split_max) {
         leaf->action.lock()->set_action([this,&action,leaf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->specialize(action, leaf);
-          this->m_next_q_values[action].push_back(leaf->q_value);
+          if(!this->specialize(action, leaf))
+            this->m_next_q_values[action].push_back(leaf->q_value);
         });
 
 //#ifdef DEBUG_OUTPUT
@@ -148,7 +151,6 @@ public:
           rl->feature = refined_feature;
           auto predicate = make_predicate_vc(refined_feature->predicate(), leaf->feature->axis, refined_feature->symbol_constant(), leaf->action.lock()->parent());
           rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-            this->specialize(action, rl);
             this->m_next_q_values[action].push_back(rl->q_value);
           }, predicate);
 
@@ -162,7 +164,6 @@ public:
           rl->feature = fringe->feature->clone();
           auto predicate = make_predicate_vc(rl->feature->predicate(), fringe->feature->axis, rl->feature->symbol_constant(), leaf->action.lock()->parent());
           rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-            this->specialize(action, rl);
             this->m_next_q_values[action].push_back(rl->q_value);
           }, predicate);
 

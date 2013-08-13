@@ -304,8 +304,8 @@ namespace Puddle_World {
         ++this->m_q_value_count;
         rl->fringe_values = new RL::Fringe_Values;
         rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->specialize(action, rl);
-          this->m_next_q_values[action].push_back(rl->q_value);
+          if(!this->specialize(action, rl))
+            this->m_next_q_values[action].push_back(rl->q_value);
         }, xy);
 
         {
