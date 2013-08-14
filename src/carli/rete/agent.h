@@ -176,6 +176,11 @@ namespace Rete {
       return nodes.size();
     }
 
+  protected:
+    void destroy() {
+      filters.clear();
+    }
+
   private:
     void finish_agenda() {
       for(;;) {

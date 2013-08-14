@@ -55,16 +55,20 @@ public:
   public:
     typedef std::list<std::shared_ptr<RL>> Fringe_Values;
 
-    RL(const size_t &depth_)
-     : depth(depth_)
+    RL(Agent<FEATURE, ACTION> &agent_, const size_t &depth_)
+     : agent(agent_),
+     depth(depth_)
     {
     }
 
     ~RL() {
+      agent.purge_q_value(q_value);
       q_value.delete_and_zero();
       fringe_values.delete_and_zero();
       feature.delete_and_zero();
     }
+
+    Agent<FEATURE, ACTION> &agent;
 
     size_t depth;
     tracked_ptr<Q_Value> q_value;
@@ -95,16 +99,19 @@ public:
 
 //      std::cerr << "Refining : " << gen->first << std::endl;
 
-    generate_fringe(action, general, chosen->feature->axis);
+    expand_fringe(action, general, chosen->feature->axis);
 
-    general->action.lock()->set_action([this,&action,general](const Rete::Rete_Action &, const Rete::WME_Token &) {
+    auto general_action = general->action.lock();
+    general_action->detach();
+    general_action->set_action([this,&action,general](const Rete::Rete_Action &, const Rete::WME_Token &) {
       this->m_next_q_values[action].push_back(general->q_value);
     });
+    general_action->reattach();
 
     return true;
   }
 
-  void generate_fringe(const std::shared_ptr<typename action_type::derived_type> &action, const std::shared_ptr<RL> &general, const Rete::WME_Token_Index specialization) {
+  void expand_fringe(const std::shared_ptr<typename action_type::derived_type> &action, const std::shared_ptr<RL> &general, const Rete::WME_Token_Index specialization) {
     assert(general->fringe_values);
 
     typename RL::Fringe_Values leaves;
@@ -118,16 +125,9 @@ public:
     }
 
     for(auto &leaf : leaves) {
-      leaf->q_value->eligible.erase();
-      auto found = std::find(m_current_q_value.begin(), m_current_q_value.end(), leaf->q_value);
-      if(found != m_current_q_value.end())
-        m_current_q_value.erase(found);
-      found = std::find(m_next_q_values[action].begin(), m_next_q_values[action].end(), leaf->q_value);
-      if(found != m_next_q_values[action].end())
-        m_next_q_values[action].erase(found);
-//#ifdef DEBUG_OUTPUT
-//      std::cerr << " delete  : " << leaf.q_value << std::endl;
-//#endif
+      auto leaf_action = leaf->action.lock();
+      leaf_action->detach();
+
       leaf->q_value.delete_and_zero();
       leaf->q_value = new Q_Value(0.0f, Q_Value::Type::UNSPLIT, leaf->depth);
       ++m_q_value_count;
@@ -138,20 +138,18 @@ public:
             this->m_next_q_values[action].push_back(leaf->q_value);
         });
 
-//#ifdef DEBUG_OUTPUT
-//        std::cerr << " create  : " << leaf.q_value << std::endl;
-//#endif
-
         leaf->fringe_values = new typename RL::Fringe_Values;
 
         auto refined = leaf->feature->refined();
         for(auto &refined_feature : refined) {
-          auto rl = std::make_shared<RL>(leaf->depth + 1);
+          auto rl = std::make_shared<RL>(*this, leaf->depth + 1);
           rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
           rl->feature = refined_feature;
           auto predicate = make_predicate_vc(refined_feature->predicate(), leaf->feature->axis, refined_feature->symbol_constant(), leaf->action.lock()->parent());
-          rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          rl->action = make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->m_next_q_values[action].push_back(rl->q_value);
+          }, [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            this->purge_q_value_next(action, rl->q_value);
           }, predicate);
 
           leaf->fringe_values->push_back(rl);
@@ -159,12 +157,14 @@ public:
         leaf->feature.delete_and_zero();
 
         for(auto &fringe : *general->fringe_values) {
-          auto rl = std::make_shared<RL>(leaf->depth + 1);
+          auto rl = std::make_shared<RL>(*this, leaf->depth + 1);
           rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
           rl->feature = fringe->feature->clone();
           auto predicate = make_predicate_vc(rl->feature->predicate(), fringe->feature->axis, rl->feature->symbol_constant(), leaf->action.lock()->parent());
-          rl->action = make_action([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          rl->action = make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->m_next_q_values[action].push_back(rl->q_value);
+          }, [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            this->purge_q_value_next(action, rl->q_value);
           }, predicate);
 
           leaf->fringe_values->push_back(rl);
@@ -174,19 +174,11 @@ public:
           leaf->fringe_values.delete_and_zero();
       }
 
-      leaf->action.lock()->blink();
+      leaf_action->reattach();
     }
 
-    for(auto &fringe : *general->fringe_values) {
-      auto found = std::find(m_current_q_value.begin(), m_current_q_value.end(), fringe->q_value);
-      if(found != m_current_q_value.end())
-        m_current_q_value.erase(found);
-      found = std::find(m_next_q_values[action].begin(), m_next_q_values[action].end(), fringe->q_value);
-      if(found != m_next_q_values[action].end())
-        m_next_q_values[action].erase(found);
-      fringe->q_value.delete_and_zero();
+    for(auto &fringe : *general->fringe_values)
       excise_rule(fringe->action.lock());
-    }
     general->fringe_values.delete_and_zero();
   }
 
@@ -250,12 +242,7 @@ public:
   }
 
   virtual ~Agent() {
-//    for(typename value_function_type::iterator vt = m_value_function.begin(), vend = m_value_function.end(); vt != vend; ) {
-//      auto ptr = vt->first;
-//      vt->second->destroy(vt->second);
-//      m_value_function.erase(vt++);
-//      delete ptr;
-//    }
+    destroy();
   }
 
   bool is_null_q_values() const {return m_null_q_values;}
@@ -364,6 +351,24 @@ public:
     ++m_step_count;
 
     return reward;
+  }
+
+  void purge_q_value(const tracked_ptr<Q_Value> &q_value) {
+    auto found = std::find(m_current_q_value.begin(), m_current_q_value.end(), q_value);
+    if(found != m_current_q_value.end())
+      m_current_q_value.erase(found);
+//    for(auto &next : m_next_q_values) {
+//      found = std::find(next.second.begin(), next.second.end(), q_value);
+//      if(found != next.second.end())
+//        next.second.erase(found);
+//    }
+  }
+
+  void purge_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value) {
+    auto &q_values = m_next_q_values[action];
+    auto found = std::find(q_values.begin(), q_values.end(), q_value);
+    if(found != q_values.end())
+      q_values.erase(found);
   }
 
   void print(std::ostream &os) const {

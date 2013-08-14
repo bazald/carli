@@ -36,9 +36,7 @@ namespace Rete {
     }
 
     ~Rete_Action() {
-#ifdef USE_AGENDA
-      actions.remove(this);
-#endif
+      detach();
     }
 
     Rete_Node_Ptr_C parent() const {return input.lock();}
@@ -113,21 +111,10 @@ namespace Rete {
       return nullptr;
     }
 
-    void blink() {
-      detach();
-      reattach();
-    }
-
-    void set_action(const Action &action_) {
-      action = action_;
-    }
-
-    void set_retraction(const Action &retraction_) {
-      retraction = retraction_;
-    }
-
-  private:
     void detach() {
+#ifdef USE_AGENDA
+      actions.remove(this);
+#endif
       for(auto &wme_token : input_tokens) {
 #ifdef USE_AGENDA
         retractions.insert(this, [this,&wme_token](){retraction(*this, *wme_token);});
@@ -147,6 +134,15 @@ namespace Rete {
       }
     }
 
+    void set_action(const Action &action_) {
+      action = action_;
+    }
+
+    void set_retraction(const Action &retraction_) {
+      retraction = retraction_;
+    }
+
+  private:
     std::weak_ptr<Rete_Node> input;
     std::list<WME_Token_Ptr_C> input_tokens;
     Action action;

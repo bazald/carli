@@ -1,6 +1,7 @@
 //#define TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
 //#define ENABLE_WEIGHT
 //#define WHITESON_ADAPTIVE_TILE
+//#define USE_AGENDA
 
 #ifndef NDEBUG
 #define DEBUG_OUTPUT
@@ -117,7 +118,7 @@ int main2(int argc, char **argv) {
   options.add(     std::make_shared<Option_Ranged<bool>>("cmac", false, true, true, true, false), "Implement a CMAC for the domain instead.");
   options.add(     std::make_shared<Option_Ranged<int>>("cmac-tilings", 1, true, std::numeric_limits<int>::max(), true, 10), "The number of tile codings in the CMAC.");
   options.add(     std::make_shared<Option_Ranged<int>>("cmac-resolution", 1, true, std::numeric_limits<int>::max(), true, 16), "The number of tile codings in the CMAC.");
-  options.add(     std::make_shared<Option_Ranged<double>>("cmac-offset", 0.0, true, 1.0, false, 0.5), "How far back to offset the first coding.");
+  options.add(     std::make_shared<Option_Ranged<int>>("cmac-offset", 0, true, std::numeric_limits<int>::max(), true, 0), "The tiling that should be the base tiling.");
   options.add_line("\n  Unusual Options:");
   options.add(     std::make_shared<Option_Ranged<int>>("contribute-update-count", 0, true, std::numeric_limits<int>::max(), true, 0), "Require 1 more update than this to count toward means and variances.");
   options.add(     std::make_shared<Option_Ranged<bool>>("dynamic-midpoint", false, true, true, true, false), "Dynamically modify midpoint values for features to better balance refinements.");
