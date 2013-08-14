@@ -45,6 +45,8 @@ public:
   {
   }
 
+  virtual ~Option() {}
+
   std::string get_name() const {return name;}
   int get_num_args() const {return num_args;}
 

@@ -20,6 +20,8 @@ public:
   {
   }
 
+  virtual ~Environment() {}
+
   void init() {
     init_impl();
   }

@@ -39,7 +39,7 @@ solution "carli"
   end
 
   flags { "ExtraWarnings" }
-  buildoptions { "-Wextra", "-std=c++11", "-pedantic" }
+  buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
   include "src/carli"
 
   configuration "Debug"
@@ -67,13 +67,13 @@ solution "carli"
     buildoptions { "-Wno-unused-function" }
 
   if _ACTION == "gmake" then
-    configuration { "linux" }
-      linkoptions { "-Wl,-rpath,/home/bazald/Software/gperftools/lib",
-                    "-Wl,-rpath-link,/home/bazald/Software/gperftools/lib" }
-    configuration { "linux", "Debug" }
-      links { "tcmalloc" }
-    configuration { "linux", "Profiling" }
-      links { "tcmalloc_and_profiler" }
+--     configuration { "linux" }
+--       linkoptions { "-Wl,-rpath,/home/bazald/Software/gperftools/lib",
+--                     "-Wl,-rpath-link,/home/bazald/Software/gperftools/lib" }
+--     configuration { "linux", "Debug" }
+--      links { "tcmalloc" }
+--     configuration { "linux", "Profiling" }
+--       links { "tcmalloc_and_profiler" }
     if _OPTIONS["clang"] == "true" then
       configuration "linux"
         buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
