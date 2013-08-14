@@ -36,12 +36,7 @@ namespace Rete {
   typedef std::shared_ptr<Rete_Node> Rete_Node_Ptr;
   typedef std::shared_ptr<Rete_Predicate> Rete_Predicate_Ptr;
 
-  class Rete_Node : public std::enable_shared_from_this<Rete_Node>,
-#if __WORDSIZE == 64
-                                                                    public Zeni::Pool_Allocator<std::array<char, 192>>
-#else
-                                                                    public Zeni::Pool_Allocator<std::array<char, 192>>
-#endif
+  class Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<std::array<char, 192>>
   {
     Rete_Node(const Rete_Node &);
     Rete_Node & operator=(const Rete_Node &);

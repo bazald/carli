@@ -3,6 +3,7 @@
 
 #include "../utility/memory_pool.h"
 
+#include <array>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -32,12 +33,7 @@ namespace Rete {
   typedef std::shared_ptr<Symbol_Identifier> Symbol_Identifier_Ptr;
   typedef std::shared_ptr<Symbol_Variable> Symbol_Variable_Ptr;
 
-  class Symbol :
-#if __WORDSIZE == 64
-                 public Zeni::Pool_Allocator<Symbol_Constant_String>
-#else
-                 public Zeni::Pool_Allocator<Symbol_Constant_Float>
-#endif
+  class Symbol : public Zeni::Pool_Allocator<std::array<char, 32>>
   {
     Symbol(const Symbol &);
     Symbol & operator=(const Symbol &);
