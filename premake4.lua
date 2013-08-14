@@ -39,6 +39,7 @@ solution "carli"
   end
 
   flags { "ExtraWarnings" }
+  buildoptions { "-ffloat-store" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
   buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
   include "src/carli"
 
@@ -53,7 +54,6 @@ solution "carli"
   configuration "Release"
     defines { "NDEBUG" }
     flags { "Optimize" }
-    buildoptions { "-ffloat-store" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
 --    buildoptions { "-flto" }
 --    linkoptions { "-flto" }
 
