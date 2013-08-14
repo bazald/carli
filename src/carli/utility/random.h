@@ -86,9 +86,17 @@ namespace Zeni {
 
     /// Get a random integer in the range [0, rand_max()]
     int32_t rand() {
+#ifdef DEBUG_OUTPUT
+      static size_t count = 0u;
+#endif
       m_random_value = m_random_value * 1103515245 + 12345;
       int32_t rv = int32_t(static_cast<int32_t>(m_random_value / 65536) % (rand_max() + 1));
       log2("rand", m_random_value, rv);
+#ifdef DEBUG_OUTPUT
+      std::cerr << "rand(" << ++count << ") = " << rv << std::endl;
+//      if(count == 13)
+//        assert(false);
+#endif
       return rv;
     }
 
@@ -131,7 +139,7 @@ namespace Zeni {
       }
       else {
         double v1, v2, s;
-        do { 
+        do {
           v1 = 2.0 * frand_lte() - 1.0; // between -1.0 and 1.0
           v2 = 2.0 * frand_lte() - 1.0; // between -1.0 and 1.0
           s = v1 * v1 + v2 * v2;

@@ -88,7 +88,7 @@ public:
     auto chosen = *gen;
 
     for(auto &fringe : *general->fringe_values) {
-      if(fringe->feature->depth < chosen->feature->depth) {
+      if(*fringe->feature < *chosen->feature) {
         chosen = fringe;
       }
     }
@@ -474,6 +474,7 @@ protected:
     std::cerr << "  choose_greedy" << std::endl;
 #endif
 
+    int32_t count = 0;
     double value = double();
     action_ptrsc action;
     for(const auto &action_q : m_next_q_values) {
@@ -482,7 +483,10 @@ protected:
       if(!action || value_ > value) {
         action = action_q.first;
         value = value_;
+        count = 1;
       }
+      else if(value_ == value && random.rand_lt(++count) == 0)
+        action = action_q.first;
     }
 
     return action;
