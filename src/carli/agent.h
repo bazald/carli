@@ -128,6 +128,7 @@ public:
       auto leaf_action = leaf->action.lock();
       leaf_action->detach();
 
+      purge_q_value(leaf->q_value);
       leaf->q_value.delete_and_zero();
       leaf->q_value = new Q_Value(0.0f, Q_Value::Type::UNSPLIT, leaf->depth);
       ++m_q_value_count;
@@ -357,11 +358,6 @@ public:
     auto found = std::find(m_current_q_value.begin(), m_current_q_value.end(), q_value);
     if(found != m_current_q_value.end())
       m_current_q_value.erase(found);
-//    for(auto &next : m_next_q_values) {
-//      found = std::find(next.second.begin(), next.second.end(), q_value);
-//      if(found != next.second.end())
-//        next.second.erase(found);
-//    }
   }
 
   void purge_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value) {
