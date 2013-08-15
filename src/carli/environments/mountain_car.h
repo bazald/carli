@@ -174,13 +174,27 @@ namespace Mountain_Car {
   class Agent : public ::Agent<feature_type, action_type> {
   public:
     Agent(const shared_ptr<environment_type> &env)
-     : ::Agent<feature_type, action_type>(env),
-     m_min_x(std::make_shared<double>(-1.2)),
-     m_max_x(std::make_shared<double>(0.6)),
-     m_min_x_dot(std::make_shared<double>(-0.07)),
-     m_max_x_dot(std::make_shared<double>(0.07))
+     : ::Agent<feature_type, action_type>(env)
     {
-//      m_features_complete = false;
+      auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
+      auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
+      auto x_dot_attr = std::make_shared<Rete::Symbol_Constant_String>("x-dot");
+
+      Rete::WME_Bindings state_bindings;
+      state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
+      auto x = make_filter(Rete::WME(m_first_var, x_attr, m_third_var));
+      auto x_dot = make_filter(Rete::WME(m_first_var, x_dot_attr, m_third_var));
+      auto xxdot = make_join(state_bindings, x, x_dot);
+      const bool cmac = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value();
+      if(cmac)
+        generate_cmac(xxdot);
+      else
+        generate_rete(xxdot);
+
+      m_x_wme = std::make_shared<Rete::WME>(s_id, x_attr, m_x_value);
+      m_x_dot_wme = std::make_shared<Rete::WME>(s_id, x_dot_attr, m_x_dot_value);
+      insert_wme(m_x_wme);
+      insert_wme(m_x_dot_wme);
     }
 
 //    void print_policy(ostream &os, const size_t &granularity) {
@@ -218,40 +232,120 @@ namespace Mountain_Car {
 //      return generate_ucm_for_axes(trie, feature_type::Axis::X, feature_type::Axis::X_DOT);
 //    }
 
-    void generate_features() {
-//      auto env = dynamic_pointer_cast<const Environment>(get_env());
-//
-//      for(const action_type &action_ : *m_candidates) {
-//        auto &features = get_feature_list(action_);
-//        assert(!features);
-//
-//        Feature::List * x_tail = &(new Feature(Feature::X, m_min_x, m_max_x, 0, false, env->get_x(), true))->features;
-//        x_tail = x_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-//        Feature::List * x_dot_tail = &(new Feature(Feature::X_DOT, m_min_x_dot, m_max_x_dot, 0, false, env->get_x_dot(), true))->features;
-//        x_dot_tail = x_dot_tail->insert_in_order<feature_type::List::compare_default>(features, false);
-//
-//        feature_trie trie = get_trie(action_);
-//
-//        for(;;) {
-//          if(generate_feature_ranged(env, features, trie, x_tail, env->get_x()))
-//            continue;
-//          if(generate_feature_ranged(env, features, trie, x_dot_tail, env->get_x_dot()))
-//            continue;
-//
-//          break;
-//        }
-//      }
+    void generate_cmac(const Rete::Rete_Node_Ptr &parent) {
+      const size_t cmac_tilings = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["cmac-tilings"]).get_value();
+      const size_t cmac_resolution = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["cmac-resolution"]).get_value();
+      const size_t cmac_offset = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["cmac-offset"]).get_value();
+
+      assert(cmac_offset < cmac_tilings);
+      const double x_size = (m_max_x - m_min_x) / cmac_resolution;
+      const double xdot_size = (m_max_x_dot - m_min_x_dot) / cmac_resolution;
+
+      for(size_t tiling = -cmac_offset, tend = tiling + cmac_tilings; tiling != tend; ++tiling) {
+        const double x_offset = x_size * tiling;
+        const double xdot_offset = xdot_size * tiling;
+
+        for(size_t i = 0; i != cmac_resolution; ++i) {
+          auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(m_min_x + (i - x_offset) * x_size), parent);
+          auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(m_min_x + (i + 1 - x_offset) * x_size), xgte);
+          for(size_t j = 0; j != cmac_resolution; ++j) {
+            auto xdotgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::X_DOT, 2), std::make_shared<Rete::Symbol_Constant_Float>(m_min_x_dot + (j - xdot_offset) * xdot_size), xlt);
+            auto xdotlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::X_DOT, 2), std::make_shared<Rete::Symbol_Constant_Float>(m_min_x_dot + (j + 1 - xdot_offset) * xdot_size), xdotgte);
+            auto q_value = std::make_shared<Q_Value>(0.0, Q_Value::Type::UNSPLIT, 1);
+            for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
+              auto rl = std::make_shared<RL>(*this, 1);
+              rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
+              ++this->m_q_value_count;
+              make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+                this->m_next_q_values[action].push_back(rl->q_value);
+              }, [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+                this->purge_q_value_next(action, rl->q_value);
+              }, xdotlt);
+            }
+          }
+        }
+      }
     }
 
-//    void generate_candidates() {
-//      auto env = dynamic_pointer_cast<const Environment>(get_env());
-//
-//      assert(!m_candidates);
-//
-//      (new Move(Move::LEFT))->candidates.insert_before(m_candidates);
-//      (new Move(Move::IDLE))->candidates.insert_before(m_candidates);
-//      (new Move(Move::RIGHT))->candidates.insert_before(m_candidates);
-//    }
+    void generate_rete(const Rete::Rete_Node_Ptr &parent) {
+      for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
+        auto rl = std::make_shared<RL>(*this, 1);
+        rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
+        ++this->m_q_value_count;
+        rl->fringe_values = new RL::Fringe_Values;
+        rl->action = make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          if(!this->specialize(action, rl))
+            this->m_next_q_values[action].push_back(rl->q_value);
+        }, [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          this->purge_q_value_next(action, rl->q_value);
+        }, parent);
+
+        {
+          auto rlf = std::make_shared<RL>(*this, 2);
+          rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
+          rlf->feature = new Feature(Feature::X, m_min_x, (m_min_x + m_max_x) / 2.0, 2, false);
+          auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
+          rlf->action = make_action_retraction([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            this->m_next_q_values[action].push_back(rlf->q_value);
+          }, [this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            this->purge_q_value_next(action, rlf->q_value);
+          }, predicate);
+          rl->fringe_values->push_back(rlf);
+        }
+
+        {
+          auto rlf = std::make_shared<RL>(*this, 2);
+          rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
+          rlf->feature = new Feature(Feature::X, (m_min_x + m_max_x) / 2.0, m_max_x, 2, true);
+          auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
+          rlf->action = make_action_retraction([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            this->m_next_q_values[action].push_back(rlf->q_value);
+          }, [this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            this->purge_q_value_next(action, rlf->q_value);
+          }, predicate);
+          rl->fringe_values->push_back(rlf);
+        }
+
+        {
+          auto rlf = std::make_shared<RL>(*this, 2);
+          rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
+          rlf->feature = new Feature(Feature::X_DOT, m_min_x_dot, (m_min_x_dot + m_max_x_dot) / 2.0, 2, false);
+          auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X_DOT, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
+          rlf->action = make_action_retraction([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            this->m_next_q_values[action].push_back(rlf->q_value);
+          }, [this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            this->purge_q_value_next(action, rlf->q_value);
+          }, predicate);
+          rl->fringe_values->push_back(rlf);
+        }
+
+        {
+          auto rlf = std::make_shared<RL>(*this, 2);
+          rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
+          rlf->feature = new Feature(Feature::X_DOT, (m_min_x_dot + m_max_x_dot) / 2.0, m_max_x_dot, 2, true);
+          auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X_DOT, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
+          rlf->action = make_action_retraction([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            this->m_next_q_values[action].push_back(rlf->q_value);
+          }, [this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            this->purge_q_value_next(action, rlf->q_value);
+          }, predicate);
+          rl->fringe_values->push_back(rlf);
+        }
+      }
+    }
+
+    void generate_features() {
+      auto env = dynamic_pointer_cast<const Environment>(get_env());
+
+      m_next_q_values.clear();
+
+      remove_wme(m_x_wme);
+      remove_wme(m_x_dot_wme);
+      m_x_value->value = env->get_x();
+      m_x_dot_value->value = env->get_x_dot();
+      insert_wme(m_x_wme);
+      insert_wme(m_x_dot_wme);
+    }
 
     void update() {
       auto env = dynamic_pointer_cast<const Environment>(get_env());
@@ -259,10 +353,26 @@ namespace Mountain_Car {
       m_metastate = env->success() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
     }
 
-    std::shared_ptr<double> m_min_x;
-    std::shared_ptr<double> m_max_x;
-    std::shared_ptr<double> m_min_x_dot;
-    std::shared_ptr<double> m_max_x_dot;
+    const double m_min_x = -1.2;
+    const double m_max_x = 0.6;
+    const double m_min_x_dot = -0.07;
+    const double m_max_x_dot = 0.07;
+
+    Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
+    Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
+
+    Rete::Symbol_Identifier_Ptr_C m_s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
+    Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
+    Rete::Symbol_Constant_String_Ptr_C m_x_dot_attr = std::make_shared<Rete::Symbol_Constant_String>("x-dot");
+    Rete::Symbol_Constant_Float_Ptr m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_x());
+    Rete::Symbol_Constant_Float_Ptr m_x_dot_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_x_dot());
+
+    Rete::WME_Ptr_C m_x_wme;
+    Rete::WME_Ptr_C m_x_dot_wme;
+
+    std::array<std::shared_ptr<action_type::derived_type>, 3> m_action = {{std::make_shared<Move>(Move::LEFT),
+                                                                           std::make_shared<Move>(Move::IDLE),
+                                                                           std::make_shared<Move>(Move::RIGHT)}};
   };
 
 }

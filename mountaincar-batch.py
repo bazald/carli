@@ -9,6 +9,8 @@ g_plotters = ['./mountaincar.py', './memory.py']
 g_plotter_grid = []#['./mountaincar-grid.py', './mountaincar-heat.py']
 g_plotter_grid_filters = ['move(left)', 'move(idle)', 'move(right)', 'all']
 
+g_base_command = "./carli --output experiment --environment mountain-car --random-start false --learning-rate 1.0 --discount-rate 0.999 --epsilon-greedy 0.01 --policy off-policy --pseudoepisode-threshold 20"
+
 g_ep_tuples = []
 
 #g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 3, 17, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
@@ -21,9 +23,9 @@ g_ep_tuples = []
 #g_ep_tuples.append(('mountain-car', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 0, 0, 6, 0, 'false'))
 
 ## Experiment 0, non-hierarchical agents comparison
-#g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
-#g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
+g_ep_tuples.append(("specific_16x16_16x16_0", "--scenario 0 --credit-assignment specific --split-min 9 --split-max 9"))
+g_ep_tuples.append(("specific_32x32_32x32_0", "--scenario 0 --credit-assignment specific --split-min 11 --split-max 11"))
+g_ep_tuples.append(("specific_64x64_64x64_0", "--scenario 0 --credit-assignment specific --split-min 13 --split-max 13"))
 #g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 15, 15, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
 #g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
 
@@ -32,7 +34,7 @@ g_ep_tuples = []
 ##g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
 ##g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
 ##g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 15, 15, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
-##g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
+g_ep_tuples.append(("even_256x256_256x256_1", "--scenario 1 --credit-assignment even --split-min 17 --split-max 17"))
 
 ### Experiment 2, alternative credit assignment performance comparison - compare to 1
 ##g_ep_tuples.append(('mountain-car', 0, 'inv-log-update-count', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 0, 0, 2, 0, 'false'))
@@ -89,8 +91,8 @@ parser.add_argument('-j', '--jobs', metavar='N', type=int,
 parser.add_argument('-r', '--runs', metavar='N', type=int,
                    action='store', default=1,
                    help='number of runs per experiment')
-parser.add_argument('-s', '--steps', metavar='N', type=int,
-                   action='store', default=1000000,
+parser.add_argument('-n', '--num-steps', metavar='N', type=int,
+                   action='store', default=100000,
                    help='number of steps per run')
 
 args = parser.parse_args()
@@ -123,80 +125,31 @@ print str(seeds) + '\n'
 
 
 class Experiment:
-  def __init__(self, num_steps, seed, stderr, stdout, ep_tuple):
+  def __init__(self, num_steps, seed, stderr, stdout, experiment):
     self.num_steps = num_steps
     self.seed = seed
     self.stderr = stderr
     self.stdout = stdout
-    self.ep_tuple = ep_tuple
-    self.environment = ep_tuple[0]
-    self.contribute_update_count = ep_tuple[1]
-    self.credit_assignment = ep_tuple[2]
-    self.credit_assignment_epsilon = ep_tuple[3]
-    self.discount_rate = ep_tuple[4]
-    self.eligibility_trace_decay_rate = ep_tuple[5]
-    self.epsilon_greedy = ep_tuple[6]
-    self.learning_rate = ep_tuple[7]
-    self.policy = ep_tuple[8]
-    self.pseudoepisode_threshold = ep_tuple[9]
-    self.split_min = ep_tuple[10]
-    self.split_max = ep_tuple[11]
-    self.split_pseudoepisodes = ep_tuple[12]
-    self.split_cabe = ep_tuple[13]
-    self.split_cabe_qmult = ep_tuple[14]
-    self.split_update_count = ep_tuple[15]
-    self.mean_cabe_queue_size = ep_tuple[16]
-    self.scenario = ep_tuple[17]
-    self.skip_steps = ep_tuple[18]
-    self.reset_update_counts = ep_tuple[19]
+    self.experiment = experiment
     
   def get_args(self):
-    args = ['./carli',
-            '--num-steps', str(self.num_steps),
-            '--seed', str(self.seed),
-            '--environment', self.environment,
-            '--contribute-update-count', str(self.contribute_update_count),
-            '--credit-assignment', self.credit_assignment,
-            '--credit-assignment-epsilon', str(self.credit_assignment_epsilon),
-            #'--credit-assignment-log-base', '2',
-            #'--credit-assignment-root', '3',
-            #'--credit-assignment-normalize', 'false',
-            '--discount-rate', str(self.discount_rate),
-            '--eligibility-trace-decay-rate', str(self.eligibility_trace_decay_rate),
-            '--epsilon-greedy', str(self.epsilon_greedy),
-            '--learning-rate', str(self.learning_rate),
-            '--policy', self.policy,
-            '--pseudoepisode-threshold', str(self.pseudoepisode_threshold),
-            '--random-start', 'false',
-            '--reset-update-counts', self.reset_update_counts,
-            '--split-min', str(self.split_min),
-            '--split-max', str(self.split_max),
-            '--split-pseudoepisodes', str(self.split_pseudoepisodes),
-            '--split-cabe', str(self.split_cabe),
-            '--split-cabe-qmult', str(self.split_cabe_qmult),
-            '--split-update-count', str(self.split_update_count),
-            '--mean-cabe-queue-size', str(self.mean_cabe_queue_size),
-            '--scenario', str(self.scenario),
-            '--skip-steps', str(self.skip_steps),
-            '--output', 'experiment']
+    args = self.experiment.split(' ')
+    args.extend(['--num-steps', str(self.num_steps),
+                 '--seed', str(self.seed),
+                 '--stderr', self.stderr,
+                 '--stdout', self.stdout])
     return args
   
   def print_args(self):
     args = self.get_args()
-    cmd = ''
-    for arg in args:
-      cmd += arg + ' '
-    cmd += '> ' + self.stdout
-    cmd += ' 2> ' + self.stderr
+    cmd = args[0]
+    for arg in args[1:]:
+      cmd += ' ' + arg
     print cmd
   
   def run(self):
     args = self.get_args()
-    f1 = open(self.stdout, 'w')
-    f2 = open(self.stderr, 'w')
-    subprocess.call(args, stderr=f2, stdout=f1)
-    f2.close()
-    f1.close()
+    subprocess.call(args)
     return self
 
 def resolution(split):
@@ -204,44 +157,20 @@ def resolution(split):
   size = str(pow(2, depth))
   return size + 'x' + size
 
-dirs = []
-experiments = []
+g_dirs = []
+g_experiments = []
 for ep_tuple in g_ep_tuples:
-  dir = g_dir + '/' #+ ep_tuple[0]
-  dir += ep_tuple[2]
-  #dir += '_' + str(ep_tuple[1])
-  #dir += '_' + ep_tuple[2]
-  #dir += '_' + str(ep_tuple[3])
-  #dir += '_' + str(ep_tuple[4])
-  dir += '_' + str(ep_tuple[5])
-  #dir += '_' + str(ep_tuple[6])
-  #dir += '_' + str(ep_tuple[7])
-  #dir += '_' + ep_tuple[8]
-  #dir += '_' + str(ep_tuple[9])
-  dir += '_' + resolution(ep_tuple[10])
-  dir += '_' + resolution(ep_tuple[11])
-  #dir += '_' + str(ep_tuple[12])
-  dir += '_' + str(ep_tuple[13])
-  dir += '_' + str(ep_tuple[14])
-  #dir += '_' + str(ep_tuple[15])
-  dir += '_' + str(ep_tuple[16])
-  dir += '_' + str(ep_tuple[17])
-  #dir += '_' + str(ep_tuple[18])
-  #dir += '_' + str(ep_tuple[19])
+  dir = g_dir + '/' + ep_tuple[0]
   if not os.path.isdir(dir):
     os.mkdir(dir)
-  dirs.append(dir)
+  g_dirs.append(dir)
   
   for seed in seeds:
-    stderr = dir + '/mountaincar-' + str(seed) + '.err'
-    stdout = dir + '/mountaincar-' + str(seed) + '.out'
-    experiment = Experiment(args.steps, seed, stderr, stdout, ep_tuple)
-    experiments.append(experiment)
-    a = experiment.get_args()
-    s = a[0]
-    for ss in a[1:]:
-      s += ' ' + ss
-    print s
+    stderr = dir + '/puddleworld-' + str(seed) + '.err'
+    stdout = dir + '/puddleworld-' + str(seed) + '.out'
+    experiment = Experiment(args.num_steps, seed, stderr, stdout, g_base_command + ' ' + ep_tuple[1])
+    g_experiments.append(experiment)
+    experiment.print_args()
 
 class Progress:
   def __init__(self, experiments):
@@ -251,14 +180,14 @@ class Progress:
     self.finished = {}
     for experiment in experiments:
       try:
-        self.count[experiment.ep_tuple] += 1
+        self.count[experiment.experiment] += 1
       except KeyError:
-        self.count[experiment.ep_tuple] = 1
-      self.finished[experiment.ep_tuple] = 0
+        self.count[experiment.experiment] = 1
+      self.finished[experiment.experiment] = 0
 
   def just_finished(self, experiment):
     self.lock.acquire()
-    self.finished[experiment.ep_tuple] += 1
+    self.finished[experiment.experiment] += 1
     self.lock.release()
 
   def just_finished_plot(self, args):
@@ -266,16 +195,16 @@ class Progress:
     self.finished['plots'] += 1
     self.lock.release()
 
-  def all_finished(self, ep_tuple):
+  def all_finished(self, experiment):
     self.lock.acquire()
-    num = self.count[ep_tuple]
-    fin = self.finished[ep_tuple]
+    num = self.count[experiment]
+    fin = self.finished[experiment]
     self.lock.release()
     return fin is num
 
 class Plots:
   def __init__(self):
-    self.ep_tuple = 'plots'
+    self.experiment = 'plots'
 
 plots = []
 for i in range(len(g_ep_tuples) * (len(g_plotters) + len(g_plotter_grid) * len(g_plotter_grid_filters))):
@@ -294,20 +223,22 @@ def take_fives(group):
   job_server.wait(group)
 
 job_server = pp.Server(args.jobs)
-progress = Progress(experiments + plots)
+progress = Progress(g_experiments + plots)
 start_time = time.time()
-jobs = [(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread',), callback=progress.just_finished, group=experiment.ep_tuple)) for experiment in experiments]
+#for experiment in g_experiments:
+  #experiment.run()
+jobs = [(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread',), callback=progress.just_finished, group=experiment.experiment)) for experiment in g_experiments]
 
-for ep_tuple, dir in zip(g_ep_tuples, dirs):
-  take_fives(ep_tuple)
-  print 'Plotting data for ' + str(ep_tuple) + '\n'
+for ep_tuple, dir in zip(g_ep_tuples, g_dirs):
+  take_fives(g_base_command + ' ' + ep_tuple[1])
+  print 'Plotting data for ' + ep_tuple[1] + '\n'
   for plotter in g_plotters:
     args = [plotter] + glob.glob(dir + '/*.out')
     jobs.append(job_server.submit(syscall, (args,), (), ('subprocess', 'thread',), callback=progress.just_finished_plot, group='plots'))
   for plotter in g_plotter_grid:
     for filter in g_plotter_grid_filters:
       args = [plotter, filter] + glob.glob(dir + '/*.err')
-      print 'Plotting ' + plotter + ' data for ' + str(ep_tuple) + ', ' + filter + '\n'
+      print 'Plotting ' + plotter + ' data for ' + ep_tuple[1] + ', ' + filter + '\n'
       jobs.append(job_server.submit(syscall, (args,), (), ('subprocess', 'thread',), callback=progress.just_finished_plot, group='plots'))
 
 take_fives('plots')

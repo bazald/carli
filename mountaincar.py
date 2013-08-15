@@ -99,7 +99,7 @@ def main():
   # 4: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out
   # 5: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out experiment-mc/inv-log_*_3/*.out
   # 6: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/*_3/*.out
-  scenario = 0
+  scenario = 3
   
   #two_sided_plot = scenario > 3 and scenario < 6
   two_sided_plot = False
@@ -238,12 +238,12 @@ def main():
       y_labels = []
       yss = []
       
-      if scenario == 0:
-        for agent in smith:
-          y_labels.append(agent)
-          yss.append(smith[agent])
+      #if scenario == 3:
+        #for agent in smith:
+          #y_labels.append(agent)
+          #yss.append(smith[agent])
           
-          labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
+          #labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
 
       remap_names = {}
       remap_names['specific\\_16x16\\_16x16\\_0'] = '16x16'
@@ -264,7 +264,7 @@ def main():
       elif scenario == 2:
         agent_list = ['specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0', 'specific\\_128x128\\_128x128\\_0', 'specific\\_256x256\\_256x256\\_0']
       elif scenario == 3:
-        agent_list = ['specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0', 'specific\\_128x128\\_128x128\\_0', 'specific\\_256x256\\_256x256\\_0', 'even\\_256x256\\_256x256\\_1']
+        agent_list = ['specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0', 'even\\_256x256\\_256x256\\_1']
       if scenario > 0 and scenario < 4:
         for agent in agent_list:
           y_labels.append(remap_names[agent])

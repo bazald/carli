@@ -39,4 +39,5 @@
 *.user
 *.vcxproj
 *.vsp
+callgrind.out.*
 core

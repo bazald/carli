@@ -87,7 +87,7 @@ int main2(int argc, char **argv) {
     cout.rdbuf(cout2file.rdbuf());
   }), "<file> Redirect stdout to <file>");
   options.add_line("\n  Environment Options:");
-  options.add('e', std::make_shared<Option_Itemized>("environment", std::set<std::string>({"blocks-world", "cart-pole", "mountain-car", "puddle-world"}), "blocks-world"), "");
+  options.add('e', std::make_shared<Option_Itemized>("environment", std::set<std::string>({"blocks-world", "cart-pole", "mountain-car", "puddle-world"}), "puddle-world"), "");
   options.add(     std::make_shared<Option_Ranged<bool>>("ignore-x", false, true, true, true, false), "Simplify cart-pole from 4D to 2D, eliminating x and x-dot.");
   options.add(     std::make_shared<Option_Ranged<bool>>("random-start", false, true, true, true, false), "Should starting positions be randomized in mountain-car and puddle-world.");
   options.add(     std::make_shared<Option_Ranged<bool>>("reward-negative", false, true, true, true, true), "Use negative rewards per step in mountain-car rather than positive terminal rewards.");
@@ -158,12 +158,13 @@ int main2(int argc, char **argv) {
 //    run_agent<Blocks_World::Environment, Blocks_World::Agent>();
 //  else if(env == "cart-pole")
 //    run_agent<Cart_Pole::Environment, Cart_Pole::Agent>();
-//  else if(env == "mountain-car")
-//    run_agent<Mountain_Car::Environment, Mountain_Car::Agent>();
-//  else if(env == "puddle-world")
-    run_agent<Puddle_World::Environment, Puddle_World::Agent>();
 //  else
-//    throw runtime_error("Internal error: g_args.environment");
+  if(env == "mountain-car")
+    run_agent<Mountain_Car::Environment, Mountain_Car::Agent>();
+  else if(env == "puddle-world")
+    run_agent<Puddle_World::Environment, Puddle_World::Agent>();
+  else
+    throw runtime_error("Internal error: g_args.environment");
 
 
 //  typedef std::string test_key;

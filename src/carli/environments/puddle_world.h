@@ -457,27 +457,11 @@ namespace Puddle_World {
       insert_wme(m_y_wme);
     }
 
-//    void generate_candidates() {
-//      auto env = dynamic_pointer_cast<const Environment>(get_env());
-//
-//      assert(!m_candidates);
-//
-//      (new Move(Move::NORTH))->candidates.insert_before(m_candidates);
-//      (new Move(Move::SOUTH))->candidates.insert_before(m_candidates);
-//      (new Move(Move::EAST))->candidates.insert_before(m_candidates);
-//      (new Move(Move::WEST))->candidates.insert_before(m_candidates);
-//    }
-
     void update() {
       auto env = dynamic_pointer_cast<const Environment>(get_env());
 
       m_metastate = env->goal_reached() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
     }
-
-    std::shared_ptr<double> m_min_x = std::make_shared<double>(0.0);
-    std::shared_ptr<double> m_max_x = std::make_shared<double>(1.0);
-    std::shared_ptr<double> m_min_y = std::make_shared<double>(0.0);
-    std::shared_ptr<double> m_max_y = std::make_shared<double>(1.0);
 
     Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
     Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
