@@ -257,7 +257,7 @@ namespace Mountain_Car {
             auto xdotlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::X_DOT, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), xdotgte);
             auto q_value = std::make_shared<Q_Value>(0.0, Q_Value::Type::UNSPLIT, 1);
             for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
-              std::vector<RL::Line> lines;
+              RL::Lines lines;
               lines.push_back(RL::Line(std::make_pair(left, top), std::make_pair(left, bottom)));
               lines.push_back(RL::Line(std::make_pair(left, bottom), std::make_pair(right, bottom)));
               lines.push_back(RL::Line(std::make_pair(right, bottom), std::make_pair(right, top)));
@@ -285,7 +285,7 @@ namespace Mountain_Car {
       for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
         auto rl = std::make_shared<RL>(*this, 1,
                                        RL::Range(std::make_pair(m_min_x, m_max_x), std::make_pair(m_min_x_dot, m_max_x_dot)),
-                                       std::vector<RL::Line>());
+                                       RL::Lines());
         rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
         ++this->m_q_value_count;
         rl->fringe_values = new RL::Fringe_Values;
@@ -297,7 +297,7 @@ namespace Mountain_Car {
         }, parent);
 
         {
-          std::vector<RL::Line> lines;
+          RL::Lines lines;
           lines.push_back(RL::Line(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)));
           auto rlf = std::make_shared<RL>(*this, 2,
                                           RL::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)),
@@ -316,7 +316,7 @@ namespace Mountain_Car {
         {
           auto rlf = std::make_shared<RL>(*this, 2,
                                           RL::Range(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_max_x, m_max_x_dot)),
-                                          std::vector<RL::Line>());
+                                          RL::Lines());
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
           rlf->feature = new Feature(Feature::X, m_half_x, m_max_x, 2, true);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
@@ -329,7 +329,7 @@ namespace Mountain_Car {
         }
 
         {
-          std::vector<RL::Line> lines;
+          RL::Lines lines;
           lines.push_back(RL::Line(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_half_x_dot)));
           auto rlf = std::make_shared<RL>(*this, 2,
                                           RL::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_max_x, m_half_x_dot)),
@@ -348,7 +348,7 @@ namespace Mountain_Car {
         {
           auto rlf = std::make_shared<RL>(*this, 2,
                                           RL::Range(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_max_x_dot)),
-                                          std::vector<RL::Line>());
+                                          RL::Lines());
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
           rlf->feature = new Feature(Feature::X_DOT, m_half_x_dot, m_max_x_dot, 2, true);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X_DOT, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());

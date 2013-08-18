@@ -135,7 +135,7 @@ namespace Rete {
     WME_Token_Index m_rhs_index;
     Symbol_Ptr_C m_rhs;
     std::weak_ptr<Rete_Node> input;
-    std::list<WME_Token_Ptr_C> tokens;
+    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> tokens;
   };
 
   inline void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out) {

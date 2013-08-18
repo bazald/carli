@@ -287,7 +287,7 @@ namespace Rete {
   };
 
   inline void __symbol_size_check() {
-    typedef typename Symbol::pool_allocator_type pool_allocator_type;
+    typedef typename Symbol::value_type pool_allocator_type;
     static_assert(sizeof(pool_allocator_type) >= sizeof(Symbol_Constant_Float), "Pool size suboptimal.");
     static_assert(sizeof(pool_allocator_type) >= sizeof(Symbol_Constant_Int), "Pool size suboptimal.");
     static_assert(sizeof(pool_allocator_type) >= sizeof(Symbol_Constant_String), "Pool size suboptimal.");

@@ -48,8 +48,8 @@ namespace Rete {
     friend void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out);
 
   public:
-    typedef std::list<Rete_Filter_Ptr> Filters;
-    typedef std::list<Rete_Node_Ptr> Outputs;
+    typedef std::list<Rete_Filter_Ptr, Zeni::Pool_Allocator<Rete_Filter_Ptr>> Filters;
+    typedef std::list<Rete_Node_Ptr, Zeni::Pool_Allocator<Rete_Node_Ptr>> Outputs;
 
     Rete_Node() {}
     virtual ~Rete_Node() {}

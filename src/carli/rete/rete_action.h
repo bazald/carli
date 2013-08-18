@@ -144,7 +144,7 @@ namespace Rete {
 
   private:
     std::weak_ptr<Rete_Node> input;
-    std::list<WME_Token_Ptr_C> input_tokens;
+    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input_tokens;
     Action action;
     Action retraction;
 #ifdef USE_AGENDA

@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <inttypes.h>
+#include <limits>
 #include <unordered_map>
 
 namespace Zeni {
@@ -155,9 +156,20 @@ namespace Zeni {
   template <typename TYPE>
   class Pool_Allocator {
   public:
-    typedef TYPE pool_allocator_type;
+    typedef TYPE value_type;
+    typedef TYPE * pointer;
+    typedef const TYPE * const_pointer;
+    typedef TYPE & reference;
+    typedef const TYPE & const_reference;
+    typedef std::size_t size_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef std::true_type propagate_on_container_move_assignment;
+    template <typename NEWTYPE> struct rebind {typedef Pool_Allocator<NEWTYPE> other;};
 
-    virtual ~Pool_Allocator() {}
+    Pool_Allocator() {}
+
+    template <typename OTHERTYPE>
+    Pool_Allocator(const Pool_Allocator<OTHERTYPE> &) {}
 
     /**
      * get the default Pool if sz_ is less than or equal to the size of TYPE, otherwise a non-default pool;
@@ -166,26 +178,66 @@ namespace Zeni {
      * if it fails again, throw std::bad_alloc;
      */
     static void * operator new(size_t sz_) {
+      return allocate(sz_);
+    }
+
+    /// return a memory block to the appropriate memory Pool
+    static void operator delete(void * ptr_) throw() {
+      deallocate(reinterpret_cast<pointer>(ptr_), sizeof(TYPE));
+    }
+
+    static pointer address(reference x) {
+      return reinterpret_cast<pointer>(&reinterpret_cast<char &>(x));
+    }
+
+    static const_pointer address(const_reference x) {
+      return reinterpret_cast<const_pointer>(&reinterpret_cast<const char &>(x));
+    }
+
+    static pointer allocate(size_type sz_, std::allocator<void>::const_pointer /*hint*/ = 0) {
       Pool &p = pool->size_gte(sz_) ? *pool : pool_map->get_Pool(sz_);
 
       void * ptr = p.get();
       if(ptr)
-        return ptr;
+        return pointer(ptr);
 
       if(pool_map->clear()) {
         ptr = p.get();
         if(ptr)
-          return ptr;
+          return pointer(ptr);
       }
 
       throw std::bad_alloc();
     }
 
-    /// return a memory block to the appropriate memory Pool
-    static void operator delete(void * ptr_) throw() {
+    static void deallocate(pointer ptr_, size_type /*n*/) throw() {
       Pool &p = pool->size_gte(ptr_) ? *pool : pool_map->get_Pool(ptr_);
 
       p.give(ptr_);
+    }
+
+    static size_type max_size() {
+      return std::numeric_limits<size_type>::max();
+    }
+
+    template<class NEWTYPE, class... ARGS>
+    static void construct(NEWTYPE *p, ARGS&&... args) {
+      ::new((void *)p) NEWTYPE(std::forward<ARGS>(args)...);
+    }
+
+    template<class NEWTYPE>
+    static void destroy(NEWTYPE *p) {
+      p->~NEWTYPE();
+    }
+
+    template <typename RHSTYPE>
+    bool operator==(const Pool_Allocator<RHSTYPE> &rhs) const {
+      return pool == rhs.pool;
+    }
+
+    template <typename RHSTYPE>
+    bool operator!=(const Pool_Allocator<RHSTYPE> &rhs) const {
+      return pool != rhs.pool;
     }
 
   private:

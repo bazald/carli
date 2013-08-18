@@ -10,7 +10,7 @@
 
 namespace Rete {
   inline void __rete_node_size_check() {
-    typedef typename Rete_Node::pool_allocator_type pool_allocator_type;
+    typedef typename Rete_Node::value_type pool_allocator_type;
     static_assert(sizeof(pool_allocator_type) >= sizeof(Rete_Action), "Pool size suboptimal.");
     static_assert(sizeof(pool_allocator_type) >= sizeof(Rete_Existential), "Pool size suboptimal.");
     static_assert(sizeof(pool_allocator_type) >= sizeof(Rete_Filter), "Pool size suboptimal.");

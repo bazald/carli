@@ -124,9 +124,9 @@ namespace Rete {
     WME_Bindings bindings;
     std::weak_ptr<Rete_Node> input0;
     std::weak_ptr<Rete_Node> input1;
-    std::list<WME_Token_Ptr_C> input0_tokens;
-    std::list<WME_Token_Ptr_C> input1_tokens;
-    std::list<WME_Token_Ptr_C> output_tokens;
+    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input0_tokens;
+    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input1_tokens;
+    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> output_tokens;
   };
 
   inline void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {

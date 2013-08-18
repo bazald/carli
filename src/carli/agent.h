@@ -47,6 +47,7 @@ public:
 //  typedef std::map<action_type *, feature_list, typename action_type::Compare> feature_list_type;
 //  typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
+  typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
 
   class RL : public std::enable_shared_from_this<RL> {
     RL(const RL &) = delete;
@@ -56,8 +57,9 @@ public:
     typedef std::list<std::shared_ptr<RL>> Fringe_Values;
     typedef std::pair<std::pair<double, double>, std::pair<double, double>> Range;
     typedef std::pair<std::pair<double, double>, std::pair<double, double>> Line;
+    typedef std::vector<Line, Zeni::Pool_Allocator<Line>> Lines;
 
-    RL(Agent<FEATURE, ACTION> &agent_, const size_t &depth_, const Range &range_, const std::vector<Line> &lines_)
+    RL(Agent<FEATURE, ACTION> &agent_, const size_t &depth_, const Range &range_, const Lines &lines_)
      : agent(agent_),
      depth(depth_),
      range(range_),
@@ -85,7 +87,7 @@ public:
     tracked_ptr<feature_type> feature;
 
     Range range;
-    std::vector<Line> lines;
+    Lines lines;
   };
 
   bool specialize(const std::shared_ptr<typename action_type::derived_type> &action, const std::shared_ptr<RL> &general) {
@@ -156,7 +158,7 @@ public:
         auto refined = leaf->feature->refined();
         for(auto &refined_feature : refined) {
           typename RL::Range range(leaf->range);
-          std::vector<typename RL::Line> lines;
+          typename RL::Lines lines;
           if(refined_feature->axis.first == 0) {
             if(!refined_feature->upper) {
               range.second.first = refined_feature->bound_upper;
@@ -190,25 +192,22 @@ public:
 
         for(auto &fringe : *general->fringe_values) {
           typename RL::Range range(fringe->range);
+          typename RL::Lines lines;
           if(leaf->feature->axis.first == 0) {
             range.first.first = leaf->range.first.first;
             range.second.first = leaf->range.second.first;
+            for(auto &line : fringe->lines)
+              lines.push_back(typename RL::Line(std::make_pair(range.first.first, line.first.second), std::make_pair(range.second.first, line.second.second)));
           }
           else {
             range.first.second = leaf->range.first.second;
             range.second.second = leaf->range.second.second;
+            for(auto &line : fringe->lines)
+              lines.push_back(typename RL::Line(std::make_pair(line.first.first, range.first.second), std::make_pair(line.second.first, range.second.second)));
           }
-          auto rl = std::make_shared<RL>(*this, leaf->depth + 1, range, fringe->lines);
+          auto rl = std::make_shared<RL>(*this, leaf->depth + 1, range, lines);
           rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
           rl->feature = fringe->feature->clone();
-          if(leaf->feature->axis.first == 0) {
-            for(auto &line : fringe->lines)
-              rl->lines.push_back(typename RL::Line(std::make_pair(range.first.first, line.first.second), std::make_pair(range.second.first, line.second.second)));
-          }
-          else {
-            for(auto &line : fringe->lines)
-              rl->lines.push_back(typename RL::Line(std::make_pair(line.first.first, range.first.second), std::make_pair(line.second.first, range.second.second)));
-          }
           auto predicate = make_predicate_vc(rl->feature->predicate(), fringe->feature->axis, rl->feature->symbol_constant(), leaf->action.lock()->parent());
           rl->action = make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->m_next_q_values[action].push_back(rl->q_value);
@@ -240,26 +239,26 @@ public:
     m_environment(environment),
     m_credit_assignment(
       m_credit_assignment_code == "all" ?
-        [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_all(value_list);} :
+        [this](const Q_Value_List &value_list){return this->assign_credit_all(value_list);} :
       m_credit_assignment_code == "random" ?
-        [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_random(value_list);} :
+        [this](const Q_Value_List &value_list){return this->assign_credit_random(value_list);} :
       m_credit_assignment_code == "specific" ?
-        [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_specific(value_list);} :
+        [this](const Q_Value_List &value_list){return this->assign_credit_specific(value_list);} :
       m_credit_assignment_code == "even" ?
-        [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_evenly(value_list);} :
+        [this](const Q_Value_List &value_list){return this->assign_credit_evenly(value_list);} :
       m_credit_assignment_code == "inv-update-count" ?
-        [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_inv_update_count(value_list);} :
+        [this](const Q_Value_List &value_list){return this->assign_credit_inv_update_count(value_list);} :
       m_credit_assignment_code == "inv-log-update-count" ?
-        [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_inv_log_update_count(value_list);} :
+        [this](const Q_Value_List &value_list){return this->assign_credit_inv_log_update_count(value_list);} :
       m_credit_assignment_code == "inv-root-update-count" ?
-        [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_inv_root_update_count(value_list);} :
+        [this](const Q_Value_List &value_list){return this->assign_credit_inv_root_update_count(value_list);} :
       m_credit_assignment_code == "inv-depth" ?
-        [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_inv_depth(value_list);} :
+        [this](const Q_Value_List &value_list){return this->assign_credit_inv_depth(value_list);} :
       m_credit_assignment_code == "epsilon-even-specific" ?
-        [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_specific);} :
+        [this](const Q_Value_List &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_specific);} :
       m_credit_assignment_code == "epsilon-even-depth" ?
-        [this](const std::list<tracked_ptr<Q_Value>> &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);} :
-      std::function<void (const std::list<tracked_ptr<Q_Value>> &)>()
+        [this](const Q_Value_List &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);} :
+      std::function<void (const Q_Value_List &)>()
     )
 //#ifdef ENABLE_WEIGHT
 //     ,
@@ -395,7 +394,7 @@ public:
       }
     }
     else {
-      td_update(m_current_q_value, reward, std::list<tracked_ptr<Q_Value>>());
+      td_update(m_current_q_value, reward, Q_Value_List());
     }
 
     m_total_reward += reward;
@@ -464,7 +463,7 @@ public:
   }
 
   void print_value_function_grid(std::ostream &os) const {
-    std::set<typename RL::Line> line_segments;
+    std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>> line_segments;
     for(auto &action_value : m_next_q_values) {
       const auto &line_segments2 = m_lines.find(action_value.first);
       if(line_segments2 != m_lines.end()) {
@@ -563,7 +562,7 @@ protected:
     return action;
   }
 
-  void td_update(const std::list<tracked_ptr<Q_Value>> &current, const reward_type &reward, const std::list<tracked_ptr<Q_Value>> &next) {
+  void td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next) {
     const double target_next = m_discount_rate * sum_value(nullptr, next);
     const double target_value = reward + target_next;
 
@@ -737,9 +736,9 @@ protected:
 //  }
 //#endif
 
-  void assign_credit_epsilon(const std::list<tracked_ptr<Q_Value>> &value_list,
-                             void (Agent::*exploration)(const std::list<tracked_ptr<Q_Value>> &),
-                             void (Agent::*target)(const std::list<tracked_ptr<Q_Value>> &))
+  void assign_credit_epsilon(const Q_Value_List &value_list,
+                             void (Agent::*exploration)(const Q_Value_List &),
+                             void (Agent::*target)(const Q_Value_List &))
   {
     (this->*exploration)(value_list);
 
@@ -753,7 +752,7 @@ protected:
       q->credit = this->m_credit_assignment_epsilon * q->credit + inverse * q->t0;
   }
 
-  void assign_credit_random(const std::list<tracked_ptr<Q_Value>> &value_list) {
+  void assign_credit_random(const Q_Value_List &value_list) {
     size_t count = double();
     for(const auto &q : value_list) {
       if(q->type != Q_Value::Type::FRINGE)
@@ -770,7 +769,7 @@ protected:
     }
   }
 
-  void assign_credit_specific(const std::list<tracked_ptr<Q_Value>> &value_list) {
+  void assign_credit_specific(const Q_Value_List &value_list) {
     tracked_ptr<Q_Value> last;
     for(const auto &q : value_list) {
       if(q->type != Q_Value::Type::FRINGE) {
@@ -785,7 +784,7 @@ protected:
       last->credit = 1.0;
   }
 
-  void assign_credit_evenly(const std::list<tracked_ptr<Q_Value>> &value_list) {
+  void assign_credit_evenly(const Q_Value_List &value_list) {
     double count = double();
     for(const auto &q : value_list) {
       if(q->type != Q_Value::Type::FRINGE)
@@ -796,7 +795,7 @@ protected:
       q->credit = q->type == Q_Value::Type::FRINGE ? m_fringe_learning_scale : 1.0 / count;
   }
 
-  void assign_credit_all(const std::list<tracked_ptr<Q_Value>> &value_list) {
+  void assign_credit_all(const Q_Value_List &value_list) {
     for(const auto &q : value_list) {
       if(q->type != Q_Value::Type::FRINGE)
         q->credit = 1.0;
@@ -805,7 +804,7 @@ protected:
     }
   }
 
-  void assign_credit_inv_update_count(const std::list<tracked_ptr<Q_Value>> &value_list) {
+  void assign_credit_inv_update_count(const Q_Value_List &value_list) {
     double sum = double();
     for(const auto &q : value_list) {
       if(q->type != Q_Value::Type::FRINGE) {
@@ -817,7 +816,7 @@ protected:
     assign_credit_normalize(value_list, sum);
   }
 
-  void assign_credit_inv_log_update_count(const std::list<tracked_ptr<Q_Value>> &value_list) {
+  void assign_credit_inv_log_update_count(const Q_Value_List &value_list) {
     double sum = double();
     for(const auto &q : value_list) {
       if(q->type != Q_Value::Type::FRINGE) {
@@ -829,7 +828,7 @@ protected:
     assign_credit_normalize(value_list, sum);
   }
 
-  void assign_credit_inv_root_update_count(const std::list<tracked_ptr<Q_Value>> &value_list) {
+  void assign_credit_inv_root_update_count(const Q_Value_List &value_list) {
     double sum = double();
     for(const auto &q : value_list) {
       if(q->type != Q_Value::Type::FRINGE) {
@@ -841,7 +840,7 @@ protected:
     assign_credit_normalize(value_list, sum);
   }
 
-  void assign_credit_inv_depth(const std::list<tracked_ptr<Q_Value>> &value_list) {
+  void assign_credit_inv_depth(const Q_Value_List &value_list) {
     size_t depth = 0;
     for(const auto &q : value_list) {
       if(q->type != Q_Value::Type::FRINGE)
@@ -859,7 +858,7 @@ protected:
     assign_credit_normalize(value_list, sum);
   }
 
-  void assign_credit_normalize(const std::list<tracked_ptr<Q_Value>> &value_list, const double &sum) {
+  void assign_credit_normalize(const Q_Value_List &value_list, const double &sum) {
     if(m_credit_assignment_normalize || sum > 1.0) {
       for(const auto &q : value_list) {
         if(q->type == Q_Value::Type::FRINGE)
@@ -906,7 +905,7 @@ protected:
 #ifdef DEBUG_OUTPUT
                                                      action
 #endif
-                                                           , const std::list<tracked_ptr<Q_Value>> &value_list) {
+                                                           , const Q_Value_List &value_list) {
 #ifdef DEBUG_OUTPUT
     if(action) {
       std::cerr.unsetf(std::ios_base::floatfield);
@@ -1040,7 +1039,7 @@ protected:
 //    return update_counts;
 //  }
 
-  void print_value_function_grid_set(std::ostream &os, const std::set<typename RL::Line> &line_segments) const {
+  void print_value_function_grid_set(std::ostream &os, const std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>> &line_segments) const {
     for(const auto &line_segment : line_segments)
       os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
   }
@@ -1050,7 +1049,7 @@ protected:
 //      os << rect.first.first.first << ',' << rect.first.first.second << '/' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
 //  }
 
-  void merge_value_function_grid_sets(std::set<typename RL::Line> &combination, const std::set<typename RL::Line> &additions) const {
+  void merge_value_function_grid_sets(std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>> &combination, const std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>> &additions) const {
     for(const auto &line_segment : additions)
       combination.insert(line_segment);
   }
@@ -1062,9 +1061,9 @@ protected:
 
   Metastate m_metastate = Metastate::NON_TERMINAL;
   action_ptrsc m_current;
-  std::list<tracked_ptr<Q_Value>> m_current_q_value;
+  Q_Value_List m_current_q_value;
   action_ptrsc m_next;
-  std::map<action_ptrsc, std::list<tracked_ptr<Q_Value>>, typename action_type::Compare> m_next_q_values;
+  std::map<action_ptrsc, Q_Value_List, typename action_type::Compare, Zeni::Pool_Allocator<std::pair<action_ptrsc, Q_Value_List>>> m_next_q_values;
   std::function<action_ptrsc ()> m_target_policy; ///< Sarsa/Q-Learning selector
   std::function<action_ptrsc ()> m_exploration_policy; ///< Exploration policy
   std::function<bool (Q_Value * const &, const size_t &)> m_split_test; ///< true if too general, false if sufficiently general
@@ -1437,7 +1436,7 @@ private:
   const double m_eligibility_trace_decay_threshold = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["eligibility-trace-decay-threshold"]).get_value();
 
   const std::string m_credit_assignment_code = dynamic_cast<const Option_Itemized &>(Options::get_global()["credit-assignment"]).get_value();
-  const std::function<void (const std::list<tracked_ptr<Q_Value>> &)> m_credit_assignment; ///< How to assign credit to multiple Q-values
+  const std::function<void (const Q_Value_List &)> m_credit_assignment; ///< How to assign credit to multiple Q-values
   const double m_credit_assignment_epsilon = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["credit-assignment-epsilon"]).get_value();
   const double m_credit_assignment_log_base = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["credit-assignment-log-base"]).get_value();
   const double m_credit_assignment_log_base_value = std::log(m_credit_assignment_log_base);
@@ -1469,7 +1468,7 @@ private:
 
   Q_Value::List * m_eligible = nullptr;
 
-  std::map<action_ptrsc, std::set<typename RL::Line>> m_lines;
+  std::map<action_ptrsc, std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>>, std::less<action_ptrsc>, Zeni::Pool_Allocator<std::pair<action_ptrsc, std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>>>>> m_lines;
 };
 
 template <typename FEATURE, typename ACTION>

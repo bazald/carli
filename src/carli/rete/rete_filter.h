@@ -94,7 +94,7 @@ namespace Rete {
     WME m_wme;
     std::array<Symbol_Variable_Ptr_C, 3> m_variable;
     std::weak_ptr<Rete_Node> input;
-    std::list<std::pair<WME_Ptr_C, WME_Token_Ptr_C>> tokens;
+    std::list<std::pair<WME_Ptr_C, WME_Token_Ptr_C>, Zeni::Pool_Allocator<std::pair<WME_Ptr_C, WME_Token_Ptr_C>>> tokens;
   };
 
 }
