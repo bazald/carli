@@ -310,29 +310,29 @@ namespace Puddle_World {
       insert_wme(m_y_wme);
     }
 
-//    void print_policy(ostream &os, const size_t &granularity) {
-//      auto env = dynamic_pointer_cast<Environment>(get_env());
-//      const auto position = env->get_position();
-//
-//      for(size_t y = granularity; y != 0lu; --y) {
-//        for(size_t x = 0lu; x != granularity; ++x) {
-//          env->set_position(Environment::double_pair((x + 0.5) / granularity, (y - 0.5) / granularity));
-//          regenerate_lists();
-//          auto action = choose_greedy();
-//          switch(static_cast<const Move &>(*action).direction) {
-//            case Move::NORTH: os << 'N'; break;
-//            case Move::SOUTH: os << 'S'; break;
-//            case Move::EAST:  os << 'E'; break;
-//            case Move::WEST:  os << 'W'; break;
-//            default: abort();
-//          }
-//        }
-//        os << endl;
-//      }
-//
-//      env->set_position(position);
-//      regenerate_lists();
-//    }
+    void print_policy(ostream &os, const size_t &granularity) {
+      auto env = dynamic_pointer_cast<Environment>(get_env());
+      const auto position = env->get_position();
+
+      for(size_t y = granularity; y != 0lu; --y) {
+        for(size_t x = 0lu; x != granularity; ++x) {
+          env->set_position(Environment::double_pair((x + 0.5) / granularity, (y - 0.5) / granularity));
+          generate_features();
+          auto action = choose_greedy();
+          switch(static_cast<const Move &>(*action).direction) {
+            case Move::NORTH: os << 'N'; break;
+            case Move::SOUTH: os << 'S'; break;
+            case Move::EAST:  os << 'E'; break;
+            case Move::WEST:  os << 'W'; break;
+            default: abort();
+          }
+        }
+        os << endl;
+      }
+
+      env->set_position(position);
+      generate_features();
+    }
 
   private:
 //    set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie) const {
@@ -355,14 +355,25 @@ namespace Puddle_World {
         const double xy_offset = xy_size * tiling;
 
         for(size_t i = 0; i != cmac_resolution; ++i) {
-          auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::X, 2), std::make_shared<Rete::Symbol_Constant_Float>((i - xy_offset) * xy_size), parent);
-          auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::X, 2), std::make_shared<Rete::Symbol_Constant_Float>((i + 1 - xy_offset) * xy_size), xgte);
+          const double left = (i - xy_offset) * xy_size;
+          const double right = (i + 1 - xy_offset) * xy_size;
+          auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
+          auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
           for(size_t j = 0; j != cmac_resolution; ++j) {
-            auto ygte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>((j - xy_offset) * xy_size), xlt);
-            auto ylt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>((j + 1 - xy_offset) * xy_size), ygte);
+            const double top = (j - xy_offset) * xy_size;
+            const double bottom = (j + 1 - xy_offset) * xy_size;
+            auto ygte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
+            auto ylt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), ygte);
             auto q_value = std::make_shared<Q_Value>(0.0, Q_Value::Type::UNSPLIT, 1);
             for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
-              auto rl = std::make_shared<RL>(*this, 1);
+              std::vector<RL::Line> lines;
+              lines.push_back(RL::Line(std::make_pair(left, top), std::make_pair(left, bottom)));
+              lines.push_back(RL::Line(std::make_pair(left, bottom), std::make_pair(right, bottom)));
+              lines.push_back(RL::Line(std::make_pair(right, bottom), std::make_pair(right, top)));
+              lines.push_back(RL::Line(std::make_pair(right, top), std::make_pair(left, top)));
+              auto rl = std::make_shared<RL>(*this, 1,
+                                             RL::Range(std::make_pair(left, top), std::make_pair(right, bottom)),
+                                             lines);
               rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
               ++this->m_q_value_count;
               make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
@@ -378,7 +389,9 @@ namespace Puddle_World {
 
     void generate_rete(const Rete::Rete_Node_Ptr &parent) {
       for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
-        auto rl = std::make_shared<RL>(*this, 1);
+        auto rl = std::make_shared<RL>(*this, 1,
+                                       RL::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 1.0)),
+                                       std::vector<RL::Line>());
         rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
         ++this->m_q_value_count;
         rl->fringe_values = new RL::Fringe_Values;
@@ -390,7 +403,11 @@ namespace Puddle_World {
         }, parent);
 
         {
-          auto rlf = std::make_shared<RL>(*this, 2);
+          std::vector<RL::Line> lines;
+          lines.push_back(RL::Line(std::make_pair(0.5, 0.0), std::make_pair(0.5, 1.0)));
+          auto rlf = std::make_shared<RL>(*this, 2,
+                                          RL::Range(std::make_pair(0.0, 0.0), std::make_pair(0.5, 1.0)),
+                                          lines);
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
           rlf->feature = new Feature(Feature::X, 0.0, 0.5, 2, false);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
@@ -403,7 +420,9 @@ namespace Puddle_World {
         }
 
         {
-          auto rlf = std::make_shared<RL>(*this, 2);
+          auto rlf = std::make_shared<RL>(*this, 2,
+                                          RL::Range(std::make_pair(0.5, 0.0), std::make_pair(1.0, 1.0)),
+                                          std::vector<RL::Line>());
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
           rlf->feature = new Feature(Feature::X, 0.5, 1.0, 2, true);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
@@ -416,7 +435,11 @@ namespace Puddle_World {
         }
 
         {
-          auto rlf = std::make_shared<RL>(*this, 2);
+          std::vector<RL::Line> lines;
+          lines.push_back(RL::Line(std::make_pair(0.0, 0.5), std::make_pair(1.0, 0.5)));
+          auto rlf = std::make_shared<RL>(*this, 2,
+                                          RL::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 0.5)),
+                                          lines);
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
           rlf->feature = new Feature(Feature::Y, 0.0, 0.5, 2, false);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
@@ -429,7 +452,9 @@ namespace Puddle_World {
         }
 
         {
-          auto rlf = std::make_shared<RL>(*this, 2);
+          auto rlf = std::make_shared<RL>(*this, 2,
+                                          RL::Range(std::make_pair(0.0, 0.5), std::make_pair(1.0, 1.0)),
+                                          std::vector<RL::Line>());
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
           rlf->feature = new Feature(Feature::Y, 0.5, 1.0, 2, true);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());

@@ -197,31 +197,31 @@ namespace Mountain_Car {
       insert_wme(m_x_dot_wme);
     }
 
-//    void print_policy(ostream &os, const size_t &granularity) {
-//      auto env = dynamic_pointer_cast<Environment>(get_env());
-//      const auto x_bak = env->get_x();
-//      const auto x_dot_bak = env->get_x_dot();
-//
-//      for(size_t x_dot = granularity; x_dot != 0lu; --x_dot) {
-//        env->set_x_dot(((x_dot - 0.5) / granularity) * 0.14 - 0.07);
-//        for(size_t x = 0lu; x != granularity; ++x) {
-//          env->set_x(((x + 0.5) / granularity) * 1.8 - 1.2);
-//          regenerate_lists();
-//          auto action = choose_greedy();
-//          switch(static_cast<const Move &>(*action).direction) {
-//            case Move::LEFT:  os << '-'; break;
-//            case Move::IDLE:  os << '0'; break;
-//            case Move::RIGHT: os << '+'; break;
-//            default: abort();
-//          }
-//        }
-//        os << endl;
-//      }
-//
-//      env->set_x(x_bak);
-//      env->set_x_dot(x_dot_bak);
-//      regenerate_lists();
-//    }
+    void print_policy(ostream &os, const size_t &granularity) {
+      auto env = dynamic_pointer_cast<Environment>(get_env());
+      const auto x_bak = env->get_x();
+      const auto x_dot_bak = env->get_x_dot();
+
+      for(size_t x_dot = granularity; x_dot != 0lu; --x_dot) {
+        env->set_x_dot(((x_dot - 0.5) / granularity) * 0.14 - 0.07);
+        for(size_t x = 0lu; x != granularity; ++x) {
+          env->set_x(((x + 0.5) / granularity) * 1.8 - 1.2);
+          generate_features();
+          auto action = choose_greedy();
+          switch(static_cast<const Move &>(*action).direction) {
+            case Move::LEFT:  os << '-'; break;
+            case Move::IDLE:  os << '0'; break;
+            case Move::RIGHT: os << '+'; break;
+            default: abort();
+          }
+        }
+        os << endl;
+      }
+
+      env->set_x(x_bak);
+      env->set_x_dot(x_dot_bak);
+      generate_features();
+    }
 
   private:
 //    set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &trie) const {
@@ -246,14 +246,25 @@ namespace Mountain_Car {
         const double xdot_offset = xdot_size * tiling;
 
         for(size_t i = 0; i != cmac_resolution; ++i) {
-          auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(m_min_x + (i - x_offset) * x_size), parent);
-          auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(m_min_x + (i + 1 - x_offset) * x_size), xgte);
+          const double left = m_min_x + (i - x_offset) * x_size;
+          const double right = m_min_x + (i + 1 - x_offset) * x_size;
+          auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
+          auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
           for(size_t j = 0; j != cmac_resolution; ++j) {
-            auto xdotgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::X_DOT, 2), std::make_shared<Rete::Symbol_Constant_Float>(m_min_x_dot + (j - xdot_offset) * xdot_size), xlt);
-            auto xdotlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::X_DOT, 2), std::make_shared<Rete::Symbol_Constant_Float>(m_min_x_dot + (j + 1 - xdot_offset) * xdot_size), xdotgte);
+            const double top = m_min_x_dot + (j - xdot_offset) * xdot_size;
+            const double bottom = m_min_x_dot + (j + 1 - xdot_offset) * xdot_size;
+            auto xdotgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::X_DOT, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
+            auto xdotlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::X_DOT, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), xdotgte);
             auto q_value = std::make_shared<Q_Value>(0.0, Q_Value::Type::UNSPLIT, 1);
             for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
-              auto rl = std::make_shared<RL>(*this, 1);
+              std::vector<RL::Line> lines;
+              lines.push_back(RL::Line(std::make_pair(left, top), std::make_pair(left, bottom)));
+              lines.push_back(RL::Line(std::make_pair(left, bottom), std::make_pair(right, bottom)));
+              lines.push_back(RL::Line(std::make_pair(right, bottom), std::make_pair(right, top)));
+              lines.push_back(RL::Line(std::make_pair(right, top), std::make_pair(left, top)));
+              auto rl = std::make_shared<RL>(*this, 1,
+                                             RL::Range(std::make_pair(left, top), std::make_pair(right, bottom)),
+                                             lines);
               rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
               ++this->m_q_value_count;
               make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
@@ -268,8 +279,13 @@ namespace Mountain_Car {
     }
 
     void generate_rete(const Rete::Rete_Node_Ptr &parent) {
+      const double m_half_x = (m_min_x + m_max_x) / 2.0;
+      const double m_half_x_dot = (m_min_x_dot + m_max_x_dot) / 2.0;
+
       for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
-        auto rl = std::make_shared<RL>(*this, 1);
+        auto rl = std::make_shared<RL>(*this, 1,
+                                       RL::Range(std::make_pair(m_min_x, m_max_x), std::make_pair(m_min_x_dot, m_max_x_dot)),
+                                       std::vector<RL::Line>());
         rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
         ++this->m_q_value_count;
         rl->fringe_values = new RL::Fringe_Values;
@@ -281,9 +297,13 @@ namespace Mountain_Car {
         }, parent);
 
         {
-          auto rlf = std::make_shared<RL>(*this, 2);
+          std::vector<RL::Line> lines;
+          lines.push_back(RL::Line(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)));
+          auto rlf = std::make_shared<RL>(*this, 2,
+                                          RL::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)),
+                                          lines);
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
-          rlf->feature = new Feature(Feature::X, m_min_x, (m_min_x + m_max_x) / 2.0, 2, false);
+          rlf->feature = new Feature(Feature::X, m_min_x, m_half_x, 2, false);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
           rlf->action = make_action_retraction([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->m_next_q_values[action].push_back(rlf->q_value);
@@ -294,9 +314,11 @@ namespace Mountain_Car {
         }
 
         {
-          auto rlf = std::make_shared<RL>(*this, 2);
+          auto rlf = std::make_shared<RL>(*this, 2,
+                                          RL::Range(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_max_x, m_max_x_dot)),
+                                          std::vector<RL::Line>());
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
-          rlf->feature = new Feature(Feature::X, (m_min_x + m_max_x) / 2.0, m_max_x, 2, true);
+          rlf->feature = new Feature(Feature::X, m_half_x, m_max_x, 2, true);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
           rlf->action = make_action_retraction([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->m_next_q_values[action].push_back(rlf->q_value);
@@ -307,9 +329,13 @@ namespace Mountain_Car {
         }
 
         {
-          auto rlf = std::make_shared<RL>(*this, 2);
+          std::vector<RL::Line> lines;
+          lines.push_back(RL::Line(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_half_x_dot)));
+          auto rlf = std::make_shared<RL>(*this, 2,
+                                          RL::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_max_x, m_half_x_dot)),
+                                          lines);
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
-          rlf->feature = new Feature(Feature::X_DOT, m_min_x_dot, (m_min_x_dot + m_max_x_dot) / 2.0, 2, false);
+          rlf->feature = new Feature(Feature::X_DOT, m_min_x_dot, m_half_x_dot, 2, false);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X_DOT, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
           rlf->action = make_action_retraction([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->m_next_q_values[action].push_back(rlf->q_value);
@@ -320,9 +346,11 @@ namespace Mountain_Car {
         }
 
         {
-          auto rlf = std::make_shared<RL>(*this, 2);
+          auto rlf = std::make_shared<RL>(*this, 2,
+                                          RL::Range(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_max_x_dot)),
+                                          std::vector<RL::Line>());
           rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
-          rlf->feature = new Feature(Feature::X_DOT, (m_min_x_dot + m_max_x_dot) / 2.0, m_max_x_dot, 2, true);
+          rlf->feature = new Feature(Feature::X_DOT, m_half_x_dot, m_max_x_dot, 2, true);
           auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X_DOT, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
           rlf->action = make_action_retraction([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->m_next_q_values[action].push_back(rlf->q_value);

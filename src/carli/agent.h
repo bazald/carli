@@ -54,10 +54,14 @@ public:
 
   public:
     typedef std::list<std::shared_ptr<RL>> Fringe_Values;
+    typedef std::pair<std::pair<double, double>, std::pair<double, double>> Range;
+    typedef std::pair<std::pair<double, double>, std::pair<double, double>> Line;
 
-    RL(Agent<FEATURE, ACTION> &agent_, const size_t &depth_)
+    RL(Agent<FEATURE, ACTION> &agent_, const size_t &depth_, const Range &range_, const std::vector<Line> &lines_)
      : agent(agent_),
-     depth(depth_)
+     depth(depth_),
+     range(range_),
+     lines(lines_)
     {
     }
 
@@ -79,6 +83,9 @@ public:
 
     /// Present only for Fringe nodes
     tracked_ptr<feature_type> feature;
+
+    Range range;
+    std::vector<Line> lines;
   };
 
   bool specialize(const std::shared_ptr<typename action_type::derived_type> &action, const std::shared_ptr<RL> &general) {
@@ -132,6 +139,11 @@ public:
       leaf->q_value.delete_and_zero();
       leaf->q_value = new Q_Value(0.0f, Q_Value::Type::UNSPLIT, leaf->depth);
       ++m_q_value_count;
+
+      for(auto &line : leaf->lines)
+        m_lines[action].insert(line);
+      leaf->lines.clear();
+
       assert(leaf->depth <= m_split_max);
       if(leaf->depth < m_split_max) {
         leaf->action.lock()->set_action([this,&action,leaf](const Rete::Rete_Action &, const Rete::WME_Token &) {
@@ -143,7 +155,27 @@ public:
 
         auto refined = leaf->feature->refined();
         for(auto &refined_feature : refined) {
-          auto rl = std::make_shared<RL>(*this, leaf->depth + 1);
+          typename RL::Range range(leaf->range);
+          std::vector<typename RL::Line> lines;
+          if(refined_feature->axis.first == 0) {
+            if(!refined_feature->upper) {
+              range.second.first = refined_feature->bound_upper;
+              lines.push_back(typename RL::Line(std::make_pair(range.second.first, range.first.second), std::make_pair(range.second.first, range.second.second)));
+            }
+            else {
+              range.first.first = refined_feature->bound_lower;
+            }
+          }
+          else {
+            if(!refined_feature->upper) {
+              range.second.second = refined_feature->bound_upper;
+              lines.push_back(typename RL::Line(std::make_pair(range.first.first, range.second.second), std::make_pair(range.second.first, range.second.second)));
+            }
+            else {
+              range.first.second = refined_feature->bound_lower;
+            }
+          }
+          auto rl = std::make_shared<RL>(*this, leaf->depth + 1, range, lines);
           rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
           rl->feature = refined_feature;
           auto predicate = make_predicate_vc(refined_feature->predicate(), leaf->feature->axis, refined_feature->symbol_constant(), leaf->action.lock()->parent());
@@ -155,12 +187,28 @@ public:
 
           leaf->fringe_values->push_back(rl);
         }
-        leaf->feature.delete_and_zero();
 
         for(auto &fringe : *general->fringe_values) {
-          auto rl = std::make_shared<RL>(*this, leaf->depth + 1);
+          typename RL::Range range(fringe->range);
+          if(leaf->feature->axis.first == 0) {
+            range.first.first = leaf->range.first.first;
+            range.second.first = leaf->range.second.first;
+          }
+          else {
+            range.first.second = leaf->range.first.second;
+            range.second.second = leaf->range.second.second;
+          }
+          auto rl = std::make_shared<RL>(*this, leaf->depth + 1, range, fringe->lines);
           rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
           rl->feature = fringe->feature->clone();
+          if(leaf->feature->axis.first == 0) {
+            for(auto &line : fringe->lines)
+              rl->lines.push_back(typename RL::Line(std::make_pair(range.first.first, line.first.second), std::make_pair(range.second.first, line.second.second)));
+          }
+          else {
+            for(auto &line : fringe->lines)
+              rl->lines.push_back(typename RL::Line(std::make_pair(line.first.first, range.first.second), std::make_pair(line.second.first, range.second.second)));
+          }
           auto predicate = make_predicate_vc(rl->feature->predicate(), fringe->feature->axis, rl->feature->symbol_constant(), leaf->action.lock()->parent());
           rl->action = make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->m_next_q_values[action].push_back(rl->q_value);
@@ -173,6 +221,8 @@ public:
 
         if(leaf->fringe_values->empty())
           leaf->fringe_values.delete_and_zero();
+
+        leaf->feature.delete_and_zero();
       }
 
       leaf_action->reattach();
@@ -413,17 +463,19 @@ public:
 //    }
   }
 
-//  void print_value_function_grid(std::ostream &os) const {
-//    std::set<line_segment_type> line_segments;
-//    for(auto &value : m_value_function) {
-//      os << *value.first << ":" << std::endl;
-//      const auto line_segments2 = generate_value_function_grid_sets(value.second);
-//      merge_value_function_grid_sets(line_segments, line_segments2);
-//      print_value_function_grid_set(os, line_segments2);
-//    }
-//    os << "all:" << std::endl;
-//    print_value_function_grid_set(os, line_segments);
-//  }
+  void print_value_function_grid(std::ostream &os) const {
+    std::set<typename RL::Line> line_segments;
+    for(auto &action_value : m_next_q_values) {
+      const auto &line_segments2 = m_lines.find(action_value.first);
+      if(line_segments2 != m_lines.end()) {
+        os << *action_value.first << ":" << std::endl;
+        print_value_function_grid_set(os, line_segments2->second);
+        merge_value_function_grid_sets(line_segments, line_segments2->second);
+      }
+    }
+    os << "all:" << std::endl;
+    print_value_function_grid_set(os, line_segments);
+  }
 
 //  void print_update_count_grid(std::ostream &os) const {
 //    std::map<line_segment_type, size_t> update_counts;
@@ -438,9 +490,6 @@ public:
 //  }
 
 protected:
-  typedef std::pair<double, double> point_type;
-  typedef std::pair<point_type, point_type> line_segment_type;
-
 //  Q_Value * get_value(const action_ptrsc &action, const size_t &offset, const size_t &depth = 0) {
 //#ifdef ENABLE_WEIGHT
 //    const bool use_value = m_weight_assignment_code != "all";
@@ -920,10 +969,6 @@ protected:
 //    return false;
 //  }
 
-//  virtual std::set<line_segment_type> generate_value_function_grid_sets(const feature_trie_type * const &) const {
-//    return std::set<line_segment_type>();
-//  }
-
 //  std::set<line_segment_type> generate_vfgs_for_axes(const feature_trie_type * const &trie, const Feature_Axis &axis_x, const Feature_Axis &axis_y, const line_segment_type &extents = line_segment_type(point_type(), point_type(1.0, 1.0))) const {
 //    std::set<line_segment_type> line_segments;
 //
@@ -995,20 +1040,20 @@ protected:
 //    return update_counts;
 //  }
 
-//  void print_value_function_grid_set(std::ostream &os, const std::set<line_segment_type> &line_segments) const {
-//    for(const line_segment_type &line_segment : line_segments)
-//      os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
-//  }
+  void print_value_function_grid_set(std::ostream &os, const std::set<typename RL::Line> &line_segments) const {
+    for(const auto &line_segment : line_segments)
+      os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
+  }
 
 //  void print_update_count_map(std::ostream &os, const std::map<line_segment_type, size_t> &update_counts) const {
 //    for(const auto &rect : update_counts)
 //      os << rect.first.first.first << ',' << rect.first.first.second << '/' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
 //  }
 
-//  void merge_value_function_grid_sets(std::set<line_segment_type> &combination, const std::set<line_segment_type> &additions) const {
-//    for(const line_segment_type &line_segment : additions)
-//      combination.insert(line_segment);
-//  }
+  void merge_value_function_grid_sets(std::set<typename RL::Line> &combination, const std::set<typename RL::Line> &additions) const {
+    for(const auto &line_segment : additions)
+      combination.insert(line_segment);
+  }
 
 //  void merge_update_count_maps(std::map<line_segment_type, size_t> &combination, const std::map<line_segment_type, size_t> &additions) const {
 //    for(const auto &rect : additions)
@@ -1423,6 +1468,8 @@ private:
   const double m_fringe_learning_scale = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["fringe-learning-scale"]).get_value();
 
   Q_Value::List * m_eligible = nullptr;
+
+  std::map<action_ptrsc, std::set<typename RL::Line>> m_lines;
 };
 
 template <typename FEATURE, typename ACTION>
