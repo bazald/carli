@@ -27,7 +27,6 @@ std::ostream & operator << (std::ostream &os, const Feature<DERIVED, DERIVED2> &
   return os;
 }
 
-enum class Credit_Assignment : char {ALL, RANDOM, SPECIFIC, EVEN, INV_UPDATE_COUNT, INV_LOG_UPDATE_COUNT, INV_ROOT_UPDATE_COUNT, INV_DEPTH, EPSILON_EVEN_SPECIFIC, EPSILON_EVEN_DEPTH};
 enum class Metastate : char {NON_TERMINAL, SUCCESS, FAILURE};
 
 template <typename FEATURE, typename ACTION>
@@ -41,11 +40,7 @@ public:
   typedef ACTION action_type;
   typedef typename ACTION::List * action_list;
   typedef std::shared_ptr<const typename action_type::derived_type> action_ptrsc;
-  typedef Zeni::Trie<std::unique_ptr<feature_type>, Q_Value, typename feature_type::Compare> feature_trie_type;
-  typedef feature_trie_type * feature_trie;
   typedef Environment<action_type> environment_type;
-//  typedef std::map<action_type *, feature_list, typename action_type::Compare> feature_list_type;
-//  typedef std::map<action_type *, feature_trie, typename action_type::Compare> value_function_type;
   typedef double reward_type;
   typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
 
@@ -300,13 +295,13 @@ public:
   double get_discount_rate() const {return m_discount_rate;}
   double get_eligibility_trace_decay_rate() const {return m_eligibility_trace_decay_rate;}
   double get_eligibility_trace_decay_threshold() const {return m_eligibility_trace_decay_threshold;}
-  Credit_Assignment get_credit_assignment() const {return m_credit_assignment_code;}
+  std::string get_credit_assignment() const {return m_credit_assignment_code;}
   double get_credit_assignment_epsilon() const {return m_credit_assignment_epsilon;}
   double get_credit_assignment_log_base() const {return m_credit_assignment_log_base;}
   double get_credit_assignment_root() const {return m_credit_assignment_root;}
   bool is_credit_assignment_normalize() const {return m_credit_assignment_normalize;}
 #ifdef ENABLE_WEIGHT
-  Credit_Assignment get_weight_assignment() const {return m_weight_assignment_code;}
+  std::string get_weight_assignment() const {return m_weight_assignment_code;}
 #endif
   bool is_on_policy() const {return m_on_policy;}
   double get_epsilon() const {return m_epsilon;}
@@ -1063,30 +1058,20 @@ protected:
   action_ptrsc m_current;
   Q_Value_List m_current_q_value;
   action_ptrsc m_next;
-  std::map<action_ptrsc, Q_Value_List, typename action_type::Compare, Zeni::Pool_Allocator<std::pair<action_ptrsc, Q_Value_List>>> m_next_q_values;
+  std::map<action_ptrsc, Q_Value_List, compare_deref_lt, Zeni::Pool_Allocator<std::pair<action_ptrsc, Q_Value_List>>> m_next_q_values;
   std::function<action_ptrsc ()> m_target_policy; ///< Sarsa/Q-Learning selector
   std::function<action_ptrsc ()> m_exploration_policy; ///< Exploration policy
   std::function<bool (Q_Value * const &, const size_t &)> m_split_test; ///< true if too general, false if sufficiently general
   size_t m_q_value_count = 0;
 
 private:
-  static size_t get_trie_size(const feature_trie_type * const &trie) {
-    size_t size = 0lu;
-    for(const feature_trie_type &trie2 : *trie) {
-      if(trie2.get())
-        ++size;
-      size += get_trie_size(trie2.get_deeper());
-    }
-    return size;
-  }
-
-  static void reset_update_counts_for_trie(const feature_trie_type * const &trie) {
-    for(const feature_trie_type &trie2 : *trie) {
-      if(trie2.get())
-        trie2.get()->update_count = 0;
-      reset_update_counts_for_trie(trie2.get_deeper());
-    }
-  }
+//  static void reset_update_counts_for_trie(const feature_trie_type * const &trie) {
+//    for(const feature_trie_type &trie2 : *trie) {
+//      if(trie2.get())
+//        trie2.get()->update_count = 0;
+//      reset_update_counts_for_trie(trie2.get_deeper());
+//    }
+//  }
 
 //  feature_trie get_value_from_function(const feature_trie &head, feature_trie &function, const size_t &offset, const size_t &depth, const bool &use_value, const double &value = 0.0) {
 //    /** Begin logic to ensure that features enter the trie in the same order, regardless of current ordering. **/

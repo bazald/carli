@@ -16,30 +16,6 @@ public:
   typedef typename List::iterator iterator;
   typedef DERIVED derived_type;
 
-  struct Compare {
-    bool operator()(const derived_type &lhs, const derived_type &rhs) const {
-      return lhs < rhs;
-    }
-    bool operator()(const derived_type &lhs, const derived_type * const &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const derived_type &lhs, const std::shared_ptr<const derived_type> &rhs) const {return operator()(lhs, *rhs);}
-    bool operator()(const derived_type &lhs, const std::unique_ptr<const derived_type> &rhs) const {return operator()(lhs, *rhs);}
-
-    bool operator()(const derived_type * const &lhs, const derived_type &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const derived_type * const &lhs, const derived_type * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const derived_type * const &lhs, const std::shared_ptr<const derived_type> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const derived_type * const &lhs, const std::unique_ptr<const derived_type> &rhs) const {return operator()(*lhs, *rhs);}
-
-    bool operator()(const std::shared_ptr<const derived_type> &lhs, const derived_type &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::shared_ptr<const derived_type> &lhs, const derived_type * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<const derived_type> &lhs, const std::shared_ptr<const derived_type> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::shared_ptr<const derived_type> &lhs, const std::unique_ptr<const derived_type> &rhs) const {return operator()(*lhs, *rhs);}
-
-    bool operator()(const std::unique_ptr<const derived_type> &lhs, const derived_type &rhs) const {return operator()(*lhs, rhs);}
-    bool operator()(const std::unique_ptr<const derived_type> &lhs, const derived_type * const &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<const derived_type> &lhs, const std::shared_ptr<const derived_type> &rhs) const {return operator()(*lhs, *rhs);}
-    bool operator()(const std::unique_ptr<const derived_type> &lhs, const std::unique_ptr<const derived_type> &rhs) const {return operator()(*lhs, *rhs);}
-  };
-
   Action()
     : candidates(this)
   {
