@@ -3,7 +3,12 @@
 //#define WHITESON_ADAPTIVE_TILE
 //#define USE_AGENDA
 
-#ifndef NDEBUG
+#ifdef NDEBUG
+#define debuggable_cast static_cast
+#define debuggable_pointer_cast std::static_pointer_cast
+#else
+#define debuggable_cast dynamic_cast
+#define debuggable_pointer_cast std::dynamic_pointer_cast
 #define DEBUG_OUTPUT
 #endif
 

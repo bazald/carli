@@ -47,12 +47,7 @@ namespace Puddle_World {
     }
   };
 
-  typedef ::Feature feature_type;
-
-  class Move;
-  typedef Action<Move, Move> action_type;
-
-  class Move : public action_type {
+  class Move : public Action {
   public:
     enum Direction : char {NORTH, SOUTH, EAST, WEST};
 
@@ -63,6 +58,10 @@ namespace Puddle_World {
 
     Move * clone() const {
       return new Move(direction);
+    }
+
+    int compare(const Action &rhs) const {
+      return direction - debuggable_cast<const Move &>(rhs).direction;
     }
 
     int compare(const Move &rhs) const {
@@ -86,7 +85,7 @@ namespace Puddle_World {
     Direction direction;
   };
 
-  class Environment : public ::Environment<action_type> {
+  class Environment : public ::Environment<Action> {
     typedef std::array<double, 4> Puddle;
 
   public:
@@ -284,10 +283,10 @@ namespace Puddle_World {
     double m_noise = 0.01;
   };
 
-  class Agent : public ::Agent<feature_type, action_type> {
+  class Agent : public ::Agent<Feature, Action> {
   public:
     Agent(const shared_ptr<environment_type> &env)
-     : ::Agent<feature_type, action_type>(env)
+     : ::Agent<Feature, Action>(env)
     {
       auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
       auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
@@ -365,7 +364,7 @@ namespace Puddle_World {
             auto ygte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
             auto ylt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), ygte);
             auto q_value = std::make_shared<Q_Value>(0.0, Q_Value::Type::UNSPLIT, 1);
-            for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
+            for(const auto &action : m_action) {
               RL::Lines lines;
               lines.push_back(RL::Line(std::make_pair(left, top), std::make_pair(left, bottom)));
               lines.push_back(RL::Line(std::make_pair(left, bottom), std::make_pair(right, bottom)));
@@ -388,7 +387,7 @@ namespace Puddle_World {
     }
 
     void generate_rete(const Rete::Rete_Node_Ptr &parent) {
-      for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
+      for(const auto &action : m_action) {
         auto rl = std::make_shared<RL>(*this, 1,
                                        RL::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 1.0)),
                                        RL::Lines());
@@ -500,10 +499,10 @@ namespace Puddle_World {
     Rete::WME_Ptr_C m_x_wme;
     Rete::WME_Ptr_C m_y_wme;
 
-    std::array<std::shared_ptr<action_type::derived_type>, 4> m_action = {{std::make_shared<Move>(Move::NORTH),
-                                                                           std::make_shared<Move>(Move::SOUTH),
-                                                                           std::make_shared<Move>(Move::EAST),
-                                                                           std::make_shared<Move>(Move::WEST)}};
+    std::array<std::shared_ptr<const Action>, 4> m_action = {{std::make_shared<Move>(Move::NORTH),
+                                                              std::make_shared<Move>(Move::SOUTH),
+                                                              std::make_shared<Move>(Move::EAST),
+                                                              std::make_shared<Move>(Move::WEST)}};
   };
 
 }

@@ -31,9 +31,9 @@ class Agent : public std::enable_shared_from_this<Agent<FEATURE, ACTION>>, publi
 public:
   typedef Feature feature_type;
   typedef typename Feature::List * feature_list;
-  typedef ACTION action_type;
-  typedef typename ACTION::List * action_list;
-  typedef std::shared_ptr<const typename action_type::derived_type> action_ptrsc;
+  typedef Action action_type;
+  typedef typename Action::List * action_list;
+  typedef std::shared_ptr<const Action> action_ptrsc;
   typedef Environment<action_type> environment_type;
   typedef double reward_type;
   typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
@@ -79,7 +79,7 @@ public:
     Lines lines;
   };
 
-  bool specialize(const std::shared_ptr<typename action_type::derived_type> &action, const std::shared_ptr<RL> &general) {
+  bool specialize(const action_ptrsc &action, const std::shared_ptr<RL> &general) {
     if(!general->fringe_values || !split_test(general->q_value, general->depth))
       return false;
 
@@ -110,7 +110,7 @@ public:
     return true;
   }
 
-  void expand_fringe(const std::shared_ptr<typename action_type::derived_type> &action, const std::shared_ptr<RL> &general, const Rete::WME_Token_Index specialization) {
+  void expand_fringe(const action_ptrsc &action, const std::shared_ptr<RL> &general, const Rete::WME_Token_Index specialization) {
     assert(general->fringe_values);
 
     typename RL::Fringe_Values leaves;

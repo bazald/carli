@@ -46,12 +46,7 @@ namespace Mountain_Car {
     }
   };
 
-  typedef ::Feature feature_type;
-
-  class Move;
-  typedef Action<Move, Move> action_type;
-
-  class Move : public action_type {
+  class Move : public Action {
   public:
     enum Direction : char {LEFT = 0, IDLE = 1, RIGHT = 2};
 
@@ -62,6 +57,10 @@ namespace Mountain_Car {
 
     Move * clone() const {
       return new Move(direction);
+    }
+
+    int compare(const Action &rhs) const {
+      return direction - debuggable_cast<const Move &>(rhs).direction;
     }
 
     int compare(const Move &rhs) const {
@@ -84,7 +83,7 @@ namespace Mountain_Car {
     Direction direction;
   };
 
-  class Environment : public ::Environment<action_type> {
+  class Environment : public ::Environment<Action> {
   public:
     typedef pair<double, double> double_pair;
 
@@ -171,10 +170,10 @@ namespace Mountain_Car {
     const bool m_reward_negative = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["reward-negative"]).get_value();
   };
 
-  class Agent : public ::Agent<feature_type, action_type> {
+  class Agent : public ::Agent<Feature, Action> {
   public:
     Agent(const shared_ptr<environment_type> &env)
-     : ::Agent<feature_type, action_type>(env)
+     : ::Agent<Feature, Action>(env)
     {
       auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
       auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
@@ -256,7 +255,7 @@ namespace Mountain_Car {
             auto xdotgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::X_DOT, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
             auto xdotlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::X_DOT, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), xdotgte);
             auto q_value = std::make_shared<Q_Value>(0.0, Q_Value::Type::UNSPLIT, 1);
-            for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
+            for(const auto &action : m_action) {
               RL::Lines lines;
               lines.push_back(RL::Line(std::make_pair(left, top), std::make_pair(left, bottom)));
               lines.push_back(RL::Line(std::make_pair(left, bottom), std::make_pair(right, bottom)));
@@ -282,7 +281,7 @@ namespace Mountain_Car {
       const double m_half_x = (m_min_x + m_max_x) / 2.0;
       const double m_half_x_dot = (m_min_x_dot + m_max_x_dot) / 2.0;
 
-      for(const std::shared_ptr<action_type::derived_type> &action : m_action) {
+      for(const auto &action : m_action) {
         auto rl = std::make_shared<RL>(*this, 1,
                                        RL::Range(std::make_pair(m_min_x, m_max_x), std::make_pair(m_min_x_dot, m_max_x_dot)),
                                        RL::Lines());
@@ -398,9 +397,9 @@ namespace Mountain_Car {
     Rete::WME_Ptr_C m_x_wme;
     Rete::WME_Ptr_C m_x_dot_wme;
 
-    std::array<std::shared_ptr<action_type::derived_type>, 3> m_action = {{std::make_shared<Move>(Move::LEFT),
-                                                                           std::make_shared<Move>(Move::IDLE),
-                                                                           std::make_shared<Move>(Move::RIGHT)}};
+    std::array<std::shared_ptr<const Action>, 3> m_action = {{std::make_shared<Move>(Move::LEFT),
+                                                              std::make_shared<Move>(Move::IDLE),
+                                                              std::make_shared<Move>(Move::RIGHT)}};
   };
 
 }
