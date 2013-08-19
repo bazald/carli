@@ -102,7 +102,10 @@ class pointer_tracker {
   static void set_pointer(const void * to, const void * from);
   static void clear_pointer(const void * to, const void * from);
   static size_t count(const void * to);
+  static void print(const void * to);
 #endif
+
+  void break_on(const size_t &count);
 };
 
 template <typename T, typename Deleter>
@@ -126,7 +129,12 @@ tracked_ptr<T, Deleter> & tracked_ptr<T, Deleter>::operator=(const tracked_ptr<T
 #endif
   {
     pointer_tracker::clear_pointer(ptr, this);
-    assert(!ptr || pointer_tracker::count(ptr) != 0);
+#ifndef NDEBUG
+    if(ptr && pointer_tracker::count(ptr) == 0) {
+      pointer_tracker::print(ptr);
+      assert(!ptr || pointer_tracker::count(ptr) != 0);
+    }
+#endif
     ptr = rhs.ptr;
     pointer_tracker::set_pointer(ptr, this);
   }
@@ -140,7 +148,13 @@ void tracked_ptr<T, Deleter>::delete_and_zero() {
   if(ptr)
 #endif
   {
-    assert(pointer_tracker::count(ptr) == 1);
+#ifndef NDEBUG
+    if(pointer_tracker::count(ptr) != 1) {
+      pointer_tracker::clear_pointer(ptr, this);
+      pointer_tracker::print(ptr);
+      assert(pointer_tracker::count(ptr) == 1);
+    }
+#endif
     deleter_type()(ptr);
     pointer_tracker::clear_pointer(ptr, this);
     ptr = nullptr;

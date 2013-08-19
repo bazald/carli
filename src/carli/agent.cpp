@@ -23,7 +23,7 @@ bool Agent::specialize(const action_ptrsc &action, const std::shared_ptr<RL> &ge
 
   auto general_action = general->action.lock();
   general_action->detach();
-  general_action->set_action([this,&action,general](const Rete::Rete_Action &, const Rete::WME_Token &) {
+  general_action->set_action([this,action,general](const Rete::Rete_Action &, const Rete::WME_Token &) {
     this->m_next_q_values[action].push_back(general->q_value);
   });
   general_action->reattach();
@@ -61,7 +61,7 @@ void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<RL> 
     assert(leaf->depth <= m_split_max);
     auto leaf_ranged = dynamic_cast<Feature_Ranged *>(leaf->feature.get());
     if(leaf->depth < m_split_max && leaf_ranged) {
-      leaf->action.lock()->set_action([this,&action,leaf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+      leaf->action.lock()->set_action([this,action,leaf](const Rete::Rete_Action &, const Rete::WME_Token &) {
         if(!this->specialize(action, leaf))
           this->m_next_q_values[action].push_back(leaf->q_value);
       });
@@ -97,9 +97,9 @@ void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<RL> 
         rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
         rl->feature = refined_feature;
         auto predicate = make_predicate_vc(refined_ranged->predicate(), leaf_ranged->axis, refined_ranged->symbol_constant(), leaf->action.lock()->parent());
-        rl->action = make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        rl->action = make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->m_next_q_values[action].push_back(rl->q_value);
-        }, [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->purge_q_value_next(action, rl->q_value);
         }, predicate);
 
@@ -128,9 +128,9 @@ void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<RL> 
         rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
         rl->feature = fringe_ranged->clone();
         auto predicate = make_predicate_vc(rl->feature->predicate(), fringe_ranged->axis, rl->feature->symbol_constant(), leaf->action.lock()->parent());
-        rl->action = make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        rl->action = make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->m_next_q_values[action].push_back(rl->q_value);
-        }, [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->purge_q_value_next(action, rl->q_value);
         }, predicate);
 
@@ -211,7 +211,15 @@ Agent::Agent(const std::shared_ptr<Environment> &environment)
 }
 
 Agent::~Agent() {
-  destroy();
+  Rete_Agent::destroy();
+}
+
+void Agent::destroy() {
+  Rete_Agent::destroy();
+  m_current.zero();
+  m_next.zero();
+  m_next_q_values.clear();
+  m_lines.clear();
 }
 
 void Agent::reset_statistics() {

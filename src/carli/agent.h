@@ -31,7 +31,7 @@ public:
   typedef typename Feature::List * feature_list;
   typedef Action action_type;
   typedef typename Action::List * action_list;
-  typedef std::shared_ptr<const Action> action_ptrsc;
+  typedef tracked_ptr<const Action> action_ptrsc;
   typedef double reward_type;
   typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
 
@@ -82,6 +82,8 @@ public:
   Agent(const std::shared_ptr<Environment> &environment);
 
   virtual ~Agent();
+
+  void destroy();
 
   bool is_null_q_values() const {return m_null_q_values;}
   double get_learning_rate() const {return m_learning_rate;}

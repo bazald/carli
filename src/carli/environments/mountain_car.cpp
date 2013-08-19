@@ -77,6 +77,12 @@ namespace Mountain_Car {
     insert_wme(m_x_dot_wme);
   }
 
+  Agent::~Agent() {
+    destroy();
+    for(auto &action : m_action)
+      action.delete_and_zero();
+  }
+
   void Agent::print_policy(ostream &os, const size_t &granularity) {
     auto env = dynamic_pointer_cast<Environment>(get_env());
     const auto x_bak = env->get_x();
@@ -138,9 +144,9 @@ namespace Mountain_Car {
                                            lines);
             rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
             ++this->m_q_value_count;
-            make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
               this->m_next_q_values[action].push_back(rl->q_value);
-            }, [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
               this->purge_q_value_next(action, rl->q_value);
             }, xdotlt);
           }
@@ -160,10 +166,10 @@ namespace Mountain_Car {
       rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
       ++this->m_q_value_count;
       rl->fringe_values = new RL::Fringe_Values;
-      rl->action = make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+      rl->action = make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
         if(!this->specialize(action, rl))
           this->m_next_q_values[action].push_back(rl->q_value);
-      }, [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+      }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
         this->purge_q_value_next(action, rl->q_value);
       }, parent);
 
@@ -176,9 +182,9 @@ namespace Mountain_Car {
         rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
         rlf->feature = new Feature(Feature::X, m_min_x, m_half_x, 2, false);
         auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
-        rlf->action = make_action_retraction([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        rlf->action = make_action_retraction([this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->m_next_q_values[action].push_back(rlf->q_value);
-        }, [this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        }, [this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->purge_q_value_next(action, rlf->q_value);
         }, predicate);
         rl->fringe_values->push_back(rlf);
@@ -191,9 +197,9 @@ namespace Mountain_Car {
         rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
         rlf->feature = new Feature(Feature::X, m_half_x, m_max_x, 2, true);
         auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
-        rlf->action = make_action_retraction([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        rlf->action = make_action_retraction([this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->m_next_q_values[action].push_back(rlf->q_value);
-        }, [this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        }, [this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->purge_q_value_next(action, rlf->q_value);
         }, predicate);
         rl->fringe_values->push_back(rlf);
@@ -208,9 +214,9 @@ namespace Mountain_Car {
         rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
         rlf->feature = new Feature(Feature::X_DOT, m_min_x_dot, m_half_x_dot, 2, false);
         auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X_DOT, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
-        rlf->action = make_action_retraction([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        rlf->action = make_action_retraction([this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->m_next_q_values[action].push_back(rlf->q_value);
-        }, [this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        }, [this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->purge_q_value_next(action, rlf->q_value);
         }, predicate);
         rl->fringe_values->push_back(rlf);
@@ -223,9 +229,9 @@ namespace Mountain_Car {
         rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
         rlf->feature = new Feature(Feature::X_DOT, m_half_x_dot, m_max_x_dot, 2, true);
         auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X_DOT, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
-        rlf->action = make_action_retraction([this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        rlf->action = make_action_retraction([this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->m_next_q_values[action].push_back(rlf->q_value);
-        }, [this,&action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        }, [this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->purge_q_value_next(action, rlf->q_value);
         }, predicate);
         rl->fringe_values->push_back(rlf);
