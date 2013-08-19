@@ -23,12 +23,12 @@ namespace Puddle_World {
   using std::shared_ptr;
 
   class Feature;
-  class Feature : public Feature_Ranged<Feature> {
+  class Feature : public Feature_Ranged {
   public:
     enum Axis : size_t {X = 0, Y = 1};
 
     Feature(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-     : Feature_Ranged<Feature>(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
     {
     }
 
@@ -47,7 +47,7 @@ namespace Puddle_World {
     }
   };
 
-  typedef Feature feature_type;
+  typedef ::Feature feature_type;
 
   class Move;
   typedef Action<Move, Move> action_type;

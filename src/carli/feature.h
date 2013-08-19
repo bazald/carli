@@ -9,41 +9,39 @@
 #include <iostream>
 #include <memory>
 
-template <typename DERIVED, typename DERIVED2 = DERIVED>
-class Feature : public Zeni::Pool_Allocator<DERIVED2> {
+class Feature : public Zeni::Pool_Allocator<char> {
   Feature(const Feature &) = delete;
   Feature & operator=(const Feature &) = delete;
 
 public:
-  typedef typename Zeni::Linked_List<DERIVED> List;
+  typedef typename Zeni::Linked_List<Feature> List;
   typedef typename List::iterator iterator;
 
   Feature()
-    : features(static_cast<DERIVED *>(this))
+    : features(this)
   {
   }
 
   virtual ~Feature() {}
 
-  virtual DERIVED * clone() const = 0;
+  virtual Feature * clone() const = 0;
 
-  bool operator<(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) < 0;}
-  bool operator<=(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) <= 0;}
-  bool operator>(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) > 0;}
-  bool operator>=(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) >= 0;}
-  bool operator==(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) == 0;}
-  bool operator!=(const Feature &rhs) const {return static_cast<const DERIVED *>(this)->compare(static_cast<const DERIVED &>(rhs)) != 0;}
+  bool operator<(const Feature &rhs) const {return compare(rhs) < 0;}
+  bool operator<=(const Feature &rhs) const {return compare(rhs) <= 0;}
+  bool operator>(const Feature &rhs) const {return compare(rhs) > 0;}
+  bool operator>=(const Feature &rhs) const {return compare(rhs) >= 0;}
+  bool operator==(const Feature &rhs) const {return compare(rhs) == 0;}
+  bool operator!=(const Feature &rhs) const {return compare(rhs) != 0;}
 
-  int compare(const Feature &rhs) const {
-    return compare(static_cast<const DERIVED &>(rhs));
+  virtual int compare(const Feature &rhs) const {
+    const int axis_comparison = compare_axis(rhs);
+    return axis_comparison ? axis_comparison : compare_value(rhs);
   }
 
-  int compare(const DERIVED &rhs) const {
-    const int axis_comparison = static_cast<const DERIVED *>(this)->compare_axis(rhs);
-    return axis_comparison ? axis_comparison : static_cast<const DERIVED *>(this)->compare_value(rhs);
-  }
+  virtual int compare_axis(const Feature &rhs) const = 0;
+  virtual int compare_value(const Feature &rhs) const = 0;
 
-  virtual std::vector<DERIVED *> refined() const {return std::vector<DERIVED *>();}
+  virtual std::vector<Feature *> refined() const {return std::vector<Feature *>();}
   virtual Rete::Rete_Predicate::Predicate predicate() const = 0;
   virtual Rete::Symbol_Ptr_C symbol_constant() const = 0;
 
@@ -52,8 +50,12 @@ public:
   List features;
 };
 
-template <typename DERIVED, typename DERIVED2 = DERIVED>
-class Feature_Present : public Feature<DERIVED, DERIVED2> {
+inline std::ostream & operator<<(std::ostream &os, const Feature &feature) {
+  feature.print(os);
+  return os;
+}
+
+class Feature_Present : public Feature {
   Feature_Present(const Feature_Present &) = delete;
   Feature_Present & operator=(const Feature_Present &) = delete;
 
@@ -63,8 +65,8 @@ public:
   {
   }
 
-  int compare_value(const DERIVED &rhs) const {
-    return present - rhs.present;
+  int compare_value(const Feature &rhs) const {
+    return present - dynamic_cast<const Feature_Present &>(rhs).present;
   }
 
   Rete::Rete_Predicate::Predicate predicate() const {
@@ -119,32 +121,32 @@ public:
   bool upper; ///< Is this the upper half (same bound_upper) or lower half (same bound_lower) of a split?
 };
 
-template <typename DERIVED, typename DERIVED2 = DERIVED>
-class Feature_Ranged : public Feature<DERIVED, DERIVED2>, public Feature_Ranged_Data {
+class Feature_Ranged : public Feature, public Feature_Ranged_Data {
   Feature_Ranged(const Feature_Ranged &) = delete;
   Feature_Ranged & operator=(const Feature_Ranged &) = delete;
 
 public:
   Feature_Ranged(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-   : ::Feature<DERIVED, DERIVED2>(),
-   Feature_Ranged_Data(axis_, bound_lower_, bound_upper_, depth_, upper_)
+   : Feature_Ranged_Data(axis_, bound_lower_, bound_upper_, depth_, upper_)
   {
   }
 
-  int compare(const DERIVED &rhs) const {
-    return Feature_Ranged_Data::compare(rhs);
+  virtual Feature_Ranged * clone() const = 0;
+
+  int compare(const Feature &rhs) const {
+    return Feature_Ranged_Data::compare(dynamic_cast<const Feature_Ranged &>(rhs));
   }
 
-  int compare_axis(const DERIVED &rhs) const {
-    return Feature_Ranged_Data::compare_axis(rhs);
+  int compare_axis(const Feature &rhs) const {
+    return Feature_Ranged_Data::compare_axis(dynamic_cast<const Feature_Ranged &>(rhs));
   }
 
-  int compare_value(const DERIVED &rhs) const {
-    return Feature_Ranged_Data::compare_value(rhs);
+  int compare_value(const Feature &rhs) const {
+    return Feature_Ranged_Data::compare_value(dynamic_cast<const Feature_Ranged &>(rhs));
   }
 
-  std::vector<DERIVED *> refined() const {
-    std::vector<DERIVED *> refined_features;
+  std::vector<Feature *> refined() const {
+    std::vector<Feature *> refined_features;
 
     auto refined_feature = clone();
     refined_feature->bound_upper = refined_feature->midpt();
@@ -160,8 +162,6 @@ public:
 
     return refined_features;
   }
-
-  virtual DERIVED * clone() const = 0;
 
   void print(std::ostream &os) const {
     Feature_Ranged_Data::print(os);

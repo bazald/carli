@@ -21,12 +21,6 @@
 
 #include <iostream>
 
-template <typename DERIVED, typename DERIVED2>
-std::ostream & operator << (std::ostream &os, const Feature<DERIVED, DERIVED2> &feature) {
-  feature.print(os);
-  return os;
-}
-
 enum class Metastate : char {NON_TERMINAL, SUCCESS, FAILURE};
 
 template <typename FEATURE, typename ACTION>
@@ -35,8 +29,8 @@ class Agent : public std::enable_shared_from_this<Agent<FEATURE, ACTION>>, publi
   Agent & operator=(const Agent &) = delete;
 
 public:
-  typedef FEATURE feature_type;
-  typedef typename FEATURE::List * feature_list;
+  typedef Feature feature_type;
+  typedef typename Feature::List * feature_list;
   typedef ACTION action_type;
   typedef typename ACTION::List * action_list;
   typedef std::shared_ptr<const typename action_type::derived_type> action_ptrsc;
@@ -103,7 +97,8 @@ public:
 
 //      std::cerr << "Refining : " << gen->first << std::endl;
 
-    expand_fringe(action, general, chosen->feature->axis);
+    if(auto chosen_feature = dynamic_cast<Feature_Ranged *>(chosen->feature.get()))
+      expand_fringe(action, general, chosen_feature->axis);
 
     auto general_action = general->action.lock();
     general_action->detach();
@@ -120,7 +115,8 @@ public:
 
     typename RL::Fringe_Values leaves;
     for(auto fringe = general->fringe_values->begin(), fend = general->fringe_values->end(); fringe != fend; ) {
-      if((*fringe)->feature->axis == specialization) {
+      auto fringe_ranged = dynamic_cast<Feature_Ranged *>((*fringe)->feature.get());
+      if(fringe_ranged && fringe_ranged->axis == specialization) {
         leaves.push_back(*fringe);
         general->fringe_values->erase(fringe++);
       }
@@ -142,7 +138,8 @@ public:
       leaf->lines.clear();
 
       assert(leaf->depth <= m_split_max);
-      if(leaf->depth < m_split_max) {
+      auto leaf_ranged = dynamic_cast<Feature_Ranged *>(leaf->feature.get());
+      if(leaf->depth < m_split_max && leaf_ranged) {
         leaf->action.lock()->set_action([this,&action,leaf](const Rete::Rete_Action &, const Rete::WME_Token &) {
           if(!this->specialize(action, leaf))
             this->m_next_q_values[action].push_back(leaf->q_value);
@@ -152,30 +149,33 @@ public:
 
         auto refined = leaf->feature->refined();
         for(auto &refined_feature : refined) {
+          auto refined_ranged = dynamic_cast<Feature_Ranged *>(refined_feature);
+          if(!refined_ranged)
+            continue;
           typename RL::Range range(leaf->range);
           typename RL::Lines lines;
-          if(refined_feature->axis.first == 0) {
-            if(!refined_feature->upper) {
-              range.second.first = refined_feature->bound_upper;
+          if(refined_ranged->axis.first == 0) {
+            if(!refined_ranged->upper) {
+              range.second.first = refined_ranged->bound_upper;
               lines.push_back(typename RL::Line(std::make_pair(range.second.first, range.first.second), std::make_pair(range.second.first, range.second.second)));
             }
             else {
-              range.first.first = refined_feature->bound_lower;
+              range.first.first = refined_ranged->bound_lower;
             }
           }
           else {
-            if(!refined_feature->upper) {
-              range.second.second = refined_feature->bound_upper;
+            if(!refined_ranged->upper) {
+              range.second.second = refined_ranged->bound_upper;
               lines.push_back(typename RL::Line(std::make_pair(range.first.first, range.second.second), std::make_pair(range.second.first, range.second.second)));
             }
             else {
-              range.first.second = refined_feature->bound_lower;
+              range.first.second = refined_ranged->bound_lower;
             }
           }
           auto rl = std::make_shared<RL>(*this, leaf->depth + 1, range, lines);
           rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
           rl->feature = refined_feature;
-          auto predicate = make_predicate_vc(refined_feature->predicate(), leaf->feature->axis, refined_feature->symbol_constant(), leaf->action.lock()->parent());
+          auto predicate = make_predicate_vc(refined_ranged->predicate(), leaf_ranged->axis, refined_ranged->symbol_constant(), leaf->action.lock()->parent());
           rl->action = make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->m_next_q_values[action].push_back(rl->q_value);
           }, [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
@@ -186,9 +186,12 @@ public:
         }
 
         for(auto &fringe : *general->fringe_values) {
+          auto fringe_ranged = dynamic_cast<Feature_Ranged *>(fringe->feature.get());
+          if(!fringe_ranged)
+            continue;
           typename RL::Range range(fringe->range);
           typename RL::Lines lines;
-          if(leaf->feature->axis.first == 0) {
+          if(leaf_ranged->axis.first == 0) {
             range.first.first = leaf->range.first.first;
             range.second.first = leaf->range.second.first;
             for(auto &line : fringe->lines)
@@ -202,8 +205,8 @@ public:
           }
           auto rl = std::make_shared<RL>(*this, leaf->depth + 1, range, lines);
           rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
-          rl->feature = fringe->feature->clone();
-          auto predicate = make_predicate_vc(rl->feature->predicate(), fringe->feature->axis, rl->feature->symbol_constant(), leaf->action.lock()->parent());
+          rl->feature = fringe_ranged->clone();
+          auto predicate = make_predicate_vc(rl->feature->predicate(), fringe_ranged->axis, rl->feature->symbol_constant(), leaf->action.lock()->parent());
           rl->action = make_action_retraction([this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->m_next_q_values[action].push_back(rl->q_value);
           }, [this,&action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
