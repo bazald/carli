@@ -23,6 +23,7 @@
 *.o
 *.obj
 *.opensdf
+*.orig
 *.out
 *.pdb
 *-converted-to.pdf

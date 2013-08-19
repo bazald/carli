@@ -41,7 +41,7 @@ public:
   List candidates;
 };
 
-std::ostream & operator << (std::ostream &os, const Action &action) {
+inline std::ostream & operator << (std::ostream &os, const Action &action) {
   action.print(os);
   return os;
 }

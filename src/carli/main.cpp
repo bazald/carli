@@ -1,17 +1,3 @@
-//#define TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-//#define ENABLE_WEIGHT
-//#define WHITESON_ADAPTIVE_TILE
-//#define USE_AGENDA
-
-#ifdef NDEBUG
-#define debuggable_cast static_cast
-#define debuggable_pointer_cast std::static_pointer_cast
-#else
-#define debuggable_cast dynamic_cast
-#define debuggable_pointer_cast std::dynamic_pointer_cast
-#define DEBUG_OUTPUT
-#endif
-
 //#include "environments/blocks_world.h"
 //#include "environments/cart_pole.h"
 #include "environments/mountain_car.h"

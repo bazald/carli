@@ -51,7 +51,7 @@ private:
   bool m_altered = false;
 };
 
-std::ostream & operator<<(std::ostream &os, const Environment &env) {
+inline std::ostream & operator<<(std::ostream &os, const Environment &env) {
   env.print(os);
   return os;
 }

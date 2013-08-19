@@ -30,39 +30,11 @@ public:
   {
   }
 
-  ~Value_Queue() {
-    m_value_list->destroy(m_value_list);
-  }
+  ~Value_Queue();
 
-  void push(const double &value) {
-    Value_List::List * const entry = &(new Value_List(value))->list;
+  void push(const double &value);
 
-    entry->insert_after(m_value_list_tail);
-    m_value_list_tail = entry;
-    if(!m_value_list)
-      m_value_list = entry;
-
-    m_mean.contribute(entry->get()->value);
-
-    ++m_size;
-  }
-
-  void pop() {
-    if(m_value_list) {
-      --m_size;
-
-      m_mean.uncontribute(m_value_list->get()->value);
-
-      Value_List::List * const next = m_value_list->next();
-
-      m_value_list->erase();
-      m_value_list->destroy(m_value_list);
-
-      m_value_list = next;
-      if(!m_value_list)
-        m_value_list_tail = nullptr;
-    }
-  }
+  void pop();
 
   size_t size() const {
     return m_size;

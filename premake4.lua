@@ -44,15 +44,16 @@ solution "carli"
   include "src/carli"
 
   configuration "Debug"
-    defines { "_DEBUG", "DEBUG" }
+    defines { "_DEBUG", "DEBUG", "debuggable_cast=dynamic_cast", "debuggable_pointer_cast=std::dynamic_pointer_cast" }
+    defines { "DEBUG_OUTPUT" }
     flags { "Symbols" }
     targetsuffix "_d"
   configuration "Profiling"
-    defines { "NDEBUG" }
+    defines { "NDEBUG", "debuggable_cast=static_cast", "debuggable_pointer_cast=std::static_pointer_cast" }
     flags { "Symbols", "Optimize" }
     targetsuffix "_p"
   configuration "Release"
-    defines { "NDEBUG" }
+    defines { "NDEBUG", "debuggable_cast=static_cast", "debuggable_pointer_cast=std::static_pointer_cast" }
     flags { "Optimize" }
 --    buildoptions { "-flto" }
 --    linkoptions { "-flto" }
