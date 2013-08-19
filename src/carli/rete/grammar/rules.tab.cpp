@@ -118,7 +118,7 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
   return Rete::WME_Token_Index(size_t(-1), uint8_t(-1));
 }
 
-static void rete_error(Rete::Agent &agent, const char *s);
+static void rete_error(Rete::Rete_Agent &agent, const char *s);
 
 
 
@@ -771,7 +771,7 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, Rete::Agent &agent)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, Rete::Rete_Agent &agent)
 #else
 static void
 yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, agent)
@@ -779,7 +779,7 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, agent)
     int yytype;
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
-    Rete::Agent &agent;
+    Rete::Rete_Agent &agent;
 #endif
 {
   if (!yyvaluep)
@@ -807,7 +807,7 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, agent)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, Rete::Agent &agent)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, Rete::Rete_Agent &agent)
 #else
 static void
 yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, agent)
@@ -815,7 +815,7 @@ yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, agent)
     int yytype;
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
-    Rete::Agent &agent;
+    Rete::Rete_Agent &agent;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -868,14 +868,14 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, Rete::Agent &agent)
+yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, Rete::Rete_Agent &agent)
 #else
 static void
 yy_reduce_print (yyvsp, yylsp, yyrule, agent)
     YYSTYPE *yyvsp;
     YYLTYPE *yylsp;
     int yyrule;
-    Rete::Agent &agent;
+    Rete::Rete_Agent &agent;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -1174,7 +1174,7 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, Rete::Agent &agent)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, Rete::Rete_Agent &agent)
 #else
 static void
 yydestruct (yymsg, yytype, yyvaluep, yylocationp, agent)
@@ -1182,7 +1182,7 @@ yydestruct (yymsg, yytype, yyvaluep, yylocationp, agent)
     int yytype;
     YYSTYPE *yyvaluep;
     YYLTYPE *yylocationp;
-    Rete::Agent &agent;
+    Rete::Rete_Agent &agent;
 #endif
 {
   YYUSE (yyvaluep);
@@ -1211,7 +1211,7 @@ int yyparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int yyparse (Rete::Agent &agent);
+int yyparse (Rete::Rete_Agent &agent);
 #else
 int yyparse ();
 #endif
@@ -1249,11 +1249,11 @@ yyparse (YYPARSE_PARAM)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 int
-yyparse (Rete::Agent &agent)
+yyparse (Rete::Rete_Agent &agent)
 #else
 int
 yyparse (agent)
-    Rete::Agent &agent;
+    Rete::Rete_Agent &agent;
 #endif
 #endif
 {
@@ -2041,12 +2041,12 @@ yyreturn:
 
 extern size_t g_line_number;
 
-static void rete_error(Rete::Agent &, const char *s) {
+static void rete_error(Rete::Rete_Agent &, const char *s) {
   cout << "Parse error, line " << g_line_number << ": " << s << endl;
   exit(-1);
 }
 
-void rete_parse_file(Rete::Agent &agent, const string &filename) {
+void rete_parse_file(Rete::Rete_Agent &agent, const string &filename) {
   FILE * file = fopen(filename.c_str(), "r");
   if(!file)
     abort();

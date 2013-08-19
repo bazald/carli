@@ -11,14 +11,14 @@ namespace Rete {
     std::unordered_set<WME_Ptr_C> wmes;
   };
 
-  inline std::ostream & operator<<(std::ostream &os, const WME_Set &wme_set) {
-    os << '{' << std::endl;
-    for(const auto &wme : wme_set.wmes)
-      os << "  " << *wme << std::endl;
-    os << '}';
-    return os;
-  }
+}
 
+inline std::ostream & operator<<(std::ostream &os, const Rete::WME_Set &wme_set) {
+  os << '{' << std::endl;
+  for(const auto &wme : wme_set.wmes)
+    os << "  " << *wme << std::endl;
+  os << '}';
+  return os;
 }
 
 namespace std {

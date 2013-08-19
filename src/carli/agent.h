@@ -5,7 +5,7 @@
 #include "utility/tracked_ptr.h"
 #include "utility/random.h"
 
-#include "rete/agent.h"
+#include "rete/rete_agent.h"
 
 #include "environment.h"
 #include "feature.h"
@@ -22,7 +22,7 @@
 
 enum class Metastate : char {NON_TERMINAL, SUCCESS, FAILURE};
 
-class Agent : public std::enable_shared_from_this<Agent>, public Rete::Agent {
+class Agent : public std::enable_shared_from_this<Agent>, public Rete::Rete_Agent {
   Agent(const Agent &) = delete;
   Agent & operator=(const Agent &) = delete;
 

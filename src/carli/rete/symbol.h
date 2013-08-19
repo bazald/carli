@@ -88,10 +88,6 @@ namespace Rete {
     virtual std::ostream & print(std::ostream &os) const = 0;
   };
 
-  inline std::ostream & operator<<(std::ostream &os, const Symbol &symbol) {
-    return symbol.print(os);
-  }
-
   class Symbol_Constant : public Symbol {
     Symbol_Constant(const Symbol_Constant &);
     Symbol_Constant & operator=(const Symbol_Constant &);
@@ -295,6 +291,10 @@ namespace Rete {
     static_assert(sizeof(pool_allocator_type) >= sizeof(Symbol_Variable), "Pool size suboptimal.");
   }
 
+}
+
+inline std::ostream & operator<<(std::ostream &os, const Rete::Symbol &symbol) {
+  return symbol.print(os);
 }
 
 namespace std {

@@ -45,7 +45,7 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
   return Rete::WME_Token_Index(size_t(-1), uint8_t(-1));
 }
 
-static void rete_error(Rete::Agent &agent, const char *s);
+static void rete_error(Rete::Rete_Agent &agent, const char *s);
 
 %}
 
@@ -71,7 +71,7 @@ static void rete_error(Rete::Agent &agent, const char *s);
 %type <symbol_ptr> symbol_constant
 %type <sval> string_or_literal literal literal_parts
 
-%parse-param {Rete::Agent &agent}
+%parse-param {Rete::Rete_Agent &agent}
 
 %%
 
@@ -214,12 +214,12 @@ literal_parts:
 
 extern size_t g_line_number;
 
-static void rete_error(Rete::Agent &, const char *s) {
+static void rete_error(Rete::Rete_Agent &, const char *s) {
   cout << "Parse error, line " << g_line_number << ": " << s << endl;
   exit(-1);
 }
 
-void rete_parse_file(Rete::Agent &agent, const string &filename) {
+void rete_parse_file(Rete::Rete_Agent &agent, const string &filename) {
   FILE * file = fopen(filename.c_str(), "r");
   if(!file)
     abort();

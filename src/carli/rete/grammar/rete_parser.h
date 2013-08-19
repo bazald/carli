@@ -1,8 +1,8 @@
 #ifndef RETE_PARSER_H
 #define RETE_PARSER_H
 
-#include "../agent.h"
+#include "../rete_agent.h"
 
-void rete_parse_file(Rete::Agent &agent, const std::string &filename);
+void rete_parse_file(Rete::Rete_Agent &agent, const std::string &filename);
 
 #endif
