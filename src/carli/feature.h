@@ -66,7 +66,7 @@ public:
   }
 
   int compare_value(const Feature &rhs) const {
-    return present - dynamic_cast<const Feature_Present &>(rhs).present;
+    return present - debuggable_cast<const Feature_Present &>(rhs).present;
   }
 
   Rete::Rete_Predicate::Predicate predicate() const {
@@ -134,15 +134,15 @@ public:
   virtual Feature_Ranged * clone() const = 0;
 
   int compare(const Feature &rhs) const {
-    return Feature_Ranged_Data::compare(dynamic_cast<const Feature_Ranged &>(rhs));
+    return Feature_Ranged_Data::compare(debuggable_cast<const Feature_Ranged &>(rhs));
   }
 
   int compare_axis(const Feature &rhs) const {
-    return Feature_Ranged_Data::compare_axis(dynamic_cast<const Feature_Ranged &>(rhs));
+    return Feature_Ranged_Data::compare_axis(debuggable_cast<const Feature_Ranged &>(rhs));
   }
 
   int compare_value(const Feature &rhs) const {
-    return Feature_Ranged_Data::compare_value(dynamic_cast<const Feature_Ranged &>(rhs));
+    return Feature_Ranged_Data::compare_value(debuggable_cast<const Feature_Ranged &>(rhs));
   }
 
   std::vector<Feature *> refined() const {

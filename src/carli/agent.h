@@ -34,7 +34,6 @@ public:
   typedef Action action_type;
   typedef typename Action::List * action_list;
   typedef std::shared_ptr<const Action> action_ptrsc;
-  typedef Environment<action_type> environment_type;
   typedef double reward_type;
   typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
 
@@ -230,7 +229,7 @@ public:
     general->fringe_values.delete_and_zero();
   }
 
-  Agent(const std::shared_ptr<environment_type> &environment)
+  Agent(const std::shared_ptr<Environment> &environment)
     : m_target_policy([this]()->action_ptrsc{return this->choose_greedy();}),
     m_exploration_policy([this]()->action_ptrsc{return this->choose_epsilon_greedy(m_epsilon);}),
     m_split_test([this](Q_Value * const &q, const size_t &depth)->bool{return this->split_test(q, depth);}),
@@ -319,8 +318,8 @@ public:
   size_t get_value_function_cap() const {return m_value_function_cap;}
   size_t get_mean_cabe_queue_size() const {return m_mean_cabe_queue_size;}
 
-  const std::shared_ptr<const environment_type> & get_env() const {return m_environment;}
-  std::shared_ptr<environment_type> & get_env() {return m_environment;}
+  const std::shared_ptr<const Environment> & get_env() const {return m_environment;}
+  std::shared_ptr<Environment> & get_env() {return m_environment;}
   Metastate get_metastate() const {return m_metastate;}
   size_t get_episode_number() const {return m_episode_number;}
   size_t get_step_count() const {return m_step_count;}
@@ -1407,7 +1406,7 @@ private:
   size_t m_steps_since_minbe = 0;
 #endif
 
-  std::shared_ptr<environment_type> m_environment;
+  std::shared_ptr<Environment> m_environment;
 
   Zeni::Random random;
 

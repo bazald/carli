@@ -83,7 +83,7 @@ namespace Mountain_Car {
     Direction direction;
   };
 
-  class Environment : public ::Environment<Action> {
+  class Environment : public ::Environment {
   public:
     typedef pair<double, double> double_pair;
 
@@ -131,7 +131,7 @@ namespace Mountain_Car {
       }
     }
 
-    reward_type transition_impl(const action_type &action) {
+    reward_type transition_impl(const Action &action) {
       const int a = int(static_cast<const Move &>(action).direction);
 
       assert(0 <= a && a <= 2);
@@ -172,7 +172,7 @@ namespace Mountain_Car {
 
   class Agent : public ::Agent<Feature, Action> {
   public:
-    Agent(const shared_ptr<environment_type> &env)
+    Agent(const shared_ptr<Environment> &env)
      : ::Agent<Feature, Action>(env)
     {
       auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");

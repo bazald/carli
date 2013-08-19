@@ -85,7 +85,7 @@ namespace Puddle_World {
     Direction direction;
   };
 
-  class Environment : public ::Environment<Action> {
+  class Environment : public ::Environment {
     typedef std::array<double, 4> Puddle;
 
   public:
@@ -188,7 +188,7 @@ namespace Puddle_World {
       }
     }
 
-    reward_type transition_impl(const action_type &action) {
+    reward_type transition_impl(const Action &action) {
       const double shift = m_random_motion.frand_gaussian() * 0.01;
       const double step_size = shift + 0.05;
 
@@ -285,7 +285,7 @@ namespace Puddle_World {
 
   class Agent : public ::Agent<Feature, Action> {
   public:
-    Agent(const shared_ptr<environment_type> &env)
+    Agent(const shared_ptr<Environment> &env)
      : ::Agent<Feature, Action>(env)
     {
       auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
