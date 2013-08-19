@@ -153,6 +153,7 @@ namespace Zeni {
     std::unordered_map<size_t, Pool *> m_pools;
   };
 
+#ifndef DISABLE_POOL_ALLOCATOR
   template <typename TYPE>
   class Pool_Allocator {
   public:
@@ -249,6 +250,10 @@ namespace Zeni {
   Pool_Map * Pool_Allocator<TYPE>::pool_map = &Pool_Map::get();
   template <typename TYPE>
   Pool * Pool_Allocator<TYPE>::pool = &Pool_Map::get().get_Pool(sizeof(TYPE));
+#else
+  template <typename TYPE>
+  using Pool_Allocator = std::allocator<TYPE>;
+#endif
 
   void register_new_handler(const bool &force_reregister = false);
 

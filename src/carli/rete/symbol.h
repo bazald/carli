@@ -33,7 +33,7 @@ namespace Rete {
   typedef std::shared_ptr<Symbol_Identifier> Symbol_Identifier_Ptr;
   typedef std::shared_ptr<Symbol_Variable> Symbol_Variable_Ptr;
 
-  class Symbol : public Zeni::Pool_Allocator<std::array<char, 32>>
+  class Symbol : public Zeni::Pool_Allocator<char [32]>
   {
     Symbol(const Symbol &);
     Symbol & operator=(const Symbol &);
