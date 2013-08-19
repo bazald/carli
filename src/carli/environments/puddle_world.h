@@ -283,10 +283,10 @@ namespace Puddle_World {
     double m_noise = 0.01;
   };
 
-  class Agent : public ::Agent<Feature, Action> {
+  class Agent : public ::Agent {
   public:
     Agent(const shared_ptr<Environment> &env)
-     : ::Agent<Feature, Action>(env)
+     : ::Agent(env)
     {
       auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
       auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");

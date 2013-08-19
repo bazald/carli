@@ -23,8 +23,7 @@
 
 enum class Metastate : char {NON_TERMINAL, SUCCESS, FAILURE};
 
-template <typename FEATURE, typename ACTION>
-class Agent : public std::enable_shared_from_this<Agent<FEATURE, ACTION>>, public Rete::Agent {
+class Agent : public std::enable_shared_from_this<Agent>, public Rete::Agent {
   Agent(const Agent &) = delete;
   Agent & operator=(const Agent &) = delete;
 
@@ -47,7 +46,7 @@ public:
     typedef std::pair<std::pair<double, double>, std::pair<double, double>> Line;
     typedef std::vector<Line, Zeni::Pool_Allocator<Line>> Lines;
 
-    RL(Agent<FEATURE, ACTION> &agent_, const size_t &depth_, const Range &range_, const Lines &lines_)
+    RL(Agent &agent_, const size_t &depth_, const Range &range_, const Lines &lines_)
      : agent(agent_),
      depth(depth_),
      range(range_),
@@ -62,7 +61,7 @@ public:
       feature.delete_and_zero();
     }
 
-    Agent<FEATURE, ACTION> &agent;
+    Agent &agent;
 
     size_t depth;
     tracked_ptr<Q_Value> q_value;
@@ -252,9 +251,9 @@ public:
       m_credit_assignment_code == "inv-depth" ?
         [this](const Q_Value_List &value_list){return this->assign_credit_inv_depth(value_list);} :
       m_credit_assignment_code == "epsilon-even-specific" ?
-        [this](const Q_Value_List &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_specific);} :
+        [this](const Q_Value_List &value_list){return this->assign_credit_epsilon(value_list, &Agent::assign_credit_evenly, &Agent::assign_credit_specific);} :
       m_credit_assignment_code == "epsilon-even-depth" ?
-        [this](const Q_Value_List &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);} :
+        [this](const Q_Value_List &value_list){return this->assign_credit_epsilon(value_list, &Agent::assign_credit_evenly, &Agent::assign_credit_inv_depth);} :
       std::function<void (const Q_Value_List &)>()
     )
 //#ifdef ENABLE_WEIGHT
@@ -277,9 +276,9 @@ public:
 //      m_weight_assignment_code == "inv-depth" ?
 //        [this](Q_Value::List * const &value_list){return this->assign_credit_inv_depth(value_list);} :
 //      m_weight_assignment_code == "epsilon-even-specific" ?
-//        [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_specific);} :
+//        [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent::assign_credit_evenly, &Agent::assign_credit_specific);} :
 //      m_weight_assignment_code == "epsilon-even-depth" ?
-//        [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent<FEATURE, ACTION>::assign_credit_evenly, &Agent<FEATURE, ACTION>::assign_credit_inv_depth);} :
+//        [this](Q_Value::List * const &value_list){return this->assign_credit_epsilon(value_list, &Agent::assign_credit_evenly, &Agent::assign_credit_inv_depth);} :
 //      std::function<void (Q_Value::List * const &)>()
 //    )
 //#endif
@@ -318,16 +317,16 @@ public:
   size_t get_value_function_cap() const {return m_value_function_cap;}
   size_t get_mean_cabe_queue_size() const {return m_mean_cabe_queue_size;}
 
-  const std::shared_ptr<const Environment> & get_env() const {return m_environment;}
-  std::shared_ptr<Environment> & get_env() {return m_environment;}
+  std::shared_ptr<const Environment> get_env() const {return m_environment;}
+  const std::shared_ptr<Environment> & get_env() {return m_environment;}
   Metastate get_metastate() const {return m_metastate;}
   size_t get_episode_number() const {return m_episode_number;}
   size_t get_step_count() const {return m_step_count;}
   reward_type get_total_reward() const {return m_total_reward;}
-  Mean get_mean_cabe() const {return m_mean_cabe;}
-#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-  Mean get_mean_mabe() const {return m_mean_mabe;}
-#endif
+//  Mean get_mean_cabe() const {return m_mean_cabe;}
+//#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+//  Mean get_mean_mabe() const {return m_mean_mabe;}
+//#endif
 
   void reset_statistics() {
     m_episode_number = m_episode_number ? 1 : 0;
@@ -1458,8 +1457,7 @@ private:
   std::map<action_ptrsc, std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>>, std::less<action_ptrsc>, Zeni::Pool_Allocator<std::pair<action_ptrsc, std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>>>>> m_lines;
 };
 
-template <typename FEATURE, typename ACTION>
-std::ostream & operator << (std::ostream &os, const Agent<FEATURE, ACTION> &agent) {
+std::ostream & operator<<(std::ostream &os, const Agent &agent) {
   agent.print(os);
   return os;
 }
