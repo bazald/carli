@@ -81,11 +81,16 @@ namespace Blocks_World {
     for(const auto &action : m_action) {
       const auto &move = debuggable_cast<const Move &>(*action.get());
 
-      auto filter_top = make_filter(Rete::WME(m_s_id, m_block_attr, get_block_id(move.block)));
-      auto filter_bottom = make_filter(Rete::WME(m_s_id, m_block_attr, get_block_id(move.dest)));
+      auto filter_block = make_filter(Rete::WME(m_first_var, m_block_attr, m_third_var));
+      auto filter_name_block = make_filter(Rete::WME(m_first_var, m_name_attr, get_block_name(move.block)));
+      auto filter_name_dest = make_filter(Rete::WME(m_first_var, m_name_attr, get_block_name(move.dest)));
       Rete::WME_Bindings state_bindings;
+      state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
+      auto join_block_name = make_join(state_bindings, filter_block, filter_name_block);
+      auto join_dest_name = make_join(state_bindings, filter_block, filter_name_dest);
+      state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
-      auto join_top_and_dest = make_join(state_bindings, filter_top,filter_bottom);
+      auto join_top_and_dest = make_join(state_bindings, join_block_name, join_dest_name);
 
       auto filter_blink = make_filter(*m_wme_blink);
       auto join_blink = make_join(Rete::WME_Bindings(), join_top_and_dest, filter_blink);

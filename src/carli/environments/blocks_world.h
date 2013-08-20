@@ -183,7 +183,6 @@ namespace Blocks_World {
     const Rete::Symbol_Constant_String_Ptr_C & get_block_name(const block_id &block);
 
     Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
-    Rete::Symbol_Variable_Ptr_C m_second_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Second);
     Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
 
     Rete::Symbol_Identifier_Ptr_C m_s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
