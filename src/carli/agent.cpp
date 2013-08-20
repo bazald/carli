@@ -310,8 +310,13 @@ void Agent::purge_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_V
 
 void Agent::print(std::ostream &os) const {
   os << " Agent:\n";
+
 //    print_feature_lists(os);
-//    print_list(os, "  Candidates:\n  ", " ", m_candidates);
+
+  os << "  Candidates:\n  ";
+  for(const auto &action_value : m_next_q_values)
+    std::cerr << ' ' << *action_value.first;
+
 //#if defined(DEBUG_OUTPUT) && defined(DEBUG_OUTPUT_VALUE_FUNCTION)
 //    print_value_function(os);
 //#endif
