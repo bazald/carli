@@ -66,6 +66,7 @@ namespace Blocks_World {
   Agent::Agent(const std::shared_ptr< ::Environment> &env)
    : ::Agent(env)
   {
+    insert_wme(m_wme_blink);
     generate_rete();
     generate_features();
   }
@@ -86,6 +87,9 @@ namespace Blocks_World {
       state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
       auto join_top_and_dest = make_join(state_bindings, filter_top,filter_bottom);
 
+      auto filter_blink = make_filter(*m_wme_blink);
+      auto join_blink = make_join(Rete::WME_Bindings(), join_top_and_dest, filter_blink);
+
       auto rl = std::make_shared<RL>(*this, 1,
                                      RL::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 1.0)),
                                      RL::Lines());
@@ -97,7 +101,7 @@ namespace Blocks_World {
           this->m_next_q_values[action].push_back(rl->q_value);
       }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
         this->purge_q_value_next(action, rl->q_value);
-      }, join_top_and_dest);
+      }, join_blink);
     }
   }
 
@@ -131,6 +135,8 @@ namespace Blocks_World {
     wmes_current.push_back(std::make_shared<Rete::WME>(m_table_id, m_clear_attr, m_true_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_table_id, m_in_place_attr, m_true_value));
 
+    remove_wme(m_wme_blink);
+
     for(auto wt = m_wmes_prev.begin(), wend = m_wmes_prev.end(); wt != wend; ) {
       const auto found = std::find_if(wmes_current.begin(), wmes_current.end(), [wt](const Rete::WME_Ptr_C &wme_)->bool{return *wme_ == **wt;});
       if(found == wmes_current.end()) {
@@ -151,12 +157,7 @@ namespace Blocks_World {
       }
     }
 
-    for(auto it = m_next_q_values.begin(), iend = m_next_q_values.end(); it != iend; ) {
-      if(it->second.empty())
-        m_next_q_values.erase(it++);
-      else
-        ++it;
-    }
+    insert_wme(m_wme_blink);
   }
 
   void Agent::update() {

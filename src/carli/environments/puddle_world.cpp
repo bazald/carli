@@ -340,7 +340,6 @@ namespace Puddle_World {
     const auto pos = env->get_position();
 
     clear_wmes();
-    m_next_q_values.clear();
 
     m_x_value->value = pos.first;
     m_y_value->value = pos.second;

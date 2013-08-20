@@ -198,6 +198,8 @@ private:
   virtual void generate_features() = 0;
   virtual void update() = 0;
 
+  void clean_features();
+
   Mean m_mean_cabe;
   Value_Queue m_mean_cabe_queue;
   const size_t m_mean_cabe_queue_size = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["mean-cabe-queue-size"]).get_value();

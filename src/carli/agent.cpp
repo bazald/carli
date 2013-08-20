@@ -238,6 +238,7 @@ void Agent::init() {
   clear_eligibility_trace();
 
   generate_features();
+  clean_features();
 
   if(m_metastate == Metastate::NON_TERMINAL)
     m_next = m_exploration_policy();
@@ -261,6 +262,7 @@ Agent::reward_type Agent::act() {
 
   if(m_metastate == Metastate::NON_TERMINAL) {
     generate_features();
+    clean_features();
 
     m_next = m_target_policy();
 #ifdef DEBUG_OUTPUT
@@ -316,6 +318,7 @@ void Agent::print(std::ostream &os) const {
   os << "  Candidates:\n  ";
   for(const auto &action_value : m_next_q_values)
     std::cerr << ' ' << *action_value.first;
+  os << std::endl;
 
 //#if defined(DEBUG_OUTPUT) && defined(DEBUG_OUTPUT_VALUE_FUNCTION)
 //    print_value_function(os);
@@ -922,6 +925,15 @@ void Agent::merge_value_function_grid_sets(std::set<typename RL::Line, std::less
 //      leaf_fringe->destroy(leaf_fringe);
 //    }
 //  }
+
+void Agent::clean_features() {
+  for(auto it = m_next_q_values.begin(), iend = m_next_q_values.end(); it != iend; ) {
+    if(it->second.empty())
+      m_next_q_values.erase(it++);
+    else
+      ++it;
+  }
+}
 
 std::ostream & operator<<(std::ostream &os, const Agent &agent) {
   agent.print(os);

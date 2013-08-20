@@ -202,8 +202,8 @@ namespace Blocks_World {
     Rete::Symbol_Constant_String_Ptr_C m_table_value = std::make_shared<Rete::Symbol_Constant_String>("table");
     Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
 
-    Rete::WME_Ptr_C m_x_wme;
-    Rete::WME_Ptr_C m_y_wme;
+    Rete::WME_Ptr_C m_wme_blink = std::make_shared<Rete::WME>(m_s_id, m_s_id, m_s_id);
+    std::list<Rete::WME_Ptr_C> m_wmes_prev;
 
     std::array<tracked_ptr<const Action>, 9> m_action = {{new Move(1, 0),
                                                           new Move(1, 2),
@@ -214,8 +214,6 @@ namespace Blocks_World {
                                                           new Move(3, 0),
                                                           new Move(3, 1),
                                                           new Move(3, 2)}};
-
-    std::list<Rete::WME_Ptr_C> m_wmes_prev;
   };
 
 }

@@ -244,7 +244,6 @@ namespace Mountain_Car {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
 
     clear_wmes();
-    m_next_q_values.clear();
 
     m_x_value->value = env->get_x();
     m_x_dot_value->value = env->get_x_dot();
