@@ -1,6 +1,7 @@
 #include "mountain_car.h"
 
 namespace Mountain_Car {
+
   Environment::Environment() {
     Environment::init_impl();
   }
@@ -32,7 +33,7 @@ namespace Mountain_Car {
   }
 
   Environment::reward_type Environment::transition_impl(const Action &action) {
-    const int a = int(static_cast<const Move &>(action).direction);
+    const int a = int(debuggable_cast<const Move &>(action).direction);
 
     assert(0 <= a && a <= 2);
 
@@ -53,7 +54,7 @@ namespace Mountain_Car {
     os << " (" << m_x << ", " << m_x_dot << ')' << endl;
   }
 
-  Agent::Agent(const shared_ptr<Environment> &env)
+  Agent::Agent(const shared_ptr< ::Environment> &env)
    : ::Agent(env)
   {
     auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
@@ -242,10 +243,9 @@ namespace Mountain_Car {
   void Agent::generate_features() {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
 
+    clear_wmes();
     m_next_q_values.clear();
 
-    remove_wme(m_x_wme);
-    remove_wme(m_x_dot_wme);
     m_x_value->value = env->get_x();
     m_x_dot_value->value = env->get_x_dot();
     insert_wme(m_x_wme);
@@ -257,4 +257,5 @@ namespace Mountain_Car {
 
     m_metastate = env->success() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
   }
+
 }

@@ -138,6 +138,9 @@ namespace Rete {
   void Rete_Agent::insert_wme(const WME_Ptr_C &wme) {
     assert(working_memory.wmes.find(wme) == working_memory.wmes.end());
     working_memory.wmes.insert(wme);
+#ifdef DEBUG_OUTPUT
+    std::cerr << "rete.insert" << *wme << std::endl;
+#endif
     for(auto &filter : filters)
       filter->insert_wme(wme);
     finish_agenda();
@@ -147,8 +150,20 @@ namespace Rete {
     auto found = working_memory.wmes.find(wme);
     assert(found != working_memory.wmes.end());
     working_memory.wmes.erase(found);
+#ifdef DEBUG_OUTPUT
+    std::cerr << "rete.remove" << *wme << std::endl;
+#endif
     for(auto &filter : filters)
       filter->remove_wme(wme);
+    finish_agenda();
+  }
+
+  void Rete_Agent::clear_wmes() {
+    for(auto &wme : working_memory.wmes) {
+      for(auto &filter : filters)
+        filter->remove_wme(wme);
+    }
+    working_memory.wmes.clear();
     finish_agenda();
   }
 

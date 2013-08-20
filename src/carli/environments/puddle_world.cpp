@@ -1,6 +1,7 @@
 #include "puddle_world.h"
 
 namespace Puddle_World {
+
   Environment::Environment()
    : m_horizontal_puddles({{{0.1, 0.45, 0.75, 0.1}}}),
    m_vertical_puddles({{{0.45, 0.4, 0.8, 0.1}}})
@@ -95,7 +96,7 @@ namespace Puddle_World {
     const double shift = m_random_motion.frand_gaussian() * 0.01;
     const double step_size = shift + 0.05;
 
-    switch(static_cast<const Move &>(action).direction) {
+    switch(debuggable_cast<const Move &>(action).direction) {
       case Move::NORTH: m_position.second += step_size; break;
       case Move::SOUTH: m_position.second -= step_size; break;
       case Move::EAST:  m_position.first  += step_size; break;
@@ -155,7 +156,7 @@ namespace Puddle_World {
     os << " (" << m_position.first << ", " << m_position.second << ')' << endl;
   }
 
-  Agent::Agent(const shared_ptr<Environment> &env)
+  Agent::Agent(const shared_ptr< ::Environment> &env)
    : ::Agent(env)
   {
     auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
@@ -338,10 +339,9 @@ namespace Puddle_World {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
     const auto pos = env->get_position();
 
+    clear_wmes();
     m_next_q_values.clear();
 
-    remove_wme(m_x_wme);
-    remove_wme(m_y_wme);
     m_x_value->value = pos.first;
     m_y_value->value = pos.second;
     insert_wme(m_x_wme);
@@ -353,4 +353,5 @@ namespace Puddle_World {
 
     m_metastate = env->goal_reached() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
   }
+
 }

@@ -253,6 +253,8 @@ Agent::reward_type Agent::act() {
   m_current_q_value = m_next_q_values[m_next];
   m_current_q_value.sort([](const tracked_ptr<Q_Value> &lhs, const tracked_ptr<Q_Value> &rhs)->bool{return lhs->depth < rhs->depth;});
 
+  assert(m_current);
+
   const reward_type reward = m_environment->transition(*m_current);
 
   update();

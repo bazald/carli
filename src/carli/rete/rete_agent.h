@@ -32,6 +32,7 @@ namespace Rete {
 
     void insert_wme(const WME_Ptr_C &wme);
     void remove_wme(const WME_Ptr_C &wme);
+    void clear_wmes();
 
     size_t rete_size() const;
 

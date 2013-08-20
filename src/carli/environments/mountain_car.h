@@ -130,7 +130,7 @@ namespace Mountain_Car {
 
   class Agent : public ::Agent {
   public:
-    Agent(const shared_ptr<Environment> &env);
+    Agent(const shared_ptr< ::Environment> &env);
     ~Agent();
 
     void print_policy(ostream &os, const size_t &granularity);
