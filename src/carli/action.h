@@ -5,6 +5,7 @@
 #include "utility/memory_pool.h"
 
 #include <memory>
+#include <sstream>
 
 class Action : public Zeni::Pool_Allocator<char> {
   Action(const Action &) = delete;
@@ -32,6 +33,12 @@ public:
 
   void print(std::ostream &os) const {
     print_impl(os);
+  }
+
+  std::string to_string() const {
+    std::ostringstream oss;
+    print(oss);
+    return oss.str();
   }
 
   virtual int compare(const Action &rhs) const = 0;

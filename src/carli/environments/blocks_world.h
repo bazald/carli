@@ -186,10 +186,15 @@ namespace Blocks_World {
     Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
 
     Rete::Symbol_Identifier_Ptr_C m_s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
-    Rete::Symbol_Identifier_Ptr_C m_a_id = std::make_shared<Rete::Symbol_Identifier>("a");
-    Rete::Symbol_Identifier_Ptr_C m_b_id = std::make_shared<Rete::Symbol_Identifier>("b");
-    Rete::Symbol_Identifier_Ptr_C m_c_id = std::make_shared<Rete::Symbol_Identifier>("c");
-    Rete::Symbol_Identifier_Ptr_C m_table_id = std::make_shared<Rete::Symbol_Identifier>("S1");
+    Rete::Symbol_Identifier_Ptr_C m_input_id = std::make_shared<Rete::Symbol_Identifier>("I1");
+    Rete::Symbol_Identifier_Ptr_C m_a_id = std::make_shared<Rete::Symbol_Identifier>("A");
+    Rete::Symbol_Identifier_Ptr_C m_b_id = std::make_shared<Rete::Symbol_Identifier>("B");
+    Rete::Symbol_Identifier_Ptr_C m_c_id = std::make_shared<Rete::Symbol_Identifier>("C");
+    Rete::Symbol_Identifier_Ptr_C m_table_id = std::make_shared<Rete::Symbol_Identifier>("TABLE");
+    Rete::Symbol_Constant_String_Ptr_C m_input_attr = std::make_shared<Rete::Symbol_Constant_String>("input");
+    Rete::Symbol_Constant_String_Ptr_C m_action_attr = std::make_shared<Rete::Symbol_Constant_String>("action");
+    Rete::Symbol_Constant_String_Ptr_C m_index_attr = std::make_shared<Rete::Symbol_Constant_String>("index");
+    Rete::Symbol_Constant_String_Ptr_C m_dest_attr = std::make_shared<Rete::Symbol_Constant_String>("dest");
     Rete::Symbol_Constant_String_Ptr_C m_block_attr = std::make_shared<Rete::Symbol_Constant_String>("block");
     Rete::Symbol_Constant_String_Ptr_C m_clear_attr = std::make_shared<Rete::Symbol_Constant_String>("clear");
     Rete::Symbol_Constant_String_Ptr_C m_in_place_attr = std::make_shared<Rete::Symbol_Constant_String>("in-place");
@@ -213,6 +218,26 @@ namespace Blocks_World {
                                                           new Move(3, 0),
                                                           new Move(3, 1),
                                                           new Move(3, 2)}};
+
+    std::array<Rete::Symbol_Identifier_Ptr_C, 9> m_action_id = {{std::make_shared<Rete::Symbol_Identifier>(m_action[0]->to_string()),
+                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[1]->to_string()),
+                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[2]->to_string()),
+                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[3]->to_string()),
+                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[4]->to_string()),
+                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[5]->to_string()),
+                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[6]->to_string()),
+                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[7]->to_string()),
+                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[8]->to_string())}};
+
+    std::array<Rete::Symbol_Constant_Int_Ptr_C, 9> m_action_index = {{std::make_shared<Rete::Symbol_Constant_Int>(0),
+                                                                      std::make_shared<Rete::Symbol_Constant_Int>(1),
+                                                                      std::make_shared<Rete::Symbol_Constant_Int>(2),
+                                                                      std::make_shared<Rete::Symbol_Constant_Int>(3),
+                                                                      std::make_shared<Rete::Symbol_Constant_Int>(4),
+                                                                      std::make_shared<Rete::Symbol_Constant_Int>(5),
+                                                                      std::make_shared<Rete::Symbol_Constant_Int>(6),
+                                                                      std::make_shared<Rete::Symbol_Constant_Int>(7),
+                                                                      std::make_shared<Rete::Symbol_Constant_Int>(8)}};
   };
 
 }

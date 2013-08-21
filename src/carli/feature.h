@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <memory>
+#include <sstream>
 
 class Feature : public Zeni::Pool_Allocator<char> {
   Feature(const Feature &) = delete;
@@ -46,6 +47,12 @@ public:
   virtual Rete::Symbol_Ptr_C symbol_constant() const = 0;
 
   virtual void print(std::ostream &os) const = 0;
+
+  std::string to_string() const {
+    std::ostringstream oss;
+    print(oss);
+    return oss.str();
+  }
 
   List features;
 };

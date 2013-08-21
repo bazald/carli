@@ -78,36 +78,41 @@ namespace Blocks_World {
   }
 
   void Agent::generate_rete() {
-    for(const auto &action : m_action) {
-      const auto &move = debuggable_cast<const Move &>(*action.get());
+    Rete::WME_Bindings state_bindings;
 
-      auto filter_block = make_filter(Rete::WME(m_first_var, m_block_attr, m_third_var));
-      auto filter_name_block = make_filter(Rete::WME(m_first_var, m_name_attr, get_block_name(move.block)));
-      auto filter_name_dest = make_filter(Rete::WME(m_first_var, m_name_attr, get_block_name(move.dest)));
-      Rete::WME_Bindings state_bindings;
-      state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
-      auto join_block_name = make_join(state_bindings, filter_block, filter_name_block);
-      auto join_dest_name = make_join(state_bindings, filter_block, filter_name_dest);
-      state_bindings.clear();
-      state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
-      auto join_top_and_dest = make_join(state_bindings, join_block_name, join_dest_name);
+    auto filter_action = make_filter(Rete::WME(m_first_var, m_action_attr, m_third_var));
+//    state_bindings.clear();
+    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
+    auto filter_index = make_filter(Rete::WME(m_first_var, m_index_attr, m_third_var));
+    auto join_action_index = make_join(state_bindings, filter_action, filter_index);
+    auto filter_block = make_filter(Rete::WME(m_first_var, m_block_attr, m_third_var));
+    auto join_action_block = make_join(state_bindings, join_action_index, filter_block);
+    auto filter_dest = make_filter(Rete::WME(m_first_var, m_dest_attr, m_third_var));
+    auto join_action_dest = make_join(state_bindings, join_action_block, filter_dest);
 
-      auto filter_blink = make_filter(*m_wme_blink);
-      auto join_blink = make_join(Rete::WME_Bindings(), join_top_and_dest, filter_blink);
+//    auto filter_clear = make_filter(Rete::WME(m_first_var, m_clear_attr, m_third_var));
+//    state_bindings.clear();
+//    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(2, 2), Rete::WME_Token_Index(0, 0)));
+//    auto join_block_clear = make_join(state_bindings, join_action_dest, filter_clear);
+//    state_bindings.clear();
+//    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(3, 2), Rete::WME_Token_Index(0, 0)));
+//    auto join_dest_clear = make_join(state_bindings, join_block_clear, filter_clear);
 
-      auto rl = std::make_shared<RL>(*this, 1,
-                                     RL::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 1.0)),
-                                     RL::Lines());
-      rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
-      ++this->m_q_value_count;
-//      rl->fringe_values = new RL::Fringe_Values;
-      rl->action = make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-//        if(!this->specialize(action, rl))
-          this->m_next_q_values[action].push_back(rl->q_value);
-      }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-        this->purge_q_value_next(action, rl->q_value);
-      }, join_blink);
-    }
+    auto filter_blink = make_filter(*m_wme_blink);
+    auto join_blink = make_join(Rete::WME_Bindings(), join_action_dest, filter_blink);
+
+    auto rl = std::make_shared<RL>(*this, 1,
+                                   RL::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 1.0)),
+                                   RL::Lines());
+    rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
+    ++this->m_q_value_count;
+//    rl->fringe_values = new RL::Fringe_Values;
+    rl->action = make_action_retraction([this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+//      if(!this->specialize(action, rl))
+        this->m_next_q_values[this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value]].push_back(rl->q_value);
+    }, [this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+      this->purge_q_value_next(this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value], rl->q_value);
+    }, join_blink);
   }
 
   void Agent::generate_features() {
@@ -116,6 +121,14 @@ namespace Blocks_World {
     const auto &blocks = env->get_blocks();
     const auto &goal = env->get_goal();
     std::list<Rete::WME_Ptr_C> wmes_current;
+
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_input_attr, m_input_id));
+    for(size_t i = 0; i != m_action.size(); ++i) {
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_action_id[i]));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_action_id[i], m_index_attr, m_action_index[i]));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_action_id[i], m_block_attr, get_block_id(debuggable_cast<const Move &>(*m_action[i]).block)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_action_id[i], m_dest_attr, get_block_id(debuggable_cast<const Move &>(*m_action[i]).dest)));
+    }
 
     for(auto bt = blocks.begin(), bend = blocks.end(); bt != bend; ++bt) {
       for(auto st = bt->begin(), send = bt->end(); st != send; ++st) {
