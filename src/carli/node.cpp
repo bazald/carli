@@ -11,8 +11,8 @@ void Node::destroy() {
   agent.excise_rule(action.lock());
 }
 
-Node_Split::Node_Split(Agent &agent_, const size_t &depth_)
- : Node(agent_, new Q_Value(0.0, Q_Value::Type::SPLIT, depth_))
+Node_Split::Node_Split(Agent &agent_, const tracked_ptr<Q_Value> &q_value_)
+ : Node(agent_, q_value_)
 {
   ++agent.q_value_count;
 }

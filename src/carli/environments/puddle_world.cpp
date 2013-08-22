@@ -231,13 +231,12 @@ namespace Puddle_World {
           const double bottom = (j + 1 - xy_offset) * xy_size;
           auto ygte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
           auto ylt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), ygte);
-          auto q_value = std::make_shared<Q_Value>(0.0, Q_Value::Type::UNSPLIT, 1);
           for(const auto &action : m_action) {
             m_lines[action].insert(Node_Ranged::Line(std::make_pair(left, top), std::make_pair(left, bottom)));
             m_lines[action].insert(Node_Ranged::Line(std::make_pair(left, bottom), std::make_pair(right, bottom)));
             m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, bottom), std::make_pair(right, top)));
             m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
-            auto node_split = std::make_shared<Node_Split>(*this, 1);
+            auto node_split = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, 1));
             make_action_retraction([this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
               this->m_next_q_values[action].push_back(node_split->q_value);
             }, [this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {

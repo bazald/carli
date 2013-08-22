@@ -103,7 +103,12 @@ namespace Rete {
       return std::find_if(tokens.begin(), tokens.end(), [&token](const typename CONTAINER::value_type &tok){return tok.first == token;});
     }
 
+    bool is_iterating() const {
+      return outputs_iterator != outputs.end();
+    }
+
     Outputs outputs;
+    Outputs::iterator outputs_iterator = outputs.end();
   };
 
 }

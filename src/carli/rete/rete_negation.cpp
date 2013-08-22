@@ -36,16 +36,17 @@ namespace Rete {
     if(found != input_tokens.end()) {
       input_tokens.erase(found);
       if(input_tokens.empty()) {
-        for(auto &output : outputs)
-          output->insert_wme_token(output_token, shared());
+        for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
+          (*outputs_iterator++)->insert_wme_token(output_token, shared());
       }
     }
   }
 
   void Rete_Negation::pass_tokens(const Rete_Node_Ptr &output) {
-    if(input_tokens.empty()) {
+    if(is_iterating())
+      return;
+    if(input_tokens.empty())
       output->insert_wme_token(output_token, shared());
-    }
   }
 
   bool Rete_Negation::operator==(const Rete_Node &rhs) const {

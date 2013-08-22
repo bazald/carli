@@ -141,8 +141,8 @@ namespace Rete {
 #ifdef DEBUG_OUTPUT
     std::cerr << "rete.insert" << *wme << std::endl;
 #endif
-    for(auto &filter : filters)
-      filter->insert_wme(wme);
+    for(auto ft = filters.begin(), fend = filters.end(); ft != fend; )
+      (*ft++)->insert_wme(wme);
     finish_agenda();
   }
 
@@ -153,8 +153,8 @@ namespace Rete {
 #ifdef DEBUG_OUTPUT
     std::cerr << "rete.remove" << *wme << std::endl;
 #endif
-    for(auto &filter : filters)
-      filter->remove_wme(wme);
+    for(auto ft = filters.begin(), fend = filters.end(); ft != fend; )
+      (*ft++)->remove_wme(wme);
     finish_agenda();
   }
 

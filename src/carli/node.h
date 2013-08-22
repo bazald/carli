@@ -15,7 +15,7 @@ class Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Alloca
   Node & operator=(const Node &) = delete;
 
 public:
-  Node(Agent &agent_, Q_Value * q_value_)
+  Node(Agent &agent_, const tracked_ptr<Q_Value> &q_value_)
    : agent(agent_),
    q_value(q_value_)
   {
@@ -35,7 +35,7 @@ class Node_Split : public Node {
   Node_Split & operator=(const Node_Split &) = delete;
 
 public:
-  Node_Split(Agent &agent_, const size_t &depth_);
+  Node_Split(Agent &agent_, const tracked_ptr<Q_Value> &q_value_);
 };
 
 class Node_Unsplit : public Node {

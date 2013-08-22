@@ -34,8 +34,8 @@ namespace Rete {
     if(find_key(tokens, wme) == tokens.end()) {
       auto wme_token = std::make_pair(wme, std::make_shared<WME_Token>(wme));
       tokens.push_back(wme_token);
-      for(auto &output : outputs)
-        output->insert_wme_token(wme_token.second, shared());
+      for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
+        (*outputs_iterator++)->insert_wme_token(wme_token.second, shared());
     }
   }
 
@@ -57,6 +57,8 @@ namespace Rete {
   }
 
   void Rete_Filter::pass_tokens(const Rete_Node_Ptr &output) {
+    if(is_iterating())
+      return;
     for(auto &token : tokens)
       output->insert_wme_token(token.second, shared());
   }

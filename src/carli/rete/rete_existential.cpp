@@ -20,8 +20,8 @@ namespace Rete {
     input_tokens.push_back(wme_token);
 
     if(input_tokens.size() == 1) {
-      for(auto &output : outputs)
-        output->insert_wme_token(output_token, shared());
+      for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
+        (*outputs_iterator++)->insert_wme_token(output_token, shared());
     }
   }
 
@@ -43,6 +43,8 @@ namespace Rete {
   }
 
   void Rete_Existential::pass_tokens(const Rete_Node_Ptr &output) {
+    if(is_iterating())
+      return;
     if(!input_tokens.empty())
       output->insert_wme_token(output_token, shared());
   }
