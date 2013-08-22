@@ -149,7 +149,8 @@ void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<Node
             this->m_next_q_values[action].push_back(node_unsplit->q_value);
         }, [this,action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->purge_q_value_next(action, node_unsplit->q_value);
-        }, leaf_action->parent());
+        }, leaf_action->parent(), false);
+        node_unsplit->action.lock()->attach();
       }
 
       leaf->destroy();

@@ -7,20 +7,20 @@ namespace Rete {
   {
   }
 
-  Rete_Action_Ptr Rete_Agent::make_action(const Rete_Action::Action &action, const Rete_Node_Ptr &out) {
+  Rete_Action_Ptr Rete_Agent::make_action(const Rete_Action::Action &action, const Rete_Node_Ptr &out, const bool &attach_immediately) {
     if(auto existing = Rete_Action::find_existing(action, [](const Rete_Action &, const WME_Token &){}, out))
       return existing;
 //      std::cerr << "DEBUG: make_action" << std::endl;
-    auto action_fun = std::make_shared<Rete_Action>(this->actions, this->retractions, action);
+    auto action_fun = std::make_shared<Rete_Action>(this->actions, this->retractions, action, [](const Rete_Action &, const WME_Token &){}, attach_immediately);
     bind_to_action(action_fun, out);
 //      std::cerr << "END: make_action" << std::endl;
     return action_fun;
   }
 
-  Rete_Action_Ptr Rete_Agent::make_action_retraction(const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out) {
+  Rete_Action_Ptr Rete_Agent::make_action_retraction(const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out, const bool &attach_immediately) {
     if(auto existing = Rete_Action::find_existing(action, retraction, out))
       return existing;
-    auto action_fun = std::make_shared<Rete_Action>(this->actions, this->retractions, action, retraction);
+    auto action_fun = std::make_shared<Rete_Action>(this->actions, this->retractions, action, retraction, attach_immediately);
     bind_to_action(action_fun, out);
     return action_fun;
   }

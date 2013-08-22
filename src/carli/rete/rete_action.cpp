@@ -11,7 +11,8 @@ namespace Rete {
               Agenda &,
 #endif
               const Action &action_,
-              const Action &retraction_)
+              const Action &retraction_,
+              const bool &attach_immediately_)
     : action(action_),
     retraction(retraction_)
 #ifdef USE_AGENDA
@@ -19,6 +20,8 @@ namespace Rete {
     actions(actions_),
     retractions(retractions_)
 #endif
+    ,
+    m_attached(attach_immediately_)
   {
   }
 
@@ -45,11 +48,13 @@ namespace Rete {
 
     input_tokens.push_back(wme_token);
 
+    if(m_attached) {
 #ifdef USE_AGENDA
-    actions.insert(this, [this,&wme_token](){action(*this, *wme_token);});
+      actions.insert(this, [this,&wme_token](){action(*this, *wme_token);});
 #else
-    action(*this, *wme_token);
+      action(*this, *wme_token);
 #endif
+    }
   }
 
   void Rete_Action::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
@@ -59,18 +64,20 @@ namespace Rete {
                                                                                                   ) {
     assert(from == input.lock());
 
-    auto found = find(input_tokens, wme_token);
-    if(found != input_tokens.end())
-    // TODO: change from the 'if' to the 'assert', ensuring that we're not wasting time on non-existent removals
-    //assert(found != input_tokens.end());
-    {
+    if(m_attached) {
+      auto found = find(input_tokens, wme_token);
+      if(found != input_tokens.end())
+      // TODO: change from the 'if' to the 'assert', ensuring that we're not wasting time on non-existent removals
+      //assert(found != input_tokens.end());
+      {
 #ifdef USE_AGENDA
-      retractions.insert(this, [this,&wme_token](){retraction(*this, *wme_token);});
+        retractions.insert(this, [this,&wme_token](){retraction(*this, *wme_token);});
 #else
-      retraction(*this, *wme_token);
+        retraction(*this, *wme_token);
 #endif
 
-      input_tokens.erase(found);
+        input_tokens.erase(found);
+      }
     }
   }
 
@@ -95,7 +102,25 @@ namespace Rete {
     return nullptr;
   }
 
+  void Rete_Action::attach() {
+    if(m_attached)
+      return;
+    m_attached = true;
+
+    for(auto &wme_token : input_tokens) {
+#ifdef USE_AGENDA
+      actions.insert(this, [this,&wme_token](){action(*this, *wme_token);});
+#else
+      action(*this, *wme_token);
+#endif
+    }
+  }
+
   void Rete_Action::detach() {
+    if(!m_attached)
+      return;
+    m_attached = false;
+
 #ifdef USE_AGENDA
     actions.remove(this);
 #endif
@@ -104,16 +129,6 @@ namespace Rete {
       retractions.insert(this, [this,&wme_token](){retraction(*this, *wme_token);});
 #else
       retraction(*this, *wme_token);
-#endif
-    }
-  }
-
-  void Rete_Action::reattach() {
-    for(auto &wme_token : input_tokens) {
-#ifdef USE_AGENDA
-      actions.insert(this, [this,&wme_token](){action(*this, *wme_token);});
-#else
-      action(*this, *wme_token);
 #endif
     }
   }

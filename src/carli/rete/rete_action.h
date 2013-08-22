@@ -24,7 +24,8 @@ namespace Rete {
                 Agenda &,
 #endif
                 const Action &action_ = [](const Rete_Action &, const WME_Token &){},
-                const Action &retraction_ = [](const Rete_Action &, const WME_Token &){});
+                const Action &retraction_ = [](const Rete_Action &, const WME_Token &){},
+                const bool &attach_immediately = true);
 
     ~Rete_Action();
 
@@ -42,9 +43,9 @@ namespace Rete {
 
     static Rete_Action_Ptr find_existing(const Action &/*action_*/, const Action &/*retraction_*/, const Rete_Node_Ptr &/*out*/);
 
+    bool attached() const {return m_attached;}
+    void attach();
     void detach();
-
-    void reattach();
 
     void set_action(const Action &action_) {
       action = action_;
@@ -63,6 +64,7 @@ namespace Rete {
     Agenda &actions;
     Agenda &retractions;
 #endif
+    bool m_attached;
   };
 
   void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
