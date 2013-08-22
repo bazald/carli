@@ -264,8 +264,9 @@ namespace Puddle_World {
         auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
                                                         Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(0.5, 1.0)),
                                                         lines);
-        nfr->feature = new Feature(Feature::X, 0.0, 0.5, 2, false);
-        auto predicate = make_predicate_vc(nfr->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), nfr->feature->symbol_constant(), node_unsplit->action.lock()->parent());
+        auto feature = new Feature(Feature::X, 0.0, 0.5, 2, false);
+        nfr->feature = feature;
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), feature->symbol_constant(), node_unsplit->action.lock()->parent());
         nfr->action = make_action_retraction([this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->m_next_q_values[action].push_back(nfr->q_value);
         }, [this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
@@ -278,8 +279,9 @@ namespace Puddle_World {
         auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
                                                         Node_Ranged::Range(std::make_pair(0.5, 0.0), std::make_pair(1.0, 1.0)),
                                                         Node_Ranged::Lines());
-        nfr->feature = new Feature(Feature::X, 0.5, 1.0, 2, true);
-        auto predicate = make_predicate_vc(nfr->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), nfr->feature->symbol_constant(), node_unsplit->action.lock()->parent());
+        auto feature = new Feature(Feature::X, 0.5, 1.0, 2, true);
+        nfr->feature = feature;
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), feature->symbol_constant(), node_unsplit->action.lock()->parent());
         nfr->action = make_action_retraction([this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->m_next_q_values[action].push_back(nfr->q_value);
         }, [this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
@@ -294,8 +296,9 @@ namespace Puddle_World {
         auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
                                                         Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 0.5)),
                                                         lines);
-        nfr->feature = new Feature(Feature::Y, 0.0, 0.5, 2, false);
-        auto predicate = make_predicate_vc(nfr->feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), nfr->feature->symbol_constant(), node_unsplit->action.lock()->parent());
+        auto feature = new Feature(Feature::Y, 0.0, 0.5, 2, false);
+        nfr->feature = feature;
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), feature->symbol_constant(), node_unsplit->action.lock()->parent());
         nfr->action = make_action_retraction([this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->m_next_q_values[action].push_back(nfr->q_value);
         }, [this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
@@ -308,8 +311,9 @@ namespace Puddle_World {
         auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
                                                         Node_Ranged::Range(std::make_pair(0.0, 0.5), std::make_pair(1.0, 1.0)),
                                                         Node_Ranged::Lines());
-        nfr->feature = new Feature(Feature::Y, 0.5, 1.0, 2, true);
-        auto predicate = make_predicate_vc(nfr->feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), nfr->feature->symbol_constant(), node_unsplit->action.lock()->parent());
+        auto feature = new Feature(Feature::Y, 0.5, 1.0, 2, true);
+        nfr->feature = feature;
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), feature->symbol_constant(), node_unsplit->action.lock()->parent());
         nfr->action = make_action_retraction([this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->m_next_q_values[action].push_back(nfr->q_value);
         }, [this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {

@@ -123,8 +123,9 @@ void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<Node
               lines.push_back(Node_Ranged::Line(std::make_pair(line.first.first, range.first.second), std::make_pair(line.second.first, range.second.second)));
           }
           auto rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, range, lines);
-          rl->feature = fringe_feature_ranged->clone();
-          auto predicate = make_predicate_vc(rl->feature->predicate(), fringe_feature_ranged->axis, rl->feature->symbol_constant(), leaf->action.lock()->parent());
+          auto feature = fringe_feature_ranged->clone();
+          rl->feature = feature;
+          auto predicate = make_predicate_vc(feature->predicate(), fringe_feature_ranged->axis, feature->symbol_constant(), leaf->action.lock()->parent());
           rl->action = make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
             this->m_next_q_values[action].push_back(rl->q_value);
           }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
@@ -146,13 +147,14 @@ void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<Node
       else {
         auto node_unsplit = std::make_shared<Node_Unsplit>(*this, leaf->q_value->depth);
         node_unsplit->fringe_values.swap(node_unsplit_fringe);
-        node_unsplit->action = make_action_retraction([this,action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        auto new_action = make_action_retraction([this,action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &) {
           if(!this->specialize(action, node_unsplit))
             this->m_next_q_values[action].push_back(node_unsplit->q_value);
         }, [this,action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &) {
           this->purge_q_value_next(action, node_unsplit->q_value);
         }, leaf_action->parent(), false);
-        node_unsplit->action.lock()->attach();
+        node_unsplit->action = new_action;
+        new_action->attach();
       }
 
       leaf->destroy();

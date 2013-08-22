@@ -1,5 +1,8 @@
 #include "rete_predicate.h"
 
+#include "rete_existential.h"
+#include "rete_negation.h"
+
 namespace Rete {
 
   Rete_Predicate::Rete_Predicate(const Predicate &predicate_, const WME_Token_Index lhs_index_, const WME_Token_Index rhs_index_)
@@ -121,6 +124,8 @@ namespace Rete {
 
   void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out) {
     assert(predicate);
+    assert(!std::dynamic_pointer_cast<Rete_Existential>(out));
+    assert(!std::dynamic_pointer_cast<Rete_Negation>(out));
     predicate->input = out;
 
     out->insert_output(predicate);

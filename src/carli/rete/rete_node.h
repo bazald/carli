@@ -14,25 +14,31 @@ namespace Rete {
   class Agenda;
   class Rete_Action;
   class Rete_Existential;
+  class Rete_Existential_Join;
   class Rete_Filter;
   class Rete_Join;
   class Rete_Negation;
+  class Rete_Negation_Join;
   class Rete_Node;
   class Rete_Predicate;
 
   typedef std::shared_ptr<const Rete_Action> Rete_Action_Ptr_C;
   typedef std::shared_ptr<const Rete_Existential> Rete_Existential_Ptr_C;
+  typedef std::shared_ptr<const Rete_Existential_Join> Rete_Existential_Join_Ptr_C;
   typedef std::shared_ptr<const Rete_Filter> Rete_Filter_Ptr_C;
   typedef std::shared_ptr<const Rete_Join> Rete_Join_Ptr_C;
   typedef std::shared_ptr<const Rete_Negation> Rete_Negation_Ptr_C;
+  typedef std::shared_ptr<const Rete_Negation_Join> Rete_Negation_Join_Ptr_C;
   typedef std::shared_ptr<const Rete_Node> Rete_Node_Ptr_C;
   typedef std::shared_ptr<const Rete_Predicate> Rete_Predicate_Ptr_C;
 
   typedef std::shared_ptr<Rete_Action> Rete_Action_Ptr;
   typedef std::shared_ptr<Rete_Existential> Rete_Existential_Ptr;
+  typedef std::shared_ptr<Rete_Existential_Join> Rete_Existential_Join_Ptr;
   typedef std::shared_ptr<Rete_Filter> Rete_Filter_Ptr;
   typedef std::shared_ptr<Rete_Join> Rete_Join_Ptr;
   typedef std::shared_ptr<Rete_Negation> Rete_Negation_Ptr;
+  typedef std::shared_ptr<Rete_Negation_Join> Rete_Negation_Join_Ptr;
   typedef std::shared_ptr<Rete_Node> Rete_Node_Ptr;
   typedef std::shared_ptr<Rete_Predicate> Rete_Predicate_Ptr;
 
@@ -43,8 +49,10 @@ namespace Rete {
 
     friend void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
     friend void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out);
+    friend void bind_to_existential_join(const Rete_Existential_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
     friend void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
     friend void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
+    friend void bind_to_negation_join(const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
     friend void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out);
 
   public:

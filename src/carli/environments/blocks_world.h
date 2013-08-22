@@ -16,12 +16,15 @@ namespace Blocks_World {
 
   typedef int block_id;
 
+  class Clear;
   class In_Place;
-  class On_Top;
+  class Name;
 
   class Feature;
   class Feature : public Feature_Present {
   public:
+    enum Which {BLOCK = 0, DEST = 1};
+
     Feature(const bool &present_)
      : Feature_Present(present_)
     {
@@ -34,16 +37,55 @@ namespace Blocks_World {
     }
 
     virtual int compare_axis(const Feature &rhs) const = 0;
+    virtual int compare_axis(const Clear &rhs) const = 0;
     virtual int compare_axis(const In_Place &rhs) const = 0;
-    virtual int compare_axis(const On_Top &rhs) const = 0;
+    virtual int compare_axis(const Name &rhs) const = 0;
+
+    virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
-  typedef Feature feature_type;
-
-  class In_Place : public feature_type {
+  class Clear : public Feature {
   public:
-    In_Place(const block_id &block_, const bool &present_)
-     : feature_type(present_),
+    Clear(const Which &block_, const bool &present_)
+     : Feature(present_),
+     block(block_)
+    {
+    }
+
+    Clear * clone() const {
+      return new Clear(block, this->present);
+    }
+
+    int compare_axis(const Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int compare_axis(const Clear &rhs) const {
+      return block - rhs.block;
+    }
+    int compare_axis(const In_Place &) const {
+      return -1;
+    }
+    int compare_axis(const Name &) const {
+      return -1;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return Rete::WME_Token_Index(2 + block, 2);
+    }
+
+    void print(ostream &os) const {
+      if(!present)
+        os << '!';
+      os << "clear(" << block << ')';
+    }
+
+    Which block;
+  };
+
+  class In_Place : public Feature {
+  public:
+    In_Place(const Which &block_, const bool &present_)
+     : Feature(present_),
      block(block_)
     {
     }
@@ -55,11 +97,18 @@ namespace Blocks_World {
     int compare_axis(const Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
+    int compare_axis(const Clear &) const {
+      return 1;
+    }
     int compare_axis(const In_Place &rhs) const {
       return block - rhs.block;
     }
-    int compare_axis(const On_Top &) const {
+    int compare_axis(const Name &) const {
       return -1;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return Rete::WME_Token_Index(2 + block, 2);
     }
 
     void print(ostream &os) const {
@@ -68,48 +117,47 @@ namespace Blocks_World {
       os << "in-place(" << block << ')';
     }
 
-    Rete::Symbol_Ptr_C symbol_constant() const {
-      abort();
-    }
-
-    block_id block;
+    Which block;
   };
 
-  class On_Top : public feature_type {
+  class Name : public Feature {
   public:
-    On_Top(const block_id &top_, const block_id &bottom_, const bool &present_)
-     : feature_type(present_),
-     top(top_),
-     bottom(bottom_)
+    Name(const Which &block_, const std::string &name_, const bool &present_)
+     : Feature(present_),
+     block(block_),
+     name(name_)
     {
     }
 
-    On_Top * clone() const {
-      return new On_Top(top, bottom, present);
+    Name * clone() const {
+      return new Name(block, name, this->present);
     }
 
     int compare_axis(const Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
+    int compare_axis(const Clear &) const {
+      return 1;
+    }
     int compare_axis(const In_Place &) const {
       return 1;
     }
-    int compare_axis(const On_Top &rhs) const {
-      return top != rhs.top ? top - rhs.top : bottom - rhs.bottom;
+    int compare_axis(const Name &rhs) const {
+      return block - rhs.block;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return Rete::WME_Token_Index(4 + block, 2);
     }
 
     void print(ostream &os) const {
       if(!present)
         os << '!';
-      os << "on-top(" << top << ',' << bottom << ')';
+      os << "name(" << block << ',' << name << ')';
     }
 
-    Rete::Symbol_Ptr_C symbol_constant() const {
-      abort();
-    }
-
-    block_id top;
-    block_id bottom;
+    Which block;
+    std::string name;
   };
 
   class Move : public Action {

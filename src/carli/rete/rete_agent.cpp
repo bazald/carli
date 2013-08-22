@@ -33,17 +33,12 @@ namespace Rete {
     return existential;
   }
 
-  Rete_Join_Ptr Rete_Agent::make_existential_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
-    auto join0 = Rete_Join::find_existing(bindings, out0, out1);
-    if(!join0)
-      join0 = this->make_join(bindings, out0, out1);
-    auto existential = Rete_Existential::find_existing(join0);
-    if(!existential)
-      existential = this->make_existential(join0);
-    auto join1 = Rete_Join::find_existing(WME_Bindings(), out0, existential);
-    if(!join1)
-      join1 = this->make_join(WME_Bindings(), out0, existential);
-    return join1;
+  Rete_Existential_Join_Ptr Rete_Agent::make_existential_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
+    auto existential_join = Rete_Existential_Join::find_existing(bindings, out0, out1);
+    if(!existential_join)
+      existential_join = std::make_shared<Rete_Existential_Join>(bindings);
+    bind_to_existential_join(existential_join, out0, out1);
+    return existential_join;
   }
 
   Rete_Filter_Ptr Rete_Agent::make_filter(const WME &wme) {
@@ -76,17 +71,12 @@ namespace Rete {
     return negation;
   }
 
-  Rete_Join_Ptr Rete_Agent::make_negation_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
-    auto join0 = Rete_Join::find_existing(bindings, out0, out1);
-    if(!join0)
-      join0 = this->make_join(bindings, out0, out1);
-    auto negation = Rete_Negation::find_existing(join0);
-    if(!negation)
-      negation = this->make_negation(join0);
-    auto join1 = Rete_Join::find_existing(WME_Bindings(), out0, negation);
-    if(!join1)
-      join1 = this->make_join(WME_Bindings(), out0, negation);
-    return join1;
+  Rete_Negation_Join_Ptr Rete_Agent::make_negation_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
+    auto negation_join = Rete_Negation_Join::find_existing(bindings, out0, out1);
+    if(!negation_join)
+      negation_join = std::make_shared<Rete_Negation_Join>(bindings);
+    bind_to_negation_join(negation_join, out0, out1);
+    return negation_join;
   }
 
   Rete_Predicate_Ptr Rete_Agent::make_predicate_vc(const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out) {

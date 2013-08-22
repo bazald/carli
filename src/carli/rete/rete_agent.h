@@ -17,11 +17,11 @@ namespace Rete {
     Rete_Action_Ptr make_action(const Rete_Action::Action &action, const Rete_Node_Ptr &out, const bool &attach_immediately = true);
     Rete_Action_Ptr make_action_retraction(const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out, const bool &attach_immediately = true);
     Rete_Existential_Ptr make_existential(const Rete_Node_Ptr &out);
-    Rete_Join_Ptr make_existential_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+    Rete_Existential_Join_Ptr make_existential_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
     Rete_Filter_Ptr make_filter(const WME &wme);
     Rete_Join_Ptr make_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
     Rete_Negation_Ptr make_negation(const Rete_Node_Ptr &out);
-    Rete_Join_Ptr make_negation_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+    Rete_Negation_Join_Ptr make_negation_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
     Rete_Predicate_Ptr make_predicate_vc(const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out);
     Rete_Predicate_Ptr make_predicate_vv(const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out);
 

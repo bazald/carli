@@ -43,8 +43,6 @@ public:
   virtual int compare_value(const Feature &rhs) const = 0;
 
   virtual std::vector<Feature *> refined() const {return std::vector<Feature *>();}
-  virtual Rete::Rete_Predicate::Predicate predicate() const = 0;
-  virtual Rete::Symbol_Ptr_C symbol_constant() const = 0;
 
   virtual void print(std::ostream &os) const = 0;
 
@@ -74,10 +72,6 @@ public:
 
   int compare_value(const Feature &rhs) const {
     return present - debuggable_cast<const Feature_Present &>(rhs).present;
-  }
-
-  Rete::Rete_Predicate::Predicate predicate() const {
-    return Rete::Rete_Predicate::EQ;
   }
 
   bool present;

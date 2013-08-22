@@ -23,6 +23,8 @@ namespace Rete {
       for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
         (*outputs_iterator++)->insert_wme_token(output_token, shared());
     }
+
+    std::cerr << "input_tokens.size() == " << input_tokens.size() << std::endl;
   }
 
   void Rete_Existential::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
@@ -40,6 +42,8 @@ namespace Rete {
           output->remove_wme_token(output_token, shared());
       }
     }
+
+    std::cerr << "input_tokens.size() == " << input_tokens.size() << std::endl;
   }
 
   void Rete_Existential::pass_tokens(const Rete_Node_Ptr &output) {
