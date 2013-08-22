@@ -9,6 +9,7 @@
 
 #include "environment.h"
 #include "feature.h"
+#include "node.h"
 #include "q_value.h"
 #include "value_queue.h"
 
@@ -34,50 +35,50 @@ public:
   typedef tracked_ptr<const Action> action_ptrsc;
   typedef double reward_type;
   typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
+//
+//  class RL : public std::enable_shared_from_this<RL> {
+//    RL(const RL &) = delete;
+//    RL & operator=(const RL &) = delete;
+//
+//  public:
+//    typedef std::list<std::shared_ptr<RL>> Fringe_Values;
+//    typedef std::pair<std::pair<double, double>, std::pair<double, double>> Range;
+//    typedef std::pair<std::pair<double, double>, std::pair<double, double>> Line;
+//    typedef std::vector<Line, Zeni::Pool_Allocator<Line>> Lines;
+//
+//    RL(Agent &agent_, const size_t &depth_, const Range &range_, const Lines &lines_)
+//     : agent(agent_),
+//     depth(depth_),
+//     range(range_),
+//     lines(lines_)
+//    {
+//    }
+//
+//    ~RL() {
+//      agent.purge_q_value(q_value);
+//      q_value.delete_and_zero();
+//      fringe_values.delete_and_zero();
+//      feature.delete_and_zero();
+//    }
+//
+//    Agent &agent;
+//
+//    size_t depth;
+//    tracked_ptr<Q_Value> q_value;
+//    std::weak_ptr<Rete::Rete_Action> action;
+//
+//    /// Present only for Leaf nodes
+//    tracked_ptr<Fringe_Values> fringe_values;
+//
+//    /// Present only for Fringe nodes
+//    tracked_ptr<feature_type> feature;
+//
+//    Range range;
+//    Lines lines;
+//  };
 
-  class RL : public std::enable_shared_from_this<RL> {
-    RL(const RL &) = delete;
-    RL & operator=(const RL &) = delete;
-
-  public:
-    typedef std::list<std::shared_ptr<RL>> Fringe_Values;
-    typedef std::pair<std::pair<double, double>, std::pair<double, double>> Range;
-    typedef std::pair<std::pair<double, double>, std::pair<double, double>> Line;
-    typedef std::vector<Line, Zeni::Pool_Allocator<Line>> Lines;
-
-    RL(Agent &agent_, const size_t &depth_, const Range &range_, const Lines &lines_)
-     : agent(agent_),
-     depth(depth_),
-     range(range_),
-     lines(lines_)
-    {
-    }
-
-    ~RL() {
-      agent.purge_q_value(q_value);
-      q_value.delete_and_zero();
-      fringe_values.delete_and_zero();
-      feature.delete_and_zero();
-    }
-
-    Agent &agent;
-
-    size_t depth;
-    tracked_ptr<Q_Value> q_value;
-    std::weak_ptr<Rete::Rete_Action> action;
-
-    /// Present only for Leaf nodes
-    tracked_ptr<Fringe_Values> fringe_values;
-
-    /// Present only for Fringe nodes
-    tracked_ptr<feature_type> feature;
-
-    Range range;
-    Lines lines;
-  };
-
-  bool specialize(const action_ptrsc &action, const std::shared_ptr<RL> &general);
-  void expand_fringe(const action_ptrsc &action, const std::shared_ptr<RL> &general, const Rete::WME_Token_Index specialization);
+  bool specialize(const action_ptrsc &action, const std::shared_ptr<Node_Unsplit> &general);
+  void expand_fringe(const action_ptrsc &action, const std::shared_ptr<Node_Unsplit> &general, const Rete::WME_Token_Index specialization);
 
   Agent(const std::shared_ptr<Environment> &environment);
 
@@ -134,11 +135,11 @@ public:
 
   void print(std::ostream &os) const;
 
-  size_t get_value_function_size() const;
-
   void reset_update_counts();
 
   void print_value_function_grid(std::ostream &os) const;
+
+  size_t q_value_count = 0;
 
 protected:
   action_ptrsc choose_epsilon_greedy(const double &epsilon);
@@ -164,7 +165,7 @@ protected:
 
   void assign_credit_normalize(const Q_Value_List &value_list, const double &sum);
 
-  bool split_test(const tracked_ptr<Q_Value> &q, const size_t &depth) const;
+  bool split_test(const tracked_ptr<Q_Value> &q) const;
 
   static double sum_value(const action_type * const &action, const Q_Value_List &value_list);
 
@@ -180,9 +181,9 @@ protected:
   }
 #endif
 
-  void print_value_function_grid_set(std::ostream &os, const std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>> &line_segments) const;
+  void print_value_function_grid_set(std::ostream &os, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &line_segments) const;
 
-  void merge_value_function_grid_sets(std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>> &combination, const std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>> &additions) const;
+  void merge_value_function_grid_sets(std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &combination, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &additions) const;
 
   Metastate m_metastate = Metastate::NON_TERMINAL;
   action_ptrsc m_current;
@@ -191,8 +192,8 @@ protected:
   std::map<action_ptrsc, Q_Value_List, compare_deref_lt, Zeni::Pool_Allocator<std::pair<action_ptrsc, Q_Value_List>>> m_next_q_values;
   std::function<action_ptrsc ()> m_target_policy; ///< Sarsa/Q-Learning selector
   std::function<action_ptrsc ()> m_exploration_policy; ///< Exploration policy
-  std::function<bool (Q_Value * const &, const size_t &)> m_split_test; ///< true if too general, false if sufficiently general
-  size_t m_q_value_count = 0;
+  std::function<bool (Q_Value * const &)> m_split_test; ///< true if too general, false if sufficiently general
+  std::map<action_ptrsc, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<action_ptrsc>, Zeni::Pool_Allocator<std::pair<action_ptrsc, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
 private:
   virtual void generate_features() = 0;
@@ -260,8 +261,6 @@ private:
   const double m_fringe_learning_scale = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["fringe-learning-scale"]).get_value();
 
   Q_Value::List * m_eligible = nullptr;
-
-  std::map<action_ptrsc, std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>>, std::less<action_ptrsc>, Zeni::Pool_Allocator<std::pair<action_ptrsc, std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>>>>> m_lines;
 };
 
 std::ostream & operator<<(std::ostream &os, const Agent &agent);

@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <map>
 #include <unordered_map>
 
 #ifndef NDEBUG
@@ -32,7 +33,7 @@ class pointer_tracker_impl {
     if(to) {
       if(++g_tracked_ptr_count == g_tracked_ptr_break)
         assert(g_tracked_ptr_count != g_tracked_ptr_break);
-      address_to_pointer.insert(std::make_pair(to, std::make_pair(from, g_tracked_ptr_count)));
+      address_to_pointer[to][from] = g_tracked_ptr_count;
     }
   }
 
@@ -40,29 +41,34 @@ class pointer_tracker_impl {
     if(to) {
       if(++g_tracked_ptr_count == g_tracked_ptr_break)
         assert(g_tracked_ptr_count != g_tracked_ptr_break);
-      auto range = address_to_pointer.equal_range(to);
-      auto atp = std::find_if(range.first, range.second, [from](const std::pair<const void *, std::pair<const void *, size_t>> &atp){return atp.second.first == from;});
-      assert(atp != address_to_pointer.end());
-      address_to_pointer.erase(atp);
+      auto found_to = address_to_pointer.find(to);
+      assert(found_to != address_to_pointer.end());
+      auto found_from = found_to->second.find(from);
+      assert(found_from != found_to->second.end());
+      found_to->second.erase(found_from);
+      if(found_to->second.empty())
+        address_to_pointer.erase(found_to);
     }
   }
 
   size_t count(const void * to) {
-    auto range = address_to_pointer.equal_range(to);
-    size_t count = 0;
-    std::for_each(range.first, range.second, [&count](const std::pair<const void *, std::pair<const void *, size_t>> &){++count;});
-    return count;
+    return address_to_pointer.count(to);
   }
 
   void print(const void * to) {
-    auto range = address_to_pointer.equal_range(to);
-    std::for_each(range.first, range.second, [](const std::pair<const void *, std::pair<const void *, size_t>> &to_from) {
-      std::cerr << "tracked_ptr: " << to_from.first << " from " << to_from.second.first << " at " << to_from.second.second << std::endl;
-    });
+    if(to) {
+      if(++g_tracked_ptr_count == g_tracked_ptr_break)
+        assert(g_tracked_ptr_count != g_tracked_ptr_break);
+      auto found_to = address_to_pointer.find(to);
+      assert(found_to != address_to_pointer.end());
+      std::for_each(found_to->second.begin(), found_to->second.end(), [to](const std::pair<const void *, size_t> &from) {
+        std::cerr << "tracked_ptr: " << to << " from " << from.first << " at " << from.second << std::endl;
+      });
+    }
   }
 
 //private:
-  std::unordered_multimap<const void *, std::pair<const void *, size_t>> address_to_pointer;
+  std::unordered_map<const void *, std::map<const void *, size_t>> address_to_pointer;
 };
 
 void pointer_tracker::set_pointer(const void * to, const void * from) {

@@ -135,20 +135,15 @@ namespace Mountain_Car {
           auto xdotlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::X_DOT, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), xdotgte);
           auto q_value = std::make_shared<Q_Value>(0.0, Q_Value::Type::UNSPLIT, 1);
           for(const auto &action : m_action) {
-            RL::Lines lines;
-            lines.push_back(RL::Line(std::make_pair(left, top), std::make_pair(left, bottom)));
-            lines.push_back(RL::Line(std::make_pair(left, bottom), std::make_pair(right, bottom)));
-            lines.push_back(RL::Line(std::make_pair(right, bottom), std::make_pair(right, top)));
-            lines.push_back(RL::Line(std::make_pair(right, top), std::make_pair(left, top)));
-            auto rl = std::make_shared<RL>(*this, 1,
-                                           RL::Range(std::make_pair(left, top), std::make_pair(right, bottom)),
-                                           lines);
-            rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
-            ++this->m_q_value_count;
-            make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-              this->m_next_q_values[action].push_back(rl->q_value);
-            }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-              this->purge_q_value_next(action, rl->q_value);
+            m_lines[action].insert(Node_Ranged::Line(std::make_pair(left, top), std::make_pair(left, bottom)));
+            m_lines[action].insert(Node_Ranged::Line(std::make_pair(left, bottom), std::make_pair(right, bottom)));
+            m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, bottom), std::make_pair(right, top)));
+            m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
+            auto node_split = std::make_shared<Node_Split>(*this, 1);
+            make_action_retraction([this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
+              this->m_next_q_values[action].push_back(node_split->q_value);
+            }, [this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
+              this->purge_q_value_next(action, node_split->q_value);
             }, xdotlt);
           }
         }
@@ -161,81 +156,72 @@ namespace Mountain_Car {
     const double m_half_x_dot = (m_min_x_dot + m_max_x_dot) / 2.0;
 
     for(const auto &action : m_action) {
-      auto rl = std::make_shared<RL>(*this, 1,
-                                     RL::Range(std::make_pair(m_min_x, m_max_x), std::make_pair(m_min_x_dot, m_max_x_dot)),
-                                     RL::Lines());
-      rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
-      ++this->m_q_value_count;
-      rl->fringe_values = new RL::Fringe_Values;
-      rl->action = make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-        if(!this->specialize(action, rl))
-          this->m_next_q_values[action].push_back(rl->q_value);
-      }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-        this->purge_q_value_next(action, rl->q_value);
+      auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
+      node_unsplit->action = make_action_retraction([this,action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        if(!this->specialize(action, node_unsplit))
+          this->m_next_q_values[action].push_back(node_unsplit->q_value);
+      }, [this,action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        this->purge_q_value_next(action, node_unsplit->q_value);
       }, parent);
 
       {
-        RL::Lines lines;
-        lines.push_back(RL::Line(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)));
-        auto rlf = std::make_shared<RL>(*this, 2,
-                                        RL::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)),
-                                        lines);
-        rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
-        rlf->feature = new Feature(Feature::X, m_min_x, m_half_x, 2, false);
-        auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
-        rlf->action = make_action_retraction([this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->m_next_q_values[action].push_back(rlf->q_value);
-        }, [this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->purge_q_value_next(action, rlf->q_value);
+        Node_Ranged::Lines lines;
+        lines.push_back(Node_Ranged::Line(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)));
+        auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                        Node_Ranged::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)),
+                                                        lines);
+        nfr->feature = new Feature(Feature::X, m_min_x, m_half_x, 2, false);
+        auto predicate = make_predicate_vc(nfr->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), nfr->feature->symbol_constant(), node_unsplit->action.lock()->parent());
+        nfr->action = make_action_retraction([this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          this->m_next_q_values[action].push_back(nfr->q_value);
+        }, [this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          this->purge_q_value_next(action, nfr->q_value);
         }, predicate);
-        rl->fringe_values->push_back(rlf);
+        node_unsplit->fringe_values.push_back(nfr);
       }
 
       {
-        auto rlf = std::make_shared<RL>(*this, 2,
-                                        RL::Range(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_max_x, m_max_x_dot)),
-                                        RL::Lines());
-        rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
-        rlf->feature = new Feature(Feature::X, m_half_x, m_max_x, 2, true);
-        auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
-        rlf->action = make_action_retraction([this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->m_next_q_values[action].push_back(rlf->q_value);
-        }, [this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->purge_q_value_next(action, rlf->q_value);
+        auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                        Node_Ranged::Range(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_max_x, m_max_x_dot)),
+                                                        Node_Ranged::Lines());
+        nfr->feature = new Feature(Feature::X, m_half_x, m_max_x, 2, true);
+        auto predicate = make_predicate_vc(nfr->feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), nfr->feature->symbol_constant(), node_unsplit->action.lock()->parent());
+        nfr->action = make_action_retraction([this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          this->m_next_q_values[action].push_back(nfr->q_value);
+        }, [this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          this->purge_q_value_next(action, nfr->q_value);
         }, predicate);
-        rl->fringe_values->push_back(rlf);
+        node_unsplit->fringe_values.push_back(nfr);
       }
 
       {
-        RL::Lines lines;
-        lines.push_back(RL::Line(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_half_x_dot)));
-        auto rlf = std::make_shared<RL>(*this, 2,
-                                        RL::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_max_x, m_half_x_dot)),
-                                        lines);
-        rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
-        rlf->feature = new Feature(Feature::X_DOT, m_min_x_dot, m_half_x_dot, 2, false);
-        auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X_DOT, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
-        rlf->action = make_action_retraction([this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->m_next_q_values[action].push_back(rlf->q_value);
-        }, [this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->purge_q_value_next(action, rlf->q_value);
+        Node_Ranged::Lines lines;
+        lines.push_back(Node_Ranged::Line(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_half_x_dot)));
+        auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                        Node_Ranged::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_max_x, m_half_x_dot)),
+                                                        lines);
+        nfr->feature = new Feature(Feature::X_DOT, m_min_x_dot, m_half_x_dot, 2, false);
+        auto predicate = make_predicate_vc(nfr->feature->predicate(), Rete::WME_Token_Index(Feature::X_DOT, 2), nfr->feature->symbol_constant(), node_unsplit->action.lock()->parent());
+        nfr->action = make_action_retraction([this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          this->m_next_q_values[action].push_back(nfr->q_value);
+        }, [this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          this->purge_q_value_next(action, nfr->q_value);
         }, predicate);
-        rl->fringe_values->push_back(rlf);
+        node_unsplit->fringe_values.push_back(nfr);
       }
 
       {
-        auto rlf = std::make_shared<RL>(*this, 2,
-                                        RL::Range(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_max_x_dot)),
-                                        RL::Lines());
-        rlf->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rlf->depth);
-        rlf->feature = new Feature(Feature::X_DOT, m_half_x_dot, m_max_x_dot, 2, true);
-        auto predicate = make_predicate_vc(rlf->feature->predicate(), Rete::WME_Token_Index(Feature::X_DOT, 2), rlf->feature->symbol_constant(), rl->action.lock()->parent());
-        rlf->action = make_action_retraction([this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->m_next_q_values[action].push_back(rlf->q_value);
-        }, [this,action,rlf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->purge_q_value_next(action, rlf->q_value);
+        auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                        Node_Ranged::Range(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_max_x_dot)),
+                                                        Node_Ranged::Lines());
+        nfr->feature = new Feature(Feature::X_DOT, m_half_x_dot, m_max_x_dot, 2, true);
+        auto predicate = make_predicate_vc(nfr->feature->predicate(), Rete::WME_Token_Index(Feature::X_DOT, 2), nfr->feature->symbol_constant(), node_unsplit->action.lock()->parent());
+        nfr->action = make_action_retraction([this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          this->m_next_q_values[action].push_back(nfr->q_value);
+        }, [this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          this->purge_q_value_next(action, nfr->q_value);
         }, predicate);
-        rl->fringe_values->push_back(rlf);
+        node_unsplit->fringe_values.push_back(nfr);
       }
     }
   }

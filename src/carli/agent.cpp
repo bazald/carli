@@ -1,16 +1,16 @@
 #include "agent.h"
 
-bool Agent::specialize(const action_ptrsc &action, const std::shared_ptr<RL> &general) {
-  if(!general->fringe_values || !split_test(general->q_value, general->depth))
+bool Agent::specialize(const action_ptrsc &action, const std::shared_ptr<Node_Unsplit> &general) {
+  if(!split_test(general->q_value))
     return false;
 
   /// TODO: choose intelligently again
-  auto gen = general->fringe_values->begin();
-  for(auto count = random.rand_lt(general->fringe_values->size()); count; --count)
+  auto gen = general->fringe_values.begin();
+  for(auto count = random.rand_lt(general->fringe_values.size()); count; --count)
     ++gen;
   auto chosen = *gen;
 
-  for(auto &fringe : *general->fringe_values) {
+  for(auto &fringe : general->fringe_values) {
     if(*fringe->feature < *chosen->feature) {
       chosen = fringe;
     }
@@ -22,24 +22,25 @@ bool Agent::specialize(const action_ptrsc &action, const std::shared_ptr<RL> &ge
     expand_fringe(action, general, chosen_feature->axis);
 
   auto general_action = general->action.lock();
-  general_action->detach();
-  general_action->set_action([this,action,general](const Rete::Rete_Action &, const Rete::WME_Token &) {
-    this->m_next_q_values[action].push_back(general->q_value);
-  });
-  general_action->reattach();
+  general->destroy();
+  auto node_split = std::make_shared<Node_Split>(*this, general->q_value->depth);
+  std::swap(general->q_value, node_split->q_value);
+  make_action_retraction([this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
+    this->m_next_q_values[action].push_back(node_split->q_value);
+  }, [this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
+    this->purge_q_value_next(action, node_split->q_value);
+  }, general_action->parent());
 
   return true;
 }
 
-void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<RL> &general, const Rete::WME_Token_Index specialization) {
-  assert(general->fringe_values);
-
-  typename RL::Fringe_Values leaves;
-  for(auto fringe = general->fringe_values->begin(), fend = general->fringe_values->end(); fringe != fend; ) {
+void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<Node_Unsplit> &general, const Rete::WME_Token_Index specialization) {
+  Node_Unsplit::Fringe_Values leaves;
+  for(auto fringe = general->fringe_values.begin(), fend = general->fringe_values.end(); fringe != fend; ) {
     auto fringe_ranged = dynamic_cast<Feature_Ranged *>((*fringe)->feature.get());
     if(fringe_ranged && fringe_ranged->axis == specialization) {
       leaves.push_back(*fringe);
-      general->fringe_values->erase(fringe++);
+      general->fringe_values.erase(fringe++);
     }
     else
       ++fringe;
@@ -47,114 +48,107 @@ void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<RL> 
 
   for(auto &leaf : leaves) {
     auto leaf_action = leaf->action.lock();
-    leaf_action->detach();
 
-    purge_q_value(leaf->q_value);
-    leaf->q_value.delete_and_zero();
-    leaf->q_value = new Q_Value(0.0f, Q_Value::Type::UNSPLIT, leaf->depth);
-    ++m_q_value_count;
-
-    for(auto &line : leaf->lines)
-      m_lines[action].insert(line);
-    leaf->lines.clear();
-
-    assert(leaf->depth <= m_split_max);
-    auto leaf_ranged = dynamic_cast<Feature_Ranged *>(leaf->feature.get());
-    if(leaf->depth < m_split_max && leaf_ranged) {
-      leaf->action.lock()->set_action([this,action,leaf](const Rete::Rete_Action &, const Rete::WME_Token &) {
-        if(!this->specialize(action, leaf))
-          this->m_next_q_values[action].push_back(leaf->q_value);
-      });
-
-      leaf->fringe_values = new typename RL::Fringe_Values;
-
-      auto refined = leaf->feature->refined();
-      for(auto &refined_feature : refined) {
-        auto refined_ranged = dynamic_cast<Feature_Ranged *>(refined_feature);
-        if(!refined_ranged)
-          continue;
-        typename RL::Range range(leaf->range);
-        typename RL::Lines lines;
-        if(refined_ranged->axis.first == 0) {
-          if(!refined_ranged->upper) {
-            range.second.first = refined_ranged->bound_upper;
-            lines.push_back(typename RL::Line(std::make_pair(range.second.first, range.first.second), std::make_pair(range.second.first, range.second.second)));
-          }
-          else {
-            range.first.first = refined_ranged->bound_lower;
-          }
-        }
-        else {
-          if(!refined_ranged->upper) {
-            range.second.second = refined_ranged->bound_upper;
-            lines.push_back(typename RL::Line(std::make_pair(range.first.first, range.second.second), std::make_pair(range.second.first, range.second.second)));
-          }
-          else {
-            range.first.second = refined_ranged->bound_lower;
-          }
-        }
-        auto rl = std::make_shared<RL>(*this, leaf->depth + 1, range, lines);
-        rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
-        rl->feature = refined_feature;
-        auto predicate = make_predicate_vc(refined_ranged->predicate(), leaf_ranged->axis, refined_ranged->symbol_constant(), leaf->action.lock()->parent());
-        rl->action = make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->m_next_q_values[action].push_back(rl->q_value);
-        }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->purge_q_value_next(action, rl->q_value);
-        }, predicate);
-
-        leaf->fringe_values->push_back(rl);
-      }
-
-      for(auto &fringe : *general->fringe_values) {
-        auto fringe_ranged = dynamic_cast<Feature_Ranged *>(fringe->feature.get());
-        if(!fringe_ranged)
-          continue;
-        typename RL::Range range(fringe->range);
-        typename RL::Lines lines;
-        if(leaf_ranged->axis.first == 0) {
-          range.first.first = leaf->range.first.first;
-          range.second.first = leaf->range.second.first;
-          for(auto &line : fringe->lines)
-            lines.push_back(typename RL::Line(std::make_pair(range.first.first, line.first.second), std::make_pair(range.second.first, line.second.second)));
-        }
-        else {
-          range.first.second = leaf->range.first.second;
-          range.second.second = leaf->range.second.second;
-          for(auto &line : fringe->lines)
-            lines.push_back(typename RL::Line(std::make_pair(line.first.first, range.first.second), std::make_pair(line.second.first, range.second.second)));
-        }
-        auto rl = std::make_shared<RL>(*this, leaf->depth + 1, range, lines);
-        rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
-        rl->feature = fringe_ranged->clone();
-        auto predicate = make_predicate_vc(rl->feature->predicate(), fringe_ranged->axis, rl->feature->symbol_constant(), leaf->action.lock()->parent());
-        rl->action = make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->m_next_q_values[action].push_back(rl->q_value);
-        }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->purge_q_value_next(action, rl->q_value);
-        }, predicate);
-
-        leaf->fringe_values->push_back(rl);
-      }
-
-      if(leaf->fringe_values->empty())
-        leaf->fringe_values.delete_and_zero();
-
-      leaf->feature.delete_and_zero();
+    if(auto ranged = dynamic_cast<Node_Fringe_Ranged *>(leaf.get())) {
+      for(auto &line : ranged->lines)
+        m_lines[action].insert(line);
     }
 
-    leaf_action->reattach();
+    Node_Unsplit::Fringe_Values new_fringe;
+
+    assert(leaf->q_value->depth <= m_split_max);
+    auto leaf_ranged = dynamic_cast<Feature_Ranged *>(leaf->feature.get());
+//    if(leaf->q_value->depth < m_split_max && leaf_ranged) {
+//      leaf->action.lock()->set_action([this,action,leaf](const Rete::Rete_Action &, const Rete::WME_Token &) {
+//        if(!this->specialize(action, leaf))
+//          this->m_next_q_values[action].push_back(leaf->q_value);
+//      });
+//
+//      leaf->fringe_values = new typename RL::Fringe_Values;
+//
+//      auto refined = leaf->feature->refined();
+//      for(auto &refined_feature : refined) {
+//        auto refined_ranged = dynamic_cast<Feature_Ranged *>(refined_feature);
+//        if(!refined_ranged)
+//          continue;
+//        typename RL::Range range(leaf->range);
+//        typename RL::Lines lines;
+//        if(refined_ranged->axis.first == 0) {
+//          if(!refined_ranged->upper) {
+//            range.second.first = refined_ranged->bound_upper;
+//            lines.push_back(typename RL::Line(std::make_pair(range.second.first, range.first.second), std::make_pair(range.second.first, range.second.second)));
+//          }
+//          else {
+//            range.first.first = refined_ranged->bound_lower;
+//          }
+//        }
+//        else {
+//          if(!refined_ranged->upper) {
+//            range.second.second = refined_ranged->bound_upper;
+//            lines.push_back(typename RL::Line(std::make_pair(range.first.first, range.second.second), std::make_pair(range.second.first, range.second.second)));
+//          }
+//          else {
+//            range.first.second = refined_ranged->bound_lower;
+//          }
+//        }
+//        auto rl = std::make_shared<RL>(*this, leaf->depth + 1, range, lines);
+//        rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
+//        rl->feature = refined_feature;
+//        auto predicate = make_predicate_vc(refined_ranged->predicate(), leaf_ranged->axis, refined_ranged->symbol_constant(), leaf->action.lock()->parent());
+//        rl->action = make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+//          this->m_next_q_values[action].push_back(rl->q_value);
+//        }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+//          this->purge_q_value_next(action, rl->q_value);
+//        }, predicate);
+//
+//        leaf->fringe_values.push_back(rl);
+//      }
+//
+//      for(auto &fringe : general->fringe_values) {
+//        auto fringe_ranged = dynamic_cast<Feature_Ranged *>(fringe->feature.get());
+//        if(!fringe_ranged)
+//          continue;
+//        typename RL::Range range(fringe->range);
+//        typename RL::Lines lines;
+//        if(leaf_ranged->axis.first == 0) {
+//          range.first.first = leaf->range.first.first;
+//          range.second.first = leaf->range.second.first;
+//          for(auto &line : fringe->lines)
+//            lines.push_back(typename RL::Line(std::make_pair(range.first.first, line.first.second), std::make_pair(range.second.first, line.second.second)));
+//        }
+//        else {
+//          range.first.second = leaf->range.first.second;
+//          range.second.second = leaf->range.second.second;
+//          for(auto &line : fringe->lines)
+//            lines.push_back(typename RL::Line(std::make_pair(line.first.first, range.first.second), std::make_pair(line.second.first, range.second.second)));
+//        }
+//        auto rl = std::make_shared<RL>(*this, leaf->depth + 1, range, lines);
+//        rl->q_value = new Q_Value(0.0, Q_Value::Type::FRINGE, rl->depth);
+//        rl->feature = fringe_ranged->clone();
+//        auto predicate = make_predicate_vc(rl->feature->predicate(), fringe_ranged->axis, rl->feature->symbol_constant(), leaf->action.lock()->parent());
+//        rl->action = make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+//          this->m_next_q_values[action].push_back(rl->q_value);
+//        }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+//          this->purge_q_value_next(action, rl->q_value);
+//        }, predicate);
+//
+//        leaf->fringe_values.push_back(rl);
+//      }
+//
+//      if(leaf->fringe_values.empty())
+//        leaf->fringe_values.delete_and_zero();
+//      leaf->delete_and_zero();
+//    }
   }
 
-  for(auto &fringe : *general->fringe_values)
+  for(auto &fringe : general->fringe_values)
     excise_rule(fringe->action.lock());
-  general->fringe_values.delete_and_zero();
 }
 
 Agent::Agent(const std::shared_ptr<Environment> &environment)
   : m_target_policy([this]()->action_ptrsc{return this->choose_greedy();}),
   m_exploration_policy([this]()->action_ptrsc{return this->choose_epsilon_greedy(m_epsilon);}),
-  m_split_test([this](Q_Value * const &q, const size_t &depth)->bool{return this->split_test(q, depth);}),
+  m_split_test([this](Q_Value * const &q)->bool{return this->split_test(q);}),
   m_environment(environment),
   m_credit_assignment(
     m_credit_assignment_code == "all" ?
@@ -325,10 +319,6 @@ void Agent::print(std::ostream &os) const {
 //#endif
 }
 
-size_t Agent::get_value_function_size() const {
-  return m_q_value_count;
-}
-
 void Agent::reset_update_counts() {
 //    for(auto &vf : m_value_function) {
 //      reset_update_counts_for_trie(vf.second);
@@ -336,7 +326,7 @@ void Agent::reset_update_counts() {
 }
 
 void Agent::print_value_function_grid(std::ostream &os) const {
-  std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>> line_segments;
+  std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> line_segments;
   for(auto &action_value : m_next_q_values) {
     const auto &line_segments2 = m_lines.find(action_value.first);
     if(line_segments2 != m_lines.end()) {
@@ -719,16 +709,16 @@ void Agent::assign_credit_normalize(const Q_Value_List &value_list, const double
   }
 }
 
-bool Agent::split_test(const tracked_ptr<Q_Value> &q, const size_t &depth) const {
+bool Agent::split_test(const tracked_ptr<Q_Value> &q) const {
   assert(q);
   assert(q->type == Q_Value::Type::UNSPLIT);
 
-  if(depth < m_split_min) {
+  if(q->depth < m_split_min) {
     if(q)
       q->type = Q_Value::Type::SPLIT;
     return true;
   }
-//    if(depth >= m_split_max)
+//    if(q->depth >= m_split_max)
 //      return false;
 
 //    if(!q)
@@ -736,13 +726,13 @@ bool Agent::split_test(const tracked_ptr<Q_Value> &q, const size_t &depth) const
 //    if(q->type == Q_Value::Type::SPLIT)
 //      return true;
 
-  if(m_value_function_cap && get_value_function_size() >= m_value_function_cap)
+  if(m_value_function_cap && q_value_count >= m_value_function_cap)
     return false;
 
   if(q->update_count > m_split_update_count &&
      q->pseudoepisode_count > m_split_pseudoepisodes &&
-     (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean().outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * m_q_value_count)
-                             : m_mean_cabe.outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * m_q_value_count)))
+     (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean().outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)
+                             : m_mean_cabe.outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)))
   {
     q->type = Q_Value::Type::SPLIT;
     return true;
@@ -787,7 +777,7 @@ double Agent::sum_value(const action_type * const &
   return sum;
 }
 
-void Agent::print_value_function_grid_set(std::ostream &os, const std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>> &line_segments) const {
+void Agent::print_value_function_grid_set(std::ostream &os, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &line_segments) const {
   for(const auto &line_segment : line_segments)
     os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
 }
@@ -797,7 +787,7 @@ void Agent::print_value_function_grid_set(std::ostream &os, const std::set<typen
 //      os << rect.first.first.first << ',' << rect.first.first.second << '/' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
 //  }
 
-void Agent::merge_value_function_grid_sets(std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>> &combination, const std::set<typename RL::Line, std::less<typename RL::Line>, Zeni::Pool_Allocator<typename RL::Line>> &additions) const {
+void Agent::merge_value_function_grid_sets(std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &combination, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &additions) const {
   for(const auto &line_segment : additions)
     combination.insert(line_segment);
 }

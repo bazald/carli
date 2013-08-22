@@ -98,76 +98,71 @@ namespace Blocks_World {
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(3, 2), Rete::WME_Token_Index(0, 0)));
     auto join_dest_name = make_join(state_bindings, join_block_name, filter_name);
 
-    auto filter_clear = make_filter(Rete::WME(m_first_var, m_clear_attr, m_third_var));
-    state_bindings.clear();
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(2, 2), Rete::WME_Token_Index(0, 0)));
-    auto join_block_clear = make_join(state_bindings, join_dest_name, filter_clear);
-
-    auto filter_in_place = make_filter(Rete::WME(m_first_var, m_in_place_attr, m_third_var));
-    state_bindings.clear();
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(3, 2), Rete::WME_Token_Index(0, 0)));
-    auto join_dest_in_place = make_join(state_bindings, join_block_clear, filter_in_place);
+//    auto filter_clear = make_filter(Rete::WME(m_first_var, m_clear_attr, m_third_var));
+//    state_bindings.clear();
+//    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(2, 2), Rete::WME_Token_Index(0, 0)));
+//    auto join_block_clear = make_join(state_bindings, join_dest_name, filter_clear);
+//
+//    auto filter_in_place = make_filter(Rete::WME(m_first_var, m_in_place_attr, m_third_var));
+//    state_bindings.clear();
+//    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(3, 2), Rete::WME_Token_Index(0, 0)));
+//    auto join_dest_in_place = make_join(state_bindings, join_block_clear, filter_in_place);
 
     auto filter_blink = make_filter(*m_wme_blink);
 
     {
-      auto join_blink = make_join(Rete::WME_Bindings(), join_dest_in_place, filter_blink);
+      auto join_blink = make_join(Rete::WME_Bindings(), join_dest_name, filter_blink);
 
-      auto rl = std::make_shared<RL>(*this, 1,
-                                     RL::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 1.0)),
-                                     RL::Lines());
-      rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
-      ++this->m_q_value_count;
-  //    rl->fringe_values = new RL::Fringe_Values;
-      rl->action = make_action_retraction([this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-  //      if(!this->specialize(action, rl))
-          this->m_next_q_values[this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value]].push_back(rl->q_value);
-      }, [this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        this->purge_q_value_next(this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value], rl->q_value);
+      auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
+      node_unsplit->action = make_action_retraction([this,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+  //      if(!this->specialize(action, node_unsplit))
+          this->m_next_q_values[this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value]].push_back(node_unsplit->q_value);
+      }, [this,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        this->purge_q_value_next(this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value], node_unsplit->q_value);
       }, join_blink);
     }
 
-    for(int i = 1; i != 4; ++i) {
-      auto block_name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(4, 2), get_block_name(i), join_dest_in_place);
-
-      {
-        auto join_blink = make_join(Rete::WME_Bindings(), block_name_is, filter_blink);
-
-        auto rl = std::make_shared<RL>(*this, 2,
-                                       RL::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 1.0)),
-                                       RL::Lines());
-        rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
-        ++this->m_q_value_count;
-    //    rl->fringe_values = new RL::Fringe_Values;
-        rl->action = make_action_retraction([this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-    //      if(!this->specialize(action, rl))
-            this->m_next_q_values[this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value]].push_back(rl->q_value);
-        }, [this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-          this->purge_q_value_next(this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value], rl->q_value);
-        }, join_blink);
-      }
-
-      for(int j = 0; j != 4; ++j) {
-        if(i == j)
-          continue;
-
-        auto dest_name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(5, 2), get_block_name(j), block_name_is);
-        auto join_blink = make_join(Rete::WME_Bindings(), dest_name_is, filter_blink);
-
-        auto rl = std::make_shared<RL>(*this, 3,
-                                       RL::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 1.0)),
-                                       RL::Lines());
-        rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
-        ++this->m_q_value_count;
-    //    rl->fringe_values = new RL::Fringe_Values;
-        rl->action = make_action_retraction([this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-    //      if(!this->specialize(action, rl))
-            this->m_next_q_values[this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value]].push_back(rl->q_value);
-        }, [this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-          this->purge_q_value_next(this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value], rl->q_value);
-        }, join_blink);
-      }
-    }
+//    for(int i = 1; i != 4; ++i) {
+//      auto block_name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(4, 2), get_block_name(i), join_dest_in_place);
+//
+//      {
+//        auto join_blink = make_join(Rete::WME_Bindings(), block_name_is, filter_blink);
+//
+//        auto rl = std::make_shared<RL>(*this, 2,
+//                                       RL::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 1.0)),
+//                                       RL::Lines());
+//        rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
+//        ++this->m_q_value_count;
+//    //    rl->fringe_values = new RL::Fringe_Values;
+//        rl->action = make_action_retraction([this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+//    //      if(!this->specialize(action, rl))
+//            this->m_next_q_values[this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value]].push_back(rl->q_value);
+//        }, [this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+//          this->purge_q_value_next(this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value], rl->q_value);
+//        }, join_blink);
+//      }
+//
+//      for(int j = 0; j != 4; ++j) {
+//        if(i == j)
+//          continue;
+//
+//        auto dest_name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(5, 2), get_block_name(j), block_name_is);
+//        auto join_blink = make_join(Rete::WME_Bindings(), dest_name_is, filter_blink);
+//
+//        auto rl = std::make_shared<RL>(*this, 3,
+//                                       RL::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 1.0)),
+//                                       RL::Lines());
+//        rl->q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, rl->depth);
+//        ++this->m_q_value_count;
+//    //    rl->fringe_values = new RL::Fringe_Values;
+//        rl->action = make_action_retraction([this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+//    //      if(!this->specialize(action, rl))
+//            this->m_next_q_values[this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value]].push_back(rl->q_value);
+//        }, [this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+//          this->purge_q_value_next(this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value], rl->q_value);
+//        }, join_blink);
+//      }
+//    }
   }
 
   void Agent::generate_features() {

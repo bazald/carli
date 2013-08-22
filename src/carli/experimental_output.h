@@ -8,7 +8,7 @@ class Experimental_Output {
 public:
   Experimental_Output(const size_t &print_every = 1);
 
-  void print(const size_t &total_steps, const size_t &episode_number, const size_t &step_count, const double &reward, const bool &done, const std::function<size_t ()> get_value_function_size);
+  void print(const size_t &total_steps, const size_t &episode_number, const size_t &step_count, const double &reward, const bool &done, const size_t &q_value_count);
 
 private:
   void reset_stats();

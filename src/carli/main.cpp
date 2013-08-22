@@ -364,7 +364,7 @@ void run_agent(const function<shared_ptr<Environment> ()> &make_env, const funct
       done = agent->get_metastate() != Metastate::NON_TERMINAL /*|| agent->get_step_count() >= 5000*/ || (num_steps && total_steps > 0 && total_steps >= num_steps);
 
       if(output == "experiment" && total_steps > -1)
-        experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, [&agent]()->size_t{return agent->get_value_function_size();});
+        experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, agent->q_value_count);
 
 #ifdef DEBUG_OUTPUT
       cerr << *env << *agent;
@@ -389,7 +389,7 @@ void run_agent(const function<shared_ptr<Environment> ()> &make_env, const funct
   if(output == "simple") {
     cout << successes << " SUCCESSes" << endl;
     cout << failures << " FAILUREs" << endl;
-    cout << agent->get_value_function_size() << " Q-values" << endl;
+    cout << agent->q_value_count << " Q-values" << endl;
 
 //    if(auto mca = dynamic_pointer_cast<Mountain_Car::Agent>(agent))
 //      mca->print_policy(cout, 32);
