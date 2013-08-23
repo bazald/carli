@@ -146,6 +146,10 @@ namespace Blocks_World {
       return block - rhs.block;
     }
 
+    int compare_value(const Feature &rhs) const {
+      return strcmp(name.c_str(), debuggable_cast<const Name &>(rhs).name.c_str());
+    }
+
     Rete::WME_Token_Index wme_token_index() const {
       return Rete::WME_Token_Index(4 + block, 2);
     }

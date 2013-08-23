@@ -182,6 +182,36 @@ namespace Blocks_World {
       node_unsplit->fringe_values.push_back(node_fringe_neg);
     }
 
+    for(int i = 1; i != 4; ++i) {
+      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
+      auto feature = new Name(Feature::BLOCK, get_block_name(i)->value, true);
+      node_fringe->feature = feature;
+      auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), get_block_name(i), join_dest_name);
+      node_fringe->action = make_action_retraction([this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+        this->m_next_q_values[action].push_back(node_fringe->q_value);
+      }, [this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+        this->purge_q_value_next(action, node_fringe->q_value);
+      }, name_is);
+      node_unsplit->fringe_values.push_back(node_fringe);
+    }
+
+    for(int i = 0; i != 4; ++i) {
+      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
+      auto feature = new Name(Feature::DEST, get_block_name(i)->value, true);
+      node_fringe->feature = feature;
+      auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), get_block_name(i), join_dest_name);
+      node_fringe->action = make_action_retraction([this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+        this->m_next_q_values[action].push_back(node_fringe->q_value);
+      }, [this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+        this->purge_q_value_next(action, node_fringe->q_value);
+      }, name_is);
+      node_unsplit->fringe_values.push_back(node_fringe);
+    }
+
 //    for(int i = 1; i != 4; ++i) {
 //      auto block_name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(4, 2), get_block_name(i), join_dest_in_place);
 //
