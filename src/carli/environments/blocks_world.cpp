@@ -133,11 +133,9 @@ namespace Blocks_World {
       auto join_block_clear = make_existential_join(state_bindings, join_dest_name, filter_clear);
       node_fringe->action = make_action_retraction([this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
-        std::cerr << "Observe " << *action << ": " << debuggable_cast<const Rete::Symbol_Constant_String &>(*token[Rete::WME_Token_Index(4, 2)]).value << " is clear." << std::endl;
         this->m_next_q_values[action].push_back(node_fringe->q_value);
       }, [this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
-        std::cerr << "Unobserve " << *action << ": " << debuggable_cast<const Rete::Symbol_Constant_String &>(*token[Rete::WME_Token_Index(4, 2)]).value << " is clear." << std::endl;
         this->purge_q_value_next(action, node_fringe->q_value);
       }, join_block_clear);
       node_unsplit->fringe_values.push_back(node_fringe);
@@ -147,11 +145,38 @@ namespace Blocks_World {
       auto neg = make_negation_join(state_bindings, join_dest_name, filter_clear);
       node_fringe_neg->action = make_action_retraction([this,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
-        std::cerr << "Observe " << *action << ": " << debuggable_cast<const Rete::Symbol_Constant_String &>(*token[Rete::WME_Token_Index(4, 2)]).value << " is not clear." << std::endl;
         this->m_next_q_values[action].push_back(node_fringe_neg->q_value);
       }, [this,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
-        std::cerr << "Unobserve " << *action << ": " << debuggable_cast<const Rete::Symbol_Constant_String &>(*token[Rete::WME_Token_Index(4, 2)]).value << " is not clear." << std::endl;
+        this->purge_q_value_next(action, node_fringe_neg->q_value);
+      }, neg);
+      node_unsplit->fringe_values.push_back(node_fringe_neg);
+    }
+
+    {
+      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
+      auto feature = new In_Place(Feature::BLOCK, true);
+      node_fringe->feature = feature;
+      state_bindings.clear();
+      state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
+      auto join_block_in_place = make_existential_join(state_bindings, join_dest_name, filter_in_place);
+      node_fringe->action = make_action_retraction([this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+        this->m_next_q_values[action].push_back(node_fringe->q_value);
+      }, [this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+        this->purge_q_value_next(action, node_fringe->q_value);
+      }, join_block_in_place);
+      node_unsplit->fringe_values.push_back(node_fringe);
+
+      auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2);
+      node_fringe_neg->feature = new In_Place(Feature::BLOCK, false);
+      auto neg = make_negation_join(state_bindings, join_dest_name, filter_in_place);
+      node_fringe_neg->action = make_action_retraction([this,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+        this->m_next_q_values[action].push_back(node_fringe_neg->q_value);
+      }, [this,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
         this->purge_q_value_next(action, node_fringe_neg->q_value);
       }, neg);
       node_unsplit->fringe_values.push_back(node_fringe_neg);
@@ -223,8 +248,8 @@ namespace Blocks_World {
 
       wmes_current.push_back(std::make_shared<Rete::WME>(get_block_id(*bt->begin()), m_clear_attr, m_true_value));
 
-      for(auto st = bt->begin(), stn = ++bt->begin(), send = bt->end(); stn != send; st = stn, ++stn)
-        wmes_current.push_back(std::make_shared<Rete::WME>(get_block_id(*st), m_on_top_attr, get_block_id(*stn)));
+//      for(auto st = bt->begin(), stn = ++bt->begin(), send = bt->end(); stn != send; st = stn, ++stn)
+//        wmes_current.push_back(std::make_shared<Rete::WME>(get_block_id(*st), m_on_top_attr, get_block_id(*stn)));
 
       auto base = bt->rbegin();
       const auto stack = std::find_if(goal.begin(), goal.end(), [&base](const Environment::Stack &stack)->bool{return std::find(stack.begin(), stack.end(), *base) != stack.end();});

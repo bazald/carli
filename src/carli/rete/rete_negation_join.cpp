@@ -24,9 +24,15 @@ namespace Rete {
     if(from == input0.lock()) {
       input0_tokens.push_back(wme_token);
       output_tokens.push_back(std::make_pair(wme_token, 0u));
+      auto inserted = output_tokens.rbegin();
 
       for(const auto &other : input1_tokens)
         join_tokens(wme_token, other);
+
+      if(inserted->second == 0u) {
+        for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
+          (*outputs_iterator++)->insert_wme_token(wme_token, shared());
+      }
     }
     if(from == input1.lock()) {
       input1_tokens.push_back(wme_token);
@@ -71,10 +77,10 @@ namespace Rete {
 
   Rete_Negation_Join_Ptr Rete_Negation_Join::find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
     for(auto &o0 : out0->get_outputs()) {
-      if(auto existing_join = std::dynamic_pointer_cast<Rete_Negation_Join>(o0)) {
-        if(std::find(out1->get_outputs().begin(), out1->get_outputs().end(), existing_join) != out1->get_outputs().end()) {
-          if(bindings == existing_join->bindings)
-            return existing_join;
+      if(auto existing_negation_join = std::dynamic_pointer_cast<Rete_Negation_Join>(o0)) {
+        if(std::find(out1->get_outputs().begin(), out1->get_outputs().end(), existing_negation_join) != out1->get_outputs().end()) {
+          if(bindings == existing_negation_join->bindings)
+            return existing_negation_join;
         }
       }
     }
@@ -89,14 +95,11 @@ namespace Rete {
     }
 
     auto found = find_key(output_tokens, lhs);
-    if(found == output_tokens.end()) {
-      output_tokens.push_back(std::make_pair(lhs, 1u));
-
+    assert(found != output_tokens.end());
+    if(++found->second == 1) {
       for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
         (*outputs_iterator++)->remove_wme_token(lhs, shared());
     }
-    else
-      ++found->second;
   }
 
   void Rete_Negation_Join::unjoin_tokens(const WME_Token_Ptr_C &lhs, const WME_Token_Ptr_C &rhs) {
@@ -110,8 +113,6 @@ namespace Rete {
     if(--found->second == 0) {
       for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
         (*outputs_iterator++)->insert_wme_token(lhs, shared());
-
-      output_tokens.erase(found);
     }
   }
 

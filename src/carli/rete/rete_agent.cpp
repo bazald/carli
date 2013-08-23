@@ -34,9 +34,9 @@ namespace Rete {
   }
 
   Rete_Existential_Join_Ptr Rete_Agent::make_existential_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
-    auto existential_join = Rete_Existential_Join::find_existing(bindings, out0, out1);
-    if(!existential_join)
-      existential_join = std::make_shared<Rete_Existential_Join>(bindings);
+    if(auto existing = Rete_Existential_Join::find_existing(bindings, out0, out1))
+      return existing;
+    auto existential_join = std::make_shared<Rete_Existential_Join>(bindings);
     bind_to_existential_join(existential_join, out0, out1);
     return existential_join;
   }
@@ -72,9 +72,9 @@ namespace Rete {
   }
 
   Rete_Negation_Join_Ptr Rete_Agent::make_negation_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
-    auto negation_join = Rete_Negation_Join::find_existing(bindings, out0, out1);
-    if(!negation_join)
-      negation_join = std::make_shared<Rete_Negation_Join>(bindings);
+    if(auto existing = Rete_Negation_Join::find_existing(bindings, out0, out1))
+      return existing;
+    auto negation_join = std::make_shared<Rete_Negation_Join>(bindings);
     bind_to_negation_join(negation_join, out0, out1);
     return negation_join;
   }

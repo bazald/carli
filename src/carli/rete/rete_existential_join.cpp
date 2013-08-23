@@ -66,10 +66,10 @@ namespace Rete {
 
   Rete_Existential_Join_Ptr Rete_Existential_Join::find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
     for(auto &o0 : out0->get_outputs()) {
-      if(auto existing_join = std::dynamic_pointer_cast<Rete_Existential_Join>(o0)) {
-        if(std::find(out1->get_outputs().begin(), out1->get_outputs().end(), existing_join) != out1->get_outputs().end()) {
-          if(bindings == existing_join->bindings)
-            return existing_join;
+      if(auto existing_existential_join = std::dynamic_pointer_cast<Rete_Existential_Join>(o0)) {
+        if(std::find(out1->get_outputs().begin(), out1->get_outputs().end(), existing_existential_join) != out1->get_outputs().end()) {
+          if(bindings == existing_existential_join->bindings)
+            return existing_existential_join;
         }
       }
     }
