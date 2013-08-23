@@ -77,8 +77,8 @@ public:
 //    Lines lines;
 //  };
 
-  bool specialize(const action_ptrsc &action, const std::shared_ptr<Node_Unsplit> &general);
-  void expand_fringe(const action_ptrsc &action, const std::shared_ptr<Node_Unsplit> &general, const Rete::WME_Token_Index specialization);
+  bool specialize(const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general);
+  void expand_fringe(const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general, const Feature * const &specialization);
 
   Agent(const std::shared_ptr<Environment> &environment);
 
@@ -131,6 +131,7 @@ public:
 
   void purge_q_value(const tracked_ptr<Q_Value> &q_value);
 
+  void insert_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value);
   void purge_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value);
 
   void print(std::ostream &os) const;

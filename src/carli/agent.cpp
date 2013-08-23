@@ -1,6 +1,6 @@
 #include "agent.h"
 
-bool Agent::specialize(const action_ptrsc &action, const std::shared_ptr<Node_Unsplit> &general) {
+bool Agent::specialize(const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general) {
   if(!split_test(general->q_value))
     return false;
 
@@ -19,16 +19,17 @@ bool Agent::specialize(const action_ptrsc &action, const std::shared_ptr<Node_Un
 
 //      std::cerr << "Refining : " << gen->first << std::endl;
 
-  if(auto chosen_feature = dynamic_cast<Feature_Ranged *>(chosen->feature.get()))
-    expand_fringe(action, general, chosen_feature->axis);
+  expand_fringe(get_action, general, chosen->feature.get());
 
   auto general_action = general->action.lock();
   general_action->detach();
   auto node_split = std::make_shared<Node_Split>(*this, general->q_value);
   general->q_value.zero();
-  make_action_retraction([this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
-    this->m_next_q_values[action].push_back(node_split->q_value);
-  }, [this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
+  node_split->action = make_action_retraction([this,get_action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+    const auto action = get_action(token);
+    this->insert_q_value_next(action, node_split->q_value);
+  }, [this,get_action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+    const auto action = get_action(token);
     this->purge_q_value_next(action, node_split->q_value);
   }, general_action->parent());
   general->destroy();
@@ -36,11 +37,10 @@ bool Agent::specialize(const action_ptrsc &action, const std::shared_ptr<Node_Un
   return true;
 }
 
-void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<Node_Unsplit> &general, const Rete::WME_Token_Index specialization) {
+void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general, const Feature * const &specialization) {
   Node_Unsplit::Fringe_Values leaves;
   for(auto fringe = general->fringe_values.begin(), fend = general->fringe_values.end(); fringe != fend; ) {
-    auto fringe_ranged = dynamic_cast<Feature_Ranged *>((*fringe)->feature.get());
-    if(fringe_ranged && fringe_ranged->axis == specialization) {
+    if(specialization->compare_axis(*(*fringe)->feature) == 0) {
       leaves.push_back(*fringe);
       general->fringe_values.erase(fringe++);
     }
@@ -51,10 +51,10 @@ void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<Node
   for(auto &leaf : leaves) {
     auto leaf_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(leaf);
 
-    if(leaf_node_ranged) {
-      for(auto &line : leaf_node_ranged->lines)
-        m_lines[action].insert(line);
-    }
+//    if(leaf_node_ranged) {
+//      for(auto &line : leaf_node_ranged->lines)
+//        m_lines[action].insert(line);
+//    }
 
     Node_Unsplit::Fringe_Values new_fringe;
 
@@ -94,9 +94,11 @@ void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<Node
           auto rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, range, lines);
           rl->feature = refined_feature;
           auto predicate = make_predicate_vc(refined_ranged->predicate(), leaf_feature_ranged->axis, refined_ranged->symbol_constant(), leaf->action.lock()->parent());
-          rl->action = make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-            this->m_next_q_values[action].push_back(rl->q_value);
-          }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          rl->action = make_action_retraction([this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+            const auto action = get_action(token);
+            this->insert_q_value_next(action, rl->q_value);
+          }, [this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+            const auto action = get_action(token);
             this->purge_q_value_next(action, rl->q_value);
           }, predicate);
 
@@ -126,9 +128,11 @@ void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<Node
           auto feature = fringe_feature_ranged->clone();
           rl->feature = feature;
           auto predicate = make_predicate_vc(feature->predicate(), fringe_feature_ranged->axis, feature->symbol_constant(), leaf->action.lock()->parent());
-          rl->action = make_action_retraction([this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
-            this->m_next_q_values[action].push_back(rl->q_value);
-          }, [this,action,rl](const Rete::Rete_Action &, const Rete::WME_Token &) {
+          rl->action = make_action_retraction([this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+            const auto action = get_action(token);
+            this->insert_q_value_next(action, rl->q_value);
+          }, [this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+            const auto action = get_action(token);
             this->purge_q_value_next(action, rl->q_value);
           }, predicate);
 
@@ -138,19 +142,24 @@ void Agent::expand_fringe(const action_ptrsc &action, const std::shared_ptr<Node
 
       if(node_unsplit_fringe.empty()) {
         auto node_split = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, leaf->q_value->depth));
-        node_split->action = make_action_retraction([this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->m_next_q_values[action].push_back(node_split->q_value);
-        }, [this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        node_split->action = make_action_retraction([this,get_action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->insert_q_value_next(action, node_split->q_value);
+        }, [this,get_action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
           this->purge_q_value_next(action, node_split->q_value);
         }, leaf_action->parent());
       }
       else {
         auto node_unsplit = std::make_shared<Node_Unsplit>(*this, leaf->q_value->depth);
         node_unsplit->fringe_values.swap(node_unsplit_fringe);
-        auto new_action = make_action_retraction([this,action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          if(!this->specialize(action, node_unsplit))
-            this->m_next_q_values[action].push_back(node_unsplit->q_value);
-        }, [this,action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        auto new_action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          if(!this->specialize(get_action, node_unsplit)) {
+            const auto action = get_action(token);
+            this->insert_q_value_next(action, node_unsplit->q_value);
+          }
+        }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
           this->purge_q_value_next(action, node_unsplit->q_value);
         }, leaf_action->parent(), false);
         node_unsplit->action = new_action;
@@ -317,6 +326,12 @@ void Agent::purge_q_value(const tracked_ptr<Q_Value> &q_value) {
     m_current_q_value.erase(found);
     assert(std::find(m_current_q_value.begin(), m_current_q_value.end(), q_value) == m_current_q_value.end());
   }
+}
+
+void Agent::insert_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value) {
+  auto &q_values = m_next_q_values[action];
+  assert(std::find(q_values.begin(), q_values.end(), q_value) == q_values.end());
+  q_values.push_back(q_value);
 }
 
 void Agent::purge_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value) {

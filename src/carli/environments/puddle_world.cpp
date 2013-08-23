@@ -238,7 +238,7 @@ namespace Puddle_World {
             m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
             auto node_split = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, 1));
             make_action_retraction([this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
-              this->m_next_q_values[action].push_back(node_split->q_value);
+              this->insert_q_value_next(action, node_split->q_value);
             }, [this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
               this->purge_q_value_next(action, node_split->q_value);
             }, ylt);
@@ -250,11 +250,18 @@ namespace Puddle_World {
 
   void Agent::generate_rete(const Rete::Rete_Node_Ptr &parent) {
     for(const auto &action : m_action) {
+      auto get_action = [action](const Rete::WME_Token &)->action_ptrsc {
+        return action;
+      };
+
       auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
-      node_unsplit->action = make_action_retraction([this,action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &) {
-        if(!this->specialize(action, node_unsplit))
-          this->m_next_q_values[action].push_back(node_unsplit->q_value);
-      }, [this,action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &) {
+      node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        if(!this->specialize(get_action, node_unsplit)) {
+          const auto action = get_action(token);
+          this->insert_q_value_next(action, node_unsplit->q_value);
+        }
+      }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
         this->purge_q_value_next(action, node_unsplit->q_value);
       }, parent);
 
@@ -267,9 +274,11 @@ namespace Puddle_World {
         auto feature = new Feature(Feature::X, 0.0, 0.5, 2, false);
         nfr->feature = feature;
         auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), feature->symbol_constant(), node_unsplit->action.lock()->parent());
-        nfr->action = make_action_retraction([this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->m_next_q_values[action].push_back(nfr->q_value);
-        }, [this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->insert_q_value_next(action, nfr->q_value);
+        }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
           this->purge_q_value_next(action, nfr->q_value);
         }, predicate);
         node_unsplit->fringe_values.push_back(nfr);
@@ -282,9 +291,11 @@ namespace Puddle_World {
         auto feature = new Feature(Feature::X, 0.5, 1.0, 2, true);
         nfr->feature = feature;
         auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), feature->symbol_constant(), node_unsplit->action.lock()->parent());
-        nfr->action = make_action_retraction([this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->m_next_q_values[action].push_back(nfr->q_value);
-        }, [this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->insert_q_value_next(action, nfr->q_value);
+        }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
           this->purge_q_value_next(action, nfr->q_value);
         }, predicate);
         node_unsplit->fringe_values.push_back(nfr);
@@ -299,9 +310,11 @@ namespace Puddle_World {
         auto feature = new Feature(Feature::Y, 0.0, 0.5, 2, false);
         nfr->feature = feature;
         auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), feature->symbol_constant(), node_unsplit->action.lock()->parent());
-        nfr->action = make_action_retraction([this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->m_next_q_values[action].push_back(nfr->q_value);
-        }, [this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->insert_q_value_next(action, nfr->q_value);
+        }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
           this->purge_q_value_next(action, nfr->q_value);
         }, predicate);
         node_unsplit->fringe_values.push_back(nfr);
@@ -314,9 +327,11 @@ namespace Puddle_World {
         auto feature = new Feature(Feature::Y, 0.5, 1.0, 2, true);
         nfr->feature = feature;
         auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), feature->symbol_constant(), node_unsplit->action.lock()->parent());
-        nfr->action = make_action_retraction([this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
-          this->m_next_q_values[action].push_back(nfr->q_value);
-        }, [this,action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &) {
+        nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->insert_q_value_next(action, nfr->q_value);
+        }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
           this->purge_q_value_next(action, nfr->q_value);
         }, predicate);
         node_unsplit->fringe_values.push_back(nfr);

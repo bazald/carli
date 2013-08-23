@@ -110,16 +110,21 @@ namespace Blocks_World {
     auto filter_clear = make_filter(Rete::WME(m_first_var, m_clear_attr, m_third_var));
     auto filter_in_place = make_filter(Rete::WME(m_first_var, m_in_place_attr, m_third_var));
 
+    auto get_action = [this](const Rete::WME_Token &token)->action_ptrsc {
+      return this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+    };
+
     auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
     {
       auto join_blink = make_join(Rete::WME_Bindings(), join_dest_name, filter_blink);
 
-      node_unsplit->action = make_action_retraction([this,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
-        if(!this->specialize(action, node_unsplit))
-          this->m_next_q_values[action].push_back(node_unsplit->q_value);
-      }, [this,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+      node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        if(!this->specialize(get_action, node_unsplit)) {
+          const auto action = get_action(token);
+          this->insert_q_value_next(action, node_unsplit->q_value);
+        }
+      }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
         this->purge_q_value_next(action, node_unsplit->q_value);
       }, join_blink);
     }
@@ -131,11 +136,11 @@ namespace Blocks_World {
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
       auto join_block_clear = make_existential_join(state_bindings, join_dest_name, filter_clear);
-      node_fringe->action = make_action_retraction([this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
-        this->m_next_q_values[action].push_back(node_fringe->q_value);
-      }, [this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->insert_q_value_next(action, node_fringe->q_value);
+      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe->q_value);
       }, join_block_clear);
       node_unsplit->fringe_values.push_back(node_fringe);
@@ -143,11 +148,11 @@ namespace Blocks_World {
       auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2);
       node_fringe_neg->feature = new Clear(Feature::BLOCK, false);
       auto neg = make_negation_join(state_bindings, join_dest_name, filter_clear);
-      node_fringe_neg->action = make_action_retraction([this,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
-        this->m_next_q_values[action].push_back(node_fringe_neg->q_value);
-      }, [this,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+      node_fringe_neg->action = make_action_retraction([this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->insert_q_value_next(action, node_fringe_neg->q_value);
+      }, [this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe_neg->q_value);
       }, neg);
       node_unsplit->fringe_values.push_back(node_fringe_neg);
@@ -160,11 +165,11 @@ namespace Blocks_World {
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
       auto join_block_in_place = make_existential_join(state_bindings, join_dest_name, filter_in_place);
-      node_fringe->action = make_action_retraction([this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
-        this->m_next_q_values[action].push_back(node_fringe->q_value);
-      }, [this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->insert_q_value_next(action, node_fringe->q_value);
+      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe->q_value);
       }, join_block_in_place);
       node_unsplit->fringe_values.push_back(node_fringe);
@@ -172,11 +177,11 @@ namespace Blocks_World {
       auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2);
       node_fringe_neg->feature = new In_Place(Feature::BLOCK, false);
       auto neg = make_negation_join(state_bindings, join_dest_name, filter_in_place);
-      node_fringe_neg->action = make_action_retraction([this,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
-        this->m_next_q_values[action].push_back(node_fringe_neg->q_value);
-      }, [this,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+      node_fringe_neg->action = make_action_retraction([this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->insert_q_value_next(action, node_fringe_neg->q_value);
+      }, [this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe_neg->q_value);
       }, neg);
       node_unsplit->fringe_values.push_back(node_fringe_neg);
@@ -187,11 +192,11 @@ namespace Blocks_World {
       auto feature = new Name(Feature::BLOCK, get_block_name(i)->value, true);
       node_fringe->feature = feature;
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), get_block_name(i), join_dest_name);
-      node_fringe->action = make_action_retraction([this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
-        this->m_next_q_values[action].push_back(node_fringe->q_value);
-      }, [this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->insert_q_value_next(action, node_fringe->q_value);
+      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe->q_value);
       }, name_is);
       node_unsplit->fringe_values.push_back(node_fringe);
@@ -202,11 +207,11 @@ namespace Blocks_World {
       auto feature = new Name(Feature::DEST, get_block_name(i)->value, true);
       node_fringe->feature = feature;
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), get_block_name(i), join_dest_name);
-      node_fringe->action = make_action_retraction([this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
-        this->m_next_q_values[action].push_back(node_fringe->q_value);
-      }, [this,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto &action = this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value];
+      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->insert_q_value_next(action, node_fringe->q_value);
+      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe->q_value);
       }, name_is);
       node_unsplit->fringe_values.push_back(node_fringe);
@@ -226,7 +231,7 @@ namespace Blocks_World {
 //    //    rl->fringe_values = new RL::Fringe_Values;
 //        rl->action = make_action_retraction([this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
 //    //      if(!this->specialize(action, rl))
-//            this->m_next_q_values[this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value]].push_back(rl->q_value);
+//          this->insert_q_value_next(this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value], rl->q_value);
 //        }, [this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
 //          this->purge_q_value_next(this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value], rl->q_value);
 //        }, join_blink);
@@ -247,7 +252,7 @@ namespace Blocks_World {
 //    //    rl->fringe_values = new RL::Fringe_Values;
 //        rl->action = make_action_retraction([this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
 //    //      if(!this->specialize(action, rl))
-//            this->m_next_q_values[this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value]].push_back(rl->q_value);
+//          this->insert_q_value_next(this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value], rl->q_value);
 //        }, [this,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
 //          this->purge_q_value_next(this->m_action[debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value], rl->q_value);
 //        }, join_blink);
