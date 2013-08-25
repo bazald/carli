@@ -19,7 +19,9 @@ bool Agent::specialize(const std::function<action_ptrsc (const Rete::WME_Token &
     }
   }
 
-//      std::cerr << "Refining : " << gen->first << std::endl;
+//#ifdef DEBUG_OUTPUT
+//  std::cerr << "Refining : " << chosen << std::endl;
+//#endif
 
   expand_fringe(get_action, general, chosen->feature.get());
 
@@ -800,7 +802,6 @@ bool Agent::split_test(const tracked_ptr<Q_Value> &q) const {
      (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean().outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)
                              : m_mean_cabe.outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)))
   {
-    q->type = Q_Value::Type::SPLIT;
     return true;
   }
   else
