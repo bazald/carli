@@ -32,10 +32,9 @@ namespace Rete {
       return;
 
     if(find_key(tokens, wme) == tokens.end()) {
-      auto wme_token = std::make_pair(wme, std::make_shared<WME_Token>(wme));
-      tokens.push_back(wme_token);
+      tokens.emplace_back(wme, std::make_shared<WME_Token>(wme));
       for(auto &output : outputs)
-        output->insert_wme_token(wme_token.second, shared());
+        output->insert_wme_token(tokens.back().second, shared());
     }
   }
 

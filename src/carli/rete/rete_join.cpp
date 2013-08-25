@@ -95,10 +95,9 @@ namespace Rete {
         return;
     }
 
-    const WME_Token_Ptr_C wme_token_merge = join_wme_tokens(lhs, rhs);
-    output_tokens.push_back(wme_token_merge);
+    output_tokens.push_back(join_wme_tokens(lhs, rhs));
     for(auto &output : outputs)
-      output->insert_wme_token(wme_token_merge, shared());
+      output->insert_wme_token(output_tokens.back(), shared());
   }
 
   WME_Token_Ptr_C Rete_Join::join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs) {

@@ -49,7 +49,7 @@ namespace Rete {
     // TODO: change from the 'if' to the 'assert', ensuring that we're not wasting time on non-existent removals
     //assert(found != input_tokens.end());
     {
-      agenda.insert_retraction(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
+      retraction(*this, *wme_token);
 
       input_tokens.erase(found);
     }
