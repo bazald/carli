@@ -122,15 +122,15 @@ namespace Blocks_World {
 
   class Name : public Feature {
   public:
-    Name(const Which &block_, const std::string &name_, const bool &present_)
-     : Feature(present_),
+    Name(const Which &block_, const std::string &name_)
+     : Feature(true),
      block(block_),
      name(name_)
     {
     }
 
     Name * clone() const {
-      return new Name(block, name, this->present);
+      return new Name(block, name);
     }
 
     int compare_axis(const Feature &rhs) const {
@@ -146,7 +146,7 @@ namespace Blocks_World {
       return block - rhs.block;
     }
 
-    int compare_value(const Feature &rhs) const {
+    int compare_value(const ::Feature &rhs) const {
       return strcmp(name.c_str(), debuggable_cast<const Name &>(rhs).name.c_str());
     }
 

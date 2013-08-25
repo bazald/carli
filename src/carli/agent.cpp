@@ -8,8 +8,8 @@ bool Agent::specialize(const std::function<action_ptrsc (const Rete::WME_Token &
 
   /// TODO: choose intelligently again
   auto gen = general->fringe_values.begin();
-  for(auto count = random.rand_lt(general->fringe_values.size()); count; --count)
-    ++gen;
+//  for(auto count = random.rand_lt(general->fringe_values.size()); count; --count)
+//    ++gen;
   assert(gen != general->fringe_values.end());
   auto chosen = *gen;
 
@@ -52,15 +52,18 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
       ++fringe;
   }
 
+#ifdef DEBUG_OUTPUT
+  std::cerr << "Refining:";
+  for(auto &leaf : leaves)
+    std::cerr << ' ' << *leaf->feature;
+  std::cerr << std::endl;
+#endif
+
   auto filter_blink = make_filter(*m_wme_blink);
   for(auto &leaf : leaves) {
     auto leaf_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(leaf);
     auto leaf_feature_ranged = dynamic_cast<Feature_Ranged *>(leaf->feature.get());
     auto leaf_action = leaf->action.lock();
-
-#ifdef DEBUG_OUTPUT
-    std::cerr << "Refining using " << *leaf->feature << std::endl;
-#endif
 
 //    if(leaf_node_ranged) {
 //      for(auto &line : leaf_node_ranged->lines)
@@ -265,11 +268,11 @@ void Agent::destroy() {
   Rete_Agent::destroy();
   m_current.zero();
   m_next.zero();
-#ifdef DEBUG_OUTPUT
-  std::cerr << *this << std::endl;
-  for(const auto &action_value : m_next_q_values)
-    sum_value(action_value.first.get(), action_value.second);
-#endif
+//#ifdef DEBUG_OUTPUT
+//  std::cerr << *this << std::endl;
+//  for(const auto &action_value : m_next_q_values)
+//    sum_value(action_value.first.get(), action_value.second);
+//#endif
   m_next_q_values.clear();
   m_lines.clear();
 }
