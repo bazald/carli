@@ -16,8 +16,8 @@ namespace Rete {
 
     void destroy(Filters &filters, const Rete_Node_Ptr &output);
 
-    Rete_Node_Ptr_C parent() const {return input0.lock();}
-    Rete_Node_Ptr parent() {return input0.lock();}
+    Rete_Node_Ptr_C parent() const {return input0->shared();}
+    Rete_Node_Ptr parent() {return input0->shared();}
 
     void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from);
     void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from);
@@ -33,8 +33,8 @@ namespace Rete {
     void pass_tokens(const Rete_Node_Ptr &output);
 
     WME_Bindings bindings;
-    std::weak_ptr<Rete_Node> input0;
-    std::weak_ptr<Rete_Node> input1;
+    Rete_Node * input0 = nullptr;
+    Rete_Node * input1 = nullptr;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input0_tokens;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input1_tokens;
     std::list<std::pair<WME_Token_Ptr_C, size_t>, Zeni::Pool_Allocator<std::pair<WME_Token_Ptr_C, size_t>>> output_tokens;

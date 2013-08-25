@@ -7,7 +7,7 @@ namespace Rete {
   void Rete_Negation::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
     if(outputs.empty())
-      input.lock()->destroy(filters, shared());
+      input->destroy(filters, shared());
   }
 
   void Rete_Negation::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
@@ -15,7 +15,7 @@ namespace Rete {
                                                                                  from
 #endif
                                                                                      ) {
-    assert(from == input.lock());
+    assert(from.get() == input);
 
     input_tokens.push_back(wme_token);
 
@@ -30,7 +30,7 @@ namespace Rete {
                                                                                  from
 #endif
                                                                                      ) {
-    assert(from == input.lock());
+    assert(from.get() == input);
 
     auto found = find(input_tokens, wme_token);
     if(found != input_tokens.end()) {
@@ -51,7 +51,7 @@ namespace Rete {
 
   bool Rete_Negation::operator==(const Rete_Node &rhs) const {
     if(auto negation = dynamic_cast<const Rete_Negation *>(&rhs))
-      return input.lock() == negation->input.lock();
+      return input == negation->input;
     return false;
   }
 
@@ -66,7 +66,7 @@ namespace Rete {
 
   void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out) {
     assert(negation);
-    negation->input = out;
+    negation->input = out.get();
 
     out->insert_output(negation);
     out->pass_tokens(negation);

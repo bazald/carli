@@ -44,7 +44,7 @@ public:
   Agent &agent;
   tracked_ptr<Q_Value> q_value;
   bool delete_q_value = true;
-  std::weak_ptr<Rete::Rete_Action> action;
+  Rete::Rete_Action * action = nullptr;
 };
 
 class Node_Split : public Node {

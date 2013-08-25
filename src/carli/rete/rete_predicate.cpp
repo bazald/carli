@@ -22,7 +22,7 @@ namespace Rete {
   void Rete_Predicate::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
     if(outputs.empty())
-      input.lock()->destroy(filters, shared());
+      input->destroy(filters, shared());
   }
 
   void Rete_Predicate::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
@@ -30,7 +30,7 @@ namespace Rete {
                                                                                  from
 #endif
                                                                                      ) {
-    assert(from == input.lock());
+    assert(from.get() == input);
 
     if(m_rhs) {
       if(!test_predicate((*wme_token)[m_lhs_index], m_rhs))
@@ -52,7 +52,7 @@ namespace Rete {
                                                                                  from
 #endif
                                                                                      ) {
-    assert(from == input.lock());
+    assert(from.get() == input);
 
     auto found = find(tokens, wme_token);
     if(found != tokens.end()) {
@@ -75,7 +75,7 @@ namespace Rete {
              m_lhs_index == predicate->m_rhs_index &&
              m_rhs_index == predicate->m_rhs_index &&
              *m_rhs == *predicate->m_rhs &&
-             input.lock() == predicate->input.lock();
+             input == predicate->input;
     }
     return false;
   }
@@ -126,7 +126,7 @@ namespace Rete {
     assert(predicate);
     assert(!std::dynamic_pointer_cast<Rete_Existential>(out));
     assert(!std::dynamic_pointer_cast<Rete_Negation>(out));
-    predicate->input = out;
+    predicate->input = out.get();
 
     out->insert_output(predicate);
     out->pass_tokens(predicate);

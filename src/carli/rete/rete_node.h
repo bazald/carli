@@ -60,7 +60,7 @@ namespace Rete {
     typedef std::list<Rete_Node_Ptr, Zeni::Pool_Allocator<Rete_Node_Ptr>> Outputs;
 
     Rete_Node() {}
-    virtual ~Rete_Node();
+    virtual ~Rete_Node() {}
 
     virtual void destroy(Filters &filters, const Rete_Node_Ptr &output) = 0;
 

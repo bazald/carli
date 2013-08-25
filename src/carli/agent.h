@@ -35,47 +35,6 @@ public:
   typedef tracked_ptr<const Action> action_ptrsc;
   typedef double reward_type;
   typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
-//
-//  class RL : public std::enable_shared_from_this<RL> {
-//    RL(const RL &) = delete;
-//    RL & operator=(const RL &) = delete;
-//
-//  public:
-//    typedef std::list<std::shared_ptr<RL>> Fringe_Values;
-//    typedef std::pair<std::pair<double, double>, std::pair<double, double>> Range;
-//    typedef std::pair<std::pair<double, double>, std::pair<double, double>> Line;
-//    typedef std::vector<Line, Zeni::Pool_Allocator<Line>> Lines;
-//
-//    RL(Agent &agent_, const size_t &depth_, const Range &range_, const Lines &lines_)
-//     : agent(agent_),
-//     depth(depth_),
-//     range(range_),
-//     lines(lines_)
-//    {
-//    }
-//
-//    ~RL() {
-//      agent.purge_q_value(q_value);
-//      q_value.delete_and_zero();
-//      fringe_values.delete_and_zero();
-//      feature.delete_and_zero();
-//    }
-//
-//    Agent &agent;
-//
-//    size_t depth;
-//    tracked_ptr<Q_Value> q_value;
-//    std::weak_ptr<Rete::Rete_Action> action;
-//
-//    /// Present only for Leaf nodes
-//    tracked_ptr<Fringe_Values> fringe_values;
-//
-//    /// Present only for Fringe nodes
-//    tracked_ptr<feature_type> feature;
-//
-//    Range range;
-//    Lines lines;
-//  };
 
   bool specialize(const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general);
   void expand_fringe(const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general, const Feature * const &specialization);

@@ -19,8 +19,15 @@ namespace Rete {
   public:
     Agenda();
 
-    void insert_front(const Rete_Node_Ptr_C &node, const std::function<void ()> &action);
-    void insert_back(const Rete_Node_Ptr_C &node, const std::function<void ()> &action);
+    void insert_front(const Rete_Node_Ptr_C &node, std::function<void ()> &&action) {
+      agenda.emplace_front(node, std::move(action));
+      run();
+    }
+
+    void insert_back(const Rete_Node_Ptr_C &node, std::function<void ()> &&action) {
+      agenda.emplace_front(node, std::move(action));
+      run();
+    }
 
     void lock();
     void unlock();

@@ -7,7 +7,7 @@ namespace Rete {
   void Rete_Existential::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
     if(outputs.empty())
-      input.lock()->destroy(filters, shared());
+      input->destroy(filters, shared());
   }
 
   void Rete_Existential::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
@@ -15,7 +15,7 @@ namespace Rete {
                                                                                     from
 #endif
                                                                                         ) {
-    assert(from == input.lock());
+    assert(from.get() == input);
 
     input_tokens.push_back(wme_token);
 
@@ -32,7 +32,7 @@ namespace Rete {
                                                                                  from
 #endif
                                                                                      ) {
-    assert(from == input.lock());
+    assert(from.get() == input);
 
     auto found = find(input_tokens, wme_token);
     if(found != input_tokens.end()) {
@@ -55,7 +55,7 @@ namespace Rete {
 
   bool Rete_Existential::operator==(const Rete_Node &rhs) const {
     if(auto existential = dynamic_cast<const Rete_Existential *>(&rhs))
-      return input.lock() == existential->input.lock();
+      return input == existential->input;
     return false;
   }
 
@@ -70,7 +70,7 @@ namespace Rete {
 
   void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out) {
     assert(existential);
-    existential->input = out;
+    existential->input = out.get();
 
     out->insert_output(existential);
     out->pass_tokens(existential);

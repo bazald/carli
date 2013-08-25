@@ -22,7 +22,7 @@ namespace Rete {
 #endif
                                                                           ) {
     assert(!output);
-    input.lock()->destroy(filters, shared());
+    input->destroy(filters, shared());
   }
 
   void Rete_Action::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
@@ -30,7 +30,7 @@ namespace Rete {
                                                                                               from
 #endif
                                                                                                   ) {
-    assert(from == input.lock());
+    assert(from.get() == input);
 
     input_tokens.push_back(wme_token);
 
@@ -42,7 +42,7 @@ namespace Rete {
                                                                                               from
 #endif
                                                                                                   ) {
-    assert(from == input.lock());
+    assert(from.get() == input);
 
     auto found = find(input_tokens, wme_token);
     if(found != input_tokens.end())
@@ -61,7 +61,7 @@ namespace Rete {
 
   bool Rete_Action::operator==(const Rete_Node &/*rhs*/) const {
 //       if(auto rete_action = dynamic_cast<const Rete_Action *>(&rhs))
-//         return action == rete_action->action && retraction == rete_action->retraction && input.lock() == rete_action->input.lock();
+//         return action == rete_action->action && retraction == rete_action->retraction && input == rete_action->input;
     return false;
   }
 
@@ -77,8 +77,8 @@ namespace Rete {
   }
 
   void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out) {
-    assert(action && !action->input.lock());
-    action->input = out;
+    assert(action && !action->input);
+    action->input = out.get();
 
     out->insert_output(action);
     out->pass_tokens(action);

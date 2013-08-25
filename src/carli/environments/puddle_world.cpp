@@ -178,6 +178,7 @@ namespace Puddle_World {
     m_y_wme = std::make_shared<Rete::WME>(s_id, y_attr, m_y_value);
     insert_wme(m_x_wme);
     insert_wme(m_y_wme);
+    insert_wme(m_wme_blink);
   }
 
   Agent::~Agent() {
@@ -237,11 +238,11 @@ namespace Puddle_World {
             m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, bottom), std::make_pair(right, top)));
             m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
             auto node_split = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, 1));
-            make_action_retraction([this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
+            node_split->action = make_action_retraction([this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
               this->insert_q_value_next(action, node_split->q_value);
             }, [this,action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &) {
               this->purge_q_value_next(action, node_split->q_value);
-            }, ylt);
+            }, ylt).get();
           }
         }
       }
@@ -266,7 +267,7 @@ namespace Puddle_World {
       }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->purge_q_value_next(action, node_unsplit->q_value);
-      }, join_blink);
+      }, join_blink).get();
 
       {
         Node_Ranged::Lines lines;
@@ -276,14 +277,14 @@ namespace Puddle_World {
                                                         lines);
         auto feature = new Feature(Feature::X, 0.0, 0.5, 2, false);
         nfr->feature = feature;
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), feature->symbol_constant(), node_unsplit->action.lock()->parent());
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
         nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->insert_q_value_next(action, nfr->q_value);
         }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->purge_q_value_next(action, nfr->q_value);
-        }, predicate);
+        }, predicate).get();
         node_unsplit->fringe_values.push_back(nfr);
       }
 
@@ -293,14 +294,14 @@ namespace Puddle_World {
                                                         Node_Ranged::Lines());
         auto feature = new Feature(Feature::X, 0.5, 1.0, 2, true);
         nfr->feature = feature;
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), feature->symbol_constant(), node_unsplit->action.lock()->parent());
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
         nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->insert_q_value_next(action, nfr->q_value);
         }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->purge_q_value_next(action, nfr->q_value);
-        }, predicate);
+        }, predicate).get();
         node_unsplit->fringe_values.push_back(nfr);
       }
 
@@ -312,14 +313,14 @@ namespace Puddle_World {
                                                         lines);
         auto feature = new Feature(Feature::Y, 0.0, 0.5, 2, false);
         nfr->feature = feature;
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), feature->symbol_constant(), node_unsplit->action.lock()->parent());
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
         nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->insert_q_value_next(action, nfr->q_value);
         }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->purge_q_value_next(action, nfr->q_value);
-        }, predicate);
+        }, predicate).get();
         node_unsplit->fringe_values.push_back(nfr);
       }
 
@@ -329,14 +330,14 @@ namespace Puddle_World {
                                                         Node_Ranged::Lines());
         auto feature = new Feature(Feature::Y, 0.5, 1.0, 2, true);
         nfr->feature = feature;
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), feature->symbol_constant(), node_unsplit->action.lock()->parent());
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
         nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->insert_q_value_next(action, nfr->q_value);
         }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->purge_q_value_next(action, nfr->q_value);
-        }, predicate);
+        }, predicate).get();
         node_unsplit->fringe_values.push_back(nfr);
       }
     }
@@ -346,12 +347,17 @@ namespace Puddle_World {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
     const auto pos = env->get_position();
 
-    clear_wmes();
-
-    m_x_value->value = pos.first;
-    m_y_value->value = pos.second;
-    insert_wme(m_x_wme);
-    insert_wme(m_y_wme);
+    remove_wme(m_wme_blink);
+    if(m_x_value->value != pos.first) {
+      remove_wme(m_x_wme);
+      m_x_value->value = pos.first;
+      insert_wme(m_x_wme);
+    }
+    if(m_y_value->value != pos.second) {
+      remove_wme(m_y_wme);
+      m_y_value->value = pos.second;
+      insert_wme(m_y_wme);
+    }
     insert_wme(m_wme_blink);
   }
 

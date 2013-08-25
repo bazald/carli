@@ -118,7 +118,7 @@ namespace Blocks_World {
       }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->purge_q_value_next(action, node_unsplit->q_value);
-      }, join_blink);
+      }, join_blink).get();
     }
 
     std::vector<Feature::Which> blocks = {{Feature::BLOCK, Feature::DEST}};
@@ -140,7 +140,7 @@ namespace Blocks_World {
       }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe->q_value);
-      }, join_block_clear);
+      }, join_block_clear).get();
       node_unsplit->fringe_values.push_back(node_fringe);
 
       auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2);
@@ -152,7 +152,7 @@ namespace Blocks_World {
       }, [this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe_neg->q_value);
-      }, neg);
+      }, neg).get();
       node_unsplit->fringe_values.push_back(node_fringe_neg);
     }
 
@@ -172,7 +172,7 @@ namespace Blocks_World {
       }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe->q_value);
-      }, join_block_in_place);
+      }, join_block_in_place).get();
       node_unsplit->fringe_values.push_back(node_fringe);
 
       auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2);
@@ -184,7 +184,7 @@ namespace Blocks_World {
       }, [this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe_neg->q_value);
-      }, neg);
+      }, neg).get();
       node_unsplit->fringe_values.push_back(node_fringe_neg);
     }
 
@@ -199,7 +199,7 @@ namespace Blocks_World {
       }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe->q_value);
-      }, name_is);
+      }, name_is).get();
       node_unsplit->fringe_values.push_back(node_fringe);
     }
 
@@ -214,7 +214,7 @@ namespace Blocks_World {
       }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe->q_value);
-      }, name_is);
+      }, name_is).get();
       node_unsplit->fringe_values.push_back(node_fringe);
     }
 
@@ -240,7 +240,7 @@ namespace Blocks_World {
 //        }, [this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
 //          const auto action = get_action(token);
 //          this->purge_q_value_next(action, rl->q_value);
-//        }, join_blink);
+//        }, join_blink).get();
 //      }
 //    }
   }

@@ -5,16 +5,6 @@ namespace Rete {
   Agenda::Agenda() {
   }
 
-  void Agenda::insert_front(const Rete_Node_Ptr_C &node, const std::function<void ()> &action) {
-    agenda.push_front(std::make_pair(node, action));
-    run();
-  }
-
-  void Agenda::insert_back(const Rete_Node_Ptr_C &node, const std::function<void ()> &action) {
-    agenda.push_back(std::make_pair(node, action));
-    run();
-  }
-
   void Agenda::lock() {
     assert(!m_locked);
     m_locked = true;

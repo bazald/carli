@@ -10,8 +10,8 @@ namespace Rete {
   void Rete_Existential_Join::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
     if(outputs.empty()) {
-      auto i0 = input0.lock();
-      auto i1 = input1.lock();
+      auto i0 = input0->shared();
+      auto i1 = input1->shared();
       i0->destroy(filters, shared());
       if(i0 != i1)
         i1->destroy(filters, shared());
@@ -19,15 +19,15 @@ namespace Rete {
   }
 
   void Rete_Existential_Join::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) {
-    assert(from == input0.lock() || from == input1.lock());
+    assert(from.get() == input0 || from.get() == input1);
 
-    if(from == input0.lock()) {
+    if(from.get() == input0) {
       input0_tokens.push_back(wme_token);
 
       for(const auto &other : input1_tokens)
         join_tokens(wme_token, other);
     }
-    if(from == input1.lock()) {
+    if(from.get() == input1) {
       input1_tokens.push_back(wme_token);
 
       for(const auto &other : input0_tokens)
@@ -36,9 +36,9 @@ namespace Rete {
   }
 
   void Rete_Existential_Join::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) {
-    assert(from == input0.lock() || from == input1.lock());
+    assert(from.get() == input0 || from.get() == input1);
 
-    if(from == input0.lock()) {
+    if(from.get() == input0) {
       auto found = find(input0_tokens, wme_token);
       if(found != input0_tokens.end()) {
         // TODO: Avoid looping through non-existent pairs?
@@ -47,7 +47,7 @@ namespace Rete {
           unjoin_tokens(wme_token, other);
       }
     }
-    if(from == input1.lock()) {
+    if(from.get() == input1) {
       auto found = find(input1_tokens, wme_token);
       if(found != input1_tokens.end()) {
         // TODO: Avoid looping through non-existent pairs?
@@ -60,7 +60,7 @@ namespace Rete {
 
   bool Rete_Existential_Join::operator==(const Rete_Node &rhs) const {
     if(auto join = dynamic_cast<const Rete_Existential_Join *>(&rhs))
-      return bindings == join->bindings && input0.lock() == join->input0.lock() && input1.lock() == join->input1.lock();
+      return bindings == join->bindings && input0 == join->input0 && input1 == join->input1;
     return false;
   }
 
@@ -120,11 +120,11 @@ namespace Rete {
   }
 
   void bind_to_existential_join(const Rete_Existential_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
-    assert(join && !join->input0.lock() && !join->input1.lock());
+    assert(join && !join->input0 && !join->input1);
     assert(!std::dynamic_pointer_cast<Rete_Existential>(out0));
     assert(!std::dynamic_pointer_cast<Rete_Negation>(out0));
-    join->input0 = out0;
-    join->input1 = out1;
+    join->input0 = out0.get();
+    join->input1 = out1.get();
 
     out0->insert_output(join);
     out0->pass_tokens(join);

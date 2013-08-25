@@ -25,7 +25,6 @@ bool Agent::specialize(const std::function<action_ptrsc (const Rete::WME_Token &
 
   expand_fringe(get_action, general, chosen->feature.get());
 
-  auto general_action = general->action.lock();
   general->delete_q_value = false;
   general->q_value->type = Q_Value::Type::SPLIT;
   auto node_split = std::make_shared<Node_Split>(*this, general->q_value);
@@ -35,7 +34,7 @@ bool Agent::specialize(const std::function<action_ptrsc (const Rete::WME_Token &
   }, [this,get_action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &token) {
     const auto action = get_action(token);
     this->purge_q_value_next(action, node_split->q_value);
-  }, general_action->parent()->parent());
+  }, general->action->parent()->parent()).get();
   general->destroy();
 
   return true;
@@ -63,7 +62,6 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
   for(auto &leaf : leaves) {
     auto leaf_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(leaf);
     auto leaf_feature_ranged = dynamic_cast<Feature_Ranged *>(leaf->feature.get());
-    auto leaf_action = leaf->action.lock();
 
 //    if(leaf_node_ranged) {
 //      for(auto &line : leaf_node_ranged->lines)
@@ -103,14 +101,14 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
             }
             auto rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, range, lines);
             rl->feature = refined_feature;
-            auto predicate = make_predicate_vc(refined_ranged->predicate(), leaf_feature_ranged->axis, refined_ranged->symbol_constant(), leaf->action.lock()->parent());
+            auto predicate = make_predicate_vc(refined_ranged->predicate(), leaf_feature_ranged->axis, refined_ranged->symbol_constant(), leaf->action->parent());
             rl->action = make_action_retraction([this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
               const auto action = get_action(token);
               this->insert_q_value_next(action, rl->q_value);
             }, [this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
               const auto action = get_action(token);
               this->purge_q_value_next(action, rl->q_value);
-            }, predicate);
+            }, predicate).get();
 
             node_unsplit_fringe.push_back(rl);
           }
@@ -122,7 +120,7 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
         for(auto &fringe : general->fringe_values) {
           auto fringe_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(fringe);
           auto fringe_feature_ranged = dynamic_cast<Feature_Ranged *>(fringe->feature.get());
-          auto fringe_action = fringe->action.lock();
+          auto fringe_action = fringe->action;
 
           Node_Fringe_Ptr rl;
           Rete::Rete_Node_Ptr new_test;
@@ -144,14 +142,14 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
             }
             rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, range, lines);
 
-            new_test = make_predicate_vc(fringe_feature_ranged->predicate(), fringe_feature_ranged->axis, fringe_feature_ranged->symbol_constant(), leaf->action.lock()->parent());
+            new_test = make_predicate_vc(fringe_feature_ranged->predicate(), fringe_feature_ranged->axis, fringe_feature_ranged->symbol_constant(), leaf->action->parent());
           }
           else {
             rl = std::make_shared<Node_Fringe>(*this, leaf->q_value->depth + 1);
 
             Rete::WME_Bindings bindings;
             bindings.insert(std::make_pair(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 2)));
-            new_test = make_existential_join(bindings, leaf_action->parent(), fringe_action->parent());
+            new_test = make_existential_join(bindings, leaf->action->parent(), fringe_action->parent());
           }
 
           rl->feature = fringe->feature->clone();
@@ -161,7 +159,7 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
           }, [this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
             const auto action = get_action(token);
             this->purge_q_value_next(action, rl->q_value);
-          }, new_test);
+          }, new_test).get();
 
           node_unsplit_fringe.push_back(rl);
         }
@@ -175,10 +173,10 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
         }, [this,get_action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->purge_q_value_next(action, node_split->q_value);
-        }, leaf_action->parent());
+        }, leaf->action->parent()).get();
       }
       else {
-        auto join_blink = make_existential_join(Rete::WME_Bindings(), leaf_action->parent(), filter_blink);
+        auto join_blink = make_existential_join(Rete::WME_Bindings(), leaf->action->parent(), filter_blink);
         auto node_unsplit = std::make_shared<Node_Unsplit>(*this, leaf->q_value->depth);
         node_unsplit->fringe_values.swap(node_unsplit_fringe);
         auto new_action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
@@ -189,7 +187,7 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
         }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->purge_q_value_next(action, node_unsplit->q_value);
-        }, join_blink);
+        }, join_blink).get();
         node_unsplit->action = new_action;
       }
     }
@@ -198,7 +196,7 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
   }
 
   for(auto &fringe : general->fringe_values)
-    excise_rule(fringe->action.lock());
+    excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(fringe->action->shared()));
 }
 
 Agent::Agent(const std::shared_ptr<Environment> &environment)

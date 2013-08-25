@@ -10,7 +10,7 @@ Node::~Node() {
 }
 
 void Node::destroy() {
-  agent.excise_rule(action.lock());
+  agent.excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(action->shared()));
 }
 
 Node_Split::Node_Split(Agent &agent_, const tracked_ptr<Q_Value> &q_value_)

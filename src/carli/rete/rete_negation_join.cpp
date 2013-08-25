@@ -10,8 +10,8 @@ namespace Rete {
   void Rete_Negation_Join::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
     if(outputs.empty()) {
-      auto i0 = input0.lock();
-      auto i1 = input1.lock();
+      auto i0 = input0;
+      auto i1 = input1;
       i0->destroy(filters, shared());
       if(i0 != i1)
         i1->destroy(filters, shared());
@@ -19,9 +19,9 @@ namespace Rete {
   }
 
   void Rete_Negation_Join::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) {
-    assert(from == input0.lock() || from == input1.lock());
+    assert(from.get() == input0 || from.get() == input1);
 
-    if(from == input0.lock()) {
+    if(from.get() == input0) {
       input0_tokens.push_back(wme_token);
       output_tokens.push_back(std::make_pair(wme_token, 0u));
       auto inserted = output_tokens.rbegin();
@@ -34,7 +34,7 @@ namespace Rete {
           output->insert_wme_token(wme_token, shared());
       }
     }
-    if(from == input1.lock()) {
+    if(from.get() == input1) {
       input1_tokens.push_back(wme_token);
 
       for(const auto &other : input0_tokens)
@@ -43,9 +43,9 @@ namespace Rete {
   }
 
   void Rete_Negation_Join::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) {
-    assert(from == input0.lock() || from == input1.lock());
+    assert(from.get() == input0 || from.get() == input1);
 
-    if(from == input0.lock()) {
+    if(from.get() == input0) {
       auto found = find(input0_tokens, wme_token);
       if(found != input0_tokens.end()) {
         input0_tokens.erase(found);
@@ -58,7 +58,7 @@ namespace Rete {
         output_tokens.erase(output_found);
       }
     }
-    if(from == input1.lock()) {
+    if(from.get() == input1) {
       auto found = find(input1_tokens, wme_token);
       if(found != input1_tokens.end()) {
         // TODO: Avoid looping through non-existent pairs?
@@ -71,7 +71,7 @@ namespace Rete {
 
   bool Rete_Negation_Join::operator==(const Rete_Node &rhs) const {
     if(auto join = dynamic_cast<const Rete_Negation_Join *>(&rhs))
-      return bindings == join->bindings && input0.lock() == join->input0.lock() && input1.lock() == join->input1.lock();
+      return bindings == join->bindings && input0 == join->input0 && input1 == join->input1;
     return false;
   }
 
@@ -126,11 +126,11 @@ namespace Rete {
   }
 
   void bind_to_negation_join(const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
-    assert(join && !join->input0.lock() && !join->input1.lock());
+    assert(join && !join->input0 && !join->input1);
     assert(!std::dynamic_pointer_cast<Rete_Existential>(out0));
     assert(!std::dynamic_pointer_cast<Rete_Negation>(out0));
-    join->input0 = out0;
-    join->input1 = out1;
+    join->input0 = out0.get();
+    join->input1 = out1.get();
 
     out0->insert_output(join);
     out0->pass_tokens(join);
