@@ -82,10 +82,10 @@ namespace Rete {
     virtual void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0;
 
     virtual void pass_tokens(const Rete_Node_Ptr &output) = 0;
+    virtual void unpass_tokens(const Rete_Node_Ptr &output) = 0;
 
     virtual bool operator==(const Rete_Node &rhs) const = 0;
 
-  protected:
     void insert_output(const Rete_Node_Ptr &output) {
 //      outputs.insert(output);
       outputs.push_back(output);
@@ -96,6 +96,7 @@ namespace Rete {
       outputs.erase(std::find(outputs.begin(), outputs.end(), output));
     }
 
+  protected:
     template<typename CONTAINER, typename KEY>
     typename CONTAINER::iterator find(CONTAINER &tokens, const KEY &token) {
 //      return tokens.find(token);

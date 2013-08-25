@@ -32,6 +32,7 @@ namespace Rete {
     WME_Token_Ptr_C join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs);
 
     void pass_tokens(const Rete_Node_Ptr &output);
+    void unpass_tokens(const Rete_Node_Ptr &output);
 
     WME_Bindings bindings;
     Rete_Node * input0 = nullptr;

@@ -24,8 +24,14 @@ namespace Rete {
     if(from == input0) {
       input0_tokens.emplace_back(wme_token, 0u);
 
-      for(const auto &other : input1_tokens)
-        join_tokens(input0_tokens.back(), other);
+      if(++input0_count == 1u && input0 != input1) {
+        input1->insert_output(shared());
+        input1->pass_tokens(shared());
+      }
+      else {
+        for(const auto &other : input1_tokens)
+          join_tokens(input0_tokens.back(), other);
+      }
 
       if(input0_tokens.back().second == 0u) {
         for(auto &output : outputs)
@@ -51,6 +57,11 @@ namespace Rete {
             output->remove_wme_token(wme_token, this);
         }
         input0_tokens.erase(found);
+
+        if(--input0_count == 0u && input0 != input1) {
+          input1->unpass_tokens(shared());
+          input1->erase_output(shared());
+        }
       }
     }
     if(from == input1) {
@@ -113,6 +124,15 @@ namespace Rete {
     for(auto &wme_token : input0_tokens) {
       if(!wme_token.second)
         output->insert_wme_token(wme_token.first, this);
+    }
+  }
+
+  void Rete_Negation_Join::unpass_tokens(const Rete_Node_Ptr &output) {
+    if(is_iterating())
+      return;
+    for(auto &wme_token : input0_tokens) {
+      if(!wme_token.second)
+        output->remove_wme_token(wme_token.first, this);
     }
   }
 

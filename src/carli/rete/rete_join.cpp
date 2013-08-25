@@ -114,6 +114,13 @@ namespace Rete {
       output->insert_wme_token(wme_token, this);
   }
 
+  void Rete_Join::unpass_tokens(const Rete_Node_Ptr &output) {
+    if(is_iterating())
+      return;
+    for(auto &wme_token : output_tokens)
+      output->remove_wme_token(wme_token, this);
+  }
+
   void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
     assert(join && !join->input0 && !join->input1);
     assert(!std::dynamic_pointer_cast<Rete_Existential>(out0));

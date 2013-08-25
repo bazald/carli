@@ -69,6 +69,13 @@ namespace Rete {
       output->insert_wme_token(wme_token, this);
   }
 
+  void Rete_Predicate::unpass_tokens(const Rete_Node_Ptr &output) {
+    if(is_iterating())
+      return;
+    for(auto &wme_token : tokens)
+      output->remove_wme_token(wme_token, this);
+  }
+
   bool Rete_Predicate::operator==(const Rete_Node &rhs) const {
     if(auto predicate = dynamic_cast<const Rete_Predicate *>(&rhs)) {
       return m_predicate == predicate->m_predicate &&

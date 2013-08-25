@@ -59,6 +59,10 @@ namespace Rete {
     abort();
   }
 
+  void Rete_Action::unpass_tokens(const Rete_Node_Ptr &) {
+    abort();
+  }
+
   bool Rete_Action::operator==(const Rete_Node &/*rhs*/) const {
 //       if(auto rete_action = dynamic_cast<const Rete_Action *>(&rhs))
 //         return action == rete_action->action && retraction == rete_action->retraction && input == rete_action->input;

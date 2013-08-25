@@ -30,7 +30,8 @@ namespace Rete {
     void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from);
     void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from);
 
-    virtual void pass_tokens(const Rete_Node_Ptr &);
+    void pass_tokens(const Rete_Node_Ptr &);
+    void unpass_tokens(const Rete_Node_Ptr &);
 
     bool operator==(const Rete_Node &/*rhs*/) const;
 

@@ -26,6 +26,7 @@ namespace Rete {
     void remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &);
 
     void pass_tokens(const Rete_Node_Ptr &output);
+    void unpass_tokens(const Rete_Node_Ptr &output);
 
     bool operator==(const Rete_Node &rhs) const;
 

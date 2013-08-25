@@ -53,6 +53,13 @@ namespace Rete {
       output->insert_wme_token(output_token, this);
   }
 
+  void Rete_Existential::unpass_tokens(const Rete_Node_Ptr &output) {
+    if(is_iterating())
+      return;
+    if(!input_tokens.empty())
+      output->remove_wme_token(output_token, this);
+  }
+
   bool Rete_Existential::operator==(const Rete_Node &rhs) const {
     if(auto existential = dynamic_cast<const Rete_Existential *>(&rhs))
       return input == existential->input;
