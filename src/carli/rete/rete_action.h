@@ -11,6 +11,7 @@ namespace Rete {
     Rete_Action & operator=(const Rete_Action &);
 
     friend void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
+    friend class Rete_Action_to_Agenda;
 
   public:
     typedef std::function<void (const Rete_Action &rete_action, const WME_Token &wme_token)> Action;
@@ -52,6 +53,18 @@ namespace Rete {
   };
 
   void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
+
+  class Rete_Action_to_Agenda {
+    friend class Agenda;
+
+    static const Rete_Action::Action & action(const Rete_Action &rete_action) {
+      return rete_action.action;
+    }
+
+    static const Rete_Action::Action & retraction(const Rete_Action &rete_action) {
+      return rete_action.retraction;
+    }
+  };
 
 }
 

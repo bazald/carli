@@ -27,17 +27,16 @@ namespace Rete {
     static Rete_Negation_Join_Ptr find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
   private:
-    void join_tokens(const WME_Token_Ptr_C &lhs, const WME_Token_Ptr_C &rhs);
-    void unjoin_tokens(const WME_Token_Ptr_C &lhs, const WME_Token_Ptr_C &rhs);
+    void join_tokens(std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs);
+    void unjoin_tokens(std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs);
 
     void pass_tokens(const Rete_Node_Ptr &output);
 
     WME_Bindings bindings;
     Rete_Node * input0 = nullptr;
     Rete_Node * input1 = nullptr;
-    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input0_tokens;
+    std::list<std::pair<WME_Token_Ptr_C, size_t>, Zeni::Pool_Allocator<std::pair<WME_Token_Ptr_C, size_t>>> input0_tokens;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input1_tokens;
-    std::list<std::pair<WME_Token_Ptr_C, size_t>, Zeni::Pool_Allocator<std::pair<WME_Token_Ptr_C, size_t>>> output_tokens;
   };
 
   void bind_to_negation_join(const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);

@@ -34,7 +34,7 @@ namespace Rete {
 
     input_tokens.push_back(wme_token);
 
-    agenda.insert_back(shared(), [this,wme_token](){action(*this, *wme_token);});
+    agenda.insert_action(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
   }
 
   void Rete_Action::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
@@ -49,7 +49,7 @@ namespace Rete {
     // TODO: change from the 'if' to the 'assert', ensuring that we're not wasting time on non-existent removals
     //assert(found != input_tokens.end());
     {
-      agenda.insert_front(shared(), [this,wme_token](){retraction(*this, *wme_token);});
+      agenda.insert_retraction(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
 
       input_tokens.erase(found);
     }

@@ -19,13 +19,13 @@ namespace Rete {
   public:
     Agenda();
 
-    void insert_front(const Rete_Node_Ptr_C &node, std::function<void ()> &&action) {
-      agenda.emplace_front(node, std::move(action));
+    void insert_action(const Rete_Action_Ptr_C &action, const WME_Token_Ptr_C &wme_token) {
+      agenda.emplace_back(action, wme_token, true);
       run();
     }
 
-    void insert_back(const Rete_Node_Ptr_C &node, std::function<void ()> &&action) {
-      agenda.emplace_front(node, std::move(action));
+    void insert_retraction(const Rete_Action_Ptr_C &action, const WME_Token_Ptr_C &wme_token) {
+      agenda.emplace_front(action, wme_token, false);
       run();
     }
 
@@ -34,7 +34,7 @@ namespace Rete {
     void run();
 
   private:
-    std::list<std::pair<std::shared_ptr<const Rete_Node>, std::function<void ()>>, Zeni::Pool_Allocator<std::pair<std::shared_ptr<const Rete_Node>, std::function<void ()>>>> agenda;
+    std::list<std::tuple<Rete_Action_Ptr_C, WME_Token_Ptr_C, bool>, Zeni::Pool_Allocator<std::tuple<Rete_Action_Ptr_C, WME_Token_Ptr_C, bool>>> agenda;
     bool m_locked = false;
     bool m_manually_locked = false;
   };

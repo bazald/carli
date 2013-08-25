@@ -1,5 +1,7 @@
 #include "agenda.h"
 
+#include "rete_action.h"
+
 namespace Rete {
 
   Agenda::Agenda() {
@@ -23,9 +25,13 @@ namespace Rete {
     m_locked = true;
 
     while(!agenda.empty()) {
-      auto front = agenda.front();
-      agenda.pop_front();
-      front.second();
+      const auto front_iterator = agenda.begin();
+      const auto &front = *front_iterator;
+      if(std::get<2>(front))
+        Rete_Action_to_Agenda::action(*std::get<0>(front))(*std::get<0>(front), *std::get<1>(front));
+      else
+        Rete_Action_to_Agenda::retraction(*std::get<0>(front))(*std::get<0>(front), *std::get<1>(front));
+      agenda.erase(front_iterator);
     }
 
     assert(m_locked);
