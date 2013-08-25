@@ -63,15 +63,11 @@ namespace Rete {
   }
 
   void Rete_Predicate::pass_tokens(const Rete_Node_Ptr &output) {
-    if(is_iterating())
-      return;
     for(auto &wme_token : tokens)
       output->insert_wme_token(wme_token, this);
   }
 
   void Rete_Predicate::unpass_tokens(const Rete_Node_Ptr &output) {
-    if(is_iterating())
-      return;
     for(auto &wme_token : tokens)
       output->remove_wme_token(wme_token, this);
   }

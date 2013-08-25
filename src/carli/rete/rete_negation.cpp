@@ -43,15 +43,11 @@ namespace Rete {
   }
 
   void Rete_Negation::pass_tokens(const Rete_Node_Ptr &output) {
-    if(is_iterating())
-      return;
     if(input_tokens.empty())
       output->insert_wme_token(output_token, this);
   }
 
   void Rete_Negation::unpass_tokens(const Rete_Node_Ptr &output) {
-    if(is_iterating())
-      return;
     if(input_tokens.empty())
       output->remove_wme_token(output_token, this);
   }

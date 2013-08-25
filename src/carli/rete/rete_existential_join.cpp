@@ -113,8 +113,6 @@ namespace Rete {
   }
 
   void Rete_Existential_Join::pass_tokens(const Rete_Node_Ptr &output) {
-    if(is_iterating())
-      return;
     for(auto &wme_token : input0_tokens) {
       if(wme_token.second)
         output->insert_wme_token(wme_token.first, this);
@@ -122,8 +120,6 @@ namespace Rete {
   }
 
   void Rete_Existential_Join::unpass_tokens(const Rete_Node_Ptr &output) {
-    if(is_iterating())
-      return;
     for(auto &wme_token : input0_tokens) {
       if(wme_token.second)
         output->remove_wme_token(wme_token.first, this);

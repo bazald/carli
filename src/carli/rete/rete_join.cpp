@@ -108,15 +108,11 @@ namespace Rete {
   }
 
   void Rete_Join::pass_tokens(const Rete_Node_Ptr &output) {
-    if(is_iterating())
-      return;
     for(auto &wme_token : output_tokens)
       output->insert_wme_token(wme_token, this);
   }
 
   void Rete_Join::unpass_tokens(const Rete_Node_Ptr &output) {
-    if(is_iterating())
-      return;
     for(auto &wme_token : output_tokens)
       output->remove_wme_token(wme_token, this);
   }
