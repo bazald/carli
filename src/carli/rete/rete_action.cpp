@@ -25,24 +25,24 @@ namespace Rete {
     input->destroy(filters, shared());
   }
 
-  void Rete_Action::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
+  void Rete_Action::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                               from
 #endif
                                                                                                   ) {
-    assert(from.get() == input);
+    assert(from == input);
 
     input_tokens.push_back(wme_token);
 
     agenda.insert_action(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
   }
 
-  void Rete_Action::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
+  void Rete_Action::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                               from
 #endif
                                                                                                   ) {
-    assert(from.get() == input);
+    assert(from == input);
 
     auto found = find(input_tokens, wme_token);
     if(found != input_tokens.end())

@@ -22,8 +22,8 @@ namespace Rete {
     Rete_Node_Ptr_C parent() const {return input->shared();}
     Rete_Node_Ptr parent() {return input->shared();}
 
-    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from);
-    void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from);
+    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from);
+    void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from);
 
     void pass_tokens(const Rete_Node_Ptr &output);
 

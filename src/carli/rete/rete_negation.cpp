@@ -10,34 +10,34 @@ namespace Rete {
       input->destroy(filters, shared());
   }
 
-  void Rete_Negation::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
+  void Rete_Negation::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                  from
 #endif
                                                                                      ) {
-    assert(from.get() == input);
+    assert(from == input);
 
     input_tokens.push_back(wme_token);
 
     if(input_tokens.size() == 1) {
       for(auto &output : outputs)
-        output->remove_wme_token(output_token, shared());
+        output->remove_wme_token(output_token, this);
     }
   }
 
-  void Rete_Negation::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
+  void Rete_Negation::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                  from
 #endif
                                                                                      ) {
-    assert(from.get() == input);
+    assert(from == input);
 
     auto found = find(input_tokens, wme_token);
     if(found != input_tokens.end()) {
       input_tokens.erase(found);
       if(input_tokens.empty()) {
         for(auto &output : outputs)
-          output->insert_wme_token(output_token, shared());
+          output->insert_wme_token(output_token, this);
       }
     }
   }
@@ -46,7 +46,7 @@ namespace Rete {
     if(is_iterating())
       return;
     if(input_tokens.empty())
-      output->insert_wme_token(output_token, shared());
+      output->insert_wme_token(output_token, this);
   }
 
   bool Rete_Negation::operator==(const Rete_Node &rhs) const {

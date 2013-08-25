@@ -18,10 +18,10 @@ namespace Rete {
     }
   }
 
-  void Rete_Negation_Join::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) {
-    assert(from.get() == input0 || from.get() == input1);
+  void Rete_Negation_Join::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
+    assert(from == input0 || from == input1);
 
-    if(from.get() == input0) {
+    if(from == input0) {
       input0_tokens.emplace_back(wme_token, 0u);
 
       for(const auto &other : input1_tokens)
@@ -29,10 +29,10 @@ namespace Rete {
 
       if(input0_tokens.back().second == 0u) {
         for(auto &output : outputs)
-          output->insert_wme_token(wme_token, shared());
+          output->insert_wme_token(wme_token, this);
       }
     }
-    if(from.get() == input1) {
+    if(from == input1) {
       input1_tokens.push_back(wme_token);
 
       for(auto &other : input0_tokens)
@@ -40,20 +40,20 @@ namespace Rete {
     }
   }
 
-  void Rete_Negation_Join::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) {
-    assert(from.get() == input0 || from.get() == input1);
+  void Rete_Negation_Join::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
+    assert(from == input0 || from == input1);
 
-    if(from.get() == input0) {
+    if(from == input0) {
       auto found = find_key(input0_tokens, wme_token);
       if(found != input0_tokens.end()) {
         if(found->second == 0u) {
           for(auto &output : outputs)
-            output->remove_wme_token(wme_token, shared());
+            output->remove_wme_token(wme_token, this);
         }
         input0_tokens.erase(found);
       }
     }
-    if(from.get() == input1) {
+    if(from == input1) {
       auto found = find(input1_tokens, wme_token);
       if(found != input1_tokens.end()) {
         // TODO: Avoid looping through non-existent pairs?
@@ -91,7 +91,7 @@ namespace Rete {
 
     if(++lhs.second == 1) {
       for(auto &output : outputs)
-        output->remove_wme_token(lhs.first, shared());
+        output->remove_wme_token(lhs.first, this);
     }
   }
 
@@ -103,7 +103,7 @@ namespace Rete {
 
     if(--lhs.second == 0) {
       for(auto &output : outputs)
-        output->insert_wme_token(lhs.first, shared());
+        output->insert_wme_token(lhs.first, this);
     }
   }
 
@@ -112,7 +112,7 @@ namespace Rete {
       return;
     for(auto &wme_token : input0_tokens) {
       if(!wme_token.second)
-        output->insert_wme_token(wme_token.first, shared());
+        output->insert_wme_token(wme_token.first, this);
     }
   }
 

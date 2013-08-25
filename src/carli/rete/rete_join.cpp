@@ -18,16 +18,16 @@ namespace Rete {
     }
   }
 
-  void Rete_Join::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) {
-    assert(from.get() == input0 || from.get() == input1);
+  void Rete_Join::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
+    assert(from == input0 || from == input1);
 
-    if(from.get() == input0) {
+    if(from == input0) {
       input0_tokens.push_back(wme_token);
 
       for(const auto &other : input1_tokens)
         join_tokens(wme_token, other);
     }
-    if(from.get() == input1) {
+    if(from == input1) {
       input1_tokens.push_back(wme_token);
 
       for(const auto &other : input0_tokens)
@@ -35,10 +35,10 @@ namespace Rete {
     }
   }
 
-  void Rete_Join::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) {
-    assert(from.get() == input0 || from.get() == input1);
+  void Rete_Join::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
+    assert(from == input0 || from == input1);
 
-    if(from.get() == input0) {
+    if(from == input0) {
       auto found = find(input0_tokens, wme_token);
       if(found != input0_tokens.end()) {
         // TODO: Avoid looping through non-existent pairs?
@@ -47,13 +47,13 @@ namespace Rete {
           auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
           if(found_output != output_tokens.end()) {
             for(auto &output : outputs)
-              output->remove_wme_token(*found_output, shared());
+              output->remove_wme_token(*found_output, this);
             output_tokens.erase(found_output);
           }
         }
       }
     }
-    if(from.get() == input1) {
+    if(from == input1) {
       auto found = find(input1_tokens, wme_token);
       if(found != input1_tokens.end()) {
         // TODO: Avoid looping through non-existent pairs?
@@ -62,7 +62,7 @@ namespace Rete {
           auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
           if(found_output != output_tokens.end()) {
             for(auto &output : outputs)
-              output->remove_wme_token(*found_output, shared());
+              output->remove_wme_token(*found_output, this);
             output_tokens.erase(found_output);
           }
         }
@@ -97,7 +97,7 @@ namespace Rete {
 
     output_tokens.push_back(join_wme_tokens(lhs, rhs));
     for(auto &output : outputs)
-      output->insert_wme_token(output_tokens.back(), shared());
+      output->insert_wme_token(output_tokens.back(), this);
   }
 
   WME_Token_Ptr_C Rete_Join::join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs) {
@@ -111,7 +111,7 @@ namespace Rete {
     if(is_iterating())
       return;
     for(auto &wme_token : output_tokens)
-      output->insert_wme_token(wme_token, shared());
+      output->insert_wme_token(wme_token, this);
   }
 
   void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {

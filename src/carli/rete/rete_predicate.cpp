@@ -25,12 +25,12 @@ namespace Rete {
       input->destroy(filters, shared());
   }
 
-  void Rete_Predicate::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
+  void Rete_Predicate::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                  from
 #endif
                                                                                      ) {
-    assert(from.get() == input);
+    assert(from == input);
 
     if(m_rhs) {
       if(!test_predicate((*wme_token)[m_lhs_index], m_rhs))
@@ -44,21 +44,21 @@ namespace Rete {
     tokens.push_back(wme_token);
 
     for(auto &output : outputs)
-      output->insert_wme_token(wme_token, shared());
+      output->insert_wme_token(wme_token, this);
   }
 
-  void Rete_Predicate::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
+  void Rete_Predicate::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                  from
 #endif
                                                                                      ) {
-    assert(from.get() == input);
+    assert(from == input);
 
     auto found = find(tokens, wme_token);
     if(found != tokens.end()) {
       tokens.erase(found);
       for(auto &output : outputs)
-        output->remove_wme_token(wme_token, shared());
+        output->remove_wme_token(wme_token, this);
     }
   }
 
@@ -66,7 +66,7 @@ namespace Rete {
     if(is_iterating())
       return;
     for(auto &wme_token : tokens)
-      output->insert_wme_token(wme_token, shared());
+      output->insert_wme_token(wme_token, this);
   }
 
   bool Rete_Predicate::operator==(const Rete_Node &rhs) const {

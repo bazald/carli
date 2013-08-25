@@ -22,8 +22,8 @@ namespace Rete {
     void insert_wme(const WME_Ptr_C &wme);
     void remove_wme(const WME_Ptr_C &wme);
 
-    void insert_wme_token(const WME_Token_Ptr_C &, const Rete_Node_Ptr_C &);
-    void remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node_Ptr_C &);
+    void insert_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &);
+    void remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &);
 
     void pass_tokens(const Rete_Node_Ptr &output);
 
@@ -32,7 +32,7 @@ namespace Rete {
   private:
     WME m_wme;
     std::array<Symbol_Variable_Ptr_C, 3> m_variable;
-    std::list<std::pair<WME_Ptr_C, WME_Token_Ptr_C>, Zeni::Pool_Allocator<std::pair<WME_Ptr_C, WME_Token_Ptr_C>>> tokens;
+    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> tokens;
   };
 
 }

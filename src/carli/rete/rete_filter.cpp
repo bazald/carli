@@ -31,27 +31,27 @@ namespace Rete {
     if(m_variable[1] && m_variable[2] && *m_variable[1] == *m_variable[2] && *wme->symbols[1] != *wme->symbols[2])
       return;
 
-    if(find_key(tokens, wme) == tokens.end()) {
-      tokens.emplace_back(wme, std::make_shared<WME_Token>(wme));
+    if(std::find_if(tokens.begin(), tokens.end(), [&wme](const WME_Token_Ptr_C &token)->bool{return *wme == *token->get_wme();}) == tokens.end()) {
+      tokens.push_back(std::make_shared<WME_Token>(wme));
       for(auto &output : outputs)
-        output->insert_wme_token(tokens.back().second, shared());
+        output->insert_wme_token(tokens.back(), this);
     }
   }
 
   void Rete_Filter::remove_wme(const WME_Ptr_C &wme) {
-    auto found = find_key(tokens, wme);
+    auto found = std::find_if(tokens.begin(), tokens.end(), [&wme](const WME_Token_Ptr_C &token)->bool{return *wme == *token->get_wme();});
     if(found != tokens.end()) {
       for(auto &output : outputs)
-        output->remove_wme_token(found->second, shared());
+        output->remove_wme_token(*found, this);
       tokens.erase(found);
     }
   }
 
-  void Rete_Filter::insert_wme_token(const WME_Token_Ptr_C &, const Rete_Node_Ptr_C &) {
+  void Rete_Filter::insert_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &) {
     abort();
   }
 
-  void Rete_Filter::remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node_Ptr_C &) {
+  void Rete_Filter::remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &) {
     abort();
   }
 
@@ -59,7 +59,7 @@ namespace Rete {
     if(is_iterating())
       return;
     for(auto &token : tokens)
-      output->insert_wme_token(token.second, shared());
+      output->insert_wme_token(token, this);
   }
 
   bool Rete_Filter::operator==(const Rete_Node &rhs) const {
