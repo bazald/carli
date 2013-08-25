@@ -2,31 +2,18 @@
 
 namespace Rete {
 
-  Rete_Action::Rete_Action(
-#ifdef USE_AGENDA
-              Agenda &actions_,
-              Agenda &retractions_,
-#else
-              Agenda &,
-              Agenda &,
-#endif
-              const Action &action_,
-              const Action &retraction_,
-              const bool &attach_immediately_)
+  Rete_Action::Rete_Action(Agenda &agenda_,
+                           const Action &action_,
+                           const Action &retraction_)
     : action(action_),
-    retraction(retraction_)
-#ifdef USE_AGENDA
-    ,
-    actions(actions_),
-    retractions(retractions_)
-#endif
-    ,
-    m_attached(attach_immediately_)
+    retraction(retraction_),
+    agenda(agenda_)
   {
   }
 
   Rete_Action::~Rete_Action() {
-    detach();
+    for(auto &wme_token : input_tokens)
+      retraction(*this, *wme_token);
   }
 
   void Rete_Action::destroy(Filters &filters, const Rete_Node_Ptr &
@@ -35,7 +22,6 @@ namespace Rete {
 #endif
                                                                           ) {
     assert(!output);
-    detach();
     input.lock()->destroy(filters, shared());
   }
 
@@ -48,13 +34,7 @@ namespace Rete {
 
     input_tokens.push_back(wme_token);
 
-    if(m_attached) {
-#ifdef USE_AGENDA
-      actions.insert(this, [this,&wme_token](){action(*this, *wme_token);});
-#else
-      action(*this, *wme_token);
-#endif
-    }
+    agenda.insert_back(shared(), [this,wme_token](){action(*this, *wme_token);});
   }
 
   void Rete_Action::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &
@@ -64,20 +44,14 @@ namespace Rete {
                                                                                                   ) {
     assert(from == input.lock());
 
-    if(m_attached) {
-      auto found = find(input_tokens, wme_token);
-      if(found != input_tokens.end())
-      // TODO: change from the 'if' to the 'assert', ensuring that we're not wasting time on non-existent removals
-      //assert(found != input_tokens.end());
-      {
-#ifdef USE_AGENDA
-        retractions.insert(this, [this,&wme_token](){retraction(*this, *wme_token);});
-#else
-        retraction(*this, *wme_token);
-#endif
+    auto found = find(input_tokens, wme_token);
+    if(found != input_tokens.end())
+    // TODO: change from the 'if' to the 'assert', ensuring that we're not wasting time on non-existent removals
+    //assert(found != input_tokens.end());
+    {
+      agenda.insert_front(shared(), [this,wme_token](){retraction(*this, *wme_token);});
 
-        input_tokens.erase(found);
-      }
+      input_tokens.erase(found);
     }
   }
 
@@ -100,37 +74,6 @@ namespace Rete {
 //       }
 
     return nullptr;
-  }
-
-  void Rete_Action::attach() {
-    if(m_attached)
-      return;
-    m_attached = true;
-
-    for(auto &wme_token : input_tokens) {
-#ifdef USE_AGENDA
-      actions.insert(this, [this,&wme_token](){action(*this, *wme_token);});
-#else
-      action(*this, *wme_token);
-#endif
-    }
-  }
-
-  void Rete_Action::detach() {
-    if(!m_attached)
-      return;
-    m_attached = false;
-
-#ifdef USE_AGENDA
-    actions.remove(this);
-#endif
-    for(auto &wme_token : input_tokens) {
-#ifdef USE_AGENDA
-      retractions.insert(this, [this,&wme_token](){retraction(*this, *wme_token);});
-#else
-      retraction(*this, *wme_token);
-#endif
-    }
   }
 
   void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out) {

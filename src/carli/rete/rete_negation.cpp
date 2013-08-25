@@ -36,8 +36,8 @@ namespace Rete {
     if(found != input_tokens.end()) {
       input_tokens.erase(found);
       if(input_tokens.empty()) {
-        for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
-          (*outputs_iterator++)->insert_wme_token(output_token, shared());
+        for(auto &output : outputs)
+          output->insert_wme_token(output_token, shared());
       }
     }
   }

@@ -237,7 +237,6 @@ namespace Blocks_World {
     Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
     Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
 
-    Rete::Symbol_Identifier_Ptr_C m_s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
     Rete::Symbol_Identifier_Ptr_C m_input_id = std::make_shared<Rete::Symbol_Identifier>("I1");
     Rete::Symbol_Identifier_Ptr_C m_a_id = std::make_shared<Rete::Symbol_Identifier>("A");
     Rete::Symbol_Identifier_Ptr_C m_b_id = std::make_shared<Rete::Symbol_Identifier>("B");
@@ -258,7 +257,6 @@ namespace Blocks_World {
     Rete::Symbol_Constant_String_Ptr_C m_table_value = std::make_shared<Rete::Symbol_Constant_String>("table");
     Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
 
-    Rete::WME_Ptr_C m_wme_blink = std::make_shared<Rete::WME>(m_s_id, m_s_id, m_s_id);
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
 
     std::array<tracked_ptr<const Action>, 9> m_action = {{new Move(1, 0),

@@ -43,8 +43,8 @@ namespace Rete {
 
     tokens.push_back(wme_token);
 
-    for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
-      (*outputs_iterator++)->insert_wme_token(wme_token, shared());
+    for(auto &output : outputs)
+      output->insert_wme_token(wme_token, shared());
   }
 
   void Rete_Predicate::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &

@@ -15,24 +15,16 @@ namespace Rete {
   public:
     typedef std::function<void (const Rete_Action &rete_action, const WME_Token &wme_token)> Action;
 
-    Rete_Action(
-#ifdef USE_AGENDA
-                Agenda &actions_,
-                Agenda &retractions_,
-#else
-                Agenda &,
-                Agenda &,
-#endif
+    Rete_Action(Agenda &agenda_,
                 const Action &action_ = [](const Rete_Action &, const WME_Token &){},
-                const Action &retraction_ = [](const Rete_Action &, const WME_Token &){},
-                const bool &attach_immediately = true);
+                const Action &retraction_ = [](const Rete_Action &, const WME_Token &){});
 
     ~Rete_Action();
 
+    void destroy(Filters &filters, const Rete_Node_Ptr &output = Rete_Node_Ptr());
+
     Rete_Node_Ptr_C parent() const {return input.lock();}
     Rete_Node_Ptr parent() {return input.lock();}
-
-    void destroy(Filters &filters, const Rete_Node_Ptr &output = Rete_Node_Ptr());
 
     void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from);
     void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from);
@@ -42,10 +34,6 @@ namespace Rete {
     bool operator==(const Rete_Node &/*rhs*/) const;
 
     static Rete_Action_Ptr find_existing(const Action &/*action_*/, const Action &/*retraction_*/, const Rete_Node_Ptr &/*out*/);
-
-    bool attached() const {return m_attached;}
-    void attach();
-    void detach();
 
     void set_action(const Action &action_) {
       action = action_;
@@ -60,11 +48,7 @@ namespace Rete {
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input_tokens;
     Action action;
     Action retraction;
-#ifdef USE_AGENDA
-    Agenda &actions;
-    Agenda &retractions;
-#endif
-    bool m_attached;
+    Agenda &agenda;
   };
 
   void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);

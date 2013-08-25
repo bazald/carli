@@ -151,6 +151,9 @@ namespace Mountain_Car {
   }
 
   void Agent::generate_rete(const Rete::Rete_Node_Ptr &parent) {
+    auto filter_blink = make_filter(*m_wme_blink);
+    auto join_blink = make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
+
     const double m_half_x = (m_min_x + m_max_x) / 2.0;
     const double m_half_x_dot = (m_min_x_dot + m_max_x_dot) / 2.0;
 
@@ -168,7 +171,7 @@ namespace Mountain_Car {
       }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->purge_q_value_next(action, node_unsplit->q_value);
-      }, parent);
+      }, join_blink);
 
       {
         Node_Ranged::Lines lines;
@@ -253,6 +256,7 @@ namespace Mountain_Car {
     m_x_dot_value->value = env->get_x_dot();
     insert_wme(m_x_wme);
     insert_wme(m_x_dot_wme);
+    insert_wme(m_wme_blink);
   }
 
   void Agent::update() {

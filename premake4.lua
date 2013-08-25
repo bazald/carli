@@ -41,7 +41,6 @@ solution "carli"
   flags { "ExtraWarnings" }
   buildoptions { "-ffloat-store" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
   buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
---  defines { "USE_AGENDA" }
   include "src/carli"
 
   configuration "Debug"

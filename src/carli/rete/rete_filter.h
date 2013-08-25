@@ -16,6 +16,9 @@ namespace Rete {
 
     void destroy(Filters &filters, const Rete_Node_Ptr &output);
 
+    Rete_Node_Ptr_C parent() const {abort();}
+    Rete_Node_Ptr parent() {abort();}
+
     void insert_wme(const WME_Ptr_C &wme);
     void remove_wme(const WME_Ptr_C &wme);
 

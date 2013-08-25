@@ -196,6 +196,9 @@ protected:
   std::function<bool (Q_Value * const &)> m_split_test; ///< true if too general, false if sufficiently general
   std::map<action_ptrsc, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<action_ptrsc>, Zeni::Pool_Allocator<std::pair<action_ptrsc, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
+  Rete::Symbol_Identifier_Ptr_C m_s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
+  Rete::WME_Ptr_C m_wme_blink = std::make_shared<Rete::WME>(m_s_id, m_s_id, m_s_id);
+
 private:
   virtual void generate_features() = 0;
   virtual void update() = 0;

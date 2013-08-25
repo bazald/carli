@@ -1,6 +1,8 @@
 #ifndef RETE_AGENDA_H
 #define RETE_AGENDA_H
 
+#include "rete_node.h"
+
 #include <cassert>
 #include <cstddef>
 #include <functional>
@@ -15,19 +17,19 @@ namespace Rete {
     Agenda & operator=(Agenda &);
 
   public:
-    Agenda(Agenda * const &block_on_ = nullptr);
+    Agenda();
 
-    void insert(const Rete_Node * const &node, const std::function<void ()> &action);
+    void insert_front(const Rete_Node_Ptr_C &node, const std::function<void ()> &action);
+    void insert_back(const Rete_Node_Ptr_C &node, const std::function<void ()> &action);
 
-    void remove(const Rete_Node * const &node);
-
-    size_t run();
+    void lock();
+    void unlock();
+    void run();
 
   private:
-    std::list<std::pair<const Rete_Node *, std::function<void ()>>> agenda;
-    bool agenda_ready = true;
-
-    Agenda * block_on;
+    std::list<std::pair<std::shared_ptr<const Rete_Node>, std::function<void ()>>, Zeni::Pool_Allocator<std::pair<std::shared_ptr<const Rete_Node>, std::function<void ()>>>> agenda;
+    bool m_locked = false;
+    bool m_manually_locked = false;
   };
 
 }

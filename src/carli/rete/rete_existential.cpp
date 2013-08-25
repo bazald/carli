@@ -20,8 +20,8 @@ namespace Rete {
     input_tokens.push_back(wme_token);
 
     if(input_tokens.size() == 1) {
-      for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
-        (*outputs_iterator++)->insert_wme_token(output_token, shared());
+      for(auto &output : outputs)
+        output->insert_wme_token(output_token, shared());
     }
 
     std::cerr << "input_tokens.size() == " << input_tokens.size() << std::endl;

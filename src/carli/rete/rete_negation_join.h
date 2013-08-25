@@ -16,6 +16,9 @@ namespace Rete {
 
     void destroy(Filters &filters, const Rete_Node_Ptr &output);
 
+    Rete_Node_Ptr_C parent() const {return input0.lock();}
+    Rete_Node_Ptr parent() {return input0.lock();}
+
     void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from);
     void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from);
 

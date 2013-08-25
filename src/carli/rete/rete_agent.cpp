@@ -3,24 +3,23 @@
 namespace Rete {
 
   Rete_Agent::Rete_Agent()
-    : actions(&retractions)
   {
   }
 
-  Rete_Action_Ptr Rete_Agent::make_action(const Rete_Action::Action &action, const Rete_Node_Ptr &out, const bool &attach_immediately) {
+  Rete_Action_Ptr Rete_Agent::make_action(const Rete_Action::Action &action, const Rete_Node_Ptr &out) {
     if(auto existing = Rete_Action::find_existing(action, [](const Rete_Action &, const WME_Token &){}, out))
       return existing;
 //      std::cerr << "DEBUG: make_action" << std::endl;
-    auto action_fun = std::make_shared<Rete_Action>(this->actions, this->retractions, action, [](const Rete_Action &, const WME_Token &){}, attach_immediately);
+    auto action_fun = std::make_shared<Rete_Action>(this->agenda, action, [](const Rete_Action &, const WME_Token &){});
     bind_to_action(action_fun, out);
 //      std::cerr << "END: make_action" << std::endl;
     return action_fun;
   }
 
-  Rete_Action_Ptr Rete_Agent::make_action_retraction(const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out, const bool &attach_immediately) {
+  Rete_Action_Ptr Rete_Agent::make_action_retraction(const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out) {
     if(auto existing = Rete_Action::find_existing(action, retraction, out))
       return existing;
-    auto action_fun = std::make_shared<Rete_Action>(this->actions, this->retractions, action, retraction, attach_immediately);
+    auto action_fun = std::make_shared<Rete_Action>(this->agenda, action, retraction);
     bind_to_action(action_fun, out);
     return action_fun;
   }
@@ -118,7 +117,6 @@ namespace Rete {
       found->second->destroy(filters);
       rules.erase(found);
     }
-    finish_agenda();
   }
 
   void Rete_Agent::excise_rule(const Rete_Action_Ptr &action) {
@@ -127,34 +125,40 @@ namespace Rete {
 
   void Rete_Agent::insert_wme(const WME_Ptr_C &wme) {
     assert(working_memory.wmes.find(wme) == working_memory.wmes.end());
+    agenda.lock();
     working_memory.wmes.insert(wme);
 #ifdef DEBUG_OUTPUT
     std::cerr << "rete.insert" << *wme << std::endl;
 #endif
-    for(auto ft = filters.begin(), fend = filters.end(); ft != fend; )
-      (*ft++)->insert_wme(wme);
-    finish_agenda();
+    for(auto &filter : filters)
+      filter->insert_wme(wme);
+    agenda.unlock();
+    agenda.run();
   }
 
   void Rete_Agent::remove_wme(const WME_Ptr_C &wme) {
     auto found = working_memory.wmes.find(wme);
     assert(found != working_memory.wmes.end());
+    agenda.lock();
     working_memory.wmes.erase(found);
 #ifdef DEBUG_OUTPUT
     std::cerr << "rete.remove" << *wme << std::endl;
 #endif
-    for(auto ft = filters.begin(), fend = filters.end(); ft != fend; )
-      (*ft++)->remove_wme(wme);
-    finish_agenda();
+    for(auto &filter : filters)
+      filter->remove_wme(wme);
+    agenda.unlock();
+    agenda.run();
   }
 
   void Rete_Agent::clear_wmes() {
+    agenda.lock();
     for(auto &wme : working_memory.wmes) {
       for(auto &filter : filters)
         filter->remove_wme(wme);
     }
     working_memory.wmes.clear();
-    finish_agenda();
+    agenda.unlock();
+    agenda.run();
   }
 
   size_t Rete_Agent::rete_size() const {
@@ -171,14 +175,10 @@ namespace Rete {
   }
 
   void Rete_Agent::destroy() {
+    agenda.lock();
     filters.clear();
-  }
-
-  void Rete_Agent::finish_agenda() {
-    for(;;) {
-      if(!retractions.run() && !actions.run())
-        break;
-    }
+    agenda.unlock();
+    agenda.run();
   }
 
 }

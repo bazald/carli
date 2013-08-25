@@ -249,6 +249,9 @@ namespace Puddle_World {
   }
 
   void Agent::generate_rete(const Rete::Rete_Node_Ptr &parent) {
+    auto filter_blink = make_filter(*m_wme_blink);
+    auto join_blink = make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
+
     for(const auto &action : m_action) {
       auto get_action = [action](const Rete::WME_Token &)->action_ptrsc {
         return action;
@@ -263,7 +266,7 @@ namespace Puddle_World {
       }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->purge_q_value_next(action, node_unsplit->q_value);
-      }, parent);
+      }, join_blink);
 
       {
         Node_Ranged::Lines lines;
@@ -349,6 +352,7 @@ namespace Puddle_World {
     m_y_value->value = pos.second;
     insert_wme(m_x_wme);
     insert_wme(m_y_wme);
+    insert_wme(m_wme_blink);
   }
 
   void Agent::update() {

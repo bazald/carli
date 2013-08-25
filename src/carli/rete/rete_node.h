@@ -60,7 +60,7 @@ namespace Rete {
     typedef std::list<Rete_Node_Ptr, Zeni::Pool_Allocator<Rete_Node_Ptr>> Outputs;
 
     Rete_Node() {}
-    virtual ~Rete_Node() {}
+    virtual ~Rete_Node();
 
     virtual void destroy(Filters &filters, const Rete_Node_Ptr &output) = 0;
 
@@ -74,6 +74,9 @@ namespace Rete {
     const Outputs & get_outputs() const {
       return outputs;
     }
+
+    virtual Rete_Node_Ptr_C parent() const = 0;
+    virtual Rete_Node_Ptr parent() = 0;
 
     virtual void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) = 0;
     virtual void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node_Ptr_C &from) = 0;

@@ -30,8 +30,8 @@ namespace Rete {
         join_tokens(wme_token, other);
 
       if(inserted->second == 0u) {
-        for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
-          (*outputs_iterator++)->insert_wme_token(wme_token, shared());
+        for(auto &output : outputs)
+          output->insert_wme_token(wme_token, shared());
       }
     }
     if(from == input1.lock()) {
@@ -52,8 +52,8 @@ namespace Rete {
         auto output_found = find_key(output_tokens, wme_token);
         assert(output_found != output_tokens.end());
         if(output_found->second == 0u) {
-          for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
-            (*outputs_iterator++)->remove_wme_token(wme_token, shared());
+          for(auto &output : outputs)
+            output->remove_wme_token(wme_token, shared());
         }
         output_tokens.erase(output_found);
       }
@@ -97,8 +97,8 @@ namespace Rete {
     auto found = find_key(output_tokens, lhs);
     assert(found != output_tokens.end());
     if(++found->second == 1) {
-      for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
-        (*outputs_iterator++)->remove_wme_token(lhs, shared());
+      for(auto &output : outputs)
+        output->remove_wme_token(lhs, shared());
     }
   }
 
@@ -111,16 +111,18 @@ namespace Rete {
     auto found = find_key(output_tokens, lhs);
     assert(found != output_tokens.end());
     if(--found->second == 0) {
-      for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
-        (*outputs_iterator++)->insert_wme_token(lhs, shared());
+      for(auto &output : outputs)
+        output->insert_wme_token(lhs, shared());
     }
   }
 
   void Rete_Negation_Join::pass_tokens(const Rete_Node_Ptr &output) {
     if(is_iterating())
       return;
-    for(auto &wme_token : output_tokens)
-      output->insert_wme_token(wme_token.first, shared());
+    for(auto &wme_token : output_tokens) {
+      if(!wme_token.second)
+        output->insert_wme_token(wme_token.first, shared());
+    }
   }
 
   void bind_to_negation_join(const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {

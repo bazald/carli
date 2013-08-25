@@ -7,8 +7,24 @@
 #include "q_value.h"
 
 class Agent;
+
+class Node;
+class Node_Split;
+class Node_Unsplit;
 class Node_Fringe;
 class Node_Fringe_Ranged;
+
+typedef std::shared_ptr<const Node> Node_Ptr_C;
+typedef std::shared_ptr<const Node_Split> Node_Split_Ptr_C;
+typedef std::shared_ptr<const Node_Unsplit> Node_Unsplit_Ptr_C;
+typedef std::shared_ptr<const Node_Fringe> Node_Fringe_Ptr_C;
+typedef std::shared_ptr<const Node_Fringe_Ranged> Node_Fringe_Ranged_Ptr_C;
+
+typedef std::shared_ptr<Node> Node_Ptr;
+typedef std::shared_ptr<Node_Split> Node_Split_Ptr;
+typedef std::shared_ptr<Node_Unsplit> Node_Unsplit_Ptr;
+typedef std::shared_ptr<Node_Fringe> Node_Fringe_Ptr;
+typedef std::shared_ptr<Node_Fringe_Ranged> Node_Fringe_Ranged_Ptr;
 
 class Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Fringe_Ranged> {
   Node(const Node &) = delete;
@@ -27,6 +43,7 @@ public:
 
   Agent &agent;
   tracked_ptr<Q_Value> q_value;
+  bool delete_q_value = true;
   std::weak_ptr<Rete::Rete_Action> action;
 };
 
@@ -36,6 +53,7 @@ class Node_Split : public Node {
 
 public:
   Node_Split(Agent &agent_, const tracked_ptr<Q_Value> &q_value_);
+  ~Node_Split();
 };
 
 class Node_Unsplit : public Node {
@@ -46,6 +64,7 @@ public:
   typedef std::list<std::shared_ptr<Node_Fringe>> Fringe_Values;
 
   Node_Unsplit(Agent &agent_, const size_t &depth_);
+  ~Node_Unsplit();
 
   Fringe_Values fringe_values;
 };

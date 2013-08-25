@@ -2,48 +2,44 @@
 
 namespace Rete {
 
-  Agenda::Agenda(Agenda * const &block_on_)
-    : block_on(block_on_)
-  {
+  Agenda::Agenda() {
   }
 
-  void Agenda::insert(const Rete_Node * const &node, const std::function<void ()> &action) {
+  void Agenda::insert_front(const Rete_Node_Ptr_C &node, const std::function<void ()> &action) {
+    agenda.push_front(std::make_pair(node, action));
+    run();
+  }
+
+  void Agenda::insert_back(const Rete_Node_Ptr_C &node, const std::function<void ()> &action) {
     agenda.push_back(std::make_pair(node, action));
-    if(agenda_ready)
-      run();
+    run();
   }
 
-  void Agenda::remove(const Rete_Node * const &node) {
-    for(auto it = agenda.begin(), iend = agenda.end(); it != iend; ) {
-      if(it->first == node)
-        agenda.erase(it++);
-      else
-        ++it;
-    }
+  void Agenda::lock() {
+    assert(!m_locked);
+    m_locked = true;
+    m_manually_locked = true;
   }
 
-  size_t Agenda::run() {
-    assert(agenda_ready);
-    agenda_ready = false;
-    size_t count = 0u;
+  void Agenda::unlock() {
+    assert(m_manually_locked);
+    m_locked = false;
+    m_manually_locked = false;
+  }
 
-    if(!block_on || block_on->agenda_ready) {
-      for(;;) {
-        if(block_on)
-          count += block_on->run();
+  void Agenda::run() {
+    if(m_locked)
+      return;
+    m_locked = true;
 
-        if(agenda.empty())
-          break;
-
-        auto fcn = agenda.front().second;
-        agenda.pop_front();
-        fcn();
-        ++count;
-      }
+    while(!agenda.empty()) {
+      auto front = agenda.front();
+      agenda.pop_front();
+      front.second();
     }
 
-    agenda_ready = true;
-    return count;
+    assert(m_locked);
+    m_locked = false;
   }
 
 }

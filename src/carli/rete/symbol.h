@@ -25,6 +25,7 @@ namespace Rete {
   typedef std::shared_ptr<const Symbol_Constant_String> Symbol_Constant_String_Ptr_C;
   typedef std::shared_ptr<const Symbol_Identifier> Symbol_Identifier_Ptr_C;
   typedef std::shared_ptr<const Symbol_Variable> Symbol_Variable_Ptr_C;
+
   typedef std::shared_ptr<Symbol> Symbol_Ptr;
   typedef std::shared_ptr<Symbol_Constant> Symbol_Constant_Ptr;
   typedef std::shared_ptr<Symbol_Constant_Float> Symbol_Constant_Float_Ptr;

@@ -87,8 +87,8 @@ namespace Rete {
     if(found == output_tokens.end()) {
       output_tokens.push_back(std::make_pair(lhs, 1u));
 
-      for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
-        (*outputs_iterator++)->insert_wme_token(lhs, shared());
+      for(auto &output : outputs)
+        output->insert_wme_token(lhs, shared());
     }
     else
       ++found->second;
@@ -103,8 +103,8 @@ namespace Rete {
     auto found = find_key(output_tokens, lhs);
     assert(found != output_tokens.end());
     if(--found->second == 0) {
-      for(outputs_iterator = outputs.begin(); outputs_iterator != outputs.end(); )
-        (*outputs_iterator++)->remove_wme_token(lhs, shared());
+      for(auto &output : outputs)
+        output->remove_wme_token(lhs, shared());
 
       output_tokens.erase(found);
     }
@@ -113,8 +113,10 @@ namespace Rete {
   void Rete_Existential_Join::pass_tokens(const Rete_Node_Ptr &output) {
     if(is_iterating())
       return;
-    for(auto &wme_token : output_tokens)
-      output->insert_wme_token(wme_token.first, shared());
+    for(auto &wme_token : output_tokens) {
+      if(wme_token.second)
+        output->insert_wme_token(wme_token.first, shared());
+    }
   }
 
   void bind_to_existential_join(const Rete_Existential_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {

@@ -116,7 +116,7 @@ namespace Blocks_World {
 
     auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
     {
-      auto join_blink = make_join(Rete::WME_Bindings(), join_dest_name, filter_blink);
+      auto join_blink = make_existential_join(Rete::WME_Bindings(), join_dest_name, filter_blink);
 
       node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         if(!this->specialize(get_action, node_unsplit)) {
@@ -149,9 +149,11 @@ namespace Blocks_World {
       node_fringe_neg->feature = new Clear(Feature::BLOCK, false);
       auto neg = make_negation_join(state_bindings, join_dest_name, filter_clear);
       node_fringe_neg->action = make_action_retraction([this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        std::cerr << "+Token=" << token << std::endl;
         const auto action = get_action(token);
         this->insert_q_value_next(action, node_fringe_neg->q_value);
       }, [this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        std::cerr << "-Token=" << token << std::endl;
         const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe_neg->q_value);
       }, neg);
