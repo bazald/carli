@@ -24,8 +24,10 @@ namespace Rete {
     if(from == input0) {
       input0_tokens.emplace_back(wme_token, 0u);
 
-      if(++input0_count == 1u && input0 != input1)
+      if(++data0.input_count == 1u && !data1.connected && input0 != input1) {
+        data1.connected = true;
         input1->enable_output(shared());
+      }
       else {
         for(const auto &other : input1_tokens)
           join_tokens(input0_tokens.back(), other);
@@ -39,25 +41,37 @@ namespace Rete {
     if(from == input1) {
       input1_tokens.push_back(wme_token);
 
-      for(auto &other : input0_tokens)
-        join_tokens(other, wme_token);
+      if(++data1.input_count == 1u && !data0.connected && input0 != input1) {
+        data0.connected = true;
+        input0->enable_output(shared());
+      }
+      else {
+        for(auto &other : input0_tokens)
+          join_tokens(other, wme_token);
+      }
     }
   }
 
-  void Rete_Negation_Join::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
+  bool Rete_Negation_Join::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
     assert(from == input0 || from == input1);
+
+    bool emptied = false;
 
     if(from == input0) {
       auto found = find_key(input0_tokens, wme_token);
       if(found != input0_tokens.end()) {
         if(found->second == 0u) {
-          for(auto &output : outputs)
-            output->remove_wme_token(wme_token, this);
+          for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+            if((*ot)->remove_wme_token(wme_token, this))
+              (*ot++)->disconnect(this);
+            else
+              ++ot;
+          }
         }
         input0_tokens.erase(found);
 
-        if(--input0_count == 0u && input0 != input1)
-          input1->disable_output(shared());
+        if(--data0.input_count == 0u)
+          emptied ^= true;
       }
     }
     if(from == input1) {
@@ -67,8 +81,13 @@ namespace Rete {
         input1_tokens.erase(found);
         for(auto &other : input0_tokens)
           unjoin_tokens(other, wme_token);
+
+        if(--data1.input_count == 0u)
+          emptied ^= true;
       }
     }
+
+    return emptied;
   }
 
   bool Rete_Negation_Join::operator==(const Rete_Node &rhs) const {
@@ -97,8 +116,12 @@ namespace Rete {
     }
 
     if(++lhs.second == 1) {
-      for(auto &output : outputs)
-        output->remove_wme_token(lhs.first, this);
+      for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+        if((*ot)->remove_wme_token(lhs.first, this))
+          (*ot++)->disconnect(this);
+        else
+          ++ot;
+      }
     }
   }
 
@@ -112,6 +135,23 @@ namespace Rete {
       for(auto &output : outputs)
         output->insert_wme_token(lhs.first, this);
     }
+  }
+
+  void Rete_Negation_Join::disconnect(const Rete_Node * const &from) {
+    assert(input0 != input1);
+    if(from == input0) {
+      if(data1.connected) {
+        data1.connected = false;
+        input1->disable_output(shared());
+      }
+    }
+    else {
+      if(data0.connected) {
+        data0.connected = false;
+        input0->disable_output(shared());
+      }
+    }
+    assert(data0.connected || data1.connected);
   }
 
   void Rete_Negation_Join::pass_tokens(const Rete_Node_Ptr &output) {
@@ -137,11 +177,8 @@ namespace Rete {
 
     out0->insert_output(join);
     out0->pass_tokens(join);
-    if(out0 != out1) {
+    if(out0 != out1)
       ++out1->outputs_disabled;
-//      out1->insert_output(join);
-//      out1->pass_tokens(join);
-    }
   }
 
 }

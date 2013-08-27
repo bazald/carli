@@ -20,12 +20,16 @@ namespace Rete {
     input_tokens.push_back(wme_token);
 
     if(input_tokens.size() == 1) {
-      for(auto &output : outputs)
-        output->remove_wme_token(output_token, this);
+      for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+        if((*ot)->remove_wme_token(output_token, this))
+          (*ot++)->disconnect(this);
+        else
+          ++ot;
+      }
     }
   }
 
-  void Rete_Negation::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
+  bool Rete_Negation::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                  from
 #endif
@@ -40,6 +44,8 @@ namespace Rete {
           output->insert_wme_token(output_token, this);
       }
     }
+
+    return input_tokens.empty();
   }
 
   void Rete_Negation::pass_tokens(const Rete_Node_Ptr &output) {

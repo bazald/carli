@@ -27,7 +27,7 @@ namespace Rete {
     std::cerr << "input_tokens.size() == " << input_tokens.size() << std::endl;
   }
 
-  void Rete_Existential::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
+  bool Rete_Existential::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                  from
 #endif
@@ -38,12 +38,18 @@ namespace Rete {
     if(found != input_tokens.end()) {
       input_tokens.erase(found);
       if(input_tokens.empty()) {
-        for(auto &output : outputs)
-          output->remove_wme_token(output_token, this);
+        for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+          if((*ot)->remove_wme_token(output_token, this))
+            (*ot++)->disconnect(this);
+          else
+            ++ot;
+        }
       }
     }
 
     std::cerr << "input_tokens.size() == " << input_tokens.size() << std::endl;
+
+    return input_tokens.empty();
   }
 
   void Rete_Existential::pass_tokens(const Rete_Node_Ptr &output) {

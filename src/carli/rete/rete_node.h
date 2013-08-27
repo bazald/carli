@@ -79,7 +79,9 @@ namespace Rete {
     virtual Rete_Node_Ptr parent() = 0;
 
     virtual void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0;
-    virtual void remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0;
+    virtual bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0; ///< Returns true if removed the last
+
+    virtual void disconnect(const Rete_Node * const &/*from*/) {}
 
     virtual void pass_tokens(const Rete_Node_Ptr &output) = 0;
     virtual void unpass_tokens(const Rete_Node_Ptr &output) = 0;

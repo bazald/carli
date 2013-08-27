@@ -41,8 +41,12 @@ namespace Rete {
   void Rete_Filter::remove_wme(const WME_Ptr_C &wme) {
     auto found = std::find_if(tokens.begin(), tokens.end(), [&wme](const WME_Token_Ptr_C &token)->bool{return *wme == *token->get_wme();});
     if(found != tokens.end()) {
-      for(auto &output : outputs)
-        output->remove_wme_token(*found, this);
+      for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+        if((*ot)->remove_wme_token(*found, this))
+          (*ot++)->disconnect(this);
+        else
+          ++ot;
+      }
       tokens.erase(found);
     }
   }
@@ -51,7 +55,7 @@ namespace Rete {
     abort();
   }
 
-  void Rete_Filter::remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &) {
+  bool Rete_Filter::remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &) {
     abort();
   }
 

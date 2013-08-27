@@ -37,7 +37,7 @@ namespace Rete {
     agenda.insert_action(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
   }
 
-  void Rete_Action::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
+  bool Rete_Action::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                               from
 #endif
@@ -53,6 +53,8 @@ namespace Rete {
 
       input_tokens.erase(found);
     }
+
+    return input_tokens.empty();
   }
 
   void Rete_Action::pass_tokens(const Rete_Node_Ptr &) {

@@ -24,10 +24,10 @@ namespace Rete {
       run();
     }
 
-    void insert_retraction(const Rete_Action_Ptr_C &action, const WME_Token_Ptr_C &wme_token) {
-      agenda.emplace_front(action, wme_token, false);
-      run();
-    }
+//    void insert_retraction(const Rete_Action_Ptr_C &action, const WME_Token_Ptr_C &wme_token) {
+//      agenda.emplace_front(action, wme_token, false);
+//      run();
+//    }
 
     void lock();
     void unlock();

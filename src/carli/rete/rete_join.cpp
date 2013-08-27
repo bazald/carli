@@ -35,8 +35,10 @@ namespace Rete {
     }
   }
 
-  void Rete_Join::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
+  bool Rete_Join::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
     assert(from == input0 || from == input1);
+
+    bool emptied = false;
 
     if(from == input0) {
       auto found = find(input0_tokens, wme_token);
@@ -46,12 +48,18 @@ namespace Rete {
         for(const auto &other : input1_tokens) {
           auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
           if(found_output != output_tokens.end()) {
-            for(auto &output : outputs)
-              output->remove_wme_token(*found_output, this);
+            for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+              if((*ot)->remove_wme_token(*found_output, this))
+                (*ot++)->disconnect(this);
+              else
+                ++ot;
+            }
             output_tokens.erase(found_output);
           }
         }
       }
+
+      emptied ^= input0_tokens.empty();
     }
     if(from == input1) {
       auto found = find(input1_tokens, wme_token);
@@ -61,13 +69,21 @@ namespace Rete {
         for(const auto &other : input0_tokens) {
           auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
           if(found_output != output_tokens.end()) {
-            for(auto &output : outputs)
-              output->remove_wme_token(*found_output, this);
+            for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+              if((*ot)->remove_wme_token(*found_output, this))
+                (*ot++)->disconnect(this);
+              else
+                ++ot;
+            }
             output_tokens.erase(found_output);
           }
         }
       }
+
+      emptied ^= input1_tokens.empty();
     }
+
+    return emptied;
   }
 
   bool Rete_Join::operator==(const Rete_Node &rhs) const {

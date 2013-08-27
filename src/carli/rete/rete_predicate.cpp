@@ -47,7 +47,7 @@ namespace Rete {
       output->insert_wme_token(wme_token, this);
   }
 
-  void Rete_Predicate::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
+  bool Rete_Predicate::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                  from
 #endif
@@ -57,9 +57,15 @@ namespace Rete {
     auto found = find(tokens, wme_token);
     if(found != tokens.end()) {
       tokens.erase(found);
-      for(auto &output : outputs)
-        output->remove_wme_token(wme_token, this);
+      for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+        if((*ot)->remove_wme_token(wme_token, this))
+          (*ot++)->disconnect(this);
+        else
+          ++ot;
+      }
     }
+
+    return tokens.empty();
   }
 
   void Rete_Predicate::pass_tokens(const Rete_Node_Ptr &output) {

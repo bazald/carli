@@ -23,7 +23,7 @@ namespace Rete {
     void remove_wme(const WME_Ptr_C &wme);
 
     void insert_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &);
-    void remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &);
+    bool remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &);
 
     void pass_tokens(const Rete_Node_Ptr &output);
     void unpass_tokens(const Rete_Node_Ptr &output);
