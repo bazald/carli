@@ -166,7 +166,6 @@ namespace Rete {
 
     out0->insert_output(join);
     out0->pass_tokens(join);
-    join->data.connected1 = true;
     if(out0 != out1) {
       out1->insert_output(join);
       out1->pass_tokens(join);
