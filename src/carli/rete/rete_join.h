@@ -31,6 +31,8 @@ namespace Rete {
 
     WME_Token_Ptr_C join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs);
 
+    void disconnect(const Rete_Node * const &from);
+
     void pass_tokens(const Rete_Node_Ptr &output);
     void unpass_tokens(const Rete_Node_Ptr &output);
 
@@ -40,6 +42,11 @@ namespace Rete {
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input0_tokens;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input1_tokens;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> output_tokens;
+
+    struct {
+      bool connected0 : 1;
+      bool connected1 : 1;
+    } data = {true, false};
   };
 
   void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);

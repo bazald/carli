@@ -12,13 +12,7 @@ class Action : public Zeni::Pool_Allocator<char> {
   Action & operator=(const Action &) = delete;
 
 public:
-  typedef typename Zeni::Linked_List<Action> List;
-  typedef typename List::iterator iterator;
-
-  Action()
-    : candidates(this)
-  {
-  }
+  Action() {}
 
   virtual ~Action() {}
 
@@ -44,8 +38,6 @@ public:
   virtual int compare(const Action &rhs) const = 0;
 
   virtual void print_impl(std::ostream &os) const = 0;
-
-  List candidates;
 };
 
 inline std::ostream & operator<<(std::ostream &os, const Action &action) {

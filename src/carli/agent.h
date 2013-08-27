@@ -31,7 +31,6 @@ public:
   typedef Feature feature_type;
   typedef typename Feature::List * feature_list;
   typedef Action action_type;
-  typedef typename Action::List * action_list;
   typedef tracked_ptr<const Action> action_ptrsc;
   typedef double reward_type;
   typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
