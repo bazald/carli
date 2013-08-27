@@ -6,7 +6,7 @@ namespace Rete {
 
   void Rete_Existential::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs.empty())
+    if(outputs.empty() && !outputs_disabled)
       input->destroy(filters, shared());
   }
 

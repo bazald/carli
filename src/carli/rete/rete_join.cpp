@@ -9,7 +9,7 @@ namespace Rete {
 
   void Rete_Join::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs.empty()) {
+    if(outputs.empty() && !outputs_disabled) {
       auto i0 = input0;
       auto i1 = input1;
       i0->destroy(filters, shared());

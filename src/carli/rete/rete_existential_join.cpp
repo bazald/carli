@@ -9,7 +9,7 @@ namespace Rete {
 
   void Rete_Existential_Join::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs.empty()) {
+    if(outputs.empty() && !outputs_disabled) {
       auto i0 = input0->shared();
       auto i1 = input1->shared();
       i0->destroy(filters, shared());
@@ -24,10 +24,8 @@ namespace Rete {
     if(from == input0) {
       input0_tokens.emplace_back(wme_token, 0u);
 
-      if(++input0_count == 1u && input0 != input1) {
-        input1->insert_output(shared());
-        input1->pass_tokens(shared());
-      }
+      if(++input0_count == 1u && input0 != input1)
+        input1->enable_output(shared());
       else {
         for(const auto &other : input1_tokens)
           join_tokens(input0_tokens.back(), other);
@@ -52,10 +50,8 @@ namespace Rete {
           unjoin_tokens(*found, other);
         input0_tokens.erase(found);
 
-        if(--input0_count == 0u && input0 != input1) {
-          input1->unpass_tokens(shared());
-          input1->erase_output(shared());
-        }
+        if(--input0_count == 0u && input0 != input1)
+          input1->disable_output(shared());
       }
     }
     if(from == input1) {
@@ -135,10 +131,11 @@ namespace Rete {
 
     out0->insert_output(join);
     out0->pass_tokens(join);
-//    if(out0 != out1) {
+    if(out0 != out1) {
+      ++out1->outputs_disabled;
 //      out1->insert_output(join);
 //      out1->pass_tokens(join);
-//    }
+    }
   }
 
 }

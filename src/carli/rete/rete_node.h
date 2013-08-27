@@ -96,6 +96,18 @@ namespace Rete {
       outputs.erase(std::find(outputs.begin(), outputs.end(), output));
     }
 
+    void disable_output(const Rete_Node_Ptr &output) {
+      ++outputs_disabled;
+      unpass_tokens(output);
+      erase_output(output);
+    }
+
+    void enable_output(const Rete_Node_Ptr &output) {
+      insert_output(output);
+      pass_tokens(output);
+      --outputs_disabled;
+    }
+
   protected:
     template<typename CONTAINER, typename KEY>
     typename CONTAINER::iterator find(CONTAINER &tokens, const KEY &token) {
@@ -116,6 +128,7 @@ namespace Rete {
     }
 
     Outputs outputs;
+    size_t outputs_disabled = 0u;
   };
 
 }
