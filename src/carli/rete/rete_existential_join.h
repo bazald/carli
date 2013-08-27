@@ -42,9 +42,9 @@ namespace Rete {
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input1_tokens;
 
     struct {
-      size_t input_count : sizeof(size_t) - 1;
-      size_t connected : 1;
-    } data0 = {0u, 1u}, data1 = {0u, 0u};
+      bool connected0 : 1;
+      bool connected1 : 1;
+    } data = {true, false};
   };
 
   void bind_to_existential_join(const Rete_Existential_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
