@@ -76,6 +76,7 @@ namespace Mountain_Car {
     m_x_dot_wme = std::make_shared<Rete::WME>(s_id, x_dot_attr, m_x_dot_value);
     insert_wme(m_x_wme);
     insert_wme(m_x_dot_wme);
+    insert_wme(m_wme_blink);
   }
 
   Agent::~Agent() {
