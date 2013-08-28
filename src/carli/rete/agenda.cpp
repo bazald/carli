@@ -4,7 +4,13 @@
 
 namespace Rete {
 
-  Agenda::Agenda() {
+  void Agenda::insert_action(const Rete_Action_Ptr_C &action, const WME_Token_Ptr_C &wme_token) {
+    agenda.emplace_back(action, wme_token, true);
+    run();
+  }
+
+  void Agenda::insert_retraction(const Rete_Action_Ptr_C &action, const WME_Token_Ptr_C &wme_token) {
+    Rete_Action_to_Agenda::retraction(*action)(*action, *wme_token);
   }
 
   void Agenda::lock() {

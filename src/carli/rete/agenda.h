@@ -17,17 +17,10 @@ namespace Rete {
     Agenda & operator=(Agenda &);
 
   public:
-    Agenda();
+    Agenda() {}
 
-    void insert_action(const Rete_Action_Ptr_C &action, const WME_Token_Ptr_C &wme_token) {
-      agenda.emplace_back(action, wme_token, true);
-      run();
-    }
-
-//    void insert_retraction(const Rete_Action_Ptr_C &action, const WME_Token_Ptr_C &wme_token) {
-//      agenda.emplace_front(action, wme_token, false);
-//      run();
-//    }
+    void insert_action(const Rete_Action_Ptr_C &action, const WME_Token_Ptr_C &wme_token);
+    void insert_retraction(const Rete_Action_Ptr_C &action, const WME_Token_Ptr_C &wme_token);
 
     void lock();
     void unlock();

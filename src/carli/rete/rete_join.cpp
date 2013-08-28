@@ -26,6 +26,7 @@ namespace Rete {
         data.connected1 = true;
         input1->enable_output(shared());
       }
+
       input0_tokens.push_back(wme_token);
 
       for(const auto &other : input1_tokens)

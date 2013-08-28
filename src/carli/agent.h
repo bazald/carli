@@ -223,6 +223,12 @@ private:
   const double m_fringe_learning_scale = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["fringe-learning-scale"]).get_value();
 
   Q_Value::List * m_eligible = nullptr;
+
+#ifndef NDEBUG
+  void increment_badness() {++m_badness; assert(m_badness);}
+  void decrement_badness() {assert(m_badness); --m_badness;}
+  size_t m_badness = 0u;
+#endif
 };
 
 std::ostream & operator<<(std::ostream &os, const Agent &agent);
