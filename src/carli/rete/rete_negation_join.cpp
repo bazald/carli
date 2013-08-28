@@ -21,7 +21,7 @@ namespace Rete {
   void Rete_Negation_Join::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
     assert(from == input0 || from == input1);
 
-    if(from == input0) {
+    if(from == input0 && find_key(input0_tokens, wme_token) == input0_tokens.end()) {
       if(!data.connected1) {
         data.connected1 = true;
         input1->enable_output(shared());
@@ -37,7 +37,7 @@ namespace Rete {
           output->insert_wme_token(wme_token, this);
       }
     }
-    if(from == input1) {
+    if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
       if(!data.connected0) {
         data.connected0 = true;
         input0->enable_output(shared());

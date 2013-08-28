@@ -46,7 +46,7 @@ namespace Rete {
     struct {
       bool connected0 : 1;
       bool connected1 : 1;
-    } data = {true, true};
+    } data = {true, false};
   };
 
   void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
