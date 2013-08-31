@@ -351,9 +351,9 @@ Agent::reward_type Agent::act() {
 }
 
 void Agent::purge_q_value(const tracked_ptr<Q_Value> &q_value) {
-#ifdef DEBUG_OUTPUT
-  std::cerr << "Purging current value " << q_value << std::endl;
-#endif
+//#ifdef DEBUG_OUTPUT
+//  std::cerr << "Purging current value " << q_value << std::endl;
+//#endif
   assert(q_value);
   auto found = std::find(m_current_q_value.begin(), m_current_q_value.end(), q_value);
   if(found != m_current_q_value.end()) {
@@ -363,9 +363,9 @@ void Agent::purge_q_value(const tracked_ptr<Q_Value> &q_value) {
 }
 
 void Agent::insert_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value) {
-#ifdef DEBUG_OUTPUT
-  std::cerr << "Inserting next value " << q_value << " for action " << *action << std::endl;
-#endif
+//#ifdef DEBUG_OUTPUT
+//  std::cerr << "Inserting next value " << q_value << " for action " << *action << std::endl;
+//#endif
   auto &q_values = m_next_q_values[action];
 #ifndef NDEBUG
   if(std::find(q_values.begin(), q_values.end(), q_value) != q_values.end())
@@ -375,9 +375,9 @@ void Agent::insert_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_
 }
 
 void Agent::purge_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value) {
-#ifdef DEBUG_OUTPUT
-  std::cerr << "Purging next value " << q_value << " for action " << *action << std::endl;
-#endif
+//#ifdef DEBUG_OUTPUT
+//  std::cerr << "Purging next value " << q_value << " for action " << *action << std::endl;
+//#endif
   assert(q_value);
   auto &q_values = m_next_q_values[action];
   auto found = std::find(q_values.begin(), q_values.end(), q_value);

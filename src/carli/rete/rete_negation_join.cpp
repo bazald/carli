@@ -27,6 +27,7 @@ namespace Rete {
         input1->enable_output(shared());
       }
 
+//      assert(find_key(input0_tokens, wme_token) == input0_tokens.end());
       input0_tokens.emplace_back(wme_token, 0u);
 
       for(const auto &other : input1_tokens)
@@ -43,6 +44,7 @@ namespace Rete {
         input0->enable_output(shared());
       }
 
+//      assert(find(input1_tokens, wme_token) == input1_tokens.end());
       input1_tokens.push_back(wme_token);
 
       for(auto &other : input0_tokens)

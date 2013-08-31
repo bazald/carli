@@ -22,38 +22,38 @@ namespace Rete {
     assert(from == input0 || from == input1);
 
     if(from == input0 && find(input0_tokens, wme_token) == input0_tokens.end()) {
-#ifdef DEBUG_OUTPUT
-      std::cerr << this << " Joining left: " << *wme_token << std::endl;
-#endif
+//#ifdef DEBUG_OUTPUT
+//      std::cerr << this << " Joining left: " << *wme_token << std::endl;
+//#endif
       if(!data.connected1) {
-#ifdef DEBUG_OUTPUT
-        std::cerr << this << " Connecting right" << std::endl;
-#endif
+//#ifdef DEBUG_OUTPUT
+//        std::cerr << this << " Connecting right" << std::endl;
+//#endif
         assert(input1_tokens.empty());
         data.connected1 = true;
         input1->enable_output(shared());
       }
 
-      assert(find_deref(input0_tokens, wme_token) == input0_tokens.end());
+//      assert(find(input0_tokens, wme_token) == input0_tokens.end());
       input0_tokens.push_back(wme_token);
 
       for(const auto &other : input1_tokens)
         join_tokens(wme_token, other);
     }
     if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
-#ifdef DEBUG_OUTPUT
-      std::cerr << this << " Joining right: " << *wme_token << std::endl;
-#endif
+//#ifdef DEBUG_OUTPUT
+//      std::cerr << this << " Joining right: " << *wme_token << std::endl;
+//#endif
       if(!data.connected0) {
-#ifdef DEBUG_OUTPUT
-        std::cerr << this << " Connecting left" << std::endl;
-#endif
+//#ifdef DEBUG_OUTPUT
+//        std::cerr << this << " Connecting left" << std::endl;
+//#endif
         assert(input0_tokens.empty());
         data.connected0 = true;
         input0->enable_output(shared());
       }
 
-      assert(find_deref(input1_tokens, wme_token) == input1_tokens.end());
+//      assert(find(input1_tokens, wme_token) == input1_tokens.end());
       input1_tokens.push_back(wme_token);
 
       for(const auto &other : input0_tokens)
@@ -137,9 +137,9 @@ namespace Rete {
         return;
     }
 
-#ifdef DEBUG_OUTPUT
-    std::cerr << "Joining " << *lhs << " and " << *rhs << std::endl;
-#endif
+//#ifdef DEBUG_OUTPUT
+//    std::cerr << "Joining " << *lhs << " and " << *rhs << std::endl;
+//#endif
 
     assert(find_deref(output_tokens, join_wme_tokens(lhs, rhs)) == output_tokens.end());
 
@@ -158,17 +158,17 @@ namespace Rete {
   void Rete_Join::disconnect(const Rete_Node * const &from) {
     assert(input0 != input1);
     if(from == input0) {
-#ifdef DEBUG_OUTPUT
-      std::cerr << this << " Disconnecting right" << std::endl;
-#endif
+//#ifdef DEBUG_OUTPUT
+//      std::cerr << this << " Disconnecting right" << std::endl;
+//#endif
       assert(data.connected1);
       data.connected1 = false;
       input1->disable_output(shared());
     }
     else {
-#ifdef DEBUG_OUTPUT
-      std::cerr << this << " Disconnecting left" << std::endl;
-#endif
+//#ifdef DEBUG_OUTPUT
+//      std::cerr << this << " Disconnecting left" << std::endl;
+//#endif
       assert(data.connected0);
       data.connected0 = false;
       input0->disable_output(shared());

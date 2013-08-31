@@ -5,9 +5,9 @@
 namespace Rete {
 
   void Agenda::insert_action(const Rete_Action_Ptr_C &action, const WME_Token_Ptr_C &wme_token) {
-#ifdef DEBUG_OUTPUT
-    std::cerr << "Inserting " << *wme_token << std::endl;
-#endif
+//#ifdef DEBUG_OUTPUT
+//    std::cerr << "Inserting " << *wme_token << std::endl;
+//#endif
     agenda.emplace_back(action, wme_token, true);
     run();
   }
