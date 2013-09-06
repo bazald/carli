@@ -404,13 +404,17 @@ void run_agent(const function<shared_ptr<Environment> ()> &make_env, const funct
 //    else
     if(auto mca = dynamic_pointer_cast<Mountain_Car::Agent>(agent)) {
       mca->print_policy(cerr, 32);
-      mca->print_value_function_grid(cerr);
-//      mca->print_update_count_grid(cerr);
+      if(!dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value()) {
+        mca->print_value_function_grid(cerr);
+//        mca->print_update_count_grid(cerr);
+      }
     }
     else if(auto pwa = dynamic_pointer_cast<Puddle_World::Agent>(agent)) {
       pwa->print_policy(cerr, 32);
-      pwa->print_value_function_grid(cerr);
-//      pwa->print_update_count_grid(cerr);
+      if(!dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value()) {
+        pwa->print_value_function_grid(cerr);
+//        pwa->print_update_count_grid(cerr);
+      }
     }
   }
 }
