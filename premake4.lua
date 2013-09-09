@@ -39,7 +39,7 @@ solution "carli"
   end
 
   flags { "ExtraWarnings" }
-  buildoptions { "-ffloat-store -ffp-contract=off -mfpmath=sse -msse2" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
+  buildoptions { "-mfpmath=sse -mmmx -msse -msse2 -ffloat-store -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
   buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
   include "src/carli"
 
