@@ -22,10 +22,10 @@ g_ep_tuples.append(("specific_64x64_64x64_0", "--scenario 0 --credit-assignment 
 #g_ep_tuples.append(('mountain-car', 0, 'specific', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 17, 17, 0, 0.5, 0, 0, 0, 0, 0, 'false'))
 
 ## Experiment 1, hierarchical agents performance comparison - compare to 0
-##g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20,  9,  9, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
-##g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
-##g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 13, 13, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
-##g_ep_tuples.append(('mountain-car', 0, 'even', 0.5, 0.999, 0, 0.01, 1, 'off-policy', 20, 15, 15, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
+#g_ep_tuples.append(("even_16x16_16x16_1", "--scenario 1 --credit-assignment even --split-min 9 --split-max 9"))
+#g_ep_tuples.append(("even_32x32_32x32_1", "--scenario 1 --credit-assignment even --split-min 11 --split-max 11"))
+#g_ep_tuples.append(("even_64x64_64x64_1", "--scenario 1 --credit-assignment even --split-min 13 --split-max 13"))
+#g_ep_tuples.append(("even_128x128_128x128_1", "--scenario 1 --credit-assignment even --split-min 15 --split-max 15"))
 g_ep_tuples.append(("even_256x256_256x256_1", "--scenario 1 --credit-assignment even --split-min 17 --split-max 17"))
 
 #g_ep_tuples.append(("cmac_0_4_2", "--cmac true --cmac-resolution 4 --cmac-tilings 2"))
