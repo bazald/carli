@@ -47,7 +47,7 @@ g_ep_tuples.append(("cmac_0_32_16", "--cmac true --cmac-resolution 32 --cmac-til
 #g_ep_tuples.append(("cmac_0_64_2", "--cmac true --cmac-resolution 64 --cmac-tilings 2"))
 #g_ep_tuples.append(("cmac_0_64_4", "--cmac true --cmac-resolution 64 --cmac-tilings 4"))
 #g_ep_tuples.append(("cmac_0_64_8", "--cmac true --cmac-resolution 64 --cmac-tilings 8"))
-g_ep_tuples.append(("cmac_0_64_16", "--cmac true --cmac-resolution 64 --cmac-tilings 16"))
+#g_ep_tuples.append(("cmac_0_64_16", "--cmac true --cmac-resolution 64 --cmac-tilings 16"))
 #g_ep_tuples.append(("cmac_0_128_2", "--cmac true --cmac-resolution 128 --cmac-tilings 2"))
 #g_ep_tuples.append(("cmac_0_128_4", "--cmac true --cmac-resolution 128 --cmac-tilings 4"))
 #g_ep_tuples.append(("cmac_0_128_8", "--cmac true --cmac-resolution 128 --cmac-tilings 8"))

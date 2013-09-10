@@ -284,13 +284,13 @@ def main():
             linestyle = '-'
           elif agent is 'specific\\_16x16\\_16x16\\_0':
             color = 'blue'
-            linestyle = '-'
+            linestyle = ':'
           elif agent is 'specific\\_32x32\\_32x32\\_0':
             color = 'red'
-            linestyle = '-'
+            linestyle = ':'
           elif agent is 'specific\\_64x64\\_64x64\\_0':
             color = 'teal'
-            linestyle = '-'
+            linestyle = ':'
           if agent is 'specific\\_128x128\\_128x128\\_0':
             color = 'grey'
             linestyle = '-'
@@ -298,17 +298,17 @@ def main():
             color = 'green'
             linestyle = '-'
           elif agent is 'even\\_256x256\\_256x256\\_1':
-            color = 'brown'
-            linestyle = '-.'
+            color = 'black'
+            linestyle = '-'
           elif agent is 'cmac\\_0\\_8\\_16':
             color = 'blue'
-            linestyle = ':'
+            linestyle = '--'
           elif agent is 'cmac\\_0\\_16\\_16':
             color = 'red'
-            linestyle = ':'
+            linestyle = '--'
           elif agent is 'cmac\\_0\\_32\\_16':
             color = 'teal'
-            linestyle = ':'
+            linestyle = '--'
           
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
       
@@ -358,7 +358,7 @@ def main():
           
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
   
-  pylab.grid(True)
+  pylab.grid(False)
   
   pylab.xlabel('Step Number', fontsize=8)
   pylab.ylabel(reward_label, fontsize=8)
@@ -410,7 +410,7 @@ def main():
     ax2.xaxis.set_major_formatter(CommaFormatter())
     ax2.yaxis.set_major_formatter(CommaFormatter())
 
-    for agent in agent_list_mem:
+    for agent in agent_list:
       y_labels.append('Memory: ' + remap_names[agent])
       yss.append(memory[agent])
       
