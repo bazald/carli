@@ -34,11 +34,11 @@ g_ep_tuples.append(("even_64x64_64x64_1", "--scenario 1 --credit-assignment even
 #g_ep_tuples.append(("cmac_0_8_2", "--cmac true --cmac-resolution 8 --cmac-tilings 2"))
 #g_ep_tuples.append(("cmac_0_8_4", "--cmac true --cmac-resolution 8 --cmac-tilings 4"))
 #g_ep_tuples.append(("cmac_0_8_8", "--cmac true --cmac-resolution 8 --cmac-tilings 8"))
-#g_ep_tuples.append(("cmac_0_8_16", "--cmac true --cmac-resolution 8 --cmac-tilings 16"))
+g_ep_tuples.append(("cmac_0_8_16", "--cmac true --cmac-resolution 8 --cmac-tilings 16"))
 #g_ep_tuples.append(("cmac_0_16_2", "--cmac true --cmac-resolution 16 --cmac-tilings 2"))
 #g_ep_tuples.append(("cmac_0_16_4", "--cmac true --cmac-resolution 16 --cmac-tilings 4"))
 #g_ep_tuples.append(("cmac_0_16_8", "--cmac true --cmac-resolution 16 --cmac-tilings 8"))
-#g_ep_tuples.append(("cmac_0_16_16", "--cmac true --cmac-resolution 16 --cmac-tilings 16"))
+g_ep_tuples.append(("cmac_0_16_16", "--cmac true --cmac-resolution 16 --cmac-tilings 16"))
 #g_ep_tuples.append(("cmac_0_32_2", "--cmac true --cmac-resolution 32 --cmac-tilings 2"))
 #g_ep_tuples.append(("cmac_0_32_4", "--cmac true --cmac-resolution 32 --cmac-tilings 4"))
 #g_ep_tuples.append(("cmac_0_32_8", "--cmac true --cmac-resolution 32 --cmac-tilings 8"))
@@ -47,6 +47,12 @@ g_ep_tuples.append(("even_64x64_64x64_1", "--scenario 1 --credit-assignment even
 #g_ep_tuples.append(("cmac_0_64_4", "--cmac true --cmac-resolution 64 --cmac-tilings 4"))
 #g_ep_tuples.append(("cmac_0_64_8", "--cmac true --cmac-resolution 64 --cmac-tilings 8"))
 #g_ep_tuples.append(("cmac_0_64_16", "--cmac true --cmac-resolution 64 --cmac-tilings 16"))
+
+# Experiment 3, dynamically refined hierarchical agents performance comparison - compare to 1 and 2
+g_ep_tuples.append(("even_2x2_64x64_3", "--credit-assignment even --split-min 3 --split-max 13"))
+g_ep_tuples.append(("inv-log-update-count_2x2_64x64_3", "--credit-assignment inv-log-update-count --split-min 3 --split-max 13"))
+#g_ep_tuples.append(("inv-root-update-count_2x2_64x64_3", "--credit-assignment inv-root-update-count --split-min 3 --split-max 13"))
+g_ep_tuples.append(("specific_2x2_64x64_3", "--credit-assignment specific --split-min 3 --split-max 13"))
 
 
 
@@ -66,15 +72,6 @@ g_ep_tuples.append(("even_64x64_64x64_1", "--scenario 1 --credit-assignment even
 ##g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  9,  9, 0, 0.5, 0, 0, 0, 2, 0, 'false'))
 ##g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0, 2, 0, 'false'))
 ##g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 13, 13, 0, 0.5, 0, 0, 0, 2, 0, 'false'))
-
-## Experiment 3, dynamically refined hierarchical agents performance comparison - compare to 1 and 2
-#g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 3, 13, 0, 0.5, 0, 0, 0, 3, 0, 'false'))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 3, 13, 0, 0.5, 0, 0, 0, 3, 0, 'false'))
-#g_ep_tuples.append(('puddle-world', 0, 'inv-root-update-count', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 3, 13, 0, 0.5, 0, 0, 0, 3, 0, 'false'))
-#g_ep_tuples.append(('puddle-world', 0, 'specific',              0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 3, 13, 0, 0.5, 0, 0, 0, 3, 0, 'false'))
-#g_ep_tuples.append(('puddle-world', 0, 'random',              0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 3, 13, 0, 0.5, 0, 0, 0, 3, 0, 'false'))
-##g_ep_tuples.append(('puddle-world', 0, 'even',                  0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 3, 13, 0, 0.5, 0, 0, 0, 13, 0, 'false'))
-##g_ep_tuples.append(('puddle-world', 0, 'inv-log-update-count',  0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 3, 13, 0, 0.5, 0, 0, 0, 13, 0, 'false'))
 
 ### Experiment 100s, move goal
 ##g_ep_tuples.append(('puddle-world', 0, 'specific', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  7,  7, 0, 0.5, 0, 0, 0, 100,    -1, 'false'))

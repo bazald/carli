@@ -95,15 +95,14 @@ def main():
   
   # 1: ./mountaincar.py experiment-mc/*_0/*.out
   # 2: ./mountaincar.py experiment-mc/*_0/*.out
-  # 3: ./mountaincar.py experiment-mc/*_0/*.out experiment-mc/*_1/*.out
+  # 3: ./mountaincar.py experiment-mc/*_0/*.out experiment-mc/*_1/*.out experiment-mc/cmac_*/*.out
   # 4: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out
-  # 5: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out experiment-mc/inv-log_*_3/*.out
+  # 5: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out experiment-mc/inv-log-update-count_*_3/*.out
   # 6: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/*_3/*.out
-  scenario = 3
-  
-  #two_sided_plot = scenario > 3 and scenario < 6
-  two_sided_plot = False
-  
+  scenario = 0
+
+  two_sided_plot = scenario > 3 and scenario < 6
+
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')
     seed = int(f.readline().split(' ', 1)[1])
@@ -246,6 +245,7 @@ def main():
           #labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
 
       remap_names = {}
+      remap_names['specific\\_8x8\\_8x8\\_0'] = '8x8'
       remap_names['specific\\_16x16\\_16x16\\_0'] = '16x16'
       remap_names['specific\\_32x32\\_32x32\\_0'] = '32x32'
       remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
@@ -258,43 +258,65 @@ def main():
       remap_names['inv-log-update-count\\_2x2\\_256x256\\_3'] = r'1-256 incremental $1/\ln$'
       remap_names['inv-root-update-count\\_2x2\\_256x256\\_3'] = r'1-256 incremental $1/\sqrt{~~~}$'
       remap_names['specific\\_2x2\\_256x256\\_3'] = '1-256 incremental specific'
+      remap_names['cmac\\_0\\_8\\_16'] = '8x8 CMAC, 16 tilings'
+      remap_names['cmac\\_0\\_16\\_16'] = '16x16 CMAC, 16 tilings'
+      remap_names['cmac\\_0\\_32\\_16'] = '32x32 CMAC, 16 tilings'
 
       if scenario == 1:
         agent_list = ['specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0', 'specific\\_128x128\\_128x128\\_0', 'specific\\_256x256\\_256x256\\_0']
       elif scenario == 2:
         agent_list = ['specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0', 'specific\\_128x128\\_128x128\\_0', 'specific\\_256x256\\_256x256\\_0']
       elif scenario == 3:
-        agent_list = ['specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0', 'even\\_256x256\\_256x256\\_1']
+        agent_list = ['even\\_256x256\\_256x256\\_1',
+                      'cmac\\_0\\_8\\_16',
+                      'cmac\\_0\\_16\\_16',
+                      'cmac\\_0\\_32\\_16',
+                      'specific\\_16x16\\_16x16\\_0',
+                      'specific\\_32x32\\_32x32\\_0',
+                      'specific\\_64x64\\_64x64\\_0']
       if scenario > 0 and scenario < 4:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
           yss.append(smith[agent])
           
-          if agent is 'specific\\_16x16\\_16x16\\_0':
+          if agent is 'specific\\_8x8\\_8x8\\_0':
+            color = 'pink'
+            linestyle = '-'
+          elif agent is 'specific\\_16x16\\_16x16\\_0':
             color = 'blue'
-            linestyle = ':'
+            linestyle = '-'
           elif agent is 'specific\\_32x32\\_32x32\\_0':
-            color = 'black'
+            color = 'red'
             linestyle = '-'
           elif agent is 'specific\\_64x64\\_64x64\\_0':
-            color = 'green'
+            color = 'teal'
             linestyle = '-'
           if agent is 'specific\\_128x128\\_128x128\\_0':
             color = 'grey'
             linestyle = '-'
           elif agent is 'specific\\_256x256\\_256x256\\_0':
-            color = 'red'
-            linestyle = '-.'
+            color = 'green'
+            linestyle = '-'
           elif agent is 'even\\_256x256\\_256x256\\_1':
             color = 'brown'
-            linestyle = '-'
+            linestyle = '-.'
+          elif agent is 'cmac\\_0\\_8\\_16':
+            color = 'blue'
+            linestyle = ':'
+          elif agent is 'cmac\\_0\\_16\\_16':
+            color = 'red'
+            linestyle = ':'
+          elif agent is 'cmac\\_0\\_32\\_16':
+            color = 'teal'
+            linestyle = ':'
           
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
       
       if scenario == 4:
         agent_list = ['even\\_256x256\\_256x256\\_1', 'even\\_2x2\\_256x256\\_3']
       elif scenario == 5:
-        agent_list = ['even\\_256x256\\_256x256\\_1', 'even\\_2x2\\_256x256\\_3', 'inv-log-update-count\\_2x2\\_256x256\\_3']
+        agent_list = ['even\\_256x256\\_256x256\\_1', 'inv-log-update-count\\_2x2\\_256x256\\_3', 'even\\_2x2\\_256x256\\_3']
+        agent_list_mem = ['even\\_256x256\\_256x256\\_1', 'even\\_2x2\\_256x256\\_3', 'inv-log-update-count\\_2x2\\_256x256\\_3']
       if scenario > 3 and scenario < 6:
         for agent in agent_list:
           y_labels.append('Reward: ' + remap_names[agent])
@@ -313,7 +335,10 @@ def main():
           labels += pylab.plot(x, smith[agent], label='Reward: ' + remap_names[agent], color=color, linestyle=linestyle)
 
       if scenario == 6:
-        agent_list = ['even\\_2x2\\_256x256\\_3', 'inv-log-update-count\\_2x2\\_256x256\\_3', 'inv-root-update-count\\_2x2\\_256x256\\_3', 'specific\\_2x2\\_256x256\\_3']
+        agent_list = ['even\\_2x2\\_256x256\\_3',
+                      #'inv-log-update-count\\_2x2\\_256x256\\_3',
+                      #'inv-root-update-count\\_2x2\\_256x256\\_3',
+                      'specific\\_2x2\\_256x256\\_3']
         for agent in agent_list:
           y_labels.append(remap_names[agent])
           yss.append(smith[agent])
@@ -365,7 +390,7 @@ def main():
   elif scenario == 6:
     #pylab.title('Mountain Car: Incremental Hierarchical Tilings', fontsize=10)
     pylab.xlim(xmax=200000)
-    pylab.ylim(ymax=0)
+    pylab.ylim(ymin=-35000, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
@@ -385,7 +410,7 @@ def main():
     ax2.xaxis.set_major_formatter(CommaFormatter())
     ax2.yaxis.set_major_formatter(CommaFormatter())
 
-    for agent in agent_list:
+    for agent in agent_list_mem:
       y_labels.append('Memory: ' + remap_names[agent])
       yss.append(memory[agent])
       
@@ -401,7 +426,7 @@ def main():
       
       labels += pylab.plot(x, memory[agent], label='Memory: ' + remap_names[agent], color=color, linestyle=linestyle)
     ax2.set_xlim(0, 200000)
-    ax2.set_ylim(0, 250000)
+    ax2.set_ylim(0, 300000)
     
     #ax2.set_ylabel(r"Temperature ($^\circ$C)")
     ax2.set_ylabel('Number of Tiles / Weights')

@@ -95,14 +95,13 @@ def main():
   
   # 1: ./puddleworld.py experiment-pw/*_0/*.out
   # 2: ./puddleworld.py experiment-pw/*_0/*.out
-  # 3: ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out
+  # 3: ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out experiment-pw/cmac_*/*.out
   # 4: ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/even_*_3/*.out
   # 5: ./puddleworld.py experiment-pw/*_3/*.out
-  scenario = 3
-  
-  #two_sided_plot = scenario == 4
-  two_sided_plot = False
-  
+  scenario = 0
+
+  two_sided_plot = scenario == 4
+
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')
     seed = int(f.readline().split(' ', 1)[1])
@@ -262,14 +261,20 @@ def main():
       remap_names['inv-log-update-count\\_2x2\\_64x64\\_3'] = r'1-64 incremental $1/\ln$'
       remap_names['inv-root-update-count\\_2x2\\_64x64\\_3'] = r'1-64 incremental $1/\sqrt{~~~}$'
       remap_names['specific\\_2x2\\_64x64\\_3'] = '1-64 incremental specific'
+      remap_names['cmac\\_0\\_8\\_16'] = '8x8 CMAC, 16 tilings'
+      remap_names['cmac\\_0\\_16\\_16'] = '8x8 CMAC, 16 tilings'
       
       if scenario == 1:
         agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0']
       elif scenario == 2:
         agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0']
       elif scenario == 3:
-        agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0',
-                      'even\\_64x64\\_64x64\\_1']
+        agent_list = ['even\\_64x64\\_64x64\\_1',
+                      'cmac\\_0\\_8\\_16',
+                      'specific\\_8x8\\_8x8\\_0',
+                      'cmac\\_0\\_16\\_16',
+                      'specific\\_16x16\\_16x16\\_0',
+                      'specific\\_4x4\\_4x4\\_0']
       if scenario > 0 and scenario < 4:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
@@ -279,13 +284,13 @@ def main():
             color = 'grey'
             linestyle = '-'
           elif agent is 'specific\\_8x8\\_8x8\\_0':
-            color = 'red'
-            linestyle = '-'
-          elif agent is 'specific\\_16x16\\_16x16\\_0':
             color = 'blue'
             linestyle = '-'
+          elif agent is 'specific\\_16x16\\_16x16\\_0':
+            color = 'red'
+            linestyle = '-'
           elif agent is 'specific\\_32x32\\_32x32\\_0':
-            color = 'black'
+            color = 'teal'
             linestyle = '-'
           elif agent is 'specific\\_64x64\\_64x64\\_0':
             color = 'green'
@@ -308,6 +313,12 @@ def main():
           elif agent is 'even\\_64x64\\_64x64\\_1':
             color = 'brown'
             linestyle = '-.'
+          elif agent is 'cmac\\_0\\_8\\_16':
+            color = 'blue'
+            linestyle = ':'
+          elif agent is 'cmac\\_0\\_16\\_16':
+            color = 'red'
+            linestyle = ':'
           
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
       
@@ -326,7 +337,10 @@ def main():
           
           labels += pylab.plot(x, smith[agent], label='Reward: ' + remap_names[agent], color=color, linestyle=linestyle)
       elif scenario == 5:
-        agent_list = ['even\\_2x2\\_64x64\\_3', 'inv-log-update-count\\_2x2\\_64x64\\_3', 'inv-root-update-count\\_2x2\\_64x64\\_3', 'specific\\_2x2\\_64x64\\_3']
+        agent_list = ['even\\_2x2\\_64x64\\_3',
+                      #'inv-log-update-count\\_2x2\\_64x64\\_3',
+                      #'inv-root-update-count\\_2x2\\_64x64\\_3',
+                      'specific\\_2x2\\_64x64\\_3']
         for agent in agent_list:
           y_labels.append(remap_names[agent])
           yss.append(smith[agent])
@@ -403,7 +417,7 @@ def main():
       
       labels += pylab.plot(x, memory[agent], label='Memory: ' + remap_names[agent], color=color, linestyle=linestyle)
     ax2.set_xlim(0, 20000)
-    ax2.set_ylim(0, 35000)
+    ax2.set_ylim(0, 55000)
     
     #ax2.set_ylabel(r"Temperature ($^\circ$C)")
     ax2.set_ylabel('Number of Tiles / Weights')
@@ -415,7 +429,7 @@ def main():
     #ax2.yaxis.label.set_color('red')
     
     # lower right
-    pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.12,1,1))
+    pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.06,1,1))
   else:
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
