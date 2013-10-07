@@ -1,6 +1,7 @@
 #include "environments/puddle_world.h"
 #include "environments/mountain_car.h"
 #include "environments/blocks_world.h"
+#include "environments/tetris.h"
 //#include "environments/cart_pole.h"
 
 #include "experimental_output.h"
@@ -83,7 +84,7 @@ static int main2(int argc, char **argv) {
     cout.rdbuf(cout2file.rdbuf());
   }), "<file> Redirect stdout to <file>");
   options.add_line("\n  Environment Options:");
-  options.add('e', make_shared<Option_Itemized>("environment", set<string>({"blocks-world", /*"cart-pole",*/ "mountain-car", "puddle-world"}), "blocks-world"), "");
+  options.add('e', make_shared<Option_Itemized>("environment", set<string>({"blocks-world", /*"cart-pole",*/ "mountain-car", "puddle-world", "tetris"}), "blocks-world"), "");
   options.add(     make_shared<Option_Ranged<bool>>("ignore-x", false, true, true, true, false), "Simplify cart-pole from 4D to 2D, eliminating x and x-dot.");
   options.add(     make_shared<Option_Ranged<bool>>("random-start", false, true, true, true, false), "Should starting positions be randomized in mountain-car and puddle-world.");
   options.add(     make_shared<Option_Ranged<bool>>("reward-negative", false, true, true, true, true), "Use negative rewards per step in mountain-car rather than positive terminal rewards.");
@@ -152,12 +153,14 @@ static int main2(int argc, char **argv) {
   const string env = dynamic_cast<const Option_Itemized &>(options["environment"]).get_value();
   if(env == "blocks-world")
     run_agent([](){return make_shared<Blocks_World::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Blocks_World::Agent>(env);});
+//  else if(env == "cart-pole")
+//    run_agent([](){return make_shared<Cart_Pole::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Cart_Pole::Agent>(env);});
   else if(env == "puddle-world")
     run_agent([](){return make_shared<Puddle_World::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Puddle_World::Agent>(env);});
   else if(env == "mountain-car")
     run_agent([](){return make_shared<Mountain_Car::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Mountain_Car::Agent>(env);});
-//  else if(env == "cart-pole")
-//    run_agent([](){return make_shared<Cart_Pole::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Cart_Pole::Agent>(env);});
+  else if(env == "tetris")
+    run_agent([](){return make_shared<Tetris::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Tetris::Agent>(env);});
 //  else
   else
     throw runtime_error("Internal error: g_args.environment");
