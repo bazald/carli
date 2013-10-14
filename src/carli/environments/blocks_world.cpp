@@ -88,10 +88,10 @@ namespace Blocks_World {
 
     auto filter_name = make_filter(Rete::WME(m_first_var, m_name_attr, m_third_var));
     state_bindings.clear();
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(2, 2), Rete::WME_Token_Index(0, 0)));
+    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(1, 2), Rete::WME_Token_Index(0, 0)));
     auto join_block_name = make_join(state_bindings, join_action_dest, filter_name);
     state_bindings.clear();
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(3, 2), Rete::WME_Token_Index(0, 0)));
+    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(2, 2), Rete::WME_Token_Index(0, 0)));
     auto join_dest_name = make_join(state_bindings, join_block_name, filter_name);
 
     auto filter_blink = make_filter(*m_wme_blink);
@@ -184,7 +184,7 @@ namespace Blocks_World {
       node_unsplit->fringe_values.push_back(node_fringe_neg);
     }
 
-    for(size_t block = 1; block <= m_block_ids.size(); ++block) {
+    for(size_t block = 1; block != m_block_ids.size(); ++block) {
       auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
       auto feature = new Name(Feature::BLOCK, m_block_names[block]->value);
       node_fringe->feature = feature;
@@ -199,7 +199,7 @@ namespace Blocks_World {
       node_unsplit->fringe_values.push_back(node_fringe);
     }
 
-    for(size_t block = 0; block <= m_block_ids.size(); ++block) {
+    for(size_t block = 0; block != m_block_ids.size(); ++block) {
       auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
       auto feature = new Name(Feature::DEST, m_block_names[block]->value);
       node_fringe->feature = feature;
@@ -250,16 +250,16 @@ namespace Blocks_World {
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_input_attr, m_input_id));
     std::ostringstream oss;
-    for(size_t block = 0; block <= m_block_ids.size(); ++block) {
-      for(size_t dest = 0; dest <= m_block_ids.size(); ++dest) {
+    for(size_t block = 1; block != m_block_ids.size(); ++block) {
+      for(size_t dest = 0; dest != m_block_ids.size(); ++dest) {
         if(block == dest)
           continue;
         oss << "move-" << block << '-' << dest;
         Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
         oss.str("");
-        wmes_current.push_back(std::make_shared<Rete::WME>(m_input_id, m_index_attr, action_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_input_id, m_action_attr, action_id));
         wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_block_attr, m_block_ids[block]));
-        wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_dest_attr, m_block_ids[block]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_dest_attr, m_block_ids[dest]));
       }
     }
 

@@ -179,8 +179,8 @@ namespace Blocks_World {
     }
 
     Move(const Rete::WME_Token &token)
-     : block(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value),
-     dest(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(2, 2)]).value)
+     : block(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(3, 2)]).value),
+     dest(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(4, 2)]).value)
     {
     }
 
@@ -243,7 +243,6 @@ namespace Blocks_World {
     Rete::Symbol_Identifier_Ptr_C m_input_id = std::make_shared<Rete::Symbol_Identifier>("I1");
     Rete::Symbol_Constant_String_Ptr_C m_input_attr = std::make_shared<Rete::Symbol_Constant_String>("input");
     Rete::Symbol_Constant_String_Ptr_C m_action_attr = std::make_shared<Rete::Symbol_Constant_String>("action");
-    Rete::Symbol_Constant_String_Ptr_C m_index_attr = std::make_shared<Rete::Symbol_Constant_String>("index");
     Rete::Symbol_Constant_String_Ptr_C m_dest_attr = std::make_shared<Rete::Symbol_Constant_String>("dest");
     Rete::Symbol_Constant_String_Ptr_C m_block_attr = std::make_shared<Rete::Symbol_Constant_String>("block");
     Rete::Symbol_Constant_String_Ptr_C m_clear_attr = std::make_shared<Rete::Symbol_Constant_String>("clear");
