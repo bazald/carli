@@ -172,10 +172,10 @@ namespace Puddle_World {
     Rete::WME_Ptr_C m_x_wme;
     Rete::WME_Ptr_C m_y_wme;
 
-    std::array<tracked_ptr<const Action>, 4> m_action = {{new Move(Move::NORTH),
-                                                          new Move(Move::SOUTH),
-                                                          new Move(Move::EAST),
-                                                          new Move(Move::WEST)}};
+    std::array<std::shared_ptr<const Action>, 4> m_action = {{std::make_shared<Move>(Move::NORTH),
+                                                              std::make_shared<Move>(Move::SOUTH),
+                                                              std::make_shared<Move>(Move::EAST),
+                                                              std::make_shared<Move>(Move::WEST)}};
   };
 
 }

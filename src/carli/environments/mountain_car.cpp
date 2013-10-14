@@ -81,8 +81,6 @@ namespace Mountain_Car {
 
   Agent::~Agent() {
     destroy();
-    for(auto &action : m_action)
-      action.delete_and_zero();
   }
 
   void Agent::print_policy(ostream &os, const size_t &granularity) {

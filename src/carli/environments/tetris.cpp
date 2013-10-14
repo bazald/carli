@@ -35,6 +35,9 @@ namespace Tetris {
     return score;
   }
 
+  void Environment::print_impl(ostream &os) const {
+  }
+
   Environment::Tetromino Environment::generate_Tetronmino(const Tetromino_Type &type, const int &orientation) {
     Environment::Tetromino tet;
     memset(&tet, 0, sizeof(tet));

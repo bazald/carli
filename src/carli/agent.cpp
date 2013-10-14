@@ -264,8 +264,6 @@ Agent::~Agent() {
 
 void Agent::destroy() {
   Rete_Agent::destroy();
-  m_current.zero();
-  m_next.zero();
 //#ifdef DEBUG_OUTPUT
 //  std::cerr << *this << std::endl;
 //  for(const auto &action_value : m_next_q_values)

@@ -160,9 +160,9 @@ namespace Mountain_Car {
     Rete::WME_Ptr_C m_x_wme;
     Rete::WME_Ptr_C m_x_dot_wme;
 
-    std::array<tracked_ptr<const Action>, 3> m_action = {{new Move(Move::LEFT),
-                                                          new Move(Move::IDLE),
-                                                          new Move(Move::RIGHT)}};
+    std::array<std::shared_ptr<const Action>, 3> m_action = {{std::make_shared<Move>(Move::LEFT),
+                                                              std::make_shared<Move>(Move::IDLE),
+                                                              std::make_shared<Move>(Move::RIGHT)}};
   };
 
 }

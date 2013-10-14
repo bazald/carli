@@ -70,7 +70,7 @@ namespace Blocks_World {
     }
 
     Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(2 + block, 2);
+      return Rete::WME_Token_Index(1 + block, 2);
     }
 
     void print(ostream &os) const {
@@ -108,7 +108,7 @@ namespace Blocks_World {
     }
 
     Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(2 + block, 2);
+      return Rete::WME_Token_Index(1 + block, 2);
     }
 
     void print(ostream &os) const {
@@ -122,7 +122,7 @@ namespace Blocks_World {
 
   class Name : public Feature {
   public:
-    Name(const Which &block_, const std::string &name_)
+    Name(const Which &block_, const block_id &name_)
      : Feature(true),
      block(block_),
      name(name_)
@@ -147,11 +147,11 @@ namespace Blocks_World {
     }
 
     int compare_value(const ::Feature &rhs) const {
-      return strcmp(name.c_str(), debuggable_cast<const Name &>(rhs).name.c_str());
+      return name - debuggable_cast<const Name &>(rhs).name;
     }
 
     Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(4 + block, 2);
+      return Rete::WME_Token_Index(3 + block, 2);
     }
 
     void print(ostream &os) const {
@@ -161,7 +161,7 @@ namespace Blocks_World {
     }
 
     Which block;
-    std::string name;
+    block_id name;
   };
 
   class Move : public Action {
@@ -175,6 +175,12 @@ namespace Blocks_World {
     Move(const block_id &block_, const block_id &dest_)
      : block(block_),
      dest(dest_)
+    {
+    }
+
+    Move(const Rete::WME_Token &token)
+     : block(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value),
+     dest(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(2, 2)]).value)
     {
     }
 
@@ -231,17 +237,10 @@ namespace Blocks_World {
 
     void update();
 
-    const Rete::Symbol_Identifier_Ptr_C & get_block_id(const block_id &block);
-    const Rete::Symbol_Constant_String_Ptr_C & get_block_name(const block_id &block);
-
     Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
     Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
 
     Rete::Symbol_Identifier_Ptr_C m_input_id = std::make_shared<Rete::Symbol_Identifier>("I1");
-    Rete::Symbol_Identifier_Ptr_C m_a_id = std::make_shared<Rete::Symbol_Identifier>("A");
-    Rete::Symbol_Identifier_Ptr_C m_b_id = std::make_shared<Rete::Symbol_Identifier>("B");
-    Rete::Symbol_Identifier_Ptr_C m_c_id = std::make_shared<Rete::Symbol_Identifier>("C");
-    Rete::Symbol_Identifier_Ptr_C m_table_id = std::make_shared<Rete::Symbol_Identifier>("TABLE");
     Rete::Symbol_Constant_String_Ptr_C m_input_attr = std::make_shared<Rete::Symbol_Constant_String>("input");
     Rete::Symbol_Constant_String_Ptr_C m_action_attr = std::make_shared<Rete::Symbol_Constant_String>("action");
     Rete::Symbol_Constant_String_Ptr_C m_index_attr = std::make_shared<Rete::Symbol_Constant_String>("index");
@@ -251,43 +250,18 @@ namespace Blocks_World {
     Rete::Symbol_Constant_String_Ptr_C m_in_place_attr = std::make_shared<Rete::Symbol_Constant_String>("in-place");
 //    Rete::Symbol_Constant_String_Ptr_C m_on_top_attr = std::make_shared<Rete::Symbol_Constant_String>("on-top");
     Rete::Symbol_Constant_String_Ptr_C m_name_attr = std::make_shared<Rete::Symbol_Constant_String>("name");
-    Rete::Symbol_Constant_String_Ptr_C m_a_value = std::make_shared<Rete::Symbol_Constant_String>("a");
-    Rete::Symbol_Constant_String_Ptr_C m_b_value = std::make_shared<Rete::Symbol_Constant_String>("b");
-    Rete::Symbol_Constant_String_Ptr_C m_c_value = std::make_shared<Rete::Symbol_Constant_String>("c");
-    Rete::Symbol_Constant_String_Ptr_C m_table_value = std::make_shared<Rete::Symbol_Constant_String>("table");
     Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
 
+    std::array<Rete::Symbol_Identifier_Ptr_C, 4> m_block_ids = {{std::make_shared<Rete::Symbol_Identifier>("TABLE"),
+                                                                 std::make_shared<Rete::Symbol_Identifier>("A"),
+                                                                 std::make_shared<Rete::Symbol_Identifier>("B"),
+                                                                 std::make_shared<Rete::Symbol_Identifier>("C")}};
+    std::array<Rete::Symbol_Constant_Int_Ptr_C, 4> m_block_names = {{std::make_shared<Rete::Symbol_Constant_Int>(0),
+                                                                     std::make_shared<Rete::Symbol_Constant_Int>(1),
+                                                                     std::make_shared<Rete::Symbol_Constant_Int>(2),
+                                                                     std::make_shared<Rete::Symbol_Constant_Int>(3)}};
+
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
-
-    std::array<tracked_ptr<const Action>, 9> m_action = {{new Move(1, 0),
-                                                          new Move(1, 2),
-                                                          new Move(1, 3),
-                                                          new Move(2, 0),
-                                                          new Move(2, 1),
-                                                          new Move(2, 3),
-                                                          new Move(3, 0),
-                                                          new Move(3, 1),
-                                                          new Move(3, 2)}};
-
-    std::array<Rete::Symbol_Identifier_Ptr_C, 9> m_action_id = {{std::make_shared<Rete::Symbol_Identifier>(m_action[0]->to_string()),
-                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[1]->to_string()),
-                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[2]->to_string()),
-                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[3]->to_string()),
-                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[4]->to_string()),
-                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[5]->to_string()),
-                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[6]->to_string()),
-                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[7]->to_string()),
-                                                                 std::make_shared<Rete::Symbol_Identifier>(m_action[8]->to_string())}};
-
-    std::array<Rete::Symbol_Constant_Int_Ptr_C, 9> m_action_index = {{std::make_shared<Rete::Symbol_Constant_Int>(0),
-                                                                      std::make_shared<Rete::Symbol_Constant_Int>(1),
-                                                                      std::make_shared<Rete::Symbol_Constant_Int>(2),
-                                                                      std::make_shared<Rete::Symbol_Constant_Int>(3),
-                                                                      std::make_shared<Rete::Symbol_Constant_Int>(4),
-                                                                      std::make_shared<Rete::Symbol_Constant_Int>(5),
-                                                                      std::make_shared<Rete::Symbol_Constant_Int>(6),
-                                                                      std::make_shared<Rete::Symbol_Constant_Int>(7),
-                                                                      std::make_shared<Rete::Symbol_Constant_Int>(8)}};
   };
 
 }
