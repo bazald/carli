@@ -16,7 +16,9 @@ The simplest way to build Carli is using [premake4](http://industriousone.com/pr
 I use a fair number of C++11 features in Carli, so compilation in Visual Studio is not supported.
 I recommend the use of [Code::Blocks](http://www.codeblocks.org/), which uses the high quality [TDM-GCC](http://tdm-gcc.tdragon.net/) compilation suite.
 To build the Code::Blocks project, simply run:
+
     premake4 codeblocks
+
 I've tested the project on Windows and Linux.
 
 ##License
