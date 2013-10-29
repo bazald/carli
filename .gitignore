@@ -1,4 +1,5 @@
 *~
+*.7z
 *.aux
 *.backup
 *.bak
@@ -6,6 +7,7 @@
 *.blg
 *.cache
 *.cbTemp
+*.cbp
 *.d
 *.depend
 *.dvi
@@ -42,3 +44,12 @@
 *.vsp
 callgrind.out.*
 core
+carli
+carli.workspace
+carli_d
+carli_p
+carli_p.prof
+dump.txt
+git.h
+Makefile
+!src/carli
