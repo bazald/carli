@@ -159,8 +159,8 @@ static int main2(int argc, char **argv) {
     run_agent([](){return make_shared<Puddle_World::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Puddle_World::Agent>(env);});
   else if(env == "mountain-car")
     run_agent([](){return make_shared<Mountain_Car::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Mountain_Car::Agent>(env);});
-  else if(env == "tetris")
-    run_agent([](){return make_shared<Tetris::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Tetris::Agent>(env);});
+//  else if(env == "tetris")
+//    run_agent([](){return make_shared<Tetris::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Tetris::Agent>(env);});
 //  else
   else
     throw runtime_error("Internal error: g_args.environment");
