@@ -8,7 +8,7 @@ This is my C++ reinforcement learning testbed. If you find it useful, great. Ple
 
 ##License
 
-Copyright (c) 2013, Mitchell Keith Bloch
+Copyright (c) 2013, Mitchell Keith Bloch  
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
