@@ -6,6 +6,19 @@ This is my C++ reinforcement learning testbed. If you find it useful, great. Ple
 
 ~[bazald](mailto:bazald@gmail.com)
 
+##Building
+
+The simplest way to build Carli is using [premake4](http://industriousone.com/premake-quick-start).
+
+    premake4 gmake
+    make config=release
+
+I use a fair number of C++11 features in Carli, so compilation in Visual Studio is not supported.
+I recommend the use of [Code::Blocks](http://www.codeblocks.org/), which uses the high quality [TDM-GCC](http://tdm-gcc.tdragon.net/) compilation suite.
+To build the Code::Blocks project, simply run:
+    premake4 codeblocks
+I've tested the project on Windows and Linux.
+
 ##License
 
 Copyright (c) 2013, Mitchell Keith Bloch  
