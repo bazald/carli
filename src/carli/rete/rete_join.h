@@ -26,7 +26,7 @@ namespace Rete {
 
     static Rete_Join_Ptr find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
-    std::string generate_name() const;
+    void output_name(std::ostream &os) const;
 
   private:
     void join_tokens(const WME_Token_Ptr_C &lhs, const WME_Token_Ptr_C &rhs);

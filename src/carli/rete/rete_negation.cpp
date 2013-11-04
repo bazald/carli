@@ -73,12 +73,11 @@ namespace Rete {
     return nullptr;
   }
 
-  std::string Rete_Negation::generate_name() const {
-    std::string name = "n(";
+  void Rete_Negation::output_name(std::ostream &os) const {
+    os << "n(";
     if(input)
-      name += input->generate_name();
-    name += ')';
-    return name;
+      input->output_name(os);
+    os << ')';
   }
 
   void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out) {

@@ -30,7 +30,7 @@ namespace Rete {
 
     bool operator==(const Rete_Node &rhs) const;
 
-    std::string generate_name() const;
+    void output_name(std::ostream &os) const;
 
   private:
     WME m_wme;

@@ -121,27 +121,25 @@ namespace Rete {
     return nullptr;
   }
 
-  std::string Rete_Predicate::generate_name() const {
-    std::ostringstream oss;
+  void Rete_Predicate::output_name(std::ostream &os) const {
     switch(m_predicate) {
-      case EQ: oss << "EQ"; break;
-      case NEQ: oss << "NEQ"; break;
-      case GT: oss << "GT"; break;
-      case GTE: oss << "GTE"; break;
-      case LT: oss << "LT"; break;
-      case LTE: oss << "LTE"; break;
+      case EQ: os << "EQ"; break;
+      case NEQ: os << "NEQ"; break;
+      case GT: os << "GT"; break;
+      case GTE: os << "GTE"; break;
+      case LT: os << "LT"; break;
+      case LTE: os << "LTE"; break;
       default: abort();
     }
-    oss << '(' << m_lhs_index << ',';
+    os << '(' << m_lhs_index << ',';
     if(m_rhs)
-      oss << *m_rhs;
+      os << *m_rhs;
     else
-      oss << m_rhs_index;
-    oss << ',';
+      os << m_rhs_index;
+    os << ',';
     if(input)
-      oss << input->generate_name();
-    oss << ')';
-    return oss.str();
+      input->output_name(os);
+    os << ')';
   }
 
   bool Rete_Predicate::test_predicate(const Symbol_Ptr_C &lhs, const Symbol_Ptr_C &rhs) const {

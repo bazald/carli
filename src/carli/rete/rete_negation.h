@@ -29,7 +29,7 @@ namespace Rete {
 
     static Rete_Negation_Ptr find_existing(const Rete_Node_Ptr &out);
 
-    std::string generate_name() const;
+    void output_name(std::ostream &os) const;
 
   private:
     Rete_Node * input = nullptr;

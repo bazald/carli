@@ -77,12 +77,11 @@ namespace Rete {
     return nullptr;
   }
 
-  std::string Rete_Existential::generate_name() const {
-    std::string name = "e(";
+  void Rete_Existential::output_name(std::ostream &os) const {
+    os << "e(";
     if(input)
-      name += input->generate_name();
-    name += ')';
-    return name;
+      input->output_name(os);
+    os << ')';
   }
 
   void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out) {

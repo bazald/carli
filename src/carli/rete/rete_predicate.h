@@ -33,7 +33,7 @@ namespace Rete {
     static Rete_Predicate_Ptr find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out);
     static Rete_Predicate_Ptr find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out);
 
-    std::string generate_name() const;
+    void output_name(std::ostream &os) const;
 
   private:
     bool test_predicate(const Symbol_Ptr_C &lhs, const Symbol_Ptr_C &rhs) const;

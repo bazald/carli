@@ -35,7 +35,9 @@ namespace Rete {
     input_tokens.push_back(wme_token);
 
 #ifndef NDEBUG
-    std::cerr << "Firing action: " << generate_name() << std::endl;
+    std::cerr << "Firing action: ";
+    output_name(std::cerr);
+    std::cerr << std::endl;
 #endif
 
     agenda.insert_action(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
@@ -86,12 +88,11 @@ namespace Rete {
     return nullptr;
   }
 
-  std::string Rete_Action::generate_name() const {
-    std::string name = "a(";
+  void Rete_Action::output_name(std::ostream &os) const {
+    os << "a(";
     if(input)
-      name += input->generate_name();
-    name += ')';
-    return name;
+      input->output_name(os);
+    os << ')';
   }
 
   void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out) {

@@ -110,7 +110,7 @@ namespace Rete {
       --outputs_disabled;
     }
 
-    virtual std::string generate_name() const = 0;
+    virtual void output_name(std::ostream &os) const = 0;
 
   protected:
     template<typename CONTAINER, typename KEY>
