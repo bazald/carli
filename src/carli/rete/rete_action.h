@@ -37,6 +37,8 @@ namespace Rete {
 
     static Rete_Action_Ptr find_existing(const Action &/*action_*/, const Action &/*retraction_*/, const Rete_Node_Ptr &/*out*/);
 
+    std::string generate_name() const;
+
     void set_action(const Action &action_) {
       action = action_;
     }

@@ -1,5 +1,7 @@
 #include "rete_filter.h"
 
+#include <sstream>
+
 namespace Rete {
 
   Rete_Filter::Rete_Filter(const WME &wme_)
@@ -88,6 +90,12 @@ namespace Rete {
       return true;
     }
     return false;
+  }
+
+  std::string Rete_Filter::generate_name() const {
+    std::ostringstream oss;
+    oss << "f" << m_wme;
+    return oss.str();
   }
 
 }

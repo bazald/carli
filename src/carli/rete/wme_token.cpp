@@ -74,6 +74,22 @@ std::ostream & operator<<(std::ostream &os, const Rete::WME_Token_Index &index) 
   return os << '(' << index.first << ',' << int(index.second) << ')';
 }
 
+std::ostream & operator<<(std::ostream &os, const Rete::WME_Binding &binding) {
+  return os << binding.first << ':' << binding.second;
+}
+
+std::ostream & operator<<(std::ostream &os, const Rete::WME_Bindings &bindings) {
+  if(bindings.empty())
+    return os << "[]";
+  os << '[';
+  auto bt = bindings.begin();
+  os << *bt++;
+  while(bt != bindings.end())
+    os << ',' << *bt++;
+  os << ']';
+  return os;
+}
+
 std::ostream & operator<<(std::ostream &os, const Rete::WME_Token &wme_token) {
   os << '{';
   wme_token.print(os);

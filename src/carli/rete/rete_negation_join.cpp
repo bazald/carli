@@ -3,6 +3,8 @@
 #include "rete_existential.h"
 #include "rete_negation.h"
 
+#include <sstream>
+
 namespace Rete {
 
   Rete_Negation_Join::Rete_Negation_Join(WME_Bindings bindings_) : bindings(bindings_) {}
@@ -105,6 +107,18 @@ namespace Rete {
     }
 
     return nullptr;
+  }
+
+  std::string Rete_Negation_Join::generate_name() const {
+    std::ostringstream oss;
+    oss << "nj(" << bindings << ',';
+    if(input0)
+      oss << input0->generate_name();
+    oss << ',';
+    if(input1)
+      oss << input1->generate_name();
+    oss << ')';
+    return oss.str();
   }
 
   void Rete_Negation_Join::join_tokens(std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs) {
