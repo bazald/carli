@@ -3,6 +3,8 @@
 #include "rete_existential.h"
 #include "rete_negation.h"
 
+#include <sstream>
+
 namespace Rete {
 
   Rete_Predicate::Rete_Predicate(const Predicate &predicate_, const WME_Token_Index lhs_index_, const WME_Token_Index rhs_index_)
@@ -117,6 +119,29 @@ namespace Rete {
     }
 
     return nullptr;
+  }
+
+  std::string Rete_Predicate::generate_name() const {
+    std::ostringstream oss;
+    switch(m_predicate) {
+      case EQ: oss << "EQ"; break;
+      case NEQ: oss << "NEQ"; break;
+      case GT: oss << "GT"; break;
+      case GTE: oss << "GTE"; break;
+      case LT: oss << "LT"; break;
+      case LTE: oss << "LTE"; break;
+      default: abort();
+    }
+    oss << '(' << m_lhs_index << ',';
+    if(m_rhs)
+      oss << *m_rhs;
+    else
+      oss << m_rhs_index;
+    oss << ',';
+    if(input)
+      oss << input->generate_name();
+    oss << ')';
+    return oss.str();
   }
 
   bool Rete_Predicate::test_predicate(const Symbol_Ptr_C &lhs, const Symbol_Ptr_C &rhs) const {

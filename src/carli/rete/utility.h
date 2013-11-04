@@ -2,6 +2,7 @@
 #define RETE_UTILITY_H
 
 #include <array>
+#include <set>
 #include <unordered_set>
 #include <utility>
 #include <vector>

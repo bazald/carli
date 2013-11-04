@@ -29,6 +29,8 @@ namespace Rete {
 
     static Rete_Negation_Ptr find_existing(const Rete_Node_Ptr &out);
 
+    std::string generate_name() const;
+
   private:
     Rete_Node * input = nullptr;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input_tokens;

@@ -30,6 +30,8 @@ namespace Rete {
 
     bool operator==(const Rete_Node &rhs) const;
 
+    std::string generate_name() const;
+
   private:
     WME m_wme;
     std::array<Symbol_Variable_Ptr_C, 3> m_variable;

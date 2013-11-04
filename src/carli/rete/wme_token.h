@@ -12,7 +12,7 @@ namespace Rete {
   typedef std::shared_ptr<WME_Token> WME_Token_Ptr;
   typedef std::pair<size_t, uint8_t> WME_Token_Index;
   typedef std::pair<WME_Token_Index, WME_Token_Index> WME_Binding;
-  typedef std::unordered_set<WME_Binding> WME_Bindings;
+  typedef std::set<WME_Binding> WME_Bindings;
 
   class WME_Token : public std::enable_shared_from_this<WME_Token>, public Zeni::Pool_Allocator<WME_Token> {
   public:
@@ -47,7 +47,8 @@ namespace Rete {
 }
 
 std::ostream & operator<<(std::ostream &os, const Rete::WME_Token_Index &index);
-
+std::ostream & operator<<(std::ostream &os, const Rete::WME_Binding &binding);
+std::ostream & operator<<(std::ostream &os, const Rete::WME_Bindings &bindings);
 std::ostream & operator<<(std::ostream &os, const Rete::WME_Token &wme_token);
 
 namespace std {

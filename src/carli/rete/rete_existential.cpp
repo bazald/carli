@@ -77,6 +77,14 @@ namespace Rete {
     return nullptr;
   }
 
+  std::string Rete_Existential::generate_name() const {
+    std::string name = "e(";
+    if(input)
+      name += input->generate_name();
+    name += ')';
+    return name;
+  }
+
   void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out) {
     assert(existential);
     existential->input = out.get();

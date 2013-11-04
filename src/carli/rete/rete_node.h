@@ -110,6 +110,8 @@ namespace Rete {
       --outputs_disabled;
     }
 
+    virtual std::string generate_name() const = 0;
+
   protected:
     template<typename CONTAINER, typename KEY>
     typename CONTAINER::iterator find(CONTAINER &tokens, const KEY &token) {
