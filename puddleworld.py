@@ -96,9 +96,9 @@ def main():
   # 1: ./puddleworld.py experiment-pw/*_0/*.out
   # 2: ./puddleworld.py experiment-pw/*_0/*.out
   # 3: ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out experiment-pw/cmac_*/*.out
-  # 4: ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/even_*_3/*.out
+  # 4: ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/even_*_3/*.out experiment-pw/even_*_4/*.out
   # 5: ./puddleworld.py experiment-pw/*_3/*.out
-  scenario = 0
+  scenario = 4
 
   two_sided_plot = scenario == 4
 
@@ -258,6 +258,7 @@ def main():
       remap_names['inv-log-update-count\\_64x64\\_64x64\\_1'] = '1-64 static $1/\ln$'
       remap_names['inv-root-update-count\\_64x64\\_64x64\\_1'] = '1-64 static $1/\sqrt{~~~}$'
       remap_names['even\\_2x2\\_64x64\\_3'] = '1-64 incremental even'
+      remap_names['even\\_2x2\\_64x64\\_4'] = '1-64 incremental in'
       remap_names['inv-log-update-count\\_2x2\\_64x64\\_3'] = r'1-64 incremental $1/\ln$'
       remap_names['inv-root-update-count\\_2x2\\_64x64\\_3'] = r'1-64 incremental $1/\sqrt{~~~}$'
       remap_names['specific\\_2x2\\_64x64\\_3'] = '1-64 incremental specific'
@@ -323,7 +324,7 @@ def main():
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
       
       if scenario == 4:
-        agent_list = ['even\\_64x64\\_64x64\\_1', 'even\\_2x2\\_64x64\\_3']
+        agent_list = ['even\\_2x2\\_64x64\\_4', 'even\\_64x64\\_64x64\\_1', 'even\\_2x2\\_64x64\\_3']
         for agent in agent_list:
           y_labels.append('Reward: ' + remap_names[agent])
           yss.append(smith[agent])
@@ -334,6 +335,9 @@ def main():
           elif agent is 'even\\_2x2\\_64x64\\_3':
             color = 'blue'
             linestyle = '--'
+          elif agent is 'even\\_2x2\\_64x64\\_4':
+            color = 'blue'
+            linestyle = '-.'
           
           labels += pylab.plot(x, smith[agent], label='Reward: ' + remap_names[agent], color=color, linestyle=linestyle)
       elif scenario == 5:
@@ -414,6 +418,9 @@ def main():
       elif agent is 'even\\_2x2\\_64x64\\_3':
         color = 'red'
         linestyle = '--'
+      elif agent is 'even\\_2x2\\_64x64\\_4':
+        color = 'red'
+        linestyle = '-.'
       
       labels += pylab.plot(x, memory[agent], label='Memory: ' + remap_names[agent], color=color, linestyle=linestyle)
     ax2.set_xlim(0, 20000)

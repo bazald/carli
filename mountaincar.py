@@ -96,10 +96,10 @@ def main():
   # 1: ./mountaincar.py experiment-mc/*_0/*.out
   # 2: ./mountaincar.py experiment-mc/*_0/*.out
   # 3: ./mountaincar.py experiment-mc/*_0/*.out experiment-mc/*_1/*.out experiment-mc/cmac_*/*.out
-  # 4: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out
+  # 4: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out experiment-mc/even_*_4/*.out
   # 5: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out experiment-mc/inv-log-update-count_*_3/*.out
   # 6: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/*_3/*.out
-  scenario = 0
+  scenario = 4
 
   two_sided_plot = scenario > 3 and scenario < 6
 
@@ -255,6 +255,7 @@ def main():
       remap_names['inv-log-update-count\\_256x256\\_256x256\\_1'] = '1-256 static $1/\ln$'
       remap_names['inv-root-update-count\\_256x256\\_256x256\\_1'] = '1-256 static $1/\sqrt{~~~}$'
       remap_names['even\\_2x2\\_256x256\\_3'] = '1-256 incremental even'
+      remap_names['even\\_2x2\\_256x256\\_4'] = '1-256 incremental in'
       remap_names['inv-log-update-count\\_2x2\\_256x256\\_3'] = r'1-256 incremental $1/\ln$'
       remap_names['inv-root-update-count\\_2x2\\_256x256\\_3'] = r'1-256 incremental $1/\sqrt{~~~}$'
       remap_names['specific\\_2x2\\_256x256\\_3'] = '1-256 incremental specific'
@@ -313,7 +314,7 @@ def main():
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
       
       if scenario == 4:
-        agent_list = ['even\\_256x256\\_256x256\\_1', 'even\\_2x2\\_256x256\\_3']
+        agent_list = ['even\\_2x2\\_256x256\\_4', 'even\\_256x256\\_256x256\\_1', 'even\\_2x2\\_256x256\\_3']
       elif scenario == 5:
         agent_list = ['even\\_256x256\\_256x256\\_1', 'inv-log-update-count\\_2x2\\_256x256\\_3', 'even\\_2x2\\_256x256\\_3']
         agent_list_mem = ['even\\_256x256\\_256x256\\_1', 'even\\_2x2\\_256x256\\_3', 'inv-log-update-count\\_2x2\\_256x256\\_3']
@@ -328,6 +329,9 @@ def main():
           elif agent is 'even\\_2x2\\_256x256\\_3':
             color = 'blue'
             linestyle = '--'
+          elif agent is 'even\\_2x2\\_256x256\\_4':
+            color = 'blue'
+            linestyle = '-.'
           elif agent is 'inv-log-update-count\\_2x2\\_256x256\\_3':
             color = 'blue'
             linestyle = ':'
@@ -420,6 +424,9 @@ def main():
       elif agent is 'even\\_2x2\\_256x256\\_3':
         color = 'red'
         linestyle = '--'
+      elif agent is 'even\\_2x2\\_256x256\\_4':
+        color = 'red'
+        linestyle = '-.'
       elif agent is 'inv-log-update-count\\_2x2\\_256x256\\_3':
         color = 'red'
         linestyle = ':'

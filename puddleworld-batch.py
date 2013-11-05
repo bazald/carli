@@ -13,47 +13,49 @@ g_base_command = "./carli --output experiment --environment puddle-world --rando
 
 g_ep_tuples = []
 
-## Experiment 0, non-hierarchical agents comparison
-g_ep_tuples.append(("specific_4x4_4x4_0", "--scenario 0 --credit-assignment specific --split-min 5 --split-max 5"))
-g_ep_tuples.append(("specific_8x8_8x8_0", "--scenario 0 --credit-assignment specific --split-min 7 --split-max 7"))
-g_ep_tuples.append(("specific_16x16_16x16_0", "--scenario 0 --credit-assignment specific --split-min 9 --split-max 9"))
-#g_ep_tuples.append(("specific_32x32_32x32_0", "--scenario 0 --credit-assignment specific --split-min 11 --split-max 11"))
-#g_ep_tuples.append(("specific_64x64_64x64_0", "--scenario 0 --credit-assignment specific --split-min 13 --split-max 13"))
+### Experiment 0, non-hierarchical agents comparison
+#g_ep_tuples.append(("specific_4x4_4x4_0", "--scenario 0 --credit-assignment specific --split-min 5 --split-max 5"))
+#g_ep_tuples.append(("specific_8x8_8x8_0", "--scenario 0 --credit-assignment specific --split-min 7 --split-max 7"))
+#g_ep_tuples.append(("specific_16x16_16x16_0", "--scenario 0 --credit-assignment specific --split-min 9 --split-max 9"))
+##g_ep_tuples.append(("specific_32x32_32x32_0", "--scenario 0 --credit-assignment specific --split-min 11 --split-max 11"))
+##g_ep_tuples.append(("specific_64x64_64x64_0", "--scenario 0 --credit-assignment specific --split-min 13 --split-max 13"))
 
 ## Experiment 1, hierarchical agents performance comparison - compare to 0
 #g_ep_tuples.append(('puddle-world', 0, 'even', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  5,  5, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
 #g_ep_tuples.append(('puddle-world', 0, 'even', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  7,  7, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
 #g_ep_tuples.append(('puddle-world', 0, 'even', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  9,  9, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
 #g_ep_tuples.append(('puddle-world', 0, 'even', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
-g_ep_tuples.append(("even_64x64_64x64_1", "--scenario 1 --credit-assignment even --split-min 13 --split-max 13"))
+#g_ep_tuples.append(("even_64x64_64x64_1", "--scenario 1 --credit-assignment even --split-min 13 --split-max 13"))
 
-#g_ep_tuples.append(("cmac_0_4_2", "--cmac true --cmac-resolution 4 --cmac-tilings 2"))
-#g_ep_tuples.append(("cmac_0_4_4", "--cmac true --cmac-resolution 4 --cmac-tilings 4"))
-#g_ep_tuples.append(("cmac_0_4_8", "--cmac true --cmac-resolution 4 --cmac-tilings 8"))
-#g_ep_tuples.append(("cmac_0_4_16", "--cmac true --cmac-resolution 4 --cmac-tilings 16"))
-#g_ep_tuples.append(("cmac_0_8_2", "--cmac true --cmac-resolution 8 --cmac-tilings 2"))
-#g_ep_tuples.append(("cmac_0_8_4", "--cmac true --cmac-resolution 8 --cmac-tilings 4"))
-#g_ep_tuples.append(("cmac_0_8_8", "--cmac true --cmac-resolution 8 --cmac-tilings 8"))
-g_ep_tuples.append(("cmac_0_8_16", "--cmac true --cmac-resolution 8 --cmac-tilings 16"))
-#g_ep_tuples.append(("cmac_0_16_2", "--cmac true --cmac-resolution 16 --cmac-tilings 2"))
-#g_ep_tuples.append(("cmac_0_16_4", "--cmac true --cmac-resolution 16 --cmac-tilings 4"))
-#g_ep_tuples.append(("cmac_0_16_8", "--cmac true --cmac-resolution 16 --cmac-tilings 8"))
-g_ep_tuples.append(("cmac_0_16_16", "--cmac true --cmac-resolution 16 --cmac-tilings 16"))
-#g_ep_tuples.append(("cmac_0_32_2", "--cmac true --cmac-resolution 32 --cmac-tilings 2"))
-#g_ep_tuples.append(("cmac_0_32_4", "--cmac true --cmac-resolution 32 --cmac-tilings 4"))
-#g_ep_tuples.append(("cmac_0_32_8", "--cmac true --cmac-resolution 32 --cmac-tilings 8"))
-#g_ep_tuples.append(("cmac_0_32_16", "--cmac true --cmac-resolution 32 --cmac-tilings 16"))
-#g_ep_tuples.append(("cmac_0_64_2", "--cmac true --cmac-resolution 64 --cmac-tilings 2"))
-#g_ep_tuples.append(("cmac_0_64_4", "--cmac true --cmac-resolution 64 --cmac-tilings 4"))
-#g_ep_tuples.append(("cmac_0_64_8", "--cmac true --cmac-resolution 64 --cmac-tilings 8"))
-#g_ep_tuples.append(("cmac_0_64_16", "--cmac true --cmac-resolution 64 --cmac-tilings 16"))
+##g_ep_tuples.append(("cmac_0_4_2", "--cmac true --cmac-resolution 4 --cmac-tilings 2"))
+##g_ep_tuples.append(("cmac_0_4_4", "--cmac true --cmac-resolution 4 --cmac-tilings 4"))
+##g_ep_tuples.append(("cmac_0_4_8", "--cmac true --cmac-resolution 4 --cmac-tilings 8"))
+##g_ep_tuples.append(("cmac_0_4_16", "--cmac true --cmac-resolution 4 --cmac-tilings 16"))
+##g_ep_tuples.append(("cmac_0_8_2", "--cmac true --cmac-resolution 8 --cmac-tilings 2"))
+##g_ep_tuples.append(("cmac_0_8_4", "--cmac true --cmac-resolution 8 --cmac-tilings 4"))
+##g_ep_tuples.append(("cmac_0_8_8", "--cmac true --cmac-resolution 8 --cmac-tilings 8"))
+#g_ep_tuples.append(("cmac_0_8_16", "--cmac true --cmac-resolution 8 --cmac-tilings 16"))
+##g_ep_tuples.append(("cmac_0_16_2", "--cmac true --cmac-resolution 16 --cmac-tilings 2"))
+##g_ep_tuples.append(("cmac_0_16_4", "--cmac true --cmac-resolution 16 --cmac-tilings 4"))
+##g_ep_tuples.append(("cmac_0_16_8", "--cmac true --cmac-resolution 16 --cmac-tilings 8"))
+#g_ep_tuples.append(("cmac_0_16_16", "--cmac true --cmac-resolution 16 --cmac-tilings 16"))
+##g_ep_tuples.append(("cmac_0_32_2", "--cmac true --cmac-resolution 32 --cmac-tilings 2"))
+##g_ep_tuples.append(("cmac_0_32_4", "--cmac true --cmac-resolution 32 --cmac-tilings 4"))
+##g_ep_tuples.append(("cmac_0_32_8", "--cmac true --cmac-resolution 32 --cmac-tilings 8"))
+##g_ep_tuples.append(("cmac_0_32_16", "--cmac true --cmac-resolution 32 --cmac-tilings 16"))
+##g_ep_tuples.append(("cmac_0_64_2", "--cmac true --cmac-resolution 64 --cmac-tilings 2"))
+##g_ep_tuples.append(("cmac_0_64_4", "--cmac true --cmac-resolution 64 --cmac-tilings 4"))
+##g_ep_tuples.append(("cmac_0_64_8", "--cmac true --cmac-resolution 64 --cmac-tilings 8"))
+##g_ep_tuples.append(("cmac_0_64_16", "--cmac true --cmac-resolution 64 --cmac-tilings 16"))
 
 # Experiment 3, dynamically refined hierarchical agents performance comparison - compare to 1 and 2
-g_ep_tuples.append(("even_2x2_64x64_3", "--credit-assignment even --split-min 3 --split-max 13"))
-g_ep_tuples.append(("inv-log-update-count_2x2_64x64_3", "--credit-assignment inv-log-update-count --split-min 3 --split-max 13"))
+#g_ep_tuples.append(("even_2x2_64x64_3", "--credit-assignment even --split-min 3 --split-max 13"))
+#g_ep_tuples.append(("inv-log-update-count_2x2_64x64_3", "--credit-assignment inv-log-update-count --split-min 3 --split-max 13"))
 #g_ep_tuples.append(("inv-root-update-count_2x2_64x64_3", "--credit-assignment inv-root-update-count --split-min 3 --split-max 13"))
-g_ep_tuples.append(("specific_2x2_64x64_3", "--credit-assignment specific --split-min 3 --split-max 13"))
+#g_ep_tuples.append(("specific_2x2_64x64_3", "--credit-assignment specific --split-min 3 --split-max 13"))
 
+# Experiment 4, read in value function from 3, use as fixed value function
+g_ep_tuples.append(("even_2x2_64x64_4", "--credit-assignment even --split-min 3 --split-max 13"))
 
 
 ### Experiment 2, alternative credit assignment performance comparison - compare to 1
@@ -244,12 +246,14 @@ print str(seeds) + '\n'
 
 
 class Experiment:
-  def __init__(self, num_steps, seed, stderr, stdout, experiment):
+  def __init__(self, num_steps, seed, stderr, stdout, experiment, vfm_in=None, vfm_out=None):
     self.num_steps = num_steps
     self.seed = seed
     self.stderr = stderr
     self.stdout = stdout
     self.experiment = experiment
+    self.vfm_in = vfm_in
+    self.vfm_out = vfm_out
     
   def get_args(self):
     args = self.experiment.split(' ')
@@ -257,6 +261,10 @@ class Experiment:
                  '--seed', str(self.seed),
                  '--stderr', self.stderr,
                  '--stdout', self.stdout])
+    if self.vfm_in:
+      args.extend(['--value-function-map-mode', 'in', '--value-function-map-filename', self.vfm_in])
+    elif self.vfm_out:
+      args.extend(['--value-function-map-mode', 'out', '--value-function-map-filename', self.vfm_out])
     return args
   
   def print_args(self):
@@ -287,7 +295,8 @@ for ep_tuple in g_ep_tuples:
   for seed in seeds:
     stderr = dir + '/puddleworld-' + str(seed) + '.err'
     stdout = dir + '/puddleworld-' + str(seed) + '.out'
-    experiment = Experiment(args.num_steps, seed, stderr, stdout, g_base_command + ' ' + ep_tuple[1])
+    vfm = dir + '/puddleworld-' + str(seed) + '.vfm'
+    experiment = Experiment(args.num_steps, seed, stderr, stdout, g_base_command + ' ' + ep_tuple[1], vfm_in=vfm)
     g_experiments.append(experiment)
     experiment.print_args()
 
