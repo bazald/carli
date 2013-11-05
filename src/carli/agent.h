@@ -36,7 +36,7 @@ public:
   typedef double reward_type;
   typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
 
-  bool specialize(const Rete::Rete_Action &rete_action, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general);
+  bool specialize(const Rete::Rete_Action &rete_action, const Action &action, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general);
   void expand_fringe(const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general, const Feature * const &specialization);
 
   Agent(const std::shared_ptr<Environment> &environment);
@@ -125,7 +125,7 @@ protected:
 
   void assign_credit_normalize(const Q_Value_List &value_list, const double &sum);
 
-  bool split_test(const Rete::Rete_Action &rete_action, const tracked_ptr<Q_Value> &q) const;
+  bool split_test(const Rete::Rete_Action &rete_action, const Action &action, const tracked_ptr<Q_Value> &q) const;
 
   static double sum_value(const action_type * const &action, const Q_Value_List &value_list);
 
@@ -152,7 +152,7 @@ protected:
   std::map<action_ptrsc, Q_Value_List, compare_deref_lt, Zeni::Pool_Allocator<std::pair<action_ptrsc, Q_Value_List>>> m_next_q_values;
   std::function<action_ptrsc ()> m_target_policy; ///< Sarsa/Q-Learning selector
   std::function<action_ptrsc ()> m_exploration_policy; ///< Exploration policy
-  std::function<bool (const Rete::Rete_Action &, Q_Value * const &)> m_split_test; ///< true if too general, false if sufficiently general
+  std::function<bool (const Rete::Rete_Action &, const Action &, Q_Value * const &)> m_split_test; ///< true if too general, false if sufficiently general
   std::map<action_ptrsc, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<action_ptrsc>, Zeni::Pool_Allocator<std::pair<action_ptrsc, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
   Rete::Symbol_Identifier_Ptr_C m_s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
@@ -233,7 +233,7 @@ private:
 
   std::string m_value_function_map_mode = dynamic_cast<const Option_Itemized &>(Options::get_global()["value-function-map-mode"]).get_value();
   std::string m_value_function_map_filename = dynamic_cast<const Option_String &>(Options::get_global()["value-function-map-filename"]).get_value();
-  std::unordered_set<std::string> m_value_function_map;
+  std::unordered_set<std::pair<std::string, std::string>> m_value_function_map;
   mutable std::ofstream m_value_function_out;
 };
 
