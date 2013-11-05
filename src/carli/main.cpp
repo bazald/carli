@@ -111,6 +111,9 @@ static int main2(int argc, char **argv) {
   options.add(     make_shared<Option_Ranged<int>>("pseudoepisode-threshold", 0, true, numeric_limits<int>::max(), true, 20), "How any steps must separate updates for it to count as a pseudoepisode.");
   options.add(     make_shared<Option_Ranged<int>>("split-pseudoepisodes", 0, true, numeric_limits<int>::max(), true, 0), "Require 1 more pseudoepisode than this to allow refinement.");
   options.add(     make_shared<Option_Ranged<int>>("split-update-count", 0, true, numeric_limits<int>::max(), true, 0), "Require 1 more update than this to allow refinement.");
+  options.add_line("\n  Rete Representation Saving and Loading:");
+  options.add(     make_shared<Option_Itemized>("value-function-map-mode", set<string>({"null", "in", "out"}), "null"), "'in' reads in a file written with 'out', resulting in a fixed hierarchical representation.");
+  options.add(     make_shared<Option_String>("value-function-map-filename", "value-function-map.txt"), "");
   options.add_line("\n  CMAC Options:");
   options.add(     make_shared<Option_Ranged<bool>>("cmac", false, true, true, true, false), "Implement a CMAC for the domain instead.");
   options.add(     make_shared<Option_Ranged<int>>("cmac-tilings", 1, true, numeric_limits<int>::max(), true, 10), "The number of tile codings in the CMAC.");

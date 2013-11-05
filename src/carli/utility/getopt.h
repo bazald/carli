@@ -243,6 +243,40 @@ private:
   Function m_function;
 };
 
+class Option_String : public Option {
+public:
+  Option_String(const std::string &name_,
+                const std::string &default_value)
+   : Option(name_, 1),
+   value(default_value)
+  {
+  }
+
+  const std::string & get_value() const {return value;}
+
+  std::string get_help() const {
+    return "";
+  }
+
+  std::string print() const {
+    std::ostringstream oss;
+    oss << get_name() << " = " << value << std::endl;
+    return oss.str();
+  }
+
+  void operator()(const Arguments &args) {
+    std::string new_value;
+
+    std::istringstream iss(args.at(0));
+    iss >> new_value;
+
+    value = new_value;
+  }
+
+private:
+  std::string value;
+};
+
 class Option_Itemized : public Option {
 public:
   Option_Itemized(const std::string &name_,

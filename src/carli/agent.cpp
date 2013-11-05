@@ -1,7 +1,7 @@
 #include "agent.h"
 
-bool Agent::specialize(const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general) {
-  if(!split_test(general->q_value))
+bool Agent::specialize(const Rete::Rete_Action &rete_action, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general) {
+  if(!split_test(rete_action, general->q_value))
     return false;
   if(general->q_value->type == Q_Value::Type::SPLIT)
     return true;
@@ -179,8 +179,8 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
         auto join_blink = make_existential_join(Rete::WME_Bindings(), leaf->action->parent(), filter_blink);
         auto node_unsplit = std::make_shared<Node_Unsplit>(*this, leaf->q_value->depth);
         node_unsplit->fringe_values.swap(node_unsplit_fringe);
-        auto new_action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-          if(!this->specialize(get_action, node_unsplit)) {
+        auto new_action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
+          if(!this->specialize(rete_action, get_action, node_unsplit)) {
             const auto action = get_action(token);
             this->insert_q_value_next(action, node_unsplit->q_value);
           }
@@ -202,7 +202,7 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
 Agent::Agent(const std::shared_ptr<Environment> &environment)
   : m_target_policy([this]()->action_ptrsc{return this->choose_greedy();}),
   m_exploration_policy([this]()->action_ptrsc{return this->choose_epsilon_greedy(m_epsilon);}),
-  m_split_test([this](Q_Value * const &q)->bool{return this->split_test(q);}),
+  m_split_test([this](const Rete::Rete_Action &rete_action, Q_Value * const &q)->bool{return this->split_test(rete_action, q);}),
   m_environment(environment),
   m_credit_assignment(
     m_credit_assignment_code == "all" ?
@@ -256,6 +256,15 @@ Agent::Agent(const std::shared_ptr<Environment> &environment)
 {
   if(m_on_policy)
     m_target_policy = m_exploration_policy;
+
+  if(m_value_function_map_mode == "in") {
+    std::ifstream fin(m_value_function_map_filename);
+    std::string line;
+    while(std::getline(fin, line))
+      m_value_function_map.insert(line);
+  }
+  else if(m_value_function_map_mode == "out")
+    m_value_function_out.open(m_value_function_map_filename);
 }
 
 Agent::~Agent() {
@@ -795,7 +804,7 @@ void Agent::assign_credit_normalize(const Q_Value_List &value_list, const double
   }
 }
 
-bool Agent::split_test(const tracked_ptr<Q_Value> &q) const {
+bool Agent::split_test(const Rete::Rete_Action &rete_action, const tracked_ptr<Q_Value> &q) const {
   assert(q);
 
   if(q->type == Q_Value::Type::SPLIT || q->depth < m_split_min)
@@ -811,11 +820,21 @@ bool Agent::split_test(const tracked_ptr<Q_Value> &q) const {
   if(m_value_function_cap && q_value_count >= m_value_function_cap)
     return false;
 
+  if(m_value_function_map_mode == "in") {
+    std::ostringstream oss;
+    rete_action.output_name(oss);
+    return m_value_function_map.find(oss.str()) != m_value_function_map.end();
+  }
+
   if(q->update_count > m_split_update_count &&
      q->pseudoepisode_count > m_split_pseudoepisodes &&
      (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean().outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)
                              : m_mean_cabe.outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)))
   {
+    if(m_value_function_map_mode == "out") {
+      rete_action.output_name(m_value_function_out);
+      m_value_function_out << std::endl;
+    }
     return true;
   }
   else
