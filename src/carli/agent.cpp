@@ -259,10 +259,8 @@ Agent::Agent(const std::shared_ptr<Environment> &environment)
   if(m_value_function_map_mode == "in") {
     std::ifstream fin(m_value_function_map_filename);
     std::string line;
-    while(std::getline(fin, line)) {
-      const int pound = line.find('#');
-      m_value_function_map.insert(std::make_pair(line.substr(0, pound), line.substr(pound + 1)));
-    }
+    while(std::getline(fin, line))
+      m_value_function_map.insert(line);
   }
   else if(m_value_function_map_mode == "out")
     m_value_function_out.open(m_value_function_map_filename);
@@ -824,7 +822,7 @@ bool Agent::split_test(const Rete::Rete_Action &rete_action, const Action &actio
   if(m_value_function_map_mode == "in") {
     std::ostringstream oss;
     rete_action.output_name(oss);
-    return m_value_function_map.find(std::make_pair(action.to_string(), oss.str())) != m_value_function_map.end();
+    return m_value_function_map.find(oss.str()) != m_value_function_map.end();
   }
 
   if(q->update_count > m_split_update_count &&
@@ -833,7 +831,6 @@ bool Agent::split_test(const Rete::Rete_Action &rete_action, const Action &actio
                              : m_mean_cabe.outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)))
   {
     if(m_value_function_map_mode == "out") {
-      m_value_function_out << action << '#';
       rete_action.output_name(m_value_function_out);
       m_value_function_out << std::endl;
     }

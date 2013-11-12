@@ -23,34 +23,8 @@ namespace Puddle_World {
   using std::shared_ptr;
 
   class Feature;
+  class Move_Direction;
   class Position;
-
-  class Feature : public ::Feature {
-  };
-
-  class Position : public Feature_Ranged<Feature> {
-  public:
-    enum Axis : size_t {X = 0, Y = 1};
-
-    Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
-    {
-    }
-
-    Position * clone() const {
-      return new Position(Axis(axis.first), bound_lower, bound_upper, depth, upper);
-    }
-
-    void print(ostream &os) const {
-      switch(axis.first) {
-        case X: os << 'x'; break;
-        case Y: os << 'y'; break;
-        default: abort();
-      }
-
-      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
-    }
-  };
 
   class Move : public Action {
   public:
@@ -58,6 +32,11 @@ namespace Puddle_World {
 
     Move(const Direction &direction_ = NORTH)
      : direction(direction_)
+    {
+    }
+
+    Move(const Rete::WME_Token &token)
+     : direction(Direction(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(2, 2)]).value))
     {
     }
 
@@ -88,6 +67,107 @@ namespace Puddle_World {
     }
 
     Direction direction;
+  };
+
+  class Feature : public ::Feature {
+  public:
+    Feature() {}
+
+    virtual Feature * clone() const = 0;
+
+    int compare_axis(const ::Feature &rhs) const {
+      return compare_axis(debuggable_cast<const Feature &>(rhs));
+    }
+
+    virtual int compare_axis(const Feature &rhs) const = 0;
+    virtual int compare_axis(const Position &rhs) const = 0;
+    virtual int compare_axis(const Move_Direction &rhs) const = 0;
+
+    virtual Rete::WME_Token_Index wme_token_index() const = 0;
+  };
+
+  class Position : public Feature_Ranged<Feature> {
+  public:
+    enum Axis : size_t {X = 0, Y = 1};
+
+    Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
+    {
+    }
+
+    Position * clone() const {
+      return new Position(Axis(axis.first), bound_lower, bound_upper, depth, upper);
+    }
+
+    int compare_axis(const Puddle_World::Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int compare_axis(const Position &rhs) const {
+      return Feature_Ranged<Feature>::compare_axis(rhs);
+    }
+    int compare_axis(const Move_Direction &) const {
+      return -1;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return axis;
+    }
+
+    void print(ostream &os) const {
+      switch(axis.first) {
+        case X: os << 'x'; break;
+        case Y: os << 'y'; break;
+        default: abort();
+      }
+
+      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+    }
+  };
+
+  class Move_Direction : public Feature {
+  public:
+    Move_Direction(const Move::Direction &direction_)
+     : direction(direction_)
+    {
+    }
+
+    Move_Direction * clone() const {
+      return new Move_Direction(direction);
+    }
+
+    int compare_axis(const Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int compare_axis(const Position &) const {
+      return 1;
+    }
+    int compare_axis(const Move_Direction &rhs) const {
+      return direction - debuggable_cast<const Move_Direction &>(rhs).direction;
+    }
+
+    int compare_value(const ::Feature &) const {
+      return 0;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return Rete::WME_Token_Index(2, 2);
+    }
+
+    void print(ostream &os) const {
+      os << "move-direction(";
+
+      switch(direction) {
+        case Move::NORTH: os << "north"; break;
+        case Move::SOUTH: os << "south"; break;
+        case Move::EAST:  os << "east";  break;
+        case Move::WEST:  os << "west";  break;
+        default: abort();
+      }
+
+      os << ')';
+    }
+
+    Move::Direction direction;
   };
 
   class Environment : public ::Environment {
@@ -169,8 +249,6 @@ namespace Puddle_World {
     Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
     Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
 
-    Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
-    Rete::Symbol_Constant_String_Ptr_C m_y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
     Rete::Symbol_Constant_Float_Ptr m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_position().first);
     Rete::Symbol_Constant_Float_Ptr m_y_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_position().second);
 

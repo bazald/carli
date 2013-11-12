@@ -233,7 +233,7 @@ private:
 
   std::string m_value_function_map_mode = dynamic_cast<const Option_Itemized &>(Options::get_global()["value-function-map-mode"]).get_value();
   std::string m_value_function_map_filename = dynamic_cast<const Option_String &>(Options::get_global()["value-function-map-filename"]).get_value();
-  std::unordered_set<std::pair<std::string, std::string>> m_value_function_map;
+  std::unordered_set<std::string> m_value_function_map;
   mutable std::ofstream m_value_function_out;
 };
 
