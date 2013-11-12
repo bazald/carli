@@ -89,7 +89,7 @@ namespace Puddle_World {
 
   class Move_Direction : public Feature {
   public:
-    static const size_t index = 2;
+    enum Index {index = 2};
 
     Move_Direction(const Direction &direction_)
      : direction(direction_)

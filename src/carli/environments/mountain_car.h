@@ -52,7 +52,7 @@ namespace Mountain_Car {
 
   class Position : public Feature_Ranged<Feature> {
   public:
-    static const size_t index = 0;
+    enum Index {index = 0};
 
     Position(const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_)
@@ -87,7 +87,7 @@ namespace Mountain_Car {
 
   class Velocity : public Feature_Ranged<Feature> {
   public:
-    static const size_t index = 1;
+    enum Index {index = 1};
 
     Velocity(const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_)
@@ -122,7 +122,7 @@ namespace Mountain_Car {
 
   class Acceleration_Direction : public Feature {
   public:
-    static const size_t index = 2;
+    enum Index {index = 2};
 
     Acceleration_Direction(const Direction &direction_)
      : direction(direction_)
