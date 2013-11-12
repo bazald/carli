@@ -22,17 +22,22 @@ namespace Mountain_Car {
   using std::shared_ptr;
 
   class Feature;
-  class Feature : public Feature_Ranged {
+  class Position;
+
+  class Feature : public ::Feature {
+  };
+
+  class Position : public Feature_Ranged<Feature> {
   public:
     enum Axis : size_t {X = 0, X_DOT = 1};
 
-    Feature(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+    Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
     {
     }
 
-    Feature * clone() const {
-      return new Feature(Axis(axis.first), bound_lower, bound_upper, depth, upper);
+    Position * clone() const {
+      return new Position(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
     void print(ostream &os) const {

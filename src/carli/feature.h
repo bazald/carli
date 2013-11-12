@@ -112,6 +112,14 @@ public:
     os << axis << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
   }
 
+  Rete::Rete_Predicate::Predicate predicate() const {
+    return upper ? Rete::Rete_Predicate::GTE : Rete::Rete_Predicate::LT;
+  }
+
+  Rete::Symbol_Ptr_C symbol_constant() const {
+    return std::make_shared<Rete::Symbol_Constant_Float>(upper ? bound_lower : bound_upper);
+  }
+
   Rete::WME_Token_Index axis;
 
   double bound_lower; ///< inclusive
@@ -122,7 +130,8 @@ public:
   bool upper; ///< Is this the upper half (same bound_upper) or lower half (same bound_lower) of a split?
 };
 
-class Feature_Ranged : public Feature, public Feature_Ranged_Data {
+template <typename FEATURE>
+class Feature_Ranged : public FEATURE, public Feature_Ranged_Data {
   Feature_Ranged(const Feature_Ranged &) = delete;
   Feature_Ranged & operator=(const Feature_Ranged &) = delete;
 
@@ -166,14 +175,6 @@ public:
 
   void print(std::ostream &os) const {
     Feature_Ranged_Data::print(os);
-  }
-
-  Rete::Rete_Predicate::Predicate predicate() const {
-    return upper ? Rete::Rete_Predicate::GTE : Rete::Rete_Predicate::LT;
-  }
-
-  Rete::Symbol_Ptr_C symbol_constant() const {
-    return std::make_shared<Rete::Symbol_Constant_Float>(upper ? bound_lower : bound_upper);
   }
 };
 

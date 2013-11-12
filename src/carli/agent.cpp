@@ -61,7 +61,7 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
   auto filter_blink = make_filter(*m_wme_blink);
   for(auto &leaf : leaves) {
     auto leaf_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(leaf);
-    auto leaf_feature_ranged = dynamic_cast<Feature_Ranged *>(leaf->feature.get());
+    auto leaf_feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(leaf->feature.get());
 
 //    if(leaf_node_ranged) {
 //      for(auto &line : leaf_node_ranged->lines)
@@ -75,33 +75,33 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
 
       if(leaf->q_value->depth < m_split_max) {
         auto refined = leaf->feature->refined();
-        if(leaf_feature_ranged) {
+        if(leaf_feature_ranged_data) {
           for(auto &refined_feature : refined) {
-            auto refined_ranged = dynamic_cast<Feature_Ranged *>(refined_feature);
-            assert(refined_ranged);
+            auto refined_ranged_data = dynamic_cast<Feature_Ranged_Data *>(refined_feature);
+            assert(refined_ranged_data);
             Node_Ranged::Range range(leaf_node_ranged->range);
             Node_Ranged::Lines lines;
-            if(refined_ranged->axis.first == 0) {
-              if(!refined_ranged->upper) {
-                range.second.first = refined_ranged->bound_upper;
+            if(refined_ranged_data->axis.first == 0) {
+              if(!refined_ranged_data->upper) {
+                range.second.first = refined_ranged_data->bound_upper;
                 lines.push_back(Node_Ranged::Line(std::make_pair(range.second.first, range.first.second), std::make_pair(range.second.first, range.second.second)));
               }
               else {
-                range.first.first = refined_ranged->bound_lower;
+                range.first.first = refined_ranged_data->bound_lower;
               }
             }
             else {
-              if(!refined_ranged->upper) {
-                range.second.second = refined_ranged->bound_upper;
+              if(!refined_ranged_data->upper) {
+                range.second.second = refined_ranged_data->bound_upper;
                 lines.push_back(Node_Ranged::Line(std::make_pair(range.first.first, range.second.second), std::make_pair(range.second.first, range.second.second)));
               }
               else {
-                range.first.second = refined_ranged->bound_lower;
+                range.first.second = refined_ranged_data->bound_lower;
               }
             }
             auto rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, range, lines);
             rl->feature = refined_feature;
-            auto predicate = make_predicate_vc(refined_ranged->predicate(), leaf_feature_ranged->axis, refined_ranged->symbol_constant(), leaf->action->parent());
+            auto predicate = make_predicate_vc(refined_ranged_data->predicate(), leaf_feature_ranged_data->axis, refined_ranged_data->symbol_constant(), leaf->action->parent());
             rl->action = make_action_retraction([this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
               const auto action = get_action(token);
               this->insert_q_value_next(action, rl->q_value);
@@ -119,16 +119,16 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
 
         for(auto &fringe : general->fringe_values) {
           auto fringe_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(fringe);
-          auto fringe_feature_ranged = dynamic_cast<Feature_Ranged *>(fringe->feature.get());
+          auto fringe_feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(fringe->feature.get());
           auto fringe_action = fringe->action;
 
           Node_Fringe_Ptr rl;
           Rete::Rete_Node_Ptr new_test;
 
-          if(leaf_feature_ranged && fringe_feature_ranged) {
+          if(leaf_feature_ranged_data && fringe_feature_ranged_data) {
             Node_Ranged::Range range(fringe_node_ranged->range);
             Node_Ranged::Lines lines;
-            if(leaf_feature_ranged->axis.first == 0) {
+            if(leaf_feature_ranged_data->axis.first == 0) {
               range.first.first = leaf_node_ranged->range.first.first;
               range.second.first = leaf_node_ranged->range.second.first;
               for(auto &line : fringe_node_ranged->lines)
@@ -142,7 +142,7 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
             }
             rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, range, lines);
 
-            new_test = make_predicate_vc(fringe_feature_ranged->predicate(), fringe_feature_ranged->axis, fringe_feature_ranged->symbol_constant(), leaf->action->parent());
+            new_test = make_predicate_vc(fringe_feature_ranged_data->predicate(), fringe_feature_ranged_data->axis, fringe_feature_ranged_data->symbol_constant(), leaf->action->parent());
           }
           else {
             rl = std::make_shared<Node_Fringe>(*this, leaf->q_value->depth + 1);

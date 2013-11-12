@@ -223,13 +223,13 @@ namespace Puddle_World {
       for(size_t i = 0; i != cmac_resolution; ++i) {
         const double left = (i - xy_offset) * xy_size;
         const double right = (i + 1 - xy_offset) * xy_size;
-        auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
-        auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
+        auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Position::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
+        auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Position::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
         for(size_t j = 0; j != cmac_resolution; ++j) {
           const double top = (j - xy_offset) * xy_size;
           const double bottom = (j + 1 - xy_offset) * xy_size;
-          auto ygte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Feature::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
-          auto ylt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Feature::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), ygte);
+          auto ygte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Position::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
+          auto ylt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Position::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), ygte);
           for(const auto &action : m_action) {
             m_lines[action].insert(Node_Ranged::Line(std::make_pair(left, top), std::make_pair(left, bottom)));
             m_lines[action].insert(Node_Ranged::Line(std::make_pair(left, bottom), std::make_pair(right, bottom)));
@@ -272,9 +272,9 @@ namespace Puddle_World {
         auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
                                                         Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(0.5, 1.0)),
                                                         lines);
-        auto feature = new Feature(Feature::X, 0.0, 0.5, 2, false);
+        auto feature = new Position(Position::X, 0.0, 0.5, 2, false);
         nfr->feature = feature;
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
         nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->insert_q_value_next(action, nfr->q_value);
@@ -289,9 +289,9 @@ namespace Puddle_World {
         auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
                                                         Node_Ranged::Range(std::make_pair(0.5, 0.0), std::make_pair(1.0, 1.0)),
                                                         Node_Ranged::Lines());
-        auto feature = new Feature(Feature::X, 0.5, 1.0, 2, true);
+        auto feature = new Position(Position::X, 0.5, 1.0, 2, true);
         nfr->feature = feature;
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
         nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->insert_q_value_next(action, nfr->q_value);
@@ -308,9 +308,9 @@ namespace Puddle_World {
         auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
                                                         Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 0.5)),
                                                         lines);
-        auto feature = new Feature(Feature::Y, 0.0, 0.5, 2, false);
+        auto feature = new Position(Position::Y, 0.0, 0.5, 2, false);
         nfr->feature = feature;
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
         nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->insert_q_value_next(action, nfr->q_value);
@@ -325,9 +325,9 @@ namespace Puddle_World {
         auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
                                                         Node_Ranged::Range(std::make_pair(0.0, 0.5), std::make_pair(1.0, 1.0)),
                                                         Node_Ranged::Lines());
-        auto feature = new Feature(Feature::Y, 0.5, 1.0, 2, true);
+        auto feature = new Position(Position::Y, 0.5, 1.0, 2, true);
         nfr->feature = feature;
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
         nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->insert_q_value_next(action, nfr->q_value);
