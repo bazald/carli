@@ -49,13 +49,13 @@ g_ep_tuples = []
 ##g_ep_tuples.append(("cmac_0_64_16", "--cmac true --cmac-resolution 64 --cmac-tilings 16"))
 
 # Experiment 3, dynamically refined hierarchical agents performance comparison - compare to 1 and 2
-#g_ep_tuples.append(("even_2x2_64x64_3", "--credit-assignment even --split-min 3 --split-max 13"))
+g_ep_tuples.append(("even_2x2_64x64_3", "--credit-assignment even --split-min 3 --split-max 13 --value-function-map-mode out"))
 #g_ep_tuples.append(("inv-log-update-count_2x2_64x64_3", "--credit-assignment inv-log-update-count --split-min 3 --split-max 13"))
 #g_ep_tuples.append(("inv-root-update-count_2x2_64x64_3", "--credit-assignment inv-root-update-count --split-min 3 --split-max 13"))
 #g_ep_tuples.append(("specific_2x2_64x64_3", "--credit-assignment specific --split-min 3 --split-max 13"))
 
 # Experiment 4, read in value function from 3, use as fixed value function
-g_ep_tuples.append(("even_2x2_64x64_4", "--credit-assignment even --split-min 3 --split-max 13"))
+#g_ep_tuples.append(("even_2x2_64x64_4", "--credit-assignment even --split-min 3 --split-max 13 --value-function-map-mode in"))
 
 
 ### Experiment 2, alternative credit assignment performance comparison - compare to 1
@@ -246,14 +246,13 @@ print str(seeds) + '\n'
 
 
 class Experiment:
-  def __init__(self, num_steps, seed, stderr, stdout, experiment, vfm_in=None, vfm_out=None):
+  def __init__(self, num_steps, seed, stderr, stdout, experiment, vfm):
     self.num_steps = num_steps
     self.seed = seed
     self.stderr = stderr
     self.stdout = stdout
     self.experiment = experiment
-    self.vfm_in = vfm_in
-    self.vfm_out = vfm_out
+    self.vfm = vfm
     
   def get_args(self):
     args = self.experiment.split(' ')
@@ -261,10 +260,8 @@ class Experiment:
                  '--seed', str(self.seed),
                  '--stderr', self.stderr,
                  '--stdout', self.stdout])
-    if self.vfm_in:
-      args.extend(['--value-function-map-mode', 'in', '--value-function-map-filename', self.vfm_in])
-    elif self.vfm_out:
-      args.extend(['--value-function-map-mode', 'out', '--value-function-map-filename', self.vfm_out])
+    if self.vfm:
+      args.extend(['--value-function-map-filename', self.vfm])
     return args
   
   def print_args(self):
@@ -296,7 +293,7 @@ for ep_tuple in g_ep_tuples:
     stderr = dir + '/puddleworld-' + str(seed) + '.err'
     stdout = dir + '/puddleworld-' + str(seed) + '.out'
     vfm = dir + '/puddleworld-' + str(seed) + '.vfm'
-    experiment = Experiment(args.num_steps, seed, stderr, stdout, g_base_command + ' ' + ep_tuple[1], vfm_in=vfm)
+    experiment = Experiment(args.num_steps, seed, stderr, stdout, g_base_command + ' ' + ep_tuple[1], vfm=vfm)
     g_experiments.append(experiment)
     experiment.print_args()
 
