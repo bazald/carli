@@ -11,6 +11,12 @@
 #include <stdexcept>
 
 namespace Mountain_Car {
+  enum Direction : char {LEFT = 0, IDLE = 1, RIGHT = 2};
+}
+
+inline std::ostream & operator<<(std::ostream &os, const Mountain_Car::Direction &direction);
+
+namespace Mountain_Car {
 
   using std::dynamic_pointer_cast;
   using std::endl;
@@ -23,66 +29,164 @@ namespace Mountain_Car {
 
   class Feature;
   class Position;
+  class Velocity;
+  class Acceleration_Direction;
 
   class Feature : public ::Feature {
+  public:
+    Feature() {}
+
+    virtual Feature * clone() const = 0;
+
+    int compare_axis(const ::Feature &rhs) const {
+      return compare_axis(debuggable_cast<const Feature &>(rhs));
+    }
+
+    virtual int compare_axis(const Feature &rhs) const = 0;
+    virtual int compare_axis(const Position &rhs) const = 0;
+    virtual int compare_axis(const Velocity &rhs) const = 0;
+    virtual int compare_axis(const Acceleration_Direction &rhs) const = 0;
+
+    virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
   class Position : public Feature_Ranged<Feature> {
   public:
-    enum Axis : size_t {X = 0, X_DOT = 1};
+    static const size_t index = 0;
 
-    Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
+    Position(const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_)
     {
     }
 
     Position * clone() const {
-      return new Position(Axis(axis.first), bound_lower, bound_upper, depth, upper);
+      return new Position(bound_lower, bound_upper, depth, upper);
+    }
+
+    int compare_axis(const Mountain_Car::Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int compare_axis(const Position &rhs) const {
+      return Feature_Ranged<Feature>::compare_axis(rhs);
+    }
+    int compare_axis(const Velocity &) const {
+      return -1;
+    }
+    int compare_axis(const Acceleration_Direction &) const {
+      return -1;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return axis;
     }
 
     void print(ostream &os) const {
-      switch(axis.first) {
-        case X:     os << 'x';     break;
-        case X_DOT: os << "x-dot"; break;
-        default: abort();
-      }
-
-      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+      os << "x(" << bound_lower << ',' << bound_upper << ':' << depth << ')';
     }
   };
 
-  class Move : public Action {
+  class Velocity : public Feature_Ranged<Feature> {
   public:
-    enum Direction : char {LEFT = 0, IDLE = 1, RIGHT = 2};
+    static const size_t index = 1;
 
-    Move(const Direction &direction_ = IDLE)
+    Velocity(const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_)
+    {
+    }
+
+    Velocity * clone() const {
+      return new Velocity(bound_lower, bound_upper, depth, upper);
+    }
+
+    int compare_axis(const Mountain_Car::Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int compare_axis(const Position &) const {
+      return 1;
+    }
+    int compare_axis(const Velocity &rhs) const {
+      return Feature_Ranged<Feature>::compare_axis(rhs);
+    }
+    int compare_axis(const Acceleration_Direction &) const {
+      return -1;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return axis;
+    }
+
+    void print(ostream &os) const {
+      os << "x-dot(" << bound_lower << ',' << bound_upper << ':' << depth << ')';
+    }
+  };
+
+  class Acceleration_Direction : public Feature {
+  public:
+    static const size_t index = 2;
+
+    Acceleration_Direction(const Direction &direction_)
      : direction(direction_)
     {
     }
 
-    Move * clone() const {
-      return new Move(direction);
+    Acceleration_Direction * clone() const {
+      return new Acceleration_Direction(direction);
+    }
+
+    int compare_axis(const Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int compare_axis(const Position &) const {
+      return 1;
+    }
+    int compare_axis(const Velocity &) const {
+      return 1;
+    }
+    int compare_axis(const Acceleration_Direction &rhs) const {
+      return direction - debuggable_cast<const Acceleration_Direction &>(rhs).direction;
+    }
+
+    int compare_value(const ::Feature &) const {
+      return 0;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return Rete::WME_Token_Index(index, 2);
+    }
+
+    void print(ostream &os) const {
+      os << "acceleration(" << direction << ')';
+    }
+
+    Direction direction;
+  };
+
+  class Acceleration : public Action {
+  public:
+    Acceleration(const Direction &direction_ = IDLE)
+     : direction(direction_)
+    {
+    }
+
+    Acceleration(const Rete::WME_Token &token)
+     : direction(Direction(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Acceleration_Direction::index, 2)]).value))
+    {
+    }
+
+    Acceleration * clone() const {
+      return new Acceleration(direction);
     }
 
     int compare(const Action &rhs) const {
-      return direction - debuggable_cast<const Move &>(rhs).direction;
+      return direction - debuggable_cast<const Acceleration &>(rhs).direction;
     }
 
-    int compare(const Move &rhs) const {
+    int compare(const Acceleration &rhs) const {
       return direction - rhs.direction;
     }
 
     void print_impl(ostream &os) const {
-      os << "move(";
-
-      switch(direction) {
-        case LEFT:  os << "left";  break;
-        case IDLE:  os << "idle";  break;
-        case RIGHT: os << "right"; break;
-        default: abort();
-      }
-
-      os << ')';
+      os << "acceleration(" << direction << ')';
     }
 
     Direction direction;
@@ -165,11 +269,22 @@ namespace Mountain_Car {
     Rete::WME_Ptr_C m_x_wme;
     Rete::WME_Ptr_C m_x_dot_wme;
 
-    std::array<std::shared_ptr<const Action>, 3> m_action = {{std::make_shared<Move>(Move::LEFT),
-                                                              std::make_shared<Move>(Move::IDLE),
-                                                              std::make_shared<Move>(Move::RIGHT)}};
+    std::array<std::shared_ptr<const Action>, 3> m_action = {{std::make_shared<Acceleration>(LEFT),
+                                                              std::make_shared<Acceleration>(IDLE),
+                                                              std::make_shared<Acceleration>(RIGHT)}};
   };
 
+}
+
+std::ostream & operator<<(std::ostream &os, const Mountain_Car::Direction &direction) {
+  switch(direction) {
+    case Mountain_Car::LEFT:  os << "left";  break;
+    case Mountain_Car::IDLE:  os << "idle";  break;
+    case Mountain_Car::RIGHT: os << "right"; break;
+    default: abort();
+  }
+
+  return os;
 }
 
 #endif

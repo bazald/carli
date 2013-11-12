@@ -97,10 +97,10 @@ namespace Puddle_World {
     const double step_size = shift + 0.05;
 
     switch(debuggable_cast<const Move &>(action).direction) {
-      case Move::NORTH: m_position.second += step_size; break;
-      case Move::SOUTH: m_position.second -= step_size; break;
-      case Move::EAST:  m_position.first  += step_size; break;
-      case Move::WEST:  m_position.first  -= step_size; break;
+      case NORTH: m_position.second += step_size; break;
+      case SOUTH: m_position.second -= step_size; break;
+      case EAST:  m_position.first  += step_size; break;
+      case WEST:  m_position.first  -= step_size; break;
       default: abort();
     }
 
@@ -162,35 +162,35 @@ namespace Puddle_World {
     auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
     auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
     auto y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
-    auto move_direction_attr = std::make_shared<Rete::Symbol_Constant_String>("move-direction");
-    const std::array<Rete::Symbol_Constant_Int_Ptr, 4> move_direction_values = {{std::make_shared<Rete::Symbol_Constant_Int>(Move::NORTH),
-                                                                                 std::make_shared<Rete::Symbol_Constant_Int>(Move::SOUTH),
-                                                                                 std::make_shared<Rete::Symbol_Constant_Int>(Move::EAST),
-                                                                                 std::make_shared<Rete::Symbol_Constant_Int>(Move::WEST)}};
+    auto move_attr = std::make_shared<Rete::Symbol_Constant_String>("move");
+    const std::array<Rete::Symbol_Constant_Int_Ptr, 4> move_values = {{std::make_shared<Rete::Symbol_Constant_Int>(NORTH),
+                                                                       std::make_shared<Rete::Symbol_Constant_Int>(SOUTH),
+                                                                       std::make_shared<Rete::Symbol_Constant_Int>(EAST),
+                                                                       std::make_shared<Rete::Symbol_Constant_Int>(WEST)}};
 
     Rete::WME_Bindings state_bindings;
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
     auto x = make_filter(Rete::WME(m_first_var, x_attr, m_third_var));
     auto y = make_filter(Rete::WME(m_first_var, y_attr, m_third_var));
-    auto move_direction = make_filter(Rete::WME(m_first_var, move_direction_attr, m_third_var));
+    auto move = make_filter(Rete::WME(m_first_var, move_attr, m_third_var));
     auto xy = make_join(state_bindings, x, y);
     state_bindings.clear();
     const bool cmac = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value();
-    for(const auto &move_direction_value : move_direction_values) {
-      auto md = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(0, 2), move_direction_value, move_direction);
-      auto xymd = make_join(state_bindings, xy, md);
+    for(const auto &move_value : move_values) {
+      auto m = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(0, 2), move_value, move);
+      auto xym = make_join(state_bindings, xy, m);
       if(cmac)
-        generate_cmac(xymd);
+        generate_cmac(xym);
       else
-        generate_rete(xymd);
+        generate_rete(xym);
     }
 
     m_x_wme = std::make_shared<Rete::WME>(s_id, x_attr, m_x_value);
     m_y_wme = std::make_shared<Rete::WME>(s_id, y_attr, m_y_value);
     insert_wme(m_x_wme);
     insert_wme(m_y_wme);
-    for(int i = 0; i != 4; ++i)
-      insert_wme(std::make_shared<Rete::WME>(s_id, move_direction_attr, move_direction_values[i]));
+    for(const auto &move_value : move_values)
+      insert_wme(std::make_shared<Rete::WME>(s_id, move_attr, move_value));
     insert_wme(m_wme_blink);
   }
 
@@ -208,10 +208,10 @@ namespace Puddle_World {
         generate_features();
         auto action = choose_greedy();
         switch(static_cast<const Move &>(*action).direction) {
-          case Move::NORTH: os << 'N'; break;
-          case Move::SOUTH: os << 'S'; break;
-          case Move::EAST:  os << 'E'; break;
-          case Move::WEST:  os << 'W'; break;
+          case NORTH: os << 'N'; break;
+          case SOUTH: os << 'S'; break;
+          case EAST:  os << 'E'; break;
+          case WEST:  os << 'W'; break;
           default: abort();
         }
       }
@@ -278,7 +278,7 @@ namespace Puddle_World {
     auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
     node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
       const auto action = get_action(token);
-      if(!this->specialize(rete_action, *action, get_action, node_unsplit))
+      if(!this->specialize(rete_action, get_action, node_unsplit))
         this->insert_q_value_next(action, node_unsplit->q_value);
     }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
       const auto action = get_action(token);

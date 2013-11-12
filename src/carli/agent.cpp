@@ -1,7 +1,7 @@
 #include "agent.h"
 
-bool Agent::specialize(const Rete::Rete_Action &rete_action, const Action &action, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general) {
-  if(!split_test(rete_action, action, general->q_value))
+bool Agent::specialize(const Rete::Rete_Action &rete_action, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general) {
+  if(!split_test(rete_action, general->q_value))
     return false;
   if(general->q_value->type == Q_Value::Type::SPLIT)
     return true;
@@ -181,7 +181,7 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
         node_unsplit->fringe_values.swap(node_unsplit_fringe);
         auto new_action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
           const auto action = get_action(token);
-          if(!this->specialize(rete_action, *action, get_action, node_unsplit))
+          if(!this->specialize(rete_action, get_action, node_unsplit))
             this->insert_q_value_next(action, node_unsplit->q_value);
         }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
@@ -201,7 +201,7 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
 Agent::Agent(const std::shared_ptr<Environment> &environment)
   : m_target_policy([this]()->action_ptrsc{return this->choose_greedy();}),
   m_exploration_policy([this]()->action_ptrsc{return this->choose_epsilon_greedy(m_epsilon);}),
-  m_split_test([this](const Rete::Rete_Action &rete_action, const Action &action, Q_Value * const &q)->bool{return this->split_test(rete_action, action, q);}),
+  m_split_test([this](const Rete::Rete_Action &rete_action, Q_Value * const &q)->bool{return this->split_test(rete_action, q);}),
   m_environment(environment),
   m_credit_assignment(
     m_credit_assignment_code == "all" ?
@@ -803,7 +803,7 @@ void Agent::assign_credit_normalize(const Q_Value_List &value_list, const double
   }
 }
 
-bool Agent::split_test(const Rete::Rete_Action &rete_action, const Action &action, const tracked_ptr<Q_Value> &q) const {
+bool Agent::split_test(const Rete::Rete_Action &rete_action, const tracked_ptr<Q_Value> &q) const {
   assert(q);
 
   if(q->type == Q_Value::Type::SPLIT || q->depth < m_split_min)

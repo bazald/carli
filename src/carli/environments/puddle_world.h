@@ -12,6 +12,12 @@
 #include <vector>
 
 namespace Puddle_World {
+  enum Direction : char {NORTH, SOUTH, EAST, WEST};
+}
+
+inline std::ostream & operator<<(std::ostream &os, const Puddle_World::Direction &direction);
+
+namespace Puddle_World {
 
   using std::dynamic_pointer_cast;
   using std::endl;
@@ -23,51 +29,8 @@ namespace Puddle_World {
   using std::shared_ptr;
 
   class Feature;
-  class Move_Direction;
   class Position;
-
-  class Move : public Action {
-  public:
-    enum Direction : char {NORTH, SOUTH, EAST, WEST};
-
-    Move(const Direction &direction_ = NORTH)
-     : direction(direction_)
-    {
-    }
-
-    Move(const Rete::WME_Token &token)
-     : direction(Direction(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(2, 2)]).value))
-    {
-    }
-
-    Move * clone() const {
-      return new Move(direction);
-    }
-
-    int compare(const Action &rhs) const {
-      return direction - debuggable_cast<const Move &>(rhs).direction;
-    }
-
-    int compare(const Move &rhs) const {
-      return direction - rhs.direction;
-    }
-
-    void print_impl(ostream &os) const {
-      os << "move(";
-
-      switch(direction) {
-        case NORTH: os << "north"; break;
-        case SOUTH: os << "south"; break;
-        case EAST:  os << "east";  break;
-        case WEST:  os << "west";  break;
-        default: abort();
-      }
-
-      os << ')';
-    }
-
-    Direction direction;
-  };
+  class Move_Direction;
 
   class Feature : public ::Feature {
   public:
@@ -126,7 +89,9 @@ namespace Puddle_World {
 
   class Move_Direction : public Feature {
   public:
-    Move_Direction(const Move::Direction &direction_)
+    static const size_t index = 2;
+
+    Move_Direction(const Direction &direction_)
      : direction(direction_)
     {
     }
@@ -154,20 +119,41 @@ namespace Puddle_World {
     }
 
     void print(ostream &os) const {
-      os << "move-direction(";
-
-      switch(direction) {
-        case Move::NORTH: os << "north"; break;
-        case Move::SOUTH: os << "south"; break;
-        case Move::EAST:  os << "east";  break;
-        case Move::WEST:  os << "west";  break;
-        default: abort();
-      }
-
-      os << ')';
+      os << "move(" << direction << ')';
     }
 
-    Move::Direction direction;
+    Direction direction;
+  };
+
+  class Move : public Action {
+  public:
+    Move(const Direction &direction_ = NORTH)
+     : direction(direction_)
+    {
+    }
+
+    Move(const Rete::WME_Token &token)
+     : direction(Direction(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Move_Direction::index, 2)]).value))
+    {
+    }
+
+    Move * clone() const {
+      return new Move(direction);
+    }
+
+    int compare(const Action &rhs) const {
+      return direction - debuggable_cast<const Move &>(rhs).direction;
+    }
+
+    int compare(const Move &rhs) const {
+      return direction - rhs.direction;
+    }
+
+    void print_impl(ostream &os) const {
+      os << "move(" << direction << ')';
+    }
+
+    Direction direction;
   };
 
   class Environment : public ::Environment {
@@ -255,12 +241,24 @@ namespace Puddle_World {
     Rete::WME_Ptr_C m_x_wme;
     Rete::WME_Ptr_C m_y_wme;
 
-    std::array<std::shared_ptr<const Action>, 4> m_action = {{std::make_shared<Move>(Move::NORTH),
-                                                              std::make_shared<Move>(Move::SOUTH),
-                                                              std::make_shared<Move>(Move::EAST),
-                                                              std::make_shared<Move>(Move::WEST)}};
+    std::array<std::shared_ptr<const Action>, 4> m_action = {{std::make_shared<Move>(NORTH),
+                                                              std::make_shared<Move>(SOUTH),
+                                                              std::make_shared<Move>(EAST),
+                                                              std::make_shared<Move>(WEST)}};
   };
 
+}
+
+std::ostream & operator<<(std::ostream &os, const Puddle_World::Direction &direction) {
+  switch(direction) {
+    case Puddle_World::NORTH: os << "north"; break;
+    case Puddle_World::SOUTH: os << "south"; break;
+    case Puddle_World::EAST:  os << "east";  break;
+    case Puddle_World::WEST:  os << "west";  break;
+    default: abort();
+  }
+
+  return os;
 }
 
 #endif
