@@ -8,21 +8,25 @@
 #include <stdexcept>
 
 namespace Tetris {
+  enum Tetromino_Type {TET_LINE, TET_SQUARE, TET_T, TET_S, TET_Z, TET_L, TET_J};
+}
+
+inline std::ostream & operator<<(std::ostream &os, const Tetris::Tetromino_Type &type);
+
+namespace Tetris {
 
   using std::dynamic_pointer_cast;
   using std::endl;
   using std::ostream;
 
-  class Width;
-  class Height;
-
   class Feature;
-  class Feature : public Feature_Present {
+  class Type;
+  class Size;
+  class Position;
+
+  class Feature : public ::Feature {
   public:
-    Feature(const bool &present_)
-     : Feature_Present(present_)
-    {
-    }
+    Feature() {}
 
     virtual Feature * clone() const = 0;
 
@@ -31,80 +35,132 @@ namespace Tetris {
     }
 
     virtual int compare_axis(const Feature &rhs) const = 0;
-    virtual int compare_axis(const Width &rhs) const = 0;
-    virtual int compare_axis(const Height &rhs) const = 0;
+    virtual int compare_axis(const Type &rhs) const = 0;
+    virtual int compare_axis(const Size &rhs) const = 0;
+    virtual int compare_axis(const Position &rhs) const = 0;
 
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
-  class Width : public Feature {
+  class Type : public Feature {
   public:
-    Width(const size_t &width_, const bool &present_)
-     : Feature(present_),
-     width(width_)
+    Type(const Tetromino_Type &type_)
+     : type(type_)
     {
     }
 
-    Width * clone() const {
-      return new Width(width, this->present);
+    Type * clone() const {
+      return new Type(type);
     }
 
     int compare_axis(const Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Width &rhs) const {
-      return width - rhs.width;
+    int compare_axis(const Type &) const {
+      return 0;
     }
-    int compare_axis(const Height &) const {
+    int compare_axis(const Size &) const {
+      return -1;
+    }
+    int compare_axis(const Position &) const {
+      return -1;
+    }
+
+    int compare_value(const ::Feature &rhs) const {
+      return type - debuggable_cast<const Type &>(rhs).type;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return Rete::WME_Token_Index(0, 2);
+    }
+
+    void print(ostream &os) const {
+      os << "type(" << type << ')';
+    }
+
+    Tetromino_Type type;
+  };
+
+  class Size : public Feature_Ranged<Feature> {
+  public:
+    enum Axis : size_t {WIDTH = 0, HEIGHT = 1};
+
+    Size(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
+    {
+    }
+
+    Size * clone() const {
+      return new Size(Axis(axis.first), bound_lower, bound_upper, depth, upper);
+    }
+
+    int compare_axis(const Tetris::Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int compare_axis(const Type &) const {
+      return -1;
+    }
+    int compare_axis(const Size &rhs) const {
+      return Feature_Ranged<Feature>::compare_axis(rhs);
+    }
+    int compare_axis(const Position &) const {
       return -1;
     }
 
     Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(3, 2);
+      return axis;
     }
 
     void print(ostream &os) const {
-      if(!present)
-        os << '!';
-      os << "width(" << width << ')';
-    }
+      switch(axis.first) {
+        case WIDTH: os << "width"; break;
+        case HEIGHT: os << "height"; break;
+        default: abort();
+      }
 
-    size_t width;
+      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+    }
   };
 
-  class Height : public Feature {
+  class Position : public Feature_Ranged<Feature> {
   public:
-    Height(const size_t &height_, const bool &present_)
-     : Feature(present_),
-     height(height_)
+    enum Axis : size_t {X = 0, Y = 1};
+
+    Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
     {
     }
 
-    Height * clone() const {
-      return new Height(height, this->present);
+    Position * clone() const {
+      return new Position(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
-    int compare_axis(const Feature &rhs) const {
+    int compare_axis(const Tetris::Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Width &) const {
+    int compare_axis(const Type &) const {
       return 1;
     }
-    int compare_axis(const Height &rhs) const {
-      return height - rhs.height;
+    int compare_axis(const Size &) const {
+      return 1;
+    }
+    int compare_axis(const Position &rhs) const {
+      return Feature_Ranged<Feature>::compare_axis(rhs);
     }
 
     Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(4, 2);
+      return axis;
     }
 
     void print(ostream &os) const {
-      if(!present)
-        os << '!';
-      os << "height(" << height << ')';
-    }
+      switch(axis.first) {
+        case X: os << 'x'; break;
+        case Y: os << 'y'; break;
+        default: abort();
+      }
 
-    size_t height;
+      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+    }
   };
 
   class Place : public Action {
@@ -147,7 +203,6 @@ namespace Tetris {
     Environment();
 
   private:
-    enum Tetromino_Type {TET_LINE, TET_SQUARE, TET_T, TET_S, TET_Z, TET_L, TET__l};
     enum Placement {PLACE_ILLEGAL, PLACE_GROUNDED, PLACE_UNGROUNDED};
     typedef std::array<std::array<bool, 4>, 4> Tetromino;
 
@@ -175,6 +230,21 @@ namespace Tetris {
 //    std::list<std::pair<std::pair<size_t, size_t>, int> > m_placements;
   };
 
+}
+
+std::ostream & operator<<(std::ostream &os, const Tetris::Tetromino_Type &type) {
+  switch(type) {
+    case Tetris::TET_LINE:   os << "----"; break;
+    case Tetris::TET_SQUARE: os << "[]"; break;
+    case Tetris::TET_T:      os << "T"; break;
+    case Tetris::TET_S:      os << "S"; break;
+    case Tetris::TET_Z:      os << "Z"; break;
+    case Tetris::TET_L:      os << "L"; break;
+    case Tetris::TET_J:      os << "J"; break;
+    default: abort();
+  }
+
+  return os;
 }
 
 #endif

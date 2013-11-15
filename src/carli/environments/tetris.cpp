@@ -92,7 +92,7 @@ namespace Tetris {
           tet[0][0] = tet[1][0] = tet[2][0] = tet[2][1] = true;
       }
       break;
-    case TET__l:
+    case TET_J:
       if(orientation & 2) {
         if(orientation & 1)
           tet[0][0] = tet[1][2] = tet[1][1] = tet[1][0] = true;
