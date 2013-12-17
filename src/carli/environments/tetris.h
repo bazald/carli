@@ -200,7 +200,11 @@ namespace Tetris {
 
   class Environment : public ::Environment {
   public:
+    typedef std::list<std::pair<std::pair<size_t, size_t>, int> > Placements;
+
     Environment();
+
+    const Placements & get_placements() const {return m_placements;}
 
   private:
     enum Placement {PLACE_ILLEGAL, PLACE_GROUNDED, PLACE_UNGROUNDED};
@@ -215,7 +219,7 @@ namespace Tetris {
     Tetromino generate_Tetronmino(const Tetromino_Type &type, const int &orientation = 0);
     double clear_lines();
 
-    Placement get_placement(const Tetromino &tet, const std::pair<size_t, size_t> &position);
+    Placement test_placement(const Tetromino &tet, const std::pair<size_t, size_t> &position);
     size_t width_Tetronmino(const Tetromino &tet);
     size_t height_Tetronmino(const Tetromino &tet);
 
@@ -226,8 +230,47 @@ namespace Tetris {
     Tetromino_Type m_current;
     Tetromino_Type m_next;
 
-//    void generate_placements();
-//    std::list<std::pair<std::pair<size_t, size_t>, int> > m_placements;
+    void generate_placements();
+    Placements m_placements;
+  };
+
+  class Agent : public ::Agent {
+  public:
+    Agent(const std::shared_ptr< ::Environment> &env);
+    ~Agent();
+
+  private:
+    void generate_rete();
+
+    void generate_features();
+
+    void update();
+
+    Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
+    Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
+
+    Rete::Symbol_Identifier_Ptr_C m_input_id = std::make_shared<Rete::Symbol_Identifier>("I1");
+    Rete::Symbol_Constant_String_Ptr_C m_input_attr = std::make_shared<Rete::Symbol_Constant_String>("input");
+    Rete::Symbol_Constant_String_Ptr_C m_action_attr = std::make_shared<Rete::Symbol_Constant_String>("action");
+    Rete::Symbol_Constant_String_Ptr_C m_current_attr = std::make_shared<Rete::Symbol_Constant_String>("current");
+    Rete::Symbol_Constant_String_Ptr_C m_next_attr = std::make_shared<Rete::Symbol_Constant_String>("next");
+    Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
+    Rete::Symbol_Constant_String_Ptr_C m_y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
+    Rete::Symbol_Constant_String_Ptr_C m_orientation_attr = std::make_shared<Rete::Symbol_Constant_String>("orientation");
+    Rete::Symbol_Constant_String_Ptr_C m_width_attr = std::make_shared<Rete::Symbol_Constant_String>("width");
+    Rete::Symbol_Constant_String_Ptr_C m_height_attr = std::make_shared<Rete::Symbol_Constant_String>("height");
+    Rete::Symbol_Constant_String_Ptr_C m_type_attr = std::make_shared<Rete::Symbol_Constant_String>("type");
+    Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
+
+    std::array<Rete::Symbol_Identifier_Ptr_C, 7> m_type_ids = {{std::make_shared<Rete::Symbol_Identifier>("LINE"),
+                                                                 std::make_shared<Rete::Symbol_Identifier>("SQUARE"),
+                                                                 std::make_shared<Rete::Symbol_Identifier>("T"),
+                                                                 std::make_shared<Rete::Symbol_Identifier>("S"),
+                                                                 std::make_shared<Rete::Symbol_Identifier>("Z"),
+                                                                 std::make_shared<Rete::Symbol_Identifier>("L"),
+                                                                 std::make_shared<Rete::Symbol_Identifier>("J")}};
+
+    std::list<Rete::WME_Ptr_C> m_wmes_prev;
   };
 
 }
