@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.5.  */
+/* A Bison parser, made by GNU Bison 2.7.12-4996.  */
 
 /* Bison interface for Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,6 +30,15 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+#ifndef YY_RETE_RULES_TAB_HPP_INCLUDED
+# define YY_RETE_RULES_TAB_HPP_INCLUDED
+/* Enabling traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int rete_debug;
+#endif
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -48,13 +57,11 @@
 #endif
 
 
-
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
 {
-
-/* Line 2068 of yacc.c  */
-#line 52 "rules.y"
+/* Line 2053 of yacc.c  */
+#line 52 "rules.yyy"
 
   char cval;
   double fval;
@@ -65,16 +72,13 @@ typedef union YYSTYPE
   Rete::Rete_Predicate::Predicate predicate;
 
 
-
-/* Line 2068 of yacc.c  */
-#line 71 "rules.tab.hpp"
+/* Line 2053 of yacc.c  */
+#line 77 "rules.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
-
-extern YYSTYPE rete_lval;
 
 #if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
 typedef struct YYLTYPE
@@ -89,5 +93,20 @@ typedef struct YYLTYPE
 # define YYLTYPE_IS_TRIVIAL 1
 #endif
 
+extern YYSTYPE rete_lval;
 extern YYLTYPE rete_lloc;
+#ifdef YYPARSE_PARAM
+#if defined __STDC__ || defined __cplusplus
+int rete_parse (void *YYPARSE_PARAM);
+#else
+int rete_parse ();
+#endif
+#else /* ! YYPARSE_PARAM */
+#if defined __STDC__ || defined __cplusplus
+int rete_parse (Rete::Rete_Agent &agent);
+#else
+int rete_parse ();
+#endif
+#endif /* ! YYPARSE_PARAM */
 
+#endif /* !YY_RETE_RULES_TAB_HPP_INCLUDED  */

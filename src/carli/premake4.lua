@@ -26,7 +26,7 @@ project "carli"
 
     files { "git.cpp", "obj/scu.cpp" }
   else
-    files { "**.h", "**.hpp", "**.cpp", "**.l", "**.y" }
+    files { "**.h", "**.hpp", "**.cpp", "**.lll", "**.yyy" }
     excludes { "obj/scu.cpp" }
   end
 

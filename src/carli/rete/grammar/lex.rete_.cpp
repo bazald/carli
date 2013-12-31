@@ -511,8 +511,8 @@ int rete__flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *rete_text;
-#line 1 "rules.l"
-#line 6 "rules.l"
+#line 1 "rules.lll"
+#line 6 "rules.lll"
 #include <cstdio>
 #include <cstring>
 #include "rete_parser.h"
@@ -708,7 +708,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 23 "rules.l"
+#line 23 "rules.lll"
 
 #line 714 "lex.rete_.cpp"
 
@@ -791,33 +791,33 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 24 "rules.l"
+#line 24 "rules.lll"
 ;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 25 "rules.l"
+#line 25 "rules.lll"
 ;
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 26 "rules.l"
+#line 26 "rules.lll"
 { ++g_line_number; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 27 "rules.l"
+#line 27 "rules.lll"
 { rete_lval.fval = atof(rete_text); return FLOAT; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 28 "rules.l"
+#line 28 "rules.lll"
 { rete_lval.ival = atoi(rete_text); return INT; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 29 "rules.l"
+#line 29 "rules.lll"
 { rete_lval.sval = new string(rete_text + 1);
                                             rete_lval.sval->resize(rete_lval.sval->size() - 1);
                                             return VARIABLE;
@@ -825,92 +825,92 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 33 "rules.l"
+#line 33 "rules.lll"
 { rete_lval.sval = new string(rete_text); return STRING; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 34 "rules.l"
+#line 34 "rules.lll"
 { rete_lval.sval = new string(rete_text); return STRING; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 35 "rules.l"
+#line 35 "rules.lll"
 { return rete_text[0]; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 36 "rules.l"
+#line 36 "rules.lll"
 { rete_lval.predicate = Rete::Rete_Predicate::EQ; return PREDICATE; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 37 "rules.l"
+#line 37 "rules.lll"
 { rete_lval.predicate = Rete::Rete_Predicate::NEQ; return PREDICATE; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 38 "rules.l"
+#line 38 "rules.lll"
 { rete_lval.predicate = Rete::Rete_Predicate::GT; return PREDICATE; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 39 "rules.l"
+#line 39 "rules.lll"
 { rete_lval.predicate = Rete::Rete_Predicate::GTE; return PREDICATE; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 40 "rules.l"
+#line 40 "rules.lll"
 { rete_lval.predicate = Rete::Rete_Predicate::LT; return PREDICATE; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 41 "rules.l"
+#line 41 "rules.lll"
 { rete_lval.predicate = Rete::Rete_Predicate::LTE; return PREDICATE; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 42 "rules.l"
+#line 42 "rules.lll"
 { BEGIN(READ_STRING); return '|'; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 43 "rules.l"
+#line 43 "rules.lll"
 { rete_lval.sval = new string("\\|"); return STRING_PART_S; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 44 "rules.l"
+#line 44 "rules.lll"
 { rete_lval.sval = new string("\\t"); return STRING_PART_S; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 45 "rules.l"
+#line 45 "rules.lll"
 { rete_lval.sval = new string("\\r"); return STRING_PART_S; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 46 "rules.l"
+#line 46 "rules.lll"
 { rete_lval.sval = new string("\\n"); return STRING_PART_S; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 47 "rules.l"
+#line 47 "rules.lll"
 { BEGIN(INITIAL); return '|'; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 48 "rules.l"
+#line 48 "rules.lll"
 ;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 49 "rules.l"
+#line 49 "rules.lll"
 { rete_lval.cval = rete_text[0]; return STRING_PART_C; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 50 "rules.l"
+#line 50 "rules.lll"
 ECHO;
 	YY_BREAK
 #line 917 "lex.rete_.cpp"
@@ -1909,7 +1909,7 @@ void rete_free (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 50 "rules.l"
+#line 50 "rules.lll"
 
 
 
