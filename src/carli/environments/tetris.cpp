@@ -24,7 +24,7 @@ namespace Tetris {
     for(size_t j = 0; j != 4; ++j) {
       for(size_t i = 0; i != 4; ++i) {
         if(tet[j][i])
-          m_grid[j + place.position.second][i + place.position.first] = true;
+          m_grid[place.position.second - j][place.position.first + i] = true;
       }
     }
     m_current = m_next;
@@ -116,7 +116,7 @@ namespace Tetris {
   double Environment::clear_lines() {
     double score = 0.0;
 
-    for(size_t j = 19; j < 20; ) {
+    for(size_t j = 0; j < 20; ) {
       bool cleared = true;
       for(int i = 0; i != 10; ++i) {
         if(!m_grid[j][i]) {
@@ -126,32 +126,32 @@ namespace Tetris {
       }
 
       if(!cleared) {
-        --j;
+        ++j;
         continue;
       }
 
-      memmove(&m_grid[1], &m_grid[0], sizeof(m_grid[0]) * j);
-      memset(&m_grid[0], 0, sizeof(m_grid[0]));
+      memmove(&m_grid[j], &m_grid[j + 1], (19 - j) * sizeof(m_grid[0]));
+      memset(&m_grid[19], 0, sizeof(m_grid[0]));
     }
 
     return score;
   }
 
   Environment::Placement Environment::test_placement(const Environment::Tetromino &tet, const std::pair<size_t, size_t> &position) {
-    const size_t width = width_Tetronmino(tet);
-    const size_t height = height_Tetronmino(tet);
+    const uint8_t width = width_Tetronmino(tet);
+    const uint8_t height = height_Tetronmino(tet);
 
-    if(position.first + width > 10 || position.second + height > 20)
+    if(position.first + width > 10 || int(position.second - height) < -1)
       return PLACE_ILLEGAL;
 
-    bool grounded = position.second + height == 20;
+    bool grounded = int(position.second - height) == -1;
 
     for(int j = 0; j != 4; ++j) {
       for(int i = 0; i != 4; ++i) {
         if(tet[j][i]) {
-          if(m_grid[position.second + j][position.first + i])
+          if(m_grid[position.second - j][position.first + i])
             return PLACE_ILLEGAL;
-          else if(!grounded && m_grid[position.second + j + 1][position.first + i])
+          else if(!grounded && m_grid[position.second - j + 1][position.first + i])
             grounded = true;
         }
       }
@@ -160,9 +160,9 @@ namespace Tetris {
     return grounded ? PLACE_GROUNDED : PLACE_UNGROUNDED;
   }
 
-  size_t Environment::width_Tetronmino(const Environment::Tetromino &tet) {
-    for(size_t i = 0; i != 4; ++i) {
-      for(size_t j = 0; ; ++j) {
+  uint8_t Environment::width_Tetronmino(const Environment::Tetromino &tet) {
+    for(uint8_t i = 0; i != 4; ++i) {
+      for(uint8_t j = 0; ; ++j) {
         if(j == 4)
           return i;
         else {
@@ -175,9 +175,9 @@ namespace Tetris {
     return 4;
   }
 
-  size_t Environment::height_Tetronmino(const Environment::Tetromino &tet) {
-    for(size_t j = 0; j != 4; ++j) {
-      for(size_t i = 0; ; ++i) {
+  uint8_t Environment::height_Tetronmino(const Environment::Tetromino &tet) {
+    for(uint8_t j = 0; j != 4; ++j) {
+      for(uint8_t i = 0; ; ++i) {
         if(i == 4)
           return j;
         else {
@@ -191,21 +191,40 @@ namespace Tetris {
   }
 
   void Environment::generate_placements() {
+    const uint8_t orientations = orientations_Tetronmino(m_current);
+
     m_placements.clear();
 
-    for(int orientation = 0; orientation != 4; ++orientation) {
+    for(int orientation = 0; orientation != orientations; ++orientation) {
       const auto tet = generate_Tetronmino(m_current, orientation);
       const size_t width = width_Tetronmino(tet);
 
       for(size_t i = 0, iend = 11 - width; i != iend; ++i) {
-        for(size_t j = 0; ; ++j) {
-          if(j == 20 || test_placement(tet, std::make_pair(i, j)) == PLACE_ILLEGAL) {
-            if(j)
-              m_placements.emplace_back(std::make_pair(i, j - 1), orientation);
+        for(size_t j = 19; int(j) > -1; --j) {
+          if(test_placement(tet, std::make_pair(i, j)) == PLACE_ILLEGAL) {
+            if(j < 19)
+              m_placements.emplace_back(std::make_pair(i, j + 1), orientation);
             break;
           }
         }
       }
+    }
+  }
+
+  uint8_t Environment::orientations_Tetronmino(const Tetromino_Type &type) {
+    switch(type) {
+    case TET_SQUARE:
+      return 1;
+    case TET_LINE:
+    case TET_S:
+    case TET_Z:
+      return 2;
+    case TET_T:
+    case TET_L:
+    case TET_J:
+      return 4;
+    default:
+      abort();
     }
   }
 
@@ -222,45 +241,37 @@ namespace Tetris {
   }
 
   void Agent::generate_rete() {
-//    Rete::WME_Bindings state_bindings;
-//
-//    auto filter_action = make_filter(Rete::WME(m_first_var, m_action_attr, m_third_var));
-////    state_bindings.clear();
-//    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
-//    auto filter_block = make_filter(Rete::WME(m_first_var, m_block_attr, m_third_var));
-//    auto join_action_block = make_join(state_bindings, filter_action, filter_block);
-//    auto filter_dest = make_filter(Rete::WME(m_first_var, m_dest_attr, m_third_var));
-//    auto join_action_dest = make_join(state_bindings, join_action_block, filter_dest);
-//
-//    auto filter_name = make_filter(Rete::WME(m_first_var, m_name_attr, m_third_var));
+    Rete::WME_Bindings state_bindings;
+
 //    state_bindings.clear();
-//    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(1, 2), Rete::WME_Token_Index(0, 0)));
-//    auto join_block_name = make_join(state_bindings, join_action_dest, filter_name);
-//    state_bindings.clear();
-//    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(2, 2), Rete::WME_Token_Index(0, 0)));
-//    auto join_dest_name = make_join(state_bindings, join_block_name, filter_name);
-//
-//    auto filter_blink = make_filter(*m_wme_blink);
-//    auto filter_clear = make_filter(Rete::WME(m_first_var, m_clear_attr, m_third_var));
-//    auto filter_in_place = make_filter(Rete::WME(m_first_var, m_in_place_attr, m_third_var));
-//
-//    auto get_action = [this](const Rete::WME_Token &token)->action_ptrsc {
-//      return std::make_shared<Move>(token);
-//    };
-//
-//    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
-//    {
-//      auto join_blink = make_existential_join(Rete::WME_Bindings(), join_dest_name, filter_blink);
-//
-//      node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        if(!this->specialize(rete_action, get_action, node_unsplit))
-//          this->insert_q_value_next(action, node_unsplit->q_value);
-//      }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->purge_q_value_next(action, node_unsplit->q_value);
-//      }, join_blink).get();
-//    }
+    auto filter_action = make_filter(Rete::WME(m_first_var, m_action_attr, m_third_var));
+    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
+    auto filter_x = make_filter(Rete::WME(m_first_var, m_x_attr, m_third_var));
+    auto join_action_x = make_join(state_bindings, filter_action, filter_x);
+    auto filter_y = make_filter(Rete::WME(m_first_var, m_y_attr, m_third_var));
+    auto join_action_y = make_join(state_bindings, join_action_x, filter_y);
+    auto filter_orientation = make_filter(Rete::WME(m_first_var, m_orientation_attr, m_third_var));
+    auto join_action_orientation = make_join(state_bindings, join_action_y, filter_orientation);
+
+    auto filter_blink = make_filter(*m_wme_blink);
+
+    auto get_action = [this](const Rete::WME_Token &token)->action_ptrsc {
+      return std::make_shared<Place>(token);
+    };
+
+    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
+    {
+      auto join_blink = make_existential_join(Rete::WME_Bindings(), join_action_orientation, filter_blink);
+
+      node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        if(!this->specialize(rete_action, get_action, node_unsplit))
+          this->insert_q_value_next(action, node_unsplit->q_value);
+      }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->purge_q_value_next(action, node_unsplit->q_value);
+      }, join_blink).get();
+    }
 //
 //    std::vector<Feature::Which> blocks = {{Feature::BLOCK, Feature::DEST}};
 //    const bool disable_distractors = true;
@@ -358,32 +369,6 @@ namespace Tetris {
 //      }, name_is).get();
 //      node_unsplit->fringe_values.push_back(node_fringe);
 //    }
-//
-////    state_bindings.clear();
-////    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(2, 2), Rete::WME_Token_Index(0, 0)));
-////    auto join_block_clear = make_existential_join(state_bindings, join_dest_name, filter_clear);
-////
-////    state_bindings.clear();
-////    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(3, 2), Rete::WME_Token_Index(0, 0)));
-////    auto join_dest_in_place = make_existential_join(state_bindings, join_block_clear, filter_in_place);
-////
-////    for(int i = 1; i != 4; ++i) {
-////      auto block_name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(4, 2), get_block_name(i), join_dest_in_place);
-////
-////      for(int j = 0; j != 4; ++j) {
-////        auto dest_name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(5, 2), get_block_name(j), block_name_is);
-////        auto join_blink = make_existential_join(Rete::WME_Bindings(), dest_name_is, filter_blink);
-////
-////        auto rl = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, 1));
-////        rl->action = make_action_retraction([this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-////          const auto action = get_action(token);
-////          this->insert_q_value_next(action, rl->q_value);
-////        }, [this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-////          const auto action = get_action(token);
-////          this->purge_q_value_next(action, rl->q_value);
-////        }, join_blink).get();
-////      }
-////    }
   }
 
   void Agent::generate_features() {

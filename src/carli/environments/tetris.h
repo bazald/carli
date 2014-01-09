@@ -176,6 +176,13 @@ namespace Tetris {
     {
     }
 
+    Place(const Rete::WME_Token &token)
+     : position(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value,
+                debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(2, 2)]).value),
+     orientation(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(3, 2)]).value)
+    {
+    }
+
     Place * clone() const {
       return new Place(position, orientation);
     }
@@ -217,11 +224,12 @@ namespace Tetris {
     void print_impl(ostream &os) const;
 
     Tetromino generate_Tetronmino(const Tetromino_Type &type, const int &orientation = 0);
+    uint8_t orientations_Tetronmino(const Tetromino_Type &type);
     double clear_lines();
 
     Placement test_placement(const Tetromino &tet, const std::pair<size_t, size_t> &position);
-    size_t width_Tetronmino(const Tetromino &tet);
-    size_t height_Tetronmino(const Tetromino &tet);
+    uint8_t width_Tetronmino(const Tetromino &tet);
+    uint8_t height_Tetronmino(const Tetromino &tet);
 
     Zeni::Random m_random_init;
     Zeni::Random m_random_selection;
