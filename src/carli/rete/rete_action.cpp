@@ -34,11 +34,11 @@ namespace Rete {
 
     input_tokens.push_back(wme_token);
 
-#ifndef NDEBUG
-    std::cerr << "Firing action: ";
-    output_name(std::cerr);
-    std::cerr << std::endl;
-#endif
+//#ifndef NDEBUG
+//    std::cerr << "Firing action: ";
+//    output_name(std::cerr);
+//    std::cerr << std::endl;
+//#endif
 
     agenda.insert_action(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
   }

@@ -351,6 +351,21 @@ namespace Tetris {
       node_unsplit->fringe_values.push_back(nfr);
     }
 
+//    for(size_t orientation = 0; orientation != 4; ++orientation) {
+//      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
+//      auto feature = new Orientation(orientation);
+//      node_fringe->feature = feature;
+//      auto name_is = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Orientation::ORIENTATION, 2), feature->symbol_constant(), node_unsplit->action->parent());
+//      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+//        const auto action = get_action(token);
+//        this->insert_q_value_next(action, node_fringe->q_value);
+//      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+//        const auto action = get_action(token);
+//        this->purge_q_value_next(action, node_fringe->q_value);
+//      }, name_is).get();
+//      node_unsplit->fringe_values.push_back(node_fringe);
+//    }
+
 //    for(const auto &block : blocks) {
 //      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
 //      auto feature = new In_Place(block, true);

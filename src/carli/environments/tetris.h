@@ -199,8 +199,8 @@ namespace Tetris {
     int compare_axis(const Position &) const {
       return 1;
     }
-    int compare_axis(const Orientation &rhs) const {
-      return Feature_Enumerated<Feature>::compare_axis(rhs);
+    int compare_axis(const Orientation &) const {
+      return 0;
     }
 
     Rete::WME_Token_Index wme_token_index() const {
