@@ -21,14 +21,9 @@ namespace Blocks_World {
   class Name;
 
   class Feature;
-  class Feature : public Feature_Present {
+  class Feature : public ::Feature{
   public:
     enum Which {BLOCK = 0, DEST = 1};
-
-    Feature(const bool &present_)
-     : Feature_Present(present_)
-    {
-    }
 
     virtual Feature * clone() const = 0;
 
@@ -44,16 +39,16 @@ namespace Blocks_World {
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
-  class Clear : public Feature {
+  class Clear : public Feature_Enumerated<Feature> {
   public:
     Clear(const Which &block_, const bool &present_)
-     : Feature(present_),
+     : Feature_Enumerated<Feature>(present_),
      block(block_)
     {
     }
 
     Clear * clone() const {
-      return new Clear(block, this->present);
+      return new Clear(block, this->value);
     }
 
     int compare_axis(const Feature &rhs) const {
@@ -74,24 +69,22 @@ namespace Blocks_World {
     }
 
     void print(ostream &os) const {
-      if(!present)
-        os << '!';
-      os << "clear(" << block << ')';
+      os << "clear(" << block << ':' << value << ')';
     }
 
     Which block;
   };
 
-  class In_Place : public Feature {
+  class In_Place : public Feature_Enumerated<Feature> {
   public:
     In_Place(const Which &block_, const bool &present_)
-     : Feature(present_),
+     : Feature_Enumerated<Feature>(present_),
      block(block_)
     {
     }
 
     In_Place * clone() const {
-      return new In_Place(block, this->present);
+      return new In_Place(block, this->value);
     }
 
     int compare_axis(const Feature &rhs) const {
@@ -112,18 +105,16 @@ namespace Blocks_World {
     }
 
     void print(ostream &os) const {
-      if(!present)
-        os << '!';
-      os << "in-place(" << block << ')';
+      os << "in-place(" << block << ':' << value << ')';
     }
 
     Which block;
   };
 
-  class Name : public Feature {
+  class Name : public Feature_Enumerated<Feature> {
   public:
     Name(const Which &block_, const block_id &name_)
-     : Feature(true),
+     : Feature_Enumerated<Feature>(true),
      block(block_),
      name(name_)
     {
@@ -155,9 +146,7 @@ namespace Blocks_World {
     }
 
     void print(ostream &os) const {
-      if(!present)
-        os << '!';
-      os << "name(" << block << ',' << name << ')';
+      os << "name(" << block << ',' << name << ':' << value << ')';
     }
 
     Which block;
@@ -237,28 +226,28 @@ namespace Blocks_World {
 
     void update();
 
-    Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
-    Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
+    const Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
+    const Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
 
-    Rete::Symbol_Identifier_Ptr_C m_input_id = std::make_shared<Rete::Symbol_Identifier>("I1");
-    Rete::Symbol_Constant_String_Ptr_C m_input_attr = std::make_shared<Rete::Symbol_Constant_String>("input");
-    Rete::Symbol_Constant_String_Ptr_C m_action_attr = std::make_shared<Rete::Symbol_Constant_String>("action");
-    Rete::Symbol_Constant_String_Ptr_C m_dest_attr = std::make_shared<Rete::Symbol_Constant_String>("dest");
-    Rete::Symbol_Constant_String_Ptr_C m_block_attr = std::make_shared<Rete::Symbol_Constant_String>("block");
-    Rete::Symbol_Constant_String_Ptr_C m_clear_attr = std::make_shared<Rete::Symbol_Constant_String>("clear");
-    Rete::Symbol_Constant_String_Ptr_C m_in_place_attr = std::make_shared<Rete::Symbol_Constant_String>("in-place");
-//    Rete::Symbol_Constant_String_Ptr_C m_on_top_attr = std::make_shared<Rete::Symbol_Constant_String>("on-top");
-    Rete::Symbol_Constant_String_Ptr_C m_name_attr = std::make_shared<Rete::Symbol_Constant_String>("name");
-    Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
+    const Rete::Symbol_Identifier_Ptr_C m_input_id = std::make_shared<Rete::Symbol_Identifier>("I1");
+    const Rete::Symbol_Constant_String_Ptr_C m_input_attr = std::make_shared<Rete::Symbol_Constant_String>("input");
+    const Rete::Symbol_Constant_String_Ptr_C m_action_attr = std::make_shared<Rete::Symbol_Constant_String>("action");
+    const Rete::Symbol_Constant_String_Ptr_C m_dest_attr = std::make_shared<Rete::Symbol_Constant_String>("dest");
+    const Rete::Symbol_Constant_String_Ptr_C m_block_attr = std::make_shared<Rete::Symbol_Constant_String>("block");
+    const Rete::Symbol_Constant_String_Ptr_C m_clear_attr = std::make_shared<Rete::Symbol_Constant_String>("clear");
+    const Rete::Symbol_Constant_String_Ptr_C m_in_place_attr = std::make_shared<Rete::Symbol_Constant_String>("in-place");
+//    const Rete::Symbol_Constant_String_Ptr_C m_on_top_attr = std::make_shared<Rete::Symbol_Constant_String>("on-top");
+    const Rete::Symbol_Constant_String_Ptr_C m_name_attr = std::make_shared<Rete::Symbol_Constant_String>("name");
+    const Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
 
-    std::array<Rete::Symbol_Identifier_Ptr_C, 4> m_block_ids = {{std::make_shared<Rete::Symbol_Identifier>("TABLE"),
-                                                                 std::make_shared<Rete::Symbol_Identifier>("A"),
-                                                                 std::make_shared<Rete::Symbol_Identifier>("B"),
-                                                                 std::make_shared<Rete::Symbol_Identifier>("C")}};
-    std::array<Rete::Symbol_Constant_Int_Ptr_C, 4> m_block_names = {{std::make_shared<Rete::Symbol_Constant_Int>(0),
-                                                                     std::make_shared<Rete::Symbol_Constant_Int>(1),
-                                                                     std::make_shared<Rete::Symbol_Constant_Int>(2),
-                                                                     std::make_shared<Rete::Symbol_Constant_Int>(3)}};
+    const std::array<Rete::Symbol_Identifier_Ptr_C, 4> m_block_ids = {{std::make_shared<Rete::Symbol_Identifier>("TABLE"),
+                                                                       std::make_shared<Rete::Symbol_Identifier>("A"),
+                                                                       std::make_shared<Rete::Symbol_Identifier>("B"),
+                                                                       std::make_shared<Rete::Symbol_Identifier>("C")}};
+    const std::array<Rete::Symbol_Constant_Int_Ptr_C, 4> m_block_names = {{std::make_shared<Rete::Symbol_Constant_Int>(0),
+                                                                           std::make_shared<Rete::Symbol_Constant_Int>(1),
+                                                                           std::make_shared<Rete::Symbol_Constant_Int>(2),
+                                                                           std::make_shared<Rete::Symbol_Constant_Int>(3)}};
 
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
   };

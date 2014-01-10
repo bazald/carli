@@ -23,6 +23,7 @@ namespace Tetris {
   class Type;
   class Size;
   class Position;
+  class Orientation;
 
   class Feature : public ::Feature {
   public:
@@ -38,6 +39,7 @@ namespace Tetris {
     virtual int compare_axis(const Type &rhs) const = 0;
     virtual int compare_axis(const Size &rhs) const = 0;
     virtual int compare_axis(const Position &rhs) const = 0;
+    virtual int compare_axis(const Orientation &rhs) const = 0;
 
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
@@ -63,6 +65,9 @@ namespace Tetris {
       return -1;
     }
     int compare_axis(const Position &) const {
+      return -1;
+    }
+    int compare_axis(const Orientation &) const {
       return -1;
     }
 
@@ -106,6 +111,9 @@ namespace Tetris {
     int compare_axis(const Position &) const {
       return -1;
     }
+    int compare_axis(const Orientation &) const {
+      return -1;
+    }
 
     Rete::WME_Token_Index wme_token_index() const {
       return axis;
@@ -124,7 +132,7 @@ namespace Tetris {
 
   class Position : public Feature_Ranged<Feature> {
   public:
-    enum Axis : size_t {X = 0, Y = 1};
+    enum Axis : size_t {X = 1, Y = 2};
 
     Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
@@ -147,6 +155,9 @@ namespace Tetris {
     int compare_axis(const Position &rhs) const {
       return Feature_Ranged<Feature>::compare_axis(rhs);
     }
+    int compare_axis(const Orientation &) const {
+      return -1;
+    }
 
     Rete::WME_Token_Index wme_token_index() const {
       return axis;
@@ -160,6 +171,44 @@ namespace Tetris {
       }
 
       os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+    }
+  };
+
+  class Orientation : public Feature_Enumerated<Feature> {
+  public:
+    enum Axis : size_t {ORIENTATION = 3};
+
+    Orientation(const size_t &orientation_)
+     : Feature_Enumerated(orientation_)
+    {
+    }
+
+    Orientation * clone() const {
+      return new Orientation(value);
+    }
+
+    int compare_axis(const Tetris::Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int compare_axis(const Type &) const {
+      return 1;
+    }
+    int compare_axis(const Size &) const {
+      return 1;
+    }
+    int compare_axis(const Position &) const {
+      return 1;
+    }
+    int compare_axis(const Orientation &rhs) const {
+      return Feature_Enumerated<Feature>::compare_axis(rhs);
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return Rete::WME_Token_Index(ORIENTATION, 2);
+    }
+
+    void print(ostream &os) const {
+      os << "orientation(" << value << ')';
     }
   };
 
@@ -209,6 +258,9 @@ namespace Tetris {
   public:
     typedef std::list<std::pair<std::pair<size_t, size_t>, int> > Placements;
 
+    const std::array<double, 5> score_line = {{1.0, 10.0, 20.0, 40.0, 80.0}};
+    const double score_failure = 0.0;
+
     Environment();
 
     const Placements & get_placements() const {return m_placements;}
@@ -254,29 +306,29 @@ namespace Tetris {
 
     void update();
 
-    Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
-    Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
+    const Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
+    const Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
 
-    Rete::Symbol_Identifier_Ptr_C m_input_id = std::make_shared<Rete::Symbol_Identifier>("I1");
-    Rete::Symbol_Constant_String_Ptr_C m_input_attr = std::make_shared<Rete::Symbol_Constant_String>("input");
-    Rete::Symbol_Constant_String_Ptr_C m_action_attr = std::make_shared<Rete::Symbol_Constant_String>("action");
-    Rete::Symbol_Constant_String_Ptr_C m_current_attr = std::make_shared<Rete::Symbol_Constant_String>("current");
-    Rete::Symbol_Constant_String_Ptr_C m_next_attr = std::make_shared<Rete::Symbol_Constant_String>("next");
-    Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
-    Rete::Symbol_Constant_String_Ptr_C m_y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
-    Rete::Symbol_Constant_String_Ptr_C m_orientation_attr = std::make_shared<Rete::Symbol_Constant_String>("orientation");
-    Rete::Symbol_Constant_String_Ptr_C m_width_attr = std::make_shared<Rete::Symbol_Constant_String>("width");
-    Rete::Symbol_Constant_String_Ptr_C m_height_attr = std::make_shared<Rete::Symbol_Constant_String>("height");
-    Rete::Symbol_Constant_String_Ptr_C m_type_attr = std::make_shared<Rete::Symbol_Constant_String>("type");
-    Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
+    const Rete::Symbol_Identifier_Ptr_C m_input_id = std::make_shared<Rete::Symbol_Identifier>("I1");
+    const Rete::Symbol_Constant_String_Ptr_C m_input_attr = std::make_shared<Rete::Symbol_Constant_String>("input");
+    const Rete::Symbol_Constant_String_Ptr_C m_action_attr = std::make_shared<Rete::Symbol_Constant_String>("action");
+    const Rete::Symbol_Constant_String_Ptr_C m_current_attr = std::make_shared<Rete::Symbol_Constant_String>("current");
+    const Rete::Symbol_Constant_String_Ptr_C m_next_attr = std::make_shared<Rete::Symbol_Constant_String>("next");
+    const Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
+    const Rete::Symbol_Constant_String_Ptr_C m_y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
+    const Rete::Symbol_Constant_String_Ptr_C m_orientation_attr = std::make_shared<Rete::Symbol_Constant_String>("orientation");
+    const Rete::Symbol_Constant_String_Ptr_C m_width_attr = std::make_shared<Rete::Symbol_Constant_String>("width");
+    const Rete::Symbol_Constant_String_Ptr_C m_height_attr = std::make_shared<Rete::Symbol_Constant_String>("height");
+    const Rete::Symbol_Constant_String_Ptr_C m_type_attr = std::make_shared<Rete::Symbol_Constant_String>("type");
+    const Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
 
     std::array<Rete::Symbol_Identifier_Ptr_C, 7> m_type_ids = {{std::make_shared<Rete::Symbol_Identifier>("LINE"),
-                                                                 std::make_shared<Rete::Symbol_Identifier>("SQUARE"),
-                                                                 std::make_shared<Rete::Symbol_Identifier>("T"),
-                                                                 std::make_shared<Rete::Symbol_Identifier>("S"),
-                                                                 std::make_shared<Rete::Symbol_Identifier>("Z"),
-                                                                 std::make_shared<Rete::Symbol_Identifier>("L"),
-                                                                 std::make_shared<Rete::Symbol_Identifier>("J")}};
+                                                                std::make_shared<Rete::Symbol_Identifier>("SQUARE"),
+                                                                std::make_shared<Rete::Symbol_Identifier>("T"),
+                                                                std::make_shared<Rete::Symbol_Identifier>("S"),
+                                                                std::make_shared<Rete::Symbol_Identifier>("Z"),
+                                                                std::make_shared<Rete::Symbol_Identifier>("L"),
+                                                                std::make_shared<Rete::Symbol_Identifier>("J")}};
 
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
   };

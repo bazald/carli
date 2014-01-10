@@ -258,13 +258,13 @@ namespace Mountain_Car {
     const double m_min_x_dot = -0.07;
     const double m_max_x_dot = 0.07;
 
-    Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
-    Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
+    const Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
+    const Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
 
-    Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
-    Rete::Symbol_Constant_String_Ptr_C m_x_dot_attr = std::make_shared<Rete::Symbol_Constant_String>("x-dot");
-    Rete::Symbol_Constant_Float_Ptr m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_x());
-    Rete::Symbol_Constant_Float_Ptr m_x_dot_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_x_dot());
+    const Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
+    const Rete::Symbol_Constant_String_Ptr_C m_x_dot_attr = std::make_shared<Rete::Symbol_Constant_String>("x-dot");
+    const Rete::Symbol_Constant_Float_Ptr m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_x());
+    const Rete::Symbol_Constant_Float_Ptr m_x_dot_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_x_dot());
 
     Rete::WME_Ptr_C m_x_wme;
     Rete::WME_Ptr_C m_x_dot_wme;

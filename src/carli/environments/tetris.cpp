@@ -31,8 +31,13 @@ namespace Tetris {
     m_next = Tetromino_Type(m_random_selection.rand_lt(7));
 
     const double score = clear_lines();
+
     generate_placements();
-    return score;
+
+    if(m_placements.empty())
+      return score_failure;
+    else
+      return score;
   }
 
   void Environment::print_impl(ostream &os) const {
@@ -114,7 +119,7 @@ namespace Tetris {
   }
 
   double Environment::clear_lines() {
-    double score = 0.0;
+    size_t lines_cleared = 0.0;
 
     for(size_t j = 0; j < 20; ) {
       bool cleared = true;
@@ -132,9 +137,10 @@ namespace Tetris {
 
       memmove(&m_grid[j], &m_grid[j + 1], (19 - j) * sizeof(m_grid[0]));
       memset(&m_grid[19], 0, sizeof(m_grid[0]));
+      ++lines_cleared;
     }
 
-    return score;
+    return score_line[lines_cleared];
   }
 
   Environment::Placement Environment::test_placement(const Environment::Tetromino &tet, const std::pair<size_t, size_t> &position) {
@@ -272,45 +278,79 @@ namespace Tetris {
         this->purge_q_value_next(action, node_unsplit->q_value);
       }, join_blink).get();
     }
-//
-//    std::vector<Feature::Which> blocks = {{Feature::BLOCK, Feature::DEST}};
-//    const bool disable_distractors = true;
-//
-//    if(disable_distractors)
-//      blocks = {Feature::BLOCK};
-//
-//    for(const auto &block : blocks) {
-//      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
-//      auto feature = new Clear(block, true);
-//      node_fringe->feature = feature;
-//      state_bindings.clear();
-//      state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
-//      auto join_block_clear = make_existential_join(state_bindings, join_dest_name, filter_clear);
-//      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->insert_q_value_next(action, node_fringe->q_value);
-//      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->purge_q_value_next(action, node_fringe->q_value);
-//      }, join_block_clear).get();
-//      node_unsplit->fringe_values.push_back(node_fringe);
-//
-//      auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2);
-//      node_fringe_neg->feature = new Clear(block, false);
-//      auto neg = make_negation_join(state_bindings, join_dest_name, filter_clear);
-//      node_fringe_neg->action = make_action_retraction([this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->insert_q_value_next(action, node_fringe_neg->q_value);
-//      }, [this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->purge_q_value_next(action, node_fringe_neg->q_value);
-//      }, neg).get();
-//      node_unsplit->fringe_values.push_back(node_fringe_neg);
-//    }
-//
-//    if(disable_distractors)
-//      blocks = {Feature::DEST};
-//
+
+    {
+      Node_Ranged::Lines lines;
+      lines.push_back(Node_Ranged::Line(std::make_pair(5, 0), std::make_pair(5, 20)));
+      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                      Node_Ranged::Range(std::make_pair(0, 0), std::make_pair(5, 20)),
+                                                      lines);
+      auto feature = new Position(Position::X, 0, 5, 2, false);
+      nfr->feature = feature;
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
+      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->insert_q_value_next(action, nfr->q_value);
+      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->purge_q_value_next(action, nfr->q_value);
+      }, predicate).get();
+      node_unsplit->fringe_values.push_back(nfr);
+    }
+
+    {
+      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                      Node_Ranged::Range(std::make_pair(5, 0), std::make_pair(10, 20)),
+                                                      Node_Ranged::Lines());
+      auto feature = new Position(Position::X, 5, 10, 2, true);
+      nfr->feature = feature;
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
+      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->insert_q_value_next(action, nfr->q_value);
+      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->purge_q_value_next(action, nfr->q_value);
+      }, predicate).get();
+      node_unsplit->fringe_values.push_back(nfr);
+    }
+
+    {
+      Node_Ranged::Lines lines;
+      lines.push_back(Node_Ranged::Line(std::make_pair(0, 10), std::make_pair(10, 10)));
+      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                      Node_Ranged::Range(std::make_pair(0, 0), std::make_pair(10, 10)),
+                                                      lines);
+      auto feature = new Position(Position::Y, 0, 10, 2, false);
+      nfr->feature = feature;
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
+      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->insert_q_value_next(action, nfr->q_value);
+      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->purge_q_value_next(action, nfr->q_value);
+      }, predicate).get();
+      node_unsplit->fringe_values.push_back(nfr);
+    }
+
+    {
+      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                      Node_Ranged::Range(std::make_pair(0, 10), std::make_pair(10, 20)),
+                                                      Node_Ranged::Lines());
+      auto feature = new Position(Position::Y, 10, 20, 2, true);
+      nfr->feature = feature;
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
+      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->insert_q_value_next(action, nfr->q_value);
+      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->purge_q_value_next(action, nfr->q_value);
+      }, predicate).get();
+      node_unsplit->fringe_values.push_back(nfr);
+    }
+
 //    for(const auto &block : blocks) {
 //      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
 //      auto feature = new In_Place(block, true);

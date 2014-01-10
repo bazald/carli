@@ -60,21 +60,39 @@ inline std::ostream & operator<<(std::ostream &os, const Feature &feature) {
   return os;
 }
 
-class Feature_Present : public Feature {
-  Feature_Present(const Feature_Present &) = delete;
-  Feature_Present & operator=(const Feature_Present &) = delete;
+class Feature_Enumerated_Data {
+  Feature_Enumerated_Data(const Feature_Enumerated_Data &) = delete;
+  Feature_Enumerated_Data & operator=(const Feature_Enumerated_Data &) = delete;
 
 public:
-  Feature_Present(const bool &present_)
-   : present(present_)
+  Feature_Enumerated_Data(const size_t &value_)
+   : value(value_)
+  {
+  }
+
+  int compare_value(const Feature_Enumerated_Data &rhs) const {
+    return value > rhs.value ? 1 : value < rhs.value ? -1 : 0;
+  }
+
+  size_t value;
+};
+
+template <typename FEATURE>
+class Feature_Enumerated : public FEATURE, public Feature_Enumerated_Data {
+  Feature_Enumerated(const Feature_Enumerated &) = delete;
+  Feature_Enumerated & operator=(const Feature_Enumerated &) = delete;
+
+public:
+  Feature_Enumerated(const size_t &value_)
+   : Feature_Enumerated_Data(value_)
   {
   }
 
   int compare_value(const Feature &rhs) const {
-    return present - debuggable_cast<const Feature_Present &>(rhs).present;
+    return Feature_Enumerated_Data::compare_value(debuggable_cast<const Feature_Enumerated &>(rhs));
   }
 
-  bool present;
+  size_t value;
 };
 
 class Feature_Ranged_Data {
