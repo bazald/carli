@@ -355,75 +355,16 @@ namespace Tetris {
       auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
       auto feature = new Orientation(orientation);
       node_fringe->feature = feature;
-      auto name_is = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Orientation::ORIENTATION, 2), feature->symbol_constant(), node_unsplit->action->parent());
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Orientation::ORIENTATION, 2), feature->symbol_constant(), node_unsplit->action->parent());
       node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->insert_q_value_next(action, node_fringe->q_value);
       }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->purge_q_value_next(action, node_fringe->q_value);
-      }, name_is).get();
+      }, predicate).get();
       node_unsplit->fringe_values.push_back(node_fringe);
     }
-
-//    for(const auto &block : blocks) {
-//      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
-//      auto feature = new In_Place(block, true);
-//      node_fringe->feature = feature;
-//      state_bindings.clear();
-//      state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
-//      auto join_block_in_place = make_existential_join(state_bindings, join_dest_name, filter_in_place);
-//      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->insert_q_value_next(action, node_fringe->q_value);
-//      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->purge_q_value_next(action, node_fringe->q_value);
-//      }, join_block_in_place).get();
-//      node_unsplit->fringe_values.push_back(node_fringe);
-//
-//      auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2);
-//      node_fringe_neg->feature = new In_Place(block, false);
-//      auto neg = make_negation_join(state_bindings, join_dest_name, filter_in_place);
-//      node_fringe_neg->action = make_action_retraction([this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->insert_q_value_next(action, node_fringe_neg->q_value);
-//      }, [this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->purge_q_value_next(action, node_fringe_neg->q_value);
-//      }, neg).get();
-//      node_unsplit->fringe_values.push_back(node_fringe_neg);
-//    }
-//
-//    for(size_t block = 1; block != m_block_ids.size(); ++block) {
-//      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
-//      auto feature = new Name(Feature::BLOCK, m_block_names[block]->value);
-//      node_fringe->feature = feature;
-//      auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_dest_name);
-//      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->insert_q_value_next(action, node_fringe->q_value);
-//      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->purge_q_value_next(action, node_fringe->q_value);
-//      }, name_is).get();
-//      node_unsplit->fringe_values.push_back(node_fringe);
-//    }
-//
-//    for(size_t block = 0; block != m_block_ids.size(); ++block) {
-//      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
-//      auto feature = new Name(Feature::DEST, m_block_names[block]->value);
-//      node_fringe->feature = feature;
-//      auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_dest_name);
-//      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->insert_q_value_next(action, node_fringe->q_value);
-//      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->purge_q_value_next(action, node_fringe->q_value);
-//      }, name_is).get();
-//      node_unsplit->fringe_values.push_back(node_fringe);
-//    }
   }
 
   void Agent::generate_features() {

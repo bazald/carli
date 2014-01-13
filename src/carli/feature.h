@@ -78,6 +78,10 @@ public:
     return Rete::Rete_Predicate::EQ;
   }
 
+  Rete::Symbol_Ptr_C symbol_constant() const {
+    return std::make_shared<Rete::Symbol_Constant_Int>(value);
+  }
+
   size_t value;
 };
 
@@ -95,12 +99,6 @@ public:
   int compare_value(const Feature &rhs) const {
     return Feature_Enumerated_Data::compare_value(debuggable_cast<const Feature_Enumerated &>(rhs));
   }
-
-  Rete::Symbol_Ptr_C symbol_constant() const {
-    return std::make_shared<Rete::Symbol_Constant_Int>(value);
-  }
-
-  size_t value;
 };
 
 class Feature_Ranged_Data {
