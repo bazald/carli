@@ -66,7 +66,7 @@ namespace Puddle_World {
       return -rhs.compare_axis(*this);
     }
     int compare_axis(const Position &rhs) const {
-      return Feature_Ranged<Feature>::compare_axis(rhs);
+      return Feature_Ranged_Data::compare_axis(rhs);
     }
     int compare_axis(const Move_Direction &) const {
       return -1;

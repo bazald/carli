@@ -95,7 +95,9 @@ namespace Rete {
 
     void erase_output(const Rete_Node_Ptr &output) {
 //      outputs.erase(output);
-      outputs.erase(std::find(outputs.begin(), outputs.end(), output));
+      const auto found = std::find(outputs.begin(), outputs.end(), output);
+      if(found != outputs.end())
+        outputs.erase(found);
     }
 
     void disable_output(const Rete_Node_Ptr &output) {

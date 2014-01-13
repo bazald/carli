@@ -173,10 +173,6 @@ public:
     return Feature_Ranged_Data::compare(debuggable_cast<const Feature_Ranged &>(rhs));
   }
 
-  int compare_axis(const Feature &rhs) const {
-    return Feature_Ranged_Data::compare_axis(debuggable_cast<const Feature_Ranged &>(rhs));
-  }
-
   int compare_value(const Feature &rhs) const {
     return Feature_Ranged_Data::compare_value(debuggable_cast<const Feature_Ranged &>(rhs));
   }

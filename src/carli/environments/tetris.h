@@ -106,7 +106,7 @@ namespace Tetris {
       return -1;
     }
     int compare_axis(const Size &rhs) const {
-      return Feature_Ranged<Feature>::compare_axis(rhs);
+      return Feature_Ranged_Data::compare_axis(rhs);
     }
     int compare_axis(const Position &) const {
       return -1;
@@ -153,7 +153,7 @@ namespace Tetris {
       return 1;
     }
     int compare_axis(const Position &rhs) const {
-      return Feature_Ranged<Feature>::compare_axis(rhs);
+      return Feature_Ranged_Data::compare_axis(rhs);
     }
     int compare_axis(const Orientation &) const {
       return -1;

@@ -67,7 +67,7 @@ namespace Mountain_Car {
       return -rhs.compare_axis(*this);
     }
     int compare_axis(const Position &rhs) const {
-      return Feature_Ranged<Feature>::compare_axis(rhs);
+      return Feature_Ranged_Data::compare_axis(rhs);
     }
     int compare_axis(const Velocity &) const {
       return -1;
@@ -105,7 +105,7 @@ namespace Mountain_Car {
       return 1;
     }
     int compare_axis(const Velocity &rhs) const {
-      return Feature_Ranged<Feature>::compare_axis(rhs);
+      return Feature_Ranged_Data::compare_axis(rhs);
     }
     int compare_axis(const Acceleration_Direction &) const {
       return -1;
