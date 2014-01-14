@@ -46,20 +46,22 @@ namespace Tetris {
 
   class Type : public Feature {
   public:
-    Type(const Tetromino_Type &type_)
-     : type(type_)
+    enum Axis : size_t {CURRENT = 1, NEXT = 2};
+
+    Type(const Axis &axis_, const Tetromino_Type &type_)
+     : axis(axis_), type(type_)
     {
     }
 
     Type * clone() const {
-      return new Type(type);
+      return new Type(axis, type);
     }
 
     int compare_axis(const Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Type &) const {
-      return 0;
+    int compare_axis(const Type &rhs) const {
+      return axis - rhs.axis;
     }
     int compare_axis(const Size &) const {
       return -1;
@@ -76,19 +78,20 @@ namespace Tetris {
     }
 
     Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(0, 2);
+      return Rete::WME_Token_Index(axis, 2);
     }
 
     void print(ostream &os) const {
-      os << "type(" << type << ')';
+      os << "type(" << (axis == CURRENT ? "current" : "next") << ':' << type << ')';
     }
 
+    Axis axis;
     Tetromino_Type type;
   };
 
   class Size : public Feature_Ranged<Feature> {
   public:
-    enum Axis : size_t {WIDTH = 0, HEIGHT = 1};
+    enum Axis : size_t {WIDTH = 4, HEIGHT = 5};
 
     Size(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
@@ -132,7 +135,7 @@ namespace Tetris {
 
   class Position : public Feature_Ranged<Feature> {
   public:
-    enum Axis : size_t {X = 1, Y = 2};
+    enum Axis : size_t {X = 6, Y = 7};
 
     Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
@@ -226,9 +229,9 @@ namespace Tetris {
     }
 
     Place(const Rete::WME_Token &token)
-     : position(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(1, 2)]).value,
-                debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(2, 2)]).value),
-     orientation(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(3, 2)]).value)
+     : position(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Position::X, 2)]).value,
+                debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Position::Y, 2)]).value),
+     orientation(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Orientation::ORIENTATION, 2)]).value)
     {
     }
 
@@ -256,17 +259,30 @@ namespace Tetris {
 
   class Environment : public ::Environment {
   public:
-    typedef std::list<std::pair<std::pair<size_t, size_t>, int> > Placements;
+    struct Placement {
+      Placement(const size_t &orientation_, const std::pair<size_t, size_t> &size_, const std::pair<size_t, size_t> &position_)
+       : orientation(orientation_), size(size_), position(position_)
+      {
+      }
+
+      size_t orientation;
+      std::pair<size_t, size_t> size;
+      std::pair<size_t, size_t> position;
+    };
+    typedef std::list<Placement> Placements;
 
     const std::array<double, 5> score_line = {{1.0, 10.0, 20.0, 40.0, 80.0}};
     const double score_failure = 0.0;
 
     Environment();
 
+    Tetromino_Type get_current() const {return m_current;}
+    Tetromino_Type get_next() const {return m_next;}
+
     const Placements & get_placements() const {return m_placements;}
 
   private:
-    enum Placement {PLACE_ILLEGAL, PLACE_GROUNDED, PLACE_UNGROUNDED};
+    enum Result {PLACE_ILLEGAL, PLACE_GROUNDED, PLACE_UNGROUNDED};
     typedef std::array<std::array<bool, 4>, 4> Tetromino;
 
     void init_impl();
@@ -279,7 +295,7 @@ namespace Tetris {
     uint8_t orientations_Tetronmino(const Tetromino_Type &type);
     double clear_lines();
 
-    Placement test_placement(const Tetromino &tet, const std::pair<size_t, size_t> &position);
+    Result test_placement(const Tetromino &tet, const std::pair<size_t, size_t> &position);
     uint8_t width_Tetronmino(const Tetromino &tet);
     uint8_t height_Tetronmino(const Tetromino &tet);
 
@@ -312,14 +328,13 @@ namespace Tetris {
     const Rete::Symbol_Identifier_Ptr_C m_input_id = std::make_shared<Rete::Symbol_Identifier>("I1");
     const Rete::Symbol_Constant_String_Ptr_C m_input_attr = std::make_shared<Rete::Symbol_Constant_String>("input");
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = std::make_shared<Rete::Symbol_Constant_String>("action");
-    const Rete::Symbol_Constant_String_Ptr_C m_current_attr = std::make_shared<Rete::Symbol_Constant_String>("current");
-    const Rete::Symbol_Constant_String_Ptr_C m_next_attr = std::make_shared<Rete::Symbol_Constant_String>("next");
-    const Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
-    const Rete::Symbol_Constant_String_Ptr_C m_y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
+    const Rete::Symbol_Constant_String_Ptr_C m_type_current_attr = std::make_shared<Rete::Symbol_Constant_String>("type-current");
+    const Rete::Symbol_Constant_String_Ptr_C m_type_next_attr = std::make_shared<Rete::Symbol_Constant_String>("type-next");
     const Rete::Symbol_Constant_String_Ptr_C m_orientation_attr = std::make_shared<Rete::Symbol_Constant_String>("orientation");
     const Rete::Symbol_Constant_String_Ptr_C m_width_attr = std::make_shared<Rete::Symbol_Constant_String>("width");
     const Rete::Symbol_Constant_String_Ptr_C m_height_attr = std::make_shared<Rete::Symbol_Constant_String>("height");
-    const Rete::Symbol_Constant_String_Ptr_C m_type_attr = std::make_shared<Rete::Symbol_Constant_String>("type");
+    const Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
+    const Rete::Symbol_Constant_String_Ptr_C m_y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
 
     std::array<Rete::Symbol_Identifier_Ptr_C, 7> m_type_ids = {{std::make_shared<Rete::Symbol_Identifier>("LINE"),

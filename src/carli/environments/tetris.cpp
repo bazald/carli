@@ -143,7 +143,7 @@ namespace Tetris {
     return score_line[lines_cleared];
   }
 
-  Environment::Placement Environment::test_placement(const Environment::Tetromino &tet, const std::pair<size_t, size_t> &position) {
+  Environment::Result Environment::test_placement(const Environment::Tetromino &tet, const std::pair<size_t, size_t> &position) {
     const uint8_t width = width_Tetronmino(tet);
     const uint8_t height = height_Tetronmino(tet);
 
@@ -204,12 +204,13 @@ namespace Tetris {
     for(int orientation = 0; orientation != orientations; ++orientation) {
       const auto tet = generate_Tetronmino(m_current, orientation);
       const size_t width = width_Tetronmino(tet);
+      const size_t height = height_Tetronmino(tet);
 
       for(size_t i = 0, iend = 11 - width; i != iend; ++i) {
         for(size_t j = 19; int(j) > -1; --j) {
           if(test_placement(tet, std::make_pair(i, j)) == PLACE_ILLEGAL) {
             if(j < 19)
-              m_placements.emplace_back(std::make_pair(i, j + 1), orientation);
+              m_placements.emplace_back(orientation, std::make_pair(width, height), std::make_pair(i, j + 1));
             break;
           }
         }
@@ -252,12 +253,21 @@ namespace Tetris {
 //    state_bindings.clear();
     auto filter_action = make_filter(Rete::WME(m_first_var, m_action_attr, m_third_var));
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
-    auto filter_x = make_filter(Rete::WME(m_first_var, m_x_attr, m_third_var));
-    auto join_action_x = make_join(state_bindings, filter_action, filter_x);
-    auto filter_y = make_filter(Rete::WME(m_first_var, m_y_attr, m_third_var));
-    auto join_action_y = make_join(state_bindings, join_action_x, filter_y);
+    auto filter_type_current = make_filter(Rete::WME(m_first_var, m_type_current_attr, m_third_var));
+    auto join_type_current = make_join(state_bindings, filter_action, filter_type_current);
+    auto filter_type_next = make_filter(Rete::WME(m_first_var, m_type_next_attr, m_third_var));
+    auto join_type_next = make_join(state_bindings, join_type_current, filter_type_next);
     auto filter_orientation = make_filter(Rete::WME(m_first_var, m_orientation_attr, m_third_var));
-    auto join_action_orientation = make_join(state_bindings, join_action_y, filter_orientation);
+    auto join_orientation = make_join(state_bindings, join_type_next, filter_orientation);
+    auto filter_width = make_filter(Rete::WME(m_first_var, m_width_attr, m_third_var));
+    auto join_width = make_join(state_bindings, join_orientation, filter_width);
+    auto filter_height = make_filter(Rete::WME(m_first_var, m_height_attr, m_third_var));
+    auto join_height = make_join(state_bindings, join_width, filter_height);
+    auto filter_x = make_filter(Rete::WME(m_first_var, m_x_attr, m_third_var));
+    auto join_x = make_join(state_bindings, join_height, filter_x);
+    auto filter_y = make_filter(Rete::WME(m_first_var, m_y_attr, m_third_var));
+    auto join_y = make_join(state_bindings, join_x, filter_y);
+    auto &join_last = join_y;
 
     auto filter_blink = make_filter(*m_wme_blink);
 
@@ -267,7 +277,7 @@ namespace Tetris {
 
     auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
     {
-      auto join_blink = make_existential_join(Rete::WME_Bindings(), join_action_orientation, filter_blink);
+      auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
 
       node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
         const auto action = get_action(token);
@@ -381,9 +391,13 @@ namespace Tetris {
       Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
       oss.str("");
       wmes_current.push_back(std::make_shared<Rete::WME>(m_input_id, m_action_attr, action_id));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.first.first)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.first.second)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_orientation_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.second)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_type_current_attr, std::make_shared<Rete::Symbol_Constant_Int>(env->get_current())));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_type_next_attr, std::make_shared<Rete::Symbol_Constant_Int>(env->get_next())));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_orientation_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.orientation)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_width_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.first)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.second)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.position.first)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.position.second)));
     }
 
     remove_wme(m_wme_blink);
