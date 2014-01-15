@@ -67,6 +67,7 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
 //      for(auto &line : leaf_node_ranged->lines)
 //        m_lines[action].insert(line);
 //    }
+    assert(!(bool(leaf_node_ranged.get()) ^ bool(leaf_feature_ranged_data)));
 
     Node_Unsplit::Fringe_Values new_fringe;
 
@@ -145,7 +146,10 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
             new_test = make_predicate_vc(fringe_feature_ranged_data->predicate(), fringe_feature_ranged_data->axis, fringe_feature_ranged_data->symbol_constant(), leaf->action->parent());
           }
           else {
-            rl = std::make_shared<Node_Fringe>(*this, leaf->q_value->depth + 1);
+            if(fringe_feature_ranged_data)
+              rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, fringe_node_ranged->range, fringe_node_ranged->lines);
+            else
+              rl = std::make_shared<Node_Fringe>(*this, leaf->q_value->depth + 1);
 
             Rete::WME_Bindings bindings;
             bindings.insert(std::make_pair(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 2)));
