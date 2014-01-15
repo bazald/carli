@@ -8,7 +8,8 @@
 #include <stdexcept>
 
 namespace Tetris {
-  enum Tetromino_Type {TET_LINE, TET_SQUARE, TET_T, TET_S, TET_Z, TET_L, TET_J};
+  enum Tetromino_Type {TET_LINE = 0, TET_SQUARE = 1, TET_T = 2, TET_S = 3, TET_Z = 4, TET_L = 5, TET_J = 6};
+  enum {TET_TYPES = 7};
 }
 
 inline std::ostream & operator<<(std::ostream &os, const Tetris::Tetromino_Type &type);
@@ -44,17 +45,17 @@ namespace Tetris {
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
-  class Type : public Feature {
+  class Type : public Feature_Enumerated<Feature> {
   public:
     enum Axis : size_t {CURRENT = 1, NEXT = 2};
 
     Type(const Axis &axis_, const Tetromino_Type &type_)
-     : axis(axis_), type(type_)
+     : Feature_Enumerated<Feature>(type_), axis(axis_)
     {
     }
 
     Type * clone() const {
-      return new Type(axis, type);
+      return new Type(axis, Tetromino_Type(value));
     }
 
     int compare_axis(const Feature &rhs) const {
@@ -73,20 +74,15 @@ namespace Tetris {
       return -1;
     }
 
-    int compare_value(const ::Feature &rhs) const {
-      return type - debuggable_cast<const Type &>(rhs).type;
-    }
-
     Rete::WME_Token_Index wme_token_index() const {
       return Rete::WME_Token_Index(axis, 2);
     }
 
     void print(ostream &os) const {
-      os << "type(" << (axis == CURRENT ? "current" : "next") << ':' << type << ')';
+      os << "type(" << (axis == CURRENT ? "current" : "next") << ':' << value << ')';
     }
 
     Axis axis;
-    Tetromino_Type type;
   };
 
   class Size : public Feature_Ranged<Feature> {
@@ -296,6 +292,9 @@ namespace Tetris {
     double clear_lines();
 
     Result test_placement(const Tetromino &tet, const std::pair<size_t, size_t> &position);
+    size_t gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position);
+    size_t gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position);
+
     uint8_t width_Tetronmino(const Tetromino &tet);
     uint8_t height_Tetronmino(const Tetromino &tet);
 

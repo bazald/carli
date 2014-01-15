@@ -166,6 +166,52 @@ namespace Tetris {
     return grounded ? PLACE_GROUNDED : PLACE_UNGROUNDED;
   }
 
+  size_t Environment::gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position) {
+    size_t gaps = 0;
+
+    for(int i = 0; i != 4; ++i) {
+      const int barrier = position.second < 4 ? position.second : 4;
+
+      for(int j = barrier - 1; j > -1; --j) {
+        if(tet[j][i])
+          break;
+        else
+          ++gaps;
+      }
+
+      for(int j = position.second - barrier; j > -1; --j) {
+        if(!m_grid[j][position.first + i])
+          ++gaps;
+      }
+    }
+
+    return gaps;
+  }
+
+  size_t Environment::gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position) {
+    size_t gaps = 0;
+
+    for(int i = 0; i != 4; ++i) {
+      const int barrier = position.second < 4 ? position.second : 4;
+
+      for(int j = barrier - 1; j > -1; --j) {
+        if(tet[j][i])
+          break;
+        else
+          ++gaps;
+      }
+
+      for(int j = position.second - barrier; j > -1; --j) {
+        if(m_grid[j][position.first + i])
+          break;
+        else
+          ++gaps;
+      }
+    }
+
+    return gaps;
+  }
+
   uint8_t Environment::width_Tetronmino(const Environment::Tetromino &tet) {
     for(uint8_t i = 0; i != 4; ++i) {
       for(uint8_t j = 0; ; ++j) {
@@ -374,6 +420,23 @@ namespace Tetris {
         this->purge_q_value_next(action, node_fringe->q_value);
       }, predicate).get();
       node_unsplit->fringe_values.push_back(node_fringe);
+    }
+
+    for(Type::Axis axis : {Type::CURRENT, Type::NEXT}) {
+      for(size_t type = 0; type != TET_TYPES; ++type) {
+        auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
+        auto feature = new Type(axis, Tetromino_Type(type));
+        node_fringe->feature = feature;
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
+        node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->insert_q_value_next(action, node_fringe->q_value);
+        }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->purge_q_value_next(action, node_fringe->q_value);
+        }, predicate).get();
+        node_unsplit->fringe_values.push_back(node_fringe);
+      }
     }
   }
 
