@@ -120,6 +120,7 @@ static int main2(int argc, char **argv) {
   options.add(     make_shared<Option_Ranged<int>>("cmac-resolution", 1, true, numeric_limits<int>::max(), true, 16), "The number of tile codings in the CMAC.");
   options.add(     make_shared<Option_Ranged<int>>("cmac-offset", 0, true, numeric_limits<int>::max(), true, 0), "The tiling that should be the base tiling.");
   options.add_line("\n  Unusual Options:");
+  options.add(     make_shared<Option_Ranged<bool>>("generate-line-segments", false, true, true, true, false), "Generate line segments for 2D grids.");
   options.add(     make_shared<Option_Ranged<int>>("contribute-update-count", 0, true, numeric_limits<int>::max(), true, 0), "Require 1 more update than this to count toward means and variances.");
   options.add(     make_shared<Option_Ranged<bool>>("dynamic-midpoint", false, true, true, true, false), "Dynamically modify midpoint values for features to better balance refinements.");
   options.add(     make_shared<Option_Ranged<bool>>("fringe", false, true, true, true, false), "Store and use a fringe to make refinement decisions.");

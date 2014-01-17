@@ -82,22 +82,24 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
             assert(refined_ranged_data);
             Node_Ranged::Range range(leaf_node_ranged->range);
             Node_Ranged::Lines lines;
-            if(refined_ranged_data->axis.first == 0) {
-              if(!refined_ranged_data->upper) {
-                range.second.first = refined_ranged_data->bound_upper;
-                lines.push_back(Node_Ranged::Line(std::make_pair(range.second.first, range.first.second), std::make_pair(range.second.first, range.second.second)));
+            if(m_generate_line_segments) {
+              if(refined_ranged_data->axis.first == 0) {
+                if(!refined_ranged_data->upper) {
+                  range.second.first = refined_ranged_data->bound_upper;
+                  lines.push_back(Node_Ranged::Line(std::make_pair(range.second.first, range.first.second), std::make_pair(range.second.first, range.second.second)));
+                }
+                else {
+                  range.first.first = refined_ranged_data->bound_lower;
+                }
               }
               else {
-                range.first.first = refined_ranged_data->bound_lower;
-              }
-            }
-            else {
-              if(!refined_ranged_data->upper) {
-                range.second.second = refined_ranged_data->bound_upper;
-                lines.push_back(Node_Ranged::Line(std::make_pair(range.first.first, range.second.second), std::make_pair(range.second.first, range.second.second)));
-              }
-              else {
-                range.first.second = refined_ranged_data->bound_lower;
+                if(!refined_ranged_data->upper) {
+                  range.second.second = refined_ranged_data->bound_upper;
+                  lines.push_back(Node_Ranged::Line(std::make_pair(range.first.first, range.second.second), std::make_pair(range.second.first, range.second.second)));
+                }
+                else {
+                  range.first.second = refined_ranged_data->bound_lower;
+                }
               }
             }
             auto rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, range, lines);
@@ -129,17 +131,19 @@ void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Toke
           if(leaf_feature_ranged_data && fringe_feature_ranged_data) {
             Node_Ranged::Range range(fringe_node_ranged->range);
             Node_Ranged::Lines lines;
-            if(leaf_feature_ranged_data->axis.first == 0) {
-              range.first.first = leaf_node_ranged->range.first.first;
-              range.second.first = leaf_node_ranged->range.second.first;
-              for(auto &line : fringe_node_ranged->lines)
-                lines.push_back(Node_Ranged::Line(std::make_pair(range.first.first, line.first.second), std::make_pair(range.second.first, line.second.second)));
-            }
-            else {
-              range.first.second = leaf_node_ranged->range.first.second;
-              range.second.second = leaf_node_ranged->range.second.second;
-              for(auto &line : fringe_node_ranged->lines)
-                lines.push_back(Node_Ranged::Line(std::make_pair(line.first.first, range.first.second), std::make_pair(line.second.first, range.second.second)));
+            if(m_generate_line_segments) {
+              if(leaf_feature_ranged_data->axis.first == 0) {
+                range.first.first = leaf_node_ranged->range.first.first;
+                range.second.first = leaf_node_ranged->range.second.first;
+                for(auto &line : fringe_node_ranged->lines)
+                  lines.push_back(Node_Ranged::Line(std::make_pair(range.first.first, line.first.second), std::make_pair(range.second.first, line.second.second)));
+              }
+              else {
+                range.first.second = leaf_node_ranged->range.first.second;
+                range.second.second = leaf_node_ranged->range.second.second;
+                for(auto &line : fringe_node_ranged->lines)
+                  lines.push_back(Node_Ranged::Line(std::make_pair(line.first.first, range.first.second), std::make_pair(line.second.first, range.second.second)));
+              }
             }
             rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, range, lines);
 

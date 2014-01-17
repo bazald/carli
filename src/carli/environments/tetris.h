@@ -267,7 +267,8 @@ namespace Tetris {
     };
     typedef std::list<Placement> Placements;
 
-    const std::array<double, 5> score_line = {{1.0, 10.0, 20.0, 40.0, 80.0}};
+//    const std::array<double, 5> score_line = {{0.0, 10.0, 20.0, 30.0, 40.0}}; /// No risk-reward tradeoff
+    const std::array<double, 5> score_line = {{0.0, 10.0, 20.0, 40.0, 80.0}}; /// Risk-reward tradeoff
     const double score_failure = 0.0;
 
     Environment();

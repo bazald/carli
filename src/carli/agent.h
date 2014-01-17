@@ -218,6 +218,7 @@ private:
   const size_t m_split_pseudoepisodes = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["split-pseudoepisodes"]).get_value();
   const size_t m_split_update_count = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["split-update-count"]).get_value();
 
+  const bool m_generate_line_segments = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["generate-line-segments"]).get_value();
   const size_t m_contribute_update_count = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["contribute-update-count"]).get_value();
   const bool m_dynamic_midpoint = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["dynamic-midpoint"]).get_value();
   const bool m_fringe = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["fringe"]).get_value();
