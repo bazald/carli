@@ -22,9 +22,10 @@ namespace Tetris {
 
   class Feature;
   class Type;
+  class Orientation;
   class Size;
   class Position;
-  class Orientation;
+  class Gaps;
 
   class Feature : public ::Feature {
   public:
@@ -38,9 +39,10 @@ namespace Tetris {
 
     virtual int compare_axis(const Feature &rhs) const = 0;
     virtual int compare_axis(const Type &rhs) const = 0;
+    virtual int compare_axis(const Orientation &rhs) const = 0;
     virtual int compare_axis(const Size &rhs) const = 0;
     virtual int compare_axis(const Position &rhs) const = 0;
-    virtual int compare_axis(const Orientation &rhs) const = 0;
+    virtual int compare_axis(const Gaps &rhs) const = 0;
 
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
@@ -64,13 +66,16 @@ namespace Tetris {
     int compare_axis(const Type &rhs) const {
       return axis - rhs.axis;
     }
+    int compare_axis(const Orientation &) const {
+      return -1;
+    }
     int compare_axis(const Size &) const {
       return -1;
     }
     int compare_axis(const Position &) const {
       return -1;
     }
-    int compare_axis(const Orientation &) const {
+    int compare_axis(const Gaps &) const {
       return -1;
     }
 
@@ -83,6 +88,47 @@ namespace Tetris {
     }
 
     Axis axis;
+  };
+
+  class Orientation : public Feature_Enumerated<Feature> {
+  public:
+    enum Axis : size_t {ORIENTATION = 3};
+
+    Orientation(const size_t &orientation_)
+     : Feature_Enumerated(orientation_)
+    {
+    }
+
+    Orientation * clone() const {
+      return new Orientation(value);
+    }
+
+    int compare_axis(const Tetris::Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int compare_axis(const Type &) const {
+      return 1;
+    }
+    int compare_axis(const Orientation &) const {
+      return 0;
+    }
+    int compare_axis(const Size &) const {
+      return -1;
+    }
+    int compare_axis(const Position &) const {
+      return -1;
+    }
+    int compare_axis(const Gaps &) const {
+      return -1;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return Rete::WME_Token_Index(ORIENTATION, 2);
+    }
+
+    void print(ostream &os) const {
+      os << "orientation(" << value << ')';
+    }
   };
 
   class Size : public Feature_Ranged<Feature> {
@@ -102,7 +148,10 @@ namespace Tetris {
       return -rhs.compare_axis(*this);
     }
     int compare_axis(const Type &) const {
-      return -1;
+      return 1;
+    }
+    int compare_axis(const Orientation &) const {
+      return 1;
     }
     int compare_axis(const Size &rhs) const {
       return Feature_Ranged_Data::compare_axis(rhs);
@@ -110,7 +159,7 @@ namespace Tetris {
     int compare_axis(const Position &) const {
       return -1;
     }
-    int compare_axis(const Orientation &) const {
+    int compare_axis(const Gaps &) const {
       return -1;
     }
 
@@ -148,13 +197,16 @@ namespace Tetris {
     int compare_axis(const Type &) const {
       return 1;
     }
+    int compare_axis(const Orientation &) const {
+      return 1;
+    }
     int compare_axis(const Size &) const {
       return 1;
     }
     int compare_axis(const Position &rhs) const {
       return Feature_Ranged_Data::compare_axis(rhs);
     }
-    int compare_axis(const Orientation &) const {
+    int compare_axis(const Gaps &) const {
       return -1;
     }
 
@@ -173,17 +225,17 @@ namespace Tetris {
     }
   };
 
-  class Orientation : public Feature_Enumerated<Feature> {
+  class Gaps : public Feature_Ranged<Feature> {
   public:
-    enum Axis : size_t {ORIENTATION = 3};
+    enum Axis : size_t {BENEATH = 8, CREATED = 9};
 
-    Orientation(const size_t &orientation_)
-     : Feature_Enumerated(orientation_)
+    Gaps(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
     {
     }
 
-    Orientation * clone() const {
-      return new Orientation(value);
+    Gaps * clone() const {
+      return new Gaps(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
     int compare_axis(const Tetris::Feature &rhs) const {
@@ -192,22 +244,31 @@ namespace Tetris {
     int compare_axis(const Type &) const {
       return 1;
     }
+    int compare_axis(const Orientation &) const {
+      return 1;
+    }
     int compare_axis(const Size &) const {
       return 1;
     }
     int compare_axis(const Position &) const {
       return 1;
     }
-    int compare_axis(const Orientation &) const {
-      return 0;
+    int compare_axis(const Gaps &rhs) const {
+      return Feature_Ranged_Data::compare_axis(rhs);
     }
 
     Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(ORIENTATION, 2);
+      return axis;
     }
 
     void print(ostream &os) const {
-      os << "orientation(" << value << ')';
+      switch(axis.first) {
+        case BENEATH: os << "gaps-beneath"; break;
+        case CREATED: os << "gaps-created"; break;
+        default: abort();
+      }
+
+      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
     }
   };
 
@@ -256,14 +317,24 @@ namespace Tetris {
   class Environment : public ::Environment {
   public:
     struct Placement {
-      Placement(const size_t &orientation_, const std::pair<size_t, size_t> &size_, const std::pair<size_t, size_t> &position_)
-       : orientation(orientation_), size(size_), position(position_)
+      Placement(const size_t &orientation_,
+                const std::pair<size_t, size_t> &size_,
+                const std::pair<size_t, size_t> &position_,
+                const size_t &gaps_beneath_,
+                const size_t &gaps_created_)
+       : orientation(orientation_),
+       size(size_),
+       position(position_),
+       gaps_beneath(gaps_beneath_),
+       gaps_created(gaps_created_)
       {
       }
 
       size_t orientation;
       std::pair<size_t, size_t> size;
       std::pair<size_t, size_t> position;
+      size_t gaps_beneath;
+      size_t gaps_created;
     };
     typedef std::list<Placement> Placements;
 
@@ -316,6 +387,12 @@ namespace Tetris {
     ~Agent();
 
   private:
+    template<typename SUBFEATURE, typename AXIS>
+    void generate_rete_continuous(const Node_Unsplit_Ptr &node_unsplit,
+                                  const std::function<action_ptrsc(const Rete::WME_Token &token)> &get_action,
+                                  const AXIS &axis,
+                                  const float &lower_bound,
+                                  const float &upper_bound);
     void generate_rete();
 
     void generate_features();
@@ -335,6 +412,8 @@ namespace Tetris {
     const Rete::Symbol_Constant_String_Ptr_C m_height_attr = std::make_shared<Rete::Symbol_Constant_String>("height");
     const Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
     const Rete::Symbol_Constant_String_Ptr_C m_y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
+    const Rete::Symbol_Constant_String_Ptr_C m_gaps_beneath_attr = std::make_shared<Rete::Symbol_Constant_String>("gaps-beneath");
+    const Rete::Symbol_Constant_String_Ptr_C m_gaps_created_attr = std::make_shared<Rete::Symbol_Constant_String>("gaps-created");
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
 
     std::array<Rete::Symbol_Identifier_Ptr_C, 7> m_type_ids = {{std::make_shared<Rete::Symbol_Identifier>("LINE"),

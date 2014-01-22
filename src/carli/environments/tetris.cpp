@@ -256,7 +256,11 @@ namespace Tetris {
         for(size_t j = 19; int(j) > -1; --j) {
           if(test_placement(tet, std::make_pair(i, j)) == PLACE_ILLEGAL) {
             if(j < 19)
-              m_placements.emplace_back(orientation, std::make_pair(width, height), std::make_pair(i, j + 1));
+              m_placements.emplace_back(orientation,
+                                        std::make_pair(width, height),
+                                        std::make_pair(i, j + 1),
+                                        gaps_beneath(tet, std::make_pair(i, j)),
+                                        gaps_created(tet, std::make_pair(i, j)));
             break;
           }
         }
@@ -293,6 +297,37 @@ namespace Tetris {
     destroy();
   }
 
+  template<typename SUBFEATURE, typename AXIS>
+  void Agent::generate_rete_continuous(const Node_Unsplit_Ptr &node_unsplit,
+                                       const std::function<action_ptrsc(const Rete::WME_Token &token)> &get_action,
+                                       const AXIS &axis,
+                                       const float &lower_bound,
+                                       const float &upper_bound)
+  {
+    const float midpt = (lower_bound + upper_bound) / 2.0f;
+    const float values[][2] = {{lower_bound, midpt},
+                               {midpt, upper_bound}};
+
+    for(int i = 0; i != 2; ++i) {
+      Node_Ranged::Lines lines;
+//      lines.push_back(Node_Ranged::Line(std::make_pair(5, ), std::make_pair(5, 20)));
+      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                      Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/),
+                                                      lines);
+      auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
+      nfr->feature = feature;
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
+      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->insert_q_value_next(action, nfr->q_value);
+      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->purge_q_value_next(action, nfr->q_value);
+      }, predicate).get();
+      node_unsplit->fringe_values.push_back(nfr);
+    }
+  }
+
   void Agent::generate_rete() {
     Rete::WME_Bindings state_bindings;
 
@@ -313,7 +348,11 @@ namespace Tetris {
     auto join_x = make_join(state_bindings, join_height, filter_x);
     auto filter_y = make_filter(Rete::WME(m_first_var, m_y_attr, m_third_var));
     auto join_y = make_join(state_bindings, join_x, filter_y);
-    auto &join_last = join_y;
+    auto filter_gaps_beneath = make_filter(Rete::WME(m_first_var, m_gaps_beneath_attr, m_third_var));
+    auto join_gaps_beneath = make_join(state_bindings, join_y, filter_gaps_beneath);
+    auto filter_gaps_created = make_filter(Rete::WME(m_first_var, m_gaps_created_attr, m_third_var));
+    auto join_gaps_created = make_join(state_bindings, join_gaps_beneath, filter_gaps_created);
+    auto &join_last = join_gaps_created;
 
     auto filter_blink = make_filter(*m_wme_blink);
 
@@ -335,76 +374,21 @@ namespace Tetris {
       }, join_blink).get();
     }
 
-    {
-      Node_Ranged::Lines lines;
-      lines.push_back(Node_Ranged::Line(std::make_pair(5, 0), std::make_pair(5, 20)));
-      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
-                                                      Node_Ranged::Range(std::make_pair(0, 0), std::make_pair(5, 20)),
-                                                      lines);
-      auto feature = new Position(Position::X, 0, 5, 2, false);
-      nfr->feature = feature;
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, nfr->q_value);
-      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, nfr->q_value);
-      }, predicate).get();
-      node_unsplit->fringe_values.push_back(nfr);
-    }
-
-    {
-      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
-                                                      Node_Ranged::Range(std::make_pair(5, 0), std::make_pair(10, 20)),
-                                                      Node_Ranged::Lines());
-      auto feature = new Position(Position::X, 5, 10, 2, true);
-      nfr->feature = feature;
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, nfr->q_value);
-      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, nfr->q_value);
-      }, predicate).get();
-      node_unsplit->fringe_values.push_back(nfr);
-    }
-
-    {
-      Node_Ranged::Lines lines;
-      lines.push_back(Node_Ranged::Line(std::make_pair(0, 10), std::make_pair(10, 10)));
-      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
-                                                      Node_Ranged::Range(std::make_pair(0, 0), std::make_pair(10, 10)),
-                                                      lines);
-      auto feature = new Position(Position::Y, 0, 10, 2, false);
-      nfr->feature = feature;
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, nfr->q_value);
-      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, nfr->q_value);
-      }, predicate).get();
-      node_unsplit->fringe_values.push_back(nfr);
-    }
-
-    {
-      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
-                                                      Node_Ranged::Range(std::make_pair(0, 10), std::make_pair(10, 20)),
-                                                      Node_Ranged::Lines());
-      auto feature = new Position(Position::Y, 10, 20, 2, true);
-      nfr->feature = feature;
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, nfr->q_value);
-      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, nfr->q_value);
-      }, predicate).get();
-      node_unsplit->fringe_values.push_back(nfr);
+    for(Type::Axis axis : {Type::CURRENT, Type::NEXT}) {
+      for(size_t type = 0; type != TET_TYPES; ++type) {
+        auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
+        auto feature = new Type(axis, Tetromino_Type(type));
+        node_fringe->feature = feature;
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
+        node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->insert_q_value_next(action, node_fringe->q_value);
+        }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->purge_q_value_next(action, node_fringe->q_value);
+        }, predicate).get();
+        node_unsplit->fringe_values.push_back(node_fringe);
+      }
     }
 
     for(size_t orientation = 0; orientation != 4; ++orientation) {
@@ -422,22 +406,12 @@ namespace Tetris {
       node_unsplit->fringe_values.push_back(node_fringe);
     }
 
-    for(Type::Axis axis : {Type::CURRENT, Type::NEXT}) {
-      for(size_t type = 0; type != TET_TYPES; ++type) {
-        auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
-        auto feature = new Type(axis, Tetromino_Type(type));
-        node_fringe->feature = feature;
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
-        node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-          const auto action = get_action(token);
-          this->insert_q_value_next(action, node_fringe->q_value);
-        }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-          const auto action = get_action(token);
-          this->purge_q_value_next(action, node_fringe->q_value);
-        }, predicate).get();
-        node_unsplit->fringe_values.push_back(node_fringe);
-      }
-    }
+//    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::WIDTH, 0.0f, 4.0f);
+//    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::HEIGHT, 0.0f, 4.0f);
+    generate_rete_continuous<Position, Position::Axis>(node_unsplit, get_action, Position::X, 0.0f, 10.0f);
+//    generate_rete_continuous<Position, Position::Axis>(node_unsplit, get_action, Position::Y, 0.0f, 20.0f);
+//    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::BENEATH, 0.0f, 75.0f);
+//    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::CREATED, 0.0f, 75.0f);
   }
 
   void Agent::generate_features() {
@@ -461,6 +435,8 @@ namespace Tetris {
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.second)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.position.first)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.position.second)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_gaps_beneath_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.gaps_beneath)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_gaps_created_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.gaps_created)));
     }
 
     remove_wme(m_wme_blink);
