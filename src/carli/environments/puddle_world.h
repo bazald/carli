@@ -54,7 +54,7 @@ namespace Puddle_World {
     enum Axis : size_t {X = 0, Y = 1};
 
     Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, false)
     {
     }
 
@@ -98,6 +98,10 @@ namespace Puddle_World {
 
     Move_Direction * clone() const {
       return new Move_Direction(direction);
+    }
+
+    int get_depth() const {
+      return 0;
     }
 
     int compare_axis(const Feature &rhs) const {

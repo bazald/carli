@@ -35,10 +35,16 @@ public:
   bool operator!=(const Feature &rhs) const {return compare(rhs) != 0;}
 
   virtual int compare(const Feature &rhs) const {
+    const int depth_comparison = get_depth() - rhs.get_depth();
+    if(depth_comparison)
+      return depth_comparison;
     const int axis_comparison = compare_axis(rhs);
-    return axis_comparison ? axis_comparison : compare_value(rhs);
+    if(axis_comparison)
+      return axis_comparison;
+    return compare_value(rhs);
   }
 
+  virtual int get_depth() const = 0;
   virtual int compare_axis(const Feature &rhs) const = 0;
   virtual int compare_value(const Feature &rhs) const = 0;
 
@@ -96,6 +102,8 @@ public:
   {
   }
 
+  int get_depth() const {return 1;}
+
   int compare_value(const Feature &rhs) const {
     return Feature_Enumerated_Data::compare_value(debuggable_cast<const Feature_Enumerated &>(rhs));
   }
@@ -103,24 +111,19 @@ public:
 
 class Feature_Ranged_Data {
 public:
-  Feature_Ranged_Data(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+  Feature_Ranged_Data(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_, const bool &integer_locked_)
    : axis(axis_),
    bound_lower(bound_lower_),
    bound_upper(bound_upper_),
    depth(depth_),
-   upper(upper_)
+   upper(upper_),
+   integer_locked(integer_locked_)
   {
   }
 
   double midpt() const {
-    return (bound_lower + bound_upper) / 2.0;
-  }
-
-  int compare(const Feature_Ranged_Data &rhs) const {
-    return depth != rhs.depth ? depth - rhs.depth :
-           axis.first != rhs.axis.first ? int(axis.first) - int(rhs.axis.first) :
-           axis.second != rhs.axis.second ? int(axis.second) - int(rhs.axis.second) :
-           upper - rhs.upper;
+    const double mpt = (bound_lower + bound_upper) / 2.0;
+    return integer_locked ? floor(mpt) : mpt;
   }
 
   int compare_axis(const Feature_Ranged_Data &rhs) const {
@@ -128,8 +131,7 @@ public:
   }
 
   int compare_value(const Feature_Ranged_Data &rhs) const {
-    return depth != rhs.depth ? depth - rhs.depth :
-           upper - rhs.upper;
+    return upper - rhs.upper;
   }
 
   void print(std::ostream &os) const {
@@ -152,6 +154,7 @@ public:
   size_t depth; ///< 0 indicates unsplit
 
   bool upper; ///< Is this the upper half (same bound_upper) or lower half (same bound_lower) of a split?
+  bool integer_locked; ///< Is this restricted to integer values?
 };
 
 template <typename FEATURE>
@@ -160,16 +163,14 @@ class Feature_Ranged : public FEATURE, public Feature_Ranged_Data {
   Feature_Ranged & operator=(const Feature_Ranged &) = delete;
 
 public:
-  Feature_Ranged(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-   : Feature_Ranged_Data(axis_, bound_lower_, bound_upper_, depth_, upper_)
+  Feature_Ranged(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_, const bool &integer_locked_)
+   : Feature_Ranged_Data(axis_, bound_lower_, bound_upper_, depth_, upper_, integer_locked_)
   {
   }
 
   virtual Feature_Ranged * clone() const = 0;
 
-  int compare(const Feature &rhs) const {
-    return Feature_Ranged_Data::compare(debuggable_cast<const Feature_Ranged &>(rhs));
-  }
+  int get_depth() const {return depth;}
 
   int compare_value(const Feature &rhs) const {
     return Feature_Ranged_Data::compare_value(debuggable_cast<const Feature_Ranged &>(rhs));
@@ -178,17 +179,23 @@ public:
   std::vector<Feature *> refined() const {
     std::vector<Feature *> refined_features;
 
-    auto refined_feature = clone();
-    refined_feature->bound_upper = refined_feature->midpt();
-    ++refined_feature->depth;
-    refined_feature->upper = false;
-    refined_features.push_back(refined_feature);
+    const double mpt = midpt();
 
-    refined_feature = clone();
-    refined_feature->bound_lower = refined_feature->midpt();
-    ++refined_feature->depth;
-    refined_feature->upper = true;
-    refined_features.push_back(refined_feature);
+    if(bound_lower != mpt) {
+      const auto refined_feature = clone();
+      refined_feature->bound_upper = mpt;
+      ++refined_feature->depth;
+      refined_feature->upper = false;
+      refined_features.push_back(refined_feature);
+    }
+
+    if(mpt != bound_upper) {
+      const auto refined_feature = clone();
+      refined_feature->bound_lower = mpt;
+      ++refined_feature->depth;
+      refined_feature->upper = true;
+      refined_features.push_back(refined_feature);
+    }
 
     return refined_features;
   }

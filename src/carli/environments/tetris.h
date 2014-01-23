@@ -136,7 +136,7 @@ namespace Tetris {
     enum Axis : size_t {WIDTH = 4, HEIGHT = 5};
 
     Size(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
 
@@ -183,7 +183,7 @@ namespace Tetris {
     enum Axis : size_t {X = 6, Y = 7};
 
     Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
 
@@ -230,7 +230,7 @@ namespace Tetris {
     enum Axis : size_t {BENEATH = 8, CREATED = 9};
 
     Gaps(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
 
@@ -391,8 +391,8 @@ namespace Tetris {
     void generate_rete_continuous(const Node_Unsplit_Ptr &node_unsplit,
                                   const std::function<action_ptrsc(const Rete::WME_Token &token)> &get_action,
                                   const AXIS &axis,
-                                  const float &lower_bound,
-                                  const float &upper_bound);
+                                  const double &lower_bound,
+                                  const double &upper_bound);
     void generate_rete();
 
     void generate_features();

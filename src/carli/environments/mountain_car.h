@@ -55,7 +55,7 @@ namespace Mountain_Car {
     enum Index {index = 0};
 
     Position(const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_, false)
     {
     }
 
@@ -90,7 +90,7 @@ namespace Mountain_Car {
     enum Index {index = 1};
 
     Velocity(const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_, false)
     {
     }
 
@@ -131,6 +131,10 @@ namespace Mountain_Car {
 
     Acceleration_Direction * clone() const {
       return new Acceleration_Direction(direction);
+    }
+
+    int get_depth() const {
+      return 0;
     }
 
     int compare_axis(const Feature &rhs) const {

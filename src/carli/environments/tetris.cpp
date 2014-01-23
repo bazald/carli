@@ -301,12 +301,12 @@ namespace Tetris {
   void Agent::generate_rete_continuous(const Node_Unsplit_Ptr &node_unsplit,
                                        const std::function<action_ptrsc(const Rete::WME_Token &token)> &get_action,
                                        const AXIS &axis,
-                                       const float &lower_bound,
-                                       const float &upper_bound)
+                                       const double &lower_bound,
+                                       const double &upper_bound)
   {
-    const float midpt = (lower_bound + upper_bound) / 2.0f;
-    const float values[][2] = {{lower_bound, midpt},
-                               {midpt, upper_bound}};
+    const double midpt = floor((lower_bound + upper_bound) / 2.0);
+    const double values[][2] = {{lower_bound, midpt},
+                                {midpt, upper_bound}};
 
     for(int i = 0; i != 2; ++i) {
       Node_Ranged::Lines lines;
@@ -406,12 +406,12 @@ namespace Tetris {
       node_unsplit->fringe_values.push_back(node_fringe);
     }
 
-//    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::WIDTH, 0.0f, 4.0f);
-//    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::HEIGHT, 0.0f, 4.0f);
+    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::WIDTH, 0.0f, 4.0f);
+    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::HEIGHT, 0.0f, 4.0f);
     generate_rete_continuous<Position, Position::Axis>(node_unsplit, get_action, Position::X, 0.0f, 10.0f);
-//    generate_rete_continuous<Position, Position::Axis>(node_unsplit, get_action, Position::Y, 0.0f, 20.0f);
-//    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::BENEATH, 0.0f, 75.0f);
-//    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::CREATED, 0.0f, 75.0f);
+    generate_rete_continuous<Position, Position::Axis>(node_unsplit, get_action, Position::Y, 0.0f, 20.0f);
+    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::BENEATH, 0.0f, 75.0f);
+    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::CREATED, 0.0f, 75.0f);
   }
 
   void Agent::generate_features() {
