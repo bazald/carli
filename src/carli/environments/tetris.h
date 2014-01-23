@@ -359,8 +359,8 @@ namespace Tetris {
 
     void print_impl(ostream &os) const;
 
-    Tetromino generate_Tetronmino(const Tetromino_Type &type, const int &orientation = 0);
-    uint8_t orientations_Tetronmino(const Tetromino_Type &type);
+    static Tetromino generate_Tetromino(const Tetromino_Type &type, const int &orientation = 0);
+    static uint8_t orientations_Tetromino(const Tetromino_Type &type);
     double clear_lines();
 
     Result test_placement(const Tetromino &tet, const std::pair<size_t, size_t> &position);

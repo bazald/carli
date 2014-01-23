@@ -20,7 +20,7 @@ namespace Tetris {
   Environment::reward_type Environment::transition_impl(const Action &action) {
     const Place &place = debuggable_cast<const Place &>(action);
 
-    const auto tet = generate_Tetronmino(m_current, place.orientation);
+    const auto tet = generate_Tetromino(m_current, place.orientation);
     for(size_t j = 0; j != 4; ++j) {
       for(size_t i = 0; i != 4; ++i) {
         if(tet[j][i])
@@ -41,9 +41,38 @@ namespace Tetris {
   }
 
   void Environment::print_impl(ostream &os) const {
+    os << "Board:" << std::endl;
+    for(int j = 19; j != -1; --j) {
+      os << "  ";
+      for(int i = 0; i != 10; ++i)
+        os << (m_grid[j][i] ? 'O' : '.');
+      os << std::endl;
+    }
+
+    os << "Current:" << std::endl;
+    const auto current = generate_Tetromino(m_current);
+    for(int j = 0; j != 4; ++j) {
+      if(!current[j][0] && !current[j][1] && !current[j][2] && !current[j][3])
+        break;
+      os << "  ";
+      for(int i = 0; i != 4; ++i)
+        os << (current[j][i] ? 'O' : ' ');
+      os << std::endl;
+    }
+
+    os << "Next:" << std::endl;
+    const auto next = generate_Tetromino(m_next);
+    for(int j = 0; j != 4; ++j) {
+      if(!next[j][0] && !next[j][1] && !next[j][2] && !next[j][3])
+        break;
+      os << "  ";
+      for(int i = 0; i != 4; ++i)
+        os << (next[j][i] ? 'O' : ' ');
+      os << std::endl;
+    }
   }
 
-  Environment::Tetromino Environment::generate_Tetronmino(const Tetromino_Type &type, const int &orientation) {
+  Environment::Tetromino Environment::generate_Tetromino(const Tetromino_Type &type, const int &orientation) {
     Environment::Tetromino tet;
     memset(&tet, 0, sizeof(tet));
 
@@ -243,12 +272,12 @@ namespace Tetris {
   }
 
   void Environment::generate_placements() {
-    const uint8_t orientations = orientations_Tetronmino(m_current);
+    const uint8_t orientations = orientations_Tetromino(m_current);
 
     m_placements.clear();
 
     for(int orientation = 0; orientation != orientations; ++orientation) {
-      const auto tet = generate_Tetronmino(m_current, orientation);
+      const auto tet = generate_Tetromino(m_current, orientation);
       const size_t width = width_Tetronmino(tet);
       const size_t height = height_Tetronmino(tet);
 
@@ -268,7 +297,7 @@ namespace Tetris {
     }
   }
 
-  uint8_t Environment::orientations_Tetronmino(const Tetromino_Type &type) {
+  uint8_t Environment::orientations_Tetromino(const Tetromino_Type &type) {
     switch(type) {
     case TET_SQUARE:
       return 1;
