@@ -6,6 +6,20 @@ namespace Tetris {
     init_impl();
   }
 
+  Environment Environment::operator=(const Environment &rhs) {
+    ::Environment::operator=(rhs);
+
+    m_random_init = rhs.m_random_init;
+    m_random_selection = rhs.m_random_selection;
+    m_grid = rhs.m_grid;
+    m_current = rhs.m_current;
+    m_next = rhs.m_next;
+    m_placements = rhs.m_placements;
+    m_lookahead = rhs.m_lookahead;
+
+    return *this;
+  }
+
   void Environment::init_impl() {
     m_random_selection = Zeni::Random(2147483647 * m_random_init.rand());
 
@@ -21,16 +35,12 @@ namespace Tetris {
     const Place &place = debuggable_cast<const Place &>(action);
 
     const auto tet = generate_Tetromino(m_current, place.orientation);
-    for(size_t j = 0; j != 4; ++j) {
-      for(size_t i = 0; i != 4; ++i) {
-        if(tet[j][i])
-          m_grid[place.position.second - j][place.position.first + i] = true;
-      }
-    }
+    place_Tetromino(tet, place.position);
+
     m_current = m_next;
     m_next = Tetromino_Type(m_random_selection.rand_lt(7));
 
-    const double score = clear_lines();
+    const double score = score_line[clear_lines()];
 
     generate_placements();
 
@@ -38,6 +48,15 @@ namespace Tetris {
       return score_failure;
     else
       return score;
+  }
+
+  void Environment::place_Tetromino(const Environment::Tetromino &tet, const std::pair<size_t, size_t> &position) {
+    for(size_t j = 0; j != 4; ++j) {
+      for(size_t i = 0; i != 4; ++i) {
+        if(tet[j][i])
+          m_grid[position.second - j][position.first + i] = true;
+      }
+    }
   }
 
   void Environment::print_impl(ostream &os) const {
@@ -147,8 +166,8 @@ namespace Tetris {
     return tet;
   }
 
-  double Environment::clear_lines() {
-    size_t lines_cleared = 0.0;
+  uint8_t Environment::clear_lines() {
+    uint8_t lines_cleared = 0.0;
 
     for(size_t j = 0; j < 20; ) {
       bool cleared = true;
@@ -169,10 +188,10 @@ namespace Tetris {
       ++lines_cleared;
     }
 
-    return score_line[lines_cleared];
+    return lines_cleared;
   }
 
-  Environment::Result Environment::test_placement(const Environment::Tetromino &tet, const std::pair<size_t, size_t> &position) {
+  Environment::Result Environment::test_placement(const Environment::Tetromino &tet, const std::pair<size_t, size_t> &position) const {
     const uint8_t width = width_Tetronmino(tet);
     const uint8_t height = height_Tetronmino(tet);
 
@@ -195,7 +214,7 @@ namespace Tetris {
     return grounded ? PLACE_GROUNDED : PLACE_UNGROUNDED;
   }
 
-  size_t Environment::gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position) {
+  size_t Environment::gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position) const {
     size_t gaps = 0;
 
     for(int i = 0; i != 4; ++i) {
@@ -217,7 +236,7 @@ namespace Tetris {
     return gaps;
   }
 
-  size_t Environment::gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position) {
+  size_t Environment::gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position) const {
     size_t gaps = 0;
 
     for(int i = 0; i != 4; ++i) {
@@ -239,6 +258,43 @@ namespace Tetris {
     }
 
     return gaps;
+  }
+
+  Environment::Outcome Environment::outcome(const uint8_t &lines_cleared, const Tetromino &tet, const std::pair<size_t, size_t> &position) const {
+    assert(lines_cleared && lines_cleared < 5);
+
+    Environment next(*this);
+    next.m_lookahead = true;
+    next.place_Tetromino(tet, position);
+    if(next.clear_lines() >= lines_cleared)
+      return OUTCOME_ACHIEVED;
+
+    if(!m_lookahead) {
+      const auto types = {TET_LINE, TET_SQUARE, TET_T, TET_S, TET_Z, TET_L, TET_J};
+
+      for(const auto t : types) {
+        Environment next2(next);
+        next2.m_current = t;
+        next2.generate_placements();
+        for(auto nn : next2.m_placements) {
+          if(nn.outcome[lines_cleared] == OUTCOME_ACHIEVED)
+            return OUTCOME_ENABLED;
+        }
+      }
+
+      next = *this;
+      next.m_lookahead = true;
+      for(const auto t : types) {
+        next.m_current = t;
+        next.generate_placements();
+        for(auto nn : next.m_placements) {
+          if(nn.outcome[lines_cleared] == OUTCOME_ACHIEVED)
+            return OUTCOME_PROHIBITED;
+        }
+      }
+    }
+
+    return OUTCOME_NULL;
   }
 
   uint8_t Environment::width_Tetronmino(const Environment::Tetromino &tet) {
@@ -284,12 +340,18 @@ namespace Tetris {
       for(size_t i = 0, iend = 11 - width; i != iend; ++i) {
         for(size_t j = 19; int(j) > -1; --j) {
           if(test_placement(tet, std::make_pair(i, j)) == PLACE_ILLEGAL) {
-            if(j < 19)
+            if(j < 19) {
+              const auto position = std::make_pair(i, j + 1);
               m_placements.emplace_back(orientation,
                                         std::make_pair(width, height),
-                                        std::make_pair(i, j + 1),
-                                        gaps_beneath(tet, std::make_pair(i, j)),
-                                        gaps_created(tet, std::make_pair(i, j)));
+                                        position,
+                                        gaps_beneath(tet, position),
+                                        gaps_created(tet, position),
+                                        outcome(1, tet, position),
+                                        outcome(2, tet, position),
+                                        outcome(3, tet, position),
+                                        outcome(4, tet, position));
+            }
             break;
           }
         }

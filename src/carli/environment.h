@@ -8,14 +8,16 @@
 #include "getopt.h"
 
 class Environment : public std::enable_shared_from_this<Environment> {
-  Environment(const Environment &) = delete;
-  Environment & operator=(const Environment &) = delete;
-
 public:
   typedef double reward_type;
 
   Environment()
   {
+  }
+
+  Environment & operator=(const Environment &rhs) {
+    m_altered = rhs.m_altered;
+    return *this;
   }
 
   virtual ~Environment() {}

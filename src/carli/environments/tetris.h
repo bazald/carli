@@ -316,17 +316,24 @@ namespace Tetris {
 
   class Environment : public ::Environment {
   public:
+    enum Outcome {OUTCOME_NULL, OUTCOME_ACHIEVED, OUTCOME_ENABLED, OUTCOME_PROHIBITED};
+
     struct Placement {
       Placement(const size_t &orientation_,
                 const std::pair<size_t, size_t> &size_,
                 const std::pair<size_t, size_t> &position_,
                 const size_t &gaps_beneath_,
-                const size_t &gaps_created_)
+                const size_t &gaps_created_,
+                const Outcome &outcome_1,
+                const Outcome &outcome_2,
+                const Outcome &outcome_3,
+                const Outcome &outcome_4)
        : orientation(orientation_),
        size(size_),
        position(position_),
        gaps_beneath(gaps_beneath_),
-       gaps_created(gaps_created_)
+       gaps_created(gaps_created_),
+       outcome({OUTCOME_NULL, outcome_1, outcome_2, outcome_3, outcome_4})
       {
       }
 
@@ -335,14 +342,17 @@ namespace Tetris {
       std::pair<size_t, size_t> position;
       size_t gaps_beneath;
       size_t gaps_created;
+      std::array<Outcome, 5> outcome;
     };
-    typedef std::list<Placement> Placements;
+    typedef std::vector<Placement> Placements;
 
 //    const std::array<double, 5> score_line = {{0.0, 10.0, 20.0, 30.0, 40.0}}; /// No risk-reward tradeoff
     const std::array<double, 5> score_line = {{0.0, 10.0, 20.0, 40.0, 80.0}}; /// Risk-reward tradeoff
     const double score_failure = 0.0;
 
     Environment();
+
+    Environment operator=(const Environment &rhs);
 
     Tetromino_Type get_current() const {return m_current;}
     Tetromino_Type get_next() const {return m_next;}
@@ -356,19 +366,21 @@ namespace Tetris {
     void init_impl();
 
     reward_type transition_impl(const Action &action);
+    void place_Tetromino(const Tetromino &tet, const std::pair<size_t, size_t> &position);
 
     void print_impl(ostream &os) const;
 
     static Tetromino generate_Tetromino(const Tetromino_Type &type, const int &orientation = 0);
     static uint8_t orientations_Tetromino(const Tetromino_Type &type);
-    double clear_lines();
+    uint8_t clear_lines();
 
-    Result test_placement(const Tetromino &tet, const std::pair<size_t, size_t> &position);
-    size_t gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position);
-    size_t gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position);
+    Result test_placement(const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
+    size_t gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
+    size_t gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
+    Outcome outcome(const uint8_t &lines_cleared, const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
 
-    uint8_t width_Tetronmino(const Tetromino &tet);
-    uint8_t height_Tetronmino(const Tetromino &tet);
+    static uint8_t width_Tetronmino(const Tetromino &tet);
+    static uint8_t height_Tetronmino(const Tetromino &tet);
 
     Zeni::Random m_random_init;
     Zeni::Random m_random_selection;
@@ -379,6 +391,8 @@ namespace Tetris {
 
     void generate_placements();
     Placements m_placements;
+
+    bool m_lookahead = false;
   };
 
   class Agent : public ::Agent {
