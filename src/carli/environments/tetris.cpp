@@ -24,6 +24,8 @@ namespace Tetris {
     m_random_selection = Zeni::Random(2147483647 * m_random_init.rand());
 
     memset(&m_grid, 0, sizeof(m_grid));
+    for(auto &line : m_grid)
+      line.second = line.first.size();
 
     m_next = Tetromino_Type(m_random_selection.rand_lt(7));
     m_current = Tetromino_Type(m_random_selection.rand_lt(7));
@@ -40,7 +42,7 @@ namespace Tetris {
     m_current = m_next;
     m_next = Tetromino_Type(m_random_selection.rand_lt(7));
 
-    const double score = score_line[clear_lines()];
+    const double score = score_line[clear_lines(place.position)];
 
     generate_placements();
 
@@ -53,8 +55,10 @@ namespace Tetris {
   void Environment::place_Tetromino(const Environment::Tetromino &tet, const std::pair<size_t, size_t> &position) {
     for(size_t j = 0; j != 4; ++j) {
       for(size_t i = 0; i != 4; ++i) {
-        if(tet[j][i])
-          m_grid[position.second - j][position.first + i] = true;
+        if(tet[j][i]) {
+          m_grid[position.second - j].first[position.first + i] = true;
+          --m_grid[position.second - j].second;
+        }
       }
     }
   }
@@ -64,7 +68,7 @@ namespace Tetris {
     for(int j = 19; j != -1; --j) {
       os << "  ";
       for(int i = 0; i != 10; ++i)
-        os << (m_grid[j][i] ? 'O' : '.');
+        os << (m_grid[j].first[i] ? 'O' : '.');
       os << std::endl;
     }
 
@@ -166,69 +170,43 @@ namespace Tetris {
     return tet;
   }
 
-  uint8_t Environment::clear_lines() {
+  uint8_t Environment::clear_lines(const std::pair<size_t, size_t> &position) {
     uint8_t lines_cleared = 0.0;
 
-    for(size_t j = 0; j < 20; ) {
-      bool cleared = true;
-      for(int i = 0; i != 10; ++i) {
-        if(!m_grid[j][i]) {
-          cleared = false;
-          break;
-        }
-      }
-
-      if(!cleared) {
+    for(size_t j = position.second > 4 ? position.second - 4 : 0, jend = j + 4; j != jend; ) {
+      if(m_grid[j].second)
         ++j;
-        continue;
+      else {
+        memmove(&m_grid[j], &m_grid[j + 1], (19 - j) * sizeof(m_grid[0]));
+        memset(&m_grid[19].first, 0, sizeof(m_grid[19].first));
+        m_grid[19].second = m_grid[19].first.size();
+        ++lines_cleared;
+        --jend;
       }
-
-      memmove(&m_grid[j], &m_grid[j + 1], (19 - j) * sizeof(m_grid[0]));
-      memset(&m_grid[19], 0, sizeof(m_grid[0]));
-      ++lines_cleared;
     }
 
     return lines_cleared;
   }
 
-  Environment::Result Environment::test_placement(const Environment::Tetromino &tet, const std::pair<size_t, size_t> &position) const {
-    const uint8_t width = width_Tetronmino(tet);
-    const uint8_t height = height_Tetronmino(tet);
-
-    if(position.first + width > 10 || int(position.second - height) < -1)
-      return PLACE_ILLEGAL;
-
-    bool grounded = int(position.second - height) == -1;
-
-    for(int j = 0; j != 4; ++j) {
-      for(int i = 0; i != 4; ++i) {
-        if(tet[j][i]) {
-          if(m_grid[position.second - j][position.first + i])
-            return PLACE_ILLEGAL;
-          else if(!grounded && m_grid[position.second - j + 1][position.first + i])
-            grounded = true;
-        }
-      }
-    }
-
-    return grounded ? PLACE_GROUNDED : PLACE_UNGROUNDED;
-  }
-
   size_t Environment::gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position) const {
     size_t gaps = 0;
+    const uint8_t width = width_Tetronmino(tet);
 
-    for(int i = 0; i != 4; ++i) {
-      const int barrier = position.second < 4 ? position.second : 4;
+    for(int i = 0; i != width; ++i) {
+      const int barrier = position.second < 4 ? position.second + 1 : 4;
 
-      for(int j = barrier - 1; j > -1; --j) {
+      size_t sum = 0;
+      for(int j = 0; j != barrier; ++j) {
         if(tet[j][i])
-          break;
-        else
-          ++gaps;
+          sum = 0;
+        else if(!m_grid[position.second - j].first[position.first + i])
+          ++sum;
       }
 
+      gaps += sum;
+
       for(int j = position.second - barrier; j > -1; --j) {
-        if(!m_grid[j][position.first + i])
+        if(!m_grid[j].first[position.first + i])
           ++gaps;
       }
     }
@@ -238,19 +216,30 @@ namespace Tetris {
 
   size_t Environment::gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position) const {
     size_t gaps = 0;
+    const uint8_t width = width_Tetronmino(tet);
 
-    for(int i = 0; i != 4; ++i) {
-      const int barrier = position.second < 4 ? position.second : 4;
+    for(int i = 0; i != width; ++i) {
+      const int barrier = position.second < 4 ? position.second + 1 : 4;
 
-      for(int j = barrier - 1; j > -1; --j) {
+      size_t sum = 0;
+      bool done = false;
+      for(int j = 0; j != barrier; ++j) {
         if(tet[j][i])
+          sum = 0;
+        else if(m_grid[position.second - j].first[position.first + i]) {
+          done = true;
           break;
+        }
         else
-          ++gaps;
+          ++sum;
       }
 
+      gaps += sum;
+      if(done)
+        continue;
+
       for(int j = position.second - barrier; j > -1; --j) {
-        if(m_grid[j][position.first + i])
+        if(m_grid[j].first[position.first + i])
           break;
         else
           ++gaps;
@@ -266,7 +255,7 @@ namespace Tetris {
     Environment next(*this);
     next.m_lookahead = true;
     next.place_Tetromino(tet, position);
-    if(next.clear_lines() >= lines_cleared)
+    if(next.clear_lines(position) >= lines_cleared)
       return OUTCOME_ACHIEVED;
 
     if(!m_lookahead) {
@@ -338,22 +327,30 @@ namespace Tetris {
       const size_t height = height_Tetronmino(tet);
 
       for(size_t i = 0, iend = 11 - width; i != iend; ++i) {
-        for(size_t j = 19; int(j) > -1; --j) {
-          if(test_placement(tet, std::make_pair(i, j)) == PLACE_ILLEGAL) {
-            if(j < 19) {
-              const auto position = std::make_pair(i, j + 1);
-              m_placements.emplace_back(orientation,
-                                        std::make_pair(width, height),
-                                        position,
-                                        gaps_beneath(tet, position),
-                                        gaps_created(tet, position),
-                                        outcome(1, tet, position),
-                                        outcome(2, tet, position),
-                                        outcome(3, tet, position),
-                                        outcome(4, tet, position));
+        size_t j = height - 1;
+
+        for(size_t x = 0; x != width; ++x) {
+          const size_t ymax = tet[3][x] ? 4 : tet[2][x] ? 3 : tet[1][x] ? 2 : 1;
+
+          for(size_t y = 19; y < 20; --y) {
+            if(m_grid[y].first[i + x]) {
+              j = std::max(j, y + ymax);
+              break;
             }
-            break;
           }
+        }
+
+        if(j < 20) {
+          const auto position = std::make_pair(i, j);
+          m_placements.emplace_back(orientation,
+                                    std::make_pair(width, height),
+                                    position,
+                                    gaps_beneath(tet, position),
+                                    gaps_created(tet, position),
+                                    outcome(1, tet, position),
+                                    outcome(2, tet, position),
+                                    outcome(3, tet, position),
+                                    outcome(4, tet, position));
         }
       }
     }

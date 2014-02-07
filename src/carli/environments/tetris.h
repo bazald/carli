@@ -333,7 +333,7 @@ namespace Tetris {
        position(position_),
        gaps_beneath(gaps_beneath_),
        gaps_created(gaps_created_),
-       outcome({OUTCOME_NULL, outcome_1, outcome_2, outcome_3, outcome_4})
+       outcome({{OUTCOME_NULL, outcome_1, outcome_2, outcome_3, outcome_4}})
       {
       }
 
@@ -372,9 +372,8 @@ namespace Tetris {
 
     static Tetromino generate_Tetromino(const Tetromino_Type &type, const int &orientation = 0);
     static uint8_t orientations_Tetromino(const Tetromino_Type &type);
-    uint8_t clear_lines();
+    uint8_t clear_lines(const std::pair<size_t, size_t> &position);
 
-    Result test_placement(const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
     size_t gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
     size_t gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
     Outcome outcome(const uint8_t &lines_cleared, const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
@@ -385,7 +384,7 @@ namespace Tetris {
     Zeni::Random m_random_init;
     Zeni::Random m_random_selection;
 
-    std::array<std::array<bool, 10>, 20> m_grid;
+    std::array<std::pair<std::array<bool, 10>, size_t>, 20> m_grid;
     Tetromino_Type m_current;
     Tetromino_Type m_next;
 
