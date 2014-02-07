@@ -361,7 +361,11 @@ namespace Tetris {
 
   private:
     enum Result {PLACE_ILLEGAL, PLACE_GROUNDED, PLACE_UNGROUNDED};
-    typedef std::array<std::array<bool, 4>, 4> Tetromino;
+
+    struct Tetromino : public std::array<std::array<bool, 4>, 4> {
+      uint8_t width;
+      uint8_t height;
+    };
 
     void init_impl();
 
@@ -377,9 +381,6 @@ namespace Tetris {
     size_t gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
     size_t gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
     Outcome outcome(const uint8_t &lines_cleared, const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
-
-    static uint8_t width_Tetronmino(const Tetromino &tet);
-    static uint8_t height_Tetronmino(const Tetromino &tet);
 
     Zeni::Random m_random_init;
     Zeni::Random m_random_selection;

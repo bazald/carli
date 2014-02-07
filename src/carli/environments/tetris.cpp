@@ -53,8 +53,8 @@ namespace Tetris {
   }
 
   void Environment::place_Tetromino(const Environment::Tetromino &tet, const std::pair<size_t, size_t> &position) {
-    for(size_t j = 0; j != 4; ++j) {
-      for(size_t i = 0; i != 4; ++i) {
+    for(size_t j = 0; j != tet.height; ++j) {
+      for(size_t i = 0; i != tet.width; ++i) {
         if(tet[j][i]) {
           m_grid[position.second - j].first[position.first + i] = true;
           --m_grid[position.second - j].second;
@@ -74,22 +74,18 @@ namespace Tetris {
 
     os << "Current:" << std::endl;
     const auto current = generate_Tetromino(m_current);
-    for(int j = 0; j != 4; ++j) {
-      if(!current[j][0] && !current[j][1] && !current[j][2] && !current[j][3])
-        break;
+    for(int j = 0; j != current.height; ++j) {
       os << "  ";
-      for(int i = 0; i != 4; ++i)
+      for(int i = 0; i != current.width; ++i)
         os << (current[j][i] ? 'O' : ' ');
       os << std::endl;
     }
 
     os << "Next:" << std::endl;
     const auto next = generate_Tetromino(m_next);
-    for(int j = 0; j != 4; ++j) {
-      if(!next[j][0] && !next[j][1] && !next[j][2] && !next[j][3])
-        break;
+    for(int j = 0; j != next.height; ++j) {
       os << "  ";
-      for(int i = 0; i != 4; ++i)
+      for(int i = 0; i != next.width; ++i)
         os << (next[j][i] ? 'O' : ' ');
       os << std::endl;
     }
@@ -101,66 +97,122 @@ namespace Tetris {
 
     switch(type) {
     case TET_LINE:
-      if(orientation & 1)
+      if(orientation & 1) {
         tet[0][0] = tet[0][1] = tet[0][2] = tet[0][3] = true;
-      else
+        tet.width = 4;
+        tet.height = 1;
+      }
+      else {
         tet[0][0] = tet[1][0] = tet[2][0] = tet[3][0] = true;
+        tet.width = 1;
+        tet.height = 4;
+      }
       break;
     case TET_SQUARE:
       tet[0][0] = tet[0][1] = tet[1][0] = tet[1][1] = true;
+      tet.width = 2;
+      tet.height = 2;
       break;
     case TET_T:
       if(orientation & 2) {
-        if(orientation & 1)
+        if(orientation & 1) {
           tet[0][1] = tet[1][1] = tet[1][2] = tet[1][0] = true;
-        else
+          tet.width = 3;
+          tet.height = 2;
+        }
+        else {
           tet[1][0] = tet[1][1] = tet[2][1] = tet[0][1] = true;
+          tet.width = 2;
+          tet.height = 3;
+        }
       }
       else {
-        if(orientation & 1)
+        if(orientation & 1) {
           tet[0][0] = tet[0][1] = tet[0][2] = tet[1][1] = true;
-        else
+          tet.width = 3;
+          tet.height = 2;
+        }
+        else {
           tet[0][0] = tet[1][0] = tet[2][0] = tet[1][1] = true;
+          tet.width = 2;
+          tet.height = 3;
+        }
       }
       break;
     case TET_S:
-      if(orientation & 1)
+      if(orientation & 1) {
         tet[0][0] = tet[1][0] = tet[1][1] = tet[2][1] = true;
-      else
+        tet.width = 2;
+        tet.height = 3;
+      }
+      else {
         tet[1][0] = tet[1][1] = tet[0][1] = tet[0][2] = true;
+        tet.width = 3;
+        tet.height = 2;
+      }
       break;
     case TET_Z:
-      if(orientation & 1)
+      if(orientation & 1) {
         tet[0][0] = tet[0][1] = tet[1][1] = tet[1][2] = true;
-      else
+        tet.width = 3;
+        tet.height = 2;
+      }
+      else {
         tet[2][0] = tet[1][0] = tet[1][1] = tet[0][1] = true;
+        tet.width = 2;
+        tet.height = 3;
+      }
       break;
     case TET_L:
       if(orientation & 2) {
-        if(orientation & 1)
+        if(orientation & 1) {
           tet[0][2] = tet[1][2] = tet[1][1] = tet[1][0] = true;
-        else
+          tet.width = 3;
+          tet.height = 2;
+        }
+        else {
           tet[0][0] = tet[0][1] = tet[1][1] = tet[2][1] = true;
+          tet.width = 2;
+          tet.height = 3;
+        }
       }
       else {
-        if(orientation & 1)
+        if(orientation & 1) {
           tet[0][0] = tet[0][1] = tet[0][2] = tet[1][0] = true;
-        else
+          tet.width = 3;
+          tet.height = 2;
+        }
+        else {
           tet[0][0] = tet[1][0] = tet[2][0] = tet[2][1] = true;
+          tet.width = 2;
+          tet.height = 3;
+        }
       }
       break;
     case TET_J:
       if(orientation & 2) {
-        if(orientation & 1)
+        if(orientation & 1) {
           tet[0][0] = tet[1][2] = tet[1][1] = tet[1][0] = true;
-        else
+          tet.width = 3;
+          tet.height = 2;
+        }
+        else {
           tet[2][0] = tet[0][1] = tet[1][1] = tet[2][1] = true;
+          tet.width = 2;
+          tet.height = 3;
+        }
       }
       else {
-        if(orientation & 1)
+        if(orientation & 1) {
           tet[0][0] = tet[0][1] = tet[0][2] = tet[1][2] = true;
-        else
+          tet.width = 3;
+          tet.height = 2;
+        }
+        else {
           tet[0][0] = tet[1][0] = tet[2][0] = tet[0][1] = true;
+          tet.width = 2;
+          tet.height = 3;
+        }
       }
       break;
     default:
@@ -190,9 +242,8 @@ namespace Tetris {
 
   size_t Environment::gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position) const {
     size_t gaps = 0;
-    const uint8_t width = width_Tetronmino(tet);
 
-    for(int i = 0; i != width; ++i) {
+    for(int i = 0; i != tet.width; ++i) {
       const int barrier = position.second < 4 ? position.second + 1 : 4;
 
       size_t sum = 0;
@@ -216,9 +267,8 @@ namespace Tetris {
 
   size_t Environment::gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position) const {
     size_t gaps = 0;
-    const uint8_t width = width_Tetronmino(tet);
 
-    for(int i = 0; i != width; ++i) {
+    for(int i = 0; i != tet.width; ++i) {
       const int barrier = position.second < 4 ? position.second + 1 : 4;
 
       size_t sum = 0;
@@ -259,7 +309,16 @@ namespace Tetris {
       return OUTCOME_ACHIEVED;
 
     if(!m_lookahead) {
-      const auto types = {TET_LINE, TET_SQUARE, TET_T, TET_S, TET_Z, TET_L, TET_J};
+      std::vector<Tetromino_Type> types(1, TET_LINE);
+      if(lines_cleared < 4) {
+        types.push_back(TET_T);
+        types.push_back(TET_S);
+        types.push_back(TET_Z);
+        types.push_back(TET_L);
+        types.push_back(TET_J);
+        if(lines_cleared < 3)
+          types.push_back(TET_SQUARE);
+      }
 
       for(const auto t : types) {
         Environment next2(next);
@@ -286,36 +345,6 @@ namespace Tetris {
     return OUTCOME_NULL;
   }
 
-  uint8_t Environment::width_Tetronmino(const Environment::Tetromino &tet) {
-    for(uint8_t i = 0; i != 4; ++i) {
-      for(uint8_t j = 0; ; ++j) {
-        if(j == 4)
-          return i;
-        else {
-          if(tet[j][i])
-            break;
-        }
-      }
-    }
-
-    return 4;
-  }
-
-  uint8_t Environment::height_Tetronmino(const Environment::Tetromino &tet) {
-    for(uint8_t j = 0; j != 4; ++j) {
-      for(uint8_t i = 0; ; ++i) {
-        if(i == 4)
-          return j;
-        else {
-          if(tet[j][i])
-            break;
-        }
-      }
-    }
-
-    return 4;
-  }
-
   void Environment::generate_placements() {
     const uint8_t orientations = orientations_Tetromino(m_current);
 
@@ -323,13 +352,11 @@ namespace Tetris {
 
     for(int orientation = 0; orientation != orientations; ++orientation) {
       const auto tet = generate_Tetromino(m_current, orientation);
-      const size_t width = width_Tetronmino(tet);
-      const size_t height = height_Tetronmino(tet);
 
-      for(size_t i = 0, iend = 11 - width; i != iend; ++i) {
-        size_t j = height - 1;
+      for(size_t i = 0, iend = 11 - tet.width; i != iend; ++i) {
+        size_t j = tet.height - 1;
 
-        for(size_t x = 0; x != width; ++x) {
+        for(size_t x = 0; x != tet.width; ++x) {
           const size_t ymax = tet[3][x] ? 4 : tet[2][x] ? 3 : tet[1][x] ? 2 : 1;
 
           for(size_t y = 19; y < 20; --y) {
@@ -343,7 +370,7 @@ namespace Tetris {
         if(j < 20) {
           const auto position = std::make_pair(i, j);
           m_placements.emplace_back(orientation,
-                                    std::make_pair(width, height),
+                                    std::make_pair(tet.width, tet.height),
                                     position,
                                     gaps_beneath(tet, position),
                                     gaps_created(tet, position),
