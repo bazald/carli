@@ -344,7 +344,7 @@ namespace Tetris {
       size_t gaps_created;
       std::array<Outcome, 5> outcome;
     };
-    typedef std::vector<Placement> Placements;
+    typedef std::list<Placement, Zeni::Pool_Allocator<Placement>> Placements;
 
 //    const std::array<double, 5> score_line = {{0.0, 10.0, 20.0, 30.0, 40.0}}; /// No risk-reward tradeoff
     const std::array<double, 5> score_line = {{0.0, 10.0, 20.0, 40.0, 80.0}}; /// Risk-reward tradeoff
@@ -352,7 +352,8 @@ namespace Tetris {
 
     Environment();
 
-    Environment operator=(const Environment &rhs);
+    Environment(const Environment &rhs);
+    Environment & operator=(const Environment &rhs);
 
     Tetromino_Type get_current() const {return m_current;}
     Tetromino_Type get_next() const {return m_next;}

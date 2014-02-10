@@ -6,7 +6,19 @@ namespace Tetris {
     init_impl();
   }
 
-  Environment Environment::operator=(const Environment &rhs) {
+  Environment::Environment(const Environment &rhs)
+   : ::Environment(rhs),
+   m_random_init(rhs.m_random_init),
+   m_random_selection(rhs.m_random_selection),
+   m_grid(rhs.m_grid),
+   m_current(rhs.m_current),
+   m_next(rhs.m_next),
+   m_placements(rhs.m_placements),
+   m_lookahead(rhs.m_lookahead)
+  {
+  }
+
+  Environment & Environment::operator=(const Environment &rhs) {
     ::Environment::operator=(rhs);
 
     m_random_init = rhs.m_random_init;
@@ -321,10 +333,9 @@ namespace Tetris {
       }
 
       for(const auto t : types) {
-        Environment next2(next);
-        next2.m_current = t;
-        next2.generate_placements();
-        for(auto nn : next2.m_placements) {
+        next.m_current = t;
+        next.generate_placements();
+        for(auto nn : next.m_placements) {
           if(nn.outcome[lines_cleared] == OUTCOME_ACHIEVED)
             return OUTCOME_ENABLED;
         }
