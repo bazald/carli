@@ -316,7 +316,7 @@ namespace Tetris {
 
   class Environment : public ::Environment {
   public:
-    enum Outcome {OUTCOME_NULL, OUTCOME_ACHIEVED, OUTCOME_ENABLED, OUTCOME_PROHIBITED};
+    enum class Outcome {OUTCOME_NULL, OUTCOME_ACHIEVED, OUTCOME_ENABLED, OUTCOME_PROHIBITED};
 
     struct Placement {
       Placement(const size_t &orientation_,
@@ -333,7 +333,7 @@ namespace Tetris {
        position(position_),
        gaps_beneath(gaps_beneath_),
        gaps_created(gaps_created_),
-       outcome({{OUTCOME_NULL, outcome_1, outcome_2, outcome_3, outcome_4}})
+       outcome({{Outcome::OUTCOME_NULL, outcome_1, outcome_2, outcome_3, outcome_4}})
       {
       }
 
@@ -429,6 +429,9 @@ namespace Tetris {
     const Rete::Symbol_Constant_String_Ptr_C m_y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
     const Rete::Symbol_Constant_String_Ptr_C m_gaps_beneath_attr = std::make_shared<Rete::Symbol_Constant_String>("gaps-beneath");
     const Rete::Symbol_Constant_String_Ptr_C m_gaps_created_attr = std::make_shared<Rete::Symbol_Constant_String>("gaps-created");
+    const Rete::Symbol_Constant_String_Ptr_C m_clears_attr = std::make_shared<Rete::Symbol_Constant_String>("clears");
+    const Rete::Symbol_Constant_String_Ptr_C m_enables_clearing_attr = std::make_shared<Rete::Symbol_Constant_String>("enables-clearing");
+    const Rete::Symbol_Constant_String_Ptr_C m_prohibits_clearing_attr = std::make_shared<Rete::Symbol_Constant_String>("prohibits-clearing");
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
 
     std::array<Rete::Symbol_Identifier_Ptr_C, 7> m_type_ids = {{std::make_shared<Rete::Symbol_Identifier>("LINE"),

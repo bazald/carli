@@ -318,7 +318,7 @@ namespace Tetris {
     next.m_lookahead = true;
     next.place_Tetromino(tet, position);
     if(next.clear_lines(position) >= lines_cleared)
-      return OUTCOME_ACHIEVED;
+      return Outcome::OUTCOME_ACHIEVED;
 
     if(!m_lookahead) {
       std::vector<Tetromino_Type> types(1, TET_LINE);
@@ -336,8 +336,8 @@ namespace Tetris {
         next.m_current = t;
         next.generate_placements();
         for(auto nn : next.m_placements) {
-          if(nn.outcome[lines_cleared] == OUTCOME_ACHIEVED)
-            return OUTCOME_ENABLED;
+          if(nn.outcome[lines_cleared] == Outcome::OUTCOME_ACHIEVED)
+            return Outcome::OUTCOME_ENABLED;
         }
       }
 
@@ -347,13 +347,13 @@ namespace Tetris {
         next.m_current = t;
         next.generate_placements();
         for(auto nn : next.m_placements) {
-          if(nn.outcome[lines_cleared] == OUTCOME_ACHIEVED)
-            return OUTCOME_PROHIBITED;
+          if(nn.outcome[lines_cleared] == Outcome::OUTCOME_ACHIEVED)
+            return Outcome::OUTCOME_PROHIBITED;
         }
       }
     }
 
-    return OUTCOME_NULL;
+    return Outcome::OUTCOME_NULL;
   }
 
   void Environment::generate_placements() {
@@ -563,6 +563,23 @@ namespace Tetris {
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.position.second)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_gaps_beneath_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.gaps_beneath)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_gaps_created_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.gaps_created)));
+
+      int clears = 0;
+      int enables = 0;
+      int prohibits = 0;
+      for(int i = 1; i != 5; ++i) {
+        if(placement.outcome[i] == Environment::Outcome::OUTCOME_ACHIEVED)
+          clears = i;
+        else if(placement.outcome[i] == Environment::Outcome::OUTCOME_ENABLED)
+          enables = i;
+      }
+      for(int i = 4; i != 0; --i)
+        if(placement.outcome[i] == Environment::Outcome::OUTCOME_PROHIBITED)
+          prohibits = i;
+
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_clears_attr, std::make_shared<Rete::Symbol_Constant_Int>(clears)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_enables_clearing_attr, std::make_shared<Rete::Symbol_Constant_Int>(enables)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_prohibits_clearing_attr, std::make_shared<Rete::Symbol_Constant_Int>(prohibits)));
     }
 
     remove_wme(m_wme_blink);
