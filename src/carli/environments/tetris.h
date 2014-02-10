@@ -26,6 +26,7 @@ namespace Tetris {
   class Size;
   class Position;
   class Gaps;
+  class Clears;
 
   class Feature : public ::Feature {
   public:
@@ -43,6 +44,7 @@ namespace Tetris {
     virtual int compare_axis(const Size &rhs) const = 0;
     virtual int compare_axis(const Position &rhs) const = 0;
     virtual int compare_axis(const Gaps &rhs) const = 0;
+    virtual int compare_axis(const Clears &rhs) const = 0;
 
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
@@ -76,6 +78,9 @@ namespace Tetris {
       return -1;
     }
     int compare_axis(const Gaps &) const {
+      return -1;
+    }
+    int compare_axis(const Clears &) const {
       return -1;
     }
 
@@ -121,6 +126,9 @@ namespace Tetris {
     int compare_axis(const Gaps &) const {
       return -1;
     }
+    int compare_axis(const Clears &) const {
+      return -1;
+    }
 
     Rete::WME_Token_Index wme_token_index() const {
       return Rete::WME_Token_Index(ORIENTATION, 2);
@@ -160,6 +168,9 @@ namespace Tetris {
       return -1;
     }
     int compare_axis(const Gaps &) const {
+      return -1;
+    }
+    int compare_axis(const Clears &) const {
       return -1;
     }
 
@@ -209,6 +220,9 @@ namespace Tetris {
     int compare_axis(const Gaps &) const {
       return -1;
     }
+    int compare_axis(const Clears &) const {
+      return -1;
+    }
 
     Rete::WME_Token_Index wme_token_index() const {
       return axis;
@@ -256,6 +270,9 @@ namespace Tetris {
     int compare_axis(const Gaps &rhs) const {
       return Feature_Ranged_Data::compare_axis(rhs);
     }
+    int compare_axis(const Clears &) const {
+      return -1;
+    }
 
     Rete::WME_Token_Index wme_token_index() const {
       return axis;
@@ -265,6 +282,57 @@ namespace Tetris {
       switch(axis.first) {
         case BENEATH: os << "gaps-beneath"; break;
         case CREATED: os << "gaps-created"; break;
+        default: abort();
+      }
+
+      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+    }
+  };
+
+  class Clears : public Feature_Ranged<Feature> {
+  public:
+    enum Axis : size_t {CLEARS = 10, ENABLES = 11, PROHIBITS = 12};
+
+    Clears(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
+    {
+    }
+
+    Clears * clone() const {
+      return new Clears(Axis(axis.first), bound_lower, bound_upper, depth, upper);
+    }
+
+    int compare_axis(const Tetris::Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int compare_axis(const Type &) const {
+      return 1;
+    }
+    int compare_axis(const Orientation &) const {
+      return 1;
+    }
+    int compare_axis(const Size &) const {
+      return 1;
+    }
+    int compare_axis(const Position &) const {
+      return 1;
+    }
+    int compare_axis(const Gaps &) const {
+      return 1;
+    }
+    int compare_axis(const Clears &rhs) const {
+      return Feature_Ranged_Data::compare_axis(rhs);
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return axis;
+    }
+
+    void print(ostream &os) const {
+      switch(axis.first) {
+        case CLEARS: os << "clears"; break;
+        case ENABLES: os << "enables-clearing"; break;
+        case PROHIBITS: os << "prohibits-clearing"; break;
         default: abort();
       }
 

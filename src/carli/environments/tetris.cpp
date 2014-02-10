@@ -478,7 +478,13 @@ namespace Tetris {
     auto join_gaps_beneath = make_join(state_bindings, join_y, filter_gaps_beneath);
     auto filter_gaps_created = make_filter(Rete::WME(m_first_var, m_gaps_created_attr, m_third_var));
     auto join_gaps_created = make_join(state_bindings, join_gaps_beneath, filter_gaps_created);
-    auto &join_last = join_gaps_created;
+    auto filter_clears = make_filter(Rete::WME(m_first_var, m_clears_attr, m_third_var));
+    auto join_clears = make_join(state_bindings, join_gaps_created, filter_clears);
+    auto filter_enables_clearing = make_filter(Rete::WME(m_first_var, m_enables_clearing_attr, m_third_var));
+    auto join_enables_clearing = make_join(state_bindings, join_clears, filter_enables_clearing);
+    auto filter_prohibits_clearing = make_filter(Rete::WME(m_first_var, m_prohibits_clearing_attr, m_third_var));
+    auto join_prohibits_clearing = make_join(state_bindings, join_enables_clearing, filter_prohibits_clearing);
+    auto &join_last = join_prohibits_clearing;
 
     auto filter_blink = make_filter(*m_wme_blink);
 
@@ -538,6 +544,9 @@ namespace Tetris {
     generate_rete_continuous<Position, Position::Axis>(node_unsplit, get_action, Position::Y, 0.0f, 20.0f);
     generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::BENEATH, 0.0f, 75.0f);
     generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::CREATED, 0.0f, 75.0f);
+    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::CLEARS, 0.0f, 5.0f);
+    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::ENABLES, 0.0f, 5.0f);
+    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::PROHIBITS, 0.0f, 5.0f);
   }
 
   void Agent::generate_features() {
