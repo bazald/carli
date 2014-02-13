@@ -39,8 +39,10 @@ namespace Tetris {
     for(auto &line : m_grid)
       line.second = line.first.size();
 
-    m_next = Tetromino_Type(m_random_selection.rand_lt(7));
-    m_current = Tetromino_Type(m_random_selection.rand_lt(7));
+    m_next = Tetromino_Supertype(m_random_selection.rand_lt(7) + 1);
+    m_current = Tetromino_Supertype(m_random_selection.rand_lt(7) + 1);
+//    m_next = TETS_LINE;
+//    m_current = TETS_LINE;
 
     generate_placements();
   }
@@ -48,11 +50,11 @@ namespace Tetris {
   Environment::reward_type Environment::transition_impl(const Action &action) {
     const Place &place = debuggable_cast<const Place &>(action);
 
-    const auto tet = generate_Tetromino(m_current, place.orientation);
+    const auto tet = generate_Tetromino(place.type);
     place_Tetromino(tet, place.position);
 
     m_current = m_next;
-    m_next = Tetromino_Type(m_random_selection.rand_lt(7));
+    m_next = Tetromino_Supertype(m_random_selection.rand_lt(7) + 1);
 
     const double score = score_line[clear_lines(place.position)];
 
@@ -85,7 +87,7 @@ namespace Tetris {
     }
 
     os << "Current:" << std::endl;
-    const auto current = generate_Tetromino(m_current);
+    const auto current = generate_Tetromino(super_to_type(m_current, 0));
     for(int j = 0; j != current.height; ++j) {
       os << "  ";
       for(int i = 0; i != current.width; ++i)
@@ -94,7 +96,7 @@ namespace Tetris {
     }
 
     os << "Next:" << std::endl;
-    const auto next = generate_Tetromino(m_next);
+    const auto next = generate_Tetromino(super_to_type(m_next, 0));
     for(int j = 0; j != next.height; ++j) {
       os << "  ";
       for(int i = 0; i != next.width; ++i)
@@ -103,130 +105,125 @@ namespace Tetris {
     }
   }
 
-  Environment::Tetromino Environment::generate_Tetromino(const Tetromino_Type &type, const int &orientation) {
+  Environment::Tetromino Environment::generate_Tetromino(const Tetromino_Type &type) {
     Environment::Tetromino tet;
     memset(&tet, 0, sizeof(tet));
 
     switch(type) {
-    case TET_LINE:
-      if(orientation & 1) {
-        tet[0][0] = tet[0][1] = tet[0][2] = tet[0][3] = true;
-        tet.width = 4;
-        tet.height = 1;
-      }
-      else {
-        tet[0][0] = tet[1][0] = tet[2][0] = tet[3][0] = true;
-        tet.width = 1;
-        tet.height = 4;
-      }
-      break;
     case TET_SQUARE:
       tet[0][0] = tet[0][1] = tet[1][0] = tet[1][1] = true;
       tet.width = 2;
       tet.height = 2;
       break;
+
+    case TET_LINE_DOWN:
+      tet[0][0] = tet[1][0] = tet[2][0] = tet[3][0] = true;
+      tet.width = 1;
+      tet.height = 4;
+      break;
+
+    case TET_LINE_RIGHT:
+      tet[0][0] = tet[0][1] = tet[0][2] = tet[0][3] = true;
+      tet.width = 4;
+      tet.height = 1;
+      break;
+
     case TET_T:
-      if(orientation & 2) {
-        if(orientation & 1) {
-          tet[0][1] = tet[1][1] = tet[1][2] = tet[1][0] = true;
-          tet.width = 3;
-          tet.height = 2;
-        }
-        else {
-          tet[1][0] = tet[1][1] = tet[2][1] = tet[0][1] = true;
-          tet.width = 2;
-          tet.height = 3;
-        }
-      }
-      else {
-        if(orientation & 1) {
-          tet[0][0] = tet[0][1] = tet[0][2] = tet[1][1] = true;
-          tet.width = 3;
-          tet.height = 2;
-        }
-        else {
-          tet[0][0] = tet[1][0] = tet[2][0] = tet[1][1] = true;
-          tet.width = 2;
-          tet.height = 3;
-        }
-      }
+      tet[0][0] = tet[0][1] = tet[0][2] = tet[1][1] = true;
+      tet.width = 3;
+      tet.height = 2;
       break;
-    case TET_S:
-      if(orientation & 1) {
-        tet[0][0] = tet[1][0] = tet[1][1] = tet[2][1] = true;
-        tet.width = 2;
-        tet.height = 3;
-      }
-      else {
-        tet[1][0] = tet[1][1] = tet[0][1] = tet[0][2] = true;
-        tet.width = 3;
-        tet.height = 2;
-      }
+
+    case TET_T_90:
+      tet[0][0] = tet[1][0] = tet[2][0] = tet[1][1] = true;
+      tet.width = 2;
+      tet.height = 3;
       break;
-    case TET_Z:
-      if(orientation & 1) {
-        tet[0][0] = tet[0][1] = tet[1][1] = tet[1][2] = true;
-        tet.width = 3;
-        tet.height = 2;
-      }
-      else {
-        tet[2][0] = tet[1][0] = tet[1][1] = tet[0][1] = true;
-        tet.width = 2;
-        tet.height = 3;
-      }
+
+    case TET_T_180:
+      tet[0][1] = tet[1][1] = tet[1][2] = tet[1][0] = true;
+      tet.width = 3;
+      tet.height = 2;
       break;
+
+    case TET_T_270:
+      tet[1][0] = tet[1][1] = tet[2][1] = tet[0][1] = true;
+      tet.width = 2;
+      tet.height = 3;
+      break;
+
     case TET_L:
-      if(orientation & 2) {
-        if(orientation & 1) {
-          tet[0][2] = tet[1][2] = tet[1][1] = tet[1][0] = true;
-          tet.width = 3;
-          tet.height = 2;
-        }
-        else {
-          tet[0][0] = tet[0][1] = tet[1][1] = tet[2][1] = true;
-          tet.width = 2;
-          tet.height = 3;
-        }
-      }
-      else {
-        if(orientation & 1) {
-          tet[0][0] = tet[0][1] = tet[0][2] = tet[1][0] = true;
-          tet.width = 3;
-          tet.height = 2;
-        }
-        else {
-          tet[0][0] = tet[1][0] = tet[2][0] = tet[2][1] = true;
-          tet.width = 2;
-          tet.height = 3;
-        }
-      }
+      tet[0][0] = tet[1][0] = tet[2][0] = tet[2][1] = true;
+      tet.width = 2;
+      tet.height = 3;
       break;
+
+    case TET_L_90:
+      tet[0][2] = tet[1][2] = tet[1][1] = tet[1][0] = true;
+      tet.width = 3;
+      tet.height = 2;
+      break;
+
+    case TET_L_180:
+      tet[0][0] = tet[0][1] = tet[1][1] = tet[2][1] = true;
+      tet.width = 2;
+      tet.height = 3;
+      break;
+
+    case TET_L_270:
+      tet[0][0] = tet[0][1] = tet[0][2] = tet[1][0] = true;
+      tet.width = 3;
+      tet.height = 2;
+      break;
+
     case TET_J:
-      if(orientation & 2) {
-        if(orientation & 1) {
-          tet[0][0] = tet[1][2] = tet[1][1] = tet[1][0] = true;
-          tet.width = 3;
-          tet.height = 2;
-        }
-        else {
-          tet[2][0] = tet[0][1] = tet[1][1] = tet[2][1] = true;
-          tet.width = 2;
-          tet.height = 3;
-        }
-      }
-      else {
-        if(orientation & 1) {
-          tet[0][0] = tet[0][1] = tet[0][2] = tet[1][2] = true;
-          tet.width = 3;
-          tet.height = 2;
-        }
-        else {
-          tet[0][0] = tet[1][0] = tet[2][0] = tet[0][1] = true;
-          tet.width = 2;
-          tet.height = 3;
-        }
-      }
+      tet[2][0] = tet[0][1] = tet[1][1] = tet[2][1] = true;
+      tet.width = 2;
+      tet.height = 3;
       break;
+
+    case TET_J_90:
+      tet[0][0] = tet[0][1] = tet[0][2] = tet[1][2] = true;
+      tet.width = 3;
+      tet.height = 2;
+      break;
+
+    case TET_J_180:
+      tet[0][0] = tet[1][0] = tet[2][0] = tet[0][1] = true;
+      tet.width = 2;
+      tet.height = 3;
+      break;
+
+    case TET_J_270:
+      tet[0][0] = tet[1][2] = tet[1][1] = tet[1][0] = true;
+      tet.width = 3;
+      tet.height = 2;
+      break;
+
+    case TET_S:
+      tet[1][0] = tet[1][1] = tet[0][1] = tet[0][2] = true;
+      tet.width = 3;
+      tet.height = 2;
+      break;
+
+    case TET_S_90:
+      tet[0][0] = tet[1][0] = tet[1][1] = tet[2][1] = true;
+      tet.width = 2;
+      tet.height = 3;
+      break;
+
+    case TET_Z:
+      tet[0][0] = tet[0][1] = tet[1][1] = tet[1][2] = true;
+      tet.width = 3;
+      tet.height = 2;
+      break;
+
+    case TET_Z_90:
+      tet[2][0] = tet[1][0] = tet[1][1] = tet[0][1] = true;
+      tet.width = 2;
+      tet.height = 3;
+      break;
+
     default:
       abort();
     }
@@ -321,15 +318,16 @@ namespace Tetris {
       return Outcome::OUTCOME_ACHIEVED;
 
     if(!m_lookahead) {
-      std::vector<Tetromino_Type> types(1, TET_LINE);
+      std::vector<Tetromino_Supertype> types;
+      types.push_back(TETS_LINE);
       if(lines_cleared < 4) {
-        types.push_back(TET_T);
-        types.push_back(TET_S);
-        types.push_back(TET_Z);
-        types.push_back(TET_L);
-        types.push_back(TET_J);
+        types.push_back(TETS_T);
+        types.push_back(TETS_L);
+        types.push_back(TETS_J);
+        types.push_back(TETS_S);
+        types.push_back(TETS_Z);
         if(lines_cleared < 3)
-          types.push_back(TET_SQUARE);
+          types.push_back(TETS_SQUARE);
       }
 
       for(const auto t : types) {
@@ -357,12 +355,13 @@ namespace Tetris {
   }
 
   void Environment::generate_placements() {
-    const uint8_t orientations = orientations_Tetromino(m_current);
+    const uint8_t orientations = num_types(m_current);
 
     m_placements.clear();
 
-    for(int orientation = 0; orientation != orientations; ++orientation) {
-      const auto tet = generate_Tetromino(m_current, orientation);
+    for(uint8_t orientation = 0; orientation != orientations; ++orientation) {
+      const auto type = super_to_type(m_current, orientation);
+      const auto tet = generate_Tetromino(type);
 
       for(size_t i = 0, iend = 11 - tet.width; i != iend; ++i) {
         size_t j = tet.height - 1;
@@ -380,7 +379,7 @@ namespace Tetris {
 
         if(j < 20) {
           const auto position = std::make_pair(i, j);
-          m_placements.emplace_back(orientation,
+          m_placements.emplace_back(type,
                                     std::make_pair(tet.width, tet.height),
                                     position,
                                     gaps_beneath(tet, position),
@@ -391,23 +390,6 @@ namespace Tetris {
                                     outcome(4, tet, position));
         }
       }
-    }
-  }
-
-  uint8_t Environment::orientations_Tetromino(const Tetromino_Type &type) {
-    switch(type) {
-    case TET_SQUARE:
-      return 1;
-    case TET_LINE:
-    case TET_S:
-    case TET_Z:
-      return 2;
-    case TET_T:
-    case TET_L:
-    case TET_J:
-      return 4;
-    default:
-      abort();
     }
   }
 
@@ -464,10 +446,8 @@ namespace Tetris {
     auto join_type_current = make_join(state_bindings, filter_action, filter_type_current);
     auto filter_type_next = make_filter(Rete::WME(m_first_var, m_type_next_attr, m_third_var));
     auto join_type_next = make_join(state_bindings, join_type_current, filter_type_next);
-    auto filter_orientation = make_filter(Rete::WME(m_first_var, m_orientation_attr, m_third_var));
-    auto join_orientation = make_join(state_bindings, join_type_next, filter_orientation);
     auto filter_width = make_filter(Rete::WME(m_first_var, m_width_attr, m_third_var));
-    auto join_width = make_join(state_bindings, join_orientation, filter_width);
+    auto join_width = make_join(state_bindings, join_type_next, filter_width);
     auto filter_height = make_filter(Rete::WME(m_first_var, m_height_attr, m_third_var));
     auto join_height = make_join(state_bindings, join_width, filter_height);
     auto filter_x = make_filter(Rete::WME(m_first_var, m_x_attr, m_third_var));
@@ -507,35 +487,23 @@ namespace Tetris {
     }
 
     for(Type::Axis axis : {Type::CURRENT, Type::NEXT}) {
-      for(size_t type = 0; type != TET_TYPES; ++type) {
-        auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
-        auto feature = new Type(axis, Tetromino_Type(type));
-        node_fringe->feature = feature;
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
-        node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-          const auto action = get_action(token);
-          this->insert_q_value_next(action, node_fringe->q_value);
-        }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-          const auto action = get_action(token);
-          this->purge_q_value_next(action, node_fringe->q_value);
-        }, predicate).get();
-        node_unsplit->fringe_values.push_back(node_fringe);
+      for(auto super : {TETS_SQUARE, TETS_LINE, TETS_T, TETS_L, TETS_J, TETS_S, TETS_Z}) {
+        for(uint8_t orientation = 0, oend = num_types(super); orientation != oend; ++orientation) {
+          const auto type = super_to_type(super, orientation);
+          auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
+          auto feature = new Type(axis, type);
+          node_fringe->feature = feature;
+          auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
+          node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+            const auto action = get_action(token);
+            this->insert_q_value_next(action, node_fringe->q_value);
+          }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+            const auto action = get_action(token);
+            this->purge_q_value_next(action, node_fringe->q_value);
+          }, predicate).get();
+          node_unsplit->fringe_values.push_back(node_fringe);
+        }
       }
-    }
-
-    for(size_t orientation = 0; orientation != 4; ++orientation) {
-      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
-      auto feature = new Orientation(orientation);
-      node_fringe->feature = feature;
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Orientation::ORIENTATION, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, node_fringe->q_value);
-      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, node_fringe->q_value);
-      }, predicate).get();
-      node_unsplit->fringe_values.push_back(node_fringe);
     }
 
     generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::WIDTH, 0.0f, 4.0f);
@@ -563,9 +531,8 @@ namespace Tetris {
       Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
       oss.str("");
       wmes_current.push_back(std::make_shared<Rete::WME>(m_input_id, m_action_attr, action_id));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_type_current_attr, std::make_shared<Rete::Symbol_Constant_Int>(env->get_current())));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_type_current_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.type)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_type_next_attr, std::make_shared<Rete::Symbol_Constant_Int>(env->get_next())));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_orientation_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.orientation)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_width_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.first)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.second)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.position.first)));
