@@ -67,13 +67,11 @@ namespace Tetris {
   }
 
   void Environment::place_Tetromino(const Environment::Tetromino &tet, const std::pair<size_t, size_t> &position) {
-    for(size_t j = 0; j != tet.height; ++j) {
-      for(size_t i = 0; i != tet.width; ++i) {
-        if(tet[j][i]) {
-          m_grid[position.second - j].first[position.first + i] = true;
-          --m_grid[position.second - j].second;
-        }
-      }
+    for(auto tt = tet.begin(); tt != tet.end(); ++tt) {
+      auto &line = m_grid[position.second - tt->second];
+      assert(!line.first[position.first + tt->first]);
+      line.first[position.first + tt->first] = true;
+      --line.second;
     }
   }
 
@@ -88,19 +86,33 @@ namespace Tetris {
 
     os << "Current:" << std::endl;
     const auto current = generate_Tetromino(super_to_type(m_current, 0));
-    for(int j = 0; j != current.height; ++j) {
+    int index = 0;
+    for(int j = 0; index != 4 && j != current.height; ++j) {
       os << "  ";
-      for(int i = 0; i != current.width; ++i)
-        os << (current[j][i] ? 'O' : ' ');
+      for(int i = 0; index != 4 && current[index].second == j && i != current.width; ++i) {
+        if(current[index].first == i) {
+          os << 'O';
+          ++index;
+        }
+        else
+          os << ' ';
+      }
       os << std::endl;
     }
 
     os << "Next:" << std::endl;
     const auto next = generate_Tetromino(super_to_type(m_next, 0));
-    for(int j = 0; j != next.height; ++j) {
+    index = 0;
+    for(int j = 0; index != 4 && j != next.height; ++j) {
       os << "  ";
-      for(int i = 0; i != next.width; ++i)
-        os << (next[j][i] ? 'O' : ' ');
+      for(int i = 0; index != 4 && current[index].second == j && i != next.width; ++i) {
+        if(next[index].first == i) {
+          os << 'O';
+          ++index;
+        }
+        else
+          os << ' ';
+      }
       os << std::endl;
     }
   }
@@ -111,115 +123,172 @@ namespace Tetris {
 
     switch(type) {
     case TET_SQUARE:
-      tet[0][0] = tet[0][1] = tet[1][0] = tet[1][1] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(1, 0);
+      tet[2] = std::make_pair(0, 1);
+      tet[3] = std::make_pair(1, 1);
       tet.width = 2;
       tet.height = 2;
       break;
 
     case TET_LINE_DOWN:
-      tet[0][0] = tet[1][0] = tet[2][0] = tet[3][0] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(0, 1);
+      tet[2] = std::make_pair(0, 2);
+      tet[3] = std::make_pair(0, 3);
       tet.width = 1;
       tet.height = 4;
       break;
 
     case TET_LINE_RIGHT:
-      tet[0][0] = tet[0][1] = tet[0][2] = tet[0][3] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(1, 0);
+      tet[2] = std::make_pair(2, 0);
+      tet[3] = std::make_pair(3, 0);
       tet.width = 4;
       tet.height = 1;
       break;
 
     case TET_T:
-      tet[0][0] = tet[0][1] = tet[0][2] = tet[1][1] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(1, 0);
+      tet[2] = std::make_pair(2, 0);
+      tet[3] = std::make_pair(1, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_T_90:
-      tet[0][0] = tet[1][0] = tet[2][0] = tet[1][1] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(0, 1);
+      tet[2] = std::make_pair(1, 1);
+      tet[3] = std::make_pair(0, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_T_180:
-      tet[0][1] = tet[1][1] = tet[1][2] = tet[1][0] = true;
+      tet[0] = std::make_pair(1, 0);
+      tet[1] = std::make_pair(0, 1);
+      tet[2] = std::make_pair(1, 1);
+      tet[3] = std::make_pair(2, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_T_270:
-      tet[1][0] = tet[1][1] = tet[2][1] = tet[0][1] = true;
+      tet[0] = std::make_pair(1, 0);
+      tet[1] = std::make_pair(0, 1);
+      tet[2] = std::make_pair(1, 1);
+      tet[3] = std::make_pair(1, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_L:
-      tet[0][0] = tet[1][0] = tet[2][0] = tet[2][1] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(0, 1);
+      tet[2] = std::make_pair(0, 2);
+      tet[3] = std::make_pair(1, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_L_90:
-      tet[0][2] = tet[1][2] = tet[1][1] = tet[1][0] = true;
+      tet[0] = std::make_pair(2, 0);
+      tet[1] = std::make_pair(0, 1);
+      tet[2] = std::make_pair(1, 1);
+      tet[3] = std::make_pair(2, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_L_180:
-      tet[0][0] = tet[0][1] = tet[1][1] = tet[2][1] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(1, 0);
+      tet[2] = std::make_pair(1, 1);
+      tet[3] = std::make_pair(1, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_L_270:
-      tet[0][0] = tet[0][1] = tet[0][2] = tet[1][0] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(1, 0);
+      tet[2] = std::make_pair(2, 0);
+      tet[3] = std::make_pair(0, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_J:
-      tet[2][0] = tet[0][1] = tet[1][1] = tet[2][1] = true;
+      tet[0] = std::make_pair(1, 0);
+      tet[1] = std::make_pair(1, 1);
+      tet[2] = std::make_pair(0, 2);
+      tet[3] = std::make_pair(1, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_J_90:
-      tet[0][0] = tet[0][1] = tet[0][2] = tet[1][2] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(1, 0);
+      tet[2] = std::make_pair(2, 0);
+      tet[3] = std::make_pair(2, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_J_180:
-      tet[0][0] = tet[1][0] = tet[2][0] = tet[0][1] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(1, 0);
+      tet[2] = std::make_pair(0, 1);
+      tet[3] = std::make_pair(0, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_J_270:
-      tet[0][0] = tet[1][2] = tet[1][1] = tet[1][0] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(0, 1);
+      tet[2] = std::make_pair(1, 1);
+      tet[3] = std::make_pair(2, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_S:
-      tet[1][0] = tet[1][1] = tet[0][1] = tet[0][2] = true;
+      tet[0] = std::make_pair(1, 0);
+      tet[1] = std::make_pair(2, 0);
+      tet[2] = std::make_pair(0, 1);
+      tet[3] = std::make_pair(1, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_S_90:
-      tet[0][0] = tet[1][0] = tet[1][1] = tet[2][1] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(0, 1);
+      tet[2] = std::make_pair(1, 1);
+      tet[3] = std::make_pair(1, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_Z:
-      tet[0][0] = tet[0][1] = tet[1][1] = tet[1][2] = true;
+      tet[0] = std::make_pair(0, 0);
+      tet[1] = std::make_pair(1, 0);
+      tet[2] = std::make_pair(1, 1);
+      tet[3] = std::make_pair(2, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_Z_90:
-      tet[2][0] = tet[1][0] = tet[1][1] = tet[0][1] = true;
+      tet[0] = std::make_pair(1, 0);
+      tet[1] = std::make_pair(0, 1);
+      tet[2] = std::make_pair(1, 1);
+      tet[3] = std::make_pair(0, 2);
       tet.width = 2;
       tet.height = 3;
       break;
@@ -253,19 +322,12 @@ namespace Tetris {
     size_t gaps = 0;
 
     for(int i = 0; i != tet.width; ++i) {
-      const int barrier = position.second < 4 ? position.second + 1 : 4;
+      size_t j = position.second;
+      for(auto tt = tet.begin(); tt != tet.end(); ++tt)
+        if(tt->first == i)
+          j = position.second - tt->second - 1;
 
-      size_t sum = 0;
-      for(int j = 0; j != barrier; ++j) {
-        if(tet[j][i])
-          sum = 0;
-        else if(!m_grid[position.second - j].first[position.first + i])
-          ++sum;
-      }
-
-      gaps += sum;
-
-      for(int j = position.second - barrier; j > -1; --j) {
+      for(; j < m_grid.size(); --j) {
         if(!m_grid[j].first[position.first + i])
           ++gaps;
       }
@@ -278,26 +340,12 @@ namespace Tetris {
     size_t gaps = 0;
 
     for(int i = 0; i != tet.width; ++i) {
-      const int barrier = position.second < 4 ? position.second + 1 : 4;
+      size_t j = position.second;
+      for(auto tt = tet.begin(); tt != tet.end(); ++tt)
+        if(tt->first == i)
+          j = position.second - tt->second - 1;
 
-      size_t sum = 0;
-      bool done = false;
-      for(int j = 0; j != barrier; ++j) {
-        if(tet[j][i])
-          sum = 0;
-        else if(m_grid[position.second - j].first[position.first + i]) {
-          done = true;
-          break;
-        }
-        else
-          ++sum;
-      }
-
-      gaps += sum;
-      if(done)
-        continue;
-
-      for(int j = position.second - barrier; j > -1; --j) {
+      for(; j < m_grid.size(); --j) {
         if(m_grid[j].first[position.first + i])
           break;
         else
@@ -367,9 +415,12 @@ namespace Tetris {
         size_t j = tet.height - 1;
 
         for(size_t x = 0; x != tet.width; ++x) {
-          const size_t ymax = tet[3][x] ? 4 : tet[2][x] ? 3 : tet[1][x] ? 2 : 1;
+          const size_t ymax = (tet[3].first == x ? tet[3].second :
+                               tet[2].first == x ? tet[2].second :
+                               tet[1].first == x ? tet[1].second :
+                                                   tet[0].second) + 1;
 
-          for(size_t y = 19; y < 20; --y) {
+          for(size_t y = m_grid.size() - 1; y < m_grid.size(); --y) {
             if(m_grid[y].first[i + x]) {
               j = std::max(j, y + ymax);
               break;
@@ -377,7 +428,13 @@ namespace Tetris {
           }
         }
 
-        if(j < 20) {
+        if(j < m_grid.size()) {
+          assert(j + 1 - tet.height < m_grid.size());
+          assert(!m_grid[j - tet[0].second].first[i + tet[0].first]);
+          assert(!m_grid[j - tet[1].second].first[i + tet[1].first]);
+          assert(!m_grid[j - tet[2].second].first[i + tet[2].first]);
+          assert(!m_grid[j - tet[3].second].first[i + tet[3].first]);
+
           const auto position = std::make_pair(i, j);
           m_placements.emplace_back(type,
                                     std::make_pair(tet.width, tet.height),

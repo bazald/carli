@@ -356,7 +356,7 @@ namespace Tetris {
   private:
     enum Result {PLACE_ILLEGAL, PLACE_GROUNDED, PLACE_UNGROUNDED};
 
-    struct Tetromino : public std::array<std::array<bool, 4>, 4> {
+    struct Tetromino : public std::array<std::pair<uint8_t, uint8_t>, 4> {
       uint8_t width;
       uint8_t height;
     };
