@@ -51,6 +51,7 @@ namespace Tetris {
   class Position;
   class Gaps;
   class Clears;
+  class X_Odd;
 
   class Feature : public ::Feature {
   public:
@@ -68,6 +69,7 @@ namespace Tetris {
     virtual int compare_axis(const Position &rhs) const = 0;
     virtual int compare_axis(const Gaps &rhs) const = 0;
     virtual int compare_axis(const Clears &rhs) const = 0;
+    virtual int compare_axis(const X_Odd &rhs) const = 0;
 
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
@@ -95,6 +97,7 @@ namespace Tetris {
     int compare_axis(const Position &) const {return -1;}
     int compare_axis(const Gaps &) const {return -1;}
     int compare_axis(const Clears &) const {return -1;}
+    int compare_axis(const X_Odd &) const {return -1;}
 
     Rete::WME_Token_Index wme_token_index() const {
       return Rete::WME_Token_Index(axis, 2);
@@ -106,7 +109,6 @@ namespace Tetris {
 
     Axis axis;
   };
-
 
   class Size : public Feature_Ranged<Feature> {
   public:
@@ -131,6 +133,7 @@ namespace Tetris {
     int compare_axis(const Position &) const {return -1;}
     int compare_axis(const Gaps &) const {return -1;}
     int compare_axis(const Clears &) const {return -1;}
+    int compare_axis(const X_Odd &) const {return -1;}
 
     Rete::WME_Token_Index wme_token_index() const {
       return axis;
@@ -170,6 +173,7 @@ namespace Tetris {
     }
     int compare_axis(const Gaps &) const {return -1;}
     int compare_axis(const Clears &) const {return -1;}
+    int compare_axis(const X_Odd &) const {return -1;}
 
     Rete::WME_Token_Index wme_token_index() const {
       return axis;
@@ -209,6 +213,7 @@ namespace Tetris {
       return Feature_Ranged_Data::compare_axis(rhs);
     }
     int compare_axis(const Clears &) const {return -1;}
+    int compare_axis(const X_Odd &) const {return -1;}
 
     Rete::WME_Token_Index wme_token_index() const {
       return axis;
@@ -248,6 +253,7 @@ namespace Tetris {
     int compare_axis(const Clears &rhs) const {
       return Feature_Ranged_Data::compare_axis(rhs);
     }
+    int compare_axis(const X_Odd &) const {return -1;}
 
     Rete::WME_Token_Index wme_token_index() const {
       return axis;
@@ -262,6 +268,40 @@ namespace Tetris {
       }
 
       os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+    }
+  };
+
+  class X_Odd : public Feature_Enumerated<Feature> {
+  public:
+    enum Axis : size_t {AXIS = 12};
+
+    X_Odd(const bool &value_)
+     : Feature_Enumerated<Feature>(value_)
+    {
+    }
+
+    X_Odd * clone() const {
+      return new X_Odd(value);
+    }
+
+    int compare_axis(const Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int compare_axis(const Type &) const {return -1;}
+    int compare_axis(const Size &) const {return -1;}
+    int compare_axis(const Position &) const {return -1;}
+    int compare_axis(const Gaps &) const {return -1;}
+    int compare_axis(const Clears &) const {return -1;}
+    int compare_axis(const X_Odd &) const {
+      return 0;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return Rete::WME_Token_Index(AXIS, 2);
+    }
+
+    void print(ostream &os) const {
+      os << "x-odd(" << (value ? "true" : "false") << ')';
     }
   };
 
@@ -423,10 +463,12 @@ namespace Tetris {
     const Rete::Symbol_Constant_String_Ptr_C m_clears_attr = std::make_shared<Rete::Symbol_Constant_String>("clears");
     const Rete::Symbol_Constant_String_Ptr_C m_enables_clearing_attr = std::make_shared<Rete::Symbol_Constant_String>("enables-clearing");
     const Rete::Symbol_Constant_String_Ptr_C m_prohibits_clearing_attr = std::make_shared<Rete::Symbol_Constant_String>("prohibits-clearing");
+    const Rete::Symbol_Constant_String_Ptr_C m_x_odd_attr = std::make_shared<Rete::Symbol_Constant_String>("x-odd");
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
+    const Rete::Symbol_Constant_String_Ptr_C m_false_value = std::make_shared<Rete::Symbol_Constant_String>("false");
 
-    std::array<Rete::Symbol_Identifier_Ptr_C, 7> m_type_ids = {{std::make_shared<Rete::Symbol_Identifier>("LINE"),
-                                                                std::make_shared<Rete::Symbol_Identifier>("SQUARE"),
+    std::array<Rete::Symbol_Identifier_Ptr_C, 7> m_type_ids = {{std::make_shared<Rete::Symbol_Identifier>("I"),
+                                                                std::make_shared<Rete::Symbol_Identifier>("O"),
                                                                 std::make_shared<Rete::Symbol_Identifier>("T"),
                                                                 std::make_shared<Rete::Symbol_Identifier>("S"),
                                                                 std::make_shared<Rete::Symbol_Identifier>("Z"),
@@ -440,31 +482,31 @@ namespace Tetris {
 
 std::ostream & operator<<(std::ostream &os, const Tetris::Tetromino_Type &type) {
   switch(type) {
-    case Tetris::TET_SQUARE:     os << "O"; break;
+    case Tetris::TET_SQUARE:     os << "O";     break;
 
-    case Tetris::TET_LINE_DOWN:
-    case Tetris::TET_LINE_RIGHT: os << "|"; break;
+    case Tetris::TET_LINE_DOWN:  os << "I";  break;
+    case Tetris::TET_LINE_RIGHT: os << "I"; break;
 
-    case Tetris::TET_T:
-    case Tetris::TET_T_90:
-    case Tetris::TET_T_180:
-    case Tetris::TET_T_270:      os << "T"; break;
+    case Tetris::TET_T:          os << "T";          break;
+    case Tetris::TET_T_90:       os << "T_90";       break;
+    case Tetris::TET_T_180:      os << "T_180";      break;
+    case Tetris::TET_T_270:      os << "T";          break;
 
-    case Tetris::TET_L:
-    case Tetris::TET_L_90:
-    case Tetris::TET_L_180:
-    case Tetris::TET_L_270:      os << "L"; break;
+    case Tetris::TET_L:          os << "L";          break;
+    case Tetris::TET_L_90:       os << "L_90";       break;
+    case Tetris::TET_L_180:      os << "L_180";      break;
+    case Tetris::TET_L_270:      os << "L_270";      break;
 
-    case Tetris::TET_J:
-    case Tetris::TET_J_90:
-    case Tetris::TET_J_180:
-    case Tetris::TET_J_270:      os << "J"; break;
+    case Tetris::TET_J:          os << "J";          break;
+    case Tetris::TET_J_90:       os << "J_90";       break;
+    case Tetris::TET_J_180:      os << "J_180";      break;
+    case Tetris::TET_J_270:      os << "J_270";      break;
 
-    case Tetris::TET_S:
-    case Tetris::TET_S_90:       os << "S"; break;
+    case Tetris::TET_S:          os << "S";          break;
+    case Tetris::TET_S_90:       os << "S_90";       break;
 
-    case Tetris::TET_Z:
-    case Tetris::TET_Z_90:       os << "Z"; break;
+    case Tetris::TET_Z:          os << "Z";          break;
+    case Tetris::TET_Z_90:       os << "Z_90";       break;
 
     default: abort();
   }

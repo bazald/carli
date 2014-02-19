@@ -39,10 +39,12 @@ namespace Tetris {
     for(auto &line : m_grid)
       line.second = line.first.size();
 
-    m_next = Tetromino_Supertype(m_random_selection.rand_lt(7) + 1);
     m_current = Tetromino_Supertype(m_random_selection.rand_lt(7) + 1);
-//    m_next = TETS_LINE;
-//    m_current = TETS_LINE;
+    m_next = Tetromino_Supertype(m_random_selection.rand_lt(7) + 1);
+//    m_current = m_random_selection.rand_lt(2) ? TETS_LINE : TETS_SQUARE;
+//    m_next = m_random_selection.rand_lt(2) ? TETS_LINE : TETS_SQUARE;
+//    m_current = TETS_T;
+//    m_next = TETS_T;
 
     generate_placements();
   }
@@ -55,6 +57,7 @@ namespace Tetris {
 
     m_current = m_next;
     m_next = Tetromino_Supertype(m_random_selection.rand_lt(7) + 1);
+//    m_next = m_random_selection.rand_lt(2) ? TETS_LINE : TETS_SQUARE;
 
     const double score = score_line[clear_lines(place.position)];
 
@@ -85,12 +88,12 @@ namespace Tetris {
     }
 
     os << "Current:" << std::endl;
-    const auto current = generate_Tetromino(super_to_type(m_current, 0));
+    auto tet = generate_Tetromino(super_to_type(m_current, 0));
     int index = 0;
-    for(int j = 0; index != 4 && j != current.height; ++j) {
+    for(int j = 0; index != 4 && j != tet.height; ++j) {
       os << "  ";
-      for(int i = 0; index != 4 && current[index].second == j && i != current.width; ++i) {
-        if(current[index].first == i) {
+      for(int i = 0; index != 4 && tet[index].second == j && i != tet.width; ++i) {
+        if(tet[index].first == i) {
           os << 'O';
           ++index;
         }
@@ -99,14 +102,15 @@ namespace Tetris {
       }
       os << std::endl;
     }
+    assert(index == 4);
 
     os << "Next:" << std::endl;
-    const auto next = generate_Tetromino(super_to_type(m_next, 0));
+    tet = generate_Tetromino(super_to_type(m_next, 0));
     index = 0;
-    for(int j = 0; index != 4 && j != next.height; ++j) {
+    for(int j = 0; index != 4 && j != tet.height; ++j) {
       os << "  ";
-      for(int i = 0; index != 4 && current[index].second == j && i != next.width; ++i) {
-        if(next[index].first == i) {
+      for(int i = 0; index != 4 && tet[index].second == j && i != tet.width; ++i) {
+        if(tet[index].first == i) {
           os << 'O';
           ++index;
         }
@@ -115,6 +119,7 @@ namespace Tetris {
       }
       os << std::endl;
     }
+    assert(index == 4);
   }
 
   Environment::Tetromino Environment::generate_Tetromino(const Tetromino_Type &type) {
@@ -303,7 +308,7 @@ namespace Tetris {
   uint8_t Environment::clear_lines(const std::pair<size_t, size_t> &position) {
     uint8_t lines_cleared = 0.0;
 
-    for(size_t j = position.second > 4 ? position.second - 4 : 0, jend = j + 4; j != jend; ) {
+    for(size_t j = position.second > 3 ? position.second - 3 : 0, jend = j + 4; j != jend; ) {
       if(m_grid[j].second)
         ++j;
       else {
@@ -314,6 +319,11 @@ namespace Tetris {
         --jend;
       }
     }
+
+#ifndef NDEBUG
+    for(const auto &line : m_grid)
+      assert(line.second);
+#endif
 
     return lines_cleared;
   }
@@ -521,7 +531,9 @@ namespace Tetris {
     auto join_enables_clearing = make_join(state_bindings, join_clears, filter_enables_clearing);
     auto filter_prohibits_clearing = make_filter(Rete::WME(m_first_var, m_prohibits_clearing_attr, m_third_var));
     auto join_prohibits_clearing = make_join(state_bindings, join_enables_clearing, filter_prohibits_clearing);
-    auto &join_last = join_prohibits_clearing;
+    auto filter_x_odd = make_filter(Rete::WME(m_first_var, m_x_odd_attr, m_third_var));
+    auto join_x_odd = make_join(state_bindings, join_prohibits_clearing, filter_x_odd);
+    auto &join_last = join_x_odd;
 
     auto filter_blink = make_filter(*m_wme_blink);
 
@@ -543,7 +555,7 @@ namespace Tetris {
       }, join_blink).get();
     }
 
-    for(Type::Axis axis : {Type::CURRENT, Type::NEXT}) {
+    for(Type::Axis axis : {Type::CURRENT/*, Type::NEXT*/}) {
       for(auto super : {TETS_SQUARE, TETS_LINE, TETS_T, TETS_L, TETS_J, TETS_S, TETS_Z}) {
         for(uint8_t orientation = 0, oend = num_types(super); orientation != oend; ++orientation) {
           const auto type = super_to_type(super, orientation);
@@ -562,6 +574,21 @@ namespace Tetris {
         }
       }
     }
+
+//    for(auto value : {true, false}) {
+//      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
+//      auto feature = new X_Odd(value);
+//      node_fringe->feature = feature;
+//      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(X_Odd::AXIS, 2), feature->symbol_constant(), node_unsplit->action->parent());
+//      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+//        const auto action = get_action(token);
+//        this->insert_q_value_next(action, node_fringe->q_value);
+//      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+//        const auto action = get_action(token);
+//        this->purge_q_value_next(action, node_fringe->q_value);
+//      }, predicate).get();
+//      node_unsplit->fringe_values.push_back(node_fringe);
+//    }
 
     generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::WIDTH, 0.0f, 4.0f);
     generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::HEIGHT, 0.0f, 4.0f);
@@ -596,6 +623,7 @@ namespace Tetris {
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.position.second)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_gaps_beneath_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.gaps_beneath)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_gaps_created_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.gaps_created)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_x_odd_attr, (placement.position.first & 1) ? m_true_value : m_false_value));
 
       int clears = 0;
       int enables = 0;
