@@ -192,7 +192,7 @@ namespace Tetris {
 
   class Gaps : public Feature_Ranged<Feature> {
   public:
-    enum Axis : size_t {BENEATH = 7, CREATED = 8};
+    enum Axis : size_t {BENEATH = 7, CREATED = 8, DEPTH = 9};
 
     Gaps(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
@@ -232,7 +232,7 @@ namespace Tetris {
 
   class Clears : public Feature_Ranged<Feature> {
   public:
-    enum Axis : size_t {CLEARS = 9, ENABLES = 10, PROHIBITS = 11};
+    enum Axis : size_t {CLEARS = 10, ENABLES = 11, PROHIBITS = 12};
 
     Clears(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
@@ -273,7 +273,7 @@ namespace Tetris {
 
   class X_Odd : public Feature_Enumerated<Feature> {
   public:
-    enum Axis : size_t {AXIS = 12};
+    enum Axis : size_t {AXIS = 13};
 
     X_Odd(const bool &value_)
      : Feature_Enumerated<Feature>(value_)
@@ -357,6 +357,7 @@ namespace Tetris {
                 const std::pair<size_t, size_t> &position_,
                 const size_t &gaps_beneath_,
                 const size_t &gaps_created_,
+                const size_t &depth_to_gap_,
                 const Outcome &outcome_1,
                 const Outcome &outcome_2,
                 const Outcome &outcome_3,
@@ -366,6 +367,7 @@ namespace Tetris {
        position(position_),
        gaps_beneath(gaps_beneath_),
        gaps_created(gaps_created_),
+       depth_to_gap(depth_to_gap_),
        outcome({{Outcome::OUTCOME_NULL, outcome_1, outcome_2, outcome_3, outcome_4}})
       {
       }
@@ -375,12 +377,13 @@ namespace Tetris {
       std::pair<size_t, size_t> position;
       size_t gaps_beneath;
       size_t gaps_created;
+      size_t depth_to_gap;
       std::array<Outcome, 5> outcome;
     };
     typedef std::list<Placement, Zeni::Pool_Allocator<Placement>> Placements;
 
-//    const std::array<double, 5> score_line = {{0.0, 10.0, 20.0, 30.0, 40.0}}; /// No risk-reward tradeoff
-    const std::array<double, 5> score_line = {{0.0, 10.0, 20.0, 40.0, 80.0}}; /// Risk-reward tradeoff
+    const std::array<double, 5> score_line = {{0.0, 10.0, 20.0, 30.0, 40.0}}; ///< No risk-reward tradeoff
+//    const std::array<double, 5> score_line = {{0.0, 10.0, 20.0, 40.0, 80.0}}; ///< Risk-reward tradeoff
     const double score_failure = 0.0;
 
     Environment();
@@ -413,6 +416,7 @@ namespace Tetris {
 
     size_t gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
     size_t gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
+    size_t depth_to_highest_gap() const;
     Outcome outcome(const uint8_t &lines_cleared, const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
 
     Zeni::Random m_random_init;
@@ -460,6 +464,7 @@ namespace Tetris {
     const Rete::Symbol_Constant_String_Ptr_C m_y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
     const Rete::Symbol_Constant_String_Ptr_C m_gaps_beneath_attr = std::make_shared<Rete::Symbol_Constant_String>("gaps-beneath");
     const Rete::Symbol_Constant_String_Ptr_C m_gaps_created_attr = std::make_shared<Rete::Symbol_Constant_String>("gaps-created");
+    const Rete::Symbol_Constant_String_Ptr_C m_depth_to_gap_attr = std::make_shared<Rete::Symbol_Constant_String>("depth-to-gap"); ///< Depth to the highest gap
     const Rete::Symbol_Constant_String_Ptr_C m_clears_attr = std::make_shared<Rete::Symbol_Constant_String>("clears");
     const Rete::Symbol_Constant_String_Ptr_C m_enables_clearing_attr = std::make_shared<Rete::Symbol_Constant_String>("enables-clearing");
     const Rete::Symbol_Constant_String_Ptr_C m_prohibits_clearing_attr = std::make_shared<Rete::Symbol_Constant_String>("prohibits-clearing");

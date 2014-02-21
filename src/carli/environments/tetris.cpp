@@ -366,6 +366,25 @@ namespace Tetris {
     return gaps;
   }
 
+  size_t Environment::depth_to_highest_gap() const {
+    size_t max_gap = 0u;
+
+    for(size_t i = 0, iend = m_grid[0].first.size(); i != iend; ++i) {
+      size_t blocked = 0u;
+
+      for(size_t j = m_grid.size() - 1; j < m_grid.size(); --j) {
+        if(m_grid[j].first[i])
+          ++blocked;
+        else
+          break;
+      }
+
+      max_gap = std::max(max_gap, blocked);
+    }
+
+    return max_gap;
+  }
+
   Environment::Outcome Environment::outcome(const uint8_t &lines_cleared, const Tetromino &tet, const std::pair<size_t, size_t> &position) const {
     assert(lines_cleared && lines_cleared < 5);
 
@@ -451,6 +470,7 @@ namespace Tetris {
                                     position,
                                     gaps_beneath(tet, position),
                                     gaps_created(tet, position),
+                                    depth_to_highest_gap(),
                                     outcome(1, tet, position),
                                     outcome(2, tet, position),
                                     outcome(3, tet, position),
@@ -525,8 +545,10 @@ namespace Tetris {
     auto join_gaps_beneath = make_join(state_bindings, join_y, filter_gaps_beneath);
     auto filter_gaps_created = make_filter(Rete::WME(m_first_var, m_gaps_created_attr, m_third_var));
     auto join_gaps_created = make_join(state_bindings, join_gaps_beneath, filter_gaps_created);
+    auto filter_depth_to_gap = make_filter(Rete::WME(m_first_var, m_depth_to_gap_attr, m_third_var));
+    auto join_depth_to_gap = make_join(state_bindings, join_gaps_created, filter_depth_to_gap);
     auto filter_clears = make_filter(Rete::WME(m_first_var, m_clears_attr, m_third_var));
-    auto join_clears = make_join(state_bindings, join_gaps_created, filter_clears);
+    auto join_clears = make_join(state_bindings, join_depth_to_gap, filter_clears);
     auto filter_enables_clearing = make_filter(Rete::WME(m_first_var, m_enables_clearing_attr, m_third_var));
     auto join_enables_clearing = make_join(state_bindings, join_clears, filter_enables_clearing);
     auto filter_prohibits_clearing = make_filter(Rete::WME(m_first_var, m_prohibits_clearing_attr, m_third_var));
@@ -596,6 +618,7 @@ namespace Tetris {
     generate_rete_continuous<Position, Position::Axis>(node_unsplit, get_action, Position::Y, 0.0f, 20.0f);
     generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::BENEATH, 0.0f, 75.0f);
     generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::CREATED, 0.0f, 75.0f);
+//    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::DEPTH, 0.0f, 20.0f);
     generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::CLEARS, 0.0f, 5.0f);
     generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::ENABLES, 0.0f, 5.0f);
     generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::PROHIBITS, 0.0f, 5.0f);
@@ -623,6 +646,7 @@ namespace Tetris {
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.position.second)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_gaps_beneath_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.gaps_beneath)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_gaps_created_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.gaps_created)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_depth_to_gap_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.depth_to_gap)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_x_odd_attr, (placement.position.first & 1) ? m_true_value : m_false_value));
 
       int clears = 0;
