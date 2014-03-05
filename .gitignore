@@ -35,6 +35,7 @@
 *.save
 *.sdf
 *.sln
+*.so
 *.suo
 *.synctex.gz
 *.tlog
@@ -49,6 +50,7 @@ carli.workspace
 carli_d
 carli_p
 carli_p.prof
+carli_r
 dump.txt
 git.h
 Makefile

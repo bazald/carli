@@ -41,7 +41,6 @@ solution "carli"
   flags { "ExtraWarnings" }
   buildoptions { "-mfpmath=sse -mmmx -msse -msse2 -ffloat-store -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
   buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
-  include "src/carli"
 
   configuration "Debug"
     defines { "_DEBUG", "DEBUG", "debuggable_cast=dynamic_cast", "debuggable_pointer_cast=std::dynamic_pointer_cast" }
@@ -55,6 +54,7 @@ solution "carli"
   configuration "Release"
     defines { "NDEBUG", "debuggable_cast=static_cast", "debuggable_pointer_cast=std::static_pointer_cast" }
     flags { "Optimize" }
+    targetsuffix "_r"
 --    buildoptions { "-flto" }
 --    linkoptions { "-flto" }
 
@@ -65,6 +65,8 @@ solution "carli"
     buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
     buildoptions { "-Wno-deprecated-register", "-Wno-null-conversion", "-Wno-parentheses-equality", "-Wno-unneeded-internal-declaration" }
     linkoptions { "-stdlib=libc++" }
+  configuration "linux"
+    linkoptions { "-Wl,-rpath,'$$ORIGIN'", "-Wl,--hash-style=both" }
   configuration "*"
     buildoptions { "-Wno-unused-function" }
 
@@ -84,3 +86,7 @@ solution "carli"
         links { "c++", "c++abi", "m", "c", "gcc_s", "gcc" }
     end
   end
+
+  include "src/carli/utility"
+  include "src/carli/rete"
+  include "src/carli"

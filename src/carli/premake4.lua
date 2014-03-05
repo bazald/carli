@@ -4,17 +4,8 @@ project "carli"
 
   targetdir "../.."
 
---  if os.get() ~= "windows" then
---    print(os.outputof("make -C rete/grammar"))
---    if _ACTION == "gmake" then
---      prebuildcommands { "+$(MAKE) -C rete/grammar" }
---    else
---      prebuildcommands { "make -C rete/grammar" }
---    end
---  end
-
   if _OPTIONS["scu"] == "true" then
-    matches = os.matchfiles("**.cpp")
+    matches = os.matchfiles("*.cpp") + os.matchfiles("environments/*.cpp")
     os.mkdir("obj")
     local f = assert(io.open("obj/scu.cpp", "w"))
     for i, filename in ipairs(matches) do
@@ -26,7 +17,7 @@ project "carli"
 
     files { "git.cpp", "obj/scu.cpp" }
   else
-    files { "**.h", "**.hpp", "**.cpp", "**.lll", "**.yyy" }
+    files { "*.h", "*.cpp", "environments/*.h", "environments/*.cpp" }
     excludes { "obj/scu.cpp" }
   end
 
@@ -35,3 +26,12 @@ project "carli"
   else
     prebuildcommands { [[./git.sh]] }
   end
+
+  libdirs { "../.." }
+
+  configuration "Debug"
+    links { "rete_d", "utility_d" }
+  configuration "Profiling"
+    links { "rete_p", "utility_p" }
+  configuration "Release"
+    links { "rete_r", "utility_r" }
