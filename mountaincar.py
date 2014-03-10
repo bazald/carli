@@ -99,7 +99,7 @@ def main():
   # 4: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out experiment-mc/even_*_4/*.out
   # 5: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out experiment-mc/inv-log-update-count_*_3/*.out
   # 6: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/*_3/*.out
-  scenario = 4
+  scenario = 0
 
   two_sided_plot = scenario > 3 and scenario < 6
 

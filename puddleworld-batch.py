@@ -9,23 +9,23 @@ g_plotters = ['./puddleworld.py', './memory.py']
 g_plotter_grid = []#['./puddleworld-grid.py', './puddleworld-heat.py']
 g_plotter_grid_filters = ['move(north)', 'move(south)', 'move(east)', 'move(west)', 'all']
 
-g_base_command = "./carli --output experiment --environment puddle-world --random-start true --learning-rate 0.1 --discount-rate 0.999 --epsilon-greedy 0.1 --policy off-policy --pseudoepisode-threshold 20"
+g_base_command = "./carli_r --output experiment --environment puddle-world --random-start true --learning-rate 0.1 --discount-rate 0.999 --epsilon-greedy 0.1 --policy off-policy --pseudoepisode-threshold 20"
 
 g_ep_tuples = []
 
 ### Experiment 0, non-hierarchical agents comparison
-#g_ep_tuples.append(("specific_4x4_4x4_0", "--scenario 0 --credit-assignment specific --split-min 5 --split-max 5"))
-#g_ep_tuples.append(("specific_8x8_8x8_0", "--scenario 0 --credit-assignment specific --split-min 7 --split-max 7"))
-#g_ep_tuples.append(("specific_16x16_16x16_0", "--scenario 0 --credit-assignment specific --split-min 9 --split-max 9"))
-##g_ep_tuples.append(("specific_32x32_32x32_0", "--scenario 0 --credit-assignment specific --split-min 11 --split-max 11"))
-##g_ep_tuples.append(("specific_64x64_64x64_0", "--scenario 0 --credit-assignment specific --split-min 13 --split-max 13"))
+g_ep_tuples.append(("specific_4x4_4x4_0", "--scenario 0 --credit-assignment specific --split-min 5 --split-max 5"))
+g_ep_tuples.append(("specific_8x8_8x8_0", "--scenario 0 --credit-assignment specific --split-min 7 --split-max 7"))
+g_ep_tuples.append(("specific_16x16_16x16_0", "--scenario 0 --credit-assignment specific --split-min 9 --split-max 9"))
+#g_ep_tuples.append(("specific_32x32_32x32_0", "--scenario 0 --credit-assignment specific --split-min 11 --split-max 11"))
+#g_ep_tuples.append(("specific_64x64_64x64_0", "--scenario 0 --credit-assignment specific --split-min 13 --split-max 13"))
 
 ## Experiment 1, hierarchical agents performance comparison - compare to 0
 #g_ep_tuples.append(('puddle-world', 0, 'even', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  5,  5, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
 #g_ep_tuples.append(('puddle-world', 0, 'even', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  7,  7, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
 #g_ep_tuples.append(('puddle-world', 0, 'even', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20,  9,  9, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
 #g_ep_tuples.append(('puddle-world', 0, 'even', 0.5, 0.999, 0, 0.1, 0.1, 'false', 'off-policy', 20, 11, 11, 0, 0.5, 0, 0, 0, 1, 0, 'false'))
-#g_ep_tuples.append(("even_64x64_64x64_1", "--scenario 1 --credit-assignment even --split-min 13 --split-max 13"))
+g_ep_tuples.append(("even_64x64_64x64_1", "--scenario 1 --credit-assignment even --split-min 13 --split-max 13"))
 
 ##g_ep_tuples.append(("cmac_0_4_2", "--cmac true --cmac-resolution 4 --cmac-tilings 2"))
 ##g_ep_tuples.append(("cmac_0_4_4", "--cmac true --cmac-resolution 4 --cmac-tilings 4"))
@@ -34,11 +34,11 @@ g_ep_tuples = []
 ##g_ep_tuples.append(("cmac_0_8_2", "--cmac true --cmac-resolution 8 --cmac-tilings 2"))
 ##g_ep_tuples.append(("cmac_0_8_4", "--cmac true --cmac-resolution 8 --cmac-tilings 4"))
 ##g_ep_tuples.append(("cmac_0_8_8", "--cmac true --cmac-resolution 8 --cmac-tilings 8"))
-#g_ep_tuples.append(("cmac_0_8_16", "--cmac true --cmac-resolution 8 --cmac-tilings 16"))
+g_ep_tuples.append(("cmac_0_8_16", "--cmac true --cmac-resolution 8 --cmac-tilings 16"))
 ##g_ep_tuples.append(("cmac_0_16_2", "--cmac true --cmac-resolution 16 --cmac-tilings 2"))
 ##g_ep_tuples.append(("cmac_0_16_4", "--cmac true --cmac-resolution 16 --cmac-tilings 4"))
 ##g_ep_tuples.append(("cmac_0_16_8", "--cmac true --cmac-resolution 16 --cmac-tilings 8"))
-#g_ep_tuples.append(("cmac_0_16_16", "--cmac true --cmac-resolution 16 --cmac-tilings 16"))
+g_ep_tuples.append(("cmac_0_16_16", "--cmac true --cmac-resolution 16 --cmac-tilings 16"))
 ##g_ep_tuples.append(("cmac_0_32_2", "--cmac true --cmac-resolution 32 --cmac-tilings 2"))
 ##g_ep_tuples.append(("cmac_0_32_4", "--cmac true --cmac-resolution 32 --cmac-tilings 4"))
 ##g_ep_tuples.append(("cmac_0_32_8", "--cmac true --cmac-resolution 32 --cmac-tilings 8"))

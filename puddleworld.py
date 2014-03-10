@@ -98,7 +98,7 @@ def main():
   # 3: ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out experiment-pw/cmac_*/*.out
   # 4: ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/even_*_3/*.out experiment-pw/even_*_4/*.out
   # 5: ./puddleworld.py experiment-pw/*_3/*.out
-  scenario = 4
+  scenario = 0
 
   two_sided_plot = scenario == 4
 
@@ -263,7 +263,7 @@ def main():
       remap_names['inv-root-update-count\\_2x2\\_64x64\\_3'] = r'1-64 incremental $1/\sqrt{~~~}$'
       remap_names['specific\\_2x2\\_64x64\\_3'] = '1-64 incremental specific'
       remap_names['cmac\\_0\\_8\\_16'] = '8x8 CMAC, 16 tilings'
-      remap_names['cmac\\_0\\_16\\_16'] = '8x8 CMAC, 16 tilings'
+      remap_names['cmac\\_0\\_16\\_16'] = '16x16 CMAC, 16 tilings'
       
       if scenario == 1:
         agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0']
