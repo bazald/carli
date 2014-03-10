@@ -74,7 +74,7 @@ static int main2(int argc, char **argv) {
   options.add('o', make_shared<Option_Itemized>("output", set<string>({"null", "simple", "experiment"}), "simple"), "What kind of output should be generated.");
   options.add('p', make_shared<Option_Ranged<int>>("print-every", 1, true, numeric_limits<int>::max(), true, 100), "How many steps per line of output.");
   options.add(     make_shared<Option_Ranged<int>>("scenario", 0, true, numeric_limits<int>::max(), true, 0), "Which experimental scenario should be run, environment specific.");
-  options.add('s', make_shared<Option_Ranged<int>>("seed", 0, true, numeric_limits<int>::max(), true, uint32_t(time(0))), "Random seed.");
+  options.add('s', make_shared<Option_Ranged<int32_t>>("seed", numeric_limits<int32_t>::min(), true, numeric_limits<int32_t>::max(), true, std::random_device()()), "Random seed.");
   options.add(     make_shared<Option_Function>("stderr", 1, [&options,&cerr2file](const Option::Arguments &args){
     cerr2file.open(args.at(0));
     cerr.rdbuf(cerr2file.rdbuf());
