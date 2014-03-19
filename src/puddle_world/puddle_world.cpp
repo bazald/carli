@@ -4,6 +4,13 @@
 
 namespace Puddle_World {
 
+  using Carli::Metastate;
+  using Carli::Node_Fringe_Ranged;
+  using Carli::Node_Ranged;
+  using Carli::Node_Split;
+  using Carli::Node_Unsplit;
+  using Carli::Q_Value;
+
   Environment::Environment()
    : m_horizontal_puddles({{{0.1, 0.45, 0.75, 0.1}}}),
    m_vertical_puddles({{{0.45, 0.4, 0.8, 0.1}}})
@@ -94,7 +101,7 @@ namespace Puddle_World {
     }
   }
 
-  Environment::reward_type Environment::transition_impl(const Action &action) {
+  Environment::reward_type Environment::transition_impl(const Carli::Action &action) {
     const double shift = m_random_motion.frand_gaussian() * 0.01;
     const double step_size = shift + 0.05;
 
@@ -158,8 +165,8 @@ namespace Puddle_World {
     os << " (" << m_position.first << ", " << m_position.second << ')' << endl;
   }
 
-  Agent::Agent(const shared_ptr< ::Environment> &env)
-   : ::Agent(env)
+  Agent::Agent(const shared_ptr<Carli::Environment> &env)
+   : Carli::Agent(env)
   {
     auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
     auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
@@ -388,15 +395,15 @@ namespace Puddle_World {
 
 int main(int argc, char **argv) {
   try {
-    Experiment experiment;
+    Carli::Experiment experiment;
 
     experiment.take_args(argc, argv);
 
     const auto output = dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value();
 
     experiment.standard_run([](){return std::make_shared<Puddle_World::Environment>();},
-                            [](const std::shared_ptr<Environment> &env){return std::make_shared<Puddle_World::Agent>(env);},
-                            [&output](const std::shared_ptr<Agent> &agent){
+                            [](const std::shared_ptr<Carli::Environment> &env){return std::make_shared<Puddle_World::Agent>(env);},
+                            [&output](const std::shared_ptr<Carli::Agent> &agent){
                               if(output == "experiment") {
                                 auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
                                 pwa->print_policy(std::cerr, 32);

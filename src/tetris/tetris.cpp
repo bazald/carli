@@ -4,12 +4,20 @@
 
 namespace Tetris {
 
+  using Carli::Metastate;
+  using Carli::Node_Fringe;
+  using Carli::Node_Fringe_Ranged;
+  using Carli::Node_Ranged;
+  using Carli::Node_Split;
+  using Carli::Node_Unsplit;
+  using Carli::Q_Value;
+
   Environment::Environment() {
     init_impl();
   }
 
   Environment::Environment(const Environment &rhs)
-   : ::Environment(rhs),
+   : Carli::Environment(rhs),
    m_random_init(rhs.m_random_init),
    m_random_selection(rhs.m_random_selection),
    m_grid(rhs.m_grid),
@@ -21,7 +29,7 @@ namespace Tetris {
   }
 
   Environment & Environment::operator=(const Environment &rhs) {
-    ::Environment::operator=(rhs);
+    Carli::Environment::operator=(rhs);
 
     m_random_init = rhs.m_random_init;
     m_random_selection = rhs.m_random_selection;
@@ -51,7 +59,7 @@ namespace Tetris {
     generate_placements();
   }
 
-  Environment::reward_type Environment::transition_impl(const Action &action) {
+  Environment::reward_type Environment::transition_impl(const Carli::Action &action) {
     const Place &place = debuggable_cast<const Place &>(action);
 
     const auto tet = generate_Tetromino(place.type);
@@ -482,8 +490,8 @@ namespace Tetris {
     }
   }
 
-  Agent::Agent(const std::shared_ptr< ::Environment> &env)
-   : ::Agent(env)
+  Agent::Agent(const std::shared_ptr<Carli::Environment> &env)
+   : Carli::Agent(env)
   {
     insert_wme(m_wme_blink);
     generate_rete();
@@ -495,7 +503,7 @@ namespace Tetris {
   }
 
   template<typename SUBFEATURE, typename AXIS>
-  void Agent::generate_rete_continuous(const Node_Unsplit_Ptr &node_unsplit,
+  void Agent::generate_rete_continuous(const Carli::Node_Unsplit_Ptr &node_unsplit,
                                        const std::function<action_ptrsc(const Rete::WME_Token &token)> &get_action,
                                        const AXIS &axis,
                                        const double &lower_bound,
@@ -704,15 +712,15 @@ namespace Tetris {
 
 int main(int argc, char **argv) {
   try {
-    Experiment experiment;
+    Carli::Experiment experiment;
 
     experiment.take_args(argc, argv);
 
     const auto output = dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value();
 
     experiment.standard_run([](){return std::make_shared<Tetris::Environment>();},
-                            [](const std::shared_ptr<Environment> &env){return std::make_shared<Tetris::Agent>(env);},
-                            [&output](const std::shared_ptr<Agent> &){}
+                            [](const std::shared_ptr<Carli::Environment> &env){return std::make_shared<Tetris::Agent>(env);},
+                            [&output](const std::shared_ptr<Carli::Agent> &){}
                            );
 
     return 0;

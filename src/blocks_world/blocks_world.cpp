@@ -4,6 +4,12 @@
 
 namespace Blocks_World {
 
+  using Carli::Metastate;
+  using Carli::Node_Fringe;
+  using Carli::Node_Split;
+  using Carli::Node_Unsplit;
+  using Carli::Q_Value;
+
   Environment::Environment() {
     init_impl();
 
@@ -32,7 +38,7 @@ namespace Blocks_World {
     }
   }
 
-  Agent::reward_type Environment::transition_impl(const Action &action) {
+  Agent::reward_type Environment::transition_impl(const Carli::Action &action) {
     const Move &move = debuggable_cast<const Move &>(action);
 
     Stacks::iterator src = std::find_if(m_blocks.begin(), m_blocks.end(), [&move](Stack &stack)->bool {
@@ -65,8 +71,8 @@ namespace Blocks_World {
     }
   }
 
-  Agent::Agent(const std::shared_ptr< ::Environment> &env)
-   : ::Agent(env)
+  Agent::Agent(const std::shared_ptr<Carli::Environment> &env)
+   : Carli::Agent(env)
   {
     insert_wme(m_wme_blink);
     generate_rete();
@@ -322,15 +328,15 @@ namespace Blocks_World {
 
 int main(int argc, char **argv) {
   try {
-    Experiment experiment;
+    Carli::Experiment experiment;
 
     experiment.take_args(argc, argv);
 
     const auto output = dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value();
 
     experiment.standard_run([](){return std::make_shared<Blocks_World::Environment>();},
-                            [](const std::shared_ptr<Environment> &env){return std::make_shared<Blocks_World::Agent>(env);},
-                            [&output](const std::shared_ptr<Agent> &){}
+                            [](const std::shared_ptr<Carli::Environment> &env){return std::make_shared<Blocks_World::Agent>(env);},
+                            [&output](const std::shared_ptr<Carli::Agent> &){}
                            );
 
     return 0;

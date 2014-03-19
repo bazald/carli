@@ -32,13 +32,13 @@ namespace Puddle_World {
   class Position;
   class Move_Direction;
 
-  class Feature : public ::Feature {
+  class Feature : public Carli::Feature {
   public:
     Feature() {}
 
     virtual Feature * clone() const = 0;
 
-    int compare_axis(const ::Feature &rhs) const {
+    int compare_axis(const Carli::Feature &rhs) const {
       return compare_axis(debuggable_cast<const Feature &>(rhs));
     }
 
@@ -49,7 +49,7 @@ namespace Puddle_World {
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
-  class Position : public Feature_Ranged<Feature> {
+  class Position : public Carli::Feature_Ranged<Feature> {
   public:
     enum Axis : size_t {X = 0, Y = 1};
 
@@ -87,7 +87,7 @@ namespace Puddle_World {
     }
   };
 
-  class Move_Direction : public Feature {
+  class Move_Direction : public Carli::Feature {
   public:
     enum Index {index = 2};
 
@@ -114,7 +114,7 @@ namespace Puddle_World {
       return direction - debuggable_cast<const Move_Direction &>(rhs).direction;
     }
 
-    int compare_value(const ::Feature &) const {
+    int compare_value(const Carli::Feature &) const {
       return 0;
     }
 
@@ -129,7 +129,7 @@ namespace Puddle_World {
     Direction direction;
   };
 
-  class Move : public Action {
+  class Move : public Carli::Action {
   public:
     Move(const Direction &direction_ = NORTH)
      : direction(direction_)
@@ -160,7 +160,7 @@ namespace Puddle_World {
     Direction direction;
   };
 
-  class Environment : public ::Environment {
+  class Environment : public Carli::Environment {
     typedef std::array<double, 4> Puddle;
 
   public:
@@ -181,7 +181,7 @@ namespace Puddle_World {
 
     void alter_impl();
 
-    reward_type transition_impl(const Action &action);
+    reward_type transition_impl(const Carli::Action &action);
 
     double horizontal_puddle_reward(const double &left, const double &right, const double &y, const double &radius) const;
 
@@ -220,9 +220,9 @@ namespace Puddle_World {
     double m_noise = 0.01;
   };
 
-  class Agent : public ::Agent {
+  class Agent : public Carli::Agent {
   public:
-    Agent(const shared_ptr< ::Environment> &env);
+    Agent(const shared_ptr<Carli::Environment> &env);
     ~Agent();
 
     void print_policy(ostream &os, const size_t &granularity);
@@ -245,10 +245,10 @@ namespace Puddle_World {
     Rete::WME_Ptr_C m_x_wme;
     Rete::WME_Ptr_C m_y_wme;
 
-    std::array<std::shared_ptr<const Action>, 4> m_action = {{std::make_shared<Move>(NORTH),
-                                                              std::make_shared<Move>(SOUTH),
-                                                              std::make_shared<Move>(EAST),
-                                                              std::make_shared<Move>(WEST)}};
+    std::array<std::shared_ptr<const Carli::Action>, 4> m_action = {{std::make_shared<Move>(NORTH),
+                                                                     std::make_shared<Move>(SOUTH),
+                                                                     std::make_shared<Move>(EAST),
+                                                                     std::make_shared<Move>(WEST)}};
   };
 
 }

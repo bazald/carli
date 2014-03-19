@@ -53,13 +53,13 @@ namespace Tetris {
   class Clears;
   class X_Odd;
 
-  class Feature : public ::Feature {
+  class Feature : public Carli::Feature {
   public:
     Feature() {}
 
     virtual Feature * clone() const = 0;
 
-    int compare_axis(const ::Feature &rhs) const {
+    int compare_axis(const Carli::Feature &rhs) const {
       return compare_axis(debuggable_cast<const Feature &>(rhs));
     }
 
@@ -74,7 +74,7 @@ namespace Tetris {
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
-  class Type : public Feature_Enumerated<Feature> {
+  class Type : public Carli::Feature_Enumerated<Feature> {
   public:
     enum Axis : size_t {CURRENT = 1, NEXT = 2};
 
@@ -110,7 +110,7 @@ namespace Tetris {
     Axis axis;
   };
 
-  class Size : public Feature_Ranged<Feature> {
+  class Size : public Carli::Feature_Ranged<Feature> {
   public:
     enum Axis : size_t {WIDTH = 3, HEIGHT = 4};
 
@@ -150,7 +150,7 @@ namespace Tetris {
     }
   };
 
-  class Position : public Feature_Ranged<Feature> {
+  class Position : public Carli::Feature_Ranged<Feature> {
   public:
     enum Axis : size_t {X = 5, Y = 6};
 
@@ -190,7 +190,7 @@ namespace Tetris {
     }
   };
 
-  class Gaps : public Feature_Ranged<Feature> {
+  class Gaps : public Carli::Feature_Ranged<Feature> {
   public:
     enum Axis : size_t {BENEATH = 7, CREATED = 8, DEPTH = 9};
 
@@ -230,7 +230,7 @@ namespace Tetris {
     }
   };
 
-  class Clears : public Feature_Ranged<Feature> {
+  class Clears : public Carli::Feature_Ranged<Feature> {
   public:
     enum Axis : size_t {CLEARS = 10, ENABLES = 11, PROHIBITS = 12};
 
@@ -271,7 +271,7 @@ namespace Tetris {
     }
   };
 
-  class X_Odd : public Feature_Enumerated<Feature> {
+  class X_Odd : public Carli::Feature_Enumerated<Feature> {
   public:
     enum Axis : size_t {AXIS = 13};
 
@@ -305,7 +305,7 @@ namespace Tetris {
     }
   };
 
-  class Place : public Action {
+  class Place : public Carli::Action {
   public:
     Place()
      : type(TET_SQUARE)
@@ -347,7 +347,7 @@ namespace Tetris {
     Tetromino_Type type;
   };
 
-  class Environment : public ::Environment {
+  class Environment : public Carli::Environment {
   public:
     enum class Outcome {OUTCOME_NULL, OUTCOME_ACHIEVED, OUTCOME_ENABLED, OUTCOME_PROHIBITED};
 
@@ -406,7 +406,7 @@ namespace Tetris {
 
     void init_impl();
 
-    reward_type transition_impl(const Action &action);
+    reward_type transition_impl(const Carli::Action &action);
     void place_Tetromino(const Tetromino &tet, const std::pair<size_t, size_t> &position);
 
     void print_impl(ostream &os) const;
@@ -432,14 +432,14 @@ namespace Tetris {
     bool m_lookahead = false;
   };
 
-  class Agent : public ::Agent {
+  class Agent : public Carli::Agent {
   public:
-    Agent(const std::shared_ptr< ::Environment> &env);
+    Agent(const std::shared_ptr<Carli::Environment> &env);
     ~Agent();
 
   private:
     template<typename SUBFEATURE, typename AXIS>
-    void generate_rete_continuous(const Node_Unsplit_Ptr &node_unsplit,
+    void generate_rete_continuous(const Carli::Node_Unsplit_Ptr &node_unsplit,
                                   const std::function<action_ptrsc(const Rete::WME_Token &token)> &get_action,
                                   const AXIS &axis,
                                   const double &lower_bound,

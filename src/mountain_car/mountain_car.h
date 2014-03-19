@@ -32,13 +32,13 @@ namespace Mountain_Car {
   class Velocity;
   class Acceleration_Direction;
 
-  class Feature : public ::Feature {
+  class Feature : public Carli::Feature {
   public:
     Feature() {}
 
     virtual Feature * clone() const = 0;
 
-    int compare_axis(const ::Feature &rhs) const {
+    int compare_axis(const Carli::Feature &rhs) const {
       return compare_axis(debuggable_cast<const Feature &>(rhs));
     }
 
@@ -50,7 +50,7 @@ namespace Mountain_Car {
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
-  class Position : public Feature_Ranged<Feature> {
+  class Position : public Carli::Feature_Ranged<Feature> {
   public:
     enum Index {index = 0};
 
@@ -85,7 +85,7 @@ namespace Mountain_Car {
     }
   };
 
-  class Velocity : public Feature_Ranged<Feature> {
+  class Velocity : public Carli::Feature_Ranged<Feature> {
   public:
     enum Index {index = 1};
 
@@ -120,7 +120,7 @@ namespace Mountain_Car {
     }
   };
 
-  class Acceleration_Direction : public Feature {
+  class Acceleration_Direction : public Carli::Feature {
   public:
     enum Index {index = 2};
 
@@ -150,7 +150,7 @@ namespace Mountain_Car {
       return direction - debuggable_cast<const Acceleration_Direction &>(rhs).direction;
     }
 
-    int compare_value(const ::Feature &) const {
+    int compare_value(const Carli::Feature &) const {
       return 0;
     }
 
@@ -165,7 +165,7 @@ namespace Mountain_Car {
     Direction direction;
   };
 
-  class Acceleration : public Action {
+  class Acceleration : public Carli::Action {
   public:
     Acceleration(const Direction &direction_ = IDLE)
      : direction(direction_)
@@ -196,7 +196,7 @@ namespace Mountain_Car {
     Direction direction;
   };
 
-  class Environment : public ::Environment {
+  class Environment : public Carli::Environment {
   public:
     typedef pair<double, double> double_pair;
 
@@ -220,7 +220,7 @@ namespace Mountain_Car {
 
     void alter_impl();
 
-    reward_type transition_impl(const Action &action);
+    reward_type transition_impl(const Carli::Action &action);
 
     void print_impl(ostream &os) const;
 
@@ -241,9 +241,9 @@ namespace Mountain_Car {
     const bool m_reward_negative = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["reward-negative"]).get_value();
   };
 
-  class Agent : public ::Agent {
+  class Agent : public Carli::Agent {
   public:
-    Agent(const shared_ptr< ::Environment> &env);
+    Agent(const shared_ptr<Carli::Environment> &env);
     ~Agent();
 
     void print_policy(ostream &os, const size_t &granularity);
@@ -273,9 +273,9 @@ namespace Mountain_Car {
     Rete::WME_Ptr_C m_x_wme;
     Rete::WME_Ptr_C m_x_dot_wme;
 
-    std::array<std::shared_ptr<const Action>, 3> m_action = {{std::make_shared<Acceleration>(LEFT),
-                                                              std::make_shared<Acceleration>(IDLE),
-                                                              std::make_shared<Acceleration>(RIGHT)}};
+    std::array<std::shared_ptr<const Carli::Action>, 3> m_action = {{std::make_shared<Acceleration>(LEFT),
+                                                                     std::make_shared<Acceleration>(IDLE),
+                                                                     std::make_shared<Acceleration>(RIGHT)}};
   };
 
 }

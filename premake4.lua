@@ -89,11 +89,11 @@ solution "carli"
     end
   end
 
-  include "src/carli/utility"
-  include "src/carli/rete"
-  include "src/carli"
-
   include "src/blocks_world"
   include "src/mountain_car"
   include "src/puddle_world"
   include "src/tetris"
+
+  include "src/carli"
+  include "src/carli/rete"
+  include "src/carli/utility"

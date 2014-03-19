@@ -21,13 +21,13 @@ namespace Blocks_World {
   class Name;
 
   class Feature;
-  class Feature : public ::Feature{
+  class Feature : public Carli::Feature{
   public:
     enum Which {BLOCK = 0, DEST = 1};
 
     virtual Feature * clone() const = 0;
 
-    int compare_axis(const ::Feature &rhs) const {
+    int compare_axis(const Carli::Feature &rhs) const {
       return compare_axis(debuggable_cast<const Feature &>(rhs));
     }
 
@@ -39,7 +39,7 @@ namespace Blocks_World {
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
-  class Clear : public Feature_Enumerated<Feature> {
+  class Clear : public Carli::Feature_Enumerated<Feature> {
   public:
     Clear(const Which &block_, const bool &present_)
      : Feature_Enumerated<Feature>(present_),
@@ -75,7 +75,7 @@ namespace Blocks_World {
     Which block;
   };
 
-  class In_Place : public Feature_Enumerated<Feature> {
+  class In_Place : public Carli::Feature_Enumerated<Feature> {
   public:
     In_Place(const Which &block_, const bool &present_)
      : Feature_Enumerated<Feature>(present_),
@@ -111,7 +111,7 @@ namespace Blocks_World {
     Which block;
   };
 
-  class Name : public Feature_Enumerated<Feature> {
+  class Name : public Carli::Feature_Enumerated<Feature> {
   public:
     Name(const Which &block_, const block_id &name_)
      : Feature_Enumerated<Feature>(true),
@@ -137,7 +137,7 @@ namespace Blocks_World {
       return block - rhs.block;
     }
 
-    int compare_value(const ::Feature &rhs) const {
+    int compare_value(const Carli::Feature &rhs) const {
       return name - debuggable_cast<const Name &>(rhs).name;
     }
 
@@ -153,7 +153,7 @@ namespace Blocks_World {
     block_id name;
   };
 
-  class Move : public Action {
+  class Move : public Carli::Action {
   public:
     Move()
      : block(block_id()),
@@ -193,7 +193,7 @@ namespace Blocks_World {
     block_id dest;
   };
 
-  class Environment : public ::Environment {
+  class Environment : public Carli::Environment {
   public:
     Environment();
 
@@ -206,7 +206,7 @@ namespace Blocks_World {
   private:
     void init_impl();
 
-    reward_type transition_impl(const Action &action);
+    reward_type transition_impl(const Carli::Action &action);
 
     void print_impl(ostream &os) const;
 
@@ -214,9 +214,9 @@ namespace Blocks_World {
     Stacks m_goal;
   };
 
-  class Agent : public ::Agent {
+  class Agent : public Carli::Agent {
   public:
-    Agent(const std::shared_ptr< ::Environment> &env);
+    Agent(const std::shared_ptr<Carli::Environment> &env);
     ~Agent();
 
   private:

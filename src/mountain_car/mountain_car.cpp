@@ -4,6 +4,13 @@
 
 namespace Mountain_Car {
 
+  using Carli::Metastate;
+  using Carli::Node_Fringe_Ranged;
+  using Carli::Node_Ranged;
+  using Carli::Node_Split;
+  using Carli::Node_Unsplit;
+  using Carli::Q_Value;
+
   Environment::Environment() {
     Environment::init_impl();
   }
@@ -34,7 +41,7 @@ namespace Mountain_Car {
     }
   }
 
-  Environment::reward_type Environment::transition_impl(const Action &action) {
+  Environment::reward_type Environment::transition_impl(const Carli::Action &action) {
     const int a = int(debuggable_cast<const Acceleration &>(action).direction);
 
     assert(0 <= a && a <= 2);
@@ -56,8 +63,8 @@ namespace Mountain_Car {
     os << " (" << m_x << ", " << m_x_dot << ')' << endl;
   }
 
-  Agent::Agent(const shared_ptr< ::Environment> &env)
-   : ::Agent(env)
+  Agent::Agent(const shared_ptr<Carli::Environment> &env)
+   : Carli::Agent(env)
   {
     auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
     auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
@@ -291,15 +298,15 @@ namespace Mountain_Car {
 
 int main(int argc, char **argv) {
   try {
-    Experiment experiment;
+    Carli::Experiment experiment;
 
     experiment.take_args(argc, argv);
 
     const auto output = dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value();
 
     experiment.standard_run([](){return std::make_shared<Mountain_Car::Environment>();},
-                            [](const std::shared_ptr<Environment> &env){return std::make_shared<Mountain_Car::Agent>(env);},
-                            [&output](const std::shared_ptr<Agent> &agent){
+                            [](const std::shared_ptr<Carli::Environment> &env){return std::make_shared<Mountain_Car::Agent>(env);},
+                            [&output](const std::shared_ptr<Carli::Agent> &agent){
                               if(output == "experiment") {
                                 auto pwa = std::dynamic_pointer_cast<Mountain_Car::Agent>(agent);
                                 pwa->print_policy(std::cerr, 32);
