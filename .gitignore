@@ -30,6 +30,7 @@
 *.out
 *.pdb
 *-converted-to.pdf
+*.prof
 *.psess
 *.rc
 *.res
@@ -44,14 +45,12 @@
 *.user
 *.vcxproj
 *.vsp
+*_d
+*_p
+*_r
 callgrind.out.*
 core
-carli
 carli.workspace
-carli_d
-carli_p
-carli_p.prof
-carli_r
 dump.txt
 git.h
 Makefile

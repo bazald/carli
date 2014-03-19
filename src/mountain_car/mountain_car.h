@@ -1,8 +1,8 @@
 #ifndef MOUNTAIN_CAR_H
 #define MOUNTAIN_CAR_H
 
-#include "../agent.h"
-#include "../environment.h"
+#include "carli/agent.h"
+#include "carli/environment.h"
 
 #include <algorithm>
 #include <array>

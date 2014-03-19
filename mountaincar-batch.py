@@ -9,7 +9,7 @@ g_plotters = ['./mountaincar.py', './memory.py']
 g_plotter_grid = []#['./mountaincar-grid.py', './mountaincar-heat.py']
 g_plotter_grid_filters = ['move(left)', 'move(idle)', 'move(right)', 'all']
 
-g_base_command = "./carli_r --output experiment --environment mountain-car --random-start false --learning-rate 1.0 --discount-rate 0.999 --epsilon-greedy 0.01 --policy off-policy --pseudoepisode-threshold 20"
+g_base_command = "./mountain_car_r --output experiment --random-start false --learning-rate 1.0 --discount-rate 0.999 --epsilon-greedy 0.01 --policy off-policy --pseudoepisode-threshold 20"
 
 g_ep_tuples = []
 

@@ -93,4 +93,7 @@ solution "carli"
   include "src/carli/rete"
   include "src/carli"
 
+  include "src/blocks_world"
+  include "src/mountain_car"
   include "src/puddle_world"
+  include "src/tetris"

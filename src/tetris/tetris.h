@@ -1,8 +1,8 @@
 #ifndef TETRIS_H
 #define TETRIS_H
 
-#include "../agent.h"
-#include "../environment.h"
+#include "carli/agent.h"
+#include "carli/environment.h"
 
 #include <array>
 #include <stdexcept>
