@@ -2,7 +2,7 @@ project "rete"
   kind "SharedLib"
   language "C++"
 
-  targetdir "../../.."
+  targetdir "../../../lib"
 
 --  if os.get() ~= "windows" then
 --    print(os.outputof("make -C grammar"))
@@ -27,11 +27,4 @@ project "rete"
     files { "**.h", "**.hpp", "**.cpp", "**.lll", "**.yyy" }
   end
 
-  libdirs { "../../.." }
-
-  configuration "Debug"
-    links { "utility_d" }
-  configuration "Profiling"
-    links { "utility_p" }
-  configuration "Release"
-    links { "utility_r" }
+  links { "utility" }

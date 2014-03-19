@@ -1,0 +1,39 @@
+blocks-world*exists-nothing {
+  -(<a> ^<b> <c>)
+}
+
+blocks-world*exists-something {
+  +(<a> ^<b> <c>)
+}
+
+blocks-world*exists-no-block {
+  (<s> ^name blocks-world)
+  -(<s> ^block <block>)
+}
+
+blocks-world*exists-a-block {
+  (<s> ^name blocks-world)
+  +(<s> ^block <block>)
+}
+
+blocks-world*block-name-less-than-c {
+  (<s> ^name blocks-world)
+  (<s> ^block <block>)
+  (<block> ^name <name>)
+  (<name> < c)
+}
+
+blocks-world*top-on-bottom {
+  (<s> ^name blocks-world)
+  (<s> ^block <top>)
+  (<s> ^block <bottom>)
+  (<top> ^on <bottom>)
+}
+
+blocks-world*on-b {
+  (<s> ^name blocks-world)
+  (<s> ^block <top>)
+  (<s> ^block <bottom>)
+  (<top> ^on <bottom>)
+  (<bottom> ^name b)
+}

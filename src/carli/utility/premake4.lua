@@ -2,7 +2,7 @@ project "utility"
   kind "SharedLib"
   language "C++"
 
-  targetdir "../../.."
+  targetdir "../../../lib"
 
   if _OPTIONS["scu"] == "true" then
     matches = os.matchfiles("**.cpp")

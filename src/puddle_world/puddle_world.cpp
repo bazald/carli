@@ -1,5 +1,7 @@
 #include "puddle_world.h"
 
+#include "carli/experiment.h"
+
 namespace Puddle_World {
 
   Environment::Environment()
@@ -382,4 +384,36 @@ namespace Puddle_World {
     m_metastate = env->goal_reached() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
   }
 
+}
+
+int main(int argc, char **argv) {
+  try {
+    Experiment experiment;
+
+    experiment.take_args(argc, argv);
+
+    const auto output = dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value();
+
+    experiment.standard_run([](){return std::make_shared<Puddle_World::Environment>();},
+                            [](const std::shared_ptr<Environment> &env){return std::make_shared<Puddle_World::Agent>(env);},
+                            [&output](const std::shared_ptr<Agent> &agent){
+                              if(output == "experiment") {
+                                auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
+                                pwa->print_policy(std::cerr, 32);
+                                if(!dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value())
+                                  pwa->print_value_function_grid(std::cerr);
+                              }
+                            }
+                           );
+
+    return 0;
+  }
+  catch(std::exception &ex) {
+    std::cerr << "Exiting with exception: " << ex.what() << std::endl;
+  }
+  catch(...) {
+    std::cerr << "Exiting with unknown exception." << std::endl;
+  }
+
+  return -1;
 }

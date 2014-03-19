@@ -21,6 +21,7 @@
 *.layout
 *.lof
 *.log
+*.make
 *.manifest
 *.o
 *.obj

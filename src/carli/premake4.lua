@@ -1,11 +1,11 @@
 project "carli"
-  kind "ConsoleApp"
+  kind "SharedLib"
   language "C++"
 
-  targetdir "../.."
+  targetdir "../../lib"
 
   if _OPTIONS["scu"] == "true" then
-    matches = os.matchfiles("*.cpp") + os.matchfiles("environments/*.cpp")
+    matches = os.matchfiles("*.cpp")
     os.mkdir("obj")
     local f = assert(io.open("obj/scu.cpp", "w"))
     for i, filename in ipairs(matches) do
@@ -17,21 +17,16 @@ project "carli"
 
     files { "git.cpp", "obj/scu.cpp" }
   else
-    files { "*.h", "*.cpp", "environments/*.h", "environments/*.cpp" }
+    files { "*.h", "*.cpp" }
     excludes { "obj/scu.cpp" }
   end
 
   if os.get() == "windows" then
-    prebuildcommands { [[git.bat]] }
+    prebuildcommands { [[src/carli/git.bat]] }
   else
-    prebuildcommands { [[./git.sh]] }
+    prebuildcommands { [[src/carli/git.sh]] }
   end
 
-  libdirs { "../.." }
+  linkoptions { "-Wl,-rpath,'$$ORIGIN'" }
 
-  configuration "Debug"
-    links { "rete_d", "utility_d" }
-  configuration "Profiling"
-    links { "rete_p", "utility_p" }
-  configuration "Release"
-    links { "rete_r", "utility_r" }
+  links { "rete", "utility" }

@@ -1,17 +1,13 @@
-#include "environments/puddle_world.h"
-#include "environments/mountain_car.h"
-#include "environments/blocks_world.h"
-#include "environments/tetris.h"
-//#include "environments/cart_pole.h"
+#include "experiment.h"
 
 #include "experimental_output.h"
-#include "getopt.h"
+#include "git.h"
+#include "utility/getopt.h"
+#include "utility/memory_pool.h"
 
 #include <cstring>
 #include <ctime>
-#include <fstream>
-#include <iostream>
-#include <memory>
+#include <limits>
 
 using std::cerr;
 using std::cout;
@@ -24,21 +20,13 @@ using std::runtime_error;
 using std::set;
 using std::shared_ptr;
 using std::string;
-using std::vector;
 
-/// From git.cpp
-int git_modified();
-string git_modified_string();
-string git_revision_string();
+// static void run_agent(const function<shared_ptr<Environment> ()> &make_env, const function<shared_ptr<Agent> (const shared_ptr<Environment> &)> &make_agent);
 
-static void run_agent(const function<shared_ptr<Environment> ()> &make_env, const function<shared_ptr<Agent> (const shared_ptr<Environment> &)> &make_agent);
-
-static int main2(int argc, char **argv) {
-  auto cout_bak = cout.rdbuf();
-  auto cerr_bak = cerr.rdbuf();
-  std::ofstream cerr2file;
-  std::ofstream cout2file;
-
+Experiment::Experiment()
+ : cerr_bak(cerr.rdbuf()),
+ cout_bak(cout.rdbuf())
+{
   cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
   cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
   cerr.precision(9);
@@ -51,8 +39,6 @@ static int main2(int argc, char **argv) {
     version_str = string("Built from revision ") + git_revision_string() + " (" + git_modified_string() + " modified files) on " __DATE__ " at " __TIME__ ".";
   else
     version_str = string("Built from revision ") + git_revision_string() + " (clean) on " __DATE__ " at " __TIME__ ".";
-
-  /// Handle arguments
 
   Options &options = Options::get_global();
 
@@ -75,16 +61,15 @@ static int main2(int argc, char **argv) {
   options.add('p', make_shared<Option_Ranged<int>>("print-every", 1, true, numeric_limits<int>::max(), true, 100), "How many steps per line of output.");
   options.add(     make_shared<Option_Ranged<int>>("scenario", 0, true, numeric_limits<int>::max(), true, 0), "Which experimental scenario should be run, environment specific.");
   options.add('s', make_shared<Option_Ranged<int32_t>>("seed", numeric_limits<int32_t>::min(), true, numeric_limits<int32_t>::max(), true, std::random_device()()), "Random seed.");
-  options.add(     make_shared<Option_Function>("stderr", 1, [&options,&cerr2file](const Option::Arguments &args){
-    cerr2file.open(args.at(0));
-    cerr.rdbuf(cerr2file.rdbuf());
+  options.add(     make_shared<Option_Function>("stderr", 1, [this,&options](const Option::Arguments &args){
+    this->cerr2file.open(args.at(0));
+    cerr.rdbuf(this->cerr2file.rdbuf());
   }), "<file> Redirect stderr to <file>");
-  options.add(     make_shared<Option_Function>("stdout", 1, [&options,&cout2file](const Option::Arguments &args){
-    cout2file.open(args.at(0));
-    cout.rdbuf(cout2file.rdbuf());
+  options.add(     make_shared<Option_Function>("stdout", 1, [this,&options](const Option::Arguments &args){
+    this->cout2file.open(args.at(0));
+    cout.rdbuf(this->cout2file.rdbuf());
   }), "<file> Redirect stdout to <file>");
   options.add_line("\n  Environment Options:");
-  options.add('e', make_shared<Option_Itemized>("environment", set<string>({"blocks-world", /*"cart-pole",*/ "mountain-car", "puddle-world", "tetris"}), "blocks-world"), "");
   options.add(     make_shared<Option_Ranged<bool>>("ignore-x", false, true, true, true, false), "Simplify cart-pole from 4D to 2D, eliminating x and x-dot.");
   options.add(     make_shared<Option_Ranged<bool>>("random-start", false, true, true, true, false), "Should starting positions be randomized in mountain-car and puddle-world.");
   options.add(     make_shared<Option_Ranged<bool>>("reward-negative", false, true, true, true, true), "Use negative rewards per step in mountain-car rather than positive terminal rewards.");
@@ -137,6 +122,15 @@ static int main2(int argc, char **argv) {
   options.add_line("\n  For Transfer Experiments:");
   options.add(     make_shared<Option_Ranged<int>>("skip-steps", -1, true, numeric_limits<int>::max(), true, 0), "How many steps to run before counting them and generating output; 0 disables, -1 alters immediately.");
   options.add(     make_shared<Option_Ranged<bool>>("reset-update-counts", false, true, true, true, false), "Reset update counts after skip-steps.");
+}
+
+Experiment::~Experiment() {
+  cout.rdbuf(cout_bak);
+  cerr.rdbuf(cerr_bak);
+}
+
+void Experiment::take_args(int argc, char **argv) {
+  Options &options = Options::get_global();
 
   options.get(argc, argv);
   if(options.optind < argc) {
@@ -151,179 +145,11 @@ static int main2(int argc, char **argv) {
 
     throw runtime_error(oss.str());
   }
-
-  /// Run the simulation
-
-  const string env = dynamic_cast<const Option_Itemized &>(options["environment"]).get_value();
-  if(env == "blocks-world")
-    run_agent([](){return make_shared<Blocks_World::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Blocks_World::Agent>(env);});
-//  else if(env == "cart-pole")
-//    run_agent([](){return make_shared<Cart_Pole::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Cart_Pole::Agent>(env);});
-  else if(env == "puddle-world")
-    run_agent([](){return make_shared<Puddle_World::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Puddle_World::Agent>(env);});
-  else if(env == "mountain-car")
-    run_agent([](){return make_shared<Mountain_Car::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Mountain_Car::Agent>(env);});
-  else if(env == "tetris")
-    run_agent([](){return make_shared<Tetris::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Tetris::Agent>(env);});
-  else
-    throw runtime_error("Internal error: g_args.environment");
-
-
-//  typedef string test_key;
-//  typedef Q_Value test_value;
-//  typedef Zeni::Trie<test_key, test_value> test_trie;
-//
-//  test_trie * trie = new test_trie;
-//
-//  test_trie * key = nullptr;
-//  (new test_trie("world"))->list_insert_before(key);
-//  (new test_trie("hello"))->list_insert_before(key);
-//  key = key->insert(trie, Q_Value::eligible_offset());
-//  **key = 1.0;
-//  for(const Q_Value &q : (*key)->eligible)
-//    cout << q.value << ' ';
-//  cout << endl;
-//
-//  key = nullptr;
-//  (new test_trie("world"))->list_insert_before(key);
-//  (new test_trie("hi"))->list_insert_before(key);
-//  key = key->insert(trie, Q_Value::eligible_offset());
-//  **key = 2.0;
-//  for(const Q_Value &q : (*key)->eligible)
-//    cout << q.value << ' ';
-//  cout << endl;
-//
-//  key = nullptr;
-//  (new test_trie("hi"))->list_insert_before(key);
-//  key = key->insert(trie, Q_Value::eligible_offset());
-//  **key = 3.0;
-//  for(const Q_Value &q : (*key)->eligible)
-//    cout << q.value << ' ';
-//  cout << endl;
-//
-//  key = nullptr;
-//  (new test_trie("world"))->list_insert_before(key);
-//  (new test_trie("hi"))->list_insert_before(key);
-//  key = key->insert(trie, Q_Value::eligible_offset());
-//  for(const Q_Value &q : (*key)->eligible)
-//    cout << q.value << ' ';
-//  cout << endl;
-//
-//  trie->destroy(trie);
-
-
-//  typedef Zeni::Map<int, int> map_type;
-//  default_random_engine generator;
-//  generator.seed(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
-//  vector<int> numbers;
-//  int i;
-//  for(i = 0; i != dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-steps"]).get_value(); ++i)
-//    numbers.push_back(i);
-//  shuffle(numbers.begin(), numbers.end(), generator);
-//
-//  cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << endl;
-//
-//  map_type * tree = nullptr;
-////  RB_Tree<int> * tree = nullptr;
-//#ifndef NDEBUG
-//  cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << endl;
-////  tree->debug_print(cerr) << endl;
-//#endif
-//
-//  i = 0;
-//  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
-//    (new map_type(nullptr, *it))->insert_into(tree);
-////    (new RB_Tree<int>(*it))->insert_into(tree);
-//#ifndef NDEBUG
-//    cerr << "insertion(" << ++i << ")=" << *it << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << endl;
-////    tree->debug_print(cerr) << endl;
-//#endif
-//  }
-//
-//  i = 0;
-//  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
-//#ifndef NDEBUG
-//    cerr << "deletion(" << ++i << ")=" << *it << endl;
-//#endif
-//    if(i == 13)
-//      cerr << "";
-//    tree->find(*it)->remove_from(tree);
-//#ifndef NDEBUG
-////    tree->debug_print(cerr) << endl;
-//    cerr << "deletion(" << i << ")=" << *it << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << endl;
-//#endif
-//  }
-
-
-//  Zeni::Random m_random(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
-//  cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << endl;
-//
-//  Mean mean;
-//  std::list<std::shared_ptr<Value>> values;
-//  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
-//  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
-//  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
-//  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
-//  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
-//  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
-//  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
-//  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
-//  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
-//  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
-//  for(auto &value : values) {
-//    mean.contribute(*value);
-//    cout << "Adding " << *value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
-//  }
-//  for(auto &value : values) {
-//    mean.uncontribute(*value);
-//    cout << "Removing " << *value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
-//  }
-
-
-//  Zeni::Random m_random(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
-//  cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << endl;
-//
-//  Q_Value::List *q_values = nullptr;
-//  const auto comparator = [](const Q_Value &lhs, const Q_Value &rhs)->bool{
-//    return lhs.value < rhs.value;
-//  };
-//  for(int i = 0; i != 10; ++i) {
-//    auto val = m_random.rand_lt(42);
-//    cout << "Inserting: " << val << endl;
-//    (new Q_Value(val))->current.insert_before_unique(q_values, comparator);
-//  }
-//  for(auto &q : *q_values)
-//    cout << "Value: " << q.value << endl;
-//  while(q_values) {
-//    Q_Value::List * const next = q_values->next();
-//    cout << "Deleting: " << (*q_values)->value << endl;
-//    q_values->erase();
-//    delete q_values->get();
-//    q_values = next;
-//  }
-
-
-  cout.rdbuf(cout_bak);
-  cerr.rdbuf(cerr_bak);
-
-  return 0;
 }
 
-int main(int argc, char **argv) {
-  try {
-    return main2(argc, argv);
-  }
-  catch(std::exception &ex) {
-    cerr << "Exiting with exception: " << ex.what() << endl;
-  }
-  catch(...) {
-    cerr << "Exiting with unknown exception." << endl;
-  }
-
-  return -1;
-}
-
-void run_agent(const function<shared_ptr<Environment> ()> &make_env, const function<shared_ptr<Agent> (const shared_ptr<Environment> &)> &make_agent) {
+void Experiment::standard_run(const function<shared_ptr<Environment> ()> &make_env,
+                              const function<shared_ptr<Agent> (const shared_ptr<Environment> &)> &make_agent,
+                              const function<void (const shared_ptr<Agent> &)> &on_episode_termination) {
   const auto seed = uint32_t(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
   Zeni::Random::get().seed(seed);
   cout << "SEED " << seed << endl;
@@ -392,6 +218,8 @@ void run_agent(const function<shared_ptr<Environment> ()> &make_env, const funct
       cout << " in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << endl;
   }
 
+  on_episode_termination(agent);
+
   if(output == "simple") {
     cout << successes << " SUCCESSes" << endl;
     cout << failures << " FAILUREs" << endl;
@@ -402,25 +230,181 @@ void run_agent(const function<shared_ptr<Environment> ()> &make_env, const funct
 //    else if(auto pwa = dynamic_pointer_cast<Puddle_World::Agent>(agent))
 //      pwa->print_policy(cout, 32);
   }
-  else if(output == "experiment") {
-//    if(auto cpa = dynamic_pointer_cast<Cart_Pole::Agent>(agent)) {
-//      cpa->print_value_function_grid(cerr);
-//      cpa->print_update_count_grid(cerr);
-//    }
-//    else
-    if(auto mca = dynamic_pointer_cast<Mountain_Car::Agent>(agent)) {
-      mca->print_policy(cerr, 32);
-      if(!dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value()) {
-        mca->print_value_function_grid(cerr);
-//        mca->print_update_count_grid(cerr);
-      }
-    }
-    else if(auto pwa = dynamic_pointer_cast<Puddle_World::Agent>(agent)) {
-      pwa->print_policy(cerr, 32);
-      if(!dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value()) {
-        pwa->print_value_function_grid(cerr);
-//        pwa->print_update_count_grid(cerr);
-      }
-    }
-  }
+//   else if(output == "experiment") {
+// //    if(auto cpa = dynamic_pointer_cast<Cart_Pole::Agent>(agent)) {
+// //      cpa->print_value_function_grid(cerr);
+// //      cpa->print_update_count_grid(cerr);
+// //    }
+// //    else
+//     if(auto mca = dynamic_pointer_cast<Mountain_Car::Agent>(agent)) {
+//       mca->print_policy(cerr, 32);
+//       if(!dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value()) {
+//         mca->print_value_function_grid(cerr);
+// //        mca->print_update_count_grid(cerr);
+//       }
+//     }
+//     else if(auto pwa = dynamic_pointer_cast<Puddle_World::Agent>(agent)) {
+//       pwa->print_policy(cerr, 32);
+//       if(!dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value()) {
+//         pwa->print_value_function_grid(cerr);
+// //        pwa->print_update_count_grid(cerr);
+//       }
+//     }
+//   }
 }
+
+// static int main2(int argc, char **argv) {
+//   /// Run the simulation
+// 
+//   const string env = dynamic_cast<const Option_Itemized &>(options["environment"]).get_value();
+//   if(env == "blocks-world")
+//     run_agent([](){return make_shared<Blocks_World::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Blocks_World::Agent>(env);});
+// //  else if(env == "cart-pole")
+// //    run_agent([](){return make_shared<Cart_Pole::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Cart_Pole::Agent>(env);});
+//   else if(env == "puddle-world")
+//     run_agent([](){return make_shared<Puddle_World::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Puddle_World::Agent>(env);});
+//   else if(env == "mountain-car")
+//     run_agent([](){return make_shared<Mountain_Car::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Mountain_Car::Agent>(env);});
+//   else if(env == "tetris")
+//     run_agent([](){return make_shared<Tetris::Environment>();}, [](const shared_ptr<Environment> &env){return make_shared<Tetris::Agent>(env);});
+//   else
+//     throw runtime_error("Internal error: g_args.environment");
+// 
+// 
+// //  typedef string test_key;
+// //  typedef Q_Value test_value;
+// //  typedef Zeni::Trie<test_key, test_value> test_trie;
+// //
+// //  test_trie * trie = new test_trie;
+// //
+// //  test_trie * key = nullptr;
+// //  (new test_trie("world"))->list_insert_before(key);
+// //  (new test_trie("hello"))->list_insert_before(key);
+// //  key = key->insert(trie, Q_Value::eligible_offset());
+// //  **key = 1.0;
+// //  for(const Q_Value &q : (*key)->eligible)
+// //    cout << q.value << ' ';
+// //  cout << endl;
+// //
+// //  key = nullptr;
+// //  (new test_trie("world"))->list_insert_before(key);
+// //  (new test_trie("hi"))->list_insert_before(key);
+// //  key = key->insert(trie, Q_Value::eligible_offset());
+// //  **key = 2.0;
+// //  for(const Q_Value &q : (*key)->eligible)
+// //    cout << q.value << ' ';
+// //  cout << endl;
+// //
+// //  key = nullptr;
+// //  (new test_trie("hi"))->list_insert_before(key);
+// //  key = key->insert(trie, Q_Value::eligible_offset());
+// //  **key = 3.0;
+// //  for(const Q_Value &q : (*key)->eligible)
+// //    cout << q.value << ' ';
+// //  cout << endl;
+// //
+// //  key = nullptr;
+// //  (new test_trie("world"))->list_insert_before(key);
+// //  (new test_trie("hi"))->list_insert_before(key);
+// //  key = key->insert(trie, Q_Value::eligible_offset());
+// //  for(const Q_Value &q : (*key)->eligible)
+// //    cout << q.value << ' ';
+// //  cout << endl;
+// //
+// //  trie->destroy(trie);
+// 
+// 
+// //  typedef Zeni::Map<int, int> map_type;
+// //  default_random_engine generator;
+// //  generator.seed(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
+// //  vector<int> numbers;
+// //  int i;
+// //  for(i = 0; i != dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-steps"]).get_value(); ++i)
+// //    numbers.push_back(i);
+// //  shuffle(numbers.begin(), numbers.end(), generator);
+// //
+// //  cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << endl;
+// //
+// //  map_type * tree = nullptr;
+// ////  RB_Tree<int> * tree = nullptr;
+// //#ifndef NDEBUG
+// //  cerr << "height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << endl;
+// ////  tree->debug_print(cerr) << endl;
+// //#endif
+// //
+// //  i = 0;
+// //  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
+// //    (new map_type(nullptr, *it))->insert_into(tree);
+// ////    (new RB_Tree<int>(*it))->insert_into(tree);
+// //#ifndef NDEBUG
+// //    cerr << "insertion(" << ++i << ")=" << *it << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << endl;
+// ////    tree->debug_print(cerr) << endl;
+// //#endif
+// //  }
+// //
+// //  i = 0;
+// //  for(std::vector<int>::const_iterator it = numbers.begin(), iend = numbers.end(); it != iend; ++it) {
+// //#ifndef NDEBUG
+// //    cerr << "deletion(" << ++i << ")=" << *it << endl;
+// //#endif
+// //    if(i == 13)
+// //      cerr << "";
+// //    tree->find(*it)->remove_from(tree);
+// //#ifndef NDEBUG
+// ////    tree->debug_print(cerr) << endl;
+// //    cerr << "deletion(" << i << ")=" << *it << ", height=" << tree->debug_height() << ", " << "size=" << tree->debug_size() << endl;
+// //#endif
+// //  }
+// 
+// 
+// //  Zeni::Random m_random(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
+// //  cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << endl;
+// //
+// //  Mean mean;
+// //  std::list<std::shared_ptr<Value>> values;
+// //  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
+// //  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
+// //  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
+// //  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
+// //  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
+// //  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
+// //  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
+// //  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
+// //  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
+// //  values.push_back(make_shared<Value>(m_random.rand_lt(42)));
+// //  for(auto &value : values) {
+// //    mean.contribute(*value);
+// //    cout << "Adding " << *value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
+// //  }
+// //  for(auto &value : values) {
+// //    mean.uncontribute(*value);
+// //    cout << "Removing " << *value << " yields " << mean.get_mean() << ':' << mean.get_stddev() << endl;
+// //  }
+// 
+// 
+// //  Zeni::Random m_random(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
+// //  cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << endl;
+// //
+// //  Q_Value::List *q_values = nullptr;
+// //  const auto comparator = [](const Q_Value &lhs, const Q_Value &rhs)->bool{
+// //    return lhs.value < rhs.value;
+// //  };
+// //  for(int i = 0; i != 10; ++i) {
+// //    auto val = m_random.rand_lt(42);
+// //    cout << "Inserting: " << val << endl;
+// //    (new Q_Value(val))->current.insert_before_unique(q_values, comparator);
+// //  }
+// //  for(auto &q : *q_values)
+// //    cout << "Value: " << q.value << endl;
+// //  while(q_values) {
+// //    Q_Value::List * const next = q_values->next();
+// //    cout << "Deleting: " << (*q_values)->value << endl;
+// //    q_values->erase();
+// //    delete q_values->get();
+// //    q_values = next;
+// //  }
+// 
+// 
+// 
+//   return 0;
+// }

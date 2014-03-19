@@ -1,4 +1,5 @@
 solution "carli"
+  location "."
   configurations { "Debug", "Profiling", "Release"}
 
   newoption {
@@ -66,8 +67,9 @@ solution "carli"
     buildoptions { "-Wno-deprecated-register", "-Wno-null-conversion", "-Wno-parentheses-equality", "-Wno-unneeded-internal-declaration" }
     linkoptions { "-stdlib=libc++" }
   configuration "linux"
-    linkoptions { "-Wl,-rpath,'$$ORIGIN'", "-Wl,--hash-style=both" }
+    linkoptions { "-Wl,--hash-style=both" }
   configuration "*"
+    includedirs { "src" }
     buildoptions { "-Wno-unused-function" }
 
   if _ACTION == "gmake" then
@@ -90,3 +92,5 @@ solution "carli"
   include "src/carli/utility"
   include "src/carli/rete"
   include "src/carli"
+
+  include "src/puddle_world"
