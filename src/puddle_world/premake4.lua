@@ -6,6 +6,4 @@ project "puddle_world"
 
   files { "*.h", "*.cpp" }
 
-  linkoptions { "-Wl,-rpath,'$$ORIGIN/lib'" }
-
   links { "carli", "rete", "utility" }

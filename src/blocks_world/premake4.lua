@@ -6,6 +6,4 @@ project "blocks_world"
 
   files { "*.h", "*.cpp" }
 
-  linkoptions { "-Wl,-rpath,'$$ORIGIN/lib'" }
-
   links { "carli", "rete", "utility" }

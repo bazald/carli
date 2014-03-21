@@ -12,7 +12,7 @@ import ch.idsia.mario.environments.Environment;
 public class JNIAgent implements Agent {
 
     static {
-        System.loadLibrary("ch_idsia_ai_agents_ai_JNIAgent");
+        System.loadLibrary("infinite_mario");
     }
 
     private native boolean[] c_getAction(Environment observation);

@@ -27,6 +27,6 @@ project "carli"
     prebuildcommands { [[src/carli/git.sh]] }
   end
 
-  linkoptions { "-Wl,-rpath,'$$ORIGIN'" }
+--   linkoptions { "-Wl,-rpath,'$$ORIGIN'" }
 
   links { "rete", "utility" }

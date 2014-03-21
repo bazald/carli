@@ -2,6 +2,10 @@ solution "carli"
   location "."
   configurations { "Debug", "Profiling", "Release"}
 
+  if _ACTION == "clean" then
+    print(os.outputof("rmdir lib"))
+  end
+
   newoption {
     trigger     = "scu",
     value       = "false",
@@ -42,6 +46,7 @@ solution "carli"
   flags { "ExtraWarnings" }
   buildoptions { "-mfpmath=sse -mmmx -msse -msse2 -ffloat-store -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
   buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
+  libdirs { "lib" }
 
   configuration "Debug"
     defines { "_DEBUG", "DEBUG", "debuggable_cast=dynamic_cast", "debuggable_pointer_cast=std::dynamic_pointer_cast" }
@@ -90,6 +95,7 @@ solution "carli"
   end
 
   include "src/blocks_world"
+  include "src/infinite_mario"
   include "src/mountain_car"
   include "src/puddle_world"
   include "src/tetris"
