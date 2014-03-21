@@ -2,7 +2,7 @@ project "rete"
   kind "SharedLib"
   language "C++"
 
-  targetdir "../../../lib"
+  targetdir "../../.."
 
 --  if os.get() ~= "windows" then
 --    print(os.outputof("make -C grammar"))
