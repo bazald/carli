@@ -25,7 +25,7 @@
   <target name="compile" depends="init"
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac includeantruntime="false" srcdir="${src}" destdir="${build}">
+    <javac includeantruntime="false" encoding="UTF-8" srcdir="${src}" destdir="${build}">
       <classpath>
          <fileset dir="${lib}">
            <include name="**/*.jar" />
