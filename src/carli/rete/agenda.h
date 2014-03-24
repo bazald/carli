@@ -12,7 +12,7 @@ namespace Rete {
 
   class Rete_Node;
 
-  class Agenda {
+  class RETE_LINKAGE Agenda {
     Agenda(Agenda &);
     Agenda & operator=(Agenda &);
 

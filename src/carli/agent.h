@@ -26,7 +26,7 @@ namespace Carli {
 
   enum class Metastate : char {NON_TERMINAL, SUCCESS, FAILURE};
 
-  class Agent : public std::enable_shared_from_this<Agent>, public Rete::Rete_Agent {
+  class CARLI_LINKAGE Agent : public std::enable_shared_from_this<Agent>, public Rete::Rete_Agent {
     Agent(const Agent &) = delete;
     Agent & operator=(const Agent &) = delete;
 
@@ -242,6 +242,6 @@ namespace Carli {
 
 }
 
-std::ostream & operator<<(std::ostream &os, const Carli::Agent &agent);
+CARLI_LINKAGE std::ostream & operator<<(std::ostream &os, const Carli::Agent &agent);
 
 #endif

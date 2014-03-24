@@ -4,6 +4,8 @@ project "carli"
 
   targetdir "../.."
 
+  defines { "CARLI_INTERNAL" }
+
   if _OPTIONS["scu"] == "true" then
     matches = os.matchfiles("*.cpp")
     os.mkdir("obj")

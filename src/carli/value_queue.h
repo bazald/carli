@@ -8,7 +8,7 @@
 
 namespace Carli {
 
-  class Value_Queue {
+  class CARLI_LINKAGE Value_Queue {
     Value_Queue(const Value_Queue &) = delete;
     Value_Queue operator=(const Value_Queue &) = delete;
 

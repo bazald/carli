@@ -6,7 +6,7 @@
 
 namespace Rete {
 
-  class Rete_Action : public Rete_Node {
+  class RETE_LINKAGE Rete_Action : public Rete_Node {
     Rete_Action(const Rete_Action &);
     Rete_Action & operator=(const Rete_Action &);
 
@@ -55,9 +55,9 @@ namespace Rete {
     Agenda &agenda;
   };
 
-  void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
+  RETE_LINKAGE void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
 
-  class Rete_Action_to_Agenda {
+  class RETE_LINKAGE Rete_Action_to_Agenda {
     friend class Agenda;
 
     static const Rete_Action::Action & action(const Rete_Action &rete_action) {

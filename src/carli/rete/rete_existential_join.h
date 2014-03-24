@@ -5,7 +5,7 @@
 
 namespace Rete {
 
-  class Rete_Existential_Join : public Rete_Node {
+  class RETE_LINKAGE Rete_Existential_Join : public Rete_Node {
     Rete_Existential_Join(const Rete_Existential_Join &);
     Rete_Existential_Join & operator=(const Rete_Existential_Join &);
 
@@ -49,7 +49,7 @@ namespace Rete {
     } data = {true, false};
   };
 
-  void bind_to_existential_join(const Rete_Existential_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+  void RETE_LINKAGE bind_to_existential_join(const Rete_Existential_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
 }
 

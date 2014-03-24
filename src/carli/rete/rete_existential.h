@@ -5,7 +5,7 @@
 
 namespace Rete {
 
-  class Rete_Existential : public Rete_Node {
+  class RETE_LINKAGE Rete_Existential : public Rete_Node {
     Rete_Existential(const Rete_Existential &);
     Rete_Existential & operator=(const Rete_Existential &);
 
@@ -37,7 +37,7 @@ namespace Rete {
     WME_Token_Ptr_C output_token;
   };
 
-  void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out);
+  RETE_LINKAGE void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out);
 
 }
 

@@ -5,7 +5,7 @@
 
 namespace Rete {
 
-  class Rete_Join : public Rete_Node {
+  class RETE_LINKAGE Rete_Join : public Rete_Node {
     Rete_Join(const Rete_Join &);
     Rete_Join & operator=(const Rete_Join &);
 
@@ -51,7 +51,7 @@ namespace Rete {
     } data = {true, false};
   };
 
-  void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+  RETE_LINKAGE void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
 }
 

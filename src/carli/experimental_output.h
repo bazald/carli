@@ -4,9 +4,11 @@
 #include <cstddef>
 #include <functional>
 
+#include "linkage.h"
+
 namespace Carli {
 
-  class Experimental_Output {
+  class CARLI_LINKAGE Experimental_Output {
   public:
     Experimental_Output(const size_t &print_every = 1);
 

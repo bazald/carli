@@ -12,7 +12,7 @@
 
 namespace Carli {
 
-  class Experiment {
+  class CARLI_LINKAGE Experiment {
   public:
     Experiment();
     virtual ~Experiment();

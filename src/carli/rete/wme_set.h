@@ -6,7 +6,7 @@
 
 namespace Rete {
 
-  class WME_Set {
+  class RETE_LINKAGE WME_Set {
   public:
     std::unordered_set<WME_Ptr_C> wmes;
   };

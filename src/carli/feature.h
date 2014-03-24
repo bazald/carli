@@ -10,9 +10,11 @@
 #include <memory>
 #include <sstream>
 
+#include "linkage.h"
+
 namespace Carli {
 
-  class Feature : public Zeni::Pool_Allocator<char> {
+  class CARLI_LINKAGE Feature : public Zeni::Pool_Allocator<char> {
     Feature(const Feature &) = delete;
     Feature & operator=(const Feature &) = delete;
 
@@ -72,7 +74,7 @@ inline std::ostream & operator<<(std::ostream &os, const Carli::Feature &feature
 
 namespace Carli {
 
-  class Feature_Enumerated_Data {
+  class CARLI_LINKAGE Feature_Enumerated_Data {
     Feature_Enumerated_Data(const Feature_Enumerated_Data &) = delete;
     Feature_Enumerated_Data & operator=(const Feature_Enumerated_Data &) = delete;
 
@@ -115,7 +117,7 @@ namespace Carli {
     }
   };
 
-  class Feature_Ranged_Data {
+  class CARLI_LINKAGE Feature_Ranged_Data {
   public:
     Feature_Ranged_Data(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_, const bool &integer_locked_)
      : axis(axis_),

@@ -5,7 +5,7 @@
 
 namespace Rete {
 
-  class Rete_Predicate : public Rete_Node {
+  class RETE_LINKAGE Rete_Predicate : public Rete_Node {
     Rete_Predicate(const Rete_Predicate &);
     Rete_Predicate & operator=(const Rete_Predicate &);
 
@@ -46,7 +46,7 @@ namespace Rete {
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> tokens;
   };
 
-  void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out);
+  RETE_LINKAGE void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out);
 
 }
 

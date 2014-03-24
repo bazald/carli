@@ -14,7 +14,7 @@ namespace Rete {
   typedef std::pair<WME_Token_Index, WME_Token_Index> WME_Binding;
   typedef std::set<WME_Binding> WME_Bindings;
 
-  class WME_Token : public std::enable_shared_from_this<WME_Token>, public Zeni::Pool_Allocator<WME_Token> {
+  class RETE_LINKAGE WME_Token : public std::enable_shared_from_this<WME_Token>, public Zeni::Pool_Allocator<WME_Token> {
   public:
     WME_Token();
     WME_Token(const WME_Ptr_C &wme);
@@ -46,10 +46,10 @@ namespace Rete {
 
 }
 
-std::ostream & operator<<(std::ostream &os, const Rete::WME_Token_Index &index);
-std::ostream & operator<<(std::ostream &os, const Rete::WME_Binding &binding);
-std::ostream & operator<<(std::ostream &os, const Rete::WME_Bindings &bindings);
-std::ostream & operator<<(std::ostream &os, const Rete::WME_Token &wme_token);
+RETE_LINKAGE std::ostream & operator<<(std::ostream &os, const Rete::WME_Token_Index &index);
+RETE_LINKAGE std::ostream & operator<<(std::ostream &os, const Rete::WME_Binding &binding);
+RETE_LINKAGE std::ostream & operator<<(std::ostream &os, const Rete::WME_Bindings &bindings);
+RETE_LINKAGE std::ostream & operator<<(std::ostream &os, const Rete::WME_Token &wme_token);
 
 namespace std {
   template <> struct hash<Rete::WME_Token> {

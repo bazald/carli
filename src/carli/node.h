@@ -28,7 +28,7 @@ namespace Carli {
   typedef std::shared_ptr<Node_Fringe> Node_Fringe_Ptr;
   typedef std::shared_ptr<Node_Fringe_Ranged> Node_Fringe_Ranged_Ptr;
 
-  class Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Fringe_Ranged> {
+  class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Fringe_Ranged> {
     Node(const Node &) = delete;
     Node & operator=(const Node &) = delete;
 
@@ -58,7 +58,7 @@ namespace Carli {
     ~Node_Split();
   };
 
-  class Node_Unsplit : public Node {
+  class CARLI_LINKAGE Node_Unsplit : public Node {
     Node_Unsplit(const Node_Unsplit &) = delete;
     Node_Unsplit & operator=(const Node_Unsplit &) = delete;
 
@@ -71,7 +71,7 @@ namespace Carli {
     Fringe_Values fringe_values;
   };
 
-  class Node_Fringe : public Node {
+  class CARLI_LINKAGE Node_Fringe : public Node {
     Node_Fringe(const Node_Fringe &) = delete;
     Node_Fringe & operator=(const Node_Fringe &) = delete;
 
@@ -86,7 +86,7 @@ namespace Carli {
     tracked_ptr<Feature> feature;
   };
 
-  class Node_Ranged {
+  class CARLI_LINKAGE Node_Ranged {
     Node_Ranged(const Node_Ranged &) = delete;
     Node_Ranged & operator=(const Node_Ranged &) = delete;
 
@@ -105,7 +105,7 @@ namespace Carli {
     Lines lines;
   };
 
-  class Node_Fringe_Ranged : public Node_Fringe, public Node_Ranged {
+  class CARLI_LINKAGE Node_Fringe_Ranged : public Node_Fringe, public Node_Ranged {
     Node_Fringe_Ranged(const Node_Fringe_Ranged &) = delete;
     Node_Fringe_Ranged & operator=(const Node_Fringe_Ranged &) = delete;
 

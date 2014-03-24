@@ -3,6 +3,6 @@
 
 #include "../rete_agent.h"
 
-void rete_parse_file(Rete::Rete_Agent &agent, const std::string &filename);
+RETE_LINKAGE void rete_parse_file(Rete::Rete_Agent &agent, const std::string &filename);
 
 #endif

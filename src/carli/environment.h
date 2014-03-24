@@ -9,7 +9,7 @@
 
 namespace Carli {
 
-  class Environment : public std::enable_shared_from_this<Environment> {
+  class CARLI_LINKAGE Environment : public std::enable_shared_from_this<Environment> {
   public:
     typedef double reward_type;
 

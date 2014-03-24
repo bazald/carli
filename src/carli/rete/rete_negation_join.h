@@ -5,7 +5,7 @@
 
 namespace Rete {
 
-  class Rete_Negation_Join : public Rete_Node {
+  class RETE_LINKAGE Rete_Negation_Join : public Rete_Node {
     Rete_Negation_Join(const Rete_Negation_Join &);
     Rete_Negation_Join & operator=(const Rete_Negation_Join &);
 
@@ -49,7 +49,7 @@ namespace Rete {
     } data = {true, false};
   };
 
-  void bind_to_negation_join(const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+  RETE_LINKAGE void bind_to_negation_join(const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
 }
 

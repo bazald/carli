@@ -8,6 +8,8 @@
 #include <memory>
 #include <string>
 
+#include "linkage.h"
+
 namespace Rete {
 
   class Symbol;
@@ -34,7 +36,7 @@ namespace Rete {
   typedef std::shared_ptr<Symbol_Identifier> Symbol_Identifier_Ptr;
   typedef std::shared_ptr<Symbol_Variable> Symbol_Variable_Ptr;
 
-  class Symbol : public Zeni::Pool_Allocator<char [32]>
+  class RETE_LINKAGE Symbol : public Zeni::Pool_Allocator<char [32]>
   {
     Symbol(const Symbol &);
     Symbol & operator=(const Symbol &);
@@ -89,7 +91,7 @@ namespace Rete {
     virtual std::ostream & print(std::ostream &os) const = 0;
   };
 
-  class Symbol_Constant : public Symbol {
+  class RETE_LINKAGE Symbol_Constant : public Symbol {
     Symbol_Constant(const Symbol_Constant &);
     Symbol_Constant & operator=(const Symbol_Constant &);
 
@@ -97,7 +99,7 @@ namespace Rete {
     Symbol_Constant() {}
   };
 
-  class Symbol_Constant_Float : public Symbol_Constant {
+  class RETE_LINKAGE Symbol_Constant_Float : public Symbol_Constant {
     Symbol_Constant_Float(const Symbol_Constant_Float &);
     Symbol_Constant_Float & operator=(const Symbol_Constant_Float &);
 
@@ -136,7 +138,7 @@ namespace Rete {
     double value;
   };
 
-  class Symbol_Constant_Int : public Symbol_Constant {
+  class RETE_LINKAGE Symbol_Constant_Int : public Symbol_Constant {
     Symbol_Constant_Int(const Symbol_Constant_Int &);
     Symbol_Constant_Int & operator=(const Symbol_Constant_Int &);
 
@@ -182,7 +184,7 @@ namespace Rete {
   bool Symbol_Constant_Float::operator>(const Symbol_Constant_Int &rhs) const {return value > rhs.value;}
   bool Symbol_Constant_Float::operator>=(const Symbol_Constant_Int &rhs) const {return value >= rhs.value;}
 
-  class Symbol_Constant_String : public Symbol_Constant {
+  class RETE_LINKAGE Symbol_Constant_String : public Symbol_Constant {
     Symbol_Constant_String(const Symbol_Constant_String &);
     Symbol_Constant_String & operator=(const Symbol_Constant_String &);
 
@@ -214,7 +216,7 @@ namespace Rete {
     std::string value;
   };
 
-  class Symbol_Identifier : public Symbol {
+  class RETE_LINKAGE Symbol_Identifier : public Symbol {
     Symbol_Identifier(const Symbol_Identifier &);
     Symbol_Identifier & operator=(const Symbol_Identifier &);
 
@@ -246,7 +248,7 @@ namespace Rete {
     std::string value;
   };
 
-  class Symbol_Variable : public Symbol {
+  class RETE_LINKAGE Symbol_Variable : public Symbol {
     Symbol_Variable(const Symbol_Variable &);
     Symbol_Variable & operator=(const Symbol_Variable &);
 

@@ -5,7 +5,7 @@
 
 namespace Rete {
 
-  class Rete_Negation : public Rete_Node {
+  class RETE_LINKAGE Rete_Negation : public Rete_Node {
     Rete_Negation(const Rete_Negation &);
     Rete_Negation & operator=(const Rete_Negation &);
 
@@ -37,7 +37,7 @@ namespace Rete {
     WME_Token_Ptr_C output_token;
   };
 
-  void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
+  RETE_LINKAGE void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
 
 }
 

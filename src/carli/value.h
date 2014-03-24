@@ -3,9 +3,11 @@
 
 #include <cmath>
 
+#include "linkage.h"
+
 namespace Carli {
 
-  class Value {
+  class CARLI_LINKAGE Value {
     friend class Mean;
 
     Value(const Value &) = delete;
@@ -32,7 +34,7 @@ namespace Carli {
     double value_mark2 = 0.0;
   };
 
-  class Mean {
+  class CARLI_LINKAGE Mean {
     Mean(const Mean &) = delete;
     Mean operator=(const Mean &) = delete;
 

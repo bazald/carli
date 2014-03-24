@@ -5,7 +5,7 @@
 
 namespace Rete {
 
-  class Rete_Filter : public Rete_Node {
+  class RETE_LINKAGE Rete_Filter : public Rete_Node {
     Rete_Filter(const Rete_Filter &);
     Rete_Filter & operator=(const Rete_Filter &);
 

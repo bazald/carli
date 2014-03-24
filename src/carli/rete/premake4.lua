@@ -13,6 +13,8 @@ project "rete"
 --    end
 --  end
 
+  defines { "RETE_INTERNAL" }
+
   if _OPTIONS["scu"] == "true" then
     matches = os.matchfiles("**.cpp")
     os.mkdir("obj")

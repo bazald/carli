@@ -12,7 +12,7 @@ namespace Rete {
   typedef std::shared_ptr<const WME> WME_Ptr_C;
   typedef std::shared_ptr<WME> WME_Ptr;
 
-  class WME : public Zeni::Pool_Allocator<WME> {
+  class RETE_LINKAGE WME : public Zeni::Pool_Allocator<WME> {
   public:
     typedef std::array<Symbol_Ptr_C, 3> WME_Symbols;
 
@@ -26,7 +26,7 @@ namespace Rete {
 
 }
 
-std::ostream & operator<<(std::ostream &os, const Rete::WME &wme);
+RETE_LINKAGE std::ostream & operator<<(std::ostream &os, const Rete::WME &wme);
 
 namespace std {
   template <> struct hash<Rete::WME> {

@@ -7,7 +7,7 @@
 
 namespace Rete {
 
-  class Rete_Agent {
+  class RETE_LINKAGE Rete_Agent {
     Rete_Agent(Rete_Agent &);
     Rete_Agent & operator=(Rete_Agent &);
 

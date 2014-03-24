@@ -7,9 +7,11 @@
 #include <memory>
 #include <sstream>
 
+#include "linkage.h"
+
 namespace Carli {
 
-  class Action : public Zeni::Pool_Allocator<char> {
+  class CARLI_LINKAGE Action : public Zeni::Pool_Allocator<char> {
     Action(const Action &) = delete;
     Action & operator=(const Action &) = delete;
 
