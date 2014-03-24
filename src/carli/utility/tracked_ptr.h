@@ -19,6 +19,8 @@
 #include <cassert>
 #include <memory>
 
+#include "linkage.h"
+
 template <typename T, typename Deleter = std::default_delete<T>>
 class tracked_ptr {
 public:
@@ -90,7 +92,7 @@ inline bool operator>(const T * const lhs, const tracked_ptr<T, Deleter> &rhs) {
 template <typename T, typename Deleter>
 inline bool operator>=(const T * const lhs, const tracked_ptr<T, Deleter> &rhs) {return lhs >= rhs.get();}
 
-class pointer_tracker {
+class UTILITY_LINKAGE pointer_tracker {
   template <typename T, typename Deleter>
   friend class tracked_ptr;
 

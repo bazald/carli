@@ -1,5 +1,6 @@
 *~
 *.7z
+*.a
 *.aux
 *.backup
 *.bak
@@ -10,6 +11,7 @@
 *.cbp
 *.d
 *.depend
+*.dll
 *.dvi
 *.exe
 *.filters
@@ -55,3 +57,4 @@ dump.txt
 git.h
 Makefile
 !src/carli
+*.cscope_file_list

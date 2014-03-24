@@ -1,18 +1,18 @@
 @echo off
 
-echo #ifndef GIT_H>git.h~
+cd "%~dp0%"
 if ERRORLEVEL 1 exit /B 1
 
 echo #ifndef GIT_H>git.h~
-if ERRORLEVEL 1 exit /B 1
+if ERRORLEVEL 1 exit /B 2
 
-echo #include ^<string^>>> git.h~ || exit 2
+echo #include ^<string^>>> git.h~ || exit 3
 
 echo #define GIT_MODIFIED \>>git.h~
-if ERRORLEVEL 1 exit /B 3
+if ERRORLEVEL 1 exit /B 4
 
 "C:\Program Files (x86)\Git\bin\git.exe" status | grep -c modified>>git.h~
-REM if ERRORLEVEL 1 exit /B 4
+REM if ERRORLEVEL 1 exit /B 5
 ver > nul
 
 echo #define GIT_REVISION \>>git.h~

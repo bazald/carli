@@ -11,7 +11,7 @@
 static size_t g_tracked_ptr_break = 0;
 static size_t g_tracked_ptr_count = 0;
 
-class pointer_tracker_impl {
+class UTILITY_LINKAGE pointer_tracker_impl {
   pointer_tracker_impl(const pointer_tracker_impl &);
   pointer_tracker_impl & operator=(const pointer_tracker_impl &);
 

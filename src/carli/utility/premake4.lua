@@ -4,6 +4,8 @@ project "utility"
 
   targetdir "../../.."
 
+  defines { "UTILITY_INTERNAL" }
+
   if _OPTIONS["scu"] == "true" then
     matches = os.matchfiles("**.cpp")
     os.mkdir("obj")

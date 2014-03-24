@@ -22,7 +22,7 @@ project "carli"
   end
 
   if os.get() == "windows" then
-    prebuildcommands { [[src/carli/git.bat]] }
+    prebuildcommands { [[src\carli\git.bat]] }
   else
     prebuildcommands { [[src/carli/git.sh]] }
   end

@@ -14,6 +14,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include "linkage.h"
+
 template <typename FLOAT>
 std::string pretty_print(const FLOAT &value) {
   std::ostringstream oss;
@@ -59,12 +61,9 @@ private:
   int num_args;
 };
 
-class Options {
+class UTILITY_LINKAGE Options {
 public:
-  static Options & get_global() {
-    static Options g_options;
-    return g_options;
-  }
+  static Options & get_global();
 
   Options(const std::string &name_ = "a.out")
    : name(name_),

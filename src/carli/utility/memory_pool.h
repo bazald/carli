@@ -7,9 +7,11 @@
 #include <limits>
 #include <unordered_map>
 
+#include "linkage.h"
+
 namespace Zeni {
 
-  class Pool {
+  class UTILITY_LINKAGE Pool {
     Pool(const Pool &rhs) = delete;
     Pool & operator=(const Pool &rhs) = delete;
 
@@ -111,7 +113,7 @@ namespace Zeni {
     void * available;
   };
 
-  class Pool_Map {
+  class UTILITY_LINKAGE Pool_Map {
     Pool_Map(const Pool_Map &rhs) = delete;
     Pool_Map & operator=(const Pool_Map &rhs) = delete;
 
@@ -255,7 +257,7 @@ namespace Zeni {
   using Pool_Allocator = std::allocator<TYPE>;
 #endif
 
-  void register_new_handler(const bool &force_reregister = false);
+  UTILITY_LINKAGE void register_new_handler(const bool &force_reregister = false);
 
 }
 

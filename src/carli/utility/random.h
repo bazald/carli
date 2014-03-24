@@ -39,9 +39,11 @@
 #include <fstream>
 #endif
 
+#include "linkage.h"
+
 namespace Zeni {
 
-  class Random {
+  class UTILITY_LINKAGE Random {
 #ifdef RANDOM_LOG
     static std::ostream & get_os() {
       static std::ofstream os("random.txt");
