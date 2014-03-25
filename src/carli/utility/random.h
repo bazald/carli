@@ -33,8 +33,12 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <random>
 #include <stdint.h>
 
+#ifdef DEBUG_OUTPUT
+#include <iostream>
+#endif
 #ifdef RANDOM_LOG
 #include <fstream>
 #endif

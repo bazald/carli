@@ -9,7 +9,7 @@ namespace Rete {
     Rete_Existential(const Rete_Existential &);
     Rete_Existential & operator=(const Rete_Existential &);
 
-    friend void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out);
+    friend RETE_LINKAGE void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out);
 
   public:
     Rete_Existential();

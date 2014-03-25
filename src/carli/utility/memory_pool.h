@@ -1,6 +1,7 @@
 #ifndef ZENI_MEMORY_POOL_H
 #define ZENI_MEMORY_POOL_H
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdlib>
 #include <inttypes.h>

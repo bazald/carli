@@ -51,7 +51,7 @@ namespace Carli {
     virtual reward_type transition_impl(const Action &action) = 0;
     virtual void print_impl(std::ostream &os) const = 0;
 
-    const uint32_t m_scenario = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["scenario"]).get_value();
+    const uint32_t m_scenario = get_Option_Ranged<int>(Options::get_global(), "scenario");
     bool m_altered = false;
   };
 

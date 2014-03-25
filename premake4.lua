@@ -40,9 +40,11 @@ solution "carli"
   end
 
   flags { "ExtraWarnings" }
-  buildoptions { "-mfpmath=sse -mmmx -msse -msse2 -ffloat-store -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
-  buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
-  linkoptions { "-Wl,-rpath,'$$ORIGIN'" }
+  if _ACTION ~= "vs2013" then
+    buildoptions { "-mfpmath=sse -mmmx -msse -msse2 -ffloat-store -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
+    buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
+    linkoptions { "-Wl,-rpath,'$$ORIGIN'" }
+  end
 
   configuration "Debug"
     defines { "_DEBUG", "DEBUG", "debuggable_cast=dynamic_cast", "debuggable_pointer_cast=std::dynamic_pointer_cast" }
@@ -62,7 +64,9 @@ solution "carli"
 
   configuration "windows"
     flags { "StaticRuntime" }
-    linkoptions { "-static-libgcc ", "-static-libstdc++" }
+    if _ACTION ~= "vs2013" then
+      linkoptions { "-static-libgcc ", "-static-libstdc++" }
+    end
   configuration "macosx"
     buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
     buildoptions { "-Wno-deprecated-register", "-Wno-null-conversion", "-Wno-parentheses-equality", "-Wno-unneeded-internal-declaration" }
@@ -70,8 +74,10 @@ solution "carli"
   configuration "linux"
     linkoptions { "-Wl,--hash-style=both" }
   configuration "*"
+    if _ACTION ~= "vs2013" then
+      buildoptions { "-Wno-unused-function" }
+    end
     includedirs { "src" }
-    buildoptions { "-Wno-unused-function" }
 
   if _ACTION == "gmake" then
 --     configuration { "linux" }

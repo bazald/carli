@@ -10,7 +10,7 @@ namespace Rete {
     Rete_Action(const Rete_Action &);
     Rete_Action & operator=(const Rete_Action &);
 
-    friend void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
+    friend RETE_LINKAGE void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
     friend class Rete_Action_to_Agenda;
 
   public:

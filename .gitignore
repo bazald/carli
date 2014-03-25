@@ -58,3 +58,5 @@ git.h
 Makefile
 !src/carli
 *.cscope_file_list
+*.exp
+*.lib

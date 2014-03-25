@@ -1,5 +1,6 @@
 #include "experimental_output.h"
 
+#include <algorithm>
 #include <cfloat>
 #include <iostream>
 

@@ -9,7 +9,7 @@ namespace Rete {
     Rete_Negation_Join(const Rete_Negation_Join &);
     Rete_Negation_Join & operator=(const Rete_Negation_Join &);
 
-    friend void bind_to_negation_join(const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+    friend RETE_LINKAGE void bind_to_negation_join(const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
   public:
     Rete_Negation_Join(WME_Bindings bindings_);
@@ -43,10 +43,12 @@ namespace Rete {
     std::list<std::pair<WME_Token_Ptr_C, size_t>, Zeni::Pool_Allocator<std::pair<WME_Token_Ptr_C, size_t>>> input0_tokens;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input1_tokens;
 
-    struct {
+    struct Connected {
+      Connected() : connected0(true), connected1(false) {}
+
       bool connected0 : 1;
       bool connected1 : 1;
-    } data = {true, false};
+    } data;
   };
 
   RETE_LINKAGE void bind_to_negation_join(const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);

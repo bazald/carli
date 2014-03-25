@@ -9,7 +9,7 @@ namespace Rete {
     Rete_Negation(const Rete_Negation &);
     Rete_Negation & operator=(const Rete_Negation &);
 
-    friend void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
+    friend RETE_LINKAGE void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
 
   public:
     Rete_Negation();

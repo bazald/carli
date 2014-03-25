@@ -9,7 +9,7 @@ namespace Rete {
     Rete_Join(const Rete_Join &);
     Rete_Join & operator=(const Rete_Join &);
 
-    friend void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+    friend RETE_LINKAGE void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
   public:
     Rete_Join(WME_Bindings bindings_);
@@ -45,10 +45,12 @@ namespace Rete {
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input1_tokens;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> output_tokens;
 
-    struct {
+    struct Connected {
+      Connected() : connected0(true), connected1(false) {}
+
       bool connected0 : 1;
       bool connected1 : 1;
-    } data = {true, false};
+    } data;
   };
 
   RETE_LINKAGE void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);

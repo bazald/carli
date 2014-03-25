@@ -32,7 +32,7 @@ namespace Carli {
 
   public:
     typedef Feature feature_type;
-    typedef typename Feature::List * feature_list;
+    typedef Feature::List * feature_list;
     typedef Action action_type;
     typedef std::shared_ptr<const Action> action_ptrsc;
     typedef double reward_type;
@@ -157,8 +157,8 @@ namespace Carli {
     std::function<bool (const Rete::Rete_Action &, Q_Value * const &)> m_split_test; ///< true if too general, false if sufficiently general
     std::map<action_ptrsc, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<action_ptrsc>, Zeni::Pool_Allocator<std::pair<action_ptrsc, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
-    Rete::Symbol_Identifier_Ptr_C m_s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
-    Rete::WME_Ptr_C m_wme_blink = std::make_shared<Rete::WME>(m_s_id, m_s_id, m_s_id);
+    Rete::Symbol_Identifier_Ptr_C m_s_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("S1"));
+    Rete::WME_Ptr_C m_wme_blink = Rete::WME_Ptr_C(new Rete::WME(m_s_id, m_s_id, m_s_id));
 
   private:
     virtual void generate_features() = 0;
@@ -168,7 +168,7 @@ namespace Carli {
 
     Mean m_mean_cabe;
     Value_Queue m_mean_cabe_queue;
-    const size_t m_mean_cabe_queue_size = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["mean-cabe-queue-size"]).get_value();
+    const size_t m_mean_cabe_queue_size = get_Option_Ranged<int>(Options::get_global(), "mean-cabe-queue-size");
 
   #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
     Mean m_mean_mabe;
@@ -186,22 +186,22 @@ namespace Carli {
     size_t m_step_count = 0;
     reward_type m_total_reward = 0.0;
 
-    const bool m_null_q_values = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["null-q-values"]).get_value(); ///< insert nullptr instead of new Q_Values until reaching the leaf
-    const size_t m_value_function_cap = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["value-function-cap"]).get_value(); ///< at this threshold, no more entries will be added to the value functions through refinement
+    const bool m_null_q_values = get_Option_Ranged<bool>(Options::get_global(), "null-q-values"); ///< insert nullptr instead of new Q_Values until reaching the leaf
+    const size_t m_value_function_cap = get_Option_Ranged<int>(Options::get_global(), "value-function-cap"); ///< at this threshold, no more entries will be added to the value functions through refinement
 
-    const double m_learning_rate = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["learning-rate"]).get_value(); ///< alpha
-    const double m_discount_rate = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["discount-rate"]).get_value(); ///< gamma
-    const double m_eligibility_trace_decay_rate = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["eligibility-trace-decay-rate"]).get_value(); ///< lambda
-    const double m_eligibility_trace_decay_threshold = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["eligibility-trace-decay-threshold"]).get_value();
+    const double m_learning_rate = get_Option_Ranged<double>(Options::get_global(), "learning-rate"); ///< alpha
+    const double m_discount_rate = get_Option_Ranged<double>(Options::get_global(), "discount-rate"); ///< gamma
+    const double m_eligibility_trace_decay_rate = get_Option_Ranged<double>(Options::get_global(), "eligibility-trace-decay-rate"); ///< lambda
+    const double m_eligibility_trace_decay_threshold = get_Option_Ranged<double>(Options::get_global(), "eligibility-trace-decay-threshold");
 
     const std::string m_credit_assignment_code = dynamic_cast<const Option_Itemized &>(Options::get_global()["credit-assignment"]).get_value();
     const std::function<void (const Q_Value_List &)> m_credit_assignment; ///< How to assign credit to multiple Q-values
-    const double m_credit_assignment_epsilon = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["credit-assignment-epsilon"]).get_value();
-    const double m_credit_assignment_log_base = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["credit-assignment-log-base"]).get_value();
+    const double m_credit_assignment_epsilon = get_Option_Ranged<double>(Options::get_global(), "credit-assignment-epsilon");
+    const double m_credit_assignment_log_base = get_Option_Ranged<double>(Options::get_global(), "credit-assignment-log-base");
     const double m_credit_assignment_log_base_value = std::log(m_credit_assignment_log_base);
-    const double m_credit_assignment_root = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["credit-assignment-root"]).get_value();
+    const double m_credit_assignment_root = get_Option_Ranged<double>(Options::get_global(), "credit-assignment-root");
     const double m_credit_assignment_root_value = 1.0 / m_credit_assignment_root;
-    const bool m_credit_assignment_normalize = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["credit-assignment-normalize"]).get_value();
+    const bool m_credit_assignment_normalize = get_Option_Ranged<bool>(Options::get_global(), "credit-assignment-normalize");
 
   //#ifdef ENABLE_WEIGHT
   //  const std::string m_weight_assignment_code = dynamic_cast<const Option_Itemized &>(Options::get_global()["weight-assignment"]).get_value();
@@ -209,22 +209,22 @@ namespace Carli {
   //#endif
 
     const bool m_on_policy = dynamic_cast<const Option_Itemized &>(Options::get_global()["policy"]).get_value() == "on-policy"; ///< for Sarsa/Q-learning selection
-    const double m_epsilon = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["epsilon-greedy"]).get_value(); ///< for epsilon-greedy decision-making
+    const double m_epsilon = get_Option_Ranged<double>(Options::get_global(), "epsilon-greedy"); ///< for epsilon-greedy decision-making
 
-    const size_t m_split_min = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["split-min"]).get_value();
-    const size_t m_split_max = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["split-max"]).get_value();
-    const double m_split_cabe = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["split-cabe"]).get_value();
-    const double m_split_cabe_qmult = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["split-cabe-qmult"]).get_value();
+    const size_t m_split_min = get_Option_Ranged<int>(Options::get_global(), "split-min");
+    const size_t m_split_max = get_Option_Ranged<int>(Options::get_global(), "split-max");
+    const double m_split_cabe = get_Option_Ranged<double>(Options::get_global(), "split-cabe");
+    const double m_split_cabe_qmult = get_Option_Ranged<double>(Options::get_global(), "split-cabe-qmult");
 
-    const size_t m_pseudoepisode_threshold = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["pseudoepisode-threshold"]).get_value(); ///< For deciding how many steps indicates a pseudoepisode
-    const size_t m_split_pseudoepisodes = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["split-pseudoepisodes"]).get_value();
-    const size_t m_split_update_count = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["split-update-count"]).get_value();
+    const size_t m_pseudoepisode_threshold = get_Option_Ranged<int>(Options::get_global(), "pseudoepisode-threshold"); ///< For deciding how many steps indicates a pseudoepisode
+    const size_t m_split_pseudoepisodes = get_Option_Ranged<int>(Options::get_global(), "split-pseudoepisodes");
+    const size_t m_split_update_count = get_Option_Ranged<int>(Options::get_global(), "split-update-count");
 
-    const bool m_generate_line_segments = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["generate-line-segments"]).get_value();
-    const size_t m_contribute_update_count = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["contribute-update-count"]).get_value();
-    const bool m_dynamic_midpoint = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["dynamic-midpoint"]).get_value();
-    const bool m_fringe = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["fringe"]).get_value();
-    const double m_fringe_learning_scale = dynamic_cast<const Option_Ranged<double> &>(Options::get_global()["fringe-learning-scale"]).get_value();
+    const bool m_generate_line_segments = get_Option_Ranged<bool>(Options::get_global(), "generate-line-segments");
+    const size_t m_contribute_update_count = get_Option_Ranged<int>(Options::get_global(), "contribute-update-count");
+    const bool m_dynamic_midpoint = get_Option_Ranged<bool>(Options::get_global(), "dynamic-midpoint");
+    const bool m_fringe = get_Option_Ranged<bool>(Options::get_global(), "fringe");
+    const double m_fringe_learning_scale = get_Option_Ranged<double>(Options::get_global(), "fringe-learning-scale");
 
     Q_Value::List * m_eligible = nullptr;
 

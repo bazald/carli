@@ -19,8 +19,8 @@ namespace Carli {
     Feature & operator=(const Feature &) = delete;
 
   public:
-    typedef typename Zeni::Linked_List<Feature> List;
-    typedef typename List::iterator iterator;
+    typedef Zeni::Linked_List<Feature> List;
+    typedef List::iterator iterator;
 
     Feature()
       : features(this)

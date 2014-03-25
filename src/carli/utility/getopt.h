@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <iomanip>
 #include <limits>
@@ -37,7 +38,7 @@ std::string pretty_print(const FLOAT &value) {
   return pp;
 }
 
-class Option : public std::enable_shared_from_this<Option> {
+class UTILITY_LINKAGE Option : public std::enable_shared_from_this<Option> {
 public:
   typedef std::vector<const char *> Arguments;
 
@@ -222,7 +223,7 @@ inline std::ostream & operator<<(std::ostream &os, const Options &options) {
   return os;
 }
 
-class Option_Function : public Option {
+class UTILITY_LINKAGE Option_Function : public Option {
 public:
   typedef std::function<void (const Arguments &)> Function;
 
@@ -242,7 +243,7 @@ private:
   Function m_function;
 };
 
-class Option_String : public Option {
+class UTILITY_LINKAGE Option_String : public Option {
 public:
   Option_String(const std::string &name_,
                 const std::string &default_value)
@@ -276,7 +277,7 @@ private:
   std::string value;
 };
 
-class Option_Itemized : public Option {
+class UTILITY_LINKAGE Option_Itemized : public Option {
 public:
   Option_Itemized(const std::string &name_,
                   const std::set<std::string> &items_,
@@ -462,6 +463,11 @@ inline std::string Option_Ranged<double>::get_range() const {
       << pretty_print(upper_bound) << (inclusive_upper_bound ? ']' : ')');
 
   return oss.str();
+}
+
+template <typename TYPE>
+TYPE get_Option_Ranged(Options &options, const std::string &name) {
+  return dynamic_cast<const Option_Ranged<TYPE> &>(options[name]).get_value();
 }
 
 #endif

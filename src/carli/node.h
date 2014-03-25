@@ -118,7 +118,7 @@ namespace Carli {
   };
 
   inline void __node_size_check() {
-    typedef typename Node::value_type pool_allocator_type;
+    typedef Node::value_type pool_allocator_type;
     static_assert(sizeof(pool_allocator_type) >= sizeof(Node_Split), "Pool size suboptimal.");
     static_assert(sizeof(pool_allocator_type) >= sizeof(Node_Unsplit), "Pool size suboptimal.");
     static_assert(sizeof(pool_allocator_type) >= sizeof(Node_Fringe), "Pool size suboptimal.");

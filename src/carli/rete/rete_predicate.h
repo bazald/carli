@@ -9,7 +9,7 @@ namespace Rete {
     Rete_Predicate(const Rete_Predicate &);
     Rete_Predicate & operator=(const Rete_Predicate &);
 
-    friend void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out);
+    friend RETE_LINKAGE void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out);
 
   public:
     enum Predicate {EQ, NEQ, GT, GTE, LT, LTE};
