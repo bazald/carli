@@ -35,11 +35,15 @@
 #include <cstdlib>
 #include <stdint.h>
 
-#include "linkage.h"
+#ifdef DEBUG_OUTPUT
+#include <iostream>
+#endif
 
 #ifdef RANDOM_LOG
 #include <fstream>
 #endif
+
+#include "linkage.h"
 
 namespace Zeni {
 
