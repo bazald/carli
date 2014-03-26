@@ -60,8 +60,8 @@ public:
   const char * get_name() const {return name.c_str();}
   int get_num_args() const {return num_args;}
 
-  virtual std::shared_ptr<const char> get_help() const {return std::shared_ptr<const char>(_strdup(""));}
-  virtual std::shared_ptr<const char> print() const {return std::shared_ptr<const char>(_strdup(""));}
+  virtual std::shared_ptr<const char> get_help() const {return std::shared_ptr<const char>(strdup(""));}
+  virtual std::shared_ptr<const char> print() const {return std::shared_ptr<const char>(strdup(""));}
   virtual void operator()(const Arguments &) = 0;
 
 private:
@@ -290,13 +290,13 @@ public:
   const std::string & get_value() const {return value;}
 
   std::shared_ptr<const char> get_help() const {
-    return std::shared_ptr<const char>(_strdup(""));
+    return std::shared_ptr<const char>(strdup(""));
   }
 
   std::shared_ptr<const char> print() const {
     std::ostringstream oss;
     oss << get_name() << " = " << value << std::endl;
-    return std::shared_ptr<const char>(_strdup(oss.str().c_str()));
+    return std::shared_ptr<const char>(strdup(oss.str().c_str()));
   }
 
   void operator()(const Arguments &args) {
@@ -334,13 +334,13 @@ public:
   const std::string & get_value() const {return value;}
 
   std::shared_ptr<const char> get_help() const {
-    return std::shared_ptr<const char>(_strdup(get_items().c_str()));
+    return std::shared_ptr<const char>(strdup(get_items().c_str()));
   }
 
   std::shared_ptr<const char> print() const {
     std::ostringstream oss;
     oss << get_name() << " = " << value << std::endl;
-    return std::shared_ptr<const char>(_strdup(oss.str().c_str()));
+    return std::shared_ptr<const char>(strdup(oss.str().c_str()));
   }
 
   void operator()(const Arguments &args) {
@@ -414,13 +414,13 @@ public:
   const TYPE & get_value() const {return value;}
 
   std::shared_ptr<const char> get_help() const {
-    return std::shared_ptr<const char>(_strdup(get_range().c_str()));
+    return std::shared_ptr<const char>(strdup(get_range().c_str()));
   }
 
   std::shared_ptr<const char> print() const {
     std::ostringstream oss;
     oss << get_name() << " = " << value << std::endl;
-    return std::shared_ptr<const char>(_strdup(oss.str().c_str()));
+    return std::shared_ptr<const char>(strdup(oss.str().c_str()));
   }
 
   void operator()(const Arguments &args) {
@@ -465,21 +465,21 @@ template <>
 inline std::shared_ptr<const char> Option_Ranged<bool>::print() const {
   std::ostringstream oss;
   oss << get_name() << " = " << (value ? "true" : "false") << std::endl;
-  return std::shared_ptr<const char>(_strdup(oss.str().c_str()));
+  return std::shared_ptr<const char>(strdup(oss.str().c_str()));
 }
 
 template <>
 inline std::shared_ptr<const char> Option_Ranged<float>::print() const {
   std::ostringstream oss;
   oss << get_name() << " = " << pretty_print(value) << std::endl;
-  return std::shared_ptr<const char>(_strdup(oss.str().c_str()));
+  return std::shared_ptr<const char>(strdup(oss.str().c_str()));
 }
 
 template <>
 inline std::shared_ptr<const char> Option_Ranged<double>::print() const {
   std::ostringstream oss;
   oss << get_name() << " = " << pretty_print(value) << std::endl;
-  return std::shared_ptr<const char>(_strdup(oss.str().c_str()));
+  return std::shared_ptr<const char>(strdup(oss.str().c_str()));
 }
 
 template <>
