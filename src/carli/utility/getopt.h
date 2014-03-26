@@ -50,11 +50,11 @@ public:
 
   virtual ~Option() {}
 
-  std::string get_name() const {return name;}
+  const char * get_name() const {return name.c_str();}
   int get_num_args() const {return num_args;}
 
-  virtual std::string get_help() const {return "";}
-  virtual std::string print() const {return "";}
+  virtual std::shared_ptr<const char> get_help() const {return std::shared_ptr<const char>(_strdup(""));}
+  virtual std::shared_ptr<const char> print() const {return std::shared_ptr<const char>(_strdup(""));}
   virtual void operator()(const Arguments &) = 0;
 
 private:
@@ -84,7 +84,7 @@ public:
     m_short_options[std::string(short_arg, 1)] = option;
 
     if(help)
-      add_line(std::string("    -") + short_arg + " --" + option->get_name() + (!option->get_help().empty() ? " " : "") + option->get_help() + (*help ? " " : "") + help);
+      add_line(std::string("    -") + short_arg + " --" + option->get_name() + (*option->get_help() ? " " : "") + option->get_help().get() + (*help ? " " : "") + help);
   }
 
   void add(const std::shared_ptr<Option> &option, const char * const help = nullptr) {
@@ -97,7 +97,7 @@ public:
     m_long_options[option->get_name()] = option;
 
     if(help)
-      add_line(std::string("       --") + option->get_name() + (!option->get_help().empty() ? " " : "") + option->get_help() + (*help ? " " : "") + help);
+      add_line(std::string("       --") + option->get_name() + (*option->get_help() ? " " : "") + option->get_help().get() + (*help ? " " : "") + help);
   }
 
   void add_line(const std::string &line) {
@@ -178,9 +178,9 @@ public:
   void print(std::ostream &os) const {
     os << "Options:" << std::endl;
     for(const auto &opt : m_long_options) {
-      const std::string str = opt.second->print();
-      if(!str.empty())
-        os << "  " << str;
+      const auto str = opt.second->print();
+      if(!*str)
+        os << "  " << str.get();
     }
   }
 
@@ -254,14 +254,14 @@ public:
 
   const std::string & get_value() const {return value;}
 
-  std::string get_help() const {
-    return "";
+  std::shared_ptr<const char> get_help() const {
+    return std::shared_ptr<const char>(_strdup(""));
   }
 
-  std::string print() const {
+  std::shared_ptr<const char> print() const {
     std::ostringstream oss;
     oss << get_name() << " = " << value << std::endl;
-    return oss.str();
+    return std::shared_ptr<const char>(_strdup(oss.str().c_str()));
   }
 
   void operator()(const Arguments &args) {
@@ -291,14 +291,14 @@ public:
 
   const std::string & get_value() const {return value;}
 
-  std::string get_help() const {
-    return get_items();
+  std::shared_ptr<const char> get_help() const {
+    return std::shared_ptr<const char>(_strdup(get_items().c_str()));
   }
 
-  std::string print() const {
+  std::shared_ptr<const char> print() const {
     std::ostringstream oss;
     oss << get_name() << " = " << value << std::endl;
-    return oss.str();
+    return std::shared_ptr<const char>(_strdup(oss.str().c_str()));
   }
 
   void operator()(const Arguments &args) {
@@ -364,14 +364,14 @@ public:
 
   const TYPE & get_value() const {return value;}
 
-  std::string get_help() const {
-    return get_range();
+  std::shared_ptr<const char> get_help() const {
+    return std::shared_ptr<const char>(_strdup(get_range().c_str()));
   }
 
-  std::string print() const {
+  std::shared_ptr<const char> print() const {
     std::ostringstream oss;
     oss << get_name() << " = " << value << std::endl;
-    return oss.str();
+    return std::shared_ptr<const char>(_strdup(oss.str().c_str()));
   }
 
   void operator()(const Arguments &args) {
@@ -413,24 +413,24 @@ private:
 };
 
 template <>
-inline std::string Option_Ranged<bool>::print() const {
+inline std::shared_ptr<const char> Option_Ranged<bool>::print() const {
   std::ostringstream oss;
   oss << get_name() << " = " << (value ? "true" : "false") << std::endl;
-  return oss.str();
+  return std::shared_ptr<const char>(_strdup(oss.str().c_str()));
 }
 
 template <>
-inline std::string Option_Ranged<float>::print() const {
+inline std::shared_ptr<const char> Option_Ranged<float>::print() const {
   std::ostringstream oss;
   oss << get_name() << " = " << pretty_print(value) << std::endl;
-  return oss.str();
+  return std::shared_ptr<const char>(_strdup(oss.str().c_str()));
 }
 
 template <>
-inline std::string Option_Ranged<double>::print() const {
+inline std::shared_ptr<const char> Option_Ranged<double>::print() const {
   std::ostringstream oss;
   oss << get_name() << " = " << pretty_print(value) << std::endl;
-  return oss.str();
+  return std::shared_ptr<const char>(_strdup(oss.str().c_str()));
 }
 
 template <>

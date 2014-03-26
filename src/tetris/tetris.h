@@ -24,15 +24,15 @@ namespace Tetris {
                        TET_S = 0x60, TET_S_90 = 0x61,
                        TET_Z = 0x70, TET_Z_90 = 0x71};
 
-  inline constexpr uint8_t num_types(const Tetromino_Supertype &supertype) {
+  inline uint8_t num_types(const Tetromino_Supertype &supertype) {
     return supertype == TETS_SQUARE ? 1 : (supertype == TETS_LINE || supertype == TETS_S || supertype == TETS_Z) ? 2 : 4;
   }
 
-  inline constexpr Tetromino_Type super_to_type(const Tetromino_Supertype &supertype, const uint8_t &index) {
+  inline Tetromino_Type super_to_type(const Tetromino_Supertype &supertype, const uint8_t &index) {
     return Tetromino_Type((supertype << 4) | (index & 0x3));
   }
 
-  inline constexpr Tetromino_Supertype type_to_super(const Tetromino_Type &type) {
+  inline Tetromino_Supertype type_to_super(const Tetromino_Type &type) {
     return Tetromino_Supertype(type >> 4);
   }
 }
@@ -450,35 +450,35 @@ namespace Tetris {
 
     void update();
 
-    const Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
-    const Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
+    const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
+    const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
 
-    const Rete::Symbol_Identifier_Ptr_C m_input_id = std::make_shared<Rete::Symbol_Identifier>("I1");
-    const Rete::Symbol_Constant_String_Ptr_C m_input_attr = std::make_shared<Rete::Symbol_Constant_String>("input");
-    const Rete::Symbol_Constant_String_Ptr_C m_action_attr = std::make_shared<Rete::Symbol_Constant_String>("action");
-    const Rete::Symbol_Constant_String_Ptr_C m_type_current_attr = std::make_shared<Rete::Symbol_Constant_String>("type-current");
-    const Rete::Symbol_Constant_String_Ptr_C m_type_next_attr = std::make_shared<Rete::Symbol_Constant_String>("type-next");
-    const Rete::Symbol_Constant_String_Ptr_C m_width_attr = std::make_shared<Rete::Symbol_Constant_String>("width");
-    const Rete::Symbol_Constant_String_Ptr_C m_height_attr = std::make_shared<Rete::Symbol_Constant_String>("height");
-    const Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
-    const Rete::Symbol_Constant_String_Ptr_C m_y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
-    const Rete::Symbol_Constant_String_Ptr_C m_gaps_beneath_attr = std::make_shared<Rete::Symbol_Constant_String>("gaps-beneath");
-    const Rete::Symbol_Constant_String_Ptr_C m_gaps_created_attr = std::make_shared<Rete::Symbol_Constant_String>("gaps-created");
-    const Rete::Symbol_Constant_String_Ptr_C m_depth_to_gap_attr = std::make_shared<Rete::Symbol_Constant_String>("depth-to-gap"); ///< Depth to the highest gap
-    const Rete::Symbol_Constant_String_Ptr_C m_clears_attr = std::make_shared<Rete::Symbol_Constant_String>("clears");
-    const Rete::Symbol_Constant_String_Ptr_C m_enables_clearing_attr = std::make_shared<Rete::Symbol_Constant_String>("enables-clearing");
-    const Rete::Symbol_Constant_String_Ptr_C m_prohibits_clearing_attr = std::make_shared<Rete::Symbol_Constant_String>("prohibits-clearing");
-    const Rete::Symbol_Constant_String_Ptr_C m_x_odd_attr = std::make_shared<Rete::Symbol_Constant_String>("x-odd");
-    const Rete::Symbol_Constant_String_Ptr_C m_true_value = std::make_shared<Rete::Symbol_Constant_String>("true");
-    const Rete::Symbol_Constant_String_Ptr_C m_false_value = std::make_shared<Rete::Symbol_Constant_String>("false");
+    const Rete::Symbol_Identifier_Ptr_C m_input_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("I1"));
+    const Rete::Symbol_Constant_String_Ptr_C m_input_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("input"));
+    const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
+    const Rete::Symbol_Constant_String_Ptr_C m_type_current_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("type-current"));
+    const Rete::Symbol_Constant_String_Ptr_C m_type_next_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("type-next"));
+    const Rete::Symbol_Constant_String_Ptr_C m_width_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("width"));
+    const Rete::Symbol_Constant_String_Ptr_C m_height_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("height"));
+    const Rete::Symbol_Constant_String_Ptr_C m_x_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x"));
+    const Rete::Symbol_Constant_String_Ptr_C m_y_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("y"));
+    const Rete::Symbol_Constant_String_Ptr_C m_gaps_beneath_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("gaps-beneath"));
+    const Rete::Symbol_Constant_String_Ptr_C m_gaps_created_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("gaps-created"));
+    const Rete::Symbol_Constant_String_Ptr_C m_depth_to_gap_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("depth-to-gap")); ///< Depth to the highest gap
+    const Rete::Symbol_Constant_String_Ptr_C m_clears_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("clears"));
+    const Rete::Symbol_Constant_String_Ptr_C m_enables_clearing_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("enables-clearing"));
+    const Rete::Symbol_Constant_String_Ptr_C m_prohibits_clearing_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("prohibits-clearing"));
+    const Rete::Symbol_Constant_String_Ptr_C m_x_odd_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x-odd"));
+    const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
+    const Rete::Symbol_Constant_String_Ptr_C m_false_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("false"));
 
-    std::array<Rete::Symbol_Identifier_Ptr_C, 7> m_type_ids = {{std::make_shared<Rete::Symbol_Identifier>("I"),
-                                                                std::make_shared<Rete::Symbol_Identifier>("O"),
-                                                                std::make_shared<Rete::Symbol_Identifier>("T"),
-                                                                std::make_shared<Rete::Symbol_Identifier>("S"),
-                                                                std::make_shared<Rete::Symbol_Identifier>("Z"),
-                                                                std::make_shared<Rete::Symbol_Identifier>("L"),
-                                                                std::make_shared<Rete::Symbol_Identifier>("J")}};
+    std::array<Rete::Symbol_Identifier_Ptr_C, 7> m_type_ids = {{Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("I")),
+                                                                Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("O")),
+                                                                Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("T")),
+                                                                Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("S")),
+                                                                Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("Z")),
+                                                                Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("L")),
+                                                                Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("J"))}};
 
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
   };

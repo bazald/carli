@@ -49,7 +49,7 @@ namespace Carli {
     Rete::Rete_Action * action = nullptr;
   };
 
-  class Node_Split : public Node {
+  class CARLI_LINKAGE Node_Split : public Node {
     Node_Split(const Node_Split &) = delete;
     Node_Split & operator=(const Node_Split &) = delete;
 

@@ -237,8 +237,8 @@ namespace Mountain_Car {
     double m_cart_force = 0.001;
     double m_grav_force = 0.0025;
 
-    const bool m_random_start = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["random-start"]).get_value();
-    const bool m_reward_negative = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["reward-negative"]).get_value();
+    const bool m_random_start = get_Option_Ranged<bool>(Options::get_global(), "random-start");
+    const bool m_reward_negative = get_Option_Ranged<bool>(Options::get_global(), "reward-negative");
   };
 
   class Agent : public Carli::Agent {
@@ -262,20 +262,20 @@ namespace Mountain_Car {
     const double m_min_x_dot = -0.07;
     const double m_max_x_dot = 0.07;
 
-    const Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
-    const Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
+    const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
+    const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
 
-    const Rete::Symbol_Constant_String_Ptr_C m_x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
-    const Rete::Symbol_Constant_String_Ptr_C m_x_dot_attr = std::make_shared<Rete::Symbol_Constant_String>("x-dot");
-    const Rete::Symbol_Constant_Float_Ptr m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_x());
-    const Rete::Symbol_Constant_Float_Ptr m_x_dot_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_x_dot());
+    const Rete::Symbol_Constant_String_Ptr_C m_x_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x"));
+    const Rete::Symbol_Constant_String_Ptr_C m_x_dot_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x-dot"));
+    const Rete::Symbol_Constant_Float_Ptr m_x_value = Rete::Symbol_Constant_Float_Ptr(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_x()));
+    const Rete::Symbol_Constant_Float_Ptr m_x_dot_value = Rete::Symbol_Constant_Float_Ptr(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_x_dot()));
 
     Rete::WME_Ptr_C m_x_wme;
     Rete::WME_Ptr_C m_x_dot_wme;
 
-    std::array<std::shared_ptr<const Carli::Action>, 3> m_action = {{std::make_shared<Acceleration>(LEFT),
-                                                                     std::make_shared<Acceleration>(IDLE),
-                                                                     std::make_shared<Acceleration>(RIGHT)}};
+    std::array<std::shared_ptr<const Carli::Action>, 3> m_action = {{std::shared_ptr<const Carli::Action>(new Acceleration(LEFT)),
+                                                                     std::shared_ptr<const Carli::Action>(new Acceleration(IDLE)),
+                                                                     std::shared_ptr<const Carli::Action>(new Acceleration(RIGHT))}};
   };
 
 }

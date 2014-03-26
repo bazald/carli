@@ -112,7 +112,7 @@ namespace Carli {
 
     int get_depth() const {return 1;}
 
-    int compare_value(const Feature &rhs) const {
+    int compare_value(const Carli::Feature &rhs) const {
       return Feature_Enumerated_Data::compare_value(debuggable_cast<const Feature_Enumerated &>(rhs));
     }
   };
@@ -180,12 +180,12 @@ namespace Carli {
 
     int get_depth() const {return depth;}
 
-    int compare_value(const Feature &rhs) const {
+    int compare_value(const Carli::Feature &rhs) const {
       return Feature_Ranged_Data::compare_value(debuggable_cast<const Feature_Ranged &>(rhs));
     }
 
-    std::vector<Feature *> refined() const {
-      std::vector<Feature *> refined_features;
+    std::vector<Carli::Feature *> refined() const {
+      std::vector<Carli::Feature *> refined_features;
 
       const double mpt = midpt();
 

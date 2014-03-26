@@ -212,7 +212,7 @@ namespace Puddle_World {
     double_pair m_goal_y;
 
     size_t m_step_count = 0lu;
-    const bool m_random_start = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["random-start"]).get_value();
+    const bool m_random_start = get_Option_Ranged<bool>(Options::get_global(), "random-start");
 
     std::vector<Puddle> m_horizontal_puddles;
     std::vector<Puddle> m_vertical_puddles;
@@ -236,19 +236,19 @@ namespace Puddle_World {
 
     void update();
 
-    const Rete::Symbol_Variable_Ptr_C m_first_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First);
-    const Rete::Symbol_Variable_Ptr_C m_third_var = std::make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::Third);
+    const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
+    const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
 
-    const Rete::Symbol_Constant_Float_Ptr m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_position().first);
-    const Rete::Symbol_Constant_Float_Ptr m_y_value = std::make_shared<Rete::Symbol_Constant_Float>(dynamic_pointer_cast<Environment>(get_env())->get_position().second);
+    const Rete::Symbol_Constant_Float_Ptr m_x_value = Rete::Symbol_Constant_Float_Ptr(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_position().first));
+    const Rete::Symbol_Constant_Float_Ptr m_y_value = Rete::Symbol_Constant_Float_Ptr(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_position().second));
 
     Rete::WME_Ptr_C m_x_wme;
     Rete::WME_Ptr_C m_y_wme;
 
-    std::array<std::shared_ptr<const Carli::Action>, 4> m_action = {{std::make_shared<Move>(NORTH),
-                                                                     std::make_shared<Move>(SOUTH),
-                                                                     std::make_shared<Move>(EAST),
-                                                                     std::make_shared<Move>(WEST)}};
+    std::array<std::shared_ptr<const Carli::Action>, 4> m_action = {{std::shared_ptr<const Carli::Action>(new Move(NORTH)),
+                                                                     std::shared_ptr<const Carli::Action>(new Move(SOUTH)),
+                                                                     std::shared_ptr<const Carli::Action>(new Move(EAST)),
+                                                                     std::shared_ptr<const Carli::Action>(new Move(WEST))}};
   };
 
 }
