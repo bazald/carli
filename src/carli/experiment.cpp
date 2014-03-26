@@ -8,6 +8,7 @@
 #include <cstring>
 #include <ctime>
 #include <limits>
+#include <random>
 
 namespace Carli {
 

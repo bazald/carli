@@ -33,17 +33,13 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
-#include <random>
 #include <stdint.h>
 
-#ifdef DEBUG_OUTPUT
-#include <iostream>
-#endif
+#include "linkage.h"
+
 #ifdef RANDOM_LOG
 #include <fstream>
 #endif
-
-#include "linkage.h"
 
 namespace Zeni {
 
@@ -75,19 +71,19 @@ namespace Zeni {
 
   public:
     Random(const uint32_t &seed = Random::get().rand())
-     : m_random(seed)
+     : m_random_value(seed)
     {
       log1("Random", seed);
     }
 
     void seed(const uint32_t &seed) {
-      m_random.seed(seed);
+      m_random_value = seed;
       log1("seed", seed);
     }
 
     /// Get the maximum size of a random integer returned from rand()
     int32_t rand_max() const {
-      return std::numeric_limits<int32_t>::max();
+      return 32767;
     }
 
     /// Get a random integer in the range [0, rand_max()]
@@ -95,8 +91,9 @@ namespace Zeni {
 #ifdef DEBUG_OUTPUT
       static size_t count = 0u;
 #endif
-      const int32_t rv = std::uniform_int_distribution<int32_t>()(m_random);
-      log1("rand", rv);
+      m_random_value = m_random_value * 1103515245 + 12345;
+      int32_t rv = int32_t(static_cast<int32_t>(m_random_value / 65536) % (rand_max() + 1));
+      log2("rand", m_random_value, rv);
 #ifdef DEBUG_OUTPUT
       std::cerr << "rand(" << ++count << ") = " << rv << std::endl;
 //      if(count == 13)
@@ -107,30 +104,30 @@ namespace Zeni {
 
     /// Get a random floating point number in the range [0.0, 1.0)
     double frand_lt() {
-      const double rv = std::uniform_real_distribution<double>(0.0, 1.0)(m_random);
+      double rv = rand() / double(rand_max() + 1.0);
       log1("frand_lt", rv);
       return rv;
     }
 
     /// Get a random floating point number in the range [0.0, 1.0]
     double frand_lte() {
-      const double rv = std::uniform_real_distribution<double>(0.0, nexttoward(1.0, 2.0))(m_random);
+      double rv = rand() / double(rand_max());
       log1("frand_lte", rv);
       return rv;
     }
 
     /// Get a random integer in the range [0, mod)
     int32_t rand_lt(const int32_t &mod) {
-//     assert(mod <= rand_max() + 1);
-      const int32_t rv = std::uniform_int_distribution<int32_t>(0, mod - 1)(m_random);
+      assert(mod <= rand_max() + 1);
+      int32_t rv = int32_t(frand_lt() * mod);
       log2("rand_lt", mod, rv);
       return rv;
     }
 
     /// Get a random integer in the range [0, mod]
     int32_t rand_lte(const int32_t &mod) {
-//     assert(mod <= rand_max());
-      const int32_t rv = std::uniform_int_distribution<int32_t>(0, mod)(m_random);
+      assert(mod <= rand_max());
+      int32_t rv = int32_t(frand_lt() * (mod + 1));
       log2("rand_lte", mod, rv);
       return rv;
     }
@@ -156,20 +153,10 @@ namespace Zeni {
       }
     }
 
-    static Random & get() {
-      static Random g_random(0);
-      return g_random;
-    }
+    static Random & get();
 
   private:
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-    std::mt19937 m_random;
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+    uint32_t m_random_value;
 
     bool m_have_next_gaussian = false;
     double m_next_gaussian;
