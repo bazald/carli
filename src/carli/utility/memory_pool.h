@@ -153,7 +153,14 @@ namespace Zeni {
     }
 
   private:
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
     std::unordered_map<size_t, Pool *> m_pools;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
   };
 
 #ifndef DISABLE_POOL_ALLOCATOR

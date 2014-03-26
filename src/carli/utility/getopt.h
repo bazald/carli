@@ -38,7 +38,14 @@ std::string pretty_print(const FLOAT &value) {
   return pp;
 }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
 class UTILITY_LINKAGE Option : public std::enable_shared_from_this<Option> {
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 public:
   typedef std::vector<const char *> Arguments;
 
@@ -58,7 +65,14 @@ public:
   virtual void operator()(const Arguments &) = 0;
 
 private:
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
   std::string name;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
   int num_args;
 };
 
@@ -206,16 +220,30 @@ public:
     return *opt->second;
   }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
   std::string name;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
   int optind;
 
 private:
   typedef std::map<std::string, std::shared_ptr<Option>> Option_Map;
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
   Option_Map m_short_options;
   Option_Map m_long_options;
 
   std::list<std::string> m_help;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 };
 
 inline std::ostream & operator<<(std::ostream &os, const Options &options) {
@@ -240,7 +268,14 @@ public:
   }
 
 private:
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
   Function m_function;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 };
 
 class UTILITY_LINKAGE Option_String : public Option {
@@ -274,7 +309,14 @@ public:
   }
 
 private:
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
   std::string value;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 };
 
 class UTILITY_LINKAGE Option_Itemized : public Option {
@@ -338,9 +380,16 @@ private:
 
     return oss.str();
   }
-
+  
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
   std::string value;
   std::set<std::string> items;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 };
 
 template <typename TYPE>

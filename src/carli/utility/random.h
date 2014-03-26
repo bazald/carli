@@ -162,7 +162,14 @@ namespace Zeni {
     }
 
   private:
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
     std::mt19937 m_random;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
     bool m_have_next_gaussian = false;
     double m_next_gaussian;
