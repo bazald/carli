@@ -41,7 +41,7 @@ solution "carli"
 
   flags { "ExtraWarnings", "FloatStrict", "EnableSSE2" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
   if _ACTION == "vs2013" then
-    buildoptions { [[/wd"4996"]] }
+    buildoptions { [[/wd"4005"]], [[/wd"4251"]], [[/wd"4505"]], [[/wd"4996"]] }
   else
     flags { "EnableSSE" }
     buildoptions { "-mfpmath=sse -mmmx -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release

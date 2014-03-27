@@ -65,7 +65,7 @@ namespace Carli {
   public:
     typedef std::list<std::shared_ptr<Node_Fringe>> Fringe_Values;
 
-    Node_Unsplit(Agent &agent_, const size_t &depth_);
+    Node_Unsplit(Agent &agent_, const int64_t &depth_);
     ~Node_Unsplit();
 
     Fringe_Values fringe_values;
@@ -76,7 +76,7 @@ namespace Carli {
     Node_Fringe & operator=(const Node_Fringe &) = delete;
 
   public:
-    Node_Fringe(Agent &agent_, const size_t &depth_)
+    Node_Fringe(Agent &agent_, const int64_t &depth_)
      : Node(agent_, new Q_Value(0.0, Q_Value::Type::FRINGE, depth_))
     {
     }
@@ -110,7 +110,7 @@ namespace Carli {
     Node_Fringe_Ranged & operator=(const Node_Fringe_Ranged &) = delete;
 
   public:
-    Node_Fringe_Ranged(Agent &agent_, const size_t &depth_, const Range &range_, const Lines &lines_)
+    Node_Fringe_Ranged(Agent &agent_, const int64_t &depth_, const Range &range_, const Lines &lines_)
      : Node_Fringe(agent_, depth_),
      Node_Ranged(range_, lines_)
     {

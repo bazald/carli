@@ -59,17 +59,17 @@ namespace Tetris {
 
     virtual Feature * clone() const = 0;
 
-    int compare_axis(const Carli::Feature &rhs) const {
+    int64_t compare_axis(const Carli::Feature &rhs) const {
       return compare_axis(debuggable_cast<const Feature &>(rhs));
     }
 
-    virtual int compare_axis(const Feature &rhs) const = 0;
-    virtual int compare_axis(const Type &rhs) const = 0;
-    virtual int compare_axis(const Size &rhs) const = 0;
-    virtual int compare_axis(const Position &rhs) const = 0;
-    virtual int compare_axis(const Gaps &rhs) const = 0;
-    virtual int compare_axis(const Clears &rhs) const = 0;
-    virtual int compare_axis(const X_Odd &rhs) const = 0;
+    virtual int64_t compare_axis(const Feature &rhs) const = 0;
+    virtual int64_t compare_axis(const Type &rhs) const = 0;
+    virtual int64_t compare_axis(const Size &rhs) const = 0;
+    virtual int64_t compare_axis(const Position &rhs) const = 0;
+    virtual int64_t compare_axis(const Gaps &rhs) const = 0;
+    virtual int64_t compare_axis(const Clears &rhs) const = 0;
+    virtual int64_t compare_axis(const X_Odd &rhs) const = 0;
 
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
@@ -87,17 +87,17 @@ namespace Tetris {
       return new Type(axis, Tetromino_Type(value));
     }
 
-    int compare_axis(const Feature &rhs) const {
+    int64_t compare_axis(const Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Type &rhs) const {
+    int64_t compare_axis(const Type &rhs) const {
       return axis - rhs.axis;
     }
-    int compare_axis(const Size &) const {return -1;}
-    int compare_axis(const Position &) const {return -1;}
-    int compare_axis(const Gaps &) const {return -1;}
-    int compare_axis(const Clears &) const {return -1;}
-    int compare_axis(const X_Odd &) const {return -1;}
+    int64_t compare_axis(const Size &) const {return -1;}
+    int64_t compare_axis(const Position &) const {return -1;}
+    int64_t compare_axis(const Gaps &) const {return -1;}
+    int64_t compare_axis(const Clears &) const {return -1;}
+    int64_t compare_axis(const X_Odd &) const {return -1;}
 
     Rete::WME_Token_Index wme_token_index() const {
       return Rete::WME_Token_Index(axis, 2);
@@ -114,7 +114,7 @@ namespace Tetris {
   public:
     enum Axis : size_t {WIDTH = 3, HEIGHT = 4};
 
-    Size(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+    Size(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
@@ -123,17 +123,17 @@ namespace Tetris {
       return new Size(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
-    int compare_axis(const Tetris::Feature &rhs) const {
+    int64_t compare_axis(const Tetris::Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Type &) const {return 1;}
-    int compare_axis(const Size &rhs) const {
+    int64_t compare_axis(const Type &) const {return 1;}
+    int64_t compare_axis(const Size &rhs) const {
       return Feature_Ranged_Data::compare_axis(rhs);
     }
-    int compare_axis(const Position &) const {return -1;}
-    int compare_axis(const Gaps &) const {return -1;}
-    int compare_axis(const Clears &) const {return -1;}
-    int compare_axis(const X_Odd &) const {return -1;}
+    int64_t compare_axis(const Position &) const {return -1;}
+    int64_t compare_axis(const Gaps &) const {return -1;}
+    int64_t compare_axis(const Clears &) const {return -1;}
+    int64_t compare_axis(const X_Odd &) const {return -1;}
 
     Rete::WME_Token_Index wme_token_index() const {
       return axis;
@@ -154,7 +154,7 @@ namespace Tetris {
   public:
     enum Axis : size_t {X = 5, Y = 6};
 
-    Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+    Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
@@ -163,17 +163,17 @@ namespace Tetris {
       return new Position(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
-    int compare_axis(const Tetris::Feature &rhs) const {
+    int64_t compare_axis(const Tetris::Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Type &) const {return 1;}
-    int compare_axis(const Size &) const {return 1;}
-    int compare_axis(const Position &rhs) const {
+    int64_t compare_axis(const Type &) const {return 1;}
+    int64_t compare_axis(const Size &) const {return 1;}
+    int64_t compare_axis(const Position &rhs) const {
       return Feature_Ranged_Data::compare_axis(rhs);
     }
-    int compare_axis(const Gaps &) const {return -1;}
-    int compare_axis(const Clears &) const {return -1;}
-    int compare_axis(const X_Odd &) const {return -1;}
+    int64_t compare_axis(const Gaps &) const {return -1;}
+    int64_t compare_axis(const Clears &) const {return -1;}
+    int64_t compare_axis(const X_Odd &) const {return -1;}
 
     Rete::WME_Token_Index wme_token_index() const {
       return axis;
@@ -194,7 +194,7 @@ namespace Tetris {
   public:
     enum Axis : size_t {BENEATH = 7, CREATED = 8, DEPTH = 9};
 
-    Gaps(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+    Gaps(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
@@ -203,17 +203,17 @@ namespace Tetris {
       return new Gaps(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
-    int compare_axis(const Tetris::Feature &rhs) const {
+    int64_t compare_axis(const Tetris::Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Type &) const {return 1;}
-    int compare_axis(const Size &) const {return 1;}
-    int compare_axis(const Position &) const {return 1;}
-    int compare_axis(const Gaps &rhs) const {
+    int64_t compare_axis(const Type &) const {return 1;}
+    int64_t compare_axis(const Size &) const {return 1;}
+    int64_t compare_axis(const Position &) const {return 1;}
+    int64_t compare_axis(const Gaps &rhs) const {
       return Feature_Ranged_Data::compare_axis(rhs);
     }
-    int compare_axis(const Clears &) const {return -1;}
-    int compare_axis(const X_Odd &) const {return -1;}
+    int64_t compare_axis(const Clears &) const {return -1;}
+    int64_t compare_axis(const X_Odd &) const {return -1;}
 
     Rete::WME_Token_Index wme_token_index() const {
       return axis;
@@ -234,7 +234,7 @@ namespace Tetris {
   public:
     enum Axis : size_t {CLEARS = 10, ENABLES = 11, PROHIBITS = 12};
 
-    Clears(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+    Clears(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
@@ -243,17 +243,17 @@ namespace Tetris {
       return new Clears(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
-    int compare_axis(const Tetris::Feature &rhs) const {
+    int64_t compare_axis(const Tetris::Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Type &) const {return 1;}
-    int compare_axis(const Size &) const {return 1;}
-    int compare_axis(const Position &) const {return 1;}
-    int compare_axis(const Gaps &) const {return 1;}
-    int compare_axis(const Clears &rhs) const {
+    int64_t compare_axis(const Type &) const {return 1;}
+    int64_t compare_axis(const Size &) const {return 1;}
+    int64_t compare_axis(const Position &) const {return 1;}
+    int64_t compare_axis(const Gaps &) const {return 1;}
+    int64_t compare_axis(const Clears &rhs) const {
       return Feature_Ranged_Data::compare_axis(rhs);
     }
-    int compare_axis(const X_Odd &) const {return -1;}
+    int64_t compare_axis(const X_Odd &) const {return -1;}
 
     Rete::WME_Token_Index wme_token_index() const {
       return axis;
@@ -281,18 +281,18 @@ namespace Tetris {
     }
 
     X_Odd * clone() const {
-      return new X_Odd(value);
+      return new X_Odd(value != 0);
     }
 
-    int compare_axis(const Feature &rhs) const {
+    int64_t compare_axis(const Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Type &) const {return -1;}
-    int compare_axis(const Size &) const {return -1;}
-    int compare_axis(const Position &) const {return -1;}
-    int compare_axis(const Gaps &) const {return -1;}
-    int compare_axis(const Clears &) const {return -1;}
-    int compare_axis(const X_Odd &) const {
+    int64_t compare_axis(const Type &) const {return -1;}
+    int64_t compare_axis(const Size &) const {return -1;}
+    int64_t compare_axis(const Position &) const {return -1;}
+    int64_t compare_axis(const Gaps &) const {return -1;}
+    int64_t compare_axis(const Clears &) const {return -1;}
+    int64_t compare_axis(const X_Odd &) const {
       return 0;
     }
 
@@ -312,15 +312,15 @@ namespace Tetris {
     {
     }
 
-    Place(const std::pair<size_t, size_t> &position_, const Tetromino_Type &type_)
+    Place(const std::pair<int16_t, int16_t> &position_, const Tetromino_Type &type_)
      : position(position_),
      type(type_)
     {
     }
 
     Place(const Rete::WME_Token &token)
-     : position(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Position::X, 2)]).value,
-                debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Position::Y, 2)]).value),
+     : position(int16_t(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Position::X, 2)]).value),
+                int16_t(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Position::Y, 2)]).value)),
      type(Tetromino_Type(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Type::CURRENT, 2)]).value))
     {
     }
@@ -329,11 +329,11 @@ namespace Tetris {
       return new Place(position, type);
     }
 
-    int compare(const Action &rhs) const {
+    int64_t compare(const Action &rhs) const {
       return compare(debuggable_cast<const Place &>(rhs));
     }
 
-    int compare(const Place &rhs) const {
+    int64_t compare(const Place &rhs) const {
       return position.first != rhs.position.first ? position.first - rhs.position.first :
              position.second != rhs.position.second ? position.second - rhs.position.second :
              type - rhs.type;
@@ -343,7 +343,7 @@ namespace Tetris {
       os << "place(" << position.first << ',' << position.second << ':' << type << ')';
     }
 
-    std::pair<size_t, size_t> position;
+    std::pair<int16_t, int16_t> position;
     Tetromino_Type type;
   };
 
@@ -353,11 +353,11 @@ namespace Tetris {
 
     struct Placement {
       Placement(const Tetromino_Type &type_,
-                const std::pair<size_t, size_t> &size_,
-                const std::pair<size_t, size_t> &position_,
-                const size_t &gaps_beneath_,
-                const size_t &gaps_created_,
-                const size_t &depth_to_gap_,
+                const std::pair<int16_t, int16_t> &size_,
+                const std::pair<int16_t, int16_t> &position_,
+                const int16_t &gaps_beneath_,
+                const int16_t &gaps_created_,
+                const int16_t &depth_to_gap_,
                 const Outcome &outcome_1,
                 const Outcome &outcome_2,
                 const Outcome &outcome_3,
@@ -373,11 +373,11 @@ namespace Tetris {
       }
 
       Tetromino_Type type;
-      std::pair<size_t, size_t> size;
-      std::pair<size_t, size_t> position;
-      size_t gaps_beneath;
-      size_t gaps_created;
-      size_t depth_to_gap;
+      std::pair<int16_t, int16_t> size;
+      std::pair<int16_t, int16_t> position;
+      int16_t gaps_beneath;
+      int16_t gaps_created;
+      int16_t depth_to_gap;
       std::array<Outcome, 5> outcome;
     };
     typedef std::list<Placement, Zeni::Pool_Allocator<Placement>> Placements;
@@ -388,8 +388,8 @@ namespace Tetris {
 
     Environment();
 
-    Environment(const Environment &rhs);
-    Environment & operator=(const Environment &rhs);
+    Environment(const Environment &rhs); ///< Non-conformant copy constructor ignores m_placements
+    Environment & operator=(const Environment &rhs); ///< Non-conformant copy operator ignores m_placements
 
     Tetromino_Supertype get_current() const {return m_current;}
     Tetromino_Supertype get_next() const {return m_next;}
@@ -407,22 +407,22 @@ namespace Tetris {
     void init_impl();
 
     reward_type transition_impl(const Carli::Action &action);
-    void place_Tetromino(const Tetromino &tet, const std::pair<size_t, size_t> &position);
+    void place_Tetromino(const Tetromino &tet, const std::pair<int16_t, int16_t> &position);
 
     void print_impl(ostream &os) const;
 
     static Tetromino generate_Tetromino(const Tetromino_Type &type);
-    uint8_t clear_lines(const std::pair<size_t, size_t> &position);
+    uint8_t clear_lines(const std::pair<int16_t, int16_t> &position);
 
-    size_t gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
-    size_t gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
-    size_t depth_to_highest_gap() const;
-    Outcome outcome(const uint8_t &lines_cleared, const Tetromino &tet, const std::pair<size_t, size_t> &position) const;
+    int16_t gaps_beneath(const Tetromino &tet, const std::pair<int16_t, int16_t> &position) const;
+    int16_t gaps_created(const Tetromino &tet, const std::pair<int16_t, int16_t> &position) const;
+    int16_t depth_to_highest_gap() const;
+    Outcome outcome(const uint8_t &lines_cleared, const Tetromino &tet, const std::pair<int16_t, int16_t> &position) const;
 
     Zeni::Random m_random_init;
     Zeni::Random m_random_selection;
 
-    std::array<std::pair<std::array<bool, 10>, size_t>, 20> m_grid;
+    std::array<std::pair<std::array<bool, 10>, int16_t>, 20> m_grid;
     Tetromino_Supertype m_current;
     Tetromino_Supertype m_next;
 
@@ -472,14 +472,6 @@ namespace Tetris {
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
     const Rete::Symbol_Constant_String_Ptr_C m_false_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("false"));
 
-    std::array<Rete::Symbol_Identifier_Ptr_C, 7> m_type_ids = {{Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("I")),
-                                                                Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("O")),
-                                                                Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("T")),
-                                                                Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("S")),
-                                                                Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("Z")),
-                                                                Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("L")),
-                                                                Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("J"))}};
-
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
   };
 
@@ -489,29 +481,29 @@ std::ostream & operator<<(std::ostream &os, const Tetris::Tetromino_Type &type) 
   switch(type) {
     case Tetris::TET_SQUARE:     os << "O";     break;
 
-    case Tetris::TET_LINE_DOWN:  os << "I";  break;
-    case Tetris::TET_LINE_RIGHT: os << "I"; break;
+    case Tetris::TET_LINE_DOWN:  os << "I";     break;
+    case Tetris::TET_LINE_RIGHT: os << "I_90";  break;
 
-    case Tetris::TET_T:          os << "T";          break;
-    case Tetris::TET_T_90:       os << "T_90";       break;
-    case Tetris::TET_T_180:      os << "T_180";      break;
-    case Tetris::TET_T_270:      os << "T";          break;
+    case Tetris::TET_T:          os << "T";     break;
+    case Tetris::TET_T_90:       os << "T_90";  break;
+    case Tetris::TET_T_180:      os << "T_180"; break;
+    case Tetris::TET_T_270:      os << "T";     break;
 
-    case Tetris::TET_L:          os << "L";          break;
-    case Tetris::TET_L_90:       os << "L_90";       break;
-    case Tetris::TET_L_180:      os << "L_180";      break;
-    case Tetris::TET_L_270:      os << "L_270";      break;
+    case Tetris::TET_L:          os << "L";     break;
+    case Tetris::TET_L_90:       os << "L_90";  break;
+    case Tetris::TET_L_180:      os << "L_180"; break;
+    case Tetris::TET_L_270:      os << "L_270"; break;
 
-    case Tetris::TET_J:          os << "J";          break;
-    case Tetris::TET_J_90:       os << "J_90";       break;
-    case Tetris::TET_J_180:      os << "J_180";      break;
-    case Tetris::TET_J_270:      os << "J_270";      break;
+    case Tetris::TET_J:          os << "J";     break;
+    case Tetris::TET_J_90:       os << "J_90";  break;
+    case Tetris::TET_J_180:      os << "J_180"; break;
+    case Tetris::TET_J_270:      os << "J_270"; break;
 
-    case Tetris::TET_S:          os << "S";          break;
-    case Tetris::TET_S_90:       os << "S_90";       break;
+    case Tetris::TET_S:          os << "S";     break;
+    case Tetris::TET_S_90:       os << "S_90";  break;
 
-    case Tetris::TET_Z:          os << "Z";          break;
-    case Tetris::TET_Z_90:       os << "Z_90";       break;
+    case Tetris::TET_Z:          os << "Z";     break;
+    case Tetris::TET_Z_90:       os << "Z_90";  break;
 
     default: abort();
   }

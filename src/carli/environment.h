@@ -43,7 +43,7 @@ namespace Carli {
       print_impl(os);
     }
 
-    uint32_t get_scenario() const {return m_scenario;}
+    int64_t get_scenario() const {return m_scenario;}
 
   private:
     virtual void init_impl() = 0;
@@ -51,7 +51,7 @@ namespace Carli {
     virtual reward_type transition_impl(const Action &action) = 0;
     virtual void print_impl(std::ostream &os) const = 0;
 
-    const uint32_t m_scenario = get_Option_Ranged<int>(Options::get_global(), "scenario");
+    const int64_t m_scenario = get_Option_Ranged<int64_t>(Options::get_global(), "scenario");
     bool m_altered = false;
   };
 

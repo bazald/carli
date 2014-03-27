@@ -127,7 +127,14 @@ namespace Blocks_World {
     std::vector<Feature::Which> blocks = {{Feature::BLOCK, Feature::DEST}};
     const bool disable_distractors = true;
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4127)
+#endif
     if(disable_distractors)
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
       blocks = {Feature::BLOCK};
 
     for(const auto &block : blocks) {
@@ -159,8 +166,15 @@ namespace Blocks_World {
       node_unsplit->fringe_values.push_back(node_fringe_neg);
     }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4127)
+#endif
     if(disable_distractors)
       blocks = {Feature::DEST};
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
     for(const auto &block : blocks) {
       auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);

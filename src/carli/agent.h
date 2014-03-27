@@ -62,22 +62,22 @@ namespace Carli {
   #endif
     bool is_on_policy() const {return m_on_policy;}
     double get_epsilon() const {return m_epsilon;}
-    size_t get_split_min() const {return m_split_min;}
-    size_t get_split_max() const {return m_split_max;}
-    size_t get_pseudoepisode_threshold() const {return m_pseudoepisode_threshold;}
-    size_t get_split_pseudoepisodes() const {return m_split_pseudoepisodes;}
-    size_t get_split_update_count() const {return m_split_update_count;}
+    int64_t get_split_min() const {return m_split_min;}
+    int64_t get_split_max() const {return m_split_max;}
+    int64_t get_pseudoepisode_threshold() const {return m_pseudoepisode_threshold;}
+    int64_t get_split_pseudoepisodes() const {return m_split_pseudoepisodes;}
+    int64_t get_split_update_count() const {return m_split_update_count;}
     double get_split_cabe() const {return m_split_cabe;}
     double get_split_cabe_qmult() const {return m_split_cabe_qmult;}
-    size_t get_contribute_update_count() const {return m_contribute_update_count;}
-    size_t get_value_function_cap() const {return m_value_function_cap;}
-    size_t get_mean_cabe_queue_size() const {return m_mean_cabe_queue_size;}
+    int64_t get_contribute_update_count() const {return m_contribute_update_count;}
+    int64_t get_value_function_cap() const {return m_value_function_cap;}
+    int64_t get_mean_cabe_queue_size() const {return m_mean_cabe_queue_size;}
 
     std::shared_ptr<const Environment> get_env() const {return m_environment;}
     const std::shared_ptr<Environment> & get_env() {return m_environment;}
     Metastate get_metastate() const {return m_metastate;}
-    size_t get_episode_number() const {return m_episode_number;}
-    size_t get_step_count() const {return m_step_count;}
+    int64_t get_episode_number() const {return m_episode_number;}
+    int64_t get_step_count() const {return m_step_count;}
     reward_type get_total_reward() const {return m_total_reward;}
   //  Mean get_mean_cabe() const {return m_mean_cabe;}
   //#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
@@ -101,7 +101,7 @@ namespace Carli {
 
     void print_value_function_grid(std::ostream &os) const;
 
-    size_t q_value_count = 0;
+    int64_t q_value_count = 0;
 
   protected:
     action_ptrsc choose_epsilon_greedy(const double &epsilon);
@@ -168,7 +168,7 @@ namespace Carli {
 
     Mean m_mean_cabe;
     Value_Queue m_mean_cabe_queue;
-    const size_t m_mean_cabe_queue_size = get_Option_Ranged<int>(Options::get_global(), "mean-cabe-queue-size");
+    const int64_t m_mean_cabe_queue_size = get_Option_Ranged<int64_t>(Options::get_global(), "mean-cabe-queue-size");
 
   #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
     Mean m_mean_mabe;
@@ -182,12 +182,12 @@ namespace Carli {
 
     Zeni::Random random;
 
-    size_t m_episode_number = 1;
-    size_t m_step_count = 0;
+    int64_t m_episode_number = 1;
+    int64_t m_step_count = 0;
     reward_type m_total_reward = 0.0;
 
     const bool m_null_q_values = get_Option_Ranged<bool>(Options::get_global(), "null-q-values"); ///< insert nullptr instead of new Q_Values until reaching the leaf
-    const size_t m_value_function_cap = get_Option_Ranged<int>(Options::get_global(), "value-function-cap"); ///< at this threshold, no more entries will be added to the value functions through refinement
+    const int64_t m_value_function_cap = get_Option_Ranged<int64_t>(Options::get_global(), "value-function-cap"); ///< at this threshold, no more entries will be added to the value functions through refinement
 
     const double m_learning_rate = get_Option_Ranged<double>(Options::get_global(), "learning-rate"); ///< alpha
     const double m_discount_rate = get_Option_Ranged<double>(Options::get_global(), "discount-rate"); ///< gamma
@@ -211,17 +211,17 @@ namespace Carli {
     const bool m_on_policy = dynamic_cast<const Option_Itemized &>(Options::get_global()["policy"]).get_value() == "on-policy"; ///< for Sarsa/Q-learning selection
     const double m_epsilon = get_Option_Ranged<double>(Options::get_global(), "epsilon-greedy"); ///< for epsilon-greedy decision-making
 
-    const size_t m_split_min = get_Option_Ranged<int>(Options::get_global(), "split-min");
-    const size_t m_split_max = get_Option_Ranged<int>(Options::get_global(), "split-max");
+    const int64_t m_split_min = get_Option_Ranged<int64_t>(Options::get_global(), "split-min");
+    const int64_t m_split_max = get_Option_Ranged<int64_t>(Options::get_global(), "split-max");
     const double m_split_cabe = get_Option_Ranged<double>(Options::get_global(), "split-cabe");
     const double m_split_cabe_qmult = get_Option_Ranged<double>(Options::get_global(), "split-cabe-qmult");
 
-    const size_t m_pseudoepisode_threshold = get_Option_Ranged<int>(Options::get_global(), "pseudoepisode-threshold"); ///< For deciding how many steps indicates a pseudoepisode
-    const size_t m_split_pseudoepisodes = get_Option_Ranged<int>(Options::get_global(), "split-pseudoepisodes");
-    const size_t m_split_update_count = get_Option_Ranged<int>(Options::get_global(), "split-update-count");
+    const int64_t m_pseudoepisode_threshold = get_Option_Ranged<int64_t>(Options::get_global(), "pseudoepisode-threshold"); ///< For deciding how many steps indicates a pseudoepisode
+    const int64_t m_split_pseudoepisodes = get_Option_Ranged<int64_t>(Options::get_global(), "split-pseudoepisodes");
+    const int64_t m_split_update_count = get_Option_Ranged<int64_t>(Options::get_global(), "split-update-count");
 
     const bool m_generate_line_segments = get_Option_Ranged<bool>(Options::get_global(), "generate-line-segments");
-    const size_t m_contribute_update_count = get_Option_Ranged<int>(Options::get_global(), "contribute-update-count");
+    const int64_t m_contribute_update_count = get_Option_Ranged<int64_t>(Options::get_global(), "contribute-update-count");
     const bool m_dynamic_midpoint = get_Option_Ranged<bool>(Options::get_global(), "dynamic-midpoint");
     const bool m_fringe = get_Option_Ranged<bool>(Options::get_global(), "fringe");
     const double m_fringe_learning_scale = get_Option_Ranged<double>(Options::get_global(), "fringe-learning-scale");

@@ -236,22 +236,22 @@ namespace Puddle_World {
       return std::make_shared<Move>(token);
     };
 
-    const size_t cmac_tilings = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["cmac-tilings"]).get_value();
-    const size_t cmac_resolution = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["cmac-resolution"]).get_value();
-    const size_t cmac_offset = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["cmac-offset"]).get_value();
+    const int64_t cmac_tilings = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["cmac-tilings"]).get_value();
+    const int64_t cmac_resolution = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["cmac-resolution"]).get_value();
+    const int64_t cmac_offset = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["cmac-offset"]).get_value();
 
     assert(cmac_offset < cmac_tilings);
     const double xy_size = 1.0 / cmac_resolution;
 
-    for(size_t tiling = -cmac_offset, tend = tiling + cmac_tilings; tiling != tend; ++tiling) {
+    for(int64_t tiling = -cmac_offset, tend = tiling + cmac_tilings; tiling != tend; ++tiling) {
       const double xy_offset = xy_size * tiling;
 
-      for(size_t i = 0; i != cmac_resolution; ++i) {
+      for(int64_t i = 0; i != cmac_resolution; ++i) {
         const double left = (i - xy_offset) * xy_size;
         const double right = (i + 1 - xy_offset) * xy_size;
         auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Position::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
         auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Position::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
-        for(size_t j = 0; j != cmac_resolution; ++j) {
+        for(int64_t j = 0; j != cmac_resolution; ++j) {
           const double top = (j - xy_offset) * xy_size;
           const double bottom = (j + 1 - xy_offset) * xy_size;
           auto ygte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Position::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);

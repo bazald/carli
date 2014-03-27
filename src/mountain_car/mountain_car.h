@@ -38,14 +38,14 @@ namespace Mountain_Car {
 
     virtual Feature * clone() const = 0;
 
-    int compare_axis(const Carli::Feature &rhs) const {
+    int64_t compare_axis(const Carli::Feature &rhs) const {
       return compare_axis(debuggable_cast<const Feature &>(rhs));
     }
 
-    virtual int compare_axis(const Feature &rhs) const = 0;
-    virtual int compare_axis(const Position &rhs) const = 0;
-    virtual int compare_axis(const Velocity &rhs) const = 0;
-    virtual int compare_axis(const Acceleration_Direction &rhs) const = 0;
+    virtual int64_t compare_axis(const Feature &rhs) const = 0;
+    virtual int64_t compare_axis(const Position &rhs) const = 0;
+    virtual int64_t compare_axis(const Velocity &rhs) const = 0;
+    virtual int64_t compare_axis(const Acceleration_Direction &rhs) const = 0;
 
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
@@ -54,7 +54,7 @@ namespace Mountain_Car {
   public:
     enum Index {index = 0};
 
-    Position(const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+    Position(const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_, false)
     {
     }
@@ -63,16 +63,16 @@ namespace Mountain_Car {
       return new Position(bound_lower, bound_upper, depth, upper);
     }
 
-    int compare_axis(const Mountain_Car::Feature &rhs) const {
+    int64_t compare_axis(const Mountain_Car::Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Position &rhs) const {
+    int64_t compare_axis(const Position &rhs) const {
       return Feature_Ranged_Data::compare_axis(rhs);
     }
-    int compare_axis(const Velocity &) const {
+    int64_t compare_axis(const Velocity &) const {
       return -1;
     }
-    int compare_axis(const Acceleration_Direction &) const {
+    int64_t compare_axis(const Acceleration_Direction &) const {
       return -1;
     }
 
@@ -89,7 +89,7 @@ namespace Mountain_Car {
   public:
     enum Index {index = 1};
 
-    Velocity(const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_)
+    Velocity(const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_, false)
     {
     }
@@ -98,16 +98,16 @@ namespace Mountain_Car {
       return new Velocity(bound_lower, bound_upper, depth, upper);
     }
 
-    int compare_axis(const Mountain_Car::Feature &rhs) const {
+    int64_t compare_axis(const Mountain_Car::Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Position &) const {
+    int64_t compare_axis(const Position &) const {
       return 1;
     }
-    int compare_axis(const Velocity &rhs) const {
+    int64_t compare_axis(const Velocity &rhs) const {
       return Feature_Ranged_Data::compare_axis(rhs);
     }
-    int compare_axis(const Acceleration_Direction &) const {
+    int64_t compare_axis(const Acceleration_Direction &) const {
       return -1;
     }
 
@@ -133,24 +133,24 @@ namespace Mountain_Car {
       return new Acceleration_Direction(direction);
     }
 
-    int get_depth() const {
+    int64_t get_depth() const {
       return 0;
     }
 
-    int compare_axis(const Feature &rhs) const {
+    int64_t compare_axis(const Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Position &) const {
+    int64_t compare_axis(const Position &) const {
       return 1;
     }
-    int compare_axis(const Velocity &) const {
+    int64_t compare_axis(const Velocity &) const {
       return 1;
     }
-    int compare_axis(const Acceleration_Direction &rhs) const {
+    int64_t compare_axis(const Acceleration_Direction &rhs) const {
       return direction - debuggable_cast<const Acceleration_Direction &>(rhs).direction;
     }
 
-    int compare_value(const Carli::Feature &) const {
+    int64_t compare_value(const Carli::Feature &) const {
       return 0;
     }
 
@@ -181,11 +181,11 @@ namespace Mountain_Car {
       return new Acceleration(direction);
     }
 
-    int compare(const Action &rhs) const {
+    int64_t compare(const Action &rhs) const {
       return direction - debuggable_cast<const Acceleration &>(rhs).direction;
     }
 
-    int compare(const Acceleration &rhs) const {
+    int64_t compare(const Acceleration &rhs) const {
       return direction - rhs.direction;
     }
 
@@ -197,6 +197,9 @@ namespace Mountain_Car {
   };
 
   class Environment : public Carli::Environment {
+    Environment(const Environment &);
+    Environment & operator=(const Environment &);
+
   public:
     typedef pair<double, double> double_pair;
 

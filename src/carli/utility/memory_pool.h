@@ -153,14 +153,7 @@ namespace Zeni {
     }
 
   private:
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
     std::unordered_map<size_t, Pool *> m_pools;
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
   };
 
 #ifndef DISABLE_POOL_ALLOCATOR
@@ -236,6 +229,9 @@ namespace Zeni {
       ::new((void *)p) NEWTYPE(std::forward<ARGS>(args)...);
     }
 
+#ifdef _MSC_VER
+#pragma warning(suppress : 4100)
+#endif
     template<class NEWTYPE>
     static void destroy(NEWTYPE *p) {
       p->~NEWTYPE();

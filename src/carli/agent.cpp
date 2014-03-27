@@ -69,7 +69,7 @@ namespace Carli {
   //      for(auto &line : leaf_node_ranged->lines)
   //        m_lines[action].insert(line);
   //    }
-      assert(!(bool(leaf_node_ranged.get()) ^ bool(leaf_feature_ranged_data)));
+      assert(!((leaf_node_ranged.get() != nullptr) ^ (leaf_feature_ranged_data != nullptr)));
 
       Node_Unsplit::Fringe_Values new_fringe;
 
@@ -488,7 +488,7 @@ namespace Carli {
     std::cerr << "  choose_randomly" << std::endl;
   #endif
 
-    int counter = m_next_q_values.size();
+    int32_t counter = m_next_q_values.size();
   //    for(const auto &action_q : m_next_q_values) {
   //      ++counter;
   //      this->get_value(action_, Q_Value::next_offset()); ///< Trigger additional feature generation, as needed
@@ -616,7 +616,7 @@ namespace Carli {
 
         if(q.type == Q_Value::Type::UNSPLIT && q.update_count > m_contribute_update_count) {
           if(m_mean_cabe_queue_size) {
-            if(this->m_mean_cabe_queue.size() == m_mean_cabe_queue_size)
+            if(this->m_mean_cabe_queue.size() == uint64_t(m_mean_cabe_queue_size))
               this->m_mean_cabe_queue.pop();
             this->m_mean_cabe_queue.push(q.cabe);
           }
@@ -697,7 +697,7 @@ namespace Carli {
   }
 
   void Agent::assign_credit_random(const Q_Value_List &value_list) {
-    size_t count = double();
+    size_t count = size_t();
     for(const auto &q : value_list) {
       if(q->type != Q_Value::Type::FRINGE)
         ++count;

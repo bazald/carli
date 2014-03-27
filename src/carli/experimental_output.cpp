@@ -6,22 +6,22 @@
 
 namespace Carli {
 
-  Experimental_Output::Experimental_Output(const size_t &print_every)
+  Experimental_Output::Experimental_Output(const int64_t &print_every)
    : m_print_every(print_every)
   {
     reset_stats();
   }
 
-  void Experimental_Output::print(const size_t &total_steps, const size_t &episode_number, const size_t &step_count, const double &reward, const bool &done, const size_t &q_value_count) {
+  void Experimental_Output::print(const int64_t &total_steps, const int64_t &episode_number, const int64_t &step_count, const double &reward, const bool &done, const int64_t &q_value_count) {
     m_cumulative_reward += reward;
     m_simple_reward += reward;
 
     if(done) {
       const double cumulative_reward_per_episode = m_cumulative_reward / episode_number;
 
-      size_t steps = total_steps - step_count;
+      int64_t steps = total_steps - step_count;
       while(steps != total_steps) {
-        const size_t s2 = std::min(m_print_every - m_print_count, total_steps - steps);
+        const int64_t s2 = std::min(m_print_every - m_print_count, total_steps - steps);
         steps += s2;
 
         m_cumulative_min = std::min(m_cumulative_min, cumulative_reward_per_episode);

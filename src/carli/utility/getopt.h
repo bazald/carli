@@ -38,18 +38,11 @@ std::string pretty_print(const FLOAT &value) {
   return pp;
 }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
 class UTILITY_LINKAGE Option : public std::enable_shared_from_this<Option> {
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 public:
   typedef std::vector<const char *> Arguments;
 
-  Option(const std::string &name_, const int &num_args_ = 0)
+  Option(const std::string &name_, const int64_t &num_args_ = 0)
    : name(name_),
    num_args(num_args_)
   {
@@ -58,22 +51,15 @@ public:
   virtual ~Option() {}
 
   std::string get_name() const {return name;}
-  int get_num_args() const {return num_args;}
+  int64_t get_num_args() const {return num_args;}
 
   virtual std::string get_help() const {return "";}
   virtual std::string print() const {return "";}
   virtual void operator()(const Arguments &) = 0;
 
 private:
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
   std::string name;
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-  int num_args;
+  int64_t num_args;
 };
 
 class UTILITY_LINKAGE Options {
@@ -120,7 +106,7 @@ public:
 
   void get(const int &argc, const char * const * const &argv) {
     while(argc != optind) {
-      const int arglen = int(strlen(argv[optind]));
+      const size_t arglen = strlen(argv[optind]);
       switch(arglen) {
         case 0:
         case 1:
@@ -220,30 +206,16 @@ public:
     return *opt->second;
   }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
   std::string name;
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-  int optind;
+  int64_t optind;
 
 private:
   typedef std::map<std::string, std::shared_ptr<Option>> Option_Map;
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
   Option_Map m_short_options;
   Option_Map m_long_options;
 
   std::list<std::string> m_help;
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 };
 
 inline std::ostream & operator<<(std::ostream &os, const Options &options) {
@@ -256,7 +228,7 @@ public:
   typedef std::function<void (const Arguments &)> Function;
 
   Option_Function(const std::string &name_,
-                  const int &num_args_,
+                  const int64_t &num_args_,
                   const Function &function_)
    : Option(name_, num_args_),
    m_function(function_)
@@ -268,14 +240,7 @@ public:
   }
 
 private:
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
   Function m_function;
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 };
 
 class UTILITY_LINKAGE Option_String : public Option {
@@ -309,14 +274,7 @@ public:
   }
 
 private:
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
   std::string value;
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 };
 
 class UTILITY_LINKAGE Option_Itemized : public Option {
@@ -381,15 +339,8 @@ private:
     return oss.str();
   }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
   std::string value;
   std::set<std::string> items;
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 };
 
 template <typename TYPE>

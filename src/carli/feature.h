@@ -38,19 +38,19 @@ namespace Carli {
     bool operator==(const Feature &rhs) const {return compare(rhs) == 0;}
     bool operator!=(const Feature &rhs) const {return compare(rhs) != 0;}
 
-    virtual int compare(const Feature &rhs) const {
-      const int depth_comparison = get_depth() - rhs.get_depth();
+    virtual int64_t compare(const Feature &rhs) const {
+      const int64_t depth_comparison = get_depth() - rhs.get_depth();
       if(depth_comparison)
         return depth_comparison;
-      const int axis_comparison = compare_axis(rhs);
+      const int64_t axis_comparison = compare_axis(rhs);
       if(axis_comparison)
         return axis_comparison;
       return compare_value(rhs);
     }
 
-    virtual int get_depth() const = 0;
-    virtual int compare_axis(const Feature &rhs) const = 0;
-    virtual int compare_value(const Feature &rhs) const = 0;
+    virtual int64_t get_depth() const = 0;
+    virtual int64_t compare_axis(const Feature &rhs) const = 0;
+    virtual int64_t compare_value(const Feature &rhs) const = 0;
 
     virtual std::vector<Feature *> refined() const {return std::vector<Feature *>();}
 
@@ -84,7 +84,7 @@ namespace Carli {
     {
     }
 
-    int compare_value(const Feature_Enumerated_Data &rhs) const {
+    int64_t compare_value(const Feature_Enumerated_Data &rhs) const {
       return value > rhs.value ? 1 : value < rhs.value ? -1 : 0;
     }
 
@@ -96,7 +96,7 @@ namespace Carli {
       return std::make_shared<Rete::Symbol_Constant_Int>(value);
     }
 
-    size_t value;
+    int64_t value;
   };
 
   template <typename FEATURE>
@@ -110,16 +110,16 @@ namespace Carli {
     {
     }
 
-    int get_depth() const {return 1;}
+    int64_t get_depth() const {return 1;}
 
-    int compare_value(const Carli::Feature &rhs) const {
+    int64_t compare_value(const Carli::Feature &rhs) const {
       return Feature_Enumerated_Data::compare_value(debuggable_cast<const Feature_Enumerated &>(rhs));
     }
   };
 
   class CARLI_LINKAGE Feature_Ranged_Data {
   public:
-    Feature_Ranged_Data(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_, const bool &integer_locked_)
+    Feature_Ranged_Data(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_, const bool &integer_locked_)
      : axis(axis_),
      bound_lower(bound_lower_),
      bound_upper(bound_upper_),
@@ -134,11 +134,11 @@ namespace Carli {
       return integer_locked ? floor(mpt) : mpt;
     }
 
-    int compare_axis(const Feature_Ranged_Data &rhs) const {
-      return axis.first != rhs.axis.first ? int(axis.first) - int(rhs.axis.first) : int(axis.second) - int(rhs.axis.second);
+    int64_t compare_axis(const Feature_Ranged_Data &rhs) const {
+      return axis.first != rhs.axis.first ? axis.first - rhs.axis.first : axis.second - rhs.axis.second;
     }
 
-    int compare_value(const Feature_Ranged_Data &rhs) const {
+    int64_t compare_value(const Feature_Ranged_Data &rhs) const {
       return upper - rhs.upper;
     }
 
@@ -159,7 +159,7 @@ namespace Carli {
     double bound_lower; ///< inclusive
     double bound_upper; ///< exclusive
 
-    size_t depth; ///< 0 indicates unsplit
+    int64_t depth; ///< 0 indicates unsplit
 
     bool upper; ///< Is this the upper half (same bound_upper) or lower half (same bound_lower) of a split?
     bool integer_locked; ///< Is this restricted to integer values?
@@ -171,16 +171,16 @@ namespace Carli {
     Feature_Ranged & operator=(const Feature_Ranged &) = delete;
 
   public:
-    Feature_Ranged(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const size_t &depth_, const bool &upper_, const bool &integer_locked_)
+    Feature_Ranged(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_, const bool &integer_locked_)
      : Feature_Ranged_Data(axis_, bound_lower_, bound_upper_, depth_, upper_, integer_locked_)
     {
     }
 
     virtual Feature_Ranged * clone() const = 0;
 
-    int get_depth() const {return depth;}
+    int64_t get_depth() const {return depth;}
 
-    int compare_value(const Carli::Feature &rhs) const {
+    int64_t compare_value(const Carli::Feature &rhs) const {
       return Feature_Ranged_Data::compare_value(debuggable_cast<const Feature_Ranged &>(rhs));
     }
 

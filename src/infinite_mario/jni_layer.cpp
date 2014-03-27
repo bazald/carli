@@ -62,13 +62,13 @@ namespace Mario {
     {
       getter = env->GetMethodID(cls, "isMarioOnGround", "()Z");
       assert(getter);
-      isMarioOnGround = env->CallBooleanMethod(observation, getter);
+      isMarioOnGround = env->CallBooleanMethod(observation, getter) != 0;
       getter = env->GetMethodID(cls, "mayMarioJump", "()Z");
       assert(getter);
-      mayMarioJump = env->CallBooleanMethod(observation, getter);
+      mayMarioJump = env->CallBooleanMethod(observation, getter) != 0;
       getter = env->GetMethodID(cls, "isMarioCarrying", "()Z");
       assert(getter);
-      isMarioCarrying = env->CallBooleanMethod(observation, getter);
+      isMarioCarrying = env->CallBooleanMethod(observation, getter) != 0;
     }
   }
 
@@ -102,9 +102,9 @@ JNIEXPORT jbooleanArray JNICALL Java_ch_idsia_ai_agents_ai_JNIAgent_c_1getAction
   return Mario::g_current_state.to_jbooleanArray(env);
 }
 
-JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM */*vm*/, void */*pvt*/) {
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM * /*vm*/, void * /*pvt*/) {
   return JNI_VERSION_1_4;
 }
 
-JNIEXPORT void JNICALL JNI_OnUnload(JavaVM */*vm*/, void */*pvt*/) {
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM * /*vm*/, void * /*pvt*/) {
 }

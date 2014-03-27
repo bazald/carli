@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <algorithm>
 #include <functional>
+#include <inttypes.h>
 
 namespace Zeni {
 
@@ -451,7 +452,7 @@ namespace Zeni {
     bool operator==(const Linked_List<TYPE> &rhs) const {return compare(rhs) == 0;}
     bool operator!=(const Linked_List<TYPE> &rhs) const {return compare(rhs) != 0;}
 
-    int compare(const Linked_List<TYPE> &rhs) const {
+    int64_t compare(const Linked_List<TYPE> &rhs) const {
       auto it = begin();
       auto iend = end();
       auto jt = rhs.begin();

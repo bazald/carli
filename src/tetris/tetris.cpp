@@ -23,7 +23,7 @@ namespace Tetris {
    m_grid(rhs.m_grid),
    m_current(rhs.m_current),
    m_next(rhs.m_next),
-   m_placements(rhs.m_placements),
+   //m_placements(rhs.m_placements),
    m_lookahead(rhs.m_lookahead)
   {
   }
@@ -36,7 +36,7 @@ namespace Tetris {
     m_grid = rhs.m_grid;
     m_current = rhs.m_current;
     m_next = rhs.m_next;
-    m_placements = rhs.m_placements;
+    //m_placements = rhs.m_placements;
     m_lookahead = rhs.m_lookahead;
 
     return *this;
@@ -47,7 +47,7 @@ namespace Tetris {
 
     memset(&m_grid, 0, sizeof(m_grid));
     for(auto &line : m_grid)
-      line.second = line.first.size();
+      line.second = int16_t(line.first.size());
 
     m_current = Tetromino_Supertype(m_random_selection.rand_lt(7) + 1);
     m_next = Tetromino_Supertype(m_random_selection.rand_lt(7) + 1);
@@ -79,7 +79,7 @@ namespace Tetris {
       return score;
   }
 
-  void Environment::place_Tetromino(const Environment::Tetromino &tet, const std::pair<size_t, size_t> &position) {
+  void Environment::place_Tetromino(const Environment::Tetromino &tet, const std::pair<int16_t, int16_t> &position) {
     for(auto tt = tet.begin(); tt != tet.end(); ++tt) {
       auto &line = m_grid[position.second - tt->second];
       assert(!line.first[position.first + tt->first]);
@@ -315,16 +315,16 @@ namespace Tetris {
     return tet;
   }
 
-  uint8_t Environment::clear_lines(const std::pair<size_t, size_t> &position) {
-    uint8_t lines_cleared = 0.0;
+  uint8_t Environment::clear_lines(const std::pair<int16_t, int16_t> &position) {
+    uint8_t lines_cleared = 0;
 
-    for(size_t j = position.second > 3 ? position.second - 3 : 0, jend = j + 4; j != jend; ) {
+    for(int16_t j = position.second > 3 ? position.second - 3 : 0, jend = j + 4; j != jend; ) {
       if(m_grid[j].second)
         ++j;
       else {
         memmove(&m_grid[j], &m_grid[j + 1], (19 - j) * sizeof(m_grid[0]));
         memset(&m_grid[19].first, 0, sizeof(m_grid[19].first));
-        m_grid[19].second = m_grid[19].first.size();
+        m_grid[19].second = int16_t(m_grid[19].first.size());
         ++lines_cleared;
         --jend;
       }
@@ -338,16 +338,16 @@ namespace Tetris {
     return lines_cleared;
   }
 
-  size_t Environment::gaps_beneath(const Tetromino &tet, const std::pair<size_t, size_t> &position) const {
-    size_t gaps = 0;
+  int16_t Environment::gaps_beneath(const Tetromino &tet, const std::pair<int16_t, int16_t> &position) const {
+    int16_t gaps = 0;
 
     for(int i = 0; i != tet.width; ++i) {
-      size_t j = position.second;
+      int16_t j = position.second;
       for(auto tt = tet.begin(); tt != tet.end(); ++tt)
         if(tt->first == i)
           j = position.second - tt->second - 1;
 
-      for(; j < m_grid.size(); --j) {
+      for(; j > -1; --j) {
         if(!m_grid[j].first[position.first + i])
           ++gaps;
       }
@@ -356,16 +356,16 @@ namespace Tetris {
     return gaps;
   }
 
-  size_t Environment::gaps_created(const Tetromino &tet, const std::pair<size_t, size_t> &position) const {
-    size_t gaps = 0;
+  int16_t Environment::gaps_created(const Tetromino &tet, const std::pair<int16_t, int16_t> &position) const {
+    int16_t gaps = 0;
 
     for(int i = 0; i != tet.width; ++i) {
-      size_t j = position.second;
+      int16_t j = position.second;
       for(auto tt = tet.begin(); tt != tet.end(); ++tt)
         if(tt->first == i)
           j = position.second - tt->second - 1;
 
-      for(; j < m_grid.size(); --j) {
+      for(; j > -1; --j) {
         if(m_grid[j].first[position.first + i])
           break;
         else
@@ -376,13 +376,13 @@ namespace Tetris {
     return gaps;
   }
 
-  size_t Environment::depth_to_highest_gap() const {
-    size_t max_gap = 0u;
+  int16_t Environment::depth_to_highest_gap() const {
+    int16_t max_gap = 0u;
 
-    for(size_t i = 0, iend = m_grid[0].first.size(); i != iend; ++i) {
-      size_t blocked = 0u;
+    for(int16_t i = 0, iend = int16_t(m_grid[0].first.size()); i != iend; ++i) {
+      int16_t blocked = 0u;
 
-      for(size_t j = m_grid.size() - 1; j < m_grid.size(); --j) {
+      for(int16_t j = int16_t(m_grid.size()) - 1; j > -1; --j) {
         if(m_grid[j].first[i])
           ++blocked;
         else
@@ -395,7 +395,7 @@ namespace Tetris {
     return max_gap;
   }
 
-  Environment::Outcome Environment::outcome(const uint8_t &lines_cleared, const Tetromino &tet, const std::pair<size_t, size_t> &position) const {
+  Environment::Outcome Environment::outcome(const uint8_t &lines_cleared, const Tetromino &tet, const std::pair<int16_t, int16_t> &position) const {
     assert(lines_cleared && lines_cleared < 5);
 
     Environment next(*this);
@@ -450,25 +450,25 @@ namespace Tetris {
       const auto type = super_to_type(m_current, orientation);
       const auto tet = generate_Tetromino(type);
 
-      for(size_t i = 0, iend = 11 - tet.width; i != iend; ++i) {
-        size_t j = tet.height - 1;
+      for(int16_t i = 0, iend = 11 - tet.width; i != iend; ++i) {
+        int16_t j = tet.height - 1;
 
-        for(size_t x = 0; x != tet.width; ++x) {
-          const size_t ymax = (tet[3].first == x ? tet[3].second :
+        for(int16_t x = 0; x != tet.width; ++x) {
+          const int16_t ymax = (tet[3].first == x ? tet[3].second :
                                tet[2].first == x ? tet[2].second :
                                tet[1].first == x ? tet[1].second :
                                                    tet[0].second) + 1;
 
-          for(size_t y = m_grid.size() - 1; y < m_grid.size(); --y) {
+          for(int16_t y = int16_t(m_grid.size()) - 1; y > -1; --y) {
             if(m_grid[y].first[i + x]) {
-              j = std::max(j, y + ymax);
+              j = std::max(j, int16_t(y + ymax));
               break;
             }
           }
         }
 
-        if(j < m_grid.size()) {
-          assert(j + 1 - tet.height < m_grid.size());
+        if(j < int16_t(m_grid.size())) {
+          assert(j + 1 - tet.height > -1);
           assert(!m_grid[j - tet[0].second].first[i + tet[0].first]);
           assert(!m_grid[j - tet[1].second].first[i + tet[1].first]);
           assert(!m_grid[j - tet[2].second].first[i + tet[2].first]);
@@ -541,8 +541,10 @@ namespace Tetris {
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
     auto filter_type_current = make_filter(Rete::WME(m_first_var, m_type_current_attr, m_third_var));
     auto join_type_current = make_join(state_bindings, filter_action, filter_type_current);
+    state_bindings.clear();
     auto filter_type_next = make_filter(Rete::WME(m_first_var, m_type_next_attr, m_third_var));
     auto join_type_next = make_join(state_bindings, join_type_current, filter_type_next);
+    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
     auto filter_width = make_filter(Rete::WME(m_first_var, m_width_attr, m_third_var));
     auto join_width = make_join(state_bindings, join_type_next, filter_width);
     auto filter_height = make_filter(Rete::WME(m_first_var, m_height_attr, m_third_var));
@@ -641,6 +643,7 @@ namespace Tetris {
     std::ostringstream oss;
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_input_attr, m_input_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_input_id, m_type_next_attr, std::make_shared<Rete::Symbol_Constant_Int>(env->get_next())));
 
     size_t index = 0;
     for(const auto &placement : env->get_placements()) {
@@ -649,7 +652,6 @@ namespace Tetris {
       oss.str("");
       wmes_current.push_back(std::make_shared<Rete::WME>(m_input_id, m_action_attr, action_id));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_type_current_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.type)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_type_next_attr, std::make_shared<Rete::Symbol_Constant_Int>(env->get_next())));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_width_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.first)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.second)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.position.first)));

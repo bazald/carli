@@ -39,7 +39,7 @@ namespace Carli {
       return oss.str();
     }
 
-    virtual int compare(const Action &rhs) const = 0;
+    virtual int64_t compare(const Action &rhs) const = 0;
 
     virtual void print_impl(std::ostream &os) const = 0;
   };

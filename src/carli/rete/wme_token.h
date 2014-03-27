@@ -10,7 +10,7 @@ namespace Rete {
   class WME_Token;
   typedef std::shared_ptr<const WME_Token> WME_Token_Ptr_C;
   typedef std::shared_ptr<WME_Token> WME_Token_Ptr;
-  typedef std::pair<size_t, uint8_t> WME_Token_Index;
+  typedef std::pair<int64_t, int8_t> WME_Token_Index;
   typedef std::pair<WME_Token_Index, WME_Token_Index> WME_Binding;
   typedef std::set<WME_Binding> WME_Bindings;
 
@@ -25,7 +25,7 @@ namespace Rete {
       return m_wme;
     }
 
-    size_t size() const {
+    int64_t size() const {
       return m_size;
     }
 
@@ -39,7 +39,7 @@ namespace Rete {
 
   private:
     std::pair<WME_Token_Ptr_C, WME_Token_Ptr_C> m_wme_token;
-    size_t m_size;
+    int64_t m_size;
 
     WME_Ptr_C m_wme;
   };

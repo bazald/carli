@@ -42,7 +42,7 @@ namespace Mountain_Car {
   }
 
   Environment::reward_type Environment::transition_impl(const Carli::Action &action) {
-    const int a = int(debuggable_cast<const Acceleration &>(action).direction);
+    const int64_t a = int64_t(debuggable_cast<const Acceleration &>(action).direction);
 
     assert(0 <= a && a <= 2);
 
@@ -135,24 +135,24 @@ namespace Mountain_Car {
       return std::make_shared<Acceleration>(token);
     };
 
-    const size_t cmac_tilings = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["cmac-tilings"]).get_value();
-    const size_t cmac_resolution = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["cmac-resolution"]).get_value();
-    const size_t cmac_offset = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["cmac-offset"]).get_value();
+    const int64_t cmac_tilings = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["cmac-tilings"]).get_value();
+    const int64_t cmac_resolution = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["cmac-resolution"]).get_value();
+    const int64_t cmac_offset = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["cmac-offset"]).get_value();
 
     assert(cmac_offset < cmac_tilings);
     const double x_size = (m_max_x - m_min_x) / cmac_resolution;
     const double xdot_size = (m_max_x_dot - m_min_x_dot) / cmac_resolution;
 
-    for(size_t tiling = -cmac_offset, tend = tiling + cmac_tilings; tiling != tend; ++tiling) {
+    for(int64_t tiling = -cmac_offset, tend = tiling + cmac_tilings; tiling != tend; ++tiling) {
       const double x_offset = x_size * tiling;
       const double xdot_offset = xdot_size * tiling;
 
-      for(size_t i = 0; i != cmac_resolution; ++i) {
+      for(int64_t i = 0; i != cmac_resolution; ++i) {
         const double left = m_min_x + (i - x_offset) * x_size;
         const double right = m_min_x + (i + 1 - x_offset) * x_size;
         auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Position::index, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
         auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Position::index, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
-        for(size_t j = 0; j != cmac_resolution; ++j) {
+        for(int64_t j = 0; j != cmac_resolution; ++j) {
           const double top = m_min_x_dot + (j - xdot_offset) * xdot_size;
           const double bottom = m_min_x_dot + (j + 1 - xdot_offset) * xdot_size;
           auto xdotgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Velocity::index, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);

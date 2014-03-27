@@ -68,14 +68,7 @@ class UTILITY_LINKAGE pointer_tracker_impl {
   }
 
 //private:
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
   std::unordered_map<const void *, std::map<const void *, size_t>> address_to_pointer;
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 };
 
 void pointer_tracker::set_pointer(const void * to, const void * from) {

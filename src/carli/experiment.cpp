@@ -58,12 +58,12 @@ namespace Carli {
       exit(0);
     }), "");
     options.add_line("\n  Experiment Options:");
-    options.add(     make_shared<Option_Ranged<int>>("num-episodes", 0, true, numeric_limits<int>::max(), true, 0), "Maximum number of episodes; 0 disables.");
-    options.add('n', make_shared<Option_Ranged<int>>("num-steps", 0, true, numeric_limits<int>::max(), true, 50000), "Maximum number of steps; 0 disables.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("num-episodes", 0, true, numeric_limits<int64_t>::max(), true, 0), "Maximum number of episodes; 0 disables.");
+    options.add('n', make_shared<Option_Ranged<int64_t>>("num-steps", 0, true, numeric_limits<int64_t>::max(), true, 50000), "Maximum number of steps; 0 disables.");
     options.add('o', make_shared<Option_Itemized>("output", set<string>({"null", "simple", "experiment"}), "simple"), "What kind of output should be generated.");
-    options.add('p', make_shared<Option_Ranged<int>>("print-every", 1, true, numeric_limits<int>::max(), true, 100), "How many steps per line of output.");
-    options.add(     make_shared<Option_Ranged<int>>("scenario", 0, true, numeric_limits<int>::max(), true, 0), "Which experimental scenario should be run, environment specific.");
-    options.add('s', make_shared<Option_Ranged<int32_t>>("seed", numeric_limits<int32_t>::min(), true, numeric_limits<int32_t>::max(), true, std::random_device()()), "Random seed.");
+    options.add('p', make_shared<Option_Ranged<int64_t>>("print-every", 1, true, numeric_limits<int64_t>::max(), true, 100), "How many steps per line of output.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("scenario", 0, true, numeric_limits<int64_t>::max(), true, 0), "Which experimental scenario should be run, environment specific.");
+    options.add('s', make_shared<Option_Ranged<int64_t>>("seed", numeric_limits<int64_t>::min(), true, numeric_limits<int64_t>::max(), true, std::random_device()()), "Random seed.");
     options.add(     make_shared<Option_Function>("stderr", 1, [this,&options](const Option::Arguments &args){
       this->cerr2file.open(args.at(0));
       cerr.rdbuf(this->cerr2file.rdbuf());
@@ -93,29 +93,29 @@ namespace Carli {
     options.add_line("\n  CABE Options:");
     options.add(     make_shared<Option_Ranged<double>>("split-cabe", 0.0, true, numeric_limits<double>::infinity(), false, 0.84155), "How many standard deviations above the mean to refine.");
     options.add(     make_shared<Option_Ranged<double>>("split-cabe-qmult", 0.0, true, numeric_limits<double>::infinity(), false, 0.0), "Increase split-cabe by this factor of the number of weights.");
-    options.add(     make_shared<Option_Ranged<int>>("split-min", 0, true, numeric_limits<int>::max(), true, 0), "Refinement is assured through this depth.");
-    options.add(     make_shared<Option_Ranged<int>>("split-max", 0, true, numeric_limits<int>::max(), true, numeric_limits<int>::max()), "Refinement is strictly prohibited from this depth.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("split-min", 0, true, numeric_limits<int64_t>::max(), true, 0), "Refinement is assured through this depth.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("split-max", 0, true, numeric_limits<int64_t>::max(), true, numeric_limits<int64_t>::max()), "Refinement is strictly prohibited from this depth.");
     options.add_line("\n  Pseudoepisode Options:");
-    options.add(     make_shared<Option_Ranged<int>>("pseudoepisode-threshold", 0, true, numeric_limits<int>::max(), true, 20), "How any steps must separate updates for it to count as a pseudoepisode.");
-    options.add(     make_shared<Option_Ranged<int>>("split-pseudoepisodes", 0, true, numeric_limits<int>::max(), true, 0), "Require 1 more pseudoepisode than this to allow refinement.");
-    options.add(     make_shared<Option_Ranged<int>>("split-update-count", 0, true, numeric_limits<int>::max(), true, 0), "Require 1 more update than this to allow refinement.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("pseudoepisode-threshold", 0, true, numeric_limits<int64_t>::max(), true, 20), "How any steps must separate updates for it to count as a pseudoepisode.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("split-pseudoepisodes", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more pseudoepisode than this to allow refinement.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("split-update-count", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more update than this to allow refinement.");
     options.add_line("\n  Rete Representation Saving and Loading:");
     options.add(     make_shared<Option_Itemized>("value-function-map-mode", set<string>({"null", "in", "out"}), "null"), "'in' reads in a file written with 'out', resulting in a fixed hierarchical representation.");
     options.add(     make_shared<Option_String>("value-function-map-filename", "value-function-map.txt"), "");
     options.add_line("\n  CMAC Options:");
     options.add(     make_shared<Option_Ranged<bool>>("cmac", false, true, true, true, false), "Implement a CMAC for the domain instead.");
-    options.add(     make_shared<Option_Ranged<int>>("cmac-tilings", 1, true, numeric_limits<int>::max(), true, 10), "The number of tile codings in the CMAC.");
-    options.add(     make_shared<Option_Ranged<int>>("cmac-resolution", 1, true, numeric_limits<int>::max(), true, 16), "The number of tile codings in the CMAC.");
-    options.add(     make_shared<Option_Ranged<int>>("cmac-offset", 0, true, numeric_limits<int>::max(), true, 0), "The tiling that should be the base tiling.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("cmac-tilings", 1, true, numeric_limits<int64_t>::max(), true, 10), "The number of tile codings in the CMAC.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("cmac-resolution", 1, true, numeric_limits<int64_t>::max(), true, 16), "The number of tile codings in the CMAC.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("cmac-offset", 0, true, numeric_limits<int64_t>::max(), true, 0), "The tiling that should be the base tiling.");
     options.add_line("\n  Unusual Options:");
     options.add(     make_shared<Option_Ranged<bool>>("generate-line-segments", false, true, true, true, false), "Generate line segments for 2D grids.");
-    options.add(     make_shared<Option_Ranged<int>>("contribute-update-count", 0, true, numeric_limits<int>::max(), true, 0), "Require 1 more update than this to count toward means and variances.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("contribute-update-count", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more update than this to count toward means and variances.");
     options.add(     make_shared<Option_Ranged<bool>>("dynamic-midpoint", false, true, true, true, false), "Dynamically modify midpoint values for features to better balance refinements.");
     options.add(     make_shared<Option_Ranged<bool>>("fringe", false, true, true, true, false), "Store and use a fringe to make refinement decisions.");
     options.add(     make_shared<Option_Ranged<double>>("fringe-learning-scale", 0.0, false, 1.0, true, 0.3), "How quickly should the fringe learn relative to rest of the value function? (1.0 == same)");
-    options.add(     make_shared<Option_Ranged<int>>("mean-cabe-queue-size", 0, true, numeric_limits<int>::max(), true, 0), "How large of a working set to use for means and variances; 0 disables.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("mean-cabe-queue-size", 0, true, numeric_limits<int64_t>::max(), true, 0), "How large of a working set to use for means and variances; 0 disables.");
     options.add(     make_shared<Option_Ranged<bool>>("null-q-values", false, true, true, true, false), "Set Q-values preceding the minimum depth to nullptr.");
-    options.add(     make_shared<Option_Ranged<int>>("value-function-cap", 0, true, numeric_limits<int>::max(), true, 0), "The maximum number of weights allowed in the value functions; 0 disables.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("value-function-cap", 0, true, numeric_limits<int64_t>::max(), true, 0), "The maximum number of weights allowed in the value functions; 0 disables.");
   //  options.add(     make_shared<Option_Itemized>("weight-assignment", set<string>({"all", "specific", "even", "inv-update-count", "inv-log-update-count", "inv-root-update-count", "inv-depth", "epsilon-even-specific", "epsilon-even-depth"}), "all"),
   //#ifdef ENABLE_WEIGHT
   //              "How to scale weights before summing them.");
@@ -123,7 +123,7 @@ namespace Carli {
   //              "Option disabled at compile-time.");
   //#endif
     options.add_line("\n  For Transfer Experiments:");
-    options.add(     make_shared<Option_Ranged<int>>("skip-steps", -1, true, numeric_limits<int>::max(), true, 0), "How many steps to run before counting them and generating output; 0 disables, -1 alters immediately.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("skip-steps", -1, true, numeric_limits<int64_t>::max(), true, 0), "How many steps to run before counting them and generating output; 0 disables, -1 alters immediately.");
     options.add(     make_shared<Option_Ranged<bool>>("reset-update-counts", false, true, true, true, false), "Reset update counts after skip-steps.");
   }
 
@@ -153,20 +153,20 @@ namespace Carli {
   void Experiment::standard_run(const function<shared_ptr<Environment> ()> &make_env,
                                 const function<shared_ptr<Agent> (const shared_ptr<Environment> &)> &make_agent,
                                 const function<void (const shared_ptr<Agent> &)> &on_episode_termination) {
-    const auto seed = uint32_t(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
+    const auto seed = uint32_t(dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value());
     Zeni::Random::get().seed(seed);
     cout << "SEED " << seed << endl;
 
     auto env = make_env();
     auto agent = make_agent(env);
 
-    Experimental_Output experimental_output(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["print-every"]).get_value());
+    Experimental_Output experimental_output(dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["print-every"]).get_value());
 
-    const auto num_episodes = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-episodes"]).get_value();
-    const auto num_steps = dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-steps"]).get_value();
+    const auto num_episodes = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["num-episodes"]).get_value();
+    const auto num_steps = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["num-steps"]).get_value();
     const auto output = dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value();
 
-    int32_t total_steps = -dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["skip-steps"]).get_value();
+    int64_t total_steps = -dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["skip-steps"]).get_value();
     if(total_steps > 0) {
       total_steps = 0;
       env->alter();
@@ -174,7 +174,7 @@ namespace Carli {
 
     size_t successes = 0;
     size_t failures = 0;
-    for(int episodes = 0; !num_episodes || episodes < num_episodes; ++episodes) {
+    for(int64_t episodes = 0; !num_episodes || episodes < num_episodes; ++episodes) {
       if(num_steps && total_steps > -1 && total_steps >= num_steps)
         break;
 
@@ -319,14 +319,14 @@ namespace Carli {
   //
   // //  typedef Zeni::Map<int, int> map_type;
   // //  default_random_engine generator;
-  // //  generator.seed(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
+  // //  generator.seed(dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value());
   // //  vector<int> numbers;
   // //  int i;
-  // //  for(i = 0; i != dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["num-steps"]).get_value(); ++i)
+  // //  for(i = 0; i != dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["num-steps"]).get_value(); ++i)
   // //    numbers.push_back(i);
   // //  shuffle(numbers.begin(), numbers.end(), generator);
   // //
-  // //  cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << endl;
+  // //  cerr << "seed=" << dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value() << endl;
   // //
   // //  map_type * tree = nullptr;
   // ////  RB_Tree<int> * tree = nullptr;
@@ -360,8 +360,8 @@ namespace Carli {
   // //  }
   //
   //
-  // //  Zeni::Random m_random(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
-  // //  cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << endl;
+  // //  Zeni::Random m_random(dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value());
+  // //  cerr << "seed=" << dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value() << endl;
   // //
   // //  Mean mean;
   // //  std::list<std::shared_ptr<Value>> values;
@@ -385,8 +385,8 @@ namespace Carli {
   // //  }
   //
   //
-  // //  Zeni::Random m_random(dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value());
-  // //  cerr << "seed=" << dynamic_cast<const Option_Ranged<int> &>(Options::get_global()["seed"]).get_value() << endl;
+  // //  Zeni::Random m_random(dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value());
+  // //  cerr << "seed=" << dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value() << endl;
   // //
   // //  Q_Value::List *q_values = nullptr;
   // //  const auto comparator = [](const Q_Value &lhs, const Q_Value &rhs)->bool{

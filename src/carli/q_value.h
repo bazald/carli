@@ -22,7 +22,7 @@ namespace Carli {
     typedef List::iterator iterator;
     enum class Type : char {SPLIT, UNSPLIT, FRINGE};
 
-    Q_Value(const double &q_value_, const Type &type_, const size_t &depth_)
+    Q_Value(const double &q_value_, const Type &type_, const int64_t &depth_)
      : depth(depth_),
      type(type_),
      value(q_value_),
@@ -35,12 +35,12 @@ namespace Carli {
       return *this;
     }
 
-    size_t last_episode_fired = std::numeric_limits<size_t>::max();
-    size_t last_step_fired = std::numeric_limits<size_t>::max();
-    size_t pseudoepisode_count = 0;
+    int64_t last_episode_fired = std::numeric_limits<int64_t>::max();
+    int64_t last_step_fired = std::numeric_limits<int64_t>::max();
+    int64_t pseudoepisode_count = 0;
 
-    size_t depth;
-    size_t update_count = 0;
+    int64_t depth;
+    int64_t update_count = 0;
 
     Type type;
 

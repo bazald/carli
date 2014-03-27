@@ -2,6 +2,7 @@
 #define INFINITE_MARIO_JNI_LAYER_H
 
 #include <array>
+#include <inttypes.h>
 #include <jni.h>
 
 namespace Mario {
@@ -60,7 +61,7 @@ namespace Mario {
     std::array<std::array<char, OBSERVATION_SIZE>, OBSERVATION_SIZE> getCompleteObservation;
 
     std::pair<float, float> getMarioFloatPos;
-    int getMarioMode;
+    int64_t getMarioMode;
 
     bool isMarioOnGround;
     bool mayMarioJump;

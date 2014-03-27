@@ -14,7 +14,7 @@ namespace Blocks_World {
   using std::endl;
   using std::ostream;
 
-  typedef int block_id;
+  typedef int64_t block_id;
 
   class Clear;
   class In_Place;
@@ -27,14 +27,14 @@ namespace Blocks_World {
 
     virtual Feature * clone() const = 0;
 
-    int compare_axis(const Carli::Feature &rhs) const {
+    int64_t compare_axis(const Carli::Feature &rhs) const {
       return compare_axis(debuggable_cast<const Feature &>(rhs));
     }
 
-    virtual int compare_axis(const Feature &rhs) const = 0;
-    virtual int compare_axis(const Clear &rhs) const = 0;
-    virtual int compare_axis(const In_Place &rhs) const = 0;
-    virtual int compare_axis(const Name &rhs) const = 0;
+    virtual int64_t compare_axis(const Feature &rhs) const = 0;
+    virtual int64_t compare_axis(const Clear &rhs) const = 0;
+    virtual int64_t compare_axis(const In_Place &rhs) const = 0;
+    virtual int64_t compare_axis(const Name &rhs) const = 0;
 
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
@@ -48,19 +48,19 @@ namespace Blocks_World {
     }
 
     Clear * clone() const {
-      return new Clear(block, this->value);
+      return new Clear(block, this->value != 0);
     }
 
-    int compare_axis(const Feature &rhs) const {
+    int64_t compare_axis(const Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Clear &rhs) const {
+    int64_t compare_axis(const Clear &rhs) const {
       return block - rhs.block;
     }
-    int compare_axis(const In_Place &) const {
+    int64_t compare_axis(const In_Place &) const {
       return -1;
     }
-    int compare_axis(const Name &) const {
+    int64_t compare_axis(const Name &) const {
       return -1;
     }
 
@@ -84,19 +84,19 @@ namespace Blocks_World {
     }
 
     In_Place * clone() const {
-      return new In_Place(block, this->value);
+      return new In_Place(block, this->value != 0);
     }
 
-    int compare_axis(const Feature &rhs) const {
+    int64_t compare_axis(const Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Clear &) const {
+    int64_t compare_axis(const Clear &) const {
       return 1;
     }
-    int compare_axis(const In_Place &rhs) const {
+    int64_t compare_axis(const In_Place &rhs) const {
       return block - rhs.block;
     }
-    int compare_axis(const Name &) const {
+    int64_t compare_axis(const Name &) const {
       return -1;
     }
 
@@ -124,20 +124,20 @@ namespace Blocks_World {
       return new Name(block, name);
     }
 
-    int compare_axis(const Feature &rhs) const {
+    int64_t compare_axis(const Feature &rhs) const {
       return -rhs.compare_axis(*this);
     }
-    int compare_axis(const Clear &) const {
+    int64_t compare_axis(const Clear &) const {
       return 1;
     }
-    int compare_axis(const In_Place &) const {
+    int64_t compare_axis(const In_Place &) const {
       return 1;
     }
-    int compare_axis(const Name &rhs) const {
+    int64_t compare_axis(const Name &rhs) const {
       return block - rhs.block;
     }
 
-    int compare_value(const Carli::Feature &rhs) const {
+    int64_t compare_value(const Carli::Feature &rhs) const {
       return name - debuggable_cast<const Name &>(rhs).name;
     }
 
@@ -177,11 +177,11 @@ namespace Blocks_World {
       return new Move(block, dest);
     }
 
-    int compare(const Action &rhs) const {
+    int64_t compare(const Action &rhs) const {
       return compare(debuggable_cast<const Move &>(rhs));
     }
 
-    int compare(const Move &rhs) const {
+    int64_t compare(const Move &rhs) const {
       return block != rhs.block ? block - rhs.block : dest - rhs.dest;
     }
 

@@ -25,7 +25,7 @@ namespace Carli {
     --agent.q_value_count;
   }
 
-  Node_Unsplit::Node_Unsplit(Agent &agent_, const size_t &depth_)
+  Node_Unsplit::Node_Unsplit(Agent &agent_, const int64_t &depth_)
    : Node(agent_, new Q_Value(0.0, Q_Value::Type::UNSPLIT, depth_))
   {
     ++agent.q_value_count;
