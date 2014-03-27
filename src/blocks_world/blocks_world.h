@@ -240,10 +240,11 @@ namespace Blocks_World {
     const Rete::Symbol_Constant_String_Ptr_C m_name_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("name"));
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
 
-    const std::array<Rete::Symbol_Identifier_Ptr_C, 4> m_block_ids = {{Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("TABLE")),
-                                                                       Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("A")),
-                                                                       Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("B")),
-                                                                       Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("C"))}};
+    /// std::array mysteriously results in crashes when compiled with Visual Studio 12.0.21005.1 REL
+    const std::vector<Rete::Symbol_Identifier_Ptr_C> m_block_ids = {{Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("TABLE")),
+                                                                     Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("A")),
+                                                                     Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("B")),
+                                                                     Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("C"))}};
     const std::array<Rete::Symbol_Constant_Int_Ptr_C, 4> m_block_names = {{Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(0)),
                                                                            Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1)),
                                                                            Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2)),

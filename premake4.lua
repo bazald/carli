@@ -39,11 +39,12 @@ solution "carli"
     end
   end
 
-  flags { "ExtraWarnings", "FloatStrict", "EnableSSE2" }
+  flags { "ExtraWarnings", "FloatStrict", "EnableSSE2" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
   if _ACTION == "vs2013" then
     buildoptions { [[/wd"4996"]] }
   else
-    buildoptions { "-mfpmath=sse -mmmx -msse -msse2 -ffloat-store -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
+    flags { "EnableSSE" }
+    buildoptions { "-mfpmath=sse -mmmx -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
     buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
     linkoptions { "-Wl,-rpath,'$$ORIGIN'" }
   end
@@ -65,8 +66,8 @@ solution "carli"
 --    linkoptions { "-flto" }
 
   configuration "windows"
-    flags { "StaticRuntime" }
     if _ACTION ~= "vs2013" then
+      flags { "StaticRuntime" }
       linkoptions { "-static-libgcc ", "-static-libstdc++" }
     end
   configuration "macosx"
