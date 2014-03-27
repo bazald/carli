@@ -10,8 +10,8 @@
 
 namespace Mario {
 
-  static State g_prev_state;
-  static State g_current_state;
+  static std::shared_ptr<State> g_prev_state;
+  static std::shared_ptr<State> g_current_state;
 
   State::State()
    : getMarioMode(MODE_SMALL),
@@ -80,7 +80,7 @@ namespace Mario {
     assert(action);
 
     for(int i = 0; i != BUTTON_END; ++i)
-      action[i] = g_current_state.action[i];
+      action[i] = g_current_state->action[i];
 
     env->ReleaseBooleanArrayElements(j_action, action, 0);
 
@@ -93,16 +93,18 @@ namespace Mario {
 JNIEXPORT jbooleanArray JNICALL Java_ch_idsia_ai_agents_ai_JNIAgent_c_1getAction
   (JNIEnv *env, jobject /*obj*/, jobject observation)
 {
-  Mario::g_current_state = Mario::State(Mario::g_prev_state, env, observation);
+  Mario::g_current_state = std::make_shared<Mario::State>(*Mario::g_prev_state, env, observation);
 
-  infinite_mario_ai(Mario::g_prev_state, Mario::g_current_state, Mario::g_current_state.action);
+  infinite_mario_ai(Mario::g_prev_state, Mario::g_current_state, Mario::g_current_state->action);
 
   Mario::g_prev_state = Mario::g_current_state;
 
-  return Mario::g_current_state.to_jbooleanArray(env);
+  return Mario::g_current_state->to_jbooleanArray(env);
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM * /*vm*/, void * /*pvt*/) {
+  Mario::g_prev_state = std::make_shared<Mario::State>();
+  Mario::g_current_state = std::make_shared<Mario::State>();
   return JNI_VERSION_1_4;
 }
 

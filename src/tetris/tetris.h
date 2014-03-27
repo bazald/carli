@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 namespace Tetris {
+
   enum Tetromino_Supertype {TETS_SQUARE = 1,
                             TETS_LINE = 2,
                             TETS_T = 3,
@@ -35,6 +36,7 @@ namespace Tetris {
   inline Tetromino_Supertype type_to_super(const Tetromino_Type &type) {
     return Tetromino_Supertype(type >> 4);
   }
+
 }
 
 inline std::ostream & operator<<(std::ostream &os, const Tetris::Tetromino_Type &type);
@@ -509,6 +511,7 @@ std::ostream & operator<<(std::ostream &os, const Tetris::Tetromino_Type &type) 
   }
 
   return os;
+
 }
 
 #endif

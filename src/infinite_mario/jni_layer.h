@@ -1,6 +1,8 @@
 #ifndef INFINITE_MARIO_JNI_LAYER_H
 #define INFINITE_MARIO_JNI_LAYER_H
 
+#include "carli/environment.h"
+
 #include <array>
 #include <inttypes.h>
 #include <jni.h>
@@ -52,11 +54,29 @@ namespace Mario {
 
   typedef std::array<bool, 5> Action;
 
-  struct State {
+  class State : public Carli::Environment {
+  public:
     State();
     State(const State &prev, JNIEnv *env, jobject observation);
 
     jbooleanArray to_jbooleanArray(JNIEnv *env) const;
+    
+    void init_impl() {}
+
+    reward_type transition_impl(const Carli::Action &) {
+      std::cerr << "Transition timing dilemma. Restructuring may be required." << std::endl;
+      return 0.0;
+    }
+
+    void print_impl(std::ostream &os) const {
+      os << "infinite-mario(" << getMarioFloatPos.first << ',' << getMarioFloatPos.second
+         << ';' << getMarioMode
+         << ';' << isMarioOnGround << ',' << mayMarioJump << ',' << isMarioCarrying
+         << ':';
+      for(const auto &ac : action)
+        os << ac;
+      os << ')';
+    }
 
     std::array<std::array<char, OBSERVATION_SIZE>, OBSERVATION_SIZE> getCompleteObservation;
 
