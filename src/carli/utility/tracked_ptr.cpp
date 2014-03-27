@@ -92,14 +92,11 @@ size_t pointer_tracker::count(const void * to) {
 
 void pointer_tracker::print(const void * to) {
   return pointer_tracker_impl::get().print(to);
-
 }
 
-#ifndef NDEBUG
 void pointer_tracker::break_on(const size_t &count) {
   g_tracked_ptr_break = count;
 }
 #else
 void pointer_tracker::break_on(const size_t &) {}
-#endif
 #endif

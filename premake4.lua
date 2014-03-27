@@ -39,9 +39,9 @@ solution "carli"
     end
   end
 
-  flags { "ExtraWarnings" }
+  flags { "ExtraWarnings", "FloatStrict", "EnableSSE2" }
   if _ACTION == "vs2013" then
-    buildoptions { "/arch:SSE2 /fp:precise" }
+    buildoptions { [[/wd"4996"]] }
   else
     buildoptions { "-mfpmath=sse -mmmx -msse -msse2 -ffloat-store -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
     buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
