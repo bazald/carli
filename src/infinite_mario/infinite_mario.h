@@ -15,7 +15,7 @@ namespace Mario {
   class State;
 
   void infinite_mario_ai(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, Action &action);
-  
+
   using std::dynamic_pointer_cast;
   using std::endl;
   using std::ostream;
@@ -44,10 +44,10 @@ namespace Mario {
 
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
-  
+
   class Feature_Position : public Carli::Feature_Ranged<Feature> {
   public:
-    enum Axis : size_t {X = 1, Y = 2};
+    enum Axis : size_t {X = 0, Y = 1};
 
     Feature_Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
@@ -82,10 +82,10 @@ namespace Mario {
       os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
     }
   };
-  
+
   class Feature_Mode : public Carli::Feature_Enumerated<Feature> {
   public:
-    enum Axis : size_t {MODE = 3};
+    enum Axis : size_t {MODE = 2};
 
     Feature_Mode(const Mode &mode)
      : Feature_Enumerated<Feature>(mode)
@@ -112,10 +112,16 @@ namespace Mario {
       os << "mode(" << value << ')';
     }
   };
-  
+
   class Feature_Flag : public Carli::Feature_Enumerated<Feature> {
   public:
-    enum Axis : size_t {ON_GROUND = 4, MAY_JUMP = 5, IS_CARRYING = 6};
+    enum Axis : size_t {
+      START = Feature_Mode::MODE + 1,
+      ON_GROUND = START + 0,
+      MAY_JUMP = START + 1,
+      IS_CARRYING = START + 2,
+      END = IS_CARRYING + 1
+    };
 
     Feature_Flag(const Axis &axis_, const bool &flag)
      : Feature_Enumerated<Feature>(flag), axis(axis_)
@@ -145,6 +151,7 @@ namespace Mario {
       case ON_GROUND   : os << "on-ground";   break;
       case MAY_JUMP    : os << "may-jump";    break;
       case IS_CARRYING : os << "is-carrying"; break;
+      default: abort();
       }
 
       os << '(' << value << ')';
@@ -152,22 +159,30 @@ namespace Mario {
 
     Axis axis;
   };
-  
+
   class Feature_Button : public Carli::Feature_Enumerated<Feature> {
   public:
-    enum Axis : size_t {LEFT = 7 + BUTTON_LEFT,
-                        RIGHT = 7 + BUTTON_RIGHT,
-                        DOWN = 7 + BUTTON_DOWN,
-                        JUMP = 7 + BUTTON_JUMP,
-                        SPEED = 7 + BUTTON_SPEED};
+    enum Axis {
+      IN_START = Feature_Flag::END + 1, ///< Need a +1 because of the extra join
+      IN_DPAD = IN_START + 0,
+      IN_JUMP = IN_START + 1,
+      IN_SPEED = IN_START + 2,
+      IN_END = IN_SPEED + 1,
 
-    Feature_Button(const Axis &axis_, const bool &flag)
+      OUT_START = IN_END + 1, ///< Need a +1 because of the extra join
+      OUT_DPAD = OUT_START + 0,
+      OUT_JUMP = OUT_START + 1,
+      OUT_SPEED = OUT_START + 2,
+      END = OUT_SPEED + 1
+    };
+
+    Feature_Button(const Axis &axis_, const int64_t &flag)
      : Feature_Enumerated<Feature>(flag), axis(axis_)
     {
     }
 
     Feature_Button * clone() const {
-      return new Feature_Button(axis, value != 0);
+      return new Feature_Button(axis, value);
     }
 
     int64_t compare_axis(const Feature &rhs) const {
@@ -186,19 +201,29 @@ namespace Mario {
 
     void print(ostream &os) const {
       switch(axis) {
-      case LEFT  : os << "left";  break;
-      case RIGHT : os << "right"; break;
-      case DOWN  : os << "down";  break;
-      case JUMP  : os << "jump";  break;
-      case SPEED : os << "speed"; break;
-      }
+      case IN_DPAD:
+      case OUT_DPAD:
+        os << "dpad-" << (axis == IN_DPAD ? "in" : "out") << '(' << (value == BUTTON_LEFT ? "left" : value == BUTTON_RIGHT ? "right" : value == BUTTON_DOWN ? "down" : "released") << ')';
+        break;
 
-      os << '(' << value << ')';
+      case IN_JUMP:
+      case OUT_JUMP:
+        os << "jump-" << (axis == IN_JUMP ? "in" : "out") << '(' << value << ')';
+        break;
+
+      case IN_SPEED:
+      case OUT_SPEED:
+        os << "speed-" << (axis == IN_SPEED ? "in" : "out") << '(' << value << ')';
+        break;
+
+      default:
+        abort();
+      }
     }
 
     Axis axis;
   };
-  
+
   class Button_Presses : public Carli::Action {
   public:
     Button_Presses() {
@@ -211,8 +236,12 @@ namespace Mario {
     }
 
     Button_Presses(const Rete::WME_Token &token) {
-      for(int i = 0; i != BUTTON_END; ++i)
-        action[i] = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(7 + i, 2)]).value != 0;
+      memset(&action, 0, sizeof(action));
+      const int64_t dpad = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Feature_Button::OUT_DPAD, 2)]).value;
+      if(dpad != BUTTON_NONE)
+        action.at(size_t(dpad)) = true;
+      for(int64_t i = BUTTON_JUMP; i != BUTTON_END; ++i)
+        action[i] = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Feature_Button::OUT_START - 2 + i, 2)]).value != 0;
     }
 
     Button_Presses * clone() const {
@@ -244,7 +273,7 @@ namespace Mario {
 
   class Agent : public Carli::Agent {
   public:
-    Agent(const std::shared_ptr<State> &state);
+    Agent(const std::shared_ptr<State> &current);
     ~Agent();
 
   private:
@@ -260,25 +289,26 @@ namespace Mario {
 
     void update();
 
+    const std::shared_ptr<State> m_current;
+
     const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
     const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
 
-    const Rete::Symbol_Identifier_Ptr_C m_input_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("I1"));
-    const Rete::Symbol_Constant_String_Ptr_C m_input_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("input"));
-    const Rete::Symbol_Constant_String_Ptr_C m_button_presses_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("button-presses"));
+    const Rete::Symbol_Constant_String_Ptr_C m_button_presses_in_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("button-presses-in"));
+    const Rete::Symbol_Constant_String_Ptr_C m_button_presses_out_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("button-presses-out"));
     const Rete::Symbol_Constant_String_Ptr_C m_x_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x"));
     const Rete::Symbol_Constant_String_Ptr_C m_y_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("y"));
     const Rete::Symbol_Constant_String_Ptr_C m_mode_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("mode"));
     const Rete::Symbol_Constant_String_Ptr_C m_on_ground_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("on-ground"));
     const Rete::Symbol_Constant_String_Ptr_C m_may_jump_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("may-jump"));
     const Rete::Symbol_Constant_String_Ptr_C m_is_carrying_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("is-carrying"));
-    const Rete::Symbol_Constant_String_Ptr_C m_left_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left"));
-    const Rete::Symbol_Constant_String_Ptr_C m_right_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("right"));
-    const Rete::Symbol_Constant_String_Ptr_C m_down_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("down"));
+    const Rete::Symbol_Constant_String_Ptr_C m_dpad_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("dpad"));
     const Rete::Symbol_Constant_String_Ptr_C m_jump_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("jump"));
     const Rete::Symbol_Constant_String_Ptr_C m_speed_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("speed"));
-    const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
-    const Rete::Symbol_Constant_String_Ptr_C m_false_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("false"));
+    const Rete::Symbol_Constant_Int_Ptr_C m_true_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
+    const Rete::Symbol_Constant_Int_Ptr_C m_false_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(0));
+
+    const Rete::Symbol_Identifier_Ptr_C m_button_presses_in_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("I1"));
 
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
   };

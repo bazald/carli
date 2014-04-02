@@ -4,7 +4,15 @@
 
 namespace Mario {
 
-  //void infinite_mario_ai(const State &prev, const State &current, Action &action) {
+  using Carli::Metastate;
+  using Carli::Node_Fringe;
+  using Carli::Node_Fringe_Ranged;
+  using Carli::Node_Ranged;
+  using Carli::Node_Split;
+  using Carli::Node_Unsplit;
+  using Carli::Q_Value;
+
+  //void infinite_mario_ai(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, Action &action) {
   //  action[BUTTON_LEFT] = 0;
   //  action[BUTTON_RIGHT] = 1;
   //  action[BUTTON_DOWN] = 0;
@@ -22,15 +30,15 @@ namespace Mario {
   ////     }
   ////   }
 
-  //  if(prev.action[BUTTON_JUMP])
-  //    action[BUTTON_JUMP] = !current.isMarioOnGround;
+  //  if(prev->action[BUTTON_JUMP])
+  //    action[BUTTON_JUMP] = !current->isMarioOnGround;
   //  else
-  //    action[BUTTON_JUMP] = current.mayMarioJump;
+  //    action[BUTTON_JUMP] = current->mayMarioJump;
 
-  //  if(current.getMarioMode == 2)
-  //    action[BUTTON_SPEED] = !prev.action[BUTTON_SPEED];
-  //  else if(prev.action[BUTTON_SPEED])
-  //    action[BUTTON_SPEED] = !current.isMarioCarrying;
+  //  if(current->getMarioMode == 2)
+  //    action[BUTTON_SPEED] = !prev->action[BUTTON_SPEED];
+  //  else if(prev->action[BUTTON_SPEED])
+  //    action[BUTTON_SPEED] = !current->isMarioCarrying;
   //  else
   //    action[BUTTON_SPEED] = 1;
   //}
@@ -43,11 +51,13 @@ namespace Mario {
   void infinite_mario_ai(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, Action &action) {
     Agent &agent = get_Agent(current, action);
 
+    /// Do more stuff
+
     const double reward = agent.act();
   }
-  
-  Agent::Agent(const std::shared_ptr<State> &state)
-   : Carli::Agent(state)
+
+  Agent::Agent(const std::shared_ptr<State> &current)
+   : Carli::Agent(current), m_current(current)
   {
     insert_wme(m_wme_blink);
     generate_rete();
@@ -92,43 +102,46 @@ namespace Mario {
   void Agent::generate_rete() {
     Rete::WME_Bindings state_bindings;
 
-//    state_bindings.clear();
-    auto filter_action = make_filter(Rete::WME(m_first_var, m_action_attr, m_third_var));
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
-    auto filter_type_current = make_filter(Rete::WME(m_first_var, m_type_current_attr, m_third_var));
-    auto join_type_current = make_join(state_bindings, filter_action, filter_type_current);
-    state_bindings.clear();
-    auto filter_type_next = make_filter(Rete::WME(m_first_var, m_type_next_attr, m_third_var));
-    auto join_type_next = make_join(state_bindings, join_type_current, filter_type_next);
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
-    auto filter_width = make_filter(Rete::WME(m_first_var, m_width_attr, m_third_var));
-    auto join_width = make_join(state_bindings, join_type_next, filter_width);
-    auto filter_height = make_filter(Rete::WME(m_first_var, m_height_attr, m_third_var));
-    auto join_height = make_join(state_bindings, join_width, filter_height);
     auto filter_x = make_filter(Rete::WME(m_first_var, m_x_attr, m_third_var));
-    auto join_x = make_join(state_bindings, join_height, filter_x);
     auto filter_y = make_filter(Rete::WME(m_first_var, m_y_attr, m_third_var));
-    auto join_y = make_join(state_bindings, join_x, filter_y);
-    auto filter_gaps_beneath = make_filter(Rete::WME(m_first_var, m_gaps_beneath_attr, m_third_var));
-    auto join_gaps_beneath = make_join(state_bindings, join_y, filter_gaps_beneath);
-    auto filter_gaps_created = make_filter(Rete::WME(m_first_var, m_gaps_created_attr, m_third_var));
-    auto join_gaps_created = make_join(state_bindings, join_gaps_beneath, filter_gaps_created);
-    auto filter_depth_to_gap = make_filter(Rete::WME(m_first_var, m_depth_to_gap_attr, m_third_var));
-    auto join_depth_to_gap = make_join(state_bindings, join_gaps_created, filter_depth_to_gap);
-    auto filter_clears = make_filter(Rete::WME(m_first_var, m_clears_attr, m_third_var));
-    auto join_clears = make_join(state_bindings, join_depth_to_gap, filter_clears);
-    auto filter_enables_clearing = make_filter(Rete::WME(m_first_var, m_enables_clearing_attr, m_third_var));
-    auto join_enables_clearing = make_join(state_bindings, join_clears, filter_enables_clearing);
-    auto filter_prohibits_clearing = make_filter(Rete::WME(m_first_var, m_prohibits_clearing_attr, m_third_var));
-    auto join_prohibits_clearing = make_join(state_bindings, join_enables_clearing, filter_prohibits_clearing);
-    auto filter_x_odd = make_filter(Rete::WME(m_first_var, m_x_odd_attr, m_third_var));
-    auto join_x_odd = make_join(state_bindings, join_prohibits_clearing, filter_x_odd);
-    auto &join_last = join_x_odd;
+    auto filter_mode = make_filter(Rete::WME(m_first_var, m_mode_attr, m_third_var));
+    auto filter_on_ground = make_filter(Rete::WME(m_first_var, m_on_ground_attr, m_third_var));
+    auto filter_may_jump = make_filter(Rete::WME(m_first_var, m_may_jump_attr, m_third_var));
+    auto filter_is_carrying = make_filter(Rete::WME(m_first_var, m_is_carrying_attr, m_third_var));
+    auto filter_dpad = make_filter(Rete::WME(m_first_var, m_dpad_attr, m_third_var));
+    auto filter_jump = make_filter(Rete::WME(m_first_var, m_jump_attr, m_third_var));
+    auto filter_speed = make_filter(Rete::WME(m_first_var, m_speed_attr, m_third_var));
+
+    state_bindings.clear();
+    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
+
+    auto filter_button_presses_in = make_filter(Rete::WME(m_first_var, m_button_presses_in_attr, m_third_var));
+    auto join_button_presses_in_dpad = make_join(state_bindings, filter_button_presses_in, filter_dpad);
+    auto join_button_presses_in_jump = make_join(state_bindings, join_button_presses_in_dpad, filter_jump);
+    auto join_button_presses_in_speed = make_join(state_bindings, join_button_presses_in_jump, filter_speed);
+
+    auto filter_button_presses_out = make_filter(Rete::WME(m_first_var, m_button_presses_out_attr, m_third_var));
+    auto join_button_presses_out_dpad = make_join(state_bindings, filter_button_presses_out, filter_dpad);
+    auto join_button_presses_out_jump = make_join(state_bindings, join_button_presses_out_dpad, filter_jump);
+    auto join_button_presses_out_speed = make_join(state_bindings, join_button_presses_out_jump, filter_speed);
+
+    state_bindings.clear();
+    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
+
+    auto join_state_x_y = make_join(state_bindings, filter_x, filter_y);
+    auto join_state_mode = make_join(state_bindings, join_state_x_y, filter_mode);
+    auto join_state_on_ground = make_join(state_bindings, join_state_mode, filter_on_ground);
+    auto join_state_may_jump = make_join(state_bindings, join_state_on_ground, filter_may_jump);
+    auto join_state_is_carrying = make_join(state_bindings, join_state_may_jump, filter_is_carrying);
+
+    auto join_complete_state = make_join(state_bindings, join_state_is_carrying, join_button_presses_in_speed);
+
+    auto join_last = make_join(state_bindings, join_complete_state, join_button_presses_out_speed);
 
     auto filter_blink = make_filter(*m_wme_blink);
 
     auto get_action = [this](const Rete::WME_Token &token)->action_ptrsc {
-      return std::make_shared<Place>(token);
+      return std::make_shared<Button_Presses>(token);
     };
 
     auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
@@ -145,25 +158,25 @@ namespace Mario {
       }, join_blink).get();
     }
 
-    for(Type::Axis axis : {Type::CURRENT/*, Type::NEXT*/}) {
-      for(auto super : {TETS_SQUARE, TETS_LINE, TETS_T, TETS_L, TETS_J, TETS_S, TETS_Z}) {
-        for(uint8_t orientation = 0, oend = num_types(super); orientation != oend; ++orientation) {
-          const auto type = super_to_type(super, orientation);
-          auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
-          auto feature = new Type(axis, type);
-          node_fringe->feature = feature;
-          auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
-          node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-            const auto action = get_action(token);
-            this->insert_q_value_next(action, node_fringe->q_value);
-          }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-            const auto action = get_action(token);
-            this->purge_q_value_next(action, node_fringe->q_value);
-          }, predicate).get();
-          node_unsplit->fringe_values.push_back(node_fringe);
-        }
-      }
-    }
+    //for(Type::Axis axis : {Type::CURRENT/*, Type::NEXT*/}) {
+    //  for(auto super : {TETS_SQUARE, TETS_LINE, TETS_T, TETS_L, TETS_J, TETS_S, TETS_Z}) {
+    //    for(uint8_t orientation = 0, oend = num_types(super); orientation != oend; ++orientation) {
+    //      const auto type = super_to_type(super, orientation);
+    //      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
+    //      auto feature = new Type(axis, type);
+    //      node_fringe->feature = feature;
+    //      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
+    //      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+    //        const auto action = get_action(token);
+    //        this->insert_q_value_next(action, node_fringe->q_value);
+    //      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+    //        const auto action = get_action(token);
+    //        this->purge_q_value_next(action, node_fringe->q_value);
+    //      }, predicate).get();
+    //      node_unsplit->fringe_values.push_back(node_fringe);
+    //    }
+    //  }
+    //}
 
 //    for(auto value : {true, false}) {
 //      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
@@ -180,59 +193,46 @@ namespace Mario {
 //      node_unsplit->fringe_values.push_back(node_fringe);
 //    }
 
-    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::WIDTH, 0.0f, 4.0f);
-    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::HEIGHT, 0.0f, 4.0f);
-    generate_rete_continuous<Position, Position::Axis>(node_unsplit, get_action, Position::X, 0.0f, 10.0f);
-    generate_rete_continuous<Position, Position::Axis>(node_unsplit, get_action, Position::Y, 0.0f, 20.0f);
-    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::BENEATH, 0.0f, 75.0f);
-    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::CREATED, 0.0f, 75.0f);
-//    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::DEPTH, 0.0f, 20.0f);
-    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::CLEARS, 0.0f, 5.0f);
-    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::ENABLES, 0.0f, 5.0f);
-    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::PROHIBITS, 0.0f, 5.0f);
+//    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::WIDTH, 0.0f, 4.0f);
+//    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::HEIGHT, 0.0f, 4.0f);
+    generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::X, 0.0f, 4000.0f);
+    generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::Y, 0.0f, 200.0f);
+//    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::BENEATH, 0.0f, 75.0f);
+//    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::CREATED, 0.0f, 75.0f);
+////    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::DEPTH, 0.0f, 20.0f);
+//    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::CLEARS, 0.0f, 5.0f);
+//    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::ENABLES, 0.0f, 5.0f);
+//    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::PROHIBITS, 0.0f, 5.0f);
   }
 
   void Agent::generate_features() {
-    auto env = dynamic_pointer_cast<const Environment>(get_env());
-
     std::list<Rete::WME_Ptr_C> wmes_current;
     std::ostringstream oss;
 
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_input_attr, m_input_id));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_input_id, m_type_next_attr, std::make_shared<Rete::Symbol_Constant_Int>(env->get_next())));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(m_current->getMarioFloatPos.first)));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(m_current->getMarioFloatPos.second)));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_mode_attr, std::make_shared<Rete::Symbol_Constant_Int>(m_current->getMarioMode)));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_on_ground_attr, m_current->isMarioOnGround ? m_true_value : m_false_value));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_may_jump_attr, m_current->mayMarioJump ? m_true_value : m_false_value));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_is_carrying_attr, m_current->isMarioCarrying ? m_true_value : m_false_value));
 
-    size_t index = 0;
-    for(const auto &placement : env->get_placements()) {
-      oss << "place-" << ++index;
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_button_presses_in_attr, m_button_presses_in_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_dpad_attr,
+      std::make_shared<Rete::Symbol_Constant_Int>(m_current->action[BUTTON_DOWN] ? BUTTON_DOWN :
+      m_current->action[BUTTON_LEFT] ^ m_current->action[BUTTON_RIGHT] ? (m_current->action[BUTTON_LEFT] ? BUTTON_LEFT : BUTTON_RIGHT) :
+      BUTTON_NONE)));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_jump_attr, m_current->action[BUTTON_JUMP] ? m_true_value : m_false_value));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_speed_attr, m_current->action[BUTTON_SPEED] ? m_true_value : m_false_value));
+
+    for(int i = 0; i != 16; ++i) {
+      oss << "O" << i + 1;
       Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
       oss.str("");
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_input_id, m_action_attr, action_id));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_type_current_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.type)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_width_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.first)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.second)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.position.first)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.position.second)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_gaps_beneath_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.gaps_beneath)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_gaps_created_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.gaps_created)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_depth_to_gap_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.depth_to_gap)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_x_odd_attr, (placement.position.first & 1) ? m_true_value : m_false_value));
-
-      int clears = 0;
-      int enables = 0;
-      int prohibits = 0;
-      for(int i = 1; i != 5; ++i) {
-        if(placement.outcome[i] == Environment::Outcome::OUTCOME_ACHIEVED)
-          clears = i;
-        else if(placement.outcome[i] == Environment::Outcome::OUTCOME_ENABLED)
-          enables = i;
-      }
-      for(int i = 4; i != 0; --i)
-        if(placement.outcome[i] == Environment::Outcome::OUTCOME_PROHIBITED)
-          prohibits = i;
-
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_clears_attr, std::make_shared<Rete::Symbol_Constant_Int>(clears)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_enables_clearing_attr, std::make_shared<Rete::Symbol_Constant_Int>(enables)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_prohibits_clearing_attr, std::make_shared<Rete::Symbol_Constant_Int>(prohibits)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_button_presses_out_attr, action_id));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_dpad_attr, std::make_shared<Rete::Symbol_Constant_Int>(
+        (i & 0xC) == 0xC ? BUTTON_DOWN : i & 0x4 ? BUTTON_LEFT : i & 0x8 ? BUTTON_RIGHT : BUTTON_NONE)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_jump_attr, i & 0x2 ? m_true_value : m_false_value));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_speed_attr, i & 0x1 ? m_true_value : m_false_value));
     }
 
     remove_wme(m_wme_blink);
@@ -257,38 +257,41 @@ namespace Mario {
       }
     }
 
+    volatile bool test = true;
+    while(test) continue;
+
     insert_wme(m_wme_blink);
   }
 
   void Agent::update() {
-    auto env = dynamic_pointer_cast<const Environment>(get_env());
+    //auto env = dynamic_pointer_cast<const Environment>(get_env());
 
-    m_metastate = env->get_placements().empty() ? Metastate::FAILURE : Metastate::NON_TERMINAL;
+    //m_metastate = env->get_placements().empty() ? Metastate::FAILURE : Metastate::NON_TERMINAL;
   }
 
 }
 
-int main(int argc, char **argv) {
-  try {
-    Carli::Experiment experiment;
-
-    experiment.take_args(argc, argv);
-
-    const auto output = dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value();
-
-    experiment.standard_run([](){return std::make_shared<Tetris::Environment>();},
-                            [](const std::shared_ptr<Carli::Environment> &env){return std::make_shared<Tetris::Agent>(env);},
-                            [&output](const std::shared_ptr<Carli::Agent> &){}
-                           );
-
-    return 0;
-  }
-  catch(std::exception &ex) {
-    std::cerr << "Exiting with exception: " << ex.what() << std::endl;
-  }
-  catch(...) {
-    std::cerr << "Exiting with unknown exception." << std::endl;
-  }
-
-  return -1;
-}
+//int main(int argc, char **argv) {
+//  try {
+//    Carli::Experiment experiment;
+//
+//    experiment.take_args(argc, argv);
+//
+//    const auto output = dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value();
+//
+//    experiment.standard_run([](){return std::make_shared<Tetris::Environment>();},
+//                            [](const std::shared_ptr<Carli::Environment> &env){return std::make_shared<Tetris::Agent>(env);},
+//                            [&output](const std::shared_ptr<Carli::Agent> &){}
+//                           );
+//
+//    return 0;
+//  }
+//  catch(std::exception &ex) {
+//    std::cerr << "Exiting with exception: " << ex.what() << std::endl;
+//  }
+//  catch(...) {
+//    std::cerr << "Exiting with unknown exception." << std::endl;
+//  }
+//
+//  return -1;
+//}

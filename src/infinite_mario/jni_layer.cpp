@@ -1,5 +1,6 @@
 #include "jni_layer.h"
 
+#include "carli/experiment.h"
 #include "ch_idsia_ai_agents_ai_JNIAgent.h"
 #include "infinite_mario.h"
 
@@ -14,10 +15,6 @@ namespace Mario {
   static std::shared_ptr<State> g_current_state;
 
   State::State()
-   : getMarioMode(MODE_SMALL),
-   isMarioOnGround(false),
-   mayMarioJump(false),
-   isMarioCarrying(false)
   {
   }
 
@@ -93,9 +90,21 @@ namespace Mario {
 JNIEXPORT jbooleanArray JNICALL Java_ch_idsia_ai_agents_ai_JNIAgent_c_1getAction
   (JNIEnv *env, jobject /*obj*/, jobject observation)
 {
-  Mario::g_current_state = std::make_shared<Mario::State>(*Mario::g_prev_state, env, observation);
+  try {
+    Mario::g_current_state = std::make_shared<Mario::State>(*Mario::g_prev_state, env, observation);
+  }
+  catch(...) {
+    std::cerr << "Exception in Java_ch_idsia_ai_agents_ai_JNIAgent_c_1getAction part 1." << std::endl;
+    abort();
+  }
 
-  infinite_mario_ai(Mario::g_prev_state, Mario::g_current_state, Mario::g_current_state->action);
+  try {
+    infinite_mario_ai(Mario::g_prev_state, Mario::g_current_state, Mario::g_current_state->action);
+  }
+  catch(...) {
+    std::cerr << "Exception in Java_ch_idsia_ai_agents_ai_JNIAgent_c_1getAction part 2." << std::endl;
+    abort();
+  }
 
   Mario::g_prev_state = Mario::g_current_state;
 
@@ -103,8 +112,16 @@ JNIEXPORT jbooleanArray JNICALL Java_ch_idsia_ai_agents_ai_JNIAgent_c_1getAction
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM * /*vm*/, void * /*pvt*/) {
-  Mario::g_prev_state = std::make_shared<Mario::State>();
-  Mario::g_current_state = std::make_shared<Mario::State>();
+  try {
+    Carli::Experiment experiment; ///< Set up global Options
+    Mario::g_prev_state = std::make_shared<Mario::State>();
+    Mario::g_current_state = std::make_shared<Mario::State>();
+  }
+  catch(...) {
+    std::cerr << "Exception in JNI_OnLoad." << std::endl;
+    abort();
+  }
+
   return JNI_VERSION_1_4;
 }
 

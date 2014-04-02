@@ -19,3 +19,7 @@ project "infinite_mario"
                 "../../marioai/classes" }
 
   links { "carli", "rete", "utility" }
+
+  if os.get() == "windows" then
+    postbuildcommands { [[cp infinite_mario.dll marioai\classes\]] }
+  end

@@ -30,3 +30,12 @@ project "rete"
   end
 
   links { "utility" }
+
+  if os.get() == "windows" then
+    configuration "Debug"
+      postbuildcommands { [[cp rete_d.dll marioai\classes\]] }
+    configuration "Profiling"
+      postbuildcommands { [[cp rete_p.dll marioai\classes\]] }
+    configuration "Release"
+      postbuildcommands { [[cp rete.dll marioai\classes\]] }
+  end

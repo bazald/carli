@@ -79,7 +79,7 @@ namespace Carli {
     Feature_Enumerated_Data & operator=(const Feature_Enumerated_Data &) = delete;
 
   public:
-    Feature_Enumerated_Data(const size_t &value_)
+    Feature_Enumerated_Data(const int64_t &value_)
      : value(value_)
     {
     }
@@ -105,7 +105,7 @@ namespace Carli {
     Feature_Enumerated & operator=(const Feature_Enumerated &) = delete;
 
   public:
-    Feature_Enumerated(const size_t &value_)
+    Feature_Enumerated(const int64_t &value_)
      : Feature_Enumerated_Data(value_)
     {
     }

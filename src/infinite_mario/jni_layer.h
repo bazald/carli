@@ -14,12 +14,13 @@ namespace Mario {
   };
 
   enum Button {
-    BUTTON_LEFT  = 0,
-    BUTTON_RIGHT = 1,
-    BUTTON_DOWN  = 2,
-    BUTTON_JUMP  = 3,
-    BUTTON_SPEED = 4,
-    BUTTON_END   = 5
+    BUTTON_NONE  = -1,
+    BUTTON_LEFT  =  0,
+    BUTTON_RIGHT =  1,
+    BUTTON_DOWN  =  2,
+    BUTTON_JUMP  =  3,
+    BUTTON_SPEED =  4,
+    BUTTON_END   =  5
   };
 
   enum Mode {
@@ -81,13 +82,13 @@ namespace Mario {
     std::array<std::array<char, OBSERVATION_SIZE>, OBSERVATION_SIZE> getCompleteObservation;
 
     std::pair<float, float> getMarioFloatPos;
-    int64_t getMarioMode;
+    int64_t getMarioMode = MODE_SMALL;
 
-    bool isMarioOnGround;
-    bool mayMarioJump;
-    bool isMarioCarrying;
+    bool isMarioOnGround = false;
+    bool mayMarioJump = false;
+    bool isMarioCarrying = false;
 
-    Action action;
+    Action action = {{false, false, false, false, false}} ;
   };
 
 }

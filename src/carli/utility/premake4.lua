@@ -19,3 +19,12 @@ project "utility"
   else
     files { "**.h", "**.hpp", "**.cpp" }
   end
+
+  if os.get() == "windows" then
+    configuration "Debug"
+      postbuildcommands { [[cp utility_d.dll marioai\classes\]] }
+    configuration "Profiling"
+      postbuildcommands { [[cp utility_p.dll marioai\classes\]] }
+    configuration "Release"
+      postbuildcommands { [[cp utility.dll marioai\classes\]] }
+  end

@@ -39,9 +39,11 @@ solution "carli"
     end
   end
 
-  flags { "ExtraWarnings", "FloatStrict", "EnableSSE2" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
+  flags { "ExtraWarnings", "FloatStrict" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
   if _ACTION == "vs2013" then
     buildoptions { [[/wd"4005"]], [[/wd"4251"]], [[/wd"4505"]], [[/wd"4996"]] }
+    configuration "x32"
+      flags { "EnableSSE2" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
   else
     flags { "EnableSSE" }
     buildoptions { "-mfpmath=sse -mmmx -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
@@ -53,17 +55,21 @@ solution "carli"
     defines { "_DEBUG", "DEBUG", "debuggable_cast=dynamic_cast", "debuggable_pointer_cast=std::dynamic_pointer_cast" }
     defines { "DEBUG_OUTPUT" }
     flags { "Symbols" }
-    targetsuffix "_d"
+    TARGETSUFFIX = "_d"
+    targetsuffix(TARGETSUFFIX)
   configuration "Profiling"
     defines { "NDEBUG", "debuggable_cast=static_cast", "debuggable_pointer_cast=std::static_pointer_cast" }
     flags { "Symbols", "Optimize" }
-    targetsuffix "_p"
+    TARGETSUFFIX = "_p"
+    targetsuffix(TARGETSUFFIX)
   configuration "Release"
     defines { "NDEBUG", "debuggable_cast=static_cast", "debuggable_pointer_cast=std::static_pointer_cast" }
     flags { "Optimize" }
     targetsuffix "_r"
 --    buildoptions { "-flto" }
 --    linkoptions { "-flto" }
+    TARGETSUFFIX = ""
+    targetsuffix(TARGETSUFFIX)
 
   configuration "windows"
     if _ACTION ~= "vs2013" then

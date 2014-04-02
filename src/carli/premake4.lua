@@ -32,3 +32,12 @@ project "carli"
 --   linkoptions { "-Wl,-rpath,'$$ORIGIN'" }
 
   links { "rete", "utility" }
+
+  if os.get() == "windows" then
+    configuration "Debug"
+      postbuildcommands { [[cp carli_d.dll marioai\classes\]] }
+    configuration "Profiling"
+      postbuildcommands { [[cp carli_p.dll marioai\classes\]] }
+    configuration "Release"
+      postbuildcommands { [[cp carli.dll marioai\classes\]] }
+  end
