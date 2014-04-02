@@ -65,7 +65,6 @@ namespace Mario {
     void init_impl() {}
 
     reward_type transition_impl(const Carli::Action &) {
-      std::cerr << "Transition timing dilemma. Restructuring may be required." << std::endl;
       return 0.0;
     }
 

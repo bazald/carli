@@ -240,8 +240,8 @@ namespace Mario {
       const int64_t dpad = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Feature_Button::OUT_DPAD, 2)]).value;
       if(dpad != BUTTON_NONE)
         action.at(size_t(dpad)) = true;
-      for(int64_t i = BUTTON_JUMP; i != BUTTON_END; ++i)
-        action[i] = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Feature_Button::OUT_START - 2 + i, 2)]).value != 0;
+      action[BUTTON_JUMP] = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Feature_Button::OUT_JUMP, 2)]).value != 0;
+      action[BUTTON_SPEED] = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Feature_Button::OUT_SPEED, 2)]).value != 0;
     }
 
     Button_Presses * clone() const {
@@ -273,8 +273,10 @@ namespace Mario {
 
   class Agent : public Carli::Agent {
   public:
-    Agent(const std::shared_ptr<State> &current);
+    Agent(const std::shared_ptr<State> &current_);
     ~Agent();
+
+    void act_part_1(Action &action);
 
   private:
     template<typename SUBFEATURE, typename AXIS>
@@ -289,7 +291,7 @@ namespace Mario {
 
     void update();
 
-    const std::shared_ptr<State> m_current;
+    const std::shared_ptr<State> m_current_state;
 
     const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
     const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));

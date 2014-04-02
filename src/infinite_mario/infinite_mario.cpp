@@ -43,21 +43,74 @@ namespace Mario {
   //    action[BUTTON_SPEED] = 1;
   //}
 
-  static Agent & get_Agent(const std::shared_ptr<State> &current, const Action &action) {
-    static Agent g_Agent(current);
+  static Agent & get_Agent(const std::shared_ptr<State> &current_) {
+    static Agent g_Agent(current_);
     return g_Agent;
   }
 
+  static bool infinite_mario_ai_initialized = false;
+
   void infinite_mario_ai(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, Action &action) {
-    Agent &agent = get_Agent(current, action);
+    Agent &agent = get_Agent(current);
 
-    /// Do more stuff
+    if(!infinite_mario_ai_initialized) {
+      infinite_mario_ai_initialized = true;
+      agent.init();
+    }
 
-    const double reward = agent.act();
+    agent.act_part_1(action);
+  }
+  
+  void Agent::act_part_1(Action &action) {
+    m_current = m_next;
+    m_current_q_value = m_next_q_values[m_next];
+    m_current_q_value.sort([](const tracked_ptr<Q_Value> &lhs, const tracked_ptr<Q_Value> &rhs)->bool{return lhs->depth < rhs->depth;});
+
+    assert(m_current);
+
+    const reward_type reward = m_current_state->transition(*m_current);
+
+    update();
+
+    if(m_metastate == Metastate::NON_TERMINAL) {
+      generate_features();
+      clean_features();
+
+      m_next = m_target_policy();
+  #ifdef DEBUG_OUTPUT
+  //      for(auto &next_q : m_next_q_values)
+  //        std::cerr << "   " << *next_q.first << " is an option." << std::endl;
+      std::cerr << "   " << *m_next << " is next." << std::endl;
+  #endif
+      //auto &value_best = m_next_q_values[m_next];
+      //td_update(m_current_q_value, reward, value_best);
+
+      if(!is_on_policy()) {
+        action_ptrsc next = m_exploration_policy();
+
+        if(*m_next != *next) {
+          if(sum_value(nullptr, m_current_q_value) < sum_value(nullptr, m_next_q_values[next]))
+            clear_eligibility_trace();
+          m_next = next;
+        }
+
+  #ifdef DEBUG_OUTPUT
+        std::cerr << "   " << *m_next << " is next." << std::endl;
+  #endif
+      }
+    }
+    //else {
+    //  td_update(m_current_q_value, reward, Q_Value_List());
+    //}
+
+    //m_total_reward += reward;
+    //++m_step_count;
+
+    action = debuggable_cast<const Button_Presses &>(*m_next).action;
   }
 
-  Agent::Agent(const std::shared_ptr<State> &current)
-   : Carli::Agent(current), m_current(current)
+  Agent::Agent(const std::shared_ptr<State> &current_)
+   : Carli::Agent(current_), m_current_state(current_)
   {
     insert_wme(m_wme_blink);
     generate_rete();
@@ -209,20 +262,20 @@ namespace Mario {
     std::list<Rete::WME_Ptr_C> wmes_current;
     std::ostringstream oss;
 
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(m_current->getMarioFloatPos.first)));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(m_current->getMarioFloatPos.second)));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_mode_attr, std::make_shared<Rete::Symbol_Constant_Int>(m_current->getMarioMode)));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_on_ground_attr, m_current->isMarioOnGround ? m_true_value : m_false_value));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_may_jump_attr, m_current->mayMarioJump ? m_true_value : m_false_value));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_is_carrying_attr, m_current->isMarioCarrying ? m_true_value : m_false_value));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(m_current_state->getMarioFloatPos.first)));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(m_current_state->getMarioFloatPos.second)));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_mode_attr, std::make_shared<Rete::Symbol_Constant_Int>(m_current_state->getMarioMode)));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_on_ground_attr, m_current_state->isMarioOnGround ? m_true_value : m_false_value));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_may_jump_attr, m_current_state->mayMarioJump ? m_true_value : m_false_value));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_is_carrying_attr, m_current_state->isMarioCarrying ? m_true_value : m_false_value));
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_button_presses_in_attr, m_button_presses_in_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_dpad_attr,
-      std::make_shared<Rete::Symbol_Constant_Int>(m_current->action[BUTTON_DOWN] ? BUTTON_DOWN :
-      m_current->action[BUTTON_LEFT] ^ m_current->action[BUTTON_RIGHT] ? (m_current->action[BUTTON_LEFT] ? BUTTON_LEFT : BUTTON_RIGHT) :
+      std::make_shared<Rete::Symbol_Constant_Int>(m_current_state->action[BUTTON_DOWN] ? BUTTON_DOWN :
+      m_current_state->action[BUTTON_LEFT] ^ m_current_state->action[BUTTON_RIGHT] ? (m_current_state->action[BUTTON_LEFT] ? BUTTON_LEFT : BUTTON_RIGHT) :
       BUTTON_NONE)));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_jump_attr, m_current->action[BUTTON_JUMP] ? m_true_value : m_false_value));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_speed_attr, m_current->action[BUTTON_SPEED] ? m_true_value : m_false_value));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_jump_attr, m_current_state->action[BUTTON_JUMP] ? m_true_value : m_false_value));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_speed_attr, m_current_state->action[BUTTON_SPEED] ? m_true_value : m_false_value));
 
     for(int i = 0; i != 16; ++i) {
       oss << "O" << i + 1;
@@ -257,8 +310,10 @@ namespace Mario {
       }
     }
 
-    volatile bool test = true;
+#ifndef NDEBUG
+    static volatile bool test = true;
     while(test) continue;
+#endif
 
     insert_wme(m_wme_blink);
   }

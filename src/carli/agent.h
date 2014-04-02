@@ -130,6 +130,8 @@ namespace Carli {
     bool split_test(const Rete::Rete_Action &rete_action, const tracked_ptr<Q_Value> &q) const;
 
     static double sum_value(const action_type * const &action, const Q_Value_List &value_list);
+    
+    void clean_features();
 
   #ifdef DEBUG_OUTPUT
     template <typename LIST>
@@ -159,12 +161,10 @@ namespace Carli {
 
     Rete::Symbol_Identifier_Ptr_C m_s_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("S1"));
     Rete::WME_Ptr_C m_wme_blink = Rete::WME_Ptr_C(new Rete::WME(m_s_id, m_s_id, m_s_id));
-
+    
   private:
     virtual void generate_features() = 0;
     virtual void update() = 0;
-
-    void clean_features();
 
     Mean m_mean_cabe;
     Value_Queue m_mean_cabe_queue;
