@@ -488,7 +488,7 @@ namespace Carli {
     std::cerr << "  choose_randomly" << std::endl;
   #endif
 
-    int32_t counter = m_next_q_values.size();
+    int32_t counter = int32_t(m_next_q_values.size());
   //    for(const auto &action_q : m_next_q_values) {
   //      ++counter;
   //      this->get_value(action_, Q_Value::next_offset()); ///< Trigger additional feature generation, as needed
@@ -697,7 +697,7 @@ namespace Carli {
   }
 
   void Agent::assign_credit_random(const Q_Value_List &value_list) {
-    size_t count = size_t();
+    int32_t count = 0;
     for(const auto &q : value_list) {
       if(q->type != Q_Value::Type::FRINGE)
         ++count;

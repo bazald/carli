@@ -1,0 +1,10 @@
+--split-min
+9
+--discount-rate
+0.9
+--learning-rate
+0.3
+--policy
+on-policy
+--epsilon-greedy
+0.03

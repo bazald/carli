@@ -53,7 +53,9 @@ namespace Mario {
   void infinite_mario_ai(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, Action &action) {
     Agent &agent = get_Agent(current);
 
-    if(!infinite_mario_ai_initialized) {
+    if(infinite_mario_ai_initialized)
+      agent.act_part_2(prev, current);
+    else {
       infinite_mario_ai_initialized = true;
       agent.init();
     }
@@ -68,7 +70,11 @@ namespace Mario {
 
     assert(m_current);
 
-    const reward_type reward = m_current_state->transition(*m_current);
+    action = debuggable_cast<const Button_Presses &>(*m_next).action;
+  }
+
+  void Agent::act_part_2(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current) {
+    const reward_type reward = current->getMarioFloatPos.first - prev->getMarioFloatPos.first > 0 ? 1 : -100;
 
     update();
 
@@ -82,8 +88,8 @@ namespace Mario {
   //        std::cerr << "   " << *next_q.first << " is an option." << std::endl;
       std::cerr << "   " << *m_next << " is next." << std::endl;
   #endif
-      //auto &value_best = m_next_q_values[m_next];
-      //td_update(m_current_q_value, reward, value_best);
+      auto &value_best = m_next_q_values[m_next];
+      td_update(m_current_q_value, reward, value_best);
 
       if(!is_on_policy()) {
         action_ptrsc next = m_exploration_policy();
@@ -99,14 +105,12 @@ namespace Mario {
   #endif
       }
     }
-    //else {
-    //  td_update(m_current_q_value, reward, Q_Value_List());
-    //}
+    else {
+      td_update(m_current_q_value, reward, Q_Value_List());
+    }
 
     //m_total_reward += reward;
     //++m_step_count;
-
-    action = debuggable_cast<const Button_Presses &>(*m_next).action;
   }
 
   Agent::Agent(const std::shared_ptr<State> &current_)
@@ -231,31 +235,44 @@ namespace Mario {
     //  }
     //}
 
-//    for(auto value : {true, false}) {
-//      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
-//      auto feature = new X_Odd(value);
-//      node_fringe->feature = feature;
-//      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(X_Odd::AXIS, 2), feature->symbol_constant(), node_unsplit->action->parent());
-//      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->insert_q_value_next(action, node_fringe->q_value);
-//      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->purge_q_value_next(action, node_fringe->q_value);
-//      }, predicate).get();
-//      node_unsplit->fringe_values.push_back(node_fringe);
-//    }
+    /*** State ***/
 
-//    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::WIDTH, 0.0f, 4.0f);
-//    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::HEIGHT, 0.0f, 4.0f);
-    generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::X, 0.0f, 4000.0f);
-    generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::Y, 0.0f, 200.0f);
-//    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::BENEATH, 0.0f, 75.0f);
-//    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::CREATED, 0.0f, 75.0f);
-////    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::DEPTH, 0.0f, 20.0f);
-//    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::CLEARS, 0.0f, 5.0f);
-//    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::ENABLES, 0.0f, 5.0f);
-//    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::PROHIBITS, 0.0f, 5.0f);
+    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::X, 0.0f, 4000.0f);
+    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::Y, 0.0f, 200.0f);
+
+    /*** Output Buttons ***/
+
+    for(const auto dpad : {BUTTON_NONE, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_DOWN}) {
+      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
+      auto feature = new Feature_Button(Feature_Button::OUT_DPAD, dpad);
+      node_fringe->feature = feature;
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature_Button::OUT_DPAD, 2), feature->symbol_constant(), node_unsplit->action->parent());
+      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->insert_q_value_next(action, node_fringe->q_value);
+      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+        const auto action = get_action(token);
+        this->purge_q_value_next(action, node_fringe->q_value);
+      }, predicate).get();
+      node_unsplit->fringe_values.push_back(node_fringe);
+    }
+
+    for(const auto button : {Feature_Button::OUT_JUMP, Feature_Button::OUT_SPEED}) {
+      for(const auto down : {false, true}) {
+        auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
+        auto feature = new Feature_Button(button, down);
+        node_fringe->feature = feature;
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(button, 2), feature->symbol_constant(), node_unsplit->action->parent());
+        node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->insert_q_value_next(action, node_fringe->q_value);
+        }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->purge_q_value_next(action, node_fringe->q_value);
+        }, predicate).get();
+        node_unsplit->fringe_values.push_back(node_fringe);
+      }
+    }
   }
 
   void Agent::generate_features() {
@@ -311,8 +328,8 @@ namespace Mario {
     }
 
 #ifndef NDEBUG
-    static volatile bool test = true;
-    while(test) continue;
+    //static volatile bool test = true;
+    //while(test) continue;
 #endif
 
     insert_wme(m_wme_blink);

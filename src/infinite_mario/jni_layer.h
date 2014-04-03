@@ -65,7 +65,7 @@ namespace Mario {
     void init_impl() {}
 
     reward_type transition_impl(const Carli::Action &) {
-      return 0.0;
+      abort();
     }
 
     void print_impl(std::ostream &os) const {

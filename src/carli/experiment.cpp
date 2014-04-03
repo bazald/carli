@@ -132,7 +132,7 @@ namespace Carli {
     cerr.rdbuf(cerr_bak);
   }
 
-  void Experiment::take_args(int argc, char **argv) {
+  void Experiment::take_args(int argc, const char * const * argv) {
     Options &options = Options::get_global();
 
     options.get(argc, argv);

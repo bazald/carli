@@ -361,7 +361,7 @@ public:
   {
     check(value);
   }
-
+  
   const TYPE & get_value() const {return value;}
 
   std::string get_help() const {

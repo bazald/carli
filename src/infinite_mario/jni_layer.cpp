@@ -115,6 +115,36 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM * /*vm*/, void * /*pvt*/) {
   try {
     Carli::Experiment experiment; ///< Set up global Options
 
+    {
+      std::ifstream fin;
+      for(const auto &filename : {"args.txt", "../args.txt", "../../args.txt"}) {
+        fin.open(filename);
+        if(fin)
+          break;
+      }
+
+      if(fin) {
+        int argc = 0;
+        std::vector<std::string> argvv;
+        std::vector<const char *> argv(1, "carli");
+
+        std::string arg;
+        while(std::getline(fin, arg) && !arg.empty()) {
+          ++argc;
+          argvv.push_back(arg);
+        }
+
+        if(argc) {
+          ++argc;
+          argv.reserve(argvv.size() + 1);
+          for(const auto &arg : argvv)
+            argv.push_back(arg.c_str());
+
+          experiment.take_args(argc, &argv[0]);
+        }
+      }
+    }
+
     const auto seed = uint32_t(dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value());
     Zeni::Random::get().seed(seed);
     std::cout << "SEED " << seed << std::endl;

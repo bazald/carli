@@ -277,6 +277,7 @@ namespace Mario {
     ~Agent();
 
     void act_part_1(Action &action);
+    void act_part_2(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current);
 
   private:
     template<typename SUBFEATURE, typename AXIS>
@@ -291,7 +292,7 @@ namespace Mario {
 
     void update();
 
-    const std::shared_ptr<State> m_current_state;
+    std::shared_ptr<State> m_current_state;
 
     const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
     const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
