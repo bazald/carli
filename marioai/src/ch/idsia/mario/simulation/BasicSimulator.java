@@ -45,6 +45,7 @@ public class BasicSimulator implements Simulation
         prepareMarioComponent();
         marioComponent.setZLevelScene(simulationOptions.getZLevelMap());
         marioComponent.setZLevelEnemies(simulationOptions.getZLevelEnemies());
+        // System.out.println("Seed = " + (new Integer(simulationOptions.getLevelRandSeed())).toString());
         marioComponent.startLevel(simulationOptions.getLevelRandSeed(), simulationOptions.getLevelDifficulty()
                                  , simulationOptions.getLevelType(), simulationOptions.getLevelLength(),
                                   simulationOptions.getTimeLimit());

@@ -114,9 +114,7 @@ public class Evaluator implements Runnable
         LOGGER.println(startMessage, LOGGER.VERBOSE_MODE.ALL);
 
 //        boolean continueCondition;
-//        int i = 0;
-//        do
-//        {
+        for(int i = 0; i != evaluationOptions.getNumberOfTrials(); ++i) {
 //            LOGGER.println("Attempts left: " + (evaluationOptions.getNumberOfTrials() - ++i ), LOGGER.VERBOSE_MODE.ALL);
             evaluationInfo = simulator.simulateOneLevel();
                                                         
@@ -127,7 +125,7 @@ public class Evaluator implements Runnable
             LOGGER.VERBOSE_MODE VM = (evaluationInfo.marioStatus == Mario.STATUS_WIN) ? LOGGER.VERBOSE_MODE.INFO : LOGGER.VERBOSE_MODE.ALL;
             LOGGER.println("run  finished with result : " + evaluationInfo, VM);
 //            continueCondition = !GlobalOptions.StopSimulationIfWin || !(evaluationInfo.marioStatus == Mario.STATUS_WIN);
-//        }
+        }
 //        while ((evaluationOptions.getNumberOfTrials() > i || evaluationOptions.getNumberOfTrials() == -1 ) && continueCondition);
 
         String fileName = "";

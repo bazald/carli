@@ -54,13 +54,21 @@ namespace Mario {
     Agent &agent = get_Agent(current);
 
     if(infinite_mario_ai_initialized)
-      agent.act_part_2(prev, current);
+      agent.act_part_2(prev, current, false);
     else {
       infinite_mario_ai_initialized = true;
       agent.init();
     }
 
     agent.act_part_1(action);
+  }
+
+  void infinite_mario_reinit(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current) {
+    Agent &agent = get_Agent(current);
+
+    agent.act_part_2(prev, current, true);
+
+    infinite_mario_ai_initialized = false;
   }
   
   void Agent::act_part_1(Action &action) {
@@ -73,21 +81,23 @@ namespace Mario {
     action = debuggable_cast<const Button_Presses &>(*m_next).action;
   }
 
-  void Agent::act_part_2(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current) {
+  void Agent::act_part_2(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, const bool &terminal) {
     const reward_type reward = current->getMarioFloatPos.first - prev->getMarioFloatPos.first > 0 ? 1 : -100;
 
     update();
-
-    if(m_metastate == Metastate::NON_TERMINAL) {
+    
+    if(terminal)
+      td_update(m_current_q_value, reward, Q_Value_List());
+    else {
       generate_features();
       clean_features();
 
       m_next = m_target_policy();
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
   //      for(auto &next_q : m_next_q_values)
   //        std::cerr << "   " << *next_q.first << " is an option." << std::endl;
       std::cerr << "   " << *m_next << " is next." << std::endl;
-  #endif
+#endif
       auto &value_best = m_next_q_values[m_next];
       td_update(m_current_q_value, reward, value_best);
 
@@ -100,13 +110,10 @@ namespace Mario {
           m_next = next;
         }
 
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
         std::cerr << "   " << *m_next << " is next." << std::endl;
-  #endif
+#endif
       }
-    }
-    else {
-      td_update(m_current_q_value, reward, Q_Value_List());
     }
 
     //m_total_reward += reward;

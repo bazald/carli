@@ -111,6 +111,16 @@ JNIEXPORT jbooleanArray JNICALL Java_ch_idsia_ai_agents_ai_JNIAgent_c_1getAction
   return Mario::g_current_state->to_jbooleanArray(env);
 }
 
+JNIEXPORT void JNICALL Java_ch_idsia_ai_agents_ai_JNIAgent_c_1reset(JNIEnv *, jobject) {
+  try {
+    infinite_mario_reinit(Mario::g_prev_state, Mario::g_current_state);
+  }
+  catch(...) {
+    std::cerr << "Exception in Java_ch_idsia_ai_agents_ai_JNIAgent_c_1reset." << std::endl;
+    abort();
+  }
+}
+
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM * /*vm*/, void * /*pvt*/) {
   try {
     Carli::Experiment experiment; ///< Set up global Options
@@ -161,4 +171,11 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM * /*vm*/, void * /*pvt*/) {
 }
 
 JNIEXPORT void JNICALL JNI_OnUnload(JavaVM * /*vm*/, void * /*pvt*/) {
+  try {
+    Mario::infinite_mario_reinit(Mario::g_prev_state, Mario::g_current_state);
+  }
+  catch(...) {
+    std::cerr << "Exception in Java_ch_idsia_ai_agents_ai_JNIAgent_c_1reset." << std::endl;
+    abort();
+  }
 }

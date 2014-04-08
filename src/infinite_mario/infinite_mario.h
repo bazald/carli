@@ -15,6 +15,7 @@ namespace Mario {
   class State;
 
   void infinite_mario_ai(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, Action &action);
+  void infinite_mario_reinit(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current);
 
   using std::dynamic_pointer_cast;
   using std::endl;
@@ -277,7 +278,7 @@ namespace Mario {
     ~Agent();
 
     void act_part_1(Action &action);
-    void act_part_2(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current);
+    void act_part_2(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, const bool &terminal);
 
   private:
     template<typename SUBFEATURE, typename AXIS>

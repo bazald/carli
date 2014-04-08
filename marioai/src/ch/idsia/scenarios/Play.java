@@ -8,6 +8,8 @@ import ch.idsia.ai.tasks.Task;
 import ch.idsia.tools.CmdLineOptions;
 import ch.idsia.tools.EvaluationOptions;
 
+import java.util.Arrays;
+
 /**
  * Created by IntelliJ IDEA.
  * User: julian
@@ -22,17 +24,20 @@ public class Play {
             controller = AgentsPool.load (args[0]);
             AgentsPool.addAgent(controller);
         }
-        EvaluationOptions options = new CmdLineOptions(new String[0]);
+        EvaluationOptions options = new CmdLineOptions(Arrays.copyOfRange(args, 1, args.length));
         options.setAgent(controller);
         Task task = new ProgressTask(options);
-        options.setMaxFPS(false);
-        options.setVisualization(true);
-        options.setNumberOfTrials(1);
-        options.setMatlabFileName("");
-        options.setLevelRandSeed((int) (Math.random () * Integer.MAX_VALUE));
-        options.setLevelDifficulty(3);
+        // options.setMaxFPS(false);
+        // options.setVisualization(true);
+        // options.setNumberOfTrials(1);
+        // options.setMatlabFileName("");
+        // options.setLevelRandSeed((int) (Math.random () * Integer.MAX_VALUE));
+        // options.setLevelDifficulty(3);
         task.setOptions(options);
 
         System.out.println ("Score: " + task.evaluate (controller)[0]);
+
+        if(options.isExitProgramWhenFinished())
+          System.exit(0);
     }
 }

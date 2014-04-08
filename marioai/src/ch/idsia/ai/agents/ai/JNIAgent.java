@@ -16,6 +16,7 @@ public class JNIAgent implements Agent {
     }
 
     private native boolean[] c_getAction(Environment observation);
+    private native void c_reset();
 
 
 
@@ -26,14 +27,15 @@ public class JNIAgent implements Agent {
     }
 
     public void reset() {
+      c_reset();
     }
 
     public boolean[] getAction(Environment observation) {
         byte[][] scene = observation.getLevelSceneObservation(/*1*/);
-        double[] inputs = new double[]{probe(-1, -1, scene), probe(0, -1, scene), probe(1, -1, scene),
-                              probe(-1, 0, scene), probe(0, 0, scene), probe(1, 0, scene),
-                                probe(-1, 1, scene), probe(0, 1, scene), probe(1, 1, scene),
-                                1};
+        // double[] inputs = new double[]{probe(-1, -1, scene), probe(0, -1, scene), probe(1, -1, scene),
+                              // probe(-1, 0, scene), probe(0, 0, scene), probe(1, 0, scene),
+                                // probe(-1, 1, scene), probe(0, 1, scene), probe(1, 1, scene),
+                                // 1};
         return c_getAction(observation);
     }
 

@@ -18,14 +18,12 @@
         <exclude name="**/*.java"/>
       </fileset>
     </copy>
-                  
-                  
   </target>
 
   <target name="compile" depends="init"
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac includeantruntime="false" encoding="UTF-8" srcdir="${src}" destdir="${build}">
+    <javac debug="true" source="1.7" includeantruntime="false" encoding="UTF-8" srcdir="${src}" destdir="${build}">
       <classpath>
          <fileset dir="${lib}">
            <include name="**/*.jar" />
@@ -33,6 +31,7 @@
       </classpath>
     </javac>
   </target>
+
   <target name="play" depends="compile"
         description="tests Mario whether it works" >
     <!-- Create the distribution directory -->

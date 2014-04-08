@@ -18,7 +18,9 @@ public class EvaluationOptions extends SimulationOptions
     public EvaluationOptions() { super(); }
 
     public void setUpOptions(String[] args) {
-        for (int i = 0; i < args.length - 1; i += 2)
+        for (int i = 0; i < args.length - 1; i += 2) {
+            System.out.println(args[i] + " = " + args[i + 1]);
+
             try
             {
                 setParameterValue(args[i], args[i + 1]);
@@ -29,6 +31,7 @@ public class EvaluationOptions extends SimulationOptions
                 System.err.println("Error: Wrong number of input parameters");
 //                System.err.println("It is good day to kill yourself with the yellow wall");
             }
+        }
         GlobalOptions.VisualizationOn = isVisualization();
         GlobalOptions.FPS = (isMaxFPS()) ? GlobalOptions.InfiniteFPS : 24 /*GlobalOptions.FPS*/;
         GlobalOptions.pauseWorld = isPauseWorld();
