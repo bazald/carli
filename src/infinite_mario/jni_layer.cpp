@@ -25,7 +25,7 @@ namespace Mario {
     assert(cls);
 
     jmethodID getter;
-
+    
     {
       getter = env->GetMethodID(cls, "getCompleteObservation", "()[[B");
       assert(getter);
@@ -38,6 +38,22 @@ namespace Mario {
         memcpy(&getCompleteObservation[i][0], col_data, OBSERVATION_SIZE);
         env->ReleaseByteArrayElements(col, col_data, JNI_ABORT);
       }
+    }
+
+    {
+      getter = env->GetMethodID(cls, "getEnemiesFloatPos", "()[F");
+      assert(getter);
+      jfloatArray pos = jfloatArray(env->CallObjectMethod(observation, getter));
+      assert(pos);
+      float *pos_data = env->GetFloatArrayElements(pos, 0);
+      assert(pos_data);
+      for(int i = 0, iend = env->GetArrayLength(pos); i + 2 < iend; i += 3)
+        getEnemiesFloatPos.push_back(std::make_pair(Scene(int(pos_data[i])), std::make_pair(pos_data[i + 1], pos_data[i + 2])));
+      env->ReleaseFloatArrayElements(pos, pos_data, JNI_ABORT);
+
+      getter = env->GetMethodID(cls, "getMarioMode", "()I");
+      assert(getter);
+      getMarioMode = env->CallIntMethod(observation, getter);
     }
 
     {
@@ -67,6 +83,21 @@ namespace Mario {
       assert(getter);
       isMarioCarrying = env->CallBooleanMethod(observation, getter) != 0;
     }
+
+    {
+      getter = env->GetMethodID(cls, "getKillsTotal", "()I");
+      assert(getter);
+      getKillsTotal = env->CallIntMethod(observation, getter);
+      getter = env->GetMethodID(cls, "getKillsByFire", "()I");
+      assert(getter);
+      getKillsByFire = env->CallIntMethod(observation, getter);
+      getter = env->GetMethodID(cls, "getKillsByStomp", "()I");
+      assert(getter);
+      getKillsByStomp = env->CallIntMethod(observation, getter);
+      getter = env->GetMethodID(cls, "getKillsByShell", "()I");
+      assert(getter);
+      getKillsByShell = env->CallIntMethod(observation, getter);
+    }
   }
 
   jbooleanArray State::to_jbooleanArray(JNIEnv *env) const {
@@ -91,6 +122,7 @@ JNIEXPORT jbooleanArray JNICALL Java_ch_idsia_ai_agents_ai_JNIAgent_c_1getAction
   (JNIEnv *env, jobject /*obj*/, jobject observation)
 {
   try {
+    Mario::g_prev_state = Mario::g_current_state;
     Mario::g_current_state = std::make_shared<Mario::State>(*Mario::g_prev_state, env, observation);
   }
   catch(...) {
@@ -106,14 +138,15 @@ JNIEXPORT jbooleanArray JNICALL Java_ch_idsia_ai_agents_ai_JNIAgent_c_1getAction
     abort();
   }
 
-  Mario::g_prev_state = Mario::g_current_state;
-
   return Mario::g_current_state->to_jbooleanArray(env);
 }
 
 JNIEXPORT void JNICALL Java_ch_idsia_ai_agents_ai_JNIAgent_c_1reset(JNIEnv *, jobject) {
   try {
     infinite_mario_reinit(Mario::g_prev_state, Mario::g_current_state);
+
+    Mario::g_prev_state = std::make_shared<Mario::State>();
+    Mario::g_current_state = std::make_shared<Mario::State>();
   }
   catch(...) {
     std::cerr << "Exception in Java_ch_idsia_ai_agents_ai_JNIAgent_c_1reset." << std::endl;

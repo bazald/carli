@@ -80,12 +80,19 @@ namespace Mario {
 
     std::array<std::array<char, OBSERVATION_SIZE>, OBSERVATION_SIZE> getCompleteObservation;
 
+    std::vector<std::pair<Scene, std::pair<float, float>>> getEnemiesFloatPos;
+
     std::pair<float, float> getMarioFloatPos;
     int64_t getMarioMode = MODE_SMALL;
 
     bool isMarioOnGround = false;
     bool mayMarioJump = false;
     bool isMarioCarrying = false;
+    
+    int getKillsTotal = 0;
+    int getKillsByFire = 0;
+    int getKillsByStomp = 0;
+    int getKillsByShell = 0;
 
     Action action = {{false, false, false, false, false}} ;
   };

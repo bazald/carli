@@ -66,7 +66,8 @@ namespace Mario {
   void infinite_mario_reinit(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current) {
     Agent &agent = get_Agent(current);
 
-    agent.act_part_2(prev, current, true);
+    if(infinite_mario_ai_initialized)
+      agent.act_part_2(prev, current, true);
 
     infinite_mario_ai_initialized = false;
   }
@@ -245,7 +246,7 @@ namespace Mario {
     /*** State ***/
 
     //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::X, 0.0f, 4000.0f);
-    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::Y, 0.0f, 200.0f);
+    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::Y, 0.0f, 300.0f);
 
     /*** Output Buttons ***/
 
@@ -312,6 +313,17 @@ namespace Mario {
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_speed_attr, i & 0x1 ? m_true_value : m_false_value));
     }
 
+    int i = 0;
+    for(const auto &enemy : m_current_state->getEnemiesFloatPos) {
+      oss << "E" << ++i;
+      Rete::Symbol_Identifier_Ptr_C enemy_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
+      oss.str("");
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_enemy_attr, enemy_id));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(enemy.first)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.second.first)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.second.second)));
+    }
+
     remove_wme(m_wme_blink);
 
     for(auto wt = m_wmes_prev.begin(), wend = m_wmes_prev.end(); wt != wend; ) {
@@ -335,8 +347,8 @@ namespace Mario {
     }
 
 #ifndef NDEBUG
-    //static volatile bool test = true;
-    //while(test) continue;
+    static volatile bool test = true;
+    while(test) continue;
 #endif
 
     insert_wme(m_wme_blink);
