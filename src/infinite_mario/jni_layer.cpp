@@ -27,16 +27,43 @@ namespace Mario {
     jmethodID getter;
     
     {
-      getter = env->GetMethodID(cls, "getCompleteObservation", "()[[B");
+      getter = env->GetMethodID(cls, "getLevelSceneObservation", "()[[B");
       assert(getter);
-      jobjectArray completeObservation = jobjectArray(env->CallObjectMethod(observation, getter));
-      for(int i = 0; i != OBSERVATION_SIZE; ++i) {
-        jbyteArray col = jbyteArray(env->GetObjectArrayElement(completeObservation, i));
-        assert(col);
-        jbyte *col_data = env->GetByteArrayElements(col, 0);
-        assert(col_data);
-        memcpy(&getCompleteObservation[i][0], col_data, OBSERVATION_SIZE);
-        env->ReleaseByteArrayElements(col, col_data, JNI_ABORT);
+      jobjectArray levelSceneObservation = jobjectArray(env->CallObjectMethod(observation, getter));
+      for(int j = 0; j != OBSERVATION_SIZE; ++j) {
+        jbyteArray row = jbyteArray(env->GetObjectArrayElement(levelSceneObservation, j));
+        assert(row);
+        jbyte *row_data = env->GetByteArrayElements(row, 0);
+        assert(row_data);
+        for(int i = 0; i != OBSERVATION_SIZE; ++i)
+          getLevelSceneObservation[j][i] = Tile(row_data[i]);
+        env->ReleaseByteArrayElements(row, row_data, JNI_ABORT);
+      }
+
+      //getter = env->GetMethodID(cls, "getLevelSceneObservationZ", "(I)[[B");
+      //assert(getter);
+      //jobjectArray levelSceneObservation = jobjectArray(env->CallObjectMethod(observation, getter, 0));
+      //for(int j = 0; j != OBSERVATION_SIZE; ++j) {
+      //  jbyteArray row = jbyteArray(env->GetObjectArrayElement(levelSceneObservation, j));
+      //  assert(row);
+      //  jbyte *row_data = env->GetByteArrayElements(row, 0);
+      //  assert(row_data);
+      //  for(int i = 0; i != OBSERVATION_SIZE; ++i)
+      //    getLevelSceneObservation[j][i] = Tile(row_data[i]);
+      //  env->ReleaseByteArrayElements(row, row_data, JNI_ABORT);
+      //}
+
+      getter = env->GetMethodID(cls, "getEnemiesObservation", "()[[B");
+      assert(getter);
+      jobjectArray enemiesObservation = jobjectArray(env->CallObjectMethod(observation, getter));
+      for(int j = 0; j != OBSERVATION_SIZE; ++j) {
+        jbyteArray row = jbyteArray(env->GetObjectArrayElement(enemiesObservation, j));
+        assert(row);
+        jbyte *row_data = env->GetByteArrayElements(row, 0);
+        assert(row_data);
+        for(int i = 0; i != OBSERVATION_SIZE; ++i)
+          getEnemiesObservation[j][i] = Object(row_data[i]);
+        env->ReleaseByteArrayElements(row, row_data, JNI_ABORT);
       }
     }
 
@@ -48,7 +75,7 @@ namespace Mario {
       float *pos_data = env->GetFloatArrayElements(pos, 0);
       assert(pos_data);
       for(int i = 0, iend = env->GetArrayLength(pos); i + 2 < iend; i += 3)
-        getEnemiesFloatPos.push_back(std::make_pair(Scene(int(pos_data[i])), std::make_pair(pos_data[i + 1], pos_data[i + 2])));
+        getEnemiesFloatPos.push_back(std::make_pair(Object(int(pos_data[i])), std::make_pair(pos_data[i + 1], pos_data[i + 2])));
       env->ReleaseFloatArrayElements(pos, pos_data, JNI_ABORT);
 
       getter = env->GetMethodID(cls, "getMarioMode", "()I");
@@ -115,6 +142,47 @@ namespace Mario {
     return j_action;
   }
 
+}
+
+std::ostream & operator<<(std::ostream &os, const Mario::Tile &tile) {
+  switch(tile) {
+  case Mario::TILE_IRRELEVANT           : os << ' '; break;
+  case Mario::TILE_SOMETHING            : os << 'S'; break;
+  case Mario::TILE_BORDER               : os << 'B'; break;
+  case Mario::TILE_HALF_BORDER          : os << 'H'; break;
+  case Mario::TILE_BRICK                : os << 'R'; break;
+  case Mario::TILE_POT_OR_CANNON        : os << 'C'; break;
+  case Mario::TILE_QUESTION             : os << 'Q'; break;
+  default:
+    //os << int(tile) << ',';
+    abort();
+  }
+
+  return os;
+}
+
+std::ostream & operator<<(std::ostream &os, const Mario::Object &object) {
+  switch(object) {
+  case Mario::OBJECT_IRRELEVANT         : os << 'g'; break;
+  case Mario::OBJECT_GOOMBA             : os << 'g'; break;
+  case Mario::OBJECT_GOOMBA_WINGED      : os << 'o'; break;
+  case Mario::OBJECT_RED_KOOPA          : os << 'r'; break;
+  case Mario::OBJECT_RED_KOOPA_WINGED   : os << 'e'; break;
+  case Mario::OBJECT_GREEN_KOOPA        : os << 'k'; break;
+  case Mario::OBJECT_GREEN_KOOPA_WINGED : os << 'w'; break;
+  case Mario::OBJECT_BULLET_BILL        : os << 'b'; break;
+  case Mario::OBJECT_SPIKY              : os << 's'; break;
+  case Mario::OBJECT_SPIKY_WINGED       : os << 'p'; break;
+  case Mario::OBJECT_ENEMY_FLOWER       : os << 'l'; break;
+  case Mario::OBJECT_SHELL              : os << 'S'; break;
+  case Mario::OBJECT_MUSHROOM           : os << 'm'; break;
+  case Mario::OBJECT_FIRE_FLOWER        : os << 'f'; break;
+  case Mario::OBJECT_FIREBALL           : os << 'i'; break;
+  default:
+    abort();
+  }
+
+  return os;
 }
 
 /* Implementation of native method sayHello() of HelloJNI class */

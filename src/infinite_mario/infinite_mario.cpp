@@ -80,6 +80,21 @@ namespace Mario {
     assert(m_current);
 
     action = debuggable_cast<const Button_Presses &>(*m_next).action;
+
+#if defined(_WINDOWS) && defined(NDEBUG)
+    system("cls");
+#endif
+    std::cerr << "Observation:" << std::endl;
+    for(int j = 0; j != OBSERVATION_SIZE; ++j) {
+      for(int i = 0; i != OBSERVATION_SIZE; ++i) {
+        if(m_current_state->getEnemiesObservation[j][i])
+          std::cerr << m_current_state->getEnemiesObservation[j][i];
+        else
+          std::cerr << m_current_state->getLevelSceneObservation[j][i];
+      }
+      std::cerr << std::endl;
+    }
+    std::cerr << std::endl;
   }
 
   void Agent::act_part_2(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, const bool &terminal) {
@@ -176,6 +191,7 @@ namespace Mario {
     auto filter_dpad = make_filter(Rete::WME(m_first_var, m_dpad_attr, m_third_var));
     auto filter_jump = make_filter(Rete::WME(m_first_var, m_jump_attr, m_third_var));
     auto filter_speed = make_filter(Rete::WME(m_first_var, m_speed_attr, m_third_var));
+    auto filter_type = make_filter(Rete::WME(m_first_var, m_type_attr, m_third_var));
 
     state_bindings.clear();
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
@@ -190,6 +206,11 @@ namespace Mario {
     auto join_button_presses_out_jump = make_join(state_bindings, join_button_presses_out_dpad, filter_jump);
     auto join_button_presses_out_speed = make_join(state_bindings, join_button_presses_out_jump, filter_speed);
 
+    auto filter_enemy = make_filter(Rete::WME(m_first_var, m_enemy_attr, m_third_var));
+    auto join_enemy_type = make_join(state_bindings, filter_enemy, filter_type);
+    auto join_enemy_x = make_join(state_bindings, join_enemy_type, filter_x);
+    auto join_enemy_y = make_join(state_bindings, join_enemy_x, filter_y);
+
     state_bindings.clear();
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
 
@@ -202,6 +223,7 @@ namespace Mario {
     auto join_complete_state = make_join(state_bindings, join_state_is_carrying, join_button_presses_in_speed);
 
     auto join_last = make_join(state_bindings, join_complete_state, join_button_presses_out_speed);
+    auto &join_enemy_last = join_enemy_y;
 
     auto filter_blink = make_filter(*m_wme_blink);
 
@@ -320,8 +342,8 @@ namespace Mario {
       oss.str("");
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_enemy_attr, enemy_id));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(enemy.first)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.second.first)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.second.second)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.second.first - m_current_state->getMarioFloatPos.first)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.second.second - m_current_state->getMarioFloatPos.second)));
     }
 
     remove_wme(m_wme_blink);
