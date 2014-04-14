@@ -40,6 +40,33 @@ namespace Mario {
         env->ReleaseByteArrayElements(row, row_data, JNI_ABORT);
       }
 
+      /** Begin pit detection **/
+      
+      for(int i = 0; i != OBSERVATION_SIZE; ++i) {
+        for(int j = OBSERVATION_SIZE - 1; j != -1; --j) {
+          if(getLevelSceneObservation[j][i].tile == TILE_IRRELEVANT)
+            getLevelSceneObservation[j][i].detail.pit = true;
+          else
+            break;
+        }
+      }
+      for(int j = OBSERVATION_SIZE - 2; j != -1; --j) {
+        for(int i = 1; i != OBSERVATION_SIZE; ++i) {
+          if(getLevelSceneObservation[j][i - 1].tile == TILE_IRRELEVANT && !getLevelSceneObservation[j][i - 1].detail.pit && getLevelSceneObservation[j][i].detail.pit) {
+            getLevelSceneObservation[j][i].detail.pit = false;
+            getLevelSceneObservation[j][i].detail.above_pit = true;
+          }
+        }
+        for(int i = OBSERVATION_SIZE - 2; i != -1; --i) {
+          if(getLevelSceneObservation[j][i + 1].tile == TILE_IRRELEVANT && !getLevelSceneObservation[j][i + 1].detail.pit && getLevelSceneObservation[j][i].detail.pit) {
+            getLevelSceneObservation[j][i].detail.pit = false;
+            getLevelSceneObservation[j][i].detail.above_pit = true;
+          }
+        }
+      }
+
+      /** End pit detection **/
+
       //getter = env->GetMethodID(cls, "getLevelSceneObservationZ", "(I)[[B");
       //assert(getter);
       //jobjectArray levelSceneObservation = jobjectArray(env->CallObjectMethod(observation, getter, 0));

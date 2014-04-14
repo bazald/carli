@@ -72,6 +72,123 @@ namespace Mario {
     infinite_mario_ai_initialized = false;
   }
   
+  bool can_jump_into(const Tile &tile) {
+    switch(tile) {
+    case TILE_BRICK:
+    case TILE_QUESTION:
+      return true;
+    default:
+      return false;
+    }
+  }
+
+  bool can_jump_through(const Tile &tile) {
+    switch(tile) {
+    case TILE_IRRELEVANT:
+    case TILE_HALF_BORDER:
+      return true;
+    default:
+      return false;
+    }
+  }
+
+  bool can_land_on(const Tile &tile) {
+    switch(tile) {
+    case TILE_SOMETHING:
+    case TILE_BORDER:
+    case TILE_HALF_BORDER:
+    case TILE_BRICK:
+    case TILE_POT_OR_CANNON:
+    case TILE_QUESTION:
+      return true;
+    default:
+      return false;
+    }
+  }
+
+  bool can_pass_through(const Tile &tile) {
+    switch(tile) {
+    case TILE_IRRELEVANT:
+    case TILE_HALF_BORDER:
+      return true;
+    default:
+      return false;
+    }
+  }
+
+  bool dangerous(const Object &object) {
+    switch(object) {
+    case OBJECT_GOOMBA:
+    case OBJECT_GOOMBA_WINGED:
+    case OBJECT_RED_KOOPA:
+    case OBJECT_RED_KOOPA_WINGED:
+    case OBJECT_GREEN_KOOPA:
+    case OBJECT_GREEN_KOOPA_WINGED:
+    case OBJECT_BULLET_BILL:
+    case OBJECT_SPIKY:
+    case OBJECT_SPIKY_WINGED:
+    case OBJECT_ENEMY_FLOWER:
+    case OBJECT_SHELL:
+      return true;
+    default:
+      return false;
+    }
+  }
+  
+  bool flies(const Object &object) {
+    switch(object) {
+    case OBJECT_GOOMBA_WINGED:
+    case OBJECT_RED_KOOPA_WINGED:
+    case OBJECT_GREEN_KOOPA_WINGED:
+    case OBJECT_BULLET_BILL:
+    case OBJECT_SPIKY_WINGED:
+    case OBJECT_ENEMY_FLOWER:
+      return true;
+    default:
+      return false;
+    }
+  }
+  
+  bool powerup(const Object &object) {
+    switch(object) {
+    case OBJECT_MUSHROOM:
+    case OBJECT_FIRE_FLOWER:
+      return true;
+    default:
+      return false;
+    }
+  }
+
+  bool killable_by_fireball(const Object &object) {
+    switch(object) {
+    case OBJECT_GOOMBA:
+    case OBJECT_GOOMBA_WINGED:
+    case OBJECT_RED_KOOPA:
+    case OBJECT_RED_KOOPA_WINGED:
+    case OBJECT_GREEN_KOOPA:
+    case OBJECT_GREEN_KOOPA_WINGED:
+    case OBJECT_ENEMY_FLOWER:
+      return true;
+    default:
+      return false;
+    }
+  }
+
+  bool killable_by_jump(const Object &object) {
+    switch(object) {
+    case OBJECT_GOOMBA:
+    case OBJECT_GOOMBA_WINGED:
+    case OBJECT_RED_KOOPA:
+    case OBJECT_RED_KOOPA_WINGED:
+    case OBJECT_GREEN_KOOPA:
+    case OBJECT_GREEN_KOOPA_WINGED:
+    case OBJECT_BULLET_BILL:
+      return true;
+    default:
+      return false;
+    }
+  }
+
   void Agent::act_part_1(Action &action) {
     m_current = m_next;
     m_current_q_value = m_next_q_values[m_next];
@@ -84,13 +201,29 @@ namespace Mario {
 #if defined(_WINDOWS) && defined(NDEBUG)
     system("cls");
 #endif
+    /** Render scene **/
+    //std::cerr << "Observation:" << std::endl;
+    //for(int j = 0; j != OBSERVATION_SIZE; ++j) {
+    //  for(int i = 0; i != OBSERVATION_SIZE; ++i) {
+    //    if(m_current_state->getEnemiesObservation[j][i])
+    //      std::cerr << m_current_state->getEnemiesObservation[j][i];
+    //    else
+    //      std::cerr << m_current_state->getLevelSceneObservation[j][i].tile;
+    //  }
+    //  std::cerr << std::endl;
+    //}
+    //std::cerr << std::endl;
+
+    /** Render pits **/
     std::cerr << "Observation:" << std::endl;
     for(int j = 0; j != OBSERVATION_SIZE; ++j) {
       for(int i = 0; i != OBSERVATION_SIZE; ++i) {
-        if(m_current_state->getEnemiesObservation[j][i])
-          std::cerr << m_current_state->getEnemiesObservation[j][i];
+        if(m_current_state->getLevelSceneObservation[j][i].detail.pit)
+          std::cerr << ' ';
+        else if(m_current_state->getLevelSceneObservation[j][i].detail.above_pit)
+          std::cerr << '.';
         else
-          std::cerr << m_current_state->getLevelSceneObservation[j][i];
+          std::cerr << '#';
       }
       std::cerr << std::endl;
     }

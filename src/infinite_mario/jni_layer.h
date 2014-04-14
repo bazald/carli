@@ -81,8 +81,25 @@ namespace Mario {
         os << ac;
       os << ')';
     }
+
+    struct Tile_Info {
+      Tile_Info() : tile(TILE_IRRELEVANT) {
+        memset(&detail, 0, sizeof(detail));
+      }
+
+      Tile_Info(const Tile &tile_) : tile(tile_) {
+        memset(&detail, 0, sizeof(detail));
+      }
+
+      Tile tile;
+
+      struct {
+        unsigned int pit : 1;
+        unsigned int above_pit : 1;
+      } detail;
+    };
     
-    std::array<std::array<Tile, OBSERVATION_SIZE>, OBSERVATION_SIZE> getLevelSceneObservation;
+    std::array<std::array<Tile_Info, OBSERVATION_SIZE>, OBSERVATION_SIZE> getLevelSceneObservation;
     std::array<std::array<Object, OBSERVATION_SIZE>, OBSERVATION_SIZE> getEnemiesObservation;
 
     std::vector<std::pair<Object, std::pair<float, float>>> getEnemiesFloatPos;
@@ -99,7 +116,7 @@ namespace Mario {
     int getKillsByStomp = 0;
     int getKillsByShell = 0;
 
-    Action action = {{false, false, false, false, false}} ;
+    Action action = {{false, false, false, false, false}};
   };
 
 }

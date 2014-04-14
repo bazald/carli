@@ -27,6 +27,18 @@ namespace Mario {
   class Feature_Flag;
   class Feature_Button;
 
+  bool can_jump_into(const Tile &tile);
+  bool can_jump_through(const Tile &tile);
+  bool can_land_on(const Tile &tile);
+  bool can_pass_through(const Tile &tile);
+
+  bool dangerous(const Object &object);
+  bool flies(const Object &object);
+  bool powerup(const Object &object);
+  bool killable_by_fireball(const Object &object);
+  bool killable_by_jump(const Object &object);
+
+
   class Feature : public Carli::Feature {
   public:
     Feature() {}
