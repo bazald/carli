@@ -68,6 +68,17 @@ namespace Rete {
     return false;
   }
 
+  void Rete_Existential::output_name(std::ostream &os) const {
+    os << "e(";
+    if(input)
+      input->output_name(os);
+    os << ')';
+  }
+
+  bool Rete_Existential::is_active() const {
+    return !input_tokens.empty();
+  }
+
   Rete_Existential_Ptr Rete_Existential::find_existing(const Rete_Node_Ptr &out) {
     for(auto &o : out->get_outputs()) {
       if(auto existing_existential = std::dynamic_pointer_cast<Rete_Existential>(o))
@@ -75,13 +86,6 @@ namespace Rete {
     }
 
     return nullptr;
-  }
-
-  void Rete_Existential::output_name(std::ostream &os) const {
-    os << "e(";
-    if(input)
-      input->output_name(os);
-    os << ')';
   }
 
   void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out) {

@@ -287,7 +287,7 @@ namespace Puddle_World {
     auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
     node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
       const auto action = get_action(token);
-      if(!this->specialize(rete_action, get_action, node_unsplit))
+      if(!this->specialize(rete_action, token, get_action, node_unsplit))
         this->insert_q_value_next(action, node_unsplit->q_value);
     }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
       const auto action = get_action(token);

@@ -120,17 +120,17 @@ namespace Mountain_Car {
     }
   };
 
-  class Acceleration_Direction : public Carli::Feature {
+  class Acceleration_Direction : public Carli::Feature_Enumerated<Feature> {
   public:
     enum Index {index = 2};
 
-    Acceleration_Direction(const Direction &direction_)
-     : direction(direction_)
+    Acceleration_Direction(const Direction &direction)
+     : Feature_Enumerated<Feature>(direction)
     {
     }
 
     Acceleration_Direction * clone() const {
-      return new Acceleration_Direction(direction);
+      return new Acceleration_Direction(Direction(value));
     }
 
     int64_t get_depth() const {
@@ -147,7 +147,7 @@ namespace Mountain_Car {
       return 1;
     }
     int64_t compare_axis(const Acceleration_Direction &rhs) const {
-      return direction - debuggable_cast<const Acceleration_Direction &>(rhs).direction;
+      return value - debuggable_cast<const Acceleration_Direction &>(rhs).value;
     }
 
     int64_t compare_value(const Carli::Feature &) const {
@@ -159,10 +159,8 @@ namespace Mountain_Car {
     }
 
     void print(ostream &os) const {
-      os << "acceleration(" << direction << ')';
+      os << "acceleration(" << Direction(value) << ')';
     }
-
-    Direction direction;
   };
 
   class Acceleration : public Carli::Action {

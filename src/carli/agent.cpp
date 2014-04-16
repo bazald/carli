@@ -2,7 +2,7 @@
 
 namespace Carli {
 
-  bool Agent::specialize(const Rete::Rete_Action &rete_action, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general) {
+  bool Agent::specialize(const Rete::Rete_Action &rete_action, const Rete::WME_Token &token, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general) {
     if(!split_test(rete_action, general->q_value))
       return false;
     if(general->q_value->type == Q_Value::Type::SPLIT)
@@ -25,7 +25,7 @@ namespace Carli {
   //  std::cerr << "Refining : " << chosen << std::endl;
   //#endif
 
-    expand_fringe(get_action, general, chosen->feature.get());
+    expand_fringe(token, get_action, general, chosen->feature.get());
 
     general->delete_q_value = false;
     general->q_value->type = Q_Value::Type::SPLIT;
@@ -42,7 +42,7 @@ namespace Carli {
     return true;
   }
 
-  void Agent::expand_fringe(const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general, const Feature * const &specialization) {
+  void Agent::expand_fringe(const Rete::WME_Token &token, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general, const Feature * const &specialization) {
     Node_Unsplit::Fringe_Values leaves;
     for(auto fringe = general->fringe_values.begin(), fend = general->fringe_values.end(); fringe != fend; ) {
       if(specialization->compare_axis(*(*fringe)->feature) == 0) {
@@ -53,12 +53,19 @@ namespace Carli {
         ++fringe;
     }
 
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
     std::cerr << "Refining:";
     for(auto &leaf : leaves)
       std::cerr << ' ' << *leaf->feature;
+    std::cerr << std::endl << "Carrying over detected:";
+    for(auto &fringe : general->fringe_values) {
+      std::cerr << ' ';
+      if(fringe->feature->matches(token))
+        std::cerr << '*';
+      std::cerr << *fringe->feature;
+    }
     std::cerr << std::endl;
-  #endif
+#endif
 
     auto filter_blink = make_filter(*m_wme_blink);
     for(auto &leaf : leaves) {
@@ -158,7 +165,7 @@ namespace Carli {
                 rl = std::make_shared<Node_Fringe>(*this, leaf->q_value->depth + 1);
 
               Rete::WME_Bindings bindings;
-              bindings.insert(std::make_pair(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 2)));
+              //bindings.insert(std::make_pair(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 2)));
               new_test = make_existential_join(bindings, leaf->action->parent(), fringe_action->parent());
             }
 
@@ -191,7 +198,7 @@ namespace Carli {
           node_unsplit->fringe_values.swap(node_unsplit_fringe);
           auto new_action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
             const auto action = get_action(token);
-            if(!this->specialize(rete_action, get_action, node_unsplit))
+            if(!this->specialize(rete_action, token, get_action, node_unsplit))
               this->insert_q_value_next(action, node_unsplit->q_value);
           }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
             const auto action = get_action(token);
@@ -867,8 +874,11 @@ namespace Carli {
     double sum = double();
     for(auto &q : value_list) {
   #ifdef DEBUG_OUTPUT
-        if(action)
-          std::cerr << ' ' << q->value /* * q.weight */ << ':' << q->depth << (q->type == Q_Value::Type::FRINGE ? "f" : "");
+      if(action) {
+        std::cerr << ' ' << q->value /* * q.weight */ << ':' << q->depth;
+        if(q->type == Q_Value::Type::FRINGE)
+          std::cerr << "f[" << *q->node_fringe->feature << ']';
+      }
   #endif
       if(q->type != Q_Value::Type::FRINGE)
         sum += q->value /* * q->weight */;

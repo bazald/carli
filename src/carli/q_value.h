@@ -12,6 +12,8 @@
 
 namespace Carli {
 
+  class Node_Fringe;
+
   class Q_Value;
   class CARLI_LINKAGE Q_Value : public Zeni::Pool_Allocator<Q_Value>, public std::enable_shared_from_this<Q_Value> {
     Q_Value(const Q_Value &) = delete;
@@ -71,6 +73,8 @@ namespace Carli {
       u.m = &Q_Value::eligible;
       return u.c - static_cast<char *>(nullptr);
     }
+
+    Node_Fringe * node_fringe = nullptr;
   };
 
 }

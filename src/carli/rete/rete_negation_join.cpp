@@ -94,6 +94,23 @@ namespace Rete {
     return false;
   }
 
+  void Rete_Negation_Join::output_name(std::ostream &os) const {
+    os << "nj(" << bindings << ',';
+    if(input0)
+      input0->output_name(os);
+    os << ',';
+    if(input1)
+      input1->output_name(os);
+    os << ')';
+  }
+  
+  bool Rete_Negation_Join::is_active() const {
+    for(auto &wme_token : input0_tokens)
+      if(!wme_token.second)
+        return true;
+    return false;
+  }
+  
   Rete_Negation_Join_Ptr Rete_Negation_Join::find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
     for(auto &o0 : out0->get_outputs()) {
       if(auto existing_negation_join = std::dynamic_pointer_cast<Rete_Negation_Join>(o0)) {
@@ -105,16 +122,6 @@ namespace Rete {
     }
 
     return nullptr;
-  }
-
-  void Rete_Negation_Join::output_name(std::ostream &os) const {
-    os << "nj(" << bindings << ',';
-    if(input0)
-      input0->output_name(os);
-    os << ',';
-    if(input1)
-      input1->output_name(os);
-    os << ')';
   }
 
   void Rete_Negation_Join::join_tokens(std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs) {

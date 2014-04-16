@@ -76,6 +76,17 @@ namespace Rete {
 //         return action == rete_action->action && retraction == rete_action->retraction && input == rete_action->input;
     return false;
   }
+  
+  void Rete_Action::output_name(std::ostream &os) const {
+    os << "a(";
+    if(input)
+      input->output_name(os);
+    os << ')';
+  }
+
+  bool Rete_Action::is_active() const {
+    return !input_tokens.empty();
+  }
 
   Rete_Action_Ptr Rete_Action::find_existing(const Action &/*action_*/, const Action &/*retraction_*/, const Rete_Node_Ptr &/*out*/) {
 //       for(auto &o : out->get_outputs()) {
@@ -86,13 +97,6 @@ namespace Rete {
 //       }
 
     return nullptr;
-  }
-
-  void Rete_Action::output_name(std::ostream &os) const {
-    os << "a(";
-    if(input)
-      input->output_name(os);
-    os << ')';
   }
 
   void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out) {

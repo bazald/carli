@@ -30,34 +30,34 @@ namespace Mario {
       getter = env->GetMethodID(cls, "getLevelSceneObservation", "()[[B");
       assert(getter);
       jobjectArray levelSceneObservation = jobjectArray(env->CallObjectMethod(observation, getter));
-      for(int j = 0; j != OBSERVATION_SIZE; ++j) {
+      for(int j = 0; j != OBSERVATION_HEIGHT; ++j) {
         jbyteArray row = jbyteArray(env->GetObjectArrayElement(levelSceneObservation, j));
         assert(row);
         jbyte *row_data = env->GetByteArrayElements(row, 0);
         assert(row_data);
-        for(int i = 0; i != OBSERVATION_SIZE; ++i)
+        for(int i = 0; i != OBSERVATION_WIDTH; ++i)
           getLevelSceneObservation[j][i] = Tile(row_data[i]);
         env->ReleaseByteArrayElements(row, row_data, JNI_ABORT);
       }
 
       /** Begin pit detection **/
       
-      for(int i = 0; i != OBSERVATION_SIZE; ++i) {
-        for(int j = OBSERVATION_SIZE - 1; j != -1; --j) {
+      for(int i = 0; i != OBSERVATION_WIDTH; ++i) {
+        for(int j = OBSERVATION_HEIGHT - 1; j != -1; --j) {
           if(getLevelSceneObservation[j][i].tile == TILE_IRRELEVANT)
             getLevelSceneObservation[j][i].detail.pit = true;
           else
             break;
         }
       }
-      for(int j = OBSERVATION_SIZE - 2; j != -1; --j) {
-        for(int i = 1; i != OBSERVATION_SIZE; ++i) {
+      for(int j = OBSERVATION_HEIGHT - 2; j != -1; --j) {
+        for(int i = 1; i != OBSERVATION_WIDTH; ++i) {
           if(getLevelSceneObservation[j][i - 1].tile == TILE_IRRELEVANT && !getLevelSceneObservation[j][i - 1].detail.pit && getLevelSceneObservation[j][i].detail.pit) {
             getLevelSceneObservation[j][i].detail.pit = false;
             getLevelSceneObservation[j][i].detail.above_pit = true;
           }
         }
-        for(int i = OBSERVATION_SIZE - 2; i != -1; --i) {
+        for(int i = OBSERVATION_WIDTH - 2; i != -1; --i) {
           if(getLevelSceneObservation[j][i + 1].tile == TILE_IRRELEVANT && !getLevelSceneObservation[j][i + 1].detail.pit && getLevelSceneObservation[j][i].detail.pit) {
             getLevelSceneObservation[j][i].detail.pit = false;
             getLevelSceneObservation[j][i].detail.above_pit = true;
@@ -70,12 +70,12 @@ namespace Mario {
       //getter = env->GetMethodID(cls, "getLevelSceneObservationZ", "(I)[[B");
       //assert(getter);
       //jobjectArray levelSceneObservation = jobjectArray(env->CallObjectMethod(observation, getter, 0));
-      //for(int j = 0; j != OBSERVATION_SIZE; ++j) {
+      //for(int j = 0; j != OBSERVATION_HEIGHT; ++j) {
       //  jbyteArray row = jbyteArray(env->GetObjectArrayElement(levelSceneObservation, j));
       //  assert(row);
       //  jbyte *row_data = env->GetByteArrayElements(row, 0);
       //  assert(row_data);
-      //  for(int i = 0; i != OBSERVATION_SIZE; ++i)
+      //  for(int i = 0; i != OBSERVATION_WIDTH; ++i)
       //    getLevelSceneObservation[j][i] = Tile(row_data[i]);
       //  env->ReleaseByteArrayElements(row, row_data, JNI_ABORT);
       //}
@@ -83,12 +83,12 @@ namespace Mario {
       getter = env->GetMethodID(cls, "getEnemiesObservation", "()[[B");
       assert(getter);
       jobjectArray enemiesObservation = jobjectArray(env->CallObjectMethod(observation, getter));
-      for(int j = 0; j != OBSERVATION_SIZE; ++j) {
+      for(int j = 0; j != OBSERVATION_HEIGHT; ++j) {
         jbyteArray row = jbyteArray(env->GetObjectArrayElement(enemiesObservation, j));
         assert(row);
         jbyte *row_data = env->GetByteArrayElements(row, 0);
         assert(row_data);
-        for(int i = 0; i != OBSERVATION_SIZE; ++i)
+        for(int i = 0; i != OBSERVATION_WIDTH; ++i)
           getEnemiesObservation[j][i] = Object(row_data[i]);
         env->ReleaseByteArrayElements(row, row_data, JNI_ABORT);
       }
@@ -152,6 +152,11 @@ namespace Mario {
       assert(getter);
       getKillsByShell = env->CallIntMethod(observation, getter);
     }
+
+    if(prev.mayMarioJump && prev.action[BUTTON_JUMP])
+      isMarioHighJumping = true;
+    if(isMarioHighJumping && !action[BUTTON_JUMP])
+      isMarioHighJumping = false;
   }
 
   jbooleanArray State::to_jbooleanArray(JNIEnv *env) const {
@@ -250,6 +255,13 @@ JNIEXPORT void JNICALL Java_ch_idsia_ai_agents_ai_JNIAgent_c_1reset(JNIEnv *, jo
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM * /*vm*/, void * /*pvt*/) {
+#ifndef NDEBUG
+  static volatile bool test = true;
+  while(test) {
+    continue;
+  }
+#endif
+
   try {
     Carli::Experiment experiment; ///< Set up global Options
 

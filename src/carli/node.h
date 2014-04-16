@@ -79,6 +79,7 @@ namespace Carli {
     Node_Fringe(Agent &agent_, const int64_t &depth_)
      : Node(agent_, new Q_Value(0.0, Q_Value::Type::FRINGE, depth_))
     {
+      q_value->node_fringe = this;
     }
 
     ~Node_Fringe();

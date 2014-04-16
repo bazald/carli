@@ -25,19 +25,19 @@ namespace Mario {
   class Feature_Position;
   class Feature_Mode;
   class Feature_Flag;
+  class Feature_Numeric;
   class Feature_Button;
 
-  bool can_jump_into(const Tile &tile);
-  bool can_jump_through(const Tile &tile);
-  bool can_land_on(const Tile &tile);
-  bool can_pass_through(const Tile &tile);
+  bool tile_can_jump_into(const Tile &tile);
+  bool tile_can_jump_through(const Tile &tile);
+  bool tile_can_land_on(const Tile &tile);
+  bool tile_can_pass_through(const Tile &tile);
 
-  bool dangerous(const Object &object);
-  bool flies(const Object &object);
-  bool powerup(const Object &object);
-  bool killable_by_fireball(const Object &object);
-  bool killable_by_jump(const Object &object);
-
+  bool object_dangerous(const Object &object);
+  bool object_flies(const Object &object);
+  bool object_powerup(const Object &object);
+  bool object_killable_by_fireball(const Object &object);
+  bool object_killable_by_jump(const Object &object);
 
   class Feature : public Carli::Feature {
   public:
@@ -53,6 +53,7 @@ namespace Mario {
     virtual int64_t compare_axis(const Feature_Position &rhs) const = 0;
     virtual int64_t compare_axis(const Feature_Mode &rhs) const = 0;
     virtual int64_t compare_axis(const Feature_Flag &rhs) const = 0;
+    virtual int64_t compare_axis(const Feature_Numeric &rhs) const = 0;
     virtual int64_t compare_axis(const Feature_Button &rhs) const = 0;
 
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
@@ -79,6 +80,7 @@ namespace Mario {
     }
     int64_t compare_axis(const Feature_Mode &) const {return -1;}
     int64_t compare_axis(const Feature_Flag &) const {return -1;}
+    int64_t compare_axis(const Feature_Numeric &) const {return -1;}
     int64_t compare_axis(const Feature_Button &) const {return -1;}
 
     Rete::WME_Token_Index wme_token_index() const {
@@ -115,8 +117,9 @@ namespace Mario {
     int64_t compare_axis(const Feature_Position &) const {return 1;}
     int64_t compare_axis(const Feature_Mode &) const {return 0;}
     int64_t compare_axis(const Feature_Flag &) const {return -1;}
+    int64_t compare_axis(const Feature_Numeric &) const {return -1;}
     int64_t compare_axis(const Feature_Button &) const {return -1;}
-
+    
     Rete::WME_Token_Index wme_token_index() const {
       return Rete::WME_Token_Index(MODE, 2);
     }
@@ -125,7 +128,7 @@ namespace Mario {
       os << "mode(" << value << ')';
     }
   };
-
+  
   class Feature_Flag : public Carli::Feature_Enumerated<Feature> {
   public:
     enum Axis : size_t {
@@ -133,7 +136,8 @@ namespace Mario {
       ON_GROUND = START + 0,
       MAY_JUMP = START + 1,
       IS_CARRYING = START + 2,
-      END = IS_CARRYING + 1
+      IS_HIGH_JUMPING = START + 3,
+      END = IS_HIGH_JUMPING + 1
     };
 
     Feature_Flag(const Axis &axis_, const bool &flag)
@@ -153,17 +157,19 @@ namespace Mario {
     int64_t compare_axis(const Feature_Flag &rhs) const {
       return axis - rhs.axis;
     }
+    int64_t compare_axis(const Feature_Numeric &) const {return -1;}
     int64_t compare_axis(const Feature_Button &) const {return -1;}
-
+    
     Rete::WME_Token_Index wme_token_index() const {
       return Rete::WME_Token_Index(axis, 2);
     }
 
     void print(ostream &os) const {
       switch(axis) {
-      case ON_GROUND   : os << "on-ground";   break;
-      case MAY_JUMP    : os << "may-jump";    break;
-      case IS_CARRYING : os << "is-carrying"; break;
+      case ON_GROUND       : os << "on-ground";       break;
+      case MAY_JUMP        : os << "may-jump";        break;
+      case IS_CARRYING     : os << "is-carrying";     break;
+      case IS_HIGH_JUMPING : os << "is-high-jumping"; break;
       default: abort();
       }
 
@@ -172,11 +178,59 @@ namespace Mario {
 
     Axis axis;
   };
+  
+  class Feature_Numeric : public Carli::Feature_Ranged<Feature> {
+  public:
+    enum Axis {
+      START = Feature_Flag::END,
+      RIGHT_PIT_DIST = START + 0,
+      RIGHT_PIT_WIDTH = START + 1,
+      RIGHT_JUMP_DIST = START + 2,
+      RIGHT_JUMP_HEIGHT = START + 3,
+      END = RIGHT_JUMP_HEIGHT + 1
+    };
+
+    Feature_Numeric(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
+    {
+    }
+
+    Feature_Numeric * clone() const {
+      return new Feature_Numeric(Axis(axis.first), bound_lower, bound_upper, depth, upper);
+    }
+
+    int64_t compare_axis(const Mario::Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int64_t compare_axis(const Feature_Position &) const {return 1;}
+    int64_t compare_axis(const Feature_Mode &) const {return 1;}
+    int64_t compare_axis(const Feature_Flag &) const {return 1;}
+    int64_t compare_axis(const Feature_Numeric &rhs) const {
+      return Feature_Ranged_Data::compare_axis(rhs);
+    }
+    int64_t compare_axis(const Feature_Button &) const {return -1;}
+
+    Rete::WME_Token_Index wme_token_index() const {
+      return axis;
+    }
+
+    void print(ostream &os) const {
+      switch(axis.first) {
+        case RIGHT_PIT_DIST: os << "right-pit-dist"; break;
+        case RIGHT_PIT_WIDTH: os << "right-pit-width"; break;
+        case RIGHT_JUMP_DIST: os << "right-jump-dist"; break;
+        case RIGHT_JUMP_HEIGHT: os << "right-jump-height"; break;
+        default: abort();
+      }
+
+      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+    }
+  };
 
   class Feature_Button : public Carli::Feature_Enumerated<Feature> {
   public:
     enum Axis {
-      IN_START = Feature_Flag::END + 1, ///< Need a +1 because of the extra join
+      IN_START = Feature_Numeric::END + 1, ///< Need a +1 because of the extra join
       IN_DPAD = IN_START + 0,
       IN_JUMP = IN_START + 1,
       IN_SPEED = IN_START + 2,
@@ -204,6 +258,7 @@ namespace Mario {
     int64_t compare_axis(const Feature_Position &) const {return 1;}
     int64_t compare_axis(const Feature_Mode &) const {return 1;}
     int64_t compare_axis(const Feature_Flag &) const {return 1;}
+    int64_t compare_axis(const Feature_Numeric &) const {return 1;}
     int64_t compare_axis(const Feature_Button &rhs) const {
       return axis - rhs.axis;
     }
@@ -319,6 +374,11 @@ namespace Mario {
     const Rete::Symbol_Constant_String_Ptr_C m_on_ground_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("on-ground"));
     const Rete::Symbol_Constant_String_Ptr_C m_may_jump_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("may-jump"));
     const Rete::Symbol_Constant_String_Ptr_C m_is_carrying_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("is-carrying"));
+    const Rete::Symbol_Constant_String_Ptr_C m_is_high_jumping_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("is-high-jumping"));
+    const Rete::Symbol_Constant_String_Ptr_C m_right_pit_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("right-pit-dist"));
+    const Rete::Symbol_Constant_String_Ptr_C m_right_pit_width_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("right-pit-width"));
+    const Rete::Symbol_Constant_String_Ptr_C m_right_jump_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("right-jump-dist"));
+    const Rete::Symbol_Constant_String_Ptr_C m_right_jump_height_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("right-jump-height"));
     const Rete::Symbol_Constant_String_Ptr_C m_dpad_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("dpad"));
     const Rete::Symbol_Constant_String_Ptr_C m_jump_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("jump"));
     const Rete::Symbol_Constant_String_Ptr_C m_speed_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("speed"));

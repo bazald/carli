@@ -114,6 +114,8 @@ namespace Rete {
 
     virtual void output_name(std::ostream &os) const = 0;
 
+    virtual bool is_active() const = 0; ///< Has the node matched and forwarded at least one token?
+
   protected:
     template<typename CONTAINER, typename KEY>
     typename CONTAINER::iterator find(CONTAINER &tokens, const KEY &token) {

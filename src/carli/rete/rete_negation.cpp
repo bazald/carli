@@ -64,6 +64,17 @@ namespace Rete {
     return false;
   }
 
+  void Rete_Negation::output_name(std::ostream &os) const {
+    os << "n(";
+    if(input)
+      input->output_name(os);
+    os << ')';
+  }
+  
+  bool Rete_Negation::is_active() const {
+    return input_tokens.empty();
+  }
+  
   Rete_Negation_Ptr Rete_Negation::find_existing(const Rete_Node_Ptr &out) {
     for(auto &o : out->get_outputs()) {
       if(auto existing_negation = std::dynamic_pointer_cast<Rete_Negation>(o))
@@ -71,13 +82,6 @@ namespace Rete {
     }
 
     return nullptr;
-  }
-
-  void Rete_Negation::output_name(std::ostream &os) const {
-    os << "n(";
-    if(input)
-      input->output_name(os);
-    os << ')';
   }
 
   void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out) {

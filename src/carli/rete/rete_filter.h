@@ -14,23 +14,25 @@ namespace Rete {
 
     const WME & get_wme() const;
 
-    void destroy(Filters &filters, const Rete_Node_Ptr &output);
+    void destroy(Filters &filters, const Rete_Node_Ptr &output) override;
 
-    Rete_Node_Ptr_C parent() const {abort();}
-    Rete_Node_Ptr parent() {abort();}
+    Rete_Node_Ptr_C parent() const override {abort();}
+    Rete_Node_Ptr parent() override {abort();}
 
     void insert_wme(const WME_Ptr_C &wme);
     void remove_wme(const WME_Ptr_C &wme);
 
-    void insert_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &);
-    bool remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &);
+    void insert_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &) override;
+    bool remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &) override;
 
-    void pass_tokens(const Rete_Node_Ptr &output);
-    void unpass_tokens(const Rete_Node_Ptr &output);
+    void pass_tokens(const Rete_Node_Ptr &output) override;
+    void unpass_tokens(const Rete_Node_Ptr &output) override;
 
-    bool operator==(const Rete_Node &rhs) const;
+    bool operator==(const Rete_Node &rhs) const override;
 
-    void output_name(std::ostream &os) const;
+    void output_name(std::ostream &os) const override;
+
+    bool is_active() const override;
 
   private:
     WME m_wme;

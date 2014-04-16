@@ -118,6 +118,20 @@ namespace Rete {
     return false;
   }
 
+  void Rete_Join::output_name(std::ostream &os) const {
+    os << "j(" << bindings << ',';
+    if(input0)
+      input0->output_name(os);
+    os << ',';
+    if(input1)
+      input1->output_name(os);
+    os << ')';
+  }
+  
+  bool Rete_Join::is_active() const {
+    return !output_tokens.empty();
+  }
+  
   Rete_Join_Ptr Rete_Join::find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
     for(auto &o0 : out0->get_outputs()) {
       if(auto existing_join = std::dynamic_pointer_cast<Rete_Join>(o0)) {
@@ -129,16 +143,6 @@ namespace Rete {
     }
 
     return nullptr;
-  }
-
-  void Rete_Join::output_name(std::ostream &os) const {
-    os << "j(" << bindings << ',';
-    if(input0)
-      input0->output_name(os);
-    os << ',';
-    if(input1)
-      input1->output_name(os);
-    os << ')';
   }
 
   void Rete_Join::join_tokens(const WME_Token_Ptr_C &lhs, const WME_Token_Ptr_C &rhs) {

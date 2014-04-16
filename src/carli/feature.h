@@ -52,6 +52,8 @@ namespace Carli {
     virtual int64_t compare_axis(const Feature &rhs) const = 0;
     virtual int64_t compare_value(const Feature &rhs) const = 0;
 
+    virtual bool matches(const Rete::WME_Token &token) const = 0;
+
     virtual std::vector<Feature *> refined() const {return std::vector<Feature *>();}
 
     virtual void print(std::ostream &os) const = 0;
@@ -63,6 +65,8 @@ namespace Carli {
     }
 
     List features;
+
+    bool detected = false;
   };
 
 }
@@ -110,10 +114,14 @@ namespace Carli {
     {
     }
 
-    int64_t get_depth() const {return 1;}
+    int64_t get_depth() const override {return 1;}
 
-    int64_t compare_value(const Carli::Feature &rhs) const {
+    int64_t compare_value(const Carli::Feature &rhs) const override {
       return Feature_Enumerated_Data::compare_value(debuggable_cast<const Feature_Enumerated &>(rhs));
+    }
+
+    bool matches(const Rete::WME_Token &token) const override {
+      return debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[wme_token_index()]).value == value;
     }
   };
 
@@ -176,15 +184,20 @@ namespace Carli {
     {
     }
 
-    virtual Feature_Ranged * clone() const = 0;
+    virtual Feature_Ranged * clone() const override = 0;
 
-    int64_t get_depth() const {return depth;}
+    int64_t get_depth() const override {return depth;}
 
-    int64_t compare_value(const Carli::Feature &rhs) const {
+    int64_t compare_value(const Carli::Feature &rhs) const override {
       return Feature_Ranged_Data::compare_value(debuggable_cast<const Feature_Ranged &>(rhs));
     }
+    
+    bool matches(const Rete::WME_Token &token) const override {
+      const double value_ = debuggable_cast<const Rete::Symbol_Constant_Float &>(*token[axis]).value;
+      return bound_lower <= value_ && value_ < bound_upper;
+    }
 
-    std::vector<Carli::Feature *> refined() const {
+    std::vector<Carli::Feature *> refined() const override {
       std::vector<Carli::Feature *> refined_features;
 
       const double mpt = midpt();
@@ -208,7 +221,7 @@ namespace Carli {
       return refined_features;
     }
 
-    void print(std::ostream &os) const {
+    void print(std::ostream &os) const override {
       Feature_Ranged_Data::print(os);
     }
   };

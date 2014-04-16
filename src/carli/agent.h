@@ -6,6 +6,7 @@
 #include "utility/random.h"
 
 #include "rete/rete_agent.h"
+#include "rete/symbol.h"
 
 #include "environment.h"
 #include "feature.h"
@@ -38,8 +39,8 @@ namespace Carli {
     typedef double reward_type;
     typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
 
-    bool specialize(const Rete::Rete_Action &rete_action, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general);
-    void expand_fringe(const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general, const Feature * const &specialization);
+    bool specialize(const Rete::Rete_Action &rete_action, const Rete::WME_Token &token, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general);
+    void expand_fringe(const Rete::WME_Token &token, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general, const Feature * const &specialization);
 
     Agent(const std::shared_ptr<Environment> &environment);
 

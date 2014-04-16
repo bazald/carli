@@ -17,23 +17,25 @@ namespace Rete {
     Rete_Predicate(const Predicate &predicate_, const WME_Token_Index lhs_index_, const WME_Token_Index rhs_index_);
     Rete_Predicate(const Predicate &predicate_, const WME_Token_Index lhs_index_, const Symbol_Ptr_C &rhs_);
 
-    void destroy(Filters &filters, const Rete_Node_Ptr &output);
+    void destroy(Filters &filters, const Rete_Node_Ptr &output) override;
 
-    Rete_Node_Ptr_C parent() const {return input->shared();}
-    Rete_Node_Ptr parent() {return input->shared();}
+    Rete_Node_Ptr_C parent() const override {return input->shared();}
+    Rete_Node_Ptr parent() override {return input->shared();}
 
-    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from);
-    bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from);
+    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
+    bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
 
-    void pass_tokens(const Rete_Node_Ptr &output);
-    void unpass_tokens(const Rete_Node_Ptr &output);
+    void pass_tokens(const Rete_Node_Ptr &output) override;
+    void unpass_tokens(const Rete_Node_Ptr &output) override;
 
-    bool operator==(const Rete_Node &rhs) const;
+    bool operator==(const Rete_Node &rhs) const override;
+
+    void output_name(std::ostream &os) const override;
+
+    bool is_active() const override;
 
     static Rete_Predicate_Ptr find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out);
     static Rete_Predicate_Ptr find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out);
-
-    void output_name(std::ostream &os) const;
 
   private:
     bool test_predicate(const Symbol_Ptr_C &lhs, const Symbol_Ptr_C &rhs) const;

@@ -94,4 +94,8 @@ namespace Rete {
     os << 'f' << m_wme;
   }
 
+  bool Rete_Filter::is_active() const {
+    return !tokens.empty();
+  }
+
 }

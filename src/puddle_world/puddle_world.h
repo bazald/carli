@@ -87,17 +87,17 @@ namespace Puddle_World {
     }
   };
 
-  class Move_Direction : public Carli::Feature {
+  class Move_Direction : public Carli::Feature_Enumerated<Feature> {
   public:
     enum Index {index = 2};
 
-    Move_Direction(const Direction &direction_)
-     : direction(direction_)
+    Move_Direction(const Direction &direction)
+     : Feature_Enumerated<Feature>(direction)
     {
     }
 
     Move_Direction * clone() const {
-      return new Move_Direction(direction);
+      return new Move_Direction(Direction(value));
     }
 
     int64_t get_depth() const {
@@ -111,7 +111,7 @@ namespace Puddle_World {
       return 1;
     }
     int64_t compare_axis(const Move_Direction &rhs) const {
-      return direction - debuggable_cast<const Move_Direction &>(rhs).direction;
+      return value - debuggable_cast<const Move_Direction &>(rhs).value;
     }
 
     int64_t compare_value(const Carli::Feature &) const {
@@ -123,10 +123,8 @@ namespace Puddle_World {
     }
 
     void print(ostream &os) const {
-      os << "move(" << direction << ')';
+      os << "move(" << Direction(value) << ')';
     }
-
-    Direction direction;
   };
 
   class Move : public Carli::Action {

@@ -10,7 +10,8 @@
 namespace Mario {
 
   enum {
-    OBSERVATION_SIZE = 22
+    OBSERVATION_WIDTH = 22,
+    OBSERVATION_HEIGHT = 22
   };
 
   enum Button {
@@ -99,8 +100,8 @@ namespace Mario {
       } detail;
     };
     
-    std::array<std::array<Tile_Info, OBSERVATION_SIZE>, OBSERVATION_SIZE> getLevelSceneObservation;
-    std::array<std::array<Object, OBSERVATION_SIZE>, OBSERVATION_SIZE> getEnemiesObservation;
+    std::array<std::array<Tile_Info, OBSERVATION_WIDTH>, OBSERVATION_HEIGHT> getLevelSceneObservation;
+    std::array<std::array<Object, OBSERVATION_WIDTH>, OBSERVATION_HEIGHT> getEnemiesObservation;
 
     std::vector<std::pair<Object, std::pair<float, float>>> getEnemiesFloatPos;
 
@@ -110,6 +111,7 @@ namespace Mario {
     bool isMarioOnGround = false;
     bool mayMarioJump = false;
     bool isMarioCarrying = false;
+    bool isMarioHighJumping = false;
     
     int getKillsTotal = 0;
     int getKillsByFire = 0;

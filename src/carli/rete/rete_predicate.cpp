@@ -91,6 +91,31 @@ namespace Rete {
     return false;
   }
 
+  void Rete_Predicate::output_name(std::ostream &os) const {
+    switch(m_predicate) {
+      case EQ: os << "EQ"; break;
+      case NEQ: os << "NEQ"; break;
+      case GT: os << "GT"; break;
+      case GTE: os << "GTE"; break;
+      case LT: os << "LT"; break;
+      case LTE: os << "LTE"; break;
+      default: abort();
+    }
+    os << '(' << m_lhs_index << ',';
+    if(m_rhs)
+      os << *m_rhs;
+    else
+      os << m_rhs_index;
+    os << ',';
+    if(input)
+      input->output_name(os);
+    os << ')';
+  }
+  
+  bool Rete_Predicate::is_active() const {
+    return !tokens.empty();
+  }
+  
   Rete_Predicate_Ptr Rete_Predicate::find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out) {
     for(auto &o : out->get_outputs()) {
       if(auto existing_predicate = std::dynamic_pointer_cast<Rete_Predicate>(o)) {
@@ -119,27 +144,6 @@ namespace Rete {
     }
 
     return nullptr;
-  }
-
-  void Rete_Predicate::output_name(std::ostream &os) const {
-    switch(m_predicate) {
-      case EQ: os << "EQ"; break;
-      case NEQ: os << "NEQ"; break;
-      case GT: os << "GT"; break;
-      case GTE: os << "GTE"; break;
-      case LT: os << "LT"; break;
-      case LTE: os << "LTE"; break;
-      default: abort();
-    }
-    os << '(' << m_lhs_index << ',';
-    if(m_rhs)
-      os << *m_rhs;
-    else
-      os << m_rhs_index;
-    os << ',';
-    if(input)
-      input->output_name(os);
-    os << ')';
   }
 
   bool Rete_Predicate::test_predicate(const Symbol_Ptr_C &lhs, const Symbol_Ptr_C &rhs) const {

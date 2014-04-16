@@ -22,22 +22,24 @@ namespace Rete {
 
     ~Rete_Action();
 
-    void destroy(Filters &filters, const Rete_Node_Ptr &output = Rete_Node_Ptr());
+    void destroy(Filters &filters, const Rete_Node_Ptr &output = Rete_Node_Ptr()) override;
 
-    Rete_Node_Ptr_C parent() const {return input->shared();}
-    Rete_Node_Ptr parent() {return input->shared();}
+    Rete_Node_Ptr_C parent() const override {return input->shared();}
+    Rete_Node_Ptr parent() override {return input->shared();}
 
-    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from);
-    bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from);
+    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
+    bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
 
-    void pass_tokens(const Rete_Node_Ptr &);
-    void unpass_tokens(const Rete_Node_Ptr &);
+    void pass_tokens(const Rete_Node_Ptr &) override;
+    void unpass_tokens(const Rete_Node_Ptr &) override;
 
-    bool operator==(const Rete_Node &/*rhs*/) const;
+    bool operator==(const Rete_Node &/*rhs*/) const override;
+
+    void output_name(std::ostream &os) const override;
+
+    bool is_active() const override;
 
     static Rete_Action_Ptr find_existing(const Action &/*action_*/, const Action &/*retraction_*/, const Rete_Node_Ptr &/*out*/);
-
-    void output_name(std::ostream &os) const;
 
     void set_action(const Action &action_) {
       action = action_;

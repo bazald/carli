@@ -16,9 +16,9 @@ namespace Mario {
   //  action[BUTTON_LEFT] = 0;
   //  action[BUTTON_RIGHT] = 1;
   //  action[BUTTON_DOWN] = 0;
-
-  ////   for(int i = 0; i != OBSERVATION_SIZE; ++i) {
-  ////     for(int j = 0; j != OBSERVATION_SIZE; ++j) {
+  
+  ////   for(int j = 0; j != OBSERVATION_HEIGHT; ++j) {
+  ////     for(int i = 0; i != OBSERVATION_WIDTH; ++i) {
   ////       if(current.getCompleteObservation[i][j] == SCENE_OBJECT_RED_KOOPA_WINGED ||
   ////          current.getCompleteObservation[i][j] == SCENE_OBJECT_GREEN_KOOPA_WINGED ||
   ////          current.getCompleteObservation[i][j] == SCENE_OBJECT_SPIKY_WINGED
@@ -72,7 +72,7 @@ namespace Mario {
     infinite_mario_ai_initialized = false;
   }
   
-  bool can_jump_into(const Tile &tile) {
+  bool tile_can_jump_into(const Tile &tile) {
     switch(tile) {
     case TILE_BRICK:
     case TILE_QUESTION:
@@ -82,7 +82,7 @@ namespace Mario {
     }
   }
 
-  bool can_jump_through(const Tile &tile) {
+  bool tile_can_jump_through(const Tile &tile) {
     switch(tile) {
     case TILE_IRRELEVANT:
     case TILE_HALF_BORDER:
@@ -92,7 +92,7 @@ namespace Mario {
     }
   }
 
-  bool can_land_on(const Tile &tile) {
+  bool tile_can_land_on(const Tile &tile) {
     switch(tile) {
     case TILE_SOMETHING:
     case TILE_BORDER:
@@ -106,7 +106,7 @@ namespace Mario {
     }
   }
 
-  bool can_pass_through(const Tile &tile) {
+  bool tile_can_pass_through(const Tile &tile) {
     switch(tile) {
     case TILE_IRRELEVANT:
     case TILE_HALF_BORDER:
@@ -116,7 +116,7 @@ namespace Mario {
     }
   }
 
-  bool dangerous(const Object &object) {
+  bool object_dangerous(const Object &object) {
     switch(object) {
     case OBJECT_GOOMBA:
     case OBJECT_GOOMBA_WINGED:
@@ -135,7 +135,7 @@ namespace Mario {
     }
   }
   
-  bool flies(const Object &object) {
+  bool object_flies(const Object &object) {
     switch(object) {
     case OBJECT_GOOMBA_WINGED:
     case OBJECT_RED_KOOPA_WINGED:
@@ -149,7 +149,7 @@ namespace Mario {
     }
   }
   
-  bool powerup(const Object &object) {
+  bool object_powerup(const Object &object) {
     switch(object) {
     case OBJECT_MUSHROOM:
     case OBJECT_FIRE_FLOWER:
@@ -159,7 +159,7 @@ namespace Mario {
     }
   }
 
-  bool killable_by_fireball(const Object &object) {
+  bool object_killable_by_fireball(const Object &object) {
     switch(object) {
     case OBJECT_GOOMBA:
     case OBJECT_GOOMBA_WINGED:
@@ -174,7 +174,7 @@ namespace Mario {
     }
   }
 
-  bool killable_by_jump(const Object &object) {
+  bool object_killable_by_jump(const Object &object) {
     switch(object) {
     case OBJECT_GOOMBA:
     case OBJECT_GOOMBA_WINGED:
@@ -199,12 +199,12 @@ namespace Mario {
     action = debuggable_cast<const Button_Presses &>(*m_next).action;
 
 #if defined(_WINDOWS) && defined(NDEBUG)
-    system("cls");
+    //system("cls");
 #endif
     /** Render scene **/
     //std::cerr << "Observation:" << std::endl;
-    //for(int j = 0; j != OBSERVATION_SIZE; ++j) {
-    //  for(int i = 0; i != OBSERVATION_SIZE; ++i) {
+    //for(int j = 0; j != OBSERVATION_HEIGHT; ++j) {
+    //  for(int i = 0; i != OBSERVATION_WIDTH; ++i) {
     //    if(m_current_state->getEnemiesObservation[j][i])
     //      std::cerr << m_current_state->getEnemiesObservation[j][i];
     //    else
@@ -215,23 +215,24 @@ namespace Mario {
     //std::cerr << std::endl;
 
     /** Render pits **/
-    std::cerr << "Observation:" << std::endl;
-    for(int j = 0; j != OBSERVATION_SIZE; ++j) {
-      for(int i = 0; i != OBSERVATION_SIZE; ++i) {
-        if(m_current_state->getLevelSceneObservation[j][i].detail.pit)
-          std::cerr << ' ';
-        else if(m_current_state->getLevelSceneObservation[j][i].detail.above_pit)
-          std::cerr << '.';
-        else
-          std::cerr << '#';
-      }
-      std::cerr << std::endl;
-    }
-    std::cerr << std::endl;
+    //std::cerr << "Observation:" << std::endl;
+    //for(int j = 0; j != OBSERVATION_HEIGHT; ++j) {
+    //  for(int i = 0; i != OBSERVATION_WIDTH; ++i) {
+    //    if(m_current_state->getLevelSceneObservation[j][i].detail.pit)
+    //      std::cerr << ' ';
+    //    else if(m_current_state->getLevelSceneObservation[j][i].detail.above_pit)
+    //      std::cerr << '.';
+    //    else
+    //      std::cerr << '#';
+    //  }
+    //  std::cerr << std::endl;
+    //}
+    //std::cerr << std::endl;
   }
 
   void Agent::act_part_2(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, const bool &terminal) {
-    const reward_type reward = current->getMarioFloatPos.first - prev->getMarioFloatPos.first > 0 ? 1 : -100;
+    const reward_type reward = (current->getMarioFloatPos.first - prev->getMarioFloatPos.first > 0 ? 5 : -100);
+      //- (200.0f - current->getMarioFloatPos.second) / 200.0f;
 
     update();
     
@@ -321,10 +322,15 @@ namespace Mario {
     auto filter_on_ground = make_filter(Rete::WME(m_first_var, m_on_ground_attr, m_third_var));
     auto filter_may_jump = make_filter(Rete::WME(m_first_var, m_may_jump_attr, m_third_var));
     auto filter_is_carrying = make_filter(Rete::WME(m_first_var, m_is_carrying_attr, m_third_var));
+    auto filter_is_high_jumping = make_filter(Rete::WME(m_first_var, m_is_high_jumping_attr, m_third_var));
     auto filter_dpad = make_filter(Rete::WME(m_first_var, m_dpad_attr, m_third_var));
     auto filter_jump = make_filter(Rete::WME(m_first_var, m_jump_attr, m_third_var));
     auto filter_speed = make_filter(Rete::WME(m_first_var, m_speed_attr, m_third_var));
     auto filter_type = make_filter(Rete::WME(m_first_var, m_type_attr, m_third_var));
+    auto filter_right_pit_dist = make_filter(Rete::WME(m_first_var, m_right_pit_dist_attr, m_third_var));
+    auto filter_right_pit_width = make_filter(Rete::WME(m_first_var, m_right_pit_width_attr, m_third_var));
+    auto filter_right_jump_dist = make_filter(Rete::WME(m_first_var, m_right_jump_dist_attr, m_third_var));
+    auto filter_right_jump_height = make_filter(Rete::WME(m_first_var, m_right_jump_height_attr, m_third_var));
 
     state_bindings.clear();
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
@@ -352,8 +358,13 @@ namespace Mario {
     auto join_state_on_ground = make_join(state_bindings, join_state_mode, filter_on_ground);
     auto join_state_may_jump = make_join(state_bindings, join_state_on_ground, filter_may_jump);
     auto join_state_is_carrying = make_join(state_bindings, join_state_may_jump, filter_is_carrying);
+    auto join_state_is_high_jumping = make_join(state_bindings, join_state_is_carrying, filter_is_high_jumping);
+    auto join_state_right_pit_dist = make_join(state_bindings, join_state_is_high_jumping, filter_right_pit_dist);
+    auto join_state_right_pit_width = make_join(state_bindings, join_state_right_pit_dist, filter_right_pit_width);
+    auto join_state_right_jump_dist = make_join(state_bindings, join_state_right_pit_width, filter_right_jump_dist);
+    auto join_state_right_jump_height = make_join(state_bindings, join_state_right_jump_dist, filter_right_jump_height);
 
-    auto join_complete_state = make_join(state_bindings, join_state_is_carrying, join_button_presses_in_speed);
+    auto join_complete_state = make_join(state_bindings, join_state_right_jump_height, join_button_presses_in_speed);
 
     auto join_last = make_join(state_bindings, join_complete_state, join_button_presses_out_speed);
     auto &join_enemy_last = join_enemy_y;
@@ -370,7 +381,7 @@ namespace Mario {
 
       node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
         const auto action = get_action(token);
-        if(!this->specialize(rete_action, get_action, node_unsplit))
+        if(!this->specialize(rete_action, token, get_action, node_unsplit))
           this->insert_q_value_next(action, node_unsplit->q_value);
       }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
@@ -399,9 +410,32 @@ namespace Mario {
     //}
 
     /*** State ***/
+    
+    //for(const auto flag : {Feature_Flag::ON_GROUND, Feature_Flag::MAY_JUMP, Feature_Flag::IS_CARRYING, Feature_Flag::IS_HIGH_JUMPING}) {
+    for(const auto flag : {Feature_Flag::IS_CARRYING}) {
+      for(const auto value : {false, true}) {
+        auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
+        auto feature = new Feature_Flag(flag, value);
+        node_fringe->feature = feature;
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(flag, 2), feature->symbol_constant(), node_unsplit->action->parent());
+        node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->insert_q_value_next(action, node_fringe->q_value);
+        }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
+          const auto action = get_action(token);
+          this->purge_q_value_next(action, node_fringe->q_value);
+        }, predicate).get();
+        node_unsplit->fringe_values.push_back(node_fringe);
+      }
+    }
 
     //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::X, 0.0f, 4000.0f);
-    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::Y, 0.0f, 300.0f);
+    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::Y, 0.0f, 352.0f);
+    
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_PIT_DIST, 0.0f, 11.0f);
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_PIT_WIDTH, 0.0f, 11.0f);
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_JUMP_DIST, 0.0f, 11.0f);
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_JUMP_HEIGHT, 0.0f, 11.0f);
 
     /*** Output Buttons ***/
 
@@ -448,6 +482,7 @@ namespace Mario {
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_on_ground_attr, m_current_state->isMarioOnGround ? m_true_value : m_false_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_may_jump_attr, m_current_state->mayMarioJump ? m_true_value : m_false_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_is_carrying_attr, m_current_state->isMarioCarrying ? m_true_value : m_false_value));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_is_high_jumping_attr, m_current_state->isMarioHighJumping ? m_true_value : m_false_value));
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_button_presses_in_attr, m_button_presses_in_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_dpad_attr,
@@ -456,6 +491,51 @@ namespace Mario {
       BUTTON_NONE)));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_jump_attr, m_current_state->action[BUTTON_JUMP] ? m_true_value : m_false_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_speed_attr, m_current_state->action[BUTTON_SPEED] ? m_true_value : m_false_value));
+    
+    {
+      int dist = 0;
+      int width = 0;
+
+      while(dist != OBSERVATION_WIDTH / 2) {
+        if(!m_current_state->getLevelSceneObservation[OBSERVATION_HEIGHT / 2][OBSERVATION_WIDTH / 2 + dist].detail.above_pit) {
+          ++dist;
+          continue;
+        }
+
+        width = 1;
+        while(dist + width != OBSERVATION_WIDTH / 2) {
+          if(!m_current_state->getLevelSceneObservation[OBSERVATION_HEIGHT / 2][OBSERVATION_WIDTH / 2 + dist + width].detail.above_pit)
+            break;
+          ++width;
+        }
+        break;
+      }
+      
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_right_pit_dist_attr, std::make_shared<Rete::Symbol_Constant_Float>(dist)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_right_pit_width_attr, std::make_shared<Rete::Symbol_Constant_Float>(width)));
+    }
+
+    {
+      int dist = 0;
+      int j = OBSERVATION_HEIGHT / 2;
+
+      while(dist != OBSERVATION_WIDTH / 2) {
+        if(tile_can_pass_through(m_current_state->getLevelSceneObservation[j][OBSERVATION_WIDTH / 2 + dist].tile)) {
+          ++dist;
+          continue;
+        }
+
+        while(j != -1) {
+          if(tile_can_pass_through(m_current_state->getLevelSceneObservation[j][OBSERVATION_WIDTH / 2 + dist].tile))
+            break;
+          --j;
+        }
+        break;
+      }
+      
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_right_jump_dist_attr, std::make_shared<Rete::Symbol_Constant_Float>(dist)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_right_jump_height_attr, std::make_shared<Rete::Symbol_Constant_Float>(OBSERVATION_HEIGHT / 2 - j)));
+    }
 
     for(int i = 0; i != 16; ++i) {
       oss << "O" << i + 1;
@@ -500,11 +580,6 @@ namespace Mario {
         insert_wme(wme);
       }
     }
-
-#ifndef NDEBUG
-    static volatile bool test = true;
-    while(test) continue;
-#endif
 
     insert_wme(m_wme_blink);
   }
