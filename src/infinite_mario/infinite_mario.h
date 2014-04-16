@@ -55,8 +55,6 @@ namespace Mario {
     virtual int64_t compare_axis(const Feature_Flag &rhs) const = 0;
     virtual int64_t compare_axis(const Feature_Numeric &rhs) const = 0;
     virtual int64_t compare_axis(const Feature_Button &rhs) const = 0;
-
-    virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
   class Feature_Position : public Carli::Feature_Ranged<Feature> {
@@ -230,13 +228,15 @@ namespace Mario {
   class Feature_Button : public Carli::Feature_Enumerated<Feature> {
   public:
     enum Axis {
-      IN_START = Feature_Numeric::END + 1, ///< Need a +1 because of the extra join
+      IN_JOIN = Feature_Numeric::END,
+      IN_START = IN_JOIN + 1,
       IN_DPAD = IN_START + 0,
       IN_JUMP = IN_START + 1,
       IN_SPEED = IN_START + 2,
       IN_END = IN_SPEED + 1,
 
-      OUT_START = IN_END + 1, ///< Need a +1 because of the extra join
+      OUT_JOIN = IN_END,
+      OUT_START = OUT_JOIN + 1,
       OUT_DPAD = OUT_START + 0,
       OUT_JUMP = OUT_START + 1,
       OUT_SPEED = OUT_START + 2,
@@ -261,6 +261,13 @@ namespace Mario {
     int64_t compare_axis(const Feature_Numeric &) const {return 1;}
     int64_t compare_axis(const Feature_Button &rhs) const {
       return axis - rhs.axis;
+    }
+    
+    Rete::WME_Bindings bindings() const override {
+      const auto binding = axis < OUT_JOIN ? IN_JOIN : OUT_JOIN;
+      Rete::WME_Bindings bindings;
+      bindings.insert(std::make_pair(Rete::WME_Token_Index(binding, 2), Rete::WME_Token_Index(axis, 0)));
+      return bindings;
     }
 
     Rete::WME_Token_Index wme_token_index() const {

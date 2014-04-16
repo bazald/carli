@@ -10,15 +10,12 @@ namespace Carli {
 
     /// TODO: choose intelligently again
     auto gen = general->fringe_values.begin();
-  //  for(auto count = random.rand_lt(general->fringe_values.size()); count; --count)
-  //    ++gen;
-    assert(gen != general->fringe_values.end());
     auto chosen = *gen;
-
+    assert(gen != general->fringe_values.end());
+    size_t count = 0;
     for(auto &fringe : general->fringe_values) {
-      if(*fringe->feature < *chosen->feature) {
+      if(fringe->feature->matches(token) && random.frand_lt() < 1.0 / ++count)
         chosen = fringe;
-      }
     }
 
   //#ifdef DEBUG_OUTPUT
@@ -61,7 +58,7 @@ namespace Carli {
     for(auto &fringe : general->fringe_values) {
       std::cerr << ' ';
       if(fringe->feature->matches(token))
-        std::cerr << '*';
+      std::cerr << '*';
       std::cerr << *fringe->feature;
     }
     std::cerr << std::endl;
@@ -164,9 +161,7 @@ namespace Carli {
               else
                 rl = std::make_shared<Node_Fringe>(*this, leaf->q_value->depth + 1);
 
-              Rete::WME_Bindings bindings;
-              //bindings.insert(std::make_pair(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 2)));
-              new_test = make_existential_join(bindings, leaf->action->parent(), fringe_action->parent());
+              new_test = make_existential_join(leaf->feature->bindings(), leaf->action->parent(), fringe_action->parent());
             }
 
             rl->feature = fringe->feature->clone();

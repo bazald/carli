@@ -1,5 +1,5 @@
 --split-min
-9
+2
 --discount-rate
 0.9
 --learning-rate

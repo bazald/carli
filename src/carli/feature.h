@@ -53,6 +53,10 @@ namespace Carli {
     virtual int64_t compare_value(const Feature &rhs) const = 0;
 
     virtual bool matches(const Rete::WME_Token &token) const = 0;
+    
+    virtual Rete::WME_Bindings bindings() const {return Rete::WME_Bindings();}
+
+    virtual Rete::WME_Token_Index wme_token_index() const = 0;
 
     virtual std::vector<Feature *> refined() const {return std::vector<Feature *>();}
 
