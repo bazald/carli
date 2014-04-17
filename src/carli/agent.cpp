@@ -161,7 +161,7 @@ namespace Carli {
               else
                 rl = std::make_shared<Node_Fringe>(*this, leaf->q_value->depth + 1);
 
-              new_test = make_existential_join(leaf->feature->bindings(), leaf->action->parent(), fringe_action->parent());
+              new_test = make_existential_join(fringe->feature->bindings(), leaf->action->parent(), fringe_action->parent());
             }
 
             rl->feature = fringe->feature->clone();

@@ -45,8 +45,6 @@ namespace Puddle_World {
     virtual int64_t compare_axis(const Feature &rhs) const = 0;
     virtual int64_t compare_axis(const Position &rhs) const = 0;
     virtual int64_t compare_axis(const Move_Direction &rhs) const = 0;
-
-    virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
   class Position : public Carli::Feature_Ranged<Feature> {
@@ -72,10 +70,6 @@ namespace Puddle_World {
       return -1;
     }
 
-    Rete::WME_Token_Index wme_token_index() const {
-      return axis;
-    }
-
     void print(ostream &os) const {
       switch(axis.first) {
         case X: os << 'x'; break;
@@ -92,7 +86,7 @@ namespace Puddle_World {
     enum Index {index = 2};
 
     Move_Direction(const Direction &direction)
-     : Feature_Enumerated<Feature>(direction)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(index, 2), direction)
     {
     }
 
@@ -116,10 +110,6 @@ namespace Puddle_World {
 
     int64_t compare_value(const Carli::Feature &) const {
       return 0;
-    }
-
-    Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(2, 2);
     }
 
     void print(ostream &os) const {

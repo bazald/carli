@@ -72,8 +72,6 @@ namespace Tetris {
     virtual int64_t compare_axis(const Gaps &rhs) const = 0;
     virtual int64_t compare_axis(const Clears &rhs) const = 0;
     virtual int64_t compare_axis(const X_Odd &rhs) const = 0;
-
-    virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
   class Type : public Carli::Feature_Enumerated<Feature> {
@@ -81,7 +79,7 @@ namespace Tetris {
     enum Axis : size_t {CURRENT = 1, NEXT = 2};
 
     Type(const Axis &axis_, const Tetromino_Type &type_)
-     : Feature_Enumerated<Feature>(type_), axis(axis_)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), type_), axis(axis_)
     {
     }
 
@@ -100,10 +98,6 @@ namespace Tetris {
     int64_t compare_axis(const Gaps &) const {return -1;}
     int64_t compare_axis(const Clears &) const {return -1;}
     int64_t compare_axis(const X_Odd &) const {return -1;}
-
-    Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(axis, 2);
-    }
 
     void print(ostream &os) const {
       os << "type(" << (axis == CURRENT ? "current" : "next") << ':' << value << ')';
@@ -136,10 +130,6 @@ namespace Tetris {
     int64_t compare_axis(const Gaps &) const {return -1;}
     int64_t compare_axis(const Clears &) const {return -1;}
     int64_t compare_axis(const X_Odd &) const {return -1;}
-
-    Rete::WME_Token_Index wme_token_index() const {
-      return axis;
-    }
 
     void print(ostream &os) const {
       switch(axis.first) {
@@ -177,10 +167,6 @@ namespace Tetris {
     int64_t compare_axis(const Clears &) const {return -1;}
     int64_t compare_axis(const X_Odd &) const {return -1;}
 
-    Rete::WME_Token_Index wme_token_index() const {
-      return axis;
-    }
-
     void print(ostream &os) const {
       switch(axis.first) {
         case X: os << 'x'; break;
@@ -216,10 +202,6 @@ namespace Tetris {
     }
     int64_t compare_axis(const Clears &) const {return -1;}
     int64_t compare_axis(const X_Odd &) const {return -1;}
-
-    Rete::WME_Token_Index wme_token_index() const {
-      return axis;
-    }
 
     void print(ostream &os) const {
       switch(axis.first) {
@@ -257,10 +239,6 @@ namespace Tetris {
     }
     int64_t compare_axis(const X_Odd &) const {return -1;}
 
-    Rete::WME_Token_Index wme_token_index() const {
-      return axis;
-    }
-
     void print(ostream &os) const {
       switch(axis.first) {
         case CLEARS: os << "clears"; break;
@@ -278,7 +256,7 @@ namespace Tetris {
     enum Axis : size_t {AXIS = 13};
 
     X_Odd(const bool &value_)
-     : Feature_Enumerated<Feature>(value_)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(AXIS, 2), value_)
     {
     }
 
@@ -296,10 +274,6 @@ namespace Tetris {
     int64_t compare_axis(const Clears &) const {return -1;}
     int64_t compare_axis(const X_Odd &) const {
       return 0;
-    }
-
-    Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(AXIS, 2);
     }
 
     void print(ostream &os) const {

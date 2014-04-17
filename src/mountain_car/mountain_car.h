@@ -46,8 +46,6 @@ namespace Mountain_Car {
     virtual int64_t compare_axis(const Position &rhs) const = 0;
     virtual int64_t compare_axis(const Velocity &rhs) const = 0;
     virtual int64_t compare_axis(const Acceleration_Direction &rhs) const = 0;
-
-    virtual Rete::WME_Token_Index wme_token_index() const = 0;
   };
 
   class Position : public Carli::Feature_Ranged<Feature> {
@@ -74,10 +72,6 @@ namespace Mountain_Car {
     }
     int64_t compare_axis(const Acceleration_Direction &) const {
       return -1;
-    }
-
-    Rete::WME_Token_Index wme_token_index() const {
-      return axis;
     }
 
     void print(ostream &os) const {
@@ -111,10 +105,6 @@ namespace Mountain_Car {
       return -1;
     }
 
-    Rete::WME_Token_Index wme_token_index() const {
-      return axis;
-    }
-
     void print(ostream &os) const {
       os << "x-dot(" << bound_lower << ',' << bound_upper << ':' << depth << ')';
     }
@@ -125,7 +115,7 @@ namespace Mountain_Car {
     enum Index {index = 2};
 
     Acceleration_Direction(const Direction &direction)
-     : Feature_Enumerated<Feature>(direction)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(index, 2), direction)
     {
     }
 
@@ -152,10 +142,6 @@ namespace Mountain_Car {
 
     int64_t compare_value(const Carli::Feature &) const {
       return 0;
-    }
-
-    Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(index, 2);
     }
 
     void print(ostream &os) const {

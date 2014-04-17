@@ -315,7 +315,7 @@ namespace Mario {
 
   void Agent::generate_rete() {
     Rete::WME_Bindings state_bindings;
-
+    
     auto filter_x = make_filter(Rete::WME(m_first_var, m_x_attr, m_third_var));
     auto filter_y = make_filter(Rete::WME(m_first_var, m_y_attr, m_third_var));
     auto filter_mode = make_filter(Rete::WME(m_first_var, m_mode_attr, m_third_var));
@@ -345,10 +345,10 @@ namespace Mario {
     auto join_button_presses_out_jump = make_join(state_bindings, join_button_presses_out_dpad, filter_jump);
     auto join_button_presses_out_speed = make_join(state_bindings, join_button_presses_out_jump, filter_speed);
 
-    auto filter_enemy = make_filter(Rete::WME(m_first_var, m_enemy_attr, m_third_var));
-    auto join_enemy_type = make_join(state_bindings, filter_enemy, filter_type);
-    auto join_enemy_x = make_join(state_bindings, join_enemy_type, filter_x);
-    auto join_enemy_y = make_join(state_bindings, join_enemy_x, filter_y);
+    //auto filter_enemy = make_filter(Rete::WME(m_first_var, m_enemy_attr, m_third_var));
+    //auto join_enemy_type = make_join(state_bindings, filter_enemy, filter_type);
+    //auto join_enemy_x = make_join(state_bindings, join_enemy_type, filter_x);
+    //auto join_enemy_y = make_join(state_bindings, join_enemy_x, filter_y);
 
     state_bindings.clear();
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
@@ -367,7 +367,7 @@ namespace Mario {
     auto join_complete_state = make_join(state_bindings, join_state_right_jump_height, join_button_presses_in_speed);
 
     auto join_last = make_join(state_bindings, join_complete_state, join_button_presses_out_speed);
-    auto &join_enemy_last = join_enemy_y;
+    //auto &join_enemy_last = join_enemy_y;
 
     auto filter_blink = make_filter(*m_wme_blink);
 
@@ -389,35 +389,14 @@ namespace Mario {
       }, join_blink).get();
     }
 
-    //for(Type::Axis axis : {Type::CURRENT/*, Type::NEXT*/}) {
-    //  for(auto super : {TETS_SQUARE, TETS_LINE, TETS_T, TETS_L, TETS_J, TETS_S, TETS_Z}) {
-    //    for(uint8_t orientation = 0, oend = num_types(super); orientation != oend; ++orientation) {
-    //      const auto type = super_to_type(super, orientation);
-    //      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
-    //      auto feature = new Type(axis, type);
-    //      node_fringe->feature = feature;
-    //      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
-    //      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-    //        const auto action = get_action(token);
-    //        this->insert_q_value_next(action, node_fringe->q_value);
-    //      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-    //        const auto action = get_action(token);
-    //        this->purge_q_value_next(action, node_fringe->q_value);
-    //      }, predicate).get();
-    //      node_unsplit->fringe_values.push_back(node_fringe);
-    //    }
-    //  }
-    //}
-
     /*** State ***/
     
-    //for(const auto flag : {Feature_Flag::ON_GROUND, Feature_Flag::MAY_JUMP, Feature_Flag::IS_CARRYING, Feature_Flag::IS_HIGH_JUMPING}) {
-    for(const auto flag : {Feature_Flag::IS_CARRYING}) {
+    for(const auto flag : {/*Feature_Flag::ON_GROUND, Feature_Flag::MAY_JUMP,*/ Feature_Flag::IS_CARRYING, /*Feature_Flag::IS_HIGH_JUMPING*/}) {
       for(const auto value : {false, true}) {
         auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
         auto feature = new Feature_Flag(flag, value);
         node_fringe->feature = feature;
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(flag, 2), feature->symbol_constant(), node_unsplit->action->parent());
+        auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), node_unsplit->action->parent());
         node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
           this->insert_q_value_next(action, node_fringe->q_value);
@@ -443,7 +422,7 @@ namespace Mario {
       auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
       auto feature = new Feature_Button(Feature_Button::OUT_DPAD, dpad);
       node_fringe->feature = feature;
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Feature_Button::OUT_DPAD, 2), feature->symbol_constant(), node_unsplit->action->parent());
+      auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), node_unsplit->action->parent());
       node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
         this->insert_q_value_next(action, node_fringe->q_value);

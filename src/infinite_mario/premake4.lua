@@ -14,9 +14,7 @@ project "infinite_mario"
     print(os.outputof("cd ../../marioai && ant clean"))
   end
 
-  includedirs { "C:\\Program Files\\Java\\jdk1.7.0_40\\include", "C:\\Program Files\\Java\\jdk1.7.0_40\\include\\win32",
-                "/usr/lib/jvm/java-7-openjdk-amd64/include",
-                "../../marioai/classes" }
+  includedirs { "../../marioai/classes" }
 
   links { "carli", "rete", "utility" }
 

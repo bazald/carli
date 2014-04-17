@@ -81,10 +81,6 @@ namespace Mario {
     int64_t compare_axis(const Feature_Numeric &) const {return -1;}
     int64_t compare_axis(const Feature_Button &) const {return -1;}
 
-    Rete::WME_Token_Index wme_token_index() const {
-      return axis;
-    }
-
     void print(ostream &os) const {
       switch(axis.first) {
         case X: os << "x"; break;
@@ -101,7 +97,7 @@ namespace Mario {
     enum Axis : size_t {MODE = 2};
 
     Feature_Mode(const Mode &mode)
-     : Feature_Enumerated<Feature>(mode)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(MODE, 2), mode)
     {
     }
 
@@ -118,10 +114,6 @@ namespace Mario {
     int64_t compare_axis(const Feature_Numeric &) const {return -1;}
     int64_t compare_axis(const Feature_Button &) const {return -1;}
     
-    Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(MODE, 2);
-    }
-
     void print(ostream &os) const {
       os << "mode(" << value << ')';
     }
@@ -139,12 +131,12 @@ namespace Mario {
     };
 
     Feature_Flag(const Axis &axis_, const bool &flag)
-     : Feature_Enumerated<Feature>(flag), axis(axis_)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), flag)
     {
     }
 
     Feature_Flag * clone() const {
-      return new Feature_Flag(axis, value != 0);
+      return new Feature_Flag(Axis(axis.first), value != 0);
     }
 
     int64_t compare_axis(const Feature &rhs) const {
@@ -153,17 +145,13 @@ namespace Mario {
     int64_t compare_axis(const Feature_Position &) const {return 1;}
     int64_t compare_axis(const Feature_Mode &) const {return 1;}
     int64_t compare_axis(const Feature_Flag &rhs) const {
-      return axis - rhs.axis;
+      return axis.first - rhs.axis.first;
     }
     int64_t compare_axis(const Feature_Numeric &) const {return -1;}
     int64_t compare_axis(const Feature_Button &) const {return -1;}
     
-    Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(axis, 2);
-    }
-
     void print(ostream &os) const {
-      switch(axis) {
+      switch(axis.first) {
       case ON_GROUND       : os << "on-ground";       break;
       case MAY_JUMP        : os << "may-jump";        break;
       case IS_CARRYING     : os << "is-carrying";     break;
@@ -173,8 +161,6 @@ namespace Mario {
 
       os << '(' << value << ')';
     }
-
-    Axis axis;
   };
   
   class Feature_Numeric : public Carli::Feature_Ranged<Feature> {
@@ -208,10 +194,6 @@ namespace Mario {
     }
     int64_t compare_axis(const Feature_Button &) const {return -1;}
 
-    Rete::WME_Token_Index wme_token_index() const {
-      return axis;
-    }
-
     void print(ostream &os) const {
       switch(axis.first) {
         case RIGHT_PIT_DIST: os << "right-pit-dist"; break;
@@ -244,12 +226,12 @@ namespace Mario {
     };
 
     Feature_Button(const Axis &axis_, const int64_t &flag)
-     : Feature_Enumerated<Feature>(flag), axis(axis_)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), flag)
     {
     }
 
     Feature_Button * clone() const {
-      return new Feature_Button(axis, value);
+      return new Feature_Button(Axis(axis.first), value);
     }
 
     int64_t compare_axis(const Feature &rhs) const {
@@ -260,43 +242,37 @@ namespace Mario {
     int64_t compare_axis(const Feature_Flag &) const {return 1;}
     int64_t compare_axis(const Feature_Numeric &) const {return 1;}
     int64_t compare_axis(const Feature_Button &rhs) const {
-      return axis - rhs.axis;
+      return axis.first - rhs.axis.first;
     }
     
     Rete::WME_Bindings bindings() const override {
-      const auto binding = axis < OUT_JOIN ? IN_JOIN : OUT_JOIN;
+      const auto binding = axis.first < OUT_JOIN ? IN_JOIN : OUT_JOIN;
       Rete::WME_Bindings bindings;
-      bindings.insert(std::make_pair(Rete::WME_Token_Index(binding, 2), Rete::WME_Token_Index(axis, 0)));
+      bindings.insert(std::make_pair(Rete::WME_Token_Index(binding, 2), Rete::WME_Token_Index(binding, 2)));
       return bindings;
     }
 
-    Rete::WME_Token_Index wme_token_index() const {
-      return Rete::WME_Token_Index(axis, 2);
-    }
-
     void print(ostream &os) const {
-      switch(axis) {
+      switch(axis.first) {
       case IN_DPAD:
       case OUT_DPAD:
-        os << "dpad-" << (axis == IN_DPAD ? "in" : "out") << '(' << (value == BUTTON_LEFT ? "left" : value == BUTTON_RIGHT ? "right" : value == BUTTON_DOWN ? "down" : "released") << ')';
+        os << "dpad-" << (axis.first == IN_DPAD ? "in" : "out") << '(' << (value == BUTTON_LEFT ? "left" : value == BUTTON_RIGHT ? "right" : value == BUTTON_DOWN ? "down" : "released") << ')';
         break;
 
       case IN_JUMP:
       case OUT_JUMP:
-        os << "jump-" << (axis == IN_JUMP ? "in" : "out") << '(' << value << ')';
+        os << "jump-" << (axis.first == IN_JUMP ? "in" : "out") << '(' << value << ')';
         break;
 
       case IN_SPEED:
       case OUT_SPEED:
-        os << "speed-" << (axis == IN_SPEED ? "in" : "out") << '(' << value << ')';
+        os << "speed-" << (axis.first == IN_SPEED ? "in" : "out") << '(' << value << ')';
         break;
 
       default:
         abort();
       }
     }
-
-    Axis axis;
   };
 
   class Button_Presses : public Carli::Action {

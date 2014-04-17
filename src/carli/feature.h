@@ -87,8 +87,8 @@ namespace Carli {
     Feature_Enumerated_Data & operator=(const Feature_Enumerated_Data &) = delete;
 
   public:
-    Feature_Enumerated_Data(const int64_t &value_)
-     : value(value_)
+    Feature_Enumerated_Data(const Rete::WME_Token_Index &axis_, const int64_t &value_)
+     : axis(axis_), value(value_)
     {
     }
 
@@ -104,6 +104,8 @@ namespace Carli {
       return std::make_shared<Rete::Symbol_Constant_Int>(value);
     }
 
+    Rete::WME_Token_Index axis;
+
     int64_t value;
   };
 
@@ -113,8 +115,8 @@ namespace Carli {
     Feature_Enumerated & operator=(const Feature_Enumerated &) = delete;
 
   public:
-    Feature_Enumerated(const int64_t &value_)
-     : Feature_Enumerated_Data(value_)
+    Feature_Enumerated(const Rete::WME_Token_Index &axis_, const int64_t &value_)
+     : Feature_Enumerated_Data(axis_, value_)
     {
     }
 
@@ -126,6 +128,10 @@ namespace Carli {
 
     bool matches(const Rete::WME_Token &token) const override {
       return debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[wme_token_index()]).value == value;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const override {
+      return axis;
     }
   };
 
@@ -223,6 +229,10 @@ namespace Carli {
       }
 
       return refined_features;
+    }
+
+    Rete::WME_Token_Index wme_token_index() const override {
+      return axis;
     }
 
     void print(std::ostream &os) const override {
