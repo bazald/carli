@@ -153,9 +153,9 @@ namespace Mario {
       getKillsByShell = env->CallIntMethod(observation, getter);
     }
 
-    if(prev.mayMarioJump && prev.action[BUTTON_JUMP])
+    if((prev.mayMarioJump || prev.isMarioHighJumping) && prev.action[BUTTON_JUMP])
       isMarioHighJumping = true;
-    if(isMarioHighJumping && !action[BUTTON_JUMP])
+    if(mayMarioJump || prev.isMarioHighJumping && !action[BUTTON_JUMP] || getMarioFloatPos.second >= prev.getMarioFloatPos.second)
       isMarioHighJumping = false;
   }
 

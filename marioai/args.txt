@@ -1,10 +1,14 @@
 --split-min
-2
+3
+--split-update-count
+5
 --discount-rate
 0.9
 --learning-rate
 0.3
+--eligibility-trace-decay-rate
+0.3
 --policy
-on-policy
+off-policy
 --epsilon-greedy
-0.03
+0.1

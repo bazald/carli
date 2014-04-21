@@ -10,12 +10,18 @@ namespace Carli {
 
     /// TODO: choose intelligently again
     auto gen = general->fringe_values.begin();
-    auto chosen = *gen;
+    Node_Fringe_Ptr chosen;
     assert(gen != general->fringe_values.end());
     size_t count = 0;
     for(auto &fringe : general->fringe_values) {
-      if(fringe->feature->matches(token) && random.frand_lt() < 1.0 / ++count)
-        chosen = fringe;
+      if(fringe->feature->matches(token)) {
+        if(!chosen || fringe->q_value->cabe > chosen->q_value->cabe) {
+          chosen = fringe;
+          count = 1;
+        }
+        else if(fringe->q_value->cabe == chosen->q_value->cabe && random.frand_lt() < 1.0 / ++count)
+          chosen = fringe;
+      }
     }
 
   //#ifdef DEBUG_OUTPUT

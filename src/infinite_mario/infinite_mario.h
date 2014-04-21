@@ -23,6 +23,7 @@ namespace Mario {
 
   class Feature;
   class Feature_Position;
+  class Feature_Velocity;
   class Feature_Mode;
   class Feature_Flag;
   class Feature_Numeric;
@@ -51,15 +52,17 @@ namespace Mario {
 
     virtual int64_t compare_axis(const Feature &rhs) const = 0;
     virtual int64_t compare_axis(const Feature_Position &rhs) const = 0;
+    virtual int64_t compare_axis(const Feature_Velocity &rhs) const = 0;
     virtual int64_t compare_axis(const Feature_Mode &rhs) const = 0;
     virtual int64_t compare_axis(const Feature_Flag &rhs) const = 0;
     virtual int64_t compare_axis(const Feature_Numeric &rhs) const = 0;
     virtual int64_t compare_axis(const Feature_Button &rhs) const = 0;
   };
-
+  
   class Feature_Position : public Carli::Feature_Ranged<Feature> {
   public:
-    enum Axis : size_t {X = 0, Y = 1};
+    enum Axis : size_t {X = 0,
+                        Y = X + 1};
 
     Feature_Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
      : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
@@ -76,6 +79,7 @@ namespace Mario {
     int64_t compare_axis(const Feature_Position &rhs) const {
       return Feature_Ranged_Data::compare_axis(rhs);
     }
+    int64_t compare_axis(const Feature_Velocity &) const {return -1;}
     int64_t compare_axis(const Feature_Mode &) const {return -1;}
     int64_t compare_axis(const Feature_Flag &) const {return -1;}
     int64_t compare_axis(const Feature_Numeric &) const {return -1;}
@@ -92,9 +96,46 @@ namespace Mario {
     }
   };
 
+  class Feature_Velocity : public Carli::Feature_Ranged<Feature> {
+  public:
+    enum Axis : size_t {X_DOT = Feature_Position::Y + 1,
+                        Y_DOT = X_DOT + 1};
+
+    Feature_Velocity(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
+    {
+    }
+
+    Feature_Velocity * clone() const {
+      return new Feature_Velocity(Axis(axis.first), bound_lower, bound_upper, depth, upper);
+    }
+
+    int64_t compare_axis(const Mario::Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int64_t compare_axis(const Feature_Position &) const {return 1;}
+    int64_t compare_axis(const Feature_Velocity &rhs) const {
+      return Feature_Ranged_Data::compare_axis(rhs);
+    }
+    int64_t compare_axis(const Feature_Mode &) const {return -1;}
+    int64_t compare_axis(const Feature_Flag &) const {return -1;}
+    int64_t compare_axis(const Feature_Numeric &) const {return -1;}
+    int64_t compare_axis(const Feature_Button &) const {return -1;}
+
+    void print(ostream &os) const {
+      switch(axis.first) {
+        case X_DOT: os << "x-dot"; break;
+        case Y_DOT: os << "y-dot"; break;
+        default: abort();
+      }
+
+      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+    }
+  };
+
   class Feature_Mode : public Carli::Feature_Enumerated<Feature> {
   public:
-    enum Axis : size_t {MODE = 2};
+    enum Axis : size_t {MODE = Feature_Velocity::Y_DOT + 1};
 
     Feature_Mode(const Mode &mode)
      : Feature_Enumerated<Feature>(Rete::WME_Token_Index(MODE, 2), mode)
@@ -109,6 +150,7 @@ namespace Mario {
       return -rhs.compare_axis(*this);
     }
     int64_t compare_axis(const Feature_Position &) const {return 1;}
+    int64_t compare_axis(const Feature_Velocity &) const {return 1;}
     int64_t compare_axis(const Feature_Mode &) const {return 0;}
     int64_t compare_axis(const Feature_Flag &) const {return -1;}
     int64_t compare_axis(const Feature_Numeric &) const {return -1;}
@@ -127,7 +169,11 @@ namespace Mario {
       MAY_JUMP = START + 1,
       IS_CARRYING = START + 2,
       IS_HIGH_JUMPING = START + 3,
-      END = IS_HIGH_JUMPING + 1
+      IS_ABOVE_PIT = START + 4,
+      IS_IN_PIT = START + 5,
+      PIT_RIGHT = START + 6,
+      OBSTACLE_RIGHT = START + 7,
+      END = OBSTACLE_RIGHT + 1
     };
 
     Feature_Flag(const Axis &axis_, const bool &flag)
@@ -143,6 +189,7 @@ namespace Mario {
       return -rhs.compare_axis(*this);
     }
     int64_t compare_axis(const Feature_Position &) const {return 1;}
+    int64_t compare_axis(const Feature_Velocity &) const {return 1;}
     int64_t compare_axis(const Feature_Mode &) const {return 1;}
     int64_t compare_axis(const Feature_Flag &rhs) const {
       return axis.first - rhs.axis.first;
@@ -156,6 +203,10 @@ namespace Mario {
       case MAY_JUMP        : os << "may-jump";        break;
       case IS_CARRYING     : os << "is-carrying";     break;
       case IS_HIGH_JUMPING : os << "is-high-jumping"; break;
+      case IS_ABOVE_PIT    : os << "is-above-pit";    break;
+      case IS_IN_PIT       : os << "is-in-pit";       break;
+      case PIT_RIGHT       : os << "pit-right";       break;
+      case OBSTACLE_RIGHT  : os << "obstacle-right";  break;
       default: abort();
       }
 
@@ -187,6 +238,7 @@ namespace Mario {
       return -rhs.compare_axis(*this);
     }
     int64_t compare_axis(const Feature_Position &) const {return 1;}
+    int64_t compare_axis(const Feature_Velocity &) const {return 1;}
     int64_t compare_axis(const Feature_Mode &) const {return 1;}
     int64_t compare_axis(const Feature_Flag &) const {return 1;}
     int64_t compare_axis(const Feature_Numeric &rhs) const {
@@ -238,6 +290,7 @@ namespace Mario {
       return -rhs.compare_axis(*this);
     }
     int64_t compare_axis(const Feature_Position &) const {return 1;}
+    int64_t compare_axis(const Feature_Velocity &) const {return 1;}
     int64_t compare_axis(const Feature_Mode &) const {return 1;}
     int64_t compare_axis(const Feature_Flag &) const {return 1;}
     int64_t compare_axis(const Feature_Numeric &) const {return 1;}
@@ -324,7 +377,7 @@ namespace Mario {
 
   class Agent : public Carli::Agent {
   public:
-    Agent(const std::shared_ptr<State> &current_);
+    Agent(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current);
     ~Agent();
 
     void act_part_1(Action &action);
@@ -342,8 +395,9 @@ namespace Mario {
     void generate_features();
 
     void update();
-
+    
     const std::shared_ptr<State> &m_current_state;
+    const std::shared_ptr<State> &m_prev_state;
 
     const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
     const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
@@ -353,11 +407,17 @@ namespace Mario {
     const Rete::Symbol_Constant_String_Ptr_C m_enemy_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("enemy"));
     const Rete::Symbol_Constant_String_Ptr_C m_x_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x"));
     const Rete::Symbol_Constant_String_Ptr_C m_y_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("y"));
+    const Rete::Symbol_Constant_String_Ptr_C m_x_dot_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x-dot"));
+    const Rete::Symbol_Constant_String_Ptr_C m_y_dot_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("y-dot"));
     const Rete::Symbol_Constant_String_Ptr_C m_mode_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("mode"));
     const Rete::Symbol_Constant_String_Ptr_C m_on_ground_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("on-ground"));
     const Rete::Symbol_Constant_String_Ptr_C m_may_jump_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("may-jump"));
     const Rete::Symbol_Constant_String_Ptr_C m_is_carrying_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("is-carrying"));
     const Rete::Symbol_Constant_String_Ptr_C m_is_high_jumping_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("is-high-jumping"));
+    const Rete::Symbol_Constant_String_Ptr_C m_is_above_pit_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("is-above-pit"));
+    const Rete::Symbol_Constant_String_Ptr_C m_is_in_pit_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("is-in-pit"));
+    const Rete::Symbol_Constant_String_Ptr_C m_pit_right_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("pit-right"));
+    const Rete::Symbol_Constant_String_Ptr_C m_obstacle_right_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("obstacle-right"));
     const Rete::Symbol_Constant_String_Ptr_C m_right_pit_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("right-pit-dist"));
     const Rete::Symbol_Constant_String_Ptr_C m_right_pit_width_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("right-pit-width"));
     const Rete::Symbol_Constant_String_Ptr_C m_right_jump_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("right-jump-dist"));
