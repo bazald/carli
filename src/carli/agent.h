@@ -96,6 +96,8 @@ namespace Carli {
     void insert_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value);
     void purge_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value);
 
+    void purge_q_value_eligible(const tracked_ptr<Q_Value> &q_value);
+
     void print(std::ostream &os) const;
 
     void reset_update_counts();

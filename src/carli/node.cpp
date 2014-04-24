@@ -7,6 +7,7 @@ namespace Carli {
   Node::~Node() {
     if(delete_q_value) {
       agent.purge_q_value(q_value);
+      agent.purge_q_value_eligible(q_value);
       q_value.delete_and_zero();
     }
   }

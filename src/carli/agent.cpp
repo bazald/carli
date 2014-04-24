@@ -1,5 +1,7 @@
 #include "agent.h"
 
+//#include "../infinite_mario/infinite_mario.h"
+
 namespace Carli {
 
   bool Agent::specialize(const Rete::Rete_Action &rete_action, const Rete::WME_Token &token, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general) {
@@ -21,6 +23,23 @@ namespace Carli {
         else if(fringe->q_value->cabe == chosen->q_value->cabe && random.frand_lt() < 1.0 / ++count)
           chosen = fringe;
       }
+    }
+    
+    //for(auto &fringe : general->fringe_values) {
+    //  const auto button = dynamic_cast<const Mario::Feature_Button * const>(fringe->feature.get());
+    //  if(button && button->axis.first == Mario::Feature_Button::OUT_JUMP)
+    //    chosen = fringe;
+    //}
+
+    //for(auto &fringe : general->fringe_values) {
+    //  const auto button = dynamic_cast<const Mario::Feature_Button * const>(fringe->feature.get());
+    //  if(button && button->axis.first == Mario::Feature_Button::OUT_DPAD)
+    //    chosen = fringe;
+    //}
+
+    if(!chosen) {
+      std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
+      return false;
     }
 
   //#ifdef DEBUG_OUTPUT
@@ -396,7 +415,7 @@ namespace Carli {
   #endif
     q_values.push_back(q_value);
   }
-
+  
   void Agent::purge_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value) {
   //#ifdef DEBUG_OUTPUT
   //  std::cerr << "Purging next value " << q_value << " for action " << *action << std::endl;
@@ -411,6 +430,12 @@ namespace Carli {
         decrement_badness();
   #endif
     }
+  }
+
+  void Agent::purge_q_value_eligible(const tracked_ptr<Q_Value> &q_value) {
+    if(m_eligible == &q_value->eligible)
+      m_eligible = q_value->eligible.next();
+    q_value->eligible.erase();
   }
 
   void Agent::print(std::ostream &os) const {

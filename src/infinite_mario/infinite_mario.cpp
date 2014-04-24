@@ -235,19 +235,21 @@ namespace Mario {
 
   void Agent::act_part_2(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, const bool &terminal) {
     double delta_x = current->getMarioFloatPos.first - prev->getMarioFloatPos.first;
-    if(delta_x < 0.75)
-      delta_x = -1.0;
+    if(prev->action[BUTTON_RIGHT])
+      delta_x = std::max(delta_x, 0.0);
+    else if(prev->action[BUTTON_LEFT])
+      delta_x = std::min(delta_x, 0.0);
 
-    const bool continued_high_jump = prev->isMarioHighJumping && prev->action[BUTTON_JUMP];
-    const bool stopped_high_jump = prev->isMarioHighJumping && !prev->action[BUTTON_JUMP];
-    const bool legal_jump = prev->mayMarioJump && prev->action[BUTTON_JUMP];
-    const bool illegal_jump = !prev->mayMarioJump && prev->action[BUTTON_JUMP];
+    //const bool continued_high_jump = prev->isMarioHighJumping && prev->action[BUTTON_JUMP];
+    //const bool stopped_high_jump = prev->isMarioHighJumping && !prev->action[BUTTON_JUMP];
+    //const bool legal_jump = prev->mayMarioJump && prev->action[BUTTON_JUMP];
+    //const bool illegal_jump = !prev->mayMarioJump && prev->action[BUTTON_JUMP];
     //const reward_type reward = (delta_x > 0 ? 1 : 2) * delta_x;
 
-    const reward_type reward_jumping = 0; // legal_jump ? 30 : continued_high_jump ? 30 : stopped_high_jump ? -50 : 0;
+    //const reward_type reward_jumping = 0; // legal_jump ? 30 : continued_high_jump ? 30 : stopped_high_jump ? -50 : 0;
     const reward_type reward =
       m_current_state->getLevelSceneObservation[OBSERVATION_HEIGHT / 2][OBSERVATION_WIDTH / 2 - 1].detail.pit
-        ? -10000.0 : 100 * delta_x + reward_jumping;
+        ? -10000.0 : 100.0 * delta_x - 100.0;
 
     std::cerr << "Reward = " << reward << std::endl;
 
@@ -422,7 +424,7 @@ namespace Mario {
     
     for(const auto flag : {/*Feature_Flag::ON_GROUND, Feature_Flag::MAY_JUMP, Feature_Flag::IS_CARRYING,*/
                            /*Feature_Flag::IS_HIGH_JUMPING,*/ Feature_Flag::IS_ABOVE_PIT, Feature_Flag::IS_IN_PIT,
-                           Feature_Flag::PIT_RIGHT, Feature_Flag::OBSTACLE_RIGHT}) {
+                           /*Feature_Flag::PIT_RIGHT,*/ Feature_Flag::OBSTACLE_RIGHT}) {
       for(const auto value : {false, true}) {
         auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
         auto feature = new Feature_Flag(flag, value);
@@ -442,10 +444,10 @@ namespace Mario {
     //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::X, 0.0f, 4000.0f);
     //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::Y, 0.0f, 352.0f);
     
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_PIT_DIST, 0.0f, 11.0f);
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_PIT_WIDTH, 0.0f, 11.0f);
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_JUMP_DIST, 0.0f, 11.0f);
-    generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_JUMP_HEIGHT, 0.0f, 11.0f);
+    generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_PIT_DIST, 0.0f, 12.0f);
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_PIT_WIDTH, 0.0f, 12.0f);
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_JUMP_DIST, 0.0f, 12.0f);
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_JUMP_HEIGHT, 0.0f, 12.0f);
 
     /*** Output Buttons ***/
 
@@ -560,6 +562,8 @@ namespace Mario {
     for(int i = 0; i != 16; ++i) {
       if(i & 0x2 && !m_current_state->mayMarioJump && !m_current_state->isMarioHighJumping)
         continue; ///< Cannot jump, not high jumping
+      if(!(i & 0x2) && m_current_state->isMarioHighJumping)
+        continue; ///< Force high jumping
       oss << "O" << i + 1;
       Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
       oss.str("");

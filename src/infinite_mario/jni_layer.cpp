@@ -295,10 +295,6 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM * /*vm*/, void * /*pvt*/) {
       }
     }
 
-    const auto seed = uint32_t(dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value());
-    Zeni::Random::get().seed(seed);
-    std::cout << "SEED " << seed << std::endl;
-
     Mario::g_prev_state = std::make_shared<Mario::State>();
     Mario::g_current_state = std::make_shared<Mario::State>();
   }
