@@ -148,15 +148,15 @@ namespace Carli {
 
       throw runtime_error(oss.str());
     }
+
+    const auto seed = uint32_t(dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value());
+    Zeni::Random::get().seed(seed);
+    cout << "SEED " << seed << endl;
   }
 
   void Experiment::standard_run(const function<shared_ptr<Environment> ()> &make_env,
                                 const function<shared_ptr<Agent> (const shared_ptr<Environment> &)> &make_agent,
                                 const function<void (const shared_ptr<Agent> &)> &on_episode_termination) {
-    const auto seed = uint32_t(dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value());
-    Zeni::Random::get().seed(seed);
-    cout << "SEED " << seed << endl;
-
     auto env = make_env();
     auto agent = make_agent(env);
 

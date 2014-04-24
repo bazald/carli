@@ -33,17 +33,14 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <random>
 #include <stdint.h>
 
-#ifdef DEBUG_OUTPUT
-#include <iostream>
-#endif
+#include "linkage.h"
 
 #ifdef RANDOM_LOG
 #include <fstream>
 #endif
-
-#include "linkage.h"
 
 namespace Zeni {
 
@@ -75,34 +72,33 @@ namespace Zeni {
 
   public:
     Random(const uint32_t &seed = Random::get().rand())
-     : m_random_value(seed)
+     : m_random(seed)
     {
       log1("Random", seed);
     }
 
     void seed(const uint32_t &seed) {
-      m_random_value = seed;
+      m_random.seed(seed);
       log1("seed", seed);
     }
 
     /// Get the maximum size of a random integer returned from rand()
     int32_t rand_max() const {
-      return 32767;
+      return std::numeric_limits<int32_t>::max();
     }
 
     /// Get a random integer in the range [0, rand_max()]
     int32_t rand() {
-#ifdef DEBUG_OUTPUT
-      static size_t count = 0u;
-#endif
-      m_random_value = m_random_value * 1103515245 + 12345;
-      int32_t rv = int32_t(static_cast<int32_t>(m_random_value / 65536) % (rand_max() + 1));
-      log2("rand", m_random_value, rv);
-#ifdef DEBUG_OUTPUT
-      std::cerr << "rand(" << ++count << ") = " << rv << std::endl;
+//#ifdef DEBUG_OUTPUT
+      //static size_t count = 0u;
+//#endif
+      const int32_t rv = abs(int32_t(m_random()));
+      log1("rand", rv);
+//#ifdef DEBUG_OUTPUT
+//      std::cerr << "rand(" << ++count << ") = " << rv << std::endl;
 //      if(count == 13)
 //        assert(false);
-#endif
+//#endif
       return rv;
     }
 
@@ -122,7 +118,7 @@ namespace Zeni {
 
     /// Get a random integer in the range [0, mod)
     int32_t rand_lt(const int32_t &mod) {
-      assert(mod <= rand_max() + 1);
+      assert(mod <= rand_max() + 1 || rand_max() == std::numeric_limits<int32_t>::max());
       int32_t rv = int32_t(frand_lt() * mod);
       log2("rand_lt", mod, rv);
       return rv;
@@ -160,7 +156,14 @@ namespace Zeni {
     static Random & get();
 
   private:
-    uint32_t m_random_value;
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
+    std::mt19937 m_random;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
     bool m_have_next_gaussian = false;
     double m_next_gaussian;

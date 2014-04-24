@@ -25,7 +25,7 @@ namespace Mario {
     assert(cls);
 
     jmethodID getter;
-    
+
     {
       getter = env->GetMethodID(cls, "getLevelSceneObservation", "()[[B");
       assert(getter);
@@ -41,7 +41,7 @@ namespace Mario {
       }
 
       /** Begin pit detection **/
-      
+
       for(int i = 0; i != OBSERVATION_WIDTH; ++i) {
         for(int j = OBSERVATION_HEIGHT - 1; j != -1; --j) {
           if(getLevelSceneObservation[j][i].tile == TILE_IRRELEVANT)
@@ -155,7 +155,7 @@ namespace Mario {
 
     if((prev.mayMarioJump || prev.isMarioHighJumping) && prev.action[BUTTON_JUMP])
       isMarioHighJumping = true;
-    if(mayMarioJump || prev.isMarioHighJumping && !action[BUTTON_JUMP] || getMarioFloatPos.second >= prev.getMarioFloatPos.second)
+    if(mayMarioJump || (prev.isMarioHighJumping && !action[BUTTON_JUMP]) || getMarioFloatPos.second >= prev.getMarioFloatPos.second)
       isMarioHighJumping = false;
   }
 

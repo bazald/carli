@@ -48,28 +48,31 @@ namespace Mario {
     return g_Agent;
   }
 
-  static bool infinite_mario_ai_initialized = false;
+  static bool g_infinite_mario_ai_initialized = false;
+  static size_t g_steps_passed = 0;
 
   void infinite_mario_ai(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, Action &action) {
     Agent &agent = get_Agent(prev, current);
 
-    if(infinite_mario_ai_initialized)
+    if(g_infinite_mario_ai_initialized)
       agent.act_part_2(prev, current, false);
-    else {
-      infinite_mario_ai_initialized = true;
+    else if(++g_steps_passed >= 24) {
+      g_infinite_mario_ai_initialized = true;
       agent.init();
     }
 
-    agent.act_part_1(action);
+    if(g_infinite_mario_ai_initialized)
+      agent.act_part_1(action);
   }
 
   void infinite_mario_reinit(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current) {
     Agent &agent = get_Agent(prev, current);
 
-    if(infinite_mario_ai_initialized)
+    if(g_infinite_mario_ai_initialized)
       agent.act_part_2(prev, current, true);
 
-    infinite_mario_ai_initialized = false;
+    g_infinite_mario_ai_initialized = false;
+    g_steps_passed = 0;
   }
   
   bool tile_can_jump_into(const Tile &tile) {
@@ -232,7 +235,7 @@ namespace Mario {
 
   void Agent::act_part_2(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, const bool &terminal) {
     double delta_x = current->getMarioFloatPos.first - prev->getMarioFloatPos.first;
-    if(delta_x < 0.01)
+    if(delta_x < 0.75)
       delta_x = -1.0;
 
     const bool continued_high_jump = prev->isMarioHighJumping && prev->action[BUTTON_JUMP];
@@ -241,10 +244,10 @@ namespace Mario {
     const bool illegal_jump = !prev->mayMarioJump && prev->action[BUTTON_JUMP];
     //const reward_type reward = (delta_x > 0 ? 1 : 2) * delta_x;
 
-    const reward_type reward_jumping = legal_jump ? 30 : continued_high_jump ? 30 : stopped_high_jump ? -50 : 0;
+    const reward_type reward_jumping = 0; // legal_jump ? 30 : continued_high_jump ? 30 : stopped_high_jump ? -50 : 0;
     const reward_type reward =
       m_current_state->getLevelSceneObservation[OBSERVATION_HEIGHT / 2][OBSERVATION_WIDTH / 2 - 1].detail.pit
-        ? -1000.0 : 100 * delta_x + reward_jumping;
+        ? -10000.0 : 100 * delta_x + reward_jumping;
 
     std::cerr << "Reward = " << reward << std::endl;
 
@@ -442,7 +445,7 @@ namespace Mario {
     //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_PIT_DIST, 0.0f, 11.0f);
     //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_PIT_WIDTH, 0.0f, 11.0f);
     //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_JUMP_DIST, 0.0f, 11.0f);
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_JUMP_HEIGHT, 0.0f, 11.0f);
+    generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_JUMP_HEIGHT, 0.0f, 11.0f);
 
     /*** Output Buttons ***/
 
@@ -497,7 +500,8 @@ namespace Mario {
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_is_high_jumping_attr, m_current_state->isMarioHighJumping ? m_true_value : m_false_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_is_above_pit_attr, m_current_state->getLevelSceneObservation[OBSERVATION_HEIGHT / 2][OBSERVATION_WIDTH / 2 - 1].detail.above_pit ? m_true_value : m_false_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_is_in_pit_attr, m_current_state->getLevelSceneObservation[OBSERVATION_HEIGHT / 2][OBSERVATION_WIDTH / 2 - 1].detail.pit ? m_true_value : m_false_value));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_pit_right_attr, m_current_state->getLevelSceneObservation[OBSERVATION_HEIGHT / 2][OBSERVATION_WIDTH / 2].detail.pit ? m_true_value : m_false_value));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_pit_right_attr, m_current_state->getLevelSceneObservation[OBSERVATION_HEIGHT / 2][OBSERVATION_WIDTH / 2].detail.pit ||
+                                                                                 m_current_state->getLevelSceneObservation[OBSERVATION_HEIGHT / 2][OBSERVATION_WIDTH / 2 + 1].detail.pit ? m_true_value : m_false_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_obstacle_right_attr, !tile_can_pass_through(m_current_state->getLevelSceneObservation[OBSERVATION_HEIGHT / 2][OBSERVATION_WIDTH / 2].tile) ? m_true_value : m_false_value));
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_button_presses_in_attr, m_button_presses_in_id));

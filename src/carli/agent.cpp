@@ -9,9 +9,8 @@ namespace Carli {
       return true;
 
     /// TODO: choose intelligently again
-    auto gen = general->fringe_values.begin();
+    assert(!general->fringe_values.empty());
     Node_Fringe_Ptr chosen;
-    assert(gen != general->fringe_values.end());
     size_t count = 0;
     for(auto &fringe : general->fringe_values) {
       if(fringe->feature->matches(token)) {

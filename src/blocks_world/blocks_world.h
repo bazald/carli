@@ -40,7 +40,7 @@ namespace Blocks_World {
   class Clear : public Carli::Feature_Enumerated<Feature> {
   public:
     Clear(const Which &block_, const bool &present_)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(1 + block, 2), present_),
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(1 + block_, 2), present_),
      block(block_)
     {
     }
@@ -61,7 +61,7 @@ namespace Blocks_World {
     int64_t compare_axis(const Name &) const {
       return -1;
     }
-    
+
     void print(ostream &os) const {
       os << "clear(" << block << ':' << value << ')';
     }
@@ -72,7 +72,7 @@ namespace Blocks_World {
   class In_Place : public Carli::Feature_Enumerated<Feature> {
   public:
     In_Place(const Which &block_, const bool &present_)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(1 + block, 2), present_),
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(1 + block_, 2), present_),
      block(block_)
     {
     }
@@ -104,7 +104,7 @@ namespace Blocks_World {
   class Name : public Carli::Feature_Enumerated<Feature> {
   public:
     Name(const Which &block_, const block_id &name_)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(3 + block, 2), true),
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(3 + block_, 2), true),
      block(block_),
      name(name_)
     {
