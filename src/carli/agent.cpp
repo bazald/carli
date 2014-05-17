@@ -433,9 +433,7 @@ namespace Carli {
   }
 
   void Agent::purge_q_value_eligible(const tracked_ptr<Q_Value> &q_value) {
-    if(m_eligible == &q_value->eligible)
-      m_eligible = q_value->eligible.next();
-    q_value->eligible.erase();
+    q_value->eligible.erase_from(m_eligible);
   }
 
   void Agent::print(std::ostream &os) const {
@@ -665,9 +663,7 @@ namespace Carli {
       q.eligibility_init = false;
       q.eligibility *= this->m_eligibility_trace_decay_rate;
       if(q.eligibility < m_eligibility_trace_decay_threshold) {
-        if(&q.eligible == this->m_eligible)
-          this->m_eligible = this->m_eligible->next();
-        q.eligible.erase();
+        q.eligible.erase_from(this->m_eligible);
         q.eligibility = -1.0;
       }
     }
