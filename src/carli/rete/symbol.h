@@ -87,6 +87,10 @@ namespace Rete {
     virtual bool operator>(const Symbol_Variable &) const {return false;}
     virtual bool operator>=(const Symbol_Variable &) const {return false;}
 
+    virtual bool operator==(const double &) const {return false;}
+    virtual bool operator==(const int64_t &) const {return false;}
+    virtual bool operator==(const std::string &) const {return false;}
+
     virtual size_t hash() const = 0;
     virtual std::ostream & print(std::ostream &os) const = 0;
   };
@@ -106,32 +110,34 @@ namespace Rete {
   public:
     Symbol_Constant_Float(const double &value_) : value(value_) {}
 
-    bool operator==(const Symbol &rhs) const {return rhs == *this;}
-    bool operator!=(const Symbol &rhs) const {return rhs != *this;}
-    bool operator>(const Symbol &rhs) const {return rhs < *this;}
-    bool operator>=(const Symbol &rhs) const {return rhs <= *this;}
-    bool operator<(const Symbol &rhs) const {return rhs > *this;}
-    bool operator<=(const Symbol &rhs) const {return rhs >= *this;}
+    bool operator==(const Symbol &rhs) const override {return rhs == *this;}
+    bool operator!=(const Symbol &rhs) const override {return rhs != *this;}
+    bool operator>(const Symbol &rhs) const override {return rhs < *this;}
+    bool operator>=(const Symbol &rhs) const override {return rhs <= *this;}
+    bool operator<(const Symbol &rhs) const override {return rhs > *this;}
+    bool operator<=(const Symbol &rhs) const override {return rhs >= *this;}
 
-    bool operator==(const Symbol_Constant_Float &rhs) const {return value == rhs.value;}
-    bool operator!=(const Symbol_Constant_Float &rhs) const {return value != rhs.value;}
-    bool operator<(const Symbol_Constant_Float &rhs) const {return value < rhs.value;}
-    bool operator<=(const Symbol_Constant_Float &rhs) const {return value <= rhs.value;}
-    bool operator>(const Symbol_Constant_Float &rhs) const {return value > rhs.value;}
-    bool operator>=(const Symbol_Constant_Float &rhs) const {return value >= rhs.value;}
+    bool operator==(const Symbol_Constant_Float &rhs) const override {return value == rhs.value;}
+    bool operator!=(const Symbol_Constant_Float &rhs) const override {return value != rhs.value;}
+    bool operator<(const Symbol_Constant_Float &rhs) const override {return value < rhs.value;}
+    bool operator<=(const Symbol_Constant_Float &rhs) const override {return value <= rhs.value;}
+    bool operator>(const Symbol_Constant_Float &rhs) const override {return value > rhs.value;}
+    bool operator>=(const Symbol_Constant_Float &rhs) const override {return value >= rhs.value;}
 
-    inline bool operator==(const Symbol_Constant_Int &rhs) const;
-    inline bool operator!=(const Symbol_Constant_Int &rhs) const;
-    inline bool operator<(const Symbol_Constant_Int &rhs) const;
-    inline bool operator<=(const Symbol_Constant_Int &rhs) const;
-    inline bool operator>(const Symbol_Constant_Int &rhs) const;
-    inline bool operator>=(const Symbol_Constant_Int &rhs) const;
+    inline bool operator==(const Symbol_Constant_Int &rhs) const override;
+    inline bool operator!=(const Symbol_Constant_Int &rhs) const override;
+    inline bool operator<(const Symbol_Constant_Int &rhs) const override;
+    inline bool operator<=(const Symbol_Constant_Int &rhs) const override;
+    inline bool operator>(const Symbol_Constant_Int &rhs) const override;
+    inline bool operator>=(const Symbol_Constant_Int &rhs) const override;
 
-    size_t hash() const {
+    bool operator==(const double &value_) const override {return value_ == value;}
+
+    size_t hash() const override {
       return std::hash<double>()(value);
     }
 
-    virtual std::ostream & print(std::ostream &os) const {
+    virtual std::ostream & print(std::ostream &os) const override {
       return os << value;
     }
 
@@ -145,32 +151,34 @@ namespace Rete {
   public:
     Symbol_Constant_Int(const int64_t &value_) : value(value_) {}
 
-    bool operator==(const Symbol &rhs) const {return rhs == *this;}
-    bool operator!=(const Symbol &rhs) const {return rhs != *this;}
-    bool operator>(const Symbol &rhs) const {return rhs < *this;}
-    bool operator>=(const Symbol &rhs) const {return rhs <= *this;}
-    bool operator<(const Symbol &rhs) const {return rhs > *this;}
-    bool operator<=(const Symbol &rhs) const {return rhs >= *this;}
+    bool operator==(const Symbol &rhs) const override {return rhs == *this;}
+    bool operator!=(const Symbol &rhs) const override {return rhs != *this;}
+    bool operator>(const Symbol &rhs) const override {return rhs < *this;}
+    bool operator>=(const Symbol &rhs) const override {return rhs <= *this;}
+    bool operator<(const Symbol &rhs) const override {return rhs > *this;}
+    bool operator<=(const Symbol &rhs) const override {return rhs >= *this;}
 
-    bool operator==(const Symbol_Constant_Float &rhs) const {return value == rhs.value;}
-    bool operator!=(const Symbol_Constant_Float &rhs) const {return value != rhs.value;}
-    bool operator<(const Symbol_Constant_Float &rhs) const {return value < rhs.value;}
-    bool operator<=(const Symbol_Constant_Float &rhs) const {return value <= rhs.value;}
-    bool operator>(const Symbol_Constant_Float &rhs) const {return value > rhs.value;}
-    bool operator>=(const Symbol_Constant_Float &rhs) const {return value >= rhs.value;}
+    bool operator==(const Symbol_Constant_Float &rhs) const override {return value == rhs.value;}
+    bool operator!=(const Symbol_Constant_Float &rhs) const override {return value != rhs.value;}
+    bool operator<(const Symbol_Constant_Float &rhs) const override {return value < rhs.value;}
+    bool operator<=(const Symbol_Constant_Float &rhs) const override {return value <= rhs.value;}
+    bool operator>(const Symbol_Constant_Float &rhs) const override {return value > rhs.value;}
+    bool operator>=(const Symbol_Constant_Float &rhs) const override {return value >= rhs.value;}
 
-    bool operator==(const Symbol_Constant_Int &rhs) const {return value == rhs.value;}
-    bool operator!=(const Symbol_Constant_Int &rhs) const {return value != rhs.value;}
-    bool operator<(const Symbol_Constant_Int &rhs) const {return value < rhs.value;}
-    bool operator<=(const Symbol_Constant_Int &rhs) const {return value <= rhs.value;}
-    bool operator>(const Symbol_Constant_Int &rhs) const {return value > rhs.value;}
-    bool operator>=(const Symbol_Constant_Int &rhs) const {return value >= rhs.value;}
+    bool operator==(const Symbol_Constant_Int &rhs) const override {return value == rhs.value;}
+    bool operator!=(const Symbol_Constant_Int &rhs) const override {return value != rhs.value;}
+    bool operator<(const Symbol_Constant_Int &rhs) const override {return value < rhs.value;}
+    bool operator<=(const Symbol_Constant_Int &rhs) const override {return value <= rhs.value;}
+    bool operator>(const Symbol_Constant_Int &rhs) const override {return value > rhs.value;}
+    bool operator>=(const Symbol_Constant_Int &rhs) const override {return value >= rhs.value;}
 
-    size_t hash() const {
+    bool operator==(const int64_t &value_) const override {return value_ == value;}
+
+    size_t hash() const override {
       return std::hash<int64_t>()(value);
     }
 
-    virtual std::ostream & print(std::ostream &os) const {
+    virtual std::ostream & print(std::ostream &os) const override {
       return os << value;
     }
 
@@ -191,25 +199,27 @@ namespace Rete {
   public:
     Symbol_Constant_String(const std::string &value_) : value(value_) {}
 
-    bool operator==(const Symbol &rhs) const {return rhs == *this;}
-    bool operator!=(const Symbol &rhs) const {return rhs != *this;}
-    bool operator>(const Symbol &rhs) const {return rhs < *this;}
-    bool operator>=(const Symbol &rhs) const {return rhs <= *this;}
-    bool operator<(const Symbol &rhs) const {return rhs > *this;}
-    bool operator<=(const Symbol &rhs) const {return rhs >= *this;}
+    bool operator==(const Symbol &rhs) const override {return rhs == *this;}
+    bool operator!=(const Symbol &rhs) const override {return rhs != *this;}
+    bool operator>(const Symbol &rhs) const override {return rhs < *this;}
+    bool operator>=(const Symbol &rhs) const override {return rhs <= *this;}
+    bool operator<(const Symbol &rhs) const override {return rhs > *this;}
+    bool operator<=(const Symbol &rhs) const override {return rhs >= *this;}
 
-    bool operator==(const Symbol_Constant_String &rhs) const {return value == rhs.value;}
-    bool operator!=(const Symbol_Constant_String &rhs) const {return value != rhs.value;}
-    bool operator<(const Symbol_Constant_String &rhs) const {return value < rhs.value;}
-    bool operator<=(const Symbol_Constant_String &rhs) const {return value <= rhs.value;}
-    bool operator>(const Symbol_Constant_String &rhs) const {return value > rhs.value;}
-    bool operator>=(const Symbol_Constant_String &rhs) const {return value >= rhs.value;}
+    bool operator==(const Symbol_Constant_String &rhs) const override {return value == rhs.value;}
+    bool operator!=(const Symbol_Constant_String &rhs) const override {return value != rhs.value;}
+    bool operator<(const Symbol_Constant_String &rhs) const override {return value < rhs.value;}
+    bool operator<=(const Symbol_Constant_String &rhs) const override {return value <= rhs.value;}
+    bool operator>(const Symbol_Constant_String &rhs) const override {return value > rhs.value;}
+    bool operator>=(const Symbol_Constant_String &rhs) const override {return value >= rhs.value;}
 
-    size_t hash() const {
+    bool operator==(const std::string &value_) const override {return value_ == value;}
+
+    size_t hash() const override {
       return std::hash<std::string>()(value);
     }
 
-    virtual std::ostream & print(std::ostream &os) const {
+    virtual std::ostream & print(std::ostream &os) const override {
       return os << value;
     }
 
@@ -223,25 +233,27 @@ namespace Rete {
   public:
     Symbol_Identifier(const std::string &value_) : value(value_) {}
 
-    bool operator==(const Symbol &rhs) const {return rhs == *this;}
-    bool operator!=(const Symbol &rhs) const {return rhs != *this;}
-    bool operator>(const Symbol &rhs) const {return rhs < *this;}
-    bool operator>=(const Symbol &rhs) const {return rhs <= *this;}
-    bool operator<(const Symbol &rhs) const {return rhs > *this;}
-    bool operator<=(const Symbol &rhs) const {return rhs >= *this;}
+    bool operator==(const Symbol &rhs) const override {return rhs == *this;}
+    bool operator!=(const Symbol &rhs) const override {return rhs != *this;}
+    bool operator>(const Symbol &rhs) const override {return rhs < *this;}
+    bool operator>=(const Symbol &rhs) const override {return rhs <= *this;}
+    bool operator<(const Symbol &rhs) const override {return rhs > *this;}
+    bool operator<=(const Symbol &rhs) const override {return rhs >= *this;}
 
-    bool operator==(const Symbol_Identifier &rhs) const {return value == rhs.value;}
-    bool operator!=(const Symbol_Identifier &rhs) const {return value != rhs.value;}
-    bool operator<(const Symbol_Identifier &rhs) const {return value < rhs.value;}
-    bool operator<=(const Symbol_Identifier &rhs) const {return value <= rhs.value;}
-    bool operator>(const Symbol_Identifier &rhs) const {return value > rhs.value;}
-    bool operator>=(const Symbol_Identifier &rhs) const {return value >= rhs.value;}
+    bool operator==(const Symbol_Identifier &rhs) const override {return value == rhs.value;}
+    bool operator!=(const Symbol_Identifier &rhs) const override {return value != rhs.value;}
+    bool operator<(const Symbol_Identifier &rhs) const override {return value < rhs.value;}
+    bool operator<=(const Symbol_Identifier &rhs) const override {return value <= rhs.value;}
+    bool operator>(const Symbol_Identifier &rhs) const override {return value > rhs.value;}
+    bool operator>=(const Symbol_Identifier &rhs) const override {return value >= rhs.value;}
 
-    size_t hash() const {
+    bool operator==(const std::string &value_) const override {return value_ == value;}
+
+    size_t hash() const override {
       return std::hash<std::string>()(value);
     }
 
-    virtual std::ostream & print(std::ostream &os) const {
+    virtual std::ostream & print(std::ostream &os) const override {
       return os << value;
     }
 
@@ -257,25 +269,25 @@ namespace Rete {
 
     Symbol_Variable(const Variable &value_) : value(value_) {}
 
-    bool operator==(const Symbol &rhs) const {return rhs == *this;}
-    bool operator!=(const Symbol &rhs) const {return rhs != *this;}
-    bool operator>(const Symbol &rhs) const {return rhs < *this;}
-    bool operator>=(const Symbol &rhs) const {return rhs <= *this;}
-    bool operator<(const Symbol &rhs) const {return rhs > *this;}
-    bool operator<=(const Symbol &rhs) const {return rhs >= *this;}
+    bool operator==(const Symbol &rhs) const override {return rhs == *this;}
+    bool operator!=(const Symbol &rhs) const override {return rhs != *this;}
+    bool operator>(const Symbol &rhs) const override {return rhs < *this;}
+    bool operator>=(const Symbol &rhs) const override {return rhs <= *this;}
+    bool operator<(const Symbol &rhs) const override {return rhs > *this;}
+    bool operator<=(const Symbol &rhs) const override {return rhs >= *this;}
 
-    bool operator==(const Symbol_Variable &rhs) const {return value == rhs.value;}
-    bool operator!=(const Symbol_Variable &rhs) const {return value != rhs.value;}
-    bool operator<(const Symbol_Variable &rhs) const {return value < rhs.value;}
-    bool operator<=(const Symbol_Variable &rhs) const {return value <= rhs.value;}
-    bool operator>(const Symbol_Variable &rhs) const {return value > rhs.value;}
-    bool operator>=(const Symbol_Variable &rhs) const {return value >= rhs.value;}
+    bool operator==(const Symbol_Variable &rhs) const override {return value == rhs.value;}
+    bool operator!=(const Symbol_Variable &rhs) const override {return value != rhs.value;}
+    bool operator<(const Symbol_Variable &rhs) const override {return value < rhs.value;}
+    bool operator<=(const Symbol_Variable &rhs) const override {return value <= rhs.value;}
+    bool operator>(const Symbol_Variable &rhs) const override {return value > rhs.value;}
+    bool operator>=(const Symbol_Variable &rhs) const override {return value >= rhs.value;}
 
-    size_t hash() const {
+    size_t hash() const override {
       return std::hash<size_t>()(value);
     }
 
-    virtual std::ostream & print(std::ostream &os) const {
+    virtual std::ostream & print(std::ostream &os) const override {
       os.put('<');
       os << value;
       os.put('>');
@@ -295,6 +307,10 @@ namespace Rete {
   }
 
 }
+
+inline bool operator==(const double &lhs, const Rete::Symbol &rhs) {return rhs == lhs;}
+inline bool operator==(const int64_t &lhs, const Rete::Symbol &rhs) {return rhs == lhs;}
+inline bool operator==(const std::string &lhs, const Rete::Symbol &rhs) {return rhs == lhs;}
 
 inline std::ostream & operator<<(std::ostream &os, const Rete::Symbol &symbol) {
   return symbol.print(os);

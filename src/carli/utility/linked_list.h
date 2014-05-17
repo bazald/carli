@@ -414,7 +414,10 @@ namespace Zeni {
     }
 
     /// erase this entry from this list
-    void erase() {
+    void erase_from(list_pointer_type &ptr) {
+      if(ptr == this)
+        ptr = m_next;
+
       if(m_prev)
         m_prev->m_next = m_next;
       if(m_next)

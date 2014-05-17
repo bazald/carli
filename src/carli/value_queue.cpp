@@ -24,13 +24,12 @@ namespace Carli {
       --m_size;
 
       m_mean.uncontribute(m_value_list->get()->value);
+      
+      Value_List::List * head = m_value_list;
 
-      Value_List::List * const next = m_value_list->next();
+      head->erase_from(m_value_list);
+      head->destroy(head);
 
-      m_value_list->erase();
-      m_value_list->destroy(m_value_list);
-
-      m_value_list = next;
       if(!m_value_list)
         m_value_list_tail = nullptr;
     }
