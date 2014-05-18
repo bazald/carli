@@ -46,7 +46,7 @@ namespace Carli {
 
     if(!chosen) {
       std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
-#ifndef NDEBUG
+#if !defined(NDEBUG) && defined(_WINDOWS)
       __debugbreak();
 #endif
       return false;
