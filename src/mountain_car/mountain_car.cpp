@@ -166,7 +166,7 @@ namespace Mountain_Car {
             m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
           }
 
-          auto node_split = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, 1));
+          auto node_split = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr));
           node_split->action = make_action_retraction([this,get_action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &token) {
             this->insert_q_value_next(get_action(token), node_split->q_value);
           }, [this,get_action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &token) {
@@ -188,7 +188,7 @@ namespace Mountain_Car {
     const double m_half_x = (m_min_x + m_max_x) / 2.0;
     const double m_half_x_dot = (m_min_x_dot + m_max_x_dot) / 2.0;
 
-    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
+    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1, nullptr);
     node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
       const auto action = get_action(token);
       if(!this->specialize(rete_action, token, get_action, node_unsplit))
@@ -201,11 +201,11 @@ namespace Mountain_Car {
     {
       Node_Ranged::Lines lines;
       lines.push_back(Node_Ranged::Line(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)));
+      auto feature = new Position(m_min_x, m_half_x, 2, false);
       auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                      feature,
                                                       Node_Ranged::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)),
                                                       lines);
-      auto feature = new Position(m_min_x, m_half_x, 2, false);
-      nfr->feature = feature;
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::index, 2), feature->symbol_constant(), node_unsplit->action->parent());
       nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
@@ -218,11 +218,11 @@ namespace Mountain_Car {
     }
 
     {
+      auto feature = new Position(m_half_x, m_max_x, 2, true);
       auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                      feature,
                                                       Node_Ranged::Range(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_max_x, m_max_x_dot)),
                                                       Node_Ranged::Lines());
-      auto feature = new Position(m_half_x, m_max_x, 2, true);
-      nfr->feature = feature;
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::index, 2), feature->symbol_constant(), node_unsplit->action->parent());
       nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
@@ -237,11 +237,11 @@ namespace Mountain_Car {
     {
       Node_Ranged::Lines lines;
       lines.push_back(Node_Ranged::Line(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_half_x_dot)));
+      auto feature = new Velocity(m_min_x_dot, m_half_x_dot, 2, false);
       auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                      feature,
                                                       Node_Ranged::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_max_x, m_half_x_dot)),
                                                       lines);
-      auto feature = new Velocity(m_min_x_dot, m_half_x_dot, 2, false);
-      nfr->feature = feature;
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Velocity::index, 2), feature->symbol_constant(), node_unsplit->action->parent());
       nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
@@ -254,11 +254,11 @@ namespace Mountain_Car {
     }
 
     {
+      auto feature = new Velocity(m_half_x_dot, m_max_x_dot, 2, true);
       auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                      feature,
                                                       Node_Ranged::Range(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_max_x_dot)),
                                                       Node_Ranged::Lines());
-      auto feature = new Velocity(m_half_x_dot, m_max_x_dot, 2, true);
-      nfr->feature = feature;
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Velocity::index, 2), feature->symbol_constant(), node_unsplit->action->parent());
       nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);

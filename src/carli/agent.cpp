@@ -15,7 +15,10 @@ namespace Carli {
     Node_Fringe_Ptr chosen;
     size_t count = 0;
     for(auto &fringe : general->fringe_values) {
-      if(fringe->feature->matches(token)) {
+      if(fringe->q_value->feature->matches(token)) {
+//#ifndef NDEBUG
+//        std::cerr << " matches: " << *fringe->q_value->feature << std::endl;
+//#endif
         if(!chosen || fringe->q_value->cabe > chosen->q_value->cabe) {
           chosen = fringe;
           count = 1;
@@ -23,22 +26,29 @@ namespace Carli {
         else if(fringe->q_value->cabe == chosen->q_value->cabe && random.frand_lt() < 1.0 / ++count)
           chosen = fringe;
       }
+//#ifndef NDEBUG
+//      else
+//        std::cerr << "!matches: " << *fringe->q_value->feature << std::endl;
+//#endif
     }
-    
+
     //for(auto &fringe : general->fringe_values) {
-    //  const auto button = dynamic_cast<const Mario::Feature_Button * const>(fringe->feature.get());
+    //  const auto button = dynamic_cast<const Mario::Feature_Button * const>(fringe->q_value->feature.get());
     //  if(button && button->axis.first == Mario::Feature_Button::OUT_JUMP)
     //    chosen = fringe;
     //}
 
     //for(auto &fringe : general->fringe_values) {
-    //  const auto button = dynamic_cast<const Mario::Feature_Button * const>(fringe->feature.get());
+    //  const auto button = dynamic_cast<const Mario::Feature_Button * const>(fringe->q_value->feature.get());
     //  if(button && button->axis.first == Mario::Feature_Button::OUT_DPAD)
     //    chosen = fringe;
     //}
 
     if(!chosen) {
       std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
+#ifndef NDEBUG
+      __debugbreak();
+#endif
       return false;
     }
 
@@ -46,7 +56,7 @@ namespace Carli {
   //  std::cerr << "Refining : " << chosen << std::endl;
   //#endif
 
-    expand_fringe(token, get_action, general, chosen->feature.get());
+    expand_fringe(token, get_action, general, chosen->q_value->feature.get());
 
     general->delete_q_value = false;
     general->q_value->type = Q_Value::Type::SPLIT;
@@ -66,7 +76,7 @@ namespace Carli {
   void Agent::expand_fringe(const Rete::WME_Token &token, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general, const Feature * const &specialization) {
     Node_Unsplit::Fringe_Values leaves;
     for(auto fringe = general->fringe_values.begin(), fend = general->fringe_values.end(); fringe != fend; ) {
-      if(specialization->compare_axis(*(*fringe)->feature) == 0) {
+      if(specialization->compare_axis(*(*fringe)->q_value->feature) == 0) {
         leaves.push_back(*fringe);
         general->fringe_values.erase(fringe++);
       }
@@ -76,14 +86,18 @@ namespace Carli {
 
 #ifdef DEBUG_OUTPUT
     std::cerr << "Refining:";
-    for(auto &leaf : leaves)
-      std::cerr << ' ' << *leaf->feature;
+    for(auto &leaf : leaves) {
+      std::cerr << ' ';
+      if(leaf->q_value->feature->matches(token))
+        std::cerr << '*';
+      std::cerr << *leaf->q_value->feature;
+    }
     std::cerr << std::endl << "Carrying over detected:";
     for(auto &fringe : general->fringe_values) {
       std::cerr << ' ';
-      if(fringe->feature->matches(token))
-      std::cerr << '*';
-      std::cerr << *fringe->feature;
+      if(fringe->q_value->feature->matches(token))
+        std::cerr << '*';
+      std::cerr << *fringe->q_value->feature;
     }
     std::cerr << std::endl;
 #endif
@@ -91,7 +105,7 @@ namespace Carli {
     auto filter_blink = make_filter(*m_wme_blink);
     for(auto &leaf : leaves) {
       auto leaf_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(leaf);
-      auto leaf_feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(leaf->feature.get());
+      auto leaf_feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(leaf->q_value->feature.get());
 
   //    if(leaf_node_ranged) {
   //      for(auto &line : leaf_node_ranged->lines)
@@ -105,7 +119,7 @@ namespace Carli {
         Node_Unsplit::Fringe_Values node_unsplit_fringe;
 
         if(leaf->q_value->depth < m_split_max) {
-          auto refined = leaf->feature->refined();
+          auto refined = leaf->q_value->feature->refined();
           if(leaf_feature_ranged_data) {
             for(auto &refined_feature : refined) {
               auto refined_ranged_data = dynamic_cast<Feature_Ranged_Data *>(refined_feature);
@@ -132,8 +146,7 @@ namespace Carli {
                   }
                 }
               }
-              auto rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, range, lines);
-              rl->feature = refined_feature;
+              auto rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, refined_feature, range, lines);
               auto predicate = make_predicate_vc(refined_ranged_data->predicate(), leaf_feature_ranged_data->axis, refined_ranged_data->symbol_constant(), leaf->action->parent());
               rl->action = make_action_retraction([this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
                 const auto action = get_action(token);
@@ -152,7 +165,7 @@ namespace Carli {
 
           for(auto &fringe : general->fringe_values) {
             auto fringe_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(fringe);
-            auto fringe_feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(fringe->feature.get());
+            auto fringe_feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(fringe->q_value->feature.get());
             auto fringe_action = fringe->action;
 
             Node_Fringe_Ptr rl;
@@ -175,20 +188,19 @@ namespace Carli {
                     lines.push_back(Node_Ranged::Line(std::make_pair(line.first.first, range.first.second), std::make_pair(line.second.first, range.second.second)));
                 }
               }
-              rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, range, lines);
+              rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, fringe->q_value->feature->clone(), range, lines);
 
               new_test = make_predicate_vc(fringe_feature_ranged_data->predicate(), fringe_feature_ranged_data->axis, fringe_feature_ranged_data->symbol_constant(), leaf->action->parent());
             }
             else {
               if(fringe_feature_ranged_data)
-                rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, fringe_node_ranged->range, fringe_node_ranged->lines);
+                rl = std::make_shared<Node_Fringe_Ranged>(*this, leaf->q_value->depth + 1, fringe->q_value->feature->clone(), fringe_node_ranged->range, fringe_node_ranged->lines);
               else
-                rl = std::make_shared<Node_Fringe>(*this, leaf->q_value->depth + 1);
+                rl = std::make_shared<Node_Fringe>(*this, leaf->q_value->depth + 1, fringe->q_value->feature->clone());
 
-              new_test = make_existential_join(fringe->feature->bindings(), leaf->action->parent(), fringe_action->parent());
+              new_test = make_existential_join(fringe->q_value->feature->bindings(), leaf->action->parent(), fringe_action->parent());
             }
 
-            rl->feature = fringe->feature->clone();
             rl->action = make_action_retraction([this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
               const auto action = get_action(token);
               this->insert_q_value_next(action, rl->q_value);
@@ -202,7 +214,7 @@ namespace Carli {
         }
 
         if(node_unsplit_fringe.empty()) {
-          auto node_split = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, leaf->q_value->depth));
+          auto node_split = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, leaf->q_value->depth, leaf->q_value->feature->clone()));
           node_split->action = make_action_retraction([this,get_action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &token) {
             const auto action = get_action(token);
             this->insert_q_value_next(action, node_split->q_value);
@@ -213,7 +225,7 @@ namespace Carli {
         }
         else {
           auto join_blink = make_existential_join(Rete::WME_Bindings(), leaf->action->parent(), filter_blink);
-          auto node_unsplit = std::make_shared<Node_Unsplit>(*this, leaf->q_value->depth);
+          auto node_unsplit = std::make_shared<Node_Unsplit>(*this, leaf->q_value->depth, leaf->q_value->feature->clone());
           node_unsplit->fringe_values.swap(node_unsplit_fringe);
           auto new_action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
             const auto action = get_action(token);
@@ -415,7 +427,7 @@ namespace Carli {
   #endif
     q_values.push_back(q_value);
   }
-  
+
   void Agent::purge_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value) {
   //#ifdef DEBUG_OUTPUT
   //  std::cerr << "Purging next value " << q_value << " for action " << *action << std::endl;
@@ -897,8 +909,8 @@ namespace Carli {
   #ifdef DEBUG_OUTPUT
       if(action) {
         std::cerr << ' ' << q->value /* * q.weight */ << ':' << q->depth;
-        if(q->type == Q_Value::Type::FRINGE)
-          std::cerr << "f[" << *q->node_fringe->feature << ']';
+        if(q->feature)
+          std::cerr << "f[" << *q->feature << ']';
       }
   #endif
       if(q->type != Q_Value::Type::FRINGE)

@@ -16,7 +16,7 @@ namespace Mario {
   //  action[BUTTON_LEFT] = 0;
   //  action[BUTTON_RIGHT] = 1;
   //  action[BUTTON_DOWN] = 0;
-  
+
   ////   for(int j = 0; j != OBSERVATION_HEIGHT; ++j) {
   ////     for(int i = 0; i != OBSERVATION_WIDTH; ++i) {
   ////       if(current.getCompleteObservation[i][j] == SCENE_OBJECT_RED_KOOPA_WINGED ||
@@ -74,7 +74,7 @@ namespace Mario {
     g_infinite_mario_ai_initialized = false;
     g_steps_passed = 0;
   }
-  
+
   bool tile_can_jump_into(const Tile &tile) {
     switch(tile) {
     case TILE_BRICK:
@@ -137,7 +137,7 @@ namespace Mario {
       return false;
     }
   }
-  
+
   bool object_flies(const Object &object) {
     switch(object) {
     case OBJECT_GOOMBA_WINGED:
@@ -151,7 +151,7 @@ namespace Mario {
       return false;
     }
   }
-  
+
   bool object_powerup(const Object &object) {
     switch(object) {
     case OBJECT_MUSHROOM:
@@ -254,7 +254,7 @@ namespace Mario {
     std::cerr << "Reward = " << reward << std::endl;
 
     update();
-    
+
     if(terminal)
       td_update(m_current_q_value, reward, Q_Value_List());
     else {
@@ -315,11 +315,11 @@ namespace Mario {
     for(int i = 0; i != 2; ++i) {
       Node_Ranged::Lines lines;
 //      lines.push_back(Node_Ranged::Line(std::make_pair(5, ), std::make_pair(5, 20)));
+      auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
       auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                      feature,
                                                       Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/),
                                                       lines);
-      auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
-      nfr->feature = feature;
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
       nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
@@ -334,7 +334,7 @@ namespace Mario {
 
   void Agent::generate_rete() {
     Rete::WME_Bindings state_bindings;
-    
+
     auto filter_x = make_filter(Rete::WME(m_first_var, m_x_attr, m_third_var));
     auto filter_y = make_filter(Rete::WME(m_first_var, m_y_attr, m_third_var));
     auto filter_x_dot = make_filter(Rete::WME(m_first_var, m_x_dot_attr, m_third_var));
@@ -406,7 +406,7 @@ namespace Mario {
       return std::make_shared<Button_Presses>(token);
     };
 
-    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
+    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1, nullptr);
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
 
@@ -421,14 +421,13 @@ namespace Mario {
     }
 
     /*** State ***/
-    
+
     for(const auto flag : {/*Feature_Flag::ON_GROUND, Feature_Flag::MAY_JUMP, Feature_Flag::IS_CARRYING,*/
                            /*Feature_Flag::IS_HIGH_JUMPING,*/ Feature_Flag::IS_ABOVE_PIT, Feature_Flag::IS_IN_PIT,
                            /*Feature_Flag::PIT_RIGHT,*/ Feature_Flag::OBSTACLE_RIGHT}) {
       for(const auto value : {false, true}) {
-        auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
         auto feature = new Feature_Flag(flag, value);
-        node_fringe->feature = feature;
+        auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
         auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), node_unsplit->action->parent());
         node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
@@ -443,7 +442,7 @@ namespace Mario {
 
     //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::X, 0.0f, 4000.0f);
     //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::Y, 0.0f, 352.0f);
-    
+
     generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_PIT_DIST, 0.0f, 12.0f);
     //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_PIT_WIDTH, 0.0f, 12.0f);
     //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_JUMP_DIST, 0.0f, 12.0f);
@@ -452,9 +451,8 @@ namespace Mario {
     /*** Output Buttons ***/
 
     for(const auto dpad : {BUTTON_NONE, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_DOWN}) {
-      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
       auto feature = new Feature_Button(Feature_Button::OUT_DPAD, dpad);
-      node_fringe->feature = feature;
+      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2,feature);
       auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), node_unsplit->action->parent());
       node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
@@ -468,9 +466,8 @@ namespace Mario {
 
     for(const auto button : {Feature_Button::OUT_JUMP, Feature_Button::OUT_SPEED}) {
       for(const auto down : {false, true}) {
-        auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
         auto feature = new Feature_Button(button, down);
-        node_fringe->feature = feature;
+        auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
         auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(button, 2), feature->symbol_constant(), node_unsplit->action->parent());
         node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
           const auto action = get_action(token);
@@ -490,7 +487,7 @@ namespace Mario {
 
     const std::pair<double, double> velocity(m_current_state->getMarioFloatPos.first - m_prev_state->getMarioFloatPos.first,
                                              m_current_state->getMarioFloatPos.second - m_prev_state->getMarioFloatPos.second);
-    
+
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(m_current_state->getMarioFloatPos.first)));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(m_current_state->getMarioFloatPos.second)));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_x_dot_attr, std::make_shared<Rete::Symbol_Constant_Float>(velocity.first)));
@@ -513,7 +510,7 @@ namespace Mario {
       BUTTON_NONE)));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_jump_attr, m_current_state->action[BUTTON_JUMP] ? m_true_value : m_false_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_button_presses_in_id, m_speed_attr, m_current_state->action[BUTTON_SPEED] ? m_true_value : m_false_value));
-    
+
     {
       int dist = 0;
       int width = 0;
@@ -532,7 +529,7 @@ namespace Mario {
         }
         break;
       }
-      
+
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_right_pit_dist_attr, std::make_shared<Rete::Symbol_Constant_Float>(dist)));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_right_pit_width_attr, std::make_shared<Rete::Symbol_Constant_Float>(width)));
     }
@@ -554,7 +551,7 @@ namespace Mario {
         }
         break;
       }
-      
+
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_right_jump_dist_attr, std::make_shared<Rete::Symbol_Constant_Float>(dist)));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_right_jump_height_attr, std::make_shared<Rete::Symbol_Constant_Float>(OBSERVATION_HEIGHT / 2 - j)));
     }

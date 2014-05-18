@@ -110,7 +110,7 @@ namespace Blocks_World {
       return std::make_shared<Move>(token);
     };
 
-    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
+    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1, nullptr);
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_dest_name, filter_blink);
 
@@ -138,9 +138,8 @@ namespace Blocks_World {
       blocks = {Feature::BLOCK};
 
     for(const auto &block : blocks) {
-      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
       auto feature = new Clear(block, true);
-      node_fringe->feature = feature;
+      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
       auto join_block_clear = make_existential_join(state_bindings, join_dest_name, filter_clear);
@@ -152,9 +151,9 @@ namespace Blocks_World {
         this->purge_q_value_next(action, node_fringe->q_value);
       }, join_block_clear).get();
       node_unsplit->fringe_values.push_back(node_fringe);
-
-      auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2);
-      node_fringe_neg->feature = new Clear(block, false);
+      
+      feature = new Clear(block, false);
+      auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2, feature);
       auto neg = make_negation_join(state_bindings, join_dest_name, filter_clear);
       node_fringe_neg->action = make_action_retraction([this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
@@ -177,9 +176,8 @@ namespace Blocks_World {
 #endif
 
     for(const auto &block : blocks) {
-      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
       auto feature = new In_Place(block, true);
-      node_fringe->feature = feature;
+      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
       auto join_block_in_place = make_existential_join(state_bindings, join_dest_name, filter_in_place);
@@ -191,9 +189,9 @@ namespace Blocks_World {
         this->purge_q_value_next(action, node_fringe->q_value);
       }, join_block_in_place).get();
       node_unsplit->fringe_values.push_back(node_fringe);
-
-      auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2);
-      node_fringe_neg->feature = new In_Place(block, false);
+      
+      feature = new In_Place(block, false);
+      auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2, feature);
       auto neg = make_negation_join(state_bindings, join_dest_name, filter_in_place);
       node_fringe_neg->action = make_action_retraction([this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
@@ -206,9 +204,8 @@ namespace Blocks_World {
     }
 
     for(size_t block = 1; block != m_block_ids.size(); ++block) {
-      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
       auto feature = new Name(Feature::BLOCK, m_block_names[block]->value);
-      node_fringe->feature = feature;
+      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_dest_name);
       node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
@@ -221,9 +218,8 @@ namespace Blocks_World {
     }
 
     for(size_t block = 0; block != m_block_ids.size(); ++block) {
-      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
       auto feature = new Name(Feature::DEST, m_block_names[block]->value);
-      node_fringe->feature = feature;
+      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_dest_name);
       node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);

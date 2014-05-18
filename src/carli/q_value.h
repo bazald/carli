@@ -24,12 +24,17 @@ namespace Carli {
     typedef List::iterator iterator;
     enum class Type : char {SPLIT, UNSPLIT, FRINGE};
 
-    Q_Value(const double &q_value_, const Type &type_, const int64_t &depth_)
+    Q_Value(const double &q_value_, const Type &type_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
      : depth(depth_),
      type(type_),
      value(q_value_),
-     eligible(this)
+     eligible(this),
+     feature(feature_)
     {
+    }
+
+    ~Q_Value() {
+      feature.delete_and_zero();
     }
 
     Q_Value & operator=(const double &q_value_) {
@@ -74,7 +79,7 @@ namespace Carli {
       return u.c - static_cast<char *>(nullptr);
     }
 
-    Node_Fringe * node_fringe = nullptr;
+    tracked_ptr<Feature> feature;
   };
 
 }

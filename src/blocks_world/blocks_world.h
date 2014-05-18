@@ -35,6 +35,12 @@ namespace Blocks_World {
     virtual int64_t compare_axis(const Clear &rhs) const = 0;
     virtual int64_t compare_axis(const In_Place &rhs) const = 0;
     virtual int64_t compare_axis(const Name &rhs) const = 0;
+
+    Rete::WME_Bindings bindings() const override {
+      Rete::WME_Bindings bindings_;
+      bindings_.insert(std::make_pair(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 2)));
+      return bindings_;
+    }
   };
 
   class Clear : public Carli::Feature_Enumerated<Feature> {
@@ -61,6 +67,8 @@ namespace Blocks_World {
     int64_t compare_axis(const Name &) const {
       return -1;
     }
+
+    bool matches(const Rete::WME_Token &) const override {return true;}
 
     void print(ostream &os) const {
       os << "clear(" << block << ':' << value << ')';
@@ -93,6 +101,8 @@ namespace Blocks_World {
     int64_t compare_axis(const Name &) const {
       return -1;
     }
+
+    bool matches(const Rete::WME_Token &) const override {return true;}
 
     void print(ostream &os) const {
       os << "in-place(" << block << ':' << value << ')';
@@ -130,6 +140,8 @@ namespace Blocks_World {
     int64_t compare_value(const Carli::Feature &rhs) const {
       return name - debuggable_cast<const Name &>(rhs).name;
     }
+
+    bool matches(const Rete::WME_Token &) const override {return true;}
 
     void print(ostream &os) const {
       os << "name(" << block << ',' << name << ':' << value << ')';

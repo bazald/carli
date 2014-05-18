@@ -53,7 +53,7 @@ namespace Carli {
     virtual int64_t compare_value(const Feature &rhs) const = 0;
 
     virtual bool matches(const Rete::WME_Token &token) const = 0;
-    
+
     virtual Rete::WME_Bindings bindings() const {return Rete::WME_Bindings();}
 
     virtual Rete::WME_Token_Index wme_token_index() const = 0;
@@ -127,7 +127,7 @@ namespace Carli {
     }
 
     bool matches(const Rete::WME_Token &token) const override {
-      return debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[wme_token_index()]).value == value;
+      return *token[this->wme_token_index()] == value;
     }
 
     Rete::WME_Token_Index wme_token_index() const override {
@@ -201,10 +201,11 @@ namespace Carli {
     int64_t compare_value(const Carli::Feature &rhs) const override {
       return Feature_Ranged_Data::compare_value(debuggable_cast<const Feature_Ranged &>(rhs));
     }
-    
+
     bool matches(const Rete::WME_Token &token) const override {
-      const double value_ = debuggable_cast<const Rete::Symbol_Constant_Float &>(*token[axis]).value;
-      return bound_lower <= value_ && value_ < bound_upper;
+      const Rete::Symbol &symbol = debuggable_cast<const Rete::Symbol &>(*token[wme_token_index()]);
+      const Rete::Symbol_Constant_Float &symbol_cf = debuggable_cast<const Rete::Symbol_Constant_Float &>(symbol);
+      return bound_lower <= symbol_cf.value && symbol_cf.value < bound_upper;
     }
 
     std::vector<Carli::Feature *> refined() const override {

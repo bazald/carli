@@ -516,11 +516,11 @@ namespace Tetris {
     for(int i = 0; i != 2; ++i) {
       Node_Ranged::Lines lines;
 //      lines.push_back(Node_Ranged::Line(std::make_pair(5, ), std::make_pair(5, 20)));
+      auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
       auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
+                                                      feature,
                                                       Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/),
                                                       lines);
-      auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
-      nfr->feature = feature;
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
       nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
         const auto action = get_action(token);
@@ -575,7 +575,7 @@ namespace Tetris {
       return std::make_shared<Place>(token);
     };
 
-    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1);
+    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1, nullptr);
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
 
@@ -593,9 +593,8 @@ namespace Tetris {
       for(auto super : {TETS_SQUARE, TETS_LINE, TETS_T, TETS_L, TETS_J, TETS_S, TETS_Z}) {
         for(uint8_t orientation = 0, oend = num_types(super); orientation != oend; ++orientation) {
           const auto type = super_to_type(super, orientation);
-          auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
           auto feature = new Type(axis, type);
-          node_fringe->feature = feature;
+          auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
           auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
           node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
             const auto action = get_action(token);
