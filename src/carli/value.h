@@ -41,7 +41,7 @@ namespace Carli {
   public:
     Mean() {}
 
-    double outlier_above(const Value &value, const double &z = 0.84155) const;
+    bool outlier_above(const Value &value, const double &z = 0.84155) const;
 
     void contribute(Value &value);
 

@@ -2,7 +2,7 @@
 
 namespace Carli {
 
-  double Mean::outlier_above(const Value &value, const double &z) const {
+  bool Mean::outlier_above(const Value &value, const double &z) const {
     return count > 1 && value > mean + z * stddev;
   }
 

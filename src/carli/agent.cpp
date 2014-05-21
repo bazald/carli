@@ -875,11 +875,15 @@ namespace Carli {
       return m_value_function_map.find(oss.str()) != m_value_function_map.end();
     }
 
-    if(q->update_count > m_split_update_count &&
-       q->pseudoepisode_count > m_split_pseudoepisodes &&
-       (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean().outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)
-                               : m_mean_cabe.outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)))
-    {
+    bool do_split = q->update_count > m_split_update_count &&
+                    q->pseudoepisode_count > m_split_pseudoepisodes;
+
+    /// Classic CATDE criterion
+    do_split &= (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean() : m_mean_cabe).outlier_above(q->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count);
+
+//    do_split &= false;
+
+    if(do_split) {
       if(m_value_function_map_mode == "out") {
         rete_action.output_name(m_value_function_out);
         m_value_function_out << std::endl;
@@ -909,8 +913,10 @@ namespace Carli {
   #ifdef DEBUG_OUTPUT
       if(action) {
         std::cerr << ' ' << q->value /* * q.weight */ << ':' << q->depth;
+        if(q->type == Q_Value::Type::FRINGE)
+          std::cerr << 'f';
         if(q->feature)
-          std::cerr << "f[" << *q->feature << ']';
+          std::cerr << ':' << *q->feature;
       }
   #endif
       if(q->type != Q_Value::Type::FRINGE)
