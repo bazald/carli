@@ -33,13 +33,12 @@ namespace Carli {
 
   public:
     typedef Feature feature_type;
-    typedef Feature::List * feature_list;
     typedef Action action_type;
     typedef std::shared_ptr<const Action> action_ptrsc;
     typedef double reward_type;
     typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
 
-    bool specialize(const Rete::Rete_Action &rete_action, const Rete::WME_Token &token, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general);
+    bool specialize(const Rete::WME_Token &token, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general);
     void expand_fringe(const Rete::WME_Token &token, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general, const Feature * const &specialization);
 
     Agent(const std::shared_ptr<Environment> &environment);
@@ -130,10 +129,10 @@ namespace Carli {
 
     void assign_credit_normalize(const Q_Value_List &value_list, const double &sum);
 
-    bool split_test(const Rete::Rete_Action &rete_action, const tracked_ptr<Q_Value> &q) const;
+    Node_Fringe_Ptr split_test(const Rete::WME_Token &token, const Node_Unsplit_Ptr &general);
 
     static double sum_value(const action_type * const &action, const Q_Value_List &value_list);
-    
+
     void clean_features();
 
   #ifdef DEBUG_OUTPUT
@@ -159,12 +158,12 @@ namespace Carli {
     std::map<action_ptrsc, Q_Value_List, compare_deref_lt, Zeni::Pool_Allocator<std::pair<action_ptrsc, Q_Value_List>>> m_next_q_values;
     std::function<action_ptrsc ()> m_target_policy; ///< Sarsa/Q-Learning selector
     std::function<action_ptrsc ()> m_exploration_policy; ///< Exploration policy
-    std::function<bool (const Rete::Rete_Action &, Q_Value * const &)> m_split_test; ///< true if too general, false if sufficiently general
+    std::function<Node_Fringe_Ptr (const Rete::WME_Token &, const Node_Unsplit_Ptr &)> m_split_test; ///< true if too general, false if sufficiently general
     std::map<action_ptrsc, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<action_ptrsc>, Zeni::Pool_Allocator<std::pair<action_ptrsc, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
     Rete::Symbol_Identifier_Ptr_C m_s_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("S1"));
     Rete::WME_Ptr_C m_wme_blink = Rete::WME_Ptr_C(new Rete::WME(m_s_id, m_s_id, m_s_id));
-    
+
   private:
     virtual void generate_features() = 0;
     virtual void update() = 0;

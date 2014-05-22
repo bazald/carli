@@ -19,13 +19,7 @@ namespace Carli {
     Feature & operator=(const Feature &) = delete;
 
   public:
-    typedef Zeni::Linked_List<Feature> List;
-    typedef List::iterator iterator;
-
-    Feature()
-      : features(this)
-    {
-    }
+    Feature() {}
 
     virtual ~Feature() {}
 
@@ -67,8 +61,6 @@ namespace Carli {
       print(oss);
       return oss.str();
     }
-
-    List features;
 
     bool detected = false;
   };
