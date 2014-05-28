@@ -42,6 +42,18 @@ namespace Rete {
   typedef std::shared_ptr<Rete_Node> Rete_Node_Ptr;
   typedef std::shared_ptr<Rete_Predicate> Rete_Predicate_Ptr;
 
+  class RETE_LINKAGE Rete_Data {
+    Rete_Data(const Rete_Data &);
+    Rete_Data & operator=(const Rete_Data &);
+
+  public:
+    Rete_Data() {}
+
+    virtual ~Rete_Data() {}
+
+    virtual Rete_Data * clone() const = 0;
+  };
+
   class RETE_LINKAGE Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<char [256]>
   {
     Rete_Node(const Rete_Node &);
@@ -115,6 +127,8 @@ namespace Rete {
     virtual void output_name(std::ostream &os) const = 0;
 
     virtual bool is_active() const = 0; ///< Has the node matched and forwarded at least one token?
+
+    std::unique_ptr<Rete_Data> data;
 
   protected:
     template<typename CONTAINER, typename KEY>

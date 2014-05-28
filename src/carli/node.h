@@ -39,14 +39,19 @@ namespace Carli {
     {
     }
 
+    virtual Node * clone() const = 0;
+
     virtual ~Node();
 
     void destroy();
+    
+    virtual void action(Agent &agent, const Rete::WME_Token &token) = 0;
+    virtual void retraction(Agent &agent, const Rete::WME_Token &token);
 
     Agent &agent;
     tracked_ptr<Q_Value> q_value;
     bool delete_q_value = true;
-    Rete::Rete_Action * action = nullptr;
+    Rete::Rete_Action * rete_action = nullptr;
   };
 
   class CARLI_LINKAGE Node_Split : public Node {
@@ -56,6 +61,12 @@ namespace Carli {
   public:
     Node_Split(Agent &agent_, const tracked_ptr<Q_Value> &q_value_);
     ~Node_Split();
+
+    Node_Split * clone() const override {
+      return new Node_Split(agent, q_value->clone());
+    }
+
+    void action(Agent &agent, const Rete::WME_Token &token) override;
   };
 
   class CARLI_LINKAGE Node_Unsplit : public Node {
@@ -68,16 +79,40 @@ namespace Carli {
     Node_Unsplit(Agent &agent_, const int64_t &depth_, const tracked_ptr<Feature> &feature_);
     ~Node_Unsplit();
 
-    Fringe_Values fringe_values;
+    Node_Unsplit * clone() const override {
+      return new Node_Unsplit(agent, q_value->clone());
+    }
+
+    void action(Agent &agent, const Rete::WME_Token &token) override;
+
+    Fringe_Values fringe_values; ///< Not cloned
+
+  protected:
+    Node_Unsplit(Agent &agent_, const tracked_ptr<Q_Value> &q_value_)
+      : Node(agent_, q_value_)
+    {
+    }
   };
 
   class CARLI_LINKAGE Node_Fringe : public Node {
     Node_Fringe(const Node_Fringe &) = delete;
     Node_Fringe & operator=(const Node_Fringe &) = delete;
-
+    
   public:
     Node_Fringe(Agent &agent_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
      : Node(agent_, new Q_Value(0.0, Q_Value::Type::FRINGE, depth_, feature_))
+    {
+    }
+
+    Node_Fringe * clone() const override {
+      return new Node_Fringe(agent, q_value->clone());
+    }
+
+    void action(Agent &agent, const Rete::WME_Token &token) override;
+
+  protected:
+    Node_Fringe(Agent &agent_, const tracked_ptr<Q_Value> &q_value_)
+      : Node(agent_, q_value_)
     {
     }
   };
@@ -108,6 +143,17 @@ namespace Carli {
   public:
     Node_Fringe_Ranged(Agent &agent_, const int64_t &depth_, const tracked_ptr<Feature> &feature_, const Range &range_, const Lines &lines_)
      : Node_Fringe(agent_, depth_, feature_),
+     Node_Ranged(range_, lines_)
+    {
+    }
+
+    Node_Fringe * clone() const override {
+      return new Node_Fringe_Ranged(agent, q_value->clone(), range, lines);
+    }
+
+  protected:
+    Node_Fringe_Ranged(Agent &agent_, const tracked_ptr<Q_Value> &q_value_, const Range &range_, const Lines &lines_)
+      : Node_Fringe(agent_, q_value_),
      Node_Ranged(range_, lines_)
     {
     }

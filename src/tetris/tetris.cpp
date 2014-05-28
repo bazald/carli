@@ -504,7 +504,7 @@ namespace Tetris {
 
   template<typename SUBFEATURE, typename AXIS>
   void Agent::generate_rete_continuous(const Carli::Node_Unsplit_Ptr &node_unsplit,
-                                       const std::function<action_ptrsc(const Rete::WME_Token &token)> &get_action,
+                                       const std::function<Carli::Action_Ptr_C(const Rete::WME_Token &token)> &get_action,
                                        const AXIS &axis,
                                        const double &lower_bound,
                                        const double &upper_bound)
@@ -571,7 +571,7 @@ namespace Tetris {
 
     auto filter_blink = make_filter(*m_wme_blink);
 
-    auto get_action = [this](const Rete::WME_Token &token)->action_ptrsc {
+    auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
       return std::make_shared<Place>(token);
     };
 

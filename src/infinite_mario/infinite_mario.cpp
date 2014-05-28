@@ -271,7 +271,7 @@ namespace Mario {
       td_update(m_current_q_value, reward, value_best);
 
       if(!is_on_policy()) {
-        action_ptrsc next = m_exploration_policy();
+        Carli::Action_Ptr_C next = m_exploration_policy();
 
         if(*m_next != *next) {
           if(sum_value(nullptr, m_current_q_value) < sum_value(nullptr, m_next_q_values[next]))
@@ -303,7 +303,7 @@ namespace Mario {
 
   template<typename SUBFEATURE, typename AXIS>
   void Agent::generate_rete_continuous(const Carli::Node_Unsplit_Ptr &node_unsplit,
-                                       const std::function<action_ptrsc(const Rete::WME_Token &token)> &get_action,
+                                       const std::function<Carli::Action_Ptr_C(const Rete::WME_Token &token)> &get_action,
                                        const AXIS &axis,
                                        const double &lower_bound,
                                        const double &upper_bound)
@@ -402,7 +402,7 @@ namespace Mario {
 
     auto filter_blink = make_filter(*m_wme_blink);
 
-    auto get_action = [this](const Rete::WME_Token &token)->action_ptrsc {
+    auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
       return std::make_shared<Button_Presses>(token);
     };
 

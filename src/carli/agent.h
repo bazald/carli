@@ -27,6 +27,30 @@ namespace Carli {
 
   enum class Metastate : char {NON_TERMINAL, SUCCESS, FAILURE};
 
+  class CARLI_LINKAGE Carli_Data : public Rete::Rete_Data {
+  public:
+    Carli_Data(const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const Node_Ptr &node_)
+      : get_action(get_action_),
+      node(node_)
+    {
+    }
+
+    Rete_Data * clone() const override {
+      return new Carli_Data(get_action, Node_Ptr(node->clone()));
+    }
+
+    void action(Agent &agent, const Rete::WME_Token &token) {
+      node->action(agent, token);
+    }
+
+    void retraction(Agent &agent, const Rete::WME_Token &token) {
+      node->retraction(agent, token);
+    }
+
+    std::function<Action_Ptr_C (const Rete::WME_Token &)> get_action;
+    Node_Ptr node;
+  };
+
   class CARLI_LINKAGE Agent : public std::enable_shared_from_this<Agent>, public Rete::Rete_Agent {
     Agent(const Agent &) = delete;
     Agent & operator=(const Agent &) = delete;
@@ -34,12 +58,11 @@ namespace Carli {
   public:
     typedef Feature feature_type;
     typedef Action action_type;
-    typedef std::shared_ptr<const Action> action_ptrsc;
     typedef double reward_type;
     typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
 
-    bool specialize(const Rete::WME_Token &token, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general);
-    void expand_fringe(const Rete::WME_Token &token, const std::function<action_ptrsc (const Rete::WME_Token &)> &get_action, const std::shared_ptr<Node_Unsplit> &general, const Feature * const &specialization);
+    bool specialize(Carli::Carli_Data &data, const Rete::WME_Token &token);
+    void expand_fringe(Carli::Carli_Data &data, const Rete::WME_Token &token, const Feature * const &specialization);
 
     Agent(const std::shared_ptr<Environment> &environment);
 
@@ -92,8 +115,8 @@ namespace Carli {
 
     void purge_q_value(const tracked_ptr<Q_Value> &q_value);
 
-    void insert_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value);
-    void purge_q_value_next(const action_ptrsc &action, const tracked_ptr<Q_Value> &q_value);
+    void insert_q_value_next(const Action_Ptr_C &action, const tracked_ptr<Q_Value> &q_value);
+    void purge_q_value_next(const Action_Ptr_C &action, const tracked_ptr<Q_Value> &q_value);
 
     void purge_q_value_eligible(const tracked_ptr<Q_Value> &q_value);
 
@@ -106,9 +129,9 @@ namespace Carli {
     int64_t q_value_count = 0;
 
   protected:
-    action_ptrsc choose_epsilon_greedy(const double &epsilon);
-    action_ptrsc choose_greedy();
-    action_ptrsc choose_randomly();
+    Action_Ptr_C choose_epsilon_greedy(const double &epsilon);
+    Action_Ptr_C choose_greedy();
+    Action_Ptr_C choose_randomly();
 
     void td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next);
 
@@ -152,14 +175,14 @@ namespace Carli {
     void merge_value_function_grid_sets(std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &combination, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &additions) const;
 
     Metastate m_metastate = Metastate::NON_TERMINAL;
-    action_ptrsc m_current;
+    Action_Ptr_C m_current;
     Q_Value_List m_current_q_value;
-    action_ptrsc m_next;
-    std::map<action_ptrsc, Q_Value_List, compare_deref_lt, Zeni::Pool_Allocator<std::pair<action_ptrsc, Q_Value_List>>> m_next_q_values;
-    std::function<action_ptrsc ()> m_target_policy; ///< Sarsa/Q-Learning selector
-    std::function<action_ptrsc ()> m_exploration_policy; ///< Exploration policy
+    Action_Ptr_C m_next;
+    std::map<Action_Ptr_C, Q_Value_List, compare_deref_lt, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, Q_Value_List>>> m_next_q_values;
+    std::function<Action_Ptr_C ()> m_target_policy; ///< Sarsa/Q-Learning selector
+    std::function<Action_Ptr_C ()> m_exploration_policy; ///< Exploration policy
     std::function<Node_Fringe_Ptr (const Rete::WME_Token &, const Node_Unsplit_Ptr &)> m_split_test; ///< true if too general, false if sufficiently general
-    std::map<action_ptrsc, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<action_ptrsc>, Zeni::Pool_Allocator<std::pair<action_ptrsc, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
+    std::map<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<Action_Ptr_C>, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
     Rete::Symbol_Identifier_Ptr_C m_s_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("S1"));
     Rete::WME_Ptr_C m_wme_blink = Rete::WME_Ptr_C(new Rete::WME(m_s_id, m_s_id, m_s_id));

@@ -106,7 +106,7 @@ namespace Blocks_World {
     auto filter_clear = make_filter(Rete::WME(m_first_var, m_clear_attr, m_third_var));
     auto filter_in_place = make_filter(Rete::WME(m_first_var, m_in_place_attr, m_third_var));
 
-    auto get_action = [this](const Rete::WME_Token &token)->action_ptrsc {
+    auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
       return std::make_shared<Move>(token);
     };
 
@@ -114,14 +114,12 @@ namespace Blocks_World {
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_dest_name, filter_blink);
 
-      node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        if(!this->specialize(token, get_action, node_unsplit))
-          this->insert_q_value_next(action, node_unsplit->q_value);
-      }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, node_unsplit->q_value);
+      node_unsplit->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+      }, [this,get_action,node_unsplit](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
       }, join_blink).get();
+      node_unsplit->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_unsplit);
     }
 
     std::vector<Feature::Which> blocks = {{Feature::BLOCK, Feature::DEST}};
@@ -143,25 +141,23 @@ namespace Blocks_World {
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
       auto join_block_clear = make_existential_join(state_bindings, join_dest_name, filter_clear);
-      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, node_fringe->q_value);
-      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, node_fringe->q_value);
+      node_fringe->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+      }, [this,get_action,node_fringe](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
       }, join_block_clear).get();
+      node_fringe->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_fringe);
       node_unsplit->fringe_values.push_back(node_fringe);
 
       feature = new Clear(block, false);
       auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2, feature);
       auto neg = make_negation_join(state_bindings, join_dest_name, filter_clear);
-      node_fringe_neg->action = make_action_retraction([this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, node_fringe_neg->q_value);
-      }, [this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, node_fringe_neg->q_value);
+      node_fringe_neg->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+      }, [this,get_action,node_fringe](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
       }, neg).get();
+      node_fringe_neg->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_fringe_neg);
       node_unsplit->fringe_values.push_back(node_fringe_neg);
     }
 
@@ -181,25 +177,23 @@ namespace Blocks_World {
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
       auto join_block_in_place = make_existential_join(state_bindings, join_dest_name, filter_in_place);
-      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, node_fringe->q_value);
-      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, node_fringe->q_value);
+      node_fringe->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+      }, [this,get_action,node_fringe](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
       }, join_block_in_place).get();
+      node_fringe->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_fringe);
       node_unsplit->fringe_values.push_back(node_fringe);
 
       feature = new In_Place(block, false);
       auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2, feature);
       auto neg = make_negation_join(state_bindings, join_dest_name, filter_in_place);
-      node_fringe_neg->action = make_action_retraction([this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, node_fringe_neg->q_value);
-      }, [this,get_action,node_fringe_neg](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, node_fringe_neg->q_value);
+      node_fringe_neg->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+      }, [this,get_action,node_fringe](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
       }, neg).get();
+      node_fringe_neg->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_fringe_neg);
       node_unsplit->fringe_values.push_back(node_fringe_neg);
     }
 
@@ -207,13 +201,12 @@ namespace Blocks_World {
       auto feature = new Name(Feature::BLOCK, m_block_names[block]->value);
       auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_dest_name);
-      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, node_fringe->q_value);
-      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, node_fringe->q_value);
+      node_fringe->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+      }, [this,get_action,node_fringe](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
       }, name_is).get();
+      node_fringe->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_fringe);
       node_unsplit->fringe_values.push_back(node_fringe);
     }
 
@@ -221,13 +214,12 @@ namespace Blocks_World {
       auto feature = new Name(Feature::DEST, m_block_names[block]->value);
       auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_dest_name);
-      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, node_fringe->q_value);
-      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, node_fringe->q_value);
+      node_fringe->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+      }, [this,get_action,node_fringe](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
       }, name_is).get();
+      node_fringe->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_fringe);
       node_unsplit->fringe_values.push_back(node_fringe);
     }
 

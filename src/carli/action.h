@@ -11,6 +11,12 @@
 
 namespace Carli {
 
+  class Action;
+  
+  typedef std::shared_ptr<const Action> Action_Ptr_C;
+
+  typedef std::shared_ptr<Action> Action_Ptr;
+
   class CARLI_LINKAGE Action : public Zeni::Pool_Allocator<char> {
     Action(const Action &) = delete;
     Action & operator=(const Action &) = delete;

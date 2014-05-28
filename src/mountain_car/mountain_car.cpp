@@ -131,7 +131,7 @@ namespace Mountain_Car {
   }
 
   void Agent::generate_cmac(const Rete::Rete_Node_Ptr &parent) {
-    auto get_action = [this](const Rete::WME_Token &token)->action_ptrsc {
+    auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
       return std::make_shared<Acceleration>(token);
     };
 
@@ -178,7 +178,7 @@ namespace Mountain_Car {
   }
 
   void Agent::generate_rete(const Rete::Rete_Node_Ptr &parent) {
-    auto get_action = [this](const Rete::WME_Token &token)->action_ptrsc {
+    auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
       return std::make_shared<Acceleration>(token);
     };
 

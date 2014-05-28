@@ -13,7 +13,12 @@ namespace Carli {
   }
 
   void Node::destroy() {
-    agent.excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(action->shared()));
+    agent.excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(rete_action->shared()));
+  }
+  
+  void Node::retraction(Agent &agent, const Rete::WME_Token &token) {
+    auto &carli_data = debuggable_cast<Carli_Data &>(*rete_action->data.get());
+    agent.purge_q_value_next(carli_data.get_action(token), carli_data.node->q_value);
   }
 
   Node_Split::Node_Split(Agent &agent_, const tracked_ptr<Q_Value> &q_value_)
@@ -25,6 +30,11 @@ namespace Carli {
   Node_Split::~Node_Split() {
     --agent.q_value_count;
   }
+  
+  void Node_Split::action(Agent &agent, const Rete::WME_Token &token) {
+    auto &carli_data = debuggable_cast<Carli_Data &>(*rete_action->data.get());
+    agent.insert_q_value_next(carli_data.get_action(token), q_value);
+  }
 
   Node_Unsplit::Node_Unsplit(Agent &agent_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
    : Node(agent_, new Q_Value(0.0, Q_Value::Type::UNSPLIT, depth_, feature_))
@@ -35,5 +45,15 @@ namespace Carli {
   Node_Unsplit::~Node_Unsplit() {
     --agent.q_value_count;
   }
-
+  
+  void Node_Unsplit::action(Agent &agent, const Rete::WME_Token &token) {
+    auto &carli_data = debuggable_cast<Carli_Data &>(*rete_action->data.get());
+    if(!agent.specialize(carli_data, token))
+      agent.insert_q_value_next(carli_data.get_action(token), q_value);
+  }
+  
+  void Node_Fringe::action(Agent &agent, const Rete::WME_Token &token) {
+    auto &carli_data = debuggable_cast<Carli_Data &>(*rete_action->data.get());
+    agent.insert_q_value_next(carli_data.get_action(token), q_value);
+  }
 }

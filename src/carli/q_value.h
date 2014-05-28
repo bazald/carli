@@ -33,6 +33,26 @@ namespace Carli {
     {
     }
 
+    Q_Value * clone() const {
+      Q_Value * const lhs = new Q_Value(value, type, depth, feature->clone());
+
+      lhs->last_episode_fired = last_episode_fired;
+      lhs->last_step_fired = last_step_fired;
+      lhs->pseudoepisode_count = pseudoepisode_count;
+
+      lhs->depth = depth;
+      lhs->update_count = update_count;
+
+      lhs->cabe = cabe;
+      lhs->mabe = mabe;
+      
+#ifdef WHITESON_ADAPTIVE_TILE
+      lhs->minbe = minbe;
+#endif
+
+      return lhs;
+    }
+
     ~Q_Value() {
       feature.delete_and_zero();
     }
@@ -51,6 +71,7 @@ namespace Carli {
 
     Type type;
 
+    /** Not cloned **/
     bool eligibility_init = false;
     double eligibility = -1.0;
     double credit = 1.0;
@@ -60,9 +81,9 @@ namespace Carli {
     Value cabe; ///< Cumulative Absolute Bellman Error
     Value mabe; ///< Mean Absolute Bellman Error (cabe / update_count)
 
-  #ifdef WHITESON_ADAPTIVE_TILE
+#ifdef WHITESON_ADAPTIVE_TILE
     double minbe = DBL_MAX; ///< Minimum Bellman Error experienced
-  #endif
+#endif
 
     double t0; ///< temp "register"
 
