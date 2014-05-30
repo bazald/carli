@@ -27,30 +27,6 @@ namespace Carli {
 
   enum class Metastate : char {NON_TERMINAL, SUCCESS, FAILURE};
 
-  class CARLI_LINKAGE Carli_Data : public Rete::Rete_Data {
-  public:
-    Carli_Data(const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const Node_Ptr &node_)
-      : get_action(get_action_),
-      node(node_)
-    {
-    }
-
-    Rete_Data * clone() const override {
-      return new Carli_Data(get_action, Node_Ptr(node->clone()));
-    }
-
-    void action(Agent &agent, const Rete::WME_Token &token) {
-      node->action(agent, token);
-    }
-
-    void retraction(Agent &agent, const Rete::WME_Token &token) {
-      node->retraction(agent, token);
-    }
-
-    std::function<Action_Ptr_C (const Rete::WME_Token &)> get_action;
-    Node_Ptr node;
-  };
-
   class CARLI_LINKAGE Agent : public std::enable_shared_from_this<Agent>, public Rete::Rete_Agent {
     Agent(const Agent &) = delete;
     Agent & operator=(const Agent &) = delete;
@@ -61,8 +37,8 @@ namespace Carli {
     typedef double reward_type;
     typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
 
-    bool specialize(Carli::Carli_Data &data, const Rete::WME_Token &token);
-    void expand_fringe(Carli::Carli_Data &data, const Rete::WME_Token &token, const Feature * const &specialization);
+    bool specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token);
+    void expand_fringe(Rete::Rete_Action &rete_action, const Rete::WME_Token &token, const Feature * const &specialization);
 
     Agent(const std::shared_ptr<Environment> &environment);
 
@@ -112,6 +88,8 @@ namespace Carli {
     void init();
 
     reward_type act();
+    
+    Rete::Rete_Action_Ptr make_standard_action(const Rete::Rete_Node_Ptr &parent);
 
     void purge_q_value(const tracked_ptr<Q_Value> &q_value);
 
@@ -152,7 +130,7 @@ namespace Carli {
 
     void assign_credit_normalize(const Q_Value_List &value_list, const double &sum);
 
-    Node_Fringe_Ptr split_test(const Rete::WME_Token &token, const Node_Unsplit_Ptr &general);
+    Node_Fringe_Ptr split_test(const Rete::WME_Token &token, const Node_Unsplit &general);
 
     static double sum_value(const action_type * const &action, const Q_Value_List &value_list);
 
@@ -181,7 +159,7 @@ namespace Carli {
     std::map<Action_Ptr_C, Q_Value_List, compare_deref_lt, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, Q_Value_List>>> m_next_q_values;
     std::function<Action_Ptr_C ()> m_target_policy; ///< Sarsa/Q-Learning selector
     std::function<Action_Ptr_C ()> m_exploration_policy; ///< Exploration policy
-    std::function<Node_Fringe_Ptr (const Rete::WME_Token &, const Node_Unsplit_Ptr &)> m_split_test; ///< true if too general, false if sufficiently general
+    std::function<Node_Fringe_Ptr (const Rete::WME_Token &, const Node_Unsplit &)> m_split_test; ///< true if too general, false if sufficiently general
     std::map<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<Action_Ptr_C>, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
     Rete::Symbol_Identifier_Ptr_C m_s_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("S1"));

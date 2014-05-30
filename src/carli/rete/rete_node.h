@@ -13,6 +13,7 @@ namespace Rete {
 
   class Agenda;
   class Rete_Action;
+  class Rete_Data;
   class Rete_Existential;
   class Rete_Existential_Join;
   class Rete_Filter;
@@ -23,6 +24,7 @@ namespace Rete {
   class Rete_Predicate;
 
   typedef std::shared_ptr<const Rete_Action> Rete_Action_Ptr_C;
+  typedef std::shared_ptr<const Rete_Data> Rete_Data_Ptr_C;
   typedef std::shared_ptr<const Rete_Existential> Rete_Existential_Ptr_C;
   typedef std::shared_ptr<const Rete_Existential_Join> Rete_Existential_Join_Ptr_C;
   typedef std::shared_ptr<const Rete_Filter> Rete_Filter_Ptr_C;
@@ -33,6 +35,7 @@ namespace Rete {
   typedef std::shared_ptr<const Rete_Predicate> Rete_Predicate_Ptr_C;
 
   typedef std::shared_ptr<Rete_Action> Rete_Action_Ptr;
+  typedef std::shared_ptr<Rete_Data> Rete_Data_Ptr;
   typedef std::shared_ptr<Rete_Existential> Rete_Existential_Ptr;
   typedef std::shared_ptr<Rete_Existential_Join> Rete_Existential_Join_Ptr;
   typedef std::shared_ptr<Rete_Filter> Rete_Filter_Ptr;
@@ -128,7 +131,7 @@ namespace Rete {
 
     virtual bool is_active() const = 0; ///< Has the node matched and forwarded at least one token?
 
-    std::unique_ptr<Rete_Data> data;
+    Rete_Data_Ptr data;
 
   protected:
     template<typename CONTAINER, typename KEY>

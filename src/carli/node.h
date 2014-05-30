@@ -3,6 +3,7 @@
 
 #include "utility/tracked_ptr.h"
 
+#include "action.h"
 #include "feature.h"
 #include "q_value.h"
 
@@ -28,13 +29,15 @@ namespace Carli {
   typedef std::shared_ptr<Node_Fringe> Node_Fringe_Ptr;
   typedef std::shared_ptr<Node_Fringe_Ranged> Node_Fringe_Ranged_Ptr;
 
-  class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Fringe_Ranged> {
+  class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Fringe_Ranged>, public Rete::Rete_Data {
     Node(const Node &) = delete;
     Node & operator=(const Node &) = delete;
 
   public:
-    Node(Agent &agent_, const tracked_ptr<Q_Value> &q_value_)
+    Node(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_)
      : agent(agent_),
+     rete_action(rete_action_),
+     get_action(get_action_),
      q_value(q_value_)
     {
     }
@@ -43,15 +46,14 @@ namespace Carli {
 
     virtual ~Node();
 
-    void destroy();
-    
     virtual void action(Agent &agent, const Rete::WME_Token &token) = 0;
     virtual void retraction(Agent &agent, const Rete::WME_Token &token);
 
     Agent &agent;
+    Rete::Rete_Action &rete_action;
+    std::function<Action_Ptr_C (const Rete::WME_Token &)> get_action;
     tracked_ptr<Q_Value> q_value;
     bool delete_q_value = true;
-    Rete::Rete_Action * rete_action = nullptr;
   };
 
   class CARLI_LINKAGE Node_Split : public Node {
@@ -59,11 +61,11 @@ namespace Carli {
     Node_Split & operator=(const Node_Split &) = delete;
 
   public:
-    Node_Split(Agent &agent_, const tracked_ptr<Q_Value> &q_value_);
+    Node_Split(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_);
     ~Node_Split();
 
     Node_Split * clone() const override {
-      return new Node_Split(agent, q_value->clone());
+      return new Node_Split(agent, rete_action, get_action, q_value->clone());
     }
 
     void action(Agent &agent, const Rete::WME_Token &token) override;
@@ -76,11 +78,11 @@ namespace Carli {
   public:
     typedef std::list<std::shared_ptr<Node_Fringe>> Fringe_Values;
 
-    Node_Unsplit(Agent &agent_, const int64_t &depth_, const tracked_ptr<Feature> &feature_);
+    Node_Unsplit(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_);
     ~Node_Unsplit();
 
     Node_Unsplit * clone() const override {
-      return new Node_Unsplit(agent, q_value->clone());
+      return new Node_Unsplit(agent, rete_action, get_action, q_value->clone());
     }
 
     void action(Agent &agent, const Rete::WME_Token &token) override;
@@ -88,8 +90,8 @@ namespace Carli {
     Fringe_Values fringe_values; ///< Not cloned
 
   protected:
-    Node_Unsplit(Agent &agent_, const tracked_ptr<Q_Value> &q_value_)
-      : Node(agent_, q_value_)
+    Node_Unsplit(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_)
+      : Node(agent_, rete_action_, get_action_, q_value_)
     {
     }
   };
@@ -99,20 +101,20 @@ namespace Carli {
     Node_Fringe & operator=(const Node_Fringe &) = delete;
     
   public:
-    Node_Fringe(Agent &agent_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
-     : Node(agent_, new Q_Value(0.0, Q_Value::Type::FRINGE, depth_, feature_))
+    Node_Fringe(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
+     : Node(agent_, rete_action_, get_action_, new Q_Value(0.0, Q_Value::Type::FRINGE, depth_, feature_))
     {
     }
 
     Node_Fringe * clone() const override {
-      return new Node_Fringe(agent, q_value->clone());
+      return new Node_Fringe(agent, rete_action, get_action, q_value->clone());
     }
 
     void action(Agent &agent, const Rete::WME_Token &token) override;
 
   protected:
-    Node_Fringe(Agent &agent_, const tracked_ptr<Q_Value> &q_value_)
-      : Node(agent_, q_value_)
+    Node_Fringe(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_)
+      : Node(agent_, rete_action_, get_action_, q_value_)
     {
     }
   };
@@ -141,19 +143,19 @@ namespace Carli {
     Node_Fringe_Ranged & operator=(const Node_Fringe_Ranged &) = delete;
 
   public:
-    Node_Fringe_Ranged(Agent &agent_, const int64_t &depth_, const tracked_ptr<Feature> &feature_, const Range &range_, const Lines &lines_)
-     : Node_Fringe(agent_, depth_, feature_),
+    Node_Fringe_Ranged(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_, const Range &range_, const Lines &lines_)
+     : Node_Fringe(agent_, rete_action_, get_action_, depth_, feature_),
      Node_Ranged(range_, lines_)
     {
     }
 
     Node_Fringe * clone() const override {
-      return new Node_Fringe_Ranged(agent, q_value->clone(), range, lines);
+      return new Node_Fringe_Ranged(agent, rete_action, get_action, q_value->clone(), range, lines);
     }
 
   protected:
-    Node_Fringe_Ranged(Agent &agent_, const tracked_ptr<Q_Value> &q_value_, const Range &range_, const Lines &lines_)
-      : Node_Fringe(agent_, q_value_),
+    Node_Fringe_Ranged(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_, const Range &range_, const Lines &lines_)
+      : Node_Fringe(agent_, rete_action_, get_action_, q_value_),
      Node_Ranged(range_, lines_)
     {
     }
