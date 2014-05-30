@@ -110,16 +110,13 @@ namespace Blocks_World {
       return std::make_shared<Move>(token);
     };
 
-    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1, nullptr);
+    Carli::Node_Unsplit_Ptr root_action_data;
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_dest_name, filter_blink);
-
-      node_unsplit->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-      }, [this,get_action,node_unsplit](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-      }, join_blink).get();
-      node_unsplit->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_unsplit);
+      
+      auto root_action = make_standard_action(join_blink);
+      root_action_data = std::make_shared<Node_Unsplit>(*this, *root_action, get_action, 1, nullptr);
+      root_action->data = root_action_data;
     }
 
     std::vector<Feature::Which> blocks = {{Feature::BLOCK, Feature::DEST}};
@@ -137,28 +134,20 @@ namespace Blocks_World {
 
     for(const auto &block : blocks) {
       auto feature = new Clear(block, true);
-      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
       auto join_block_clear = make_existential_join(state_bindings, join_dest_name, filter_clear);
-      node_fringe->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-      }, [this,get_action,node_fringe](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-      }, join_block_clear).get();
-      node_fringe->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_fringe);
-      node_unsplit->fringe_values.push_back(node_fringe);
+      auto new_leaf = make_standard_action(join_block_clear);
+      auto new_leaf_data = std::make_shared<Node_Fringe>(*this, *new_leaf, get_action, 2, feature);
+      new_leaf->data = new_leaf_data;
+      root_action_data->fringe_values.push_back(new_leaf_data);
 
       feature = new Clear(block, false);
-      auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2, feature);
       auto neg = make_negation_join(state_bindings, join_dest_name, filter_clear);
-      node_fringe_neg->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-      }, [this,get_action,node_fringe](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-      }, neg).get();
-      node_fringe_neg->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_fringe_neg);
-      node_unsplit->fringe_values.push_back(node_fringe_neg);
+      auto new_leaf_neg = make_standard_action(neg);
+      auto new_leaf_neg_data = std::make_shared<Node_Fringe>(*this, *new_leaf_neg, get_action, 2, feature);
+      new_leaf_neg->data = new_leaf_neg_data;
+      root_action_data->fringe_values.push_back(new_leaf_neg_data);
     }
 
 #ifdef _MSC_VER
@@ -173,54 +162,38 @@ namespace Blocks_World {
 
     for(const auto &block : blocks) {
       auto feature = new In_Place(block, true);
-      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
       auto join_block_in_place = make_existential_join(state_bindings, join_dest_name, filter_in_place);
-      node_fringe->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-      }, [this,get_action,node_fringe](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-      }, join_block_in_place).get();
-      node_fringe->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_fringe);
-      node_unsplit->fringe_values.push_back(node_fringe);
+      auto new_leaf = make_standard_action(join_block_in_place);
+      auto new_leaf_data = std::make_shared<Node_Fringe>(*this, *new_leaf, get_action, 2, feature);
+      new_leaf->data = new_leaf_data;
+      root_action_data->fringe_values.push_back(new_leaf_data);
 
       feature = new In_Place(block, false);
-      auto node_fringe_neg = std::make_shared<Node_Fringe>(*this, 2, feature);
       auto neg = make_negation_join(state_bindings, join_dest_name, filter_in_place);
-      node_fringe_neg->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-      }, [this,get_action,node_fringe](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-      }, neg).get();
-      node_fringe_neg->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_fringe_neg);
-      node_unsplit->fringe_values.push_back(node_fringe_neg);
+      auto new_leaf_neg = make_standard_action(neg);
+      auto new_leaf_neg_data = std::make_shared<Node_Fringe>(*this, *new_leaf_neg, get_action, 2, feature);
+      new_leaf_neg->data = new_leaf_neg_data;
+      root_action_data->fringe_values.push_back(new_leaf_neg_data);
     }
 
     for(size_t block = 1; block != m_block_ids.size(); ++block) {
       auto feature = new Name(Feature::BLOCK, m_block_names[block]->value);
-      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_dest_name);
-      node_fringe->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-      }, [this,get_action,node_fringe](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-      }, name_is).get();
-      node_fringe->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_fringe);
-      node_unsplit->fringe_values.push_back(node_fringe);
+      auto new_leaf = make_standard_action(name_is);
+      auto new_leaf_data = std::make_shared<Node_Fringe>(*this, *new_leaf, get_action, 2, feature);
+      new_leaf->data = new_leaf_data;
+      root_action_data->fringe_values.push_back(new_leaf_data);
     }
 
     for(size_t block = 0; block != m_block_ids.size(); ++block) {
       auto feature = new Name(Feature::DEST, m_block_names[block]->value);
-      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_dest_name);
-      node_fringe->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-      }, [this,get_action,node_fringe](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-      }, name_is).get();
-      node_fringe->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_fringe);
-      node_unsplit->fringe_values.push_back(node_fringe);
+      auto new_leaf = make_standard_action(name_is);
+      auto new_leaf_data = std::make_shared<Node_Fringe>(*this, *new_leaf, get_action, 2, feature);
+      new_leaf->data = new_leaf_data;
+      root_action_data->fringe_values.push_back(new_leaf_data);
     }
 
 //    state_bindings.clear();

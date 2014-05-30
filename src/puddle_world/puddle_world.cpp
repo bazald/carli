@@ -266,11 +266,12 @@ namespace Puddle_World {
           }
 
           auto node_split = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr));
-          node_split->action = make_action_retraction([this,get_action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-            this->insert_q_value_next(get_action(token), node_split->q_value);
-          }, [this,get_action,node_split](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-            this->purge_q_value_next(get_action(token), node_split->q_value);
+          node_split->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+            debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+          }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+            debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
           }, ylt).get();
+          node_split->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_split);
         }
       }
     }
@@ -285,14 +286,12 @@ namespace Puddle_World {
     auto join_blink = make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
 
     auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1, nullptr);
-    node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-      const auto action = get_action(token);
-      if(!this->specialize(token, get_action, node_unsplit))
-        this->insert_q_value_next(action, node_unsplit->q_value);
-    }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-      const auto action = get_action(token);
-      this->purge_q_value_next(action, node_unsplit->q_value);
+    node_unsplit->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+      debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+    }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+      debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
     }, join_blink).get();
+    node_unsplit->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_unsplit);
 
     {
       Node_Ranged::Lines lines;
@@ -302,14 +301,13 @@ namespace Puddle_World {
                                                       feature,
                                                       Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(0.5, 1.0)),
                                                       lines);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, nfr->q_value);
-      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, nfr->q_value);
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), node_unsplit->rete_action->parent());
+      nfr->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+      }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
       }, predicate).get();
+      nfr->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, nfr);
       node_unsplit->fringe_values.push_back(nfr);
     }
 
@@ -320,13 +318,12 @@ namespace Puddle_World {
                                                       Node_Ranged::Range(std::make_pair(0.5, 0.0), std::make_pair(1.0, 1.0)),
                                                       Node_Ranged::Lines());
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, nfr->q_value);
-      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, nfr->q_value);
+      nfr->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+      }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
       }, predicate).get();
+      nfr->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, nfr);
       node_unsplit->fringe_values.push_back(nfr);
     }
 
@@ -339,13 +336,12 @@ namespace Puddle_World {
                                                       Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 0.5)),
                                                       lines);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, nfr->q_value);
-      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, nfr->q_value);
+      nfr->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+      }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
       }, predicate).get();
+      nfr->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, nfr);
       node_unsplit->fringe_values.push_back(nfr);
     }
 
@@ -356,13 +352,12 @@ namespace Puddle_World {
                                                       Node_Ranged::Range(std::make_pair(0.0, 0.5), std::make_pair(1.0, 1.0)),
                                                       Node_Ranged::Lines());
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, nfr->q_value);
-      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, nfr->q_value);
+      nfr->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
+      }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
+        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
       }, predicate).get();
+      nfr->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, nfr);
       node_unsplit->fringe_values.push_back(nfr);
     }
   }
