@@ -26,6 +26,8 @@ namespace Carli {
     auto new_action = make_standard_action(rete_action.parent()->parent());
     new_action->data = std::make_shared<Node_Split>(*this, *new_action, general.get_action, general.q_value);
 
+    excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(rete_action.shared()));
+
     return true;
   }
 
