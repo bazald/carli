@@ -1,6 +1,6 @@
 #include "agent.h"
 
-#include "../infinite_mario/infinite_mario.h"
+//#include "../infinite_mario/infinite_mario.h"
 
 namespace Carli {
 
@@ -381,6 +381,22 @@ namespace Carli {
     }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
       debuggable_cast<Node *>(action.data.get())->retraction(*this, token);
     }, parent);
+  }
+  
+  Rete::Rete_Action_Ptr Agent::make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature) {
+    auto new_leaf = make_standard_action(parent);
+    auto new_leaf_data = std::make_shared<Node_Fringe>(*this, *new_leaf, root_action_data->get_action, 2, feature);
+    new_leaf->data = new_leaf_data;
+    root_action_data->fringe_values.push_back(new_leaf_data);
+    return new_leaf;
+  }
+
+  Rete::Rete_Action_Ptr Agent::make_standard_fringe_ranged(const Rete::Rete_Node_Ptr &parent, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature, const Node_Ranged::Range &range, const Node_Ranged::Lines &lines) {
+    auto new_leaf = make_standard_action(parent);
+    auto new_leaf_data = std::make_shared<Node_Fringe_Ranged>(*this, *new_leaf, root_action_data->get_action, 2, feature, range, lines);
+    new_leaf->data = new_leaf_data;
+    root_action_data->fringe_values.push_back(new_leaf_data);
+    return new_leaf;
   }
 
   void Agent::purge_q_value(const tracked_ptr<Q_Value> &q_value) {

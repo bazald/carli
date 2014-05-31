@@ -303,7 +303,6 @@ namespace Mario {
 
   template<typename SUBFEATURE, typename AXIS>
   void Agent::generate_rete_continuous(const Carli::Node_Unsplit_Ptr &node_unsplit,
-                                       const std::function<Carli::Action_Ptr_C(const Rete::WME_Token &token)> &get_action,
                                        const AXIS &axis,
                                        const double &lower_bound,
                                        const double &upper_bound)
@@ -316,19 +315,8 @@ namespace Mario {
       Node_Ranged::Lines lines;
 //      lines.push_back(Node_Ranged::Line(std::make_pair(5, ), std::make_pair(5, 20)));
       auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
-      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
-                                                      feature,
-                                                      Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/),
-                                                      lines);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, nfr->q_value);
-      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, nfr->q_value);
-      }, predicate).get();
-      node_unsplit->fringe_values.push_back(nfr);
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->rete_action.parent());
+      make_standard_fringe_ranged(predicate, node_unsplit, feature, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
     }
   }
 
@@ -405,19 +393,14 @@ namespace Mario {
     auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
       return std::make_shared<Button_Presses>(token);
     };
-
-    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1, nullptr);
+    
+    Carli::Node_Unsplit_Ptr root_action_data;
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
-
-      node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        if(!this->specialize(token, get_action, node_unsplit))
-          this->insert_q_value_next(action, node_unsplit->q_value);
-      }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, node_unsplit->q_value);
-      }, join_blink).get();
+      
+      auto root_action = make_standard_action(join_blink);
+      root_action_data = std::make_shared<Node_Unsplit>(*this, *root_action, get_action, 1, nullptr);
+      root_action->data = root_action_data;
     }
 
     /*** State ***/
@@ -427,56 +410,32 @@ namespace Mario {
                            /*Feature_Flag::PIT_RIGHT,*/ Feature_Flag::OBSTACLE_RIGHT}) {
       for(const auto value : {false, true}) {
         auto feature = new Feature_Flag(flag, value);
-        auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
-        auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), node_unsplit->action->parent());
-        node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-          const auto action = get_action(token);
-          this->insert_q_value_next(action, node_fringe->q_value);
-        }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-          const auto action = get_action(token);
-          this->purge_q_value_next(action, node_fringe->q_value);
-        }, predicate).get();
-        node_unsplit->fringe_values.push_back(node_fringe);
+        auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), root_action_data->rete_action.parent());
+        make_standard_fringe(predicate, root_action_data, feature);
       }
     }
 
-    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::X, 0.0f, 4000.0f);
-    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, get_action, Feature_Position::Y, 0.0f, 352.0f);
+    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, Feature_Position::X, 0.0f, 4000.0f);
+    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, Feature_Position::Y, 0.0f, 352.0f);
 
-    generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_PIT_DIST, 0.0f, 12.0f);
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_PIT_WIDTH, 0.0f, 12.0f);
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_JUMP_DIST, 0.0f, 12.0f);
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, get_action, Feature_Numeric::RIGHT_JUMP_HEIGHT, 0.0f, 12.0f);
+    generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(root_action_data, Feature_Numeric::RIGHT_PIT_DIST, 0.0f, 12.0f);
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, Feature_Numeric::RIGHT_PIT_WIDTH, 0.0f, 12.0f);
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, Feature_Numeric::RIGHT_JUMP_DIST, 0.0f, 12.0f);
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, Feature_Numeric::RIGHT_JUMP_HEIGHT, 0.0f, 12.0f);
 
     /*** Output Buttons ***/
 
     for(const auto dpad : {BUTTON_NONE, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_DOWN}) {
       auto feature = new Feature_Button(Feature_Button::OUT_DPAD, dpad);
-      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2,feature);
-      auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), node_unsplit->action->parent());
-      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, node_fringe->q_value);
-      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, node_fringe->q_value);
-      }, predicate).get();
-      node_unsplit->fringe_values.push_back(node_fringe);
+      auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), root_action_data->rete_action.parent());
+      make_standard_fringe(predicate, root_action_data, feature);
     }
 
     for(const auto button : {Feature_Button::OUT_JUMP, Feature_Button::OUT_SPEED}) {
       for(const auto down : {false, true}) {
         auto feature = new Feature_Button(button, down);
-        auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(button, 2), feature->symbol_constant(), node_unsplit->action->parent());
-        node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-          const auto action = get_action(token);
-          this->insert_q_value_next(action, node_fringe->q_value);
-        }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-          const auto action = get_action(token);
-          this->purge_q_value_next(action, node_fringe->q_value);
-        }, predicate).get();
-        node_unsplit->fringe_values.push_back(node_fringe);
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(button, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+        make_standard_fringe(predicate, root_action_data, feature);
       }
     }
   }

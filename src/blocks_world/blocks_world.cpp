@@ -137,17 +137,11 @@ namespace Blocks_World {
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
       auto join_block_clear = make_existential_join(state_bindings, join_dest_name, filter_clear);
-      auto new_leaf = make_standard_action(join_block_clear);
-      auto new_leaf_data = std::make_shared<Node_Fringe>(*this, *new_leaf, get_action, 2, feature);
-      new_leaf->data = new_leaf_data;
-      root_action_data->fringe_values.push_back(new_leaf_data);
+      make_standard_fringe(join_block_clear, root_action_data, feature);
 
       feature = new Clear(block, false);
       auto neg = make_negation_join(state_bindings, join_dest_name, filter_clear);
-      auto new_leaf_neg = make_standard_action(neg);
-      auto new_leaf_neg_data = std::make_shared<Node_Fringe>(*this, *new_leaf_neg, get_action, 2, feature);
-      new_leaf_neg->data = new_leaf_neg_data;
-      root_action_data->fringe_values.push_back(new_leaf_neg_data);
+      make_standard_fringe(neg, root_action_data, feature);
     }
 
 #ifdef _MSC_VER
@@ -165,35 +159,23 @@ namespace Blocks_World {
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
       auto join_block_in_place = make_existential_join(state_bindings, join_dest_name, filter_in_place);
-      auto new_leaf = make_standard_action(join_block_in_place);
-      auto new_leaf_data = std::make_shared<Node_Fringe>(*this, *new_leaf, get_action, 2, feature);
-      new_leaf->data = new_leaf_data;
-      root_action_data->fringe_values.push_back(new_leaf_data);
+      make_standard_fringe(join_block_in_place, root_action_data, feature);
 
       feature = new In_Place(block, false);
       auto neg = make_negation_join(state_bindings, join_dest_name, filter_in_place);
-      auto new_leaf_neg = make_standard_action(neg);
-      auto new_leaf_neg_data = std::make_shared<Node_Fringe>(*this, *new_leaf_neg, get_action, 2, feature);
-      new_leaf_neg->data = new_leaf_neg_data;
-      root_action_data->fringe_values.push_back(new_leaf_neg_data);
+      make_standard_fringe(neg, root_action_data, feature);
     }
 
     for(size_t block = 1; block != m_block_ids.size(); ++block) {
       auto feature = new Name(Feature::BLOCK, m_block_names[block]->value);
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_dest_name);
-      auto new_leaf = make_standard_action(name_is);
-      auto new_leaf_data = std::make_shared<Node_Fringe>(*this, *new_leaf, get_action, 2, feature);
-      new_leaf->data = new_leaf_data;
-      root_action_data->fringe_values.push_back(new_leaf_data);
+      make_standard_fringe(name_is, root_action_data, feature);
     }
 
     for(size_t block = 0; block != m_block_ids.size(); ++block) {
       auto feature = new Name(Feature::DEST, m_block_names[block]->value);
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_dest_name);
-      auto new_leaf = make_standard_action(name_is);
-      auto new_leaf_data = std::make_shared<Node_Fringe>(*this, *new_leaf, get_action, 2, feature);
-      new_leaf->data = new_leaf_data;
-      root_action_data->fringe_values.push_back(new_leaf_data);
+      make_standard_fringe(name_is, root_action_data, feature);
     }
 
 //    state_bindings.clear();

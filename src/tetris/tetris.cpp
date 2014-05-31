@@ -504,7 +504,6 @@ namespace Tetris {
 
   template<typename SUBFEATURE, typename AXIS>
   void Agent::generate_rete_continuous(const Carli::Node_Unsplit_Ptr &node_unsplit,
-                                       const std::function<Carli::Action_Ptr_C(const Rete::WME_Token &token)> &get_action,
                                        const AXIS &axis,
                                        const double &lower_bound,
                                        const double &upper_bound)
@@ -517,19 +516,8 @@ namespace Tetris {
       Node_Ranged::Lines lines;
 //      lines.push_back(Node_Ranged::Line(std::make_pair(5, ), std::make_pair(5, 20)));
       auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
-      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
-                                                      feature,
-                                                      Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/),
-                                                      lines);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->action = make_action_retraction([this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->insert_q_value_next(action, nfr->q_value);
-      }, [this,get_action,nfr](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, nfr->q_value);
-      }, predicate).get();
-      node_unsplit->fringe_values.push_back(nfr);
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->rete_action.parent());
+      make_standard_fringe_ranged(predicate, node_unsplit, feature, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
     }
   }
 
@@ -574,19 +562,14 @@ namespace Tetris {
     auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
       return std::make_shared<Place>(token);
     };
-
-    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1, nullptr);
+    
+    Carli::Node_Unsplit_Ptr root_action_data;
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
-
-      node_unsplit->action = make_action_retraction([this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        if(!this->specialize(token, get_action, node_unsplit))
-          this->insert_q_value_next(action, node_unsplit->q_value);
-      }, [this,get_action,node_unsplit](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-        const auto action = get_action(token);
-        this->purge_q_value_next(action, node_unsplit->q_value);
-      }, join_blink).get();
+      
+      auto root_action = make_standard_action(join_blink);
+      root_action_data = std::make_shared<Node_Unsplit>(*this, *root_action, get_action, 1, nullptr);
+      root_action->data = root_action_data;
     }
 
     for(Type::Axis axis : {Type::CURRENT/*, Type::NEXT*/}) {
@@ -594,16 +577,8 @@ namespace Tetris {
         for(uint8_t orientation = 0, oend = num_types(super); orientation != oend; ++orientation) {
           const auto type = super_to_type(super, orientation);
           auto feature = new Type(axis, type);
-          auto node_fringe = std::make_shared<Node_Fringe>(*this, 2, feature);
-          auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->action->parent());
-          node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-            const auto action = get_action(token);
-            this->insert_q_value_next(action, node_fringe->q_value);
-          }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-            const auto action = get_action(token);
-            this->purge_q_value_next(action, node_fringe->q_value);
-          }, predicate).get();
-          node_unsplit->fringe_values.push_back(node_fringe);
+          auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+          make_standard_fringe(predicate, root_action_data, feature);
         }
       }
     }
@@ -612,27 +587,20 @@ namespace Tetris {
 //      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
 //      auto feature = new X_Odd(value);
 //      node_fringe->feature = feature;
-//      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(X_Odd::AXIS, 2), feature->symbol_constant(), node_unsplit->action->parent());
-//      node_fringe->action = make_action_retraction([this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->insert_q_value_next(action, node_fringe->q_value);
-//      }, [this,get_action,node_fringe](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//        const auto action = get_action(token);
-//        this->purge_q_value_next(action, node_fringe->q_value);
-//      }, predicate).get();
-//      node_unsplit->fringe_values.push_back(node_fringe);
+//      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(X_Odd::AXIS, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+//      make_standard_fringe(predicate, root_action_data, feature);
 //    }
 
-    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::WIDTH, 0.0f, 4.0f);
-    generate_rete_continuous<Size, Size::Axis>(node_unsplit, get_action, Size::HEIGHT, 0.0f, 4.0f);
-    generate_rete_continuous<Position, Position::Axis>(node_unsplit, get_action, Position::X, 0.0f, 10.0f);
-    generate_rete_continuous<Position, Position::Axis>(node_unsplit, get_action, Position::Y, 0.0f, 20.0f);
-    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::BENEATH, 0.0f, 75.0f);
-    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::CREATED, 0.0f, 75.0f);
-//    generate_rete_continuous<Gaps, Gaps::Axis>(node_unsplit, get_action, Gaps::DEPTH, 0.0f, 20.0f);
-    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::CLEARS, 0.0f, 5.0f);
-    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::ENABLES, 0.0f, 5.0f);
-    generate_rete_continuous<Clears, Clears::Axis>(node_unsplit, get_action, Clears::PROHIBITS, 0.0f, 5.0f);
+    generate_rete_continuous<Size, Size::Axis>(root_action_data, Size::WIDTH, 0.0f, 4.0f);
+    generate_rete_continuous<Size, Size::Axis>(root_action_data, Size::HEIGHT, 0.0f, 4.0f);
+    generate_rete_continuous<Position, Position::Axis>(root_action_data, Position::X, 0.0f, 10.0f);
+    generate_rete_continuous<Position, Position::Axis>(root_action_data, Position::Y, 0.0f, 20.0f);
+    generate_rete_continuous<Gaps, Gaps::Axis>(root_action_data, Gaps::BENEATH, 0.0f, 75.0f);
+    generate_rete_continuous<Gaps, Gaps::Axis>(root_action_data, Gaps::CREATED, 0.0f, 75.0f);
+//    generate_rete_continuous<Gaps, Gaps::Axis>(root_action_data, Gaps::DEPTH, 0.0f, 20.0f);
+    generate_rete_continuous<Clears, Clears::Axis>(root_action_data, Clears::CLEARS, 0.0f, 5.0f);
+    generate_rete_continuous<Clears, Clears::Axis>(root_action_data, Clears::ENABLES, 0.0f, 5.0f);
+    generate_rete_continuous<Clears, Clears::Axis>(root_action_data, Clears::PROHIBITS, 0.0f, 5.0f);
   }
 
   void Agent::generate_features() {

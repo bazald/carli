@@ -1,5 +1,5 @@
 --split-min
-2
+1
 --split-update-count
 5
 --discount-rate

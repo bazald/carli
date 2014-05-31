@@ -265,13 +265,8 @@ namespace Puddle_World {
             m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
           }
 
-          auto node_split = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr));
-          node_split->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-            debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-          }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-            debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-          }, ylt).get();
-          node_split->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_split);
+          auto action = make_standard_action(ylt);
+          action->data = std::make_shared<Node_Split>(*this, *action, get_action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr));
         }
       }
     }
@@ -283,82 +278,42 @@ namespace Puddle_World {
     };
 
     auto filter_blink = make_filter(*m_wme_blink);
-    auto join_blink = make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
-
-    auto node_unsplit = std::make_shared<Node_Unsplit>(*this, 1, nullptr);
-    node_unsplit->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-      debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-    }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-      debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-    }, join_blink).get();
-    node_unsplit->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, node_unsplit);
+    
+    Carli::Node_Unsplit_Ptr root_action_data;
+    {
+      auto join_blink = make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
+      
+      auto root_action = make_standard_action(join_blink);
+      root_action_data = std::make_shared<Node_Unsplit>(*this, *root_action, get_action, 1, nullptr);
+      root_action->data = root_action_data;
+    }
 
     {
       Node_Ranged::Lines lines;
       lines.push_back(Node_Ranged::Line(std::make_pair(0.5, 0.0), std::make_pair(0.5, 1.0)));
       auto feature = new Position(Position::X, 0.0, 0.5, 2, false);
-      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
-                                                      feature,
-                                                      Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(0.5, 1.0)),
-                                                      lines);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), node_unsplit->rete_action->parent());
-      nfr->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-      }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-      }, predicate).get();
-      nfr->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, nfr);
-      node_unsplit->fringe_values.push_back(nfr);
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+      make_standard_fringe_ranged(predicate, root_action_data, feature, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(0.5, 1.0)), lines);
     }
 
     {
       auto feature = new Position(Position::X, 0.5, 1.0, 2, true);
-      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
-                                                      feature,
-                                                      Node_Ranged::Range(std::make_pair(0.5, 0.0), std::make_pair(1.0, 1.0)),
-                                                      Node_Ranged::Lines());
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-      }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-      }, predicate).get();
-      nfr->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, nfr);
-      node_unsplit->fringe_values.push_back(nfr);
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+      make_standard_fringe_ranged(predicate, root_action_data, feature, Node_Ranged::Range(std::make_pair(0.5, 0.0), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
     }
 
     {
       Node_Ranged::Lines lines;
       lines.push_back(Node_Ranged::Line(std::make_pair(0.0, 0.5), std::make_pair(1.0, 0.5)));
       auto feature = new Position(Position::Y, 0.0, 0.5, 2, false);
-      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
-                                                      feature,
-                                                      Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 0.5)),
-                                                      lines);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-      }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-      }, predicate).get();
-      nfr->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, nfr);
-      node_unsplit->fringe_values.push_back(nfr);
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+      make_standard_fringe_ranged(predicate, root_action_data, feature, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 0.5)), lines);
     }
 
     {
       auto feature = new Position(Position::Y, 0.5, 1.0, 2, true);
-      auto nfr = std::make_shared<Node_Fringe_Ranged>(*this, 2,
-                                                      feature,
-                                                      Node_Ranged::Range(std::make_pair(0.0, 0.5), std::make_pair(1.0, 1.0)),
-                                                      Node_Ranged::Lines());
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), node_unsplit->action->parent());
-      nfr->rete_action = make_action_retraction([this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->action(*this, token);
-      }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Carli::Carli_Data *>(action.data.get())->retraction(*this, token);
-      }, predicate).get();
-      nfr->rete_action->data = std::make_unique<Carli::Carli_Data>(get_action, nfr);
-      node_unsplit->fringe_values.push_back(nfr);
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+      make_standard_fringe_ranged(predicate, root_action_data, feature, Node_Ranged::Range(std::make_pair(0.0, 0.5), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
     }
   }
 

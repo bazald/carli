@@ -416,7 +416,6 @@ namespace Tetris {
   private:
     template<typename SUBFEATURE, typename AXIS>
     void generate_rete_continuous(const Carli::Node_Unsplit_Ptr &node_unsplit,
-                                  const std::function<Carli::Action_Ptr_C(const Rete::WME_Token &token)> &get_action,
                                   const AXIS &axis,
                                   const double &lower_bound,
                                   const double &upper_bound);
