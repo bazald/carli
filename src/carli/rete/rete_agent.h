@@ -36,6 +36,15 @@ namespace Rete {
 
     size_t rete_size() const;
 
+    template <typename VISITOR>
+    VISITOR visit_preorder(VISITOR visitor) {
+      visitor_value = visitor_value != 1 ? 1 : 2;
+
+      for(auto &o : filters)
+        visitor = o->visit_preorder(visitor, visitor_value);
+      return visitor;
+    }
+
   protected:
     void destroy();
 
@@ -44,6 +53,7 @@ namespace Rete {
     std::unordered_map<std::string, Rete_Action_Ptr> rules;
     WME_Set working_memory;
     Agenda agenda;
+    int visitor_value = 0;
   };
 
 }

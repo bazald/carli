@@ -130,6 +130,18 @@ namespace Rete {
     virtual void output_name(std::ostream &os) const = 0;
 
     virtual bool is_active() const = 0; ///< Has the node matched and forwarded at least one token?
+    
+    template <typename VISITOR>
+    VISITOR visit_preorder(VISITOR visitor, const int &visitor_value_) {
+      if(visitor_value == visitor_value_)
+        return visitor;
+      visitor_value = visitor_value_;
+
+      visitor(*this);
+      for(auto &o : outputs)
+        visitor = o->visit_preorder(visitor, visitor_value);
+      return visitor;
+    }
 
     Rete_Data_Ptr data;
 
@@ -154,6 +166,9 @@ namespace Rete {
 
     Outputs outputs;
     size_t outputs_disabled = 0u;
+
+  private:
+    int visitor_value = 0;
   };
 
 }
