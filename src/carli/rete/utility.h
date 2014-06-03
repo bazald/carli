@@ -2,6 +2,7 @@
 #define RETE_UTILITY_H
 
 #include <array>
+#include <functional>
 #include <set>
 #include <unordered_set>
 #include <utility>
@@ -22,6 +23,15 @@ public:
   template <typename Ptr1, typename Ptr2>
   bool operator()(const Ptr1 &lhs, const Ptr2 &rhs) const {
     return *lhs < *rhs;
+  }
+};
+
+template <typename Type1, typename Type2, int64_t (Type1::*MemFun)(const Type2 &) const>
+class compare_deref_memfun_lt {
+public:
+  template <typename Ptr1, typename Ptr2>
+  bool operator()(const Ptr1 &lhs, const Ptr2 &rhs) const {
+    return std::bind(MemFun, &*lhs, std::cref(*rhs))() < 0;
   }
 };
 

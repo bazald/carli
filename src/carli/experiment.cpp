@@ -108,7 +108,6 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<int64_t>>("cmac-resolution", 1, true, numeric_limits<int64_t>::max(), true, 16), "The number of tile codings in the CMAC.");
     options.add(     make_shared<Option_Ranged<int64_t>>("cmac-offset", 0, true, numeric_limits<int64_t>::max(), true, 0), "The tiling that should be the base tiling.");
     options.add_line("\n  Unusual Options:");
-    options.add(     make_shared<Option_Ranged<bool>>("generate-line-segments", false, true, true, true, false), "Generate line segments for 2D grids.");
     options.add(     make_shared<Option_Ranged<int64_t>>("contribute-update-count", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more update than this to count toward means and variances.");
     options.add(     make_shared<Option_Ranged<bool>>("dynamic-midpoint", false, true, true, true, false), "Dynamically modify midpoint values for features to better balance refinements.");
     options.add(     make_shared<Option_Ranged<bool>>("fringe", false, true, true, true, false), "Store and use a fringe to make refinement decisions.");
@@ -193,7 +192,7 @@ namespace Carli {
           env->alter();
           agent->reset_statistics();
           if(dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["reset-update-counts"]).get_value())
-            agent->reset_update_counts();
+            agent->visit_reset_update_count();
         }
 
         done = agent->get_metastate() != Metastate::NON_TERMINAL /*|| agent->get_step_count() >= 5000*/ || (num_steps && total_steps > 0 && total_steps >= num_steps);

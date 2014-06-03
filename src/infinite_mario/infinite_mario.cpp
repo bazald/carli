@@ -6,8 +6,6 @@ namespace Mario {
 
   using Carli::Metastate;
   using Carli::Node_Fringe;
-  using Carli::Node_Fringe_Ranged;
-  using Carli::Node_Ranged;
   using Carli::Node_Split;
   using Carli::Node_Unsplit;
   using Carli::Q_Value;
@@ -312,11 +310,9 @@ namespace Mario {
                                 {midpt, upper_bound}};
 
     for(int i = 0; i != 2; ++i) {
-      Node_Ranged::Lines lines;
-//      lines.push_back(Node_Ranged::Line(std::make_pair(5, ), std::make_pair(5, 20)));
       auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->rete_action.parent());
-      make_standard_fringe_ranged(predicate, node_unsplit, feature, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
+      make_standard_fringe(predicate, node_unsplit, feature); //, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
     }
   }
 

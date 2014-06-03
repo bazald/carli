@@ -53,7 +53,7 @@ namespace Rete {
     std::unordered_map<std::string, Rete_Action_Ptr> rules;
     WME_Set working_memory;
     Agenda agenda;
-    int visitor_value = 0;
+    intptr_t visitor_value = 0;
   };
 
 }

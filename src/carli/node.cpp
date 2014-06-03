@@ -27,7 +27,8 @@ namespace Carli {
   }
   
   void Node_Split::action(Agent &agent, const Rete::WME_Token &token) {
-    agent.insert_q_value_next(get_action(token), q_value);
+    if(!agent.respecialize(rete_action, token))
+      agent.insert_q_value_next(get_action(token), q_value);
   }
 
   Node_Unsplit::Node_Unsplit(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)

@@ -21,15 +21,13 @@ namespace Carli {
   typedef std::shared_ptr<const Node_Split> Node_Split_Ptr_C;
   typedef std::shared_ptr<const Node_Unsplit> Node_Unsplit_Ptr_C;
   typedef std::shared_ptr<const Node_Fringe> Node_Fringe_Ptr_C;
-  typedef std::shared_ptr<const Node_Fringe_Ranged> Node_Fringe_Ranged_Ptr_C;
 
   typedef std::shared_ptr<Node> Node_Ptr;
   typedef std::shared_ptr<Node_Split> Node_Split_Ptr;
   typedef std::shared_ptr<Node_Unsplit> Node_Unsplit_Ptr;
   typedef std::shared_ptr<Node_Fringe> Node_Fringe_Ptr;
-  typedef std::shared_ptr<Node_Fringe_Ranged> Node_Fringe_Ranged_Ptr;
 
-  class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Fringe_Ranged>, public Rete::Rete_Data {
+  class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Unsplit>, public Rete::Rete_Data {
     Node(const Node &) = delete;
     Node & operator=(const Node &) = delete;
 
@@ -119,54 +117,11 @@ namespace Carli {
     }
   };
 
-  class CARLI_LINKAGE Node_Ranged {
-    Node_Ranged(const Node_Ranged &) = delete;
-    Node_Ranged & operator=(const Node_Ranged &) = delete;
-
-  public:
-    typedef std::pair<std::pair<double, double>, std::pair<double, double>> Range;
-    typedef std::pair<std::pair<double, double>, std::pair<double, double>> Line;
-    typedef std::vector<Line, Zeni::Pool_Allocator<Line>> Lines;
-
-    Node_Ranged(const Range &range_, const Lines &lines_)
-     : range(range_),
-     lines(lines_)
-    {
-    }
-
-    Range range;
-    Lines lines;
-  };
-
-  class CARLI_LINKAGE Node_Fringe_Ranged : public Node_Fringe, public Node_Ranged {
-    Node_Fringe_Ranged(const Node_Fringe_Ranged &) = delete;
-    Node_Fringe_Ranged & operator=(const Node_Fringe_Ranged &) = delete;
-
-  public:
-    Node_Fringe_Ranged(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_, const Range &range_, const Lines &lines_)
-     : Node_Fringe(agent_, rete_action_, get_action_, depth_, feature_),
-     Node_Ranged(range_, lines_)
-    {
-    }
-
-    Node_Fringe * clone() const override {
-      return new Node_Fringe_Ranged(agent, rete_action, get_action, q_value->clone(), range, lines);
-    }
-
-  protected:
-    Node_Fringe_Ranged(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_, const Range &range_, const Lines &lines_)
-      : Node_Fringe(agent_, rete_action_, get_action_, q_value_),
-     Node_Ranged(range_, lines_)
-    {
-    }
-  };
-
   inline void __node_size_check() {
     typedef Node::value_type pool_allocator_type;
     static_assert(sizeof(pool_allocator_type) >= sizeof(Node_Split), "Pool size suboptimal.");
     static_assert(sizeof(pool_allocator_type) >= sizeof(Node_Unsplit), "Pool size suboptimal.");
     static_assert(sizeof(pool_allocator_type) >= sizeof(Node_Fringe), "Pool size suboptimal.");
-    static_assert(sizeof(pool_allocator_type) >= sizeof(Node_Fringe_Ranged), "Pool size suboptimal.");
   }
 
 }

@@ -36,9 +36,11 @@ namespace Carli {
     typedef Action action_type;
     typedef double reward_type;
     typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
-
+    
+    bool respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token);
     bool specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token);
     void expand_fringe(Rete::Rete_Action &rete_action, const Rete::WME_Token &token, const Feature * const &specialization);
+    void collapse_rete(Rete::Rete_Action &rete_action);
 
     Agent(const std::shared_ptr<Environment> &environment);
 
@@ -91,7 +93,6 @@ namespace Carli {
     
     Rete::Rete_Action_Ptr make_standard_action(const Rete::Rete_Node_Ptr &parent);
     Rete::Rete_Action_Ptr make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature);
-    Rete::Rete_Action_Ptr make_standard_fringe_ranged(const Rete::Rete_Node_Ptr &parent, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature, const Node_Ranged::Range &range, const Node_Ranged::Lines &lines);
 
     void purge_q_value(const tracked_ptr<Q_Value> &q_value);
 
@@ -101,10 +102,11 @@ namespace Carli {
     void purge_q_value_eligible(const tracked_ptr<Q_Value> &q_value);
 
     void print(std::ostream &os) const;
+    
+    //void print_value_function_grid(std::ostream &os) const;
 
-    void reset_update_counts();
-
-    void print_value_function_grid(std::ostream &os) const;
+    void visit_increment_depth();
+    void visit_reset_update_count();
 
     int64_t q_value_count = 0;
 
@@ -150,9 +152,9 @@ namespace Carli {
     }
   #endif
 
-    void print_value_function_grid_set(std::ostream &os, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &line_segments) const;
+    //void print_value_function_grid_set(std::ostream &os, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &line_segments) const;
 
-    void merge_value_function_grid_sets(std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &combination, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &additions) const;
+    //void merge_value_function_grid_sets(std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &combination, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &additions) const;
 
     Metastate m_metastate = Metastate::NON_TERMINAL;
     Action_Ptr_C m_current;
@@ -162,7 +164,7 @@ namespace Carli {
     std::function<Action_Ptr_C ()> m_target_policy; ///< Sarsa/Q-Learning selector
     std::function<Action_Ptr_C ()> m_exploration_policy; ///< Exploration policy
     std::function<Node_Fringe_Ptr (const Rete::WME_Token &, const Node_Unsplit &)> m_split_test; ///< true if too general, false if sufficiently general
-    std::map<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<Action_Ptr_C>, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
+    //std::map<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<Action_Ptr_C>, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
     Rete::Symbol_Identifier_Ptr_C m_s_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("S1"));
     Rete::WME_Ptr_C m_wme_blink = Rete::WME_Ptr_C(new Rete::WME(m_s_id, m_s_id, m_s_id));
@@ -225,7 +227,6 @@ namespace Carli {
     const int64_t m_split_pseudoepisodes = get_Option_Ranged<int64_t>(Options::get_global(), "split-pseudoepisodes");
     const int64_t m_split_update_count = get_Option_Ranged<int64_t>(Options::get_global(), "split-update-count");
 
-    const bool m_generate_line_segments = get_Option_Ranged<bool>(Options::get_global(), "generate-line-segments");
     const int64_t m_contribute_update_count = get_Option_Ranged<int64_t>(Options::get_global(), "contribute-update-count");
     const bool m_dynamic_midpoint = get_Option_Ranged<bool>(Options::get_global(), "dynamic-midpoint");
     const bool m_fringe = get_Option_Ranged<bool>(Options::get_global(), "fringe");

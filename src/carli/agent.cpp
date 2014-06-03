@@ -4,6 +4,11 @@
 
 namespace Carli {
 
+  bool Agent::respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
+    //collapse_rete(rete_action);
+    return false;
+  }
+
   bool Agent::specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
     auto &general = debuggable_cast<Node_Unsplit &>(*rete_action.data);
 
@@ -75,7 +80,7 @@ namespace Carli {
      */
     auto filter_blink = make_filter(*m_wme_blink);
     for(auto &leaf : leaves) {
-      auto leaf_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(leaf);
+      //auto leaf_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(leaf);
       auto leaf_feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(leaf->q_value->feature.get());
 
   //    if(leaf_node_ranged) {
@@ -95,32 +100,32 @@ namespace Carli {
             for(auto &refined_feature : refined) {
               auto refined_ranged_data = dynamic_cast<Feature_Ranged_Data *>(refined_feature);
               assert(refined_ranged_data);
-              Node_Ranged::Range range(leaf_node_ranged->range);
-              Node_Ranged::Lines lines;
-              if(m_generate_line_segments) {
-                if(refined_ranged_data->axis.first == 0) {
-                  if(!refined_ranged_data->upper) {
-                    range.second.first = refined_ranged_data->bound_upper;
-                    lines.push_back(Node_Ranged::Line(std::make_pair(range.second.first, range.first.second), std::make_pair(range.second.first, range.second.second)));
-                  }
-                  else {
-                    range.first.first = refined_ranged_data->bound_lower;
-                  }
-                }
-                else {
-                  if(!refined_ranged_data->upper) {
-                    range.second.second = refined_ranged_data->bound_upper;
-                    lines.push_back(Node_Ranged::Line(std::make_pair(range.first.first, range.second.second), std::make_pair(range.second.first, range.second.second)));
-                  }
-                  else {
-                    range.first.second = refined_ranged_data->bound_lower;
-                  }
-                }
-              }
+              //Node_Ranged::Range range(leaf_node_ranged->range);
+              //Node_Ranged::Lines lines;
+              //if(m_generate_line_segments) {
+              //  if(refined_ranged_data->axis.first == 0) {
+              //    if(!refined_ranged_data->upper) {
+              //      range.second.first = refined_ranged_data->bound_upper;
+              //      lines.push_back(Node_Ranged::Line(std::make_pair(range.second.first, range.first.second), std::make_pair(range.second.first, range.second.second)));
+              //    }
+              //    else {
+              //      range.first.first = refined_ranged_data->bound_lower;
+              //    }
+              //  }
+              //  else {
+              //    if(!refined_ranged_data->upper) {
+              //      range.second.second = refined_ranged_data->bound_upper;
+              //      lines.push_back(Node_Ranged::Line(std::make_pair(range.first.first, range.second.second), std::make_pair(range.second.first, range.second.second)));
+              //    }
+              //    else {
+              //      range.first.second = refined_ranged_data->bound_lower;
+              //    }
+              //  }
+              //}
               /** Step 2.1a: Create new ranged fringe nodes if the new leaf is refineable. */
               auto predicate = make_predicate_vc(refined_ranged_data->predicate(), leaf_feature_ranged_data->axis, refined_ranged_data->symbol_constant(), leaf->rete_action.parent());
               auto new_action = make_standard_action(predicate);
-              auto new_node = std::make_shared<Node_Fringe_Ranged>(*this, *new_action, general.get_action, leaf->q_value->depth + 1, refined_feature, range, lines);
+              auto new_node = std::make_shared<Node_Fringe>(*this, *new_action, general.get_action, leaf->q_value->depth + 1, refined_feature);
               new_action->data = new_node;
               node_unsplit_fringe.push_back(new_node);
             }
@@ -131,7 +136,7 @@ namespace Carli {
           }
 
           for(auto &fringe : general.fringe_values) {
-            auto fringe_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(fringe);
+            //auto fringe_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(fringe);
             auto fringe_feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(fringe->q_value->feature.get());
             auto &fringe_action = fringe->rete_action;
 
@@ -150,33 +155,35 @@ namespace Carli {
             auto new_action = make_standard_action(new_test);
             Node_Fringe_Ptr new_action_data;
 
-            if(leaf_feature_ranged_data && fringe_feature_ranged_data) {
-              Node_Ranged::Range range(fringe_node_ranged->range);
-              Node_Ranged::Lines lines;
-              if(m_generate_line_segments) {
-                if(leaf_feature_ranged_data->axis.first == 0) {
-                  range.first.first = leaf_node_ranged->range.first.first;
-                  range.second.first = leaf_node_ranged->range.second.first;
-                  for(auto &line : fringe_node_ranged->lines)
-                    lines.push_back(Node_Ranged::Line(std::make_pair(range.first.first, line.first.second), std::make_pair(range.second.first, line.second.second)));
-                }
-                else {
-                  range.first.second = leaf_node_ranged->range.first.second;
-                  range.second.second = leaf_node_ranged->range.second.second;
-                  for(auto &line : fringe_node_ranged->lines)
-                    lines.push_back(Node_Ranged::Line(std::make_pair(line.first.first, range.first.second), std::make_pair(line.second.first, range.second.second)));
-                }
-              }
-              /** Step 2.4a: Create the new ranged fringe node. */
-              new_action_data = std::make_shared<Node_Fringe_Ranged>(*this, *new_action, general.get_action, leaf->q_value->depth + 1, fringe->q_value->feature->clone(), range, lines);
-            }
-            else {
-              if(fringe_feature_ranged_data) {
-                /** Step 2.4a: Create the new ranged fringe node. */
-                new_action_data = std::make_shared<Node_Fringe_Ranged>(*this, *new_action, general.get_action, leaf->q_value->depth + 1, fringe->q_value->feature->clone(), fringe_node_ranged->range, fringe_node_ranged->lines);
-              }
-              else {
-                /** Step 2.2b: Create the new non-ranged fringe node. */
+            //if(leaf_feature_ranged_data && fringe_feature_ranged_data) {
+            //  Node_Ranged::Range range(fringe_node_ranged->range);
+            //  Node_Ranged::Lines lines;
+            //  if(m_generate_line_segments) {
+            //    if(leaf_feature_ranged_data->axis.first == 0) {
+            //      range.first.first = leaf_node_ranged->range.first.first;
+            //      range.second.first = leaf_node_ranged->range.second.first;
+            //      for(auto &line : fringe_node_ranged->lines)
+            //        lines.push_back(Node_Ranged::Line(std::make_pair(range.first.first, line.first.second), std::make_pair(range.second.first, line.second.second)));
+            //    }
+            //    else {
+            //      range.first.second = leaf_node_ranged->range.first.second;
+            //      range.second.second = leaf_node_ranged->range.second.second;
+            //      for(auto &line : fringe_node_ranged->lines)
+            //        lines.push_back(Node_Ranged::Line(std::make_pair(line.first.first, range.first.second), std::make_pair(line.second.first, range.second.second)));
+            //    }
+            //  }
+            //  /** Step 2.4a: Create the new ranged fringe node. */
+            //  new_action_data = std::make_shared<Node_Fringe_Ranged>(*this, *new_action, general.get_action, leaf->q_value->depth + 1, fringe->q_value->feature->clone(), range, lines);
+            //}
+            //else
+            {
+              //if(fringe_feature_ranged_data) {
+              //  /** Step 2.4b: Create the new ranged fringe node. */
+              //  new_action_data = std::make_shared<Node_Fringe_Ranged>(*this, *new_action, general.get_action, leaf->q_value->depth + 1, fringe->q_value->feature->clone(), fringe_node_ranged->range, fringe_node_ranged->lines);
+              //}
+              //else
+              {
+                /** Step 2.2c: Create the new non-ranged fringe node. */
                 new_action_data = std::make_shared<Node_Fringe>(*this, *new_action, general.get_action, leaf->q_value->depth + 1, fringe->q_value->feature->clone());
               }
             }
@@ -215,6 +222,55 @@ namespace Carli {
     /** Step 3: Excise all old fringe rules from the system */
     for(auto &fringe : general.fringe_values)
       excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(fringe->rete_action.shared()));
+  }
+
+  void Agent::collapse_rete(Rete::Rete_Action &rete_action) {
+    assert(rete_action.data);
+    auto split = debuggable_pointer_cast<Node_Split>(rete_action.data);
+    assert(split);
+
+    struct {
+      std::multiset<tracked_ptr<Feature>, compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> features;
+
+      void operator()(Rete::Rete_Node &rete_node) {
+        if(rete_node.data && rete_node.data != root) {
+          auto &node = debuggable_cast<Carli::Node &>(*rete_node.data);
+          auto &feature = node.q_value->feature;
+          if(!feature)
+            return;
+
+          auto found = features.equal_range(feature);
+          if(found.first != found.second) {
+            if((*found.first)->get_depth() < feature->get_depth())
+              return;
+            else if((*found.first)->get_depth() > feature->get_depth()) {
+              do {
+                found.first = features.erase(found.first);
+              } while(found.first != found.second);
+            }
+            else {
+              do {
+                if(feature->compare_value(**found.first) == 0)
+                  return;
+              } while(++found.first != found.second);
+            }
+          }
+
+          features.insert(feature);
+        }
+      }
+
+      Node_Ptr root;
+    } fringe_collector;
+
+    fringe_collector.root = split;
+
+    fringe_collector = rete_action.parent()->visit_preorder(fringe_collector);
+
+    //std::cerr << "Features: ";
+    //for(auto &feature : fringe_collector.features)
+    //  std::cerr << ' ' << *feature;
+    //std::cerr << std::endl;
   }
 
   Agent::Agent(const std::shared_ptr<Environment> &environment)
@@ -297,7 +353,6 @@ namespace Carli {
   //    sum_value(action_value.first.get(), action_value.second);
   //#endif
     m_next_q_values.clear();
-    m_lines.clear();
   }
 
   void Agent::reset_statistics() {
@@ -391,14 +446,6 @@ namespace Carli {
     return new_leaf;
   }
 
-  Rete::Rete_Action_Ptr Agent::make_standard_fringe_ranged(const Rete::Rete_Node_Ptr &parent, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature, const Node_Ranged::Range &range, const Node_Ranged::Lines &lines) {
-    auto new_leaf = make_standard_action(parent);
-    auto new_leaf_data = std::make_shared<Node_Fringe_Ranged>(*this, *new_leaf, root_action_data->get_action, 2, feature, range, lines);
-    new_leaf->data = new_leaf_data;
-    root_action_data->fringe_values.push_back(new_leaf_data);
-    return new_leaf;
-  }
-
   void Agent::purge_q_value(const tracked_ptr<Q_Value> &q_value) {
   //#ifdef DEBUG_OUTPUT
   //  std::cerr << "Purging current value " << q_value << std::endl;
@@ -458,25 +505,19 @@ namespace Carli {
   //#endif
   }
 
-  void Agent::reset_update_counts() {
-  //    for(auto &vf : m_value_function) {
-  //      reset_update_counts_for_trie(vf.second);
+  //void Agent::print_value_function_grid(std::ostream &os) const {
+  //  std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> line_segments;
+  //  for(auto &action_value : m_next_q_values) {
+  //    const auto &line_segments2 = m_lines.find(action_value.first);
+  //    if(line_segments2 != m_lines.end()) {
+  //      os << *action_value.first << ":" << std::endl;
+  //      print_value_function_grid_set(os, line_segments2->second);
+  //      merge_value_function_grid_sets(line_segments, line_segments2->second);
   //    }
-  }
-
-  void Agent::print_value_function_grid(std::ostream &os) const {
-    std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> line_segments;
-    for(auto &action_value : m_next_q_values) {
-      const auto &line_segments2 = m_lines.find(action_value.first);
-      if(line_segments2 != m_lines.end()) {
-        os << *action_value.first << ":" << std::endl;
-        print_value_function_grid_set(os, line_segments2->second);
-        merge_value_function_grid_sets(line_segments, line_segments2->second);
-      }
-    }
-    os << "all:" << std::endl;
-    print_value_function_grid_set(os, line_segments);
-  }
+  //  }
+  //  os << "all:" << std::endl;
+  //  print_value_function_grid_set(os, line_segments);
+  //}
 
   //  void print_update_count_grid(std::ostream &os) const {
   //    std::map<line_segment_type, size_t> update_counts;
@@ -489,6 +530,24 @@ namespace Carli {
   //    os << "all:" << std::endl;
   //    print_update_count_map(os, update_counts);
   //  }
+
+  void Agent::visit_increment_depth() {
+    visit_preorder([](Rete::Rete_Node &rete_node) {
+      if(rete_node.data) {
+        auto &node = debuggable_cast<Carli::Node &>(*rete_node.data);
+        ++node.q_value->depth;
+      }
+    });
+  }
+
+  void Agent::visit_reset_update_count() {
+    visit_preorder([](Rete::Rete_Node &rete_node) {
+      if(rete_node.data) {
+        auto &node = debuggable_cast<Carli::Node &>(*rete_node.data);
+        node.q_value->update_count = 0;
+      }
+    });
+  }
 
   Carli::Action_Ptr_C Agent::choose_epsilon_greedy(const double &epsilon) {
     if(random.frand_lt() < epsilon)
@@ -961,32 +1020,24 @@ namespace Carli {
     return sum;
   }
 
-  void Agent::print_value_function_grid_set(std::ostream &os, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &line_segments) const {
-    for(const auto &line_segment : line_segments)
-      os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
-  }
+  //void Agent::print_value_function_grid_set(std::ostream &os, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &line_segments) const {
+  //  for(const auto &line_segment : line_segments)
+  //    os << line_segment.first.first << ',' << line_segment.first.second << '/' << line_segment.second.first << ',' << line_segment.second.second << std::endl;
+  //}
 
   //  void print_update_count_map(std::ostream &os, const std::map<line_segment_type, size_t> &update_counts) const {
   //    for(const auto &rect : update_counts)
   //      os << rect.first.first.first << ',' << rect.first.first.second << '/' << rect.first.second.first << ',' << rect.first.second.second << '=' << rect.second << std::endl;
   //  }
 
-  void Agent::merge_value_function_grid_sets(std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &combination, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &additions) const {
-    for(const auto &line_segment : additions)
-      combination.insert(line_segment);
-  }
+  //void Agent::merge_value_function_grid_sets(std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &combination, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &additions) const {
+  //  for(const auto &line_segment : additions)
+  //    combination.insert(line_segment);
+  //}
 
   //  void merge_update_count_maps(std::map<line_segment_type, size_t> &combination, const std::map<line_segment_type, size_t> &additions) const {
   //    for(const auto &rect : additions)
   //      combination[rect.first] += rect.second;
-  //  }
-
-  //  static void reset_update_counts_for_trie(const feature_trie_type * const &trie) {
-  //    for(const feature_trie_type &trie2 : *trie) {
-  //      if(trie2.get())
-  //        trie2.get()->update_count = 0;
-  //      reset_update_counts_for_trie(trie2.get_deeper());
-  //    }
   //  }
 
   //  void collapse_fringe(feature_trie &leaf_fringe, feature_trie head) {

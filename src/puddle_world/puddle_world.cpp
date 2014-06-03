@@ -5,8 +5,6 @@
 namespace Puddle_World {
 
   using Carli::Metastate;
-  using Carli::Node_Fringe_Ranged;
-  using Carli::Node_Ranged;
   using Carli::Node_Split;
   using Carli::Node_Unsplit;
   using Carli::Q_Value;
@@ -257,13 +255,13 @@ namespace Puddle_World {
           auto ygte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Position::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
           auto ylt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Position::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), ygte);
 
-          /// This does redundant work for actions after the first.
-          for(const auto &action : m_action) {
-            m_lines[action].insert(Node_Ranged::Line(std::make_pair(left, top), std::make_pair(left, bottom)));
-            m_lines[action].insert(Node_Ranged::Line(std::make_pair(left, bottom), std::make_pair(right, bottom)));
-            m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, bottom), std::make_pair(right, top)));
-            m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
-          }
+          ///// This does redundant work for actions after the first.
+          //for(const auto &action : m_action) {
+          //  m_lines[action].insert(Node_Ranged::Line(std::make_pair(left, top), std::make_pair(left, bottom)));
+          //  m_lines[action].insert(Node_Ranged::Line(std::make_pair(left, bottom), std::make_pair(right, bottom)));
+          //  m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, bottom), std::make_pair(right, top)));
+          //  m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
+          //}
 
           auto action = make_standard_action(ylt);
           action->data = std::make_shared<Node_Split>(*this, *action, get_action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr));
@@ -289,31 +287,31 @@ namespace Puddle_World {
     }
 
     {
-      Node_Ranged::Lines lines;
-      lines.push_back(Node_Ranged::Line(std::make_pair(0.5, 0.0), std::make_pair(0.5, 1.0)));
+      //Node_Ranged::Lines lines;
+      //lines.push_back(Node_Ranged::Line(std::make_pair(0.5, 0.0), std::make_pair(0.5, 1.0)));
       auto feature = new Position(Position::X, 0.0, 0.5, 2, false);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
-      make_standard_fringe_ranged(predicate, root_action_data, feature, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(0.5, 1.0)), lines);
+      make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(0.5, 1.0)), lines);
     }
 
     {
       auto feature = new Position(Position::X, 0.5, 1.0, 2, true);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
-      make_standard_fringe_ranged(predicate, root_action_data, feature, Node_Ranged::Range(std::make_pair(0.5, 0.0), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
+      make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.5, 0.0), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
     }
 
     {
-      Node_Ranged::Lines lines;
-      lines.push_back(Node_Ranged::Line(std::make_pair(0.0, 0.5), std::make_pair(1.0, 0.5)));
+      //Node_Ranged::Lines lines;
+      //lines.push_back(Node_Ranged::Line(std::make_pair(0.0, 0.5), std::make_pair(1.0, 0.5)));
       auto feature = new Position(Position::Y, 0.0, 0.5, 2, false);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
-      make_standard_fringe_ranged(predicate, root_action_data, feature, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 0.5)), lines);
+      make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 0.5)), lines);
     }
 
     {
       auto feature = new Position(Position::Y, 0.5, 1.0, 2, true);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
-      make_standard_fringe_ranged(predicate, root_action_data, feature, Node_Ranged::Range(std::make_pair(0.0, 0.5), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
+      make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.5), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
     }
   }
 
@@ -357,8 +355,8 @@ int main(int argc, char **argv) {
                               if(output == "experiment") {
                                 auto pwa = std::dynamic_pointer_cast<Puddle_World::Agent>(agent);
                                 pwa->print_policy(std::cerr, 32);
-                                if(!dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value())
-                                  pwa->print_value_function_grid(std::cerr);
+                                //if(!dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value())
+                                //  pwa->print_value_function_grid(std::cerr);
                               }
                             }
                            );

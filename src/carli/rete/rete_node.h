@@ -132,15 +132,17 @@ namespace Rete {
     virtual bool is_active() const = 0; ///< Has the node matched and forwarded at least one token?
     
     template <typename VISITOR>
-    VISITOR visit_preorder(VISITOR visitor, const int &visitor_value_) {
+    VISITOR visit_preorder(VISITOR visitor) {
+      visitor_value = (intptr_t(this) & ~intptr_t(3)) | ((visitor_value & 3) != 1 ? 1 : 2);
+      return visit_preorder_tail(visitor);
+    }
+    
+    template <typename VISITOR>
+    VISITOR visit_preorder(VISITOR visitor, const intptr_t &visitor_value_) {
       if(visitor_value == visitor_value_)
         return visitor;
       visitor_value = visitor_value_;
-
-      visitor(*this);
-      for(auto &o : outputs)
-        visitor = o->visit_preorder(visitor, visitor_value);
-      return visitor;
+      return visit_preorder_tail(visitor);
     }
 
     Rete_Data_Ptr data;
@@ -168,7 +170,15 @@ namespace Rete {
     size_t outputs_disabled = 0u;
 
   private:
-    int visitor_value = 0;
+    template <typename VISITOR>
+    VISITOR visit_preorder_tail(VISITOR visitor) {
+      visitor(*this);
+      for(auto &o : outputs)
+        visitor = o->visit_preorder(visitor, visitor_value);
+      return visitor;
+    }
+
+    intptr_t visitor_value = 0;
   };
 
 }
