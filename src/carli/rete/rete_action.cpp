@@ -22,7 +22,16 @@ namespace Rete {
 #endif
                                                                           ) {
     assert(!output);
-    input->destroy(filters, shared());
+
+    if(!excised) {
+      excised = true;
+
+      //std::cerr << "Destroying: ";
+      //output_name(std::cerr);
+      //std::cerr << std::endl;
+
+      input->destroy(filters, shared());
+    }
   }
 
   void Rete_Action::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
@@ -77,10 +86,10 @@ namespace Rete {
     return false;
   }
   
-  void Rete_Action::output_name(std::ostream &os) const {
+  void Rete_Action::output_name(std::ostream &os, const int64_t &depth) const {
     os << "a(";
-    if(input)
-      input->output_name(os);
+    if(input && depth > 0)
+      input->output_name(os, depth - 1);
     os << ')';
   }
 

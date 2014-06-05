@@ -15,16 +15,18 @@ namespace Rete {
     Rete_Join(WME_Bindings bindings_);
 
     void destroy(Filters &filters, const Rete_Node_Ptr &output) override;
-
-    Rete_Node_Ptr_C parent() const override {return input0->shared();}
-    Rete_Node_Ptr parent() override {return input0->shared();}
+    
+    Rete_Node_Ptr_C parent_left() const override {return input0->shared();}
+    Rete_Node_Ptr_C parent_right() const override {return input1->shared();}
+    Rete_Node_Ptr parent_left() override {return input0->shared();}
+    Rete_Node_Ptr parent_right() override {return input1->shared();}
 
     void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
     bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
 
     bool operator==(const Rete_Node &rhs) const override;
 
-    void output_name(std::ostream &os) const override;
+    void output_name(std::ostream &os, const int64_t &depth) const override;
 
     bool is_active() const override;
 

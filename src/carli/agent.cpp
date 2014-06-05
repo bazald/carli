@@ -4,9 +4,53 @@
 
 namespace Carli {
 
+  static const bool g_undo_specialization = false;
+
+  struct Fringe_Collector {
+    std::unordered_set<Rete::Rete_Action_Ptr> excise;
+    std::map<tracked_ptr<Feature>,
+      std::map<tracked_ptr<Feature>, Rete::Rete_Node_Ptr, compare_deref_lt>, 
+      compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> features;
+
+    Fringe_Collector(const Node_Split_Ptr &split)
+      : root(split)
+    {
+    }
+
+    void operator()(Rete::Rete_Node &rete_node) {
+      if(!rete_node.data)
+        return;
+
+      excise.insert(debuggable_pointer_cast<Rete::Rete_Action>(rete_node.shared()));
+
+      if(rete_node.data != root) {
+        auto &node = debuggable_cast<Carli::Node &>(*rete_node.data);
+        auto &feature = node.q_value->feature;
+        if(!feature)
+          return;
+
+        const auto found_axis = features.find(feature);
+        if(found_axis != features.end()) {
+          const int64_t depth_diff = feature->get_depth() - found_axis->second.begin()->first->get_depth();
+          if(depth_diff > 0)
+            return;
+          else if(depth_diff < 0)
+            found_axis->second.clear();
+
+          found_axis->second[feature] = rete_node.shared();
+        }
+        else
+          features[feature][feature] = rete_node.shared();
+      }
+    }
+
+    Node_Ptr root;
+  };
+
   bool Agent::respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
-    //collapse_rete(rete_action);
     return false;
+    collapse_rete(rete_action);
+    return true;
   }
 
   bool Agent::specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
@@ -24,14 +68,43 @@ namespace Carli {
   //  std::cerr << "Refining : " << chosen << std::endl;
   //#endif
 
+#ifndef NDEBUG
+    std::cerr << "Rete size before expansion: " << rete_size() << std::endl;
+#endif
+
     expand_fringe(rete_action, token, chosen->q_value->feature.get());
 
-    general.delete_q_value = false;
-    general.q_value->type = Q_Value::Type::SPLIT;
-    auto new_action = make_standard_action(rete_action.parent()->parent());
-    new_action->data = std::make_shared<Node_Split>(*this, *new_action, general.get_action, general.q_value);
+    auto new_node = general.create_split(*this, m_wme_blink);
 
     excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(rete_action.shared()));
+    
+    if(g_undo_specialization) {
+      auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector(new_node));
+      Fringe_Values old_fringe_values;
+      for(auto &fringe_axis : fringe_collector.features) {
+        for(auto &value_node : fringe_axis.second) {
+          auto fringe = std::dynamic_pointer_cast<Node_Fringe>(value_node.second->data);
+          assert(fringe);
+          old_fringe_values.push_back(fringe);
+          
+          fringe->q_value->update_count = 0;
+          fringe->q_value->pseudoepisode_count = 0;
+        }
+      }
+
+      assert(!old_fringe_values.empty());
+
+      auto old_node = new_node->create_unsplit(*this, m_wme_blink, old_fringe_values);
+
+      excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(new_node->rete_action.shared()));
+      
+      old_node->q_value->update_count = 0;
+      old_node->q_value->pseudoepisode_count = 0;
+    }
+
+#ifndef NDEBUG
+    std::cerr << "Rete size after expansion: " << rete_size() << std::endl;
+#endif
 
     return true;
   }
@@ -47,7 +120,7 @@ namespace Carli {
     /** Step 1: Collect new leaves from the fringe
      *          They'll have to be modified / replaced, but it's good to separate them from the remainder of the fringe
      */
-    Node_Unsplit::Fringe_Values leaves;
+    Fringe_Values leaves;
     for(auto fringe = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe != fend; ) {
       if(specialization->compare_axis(*(*fringe)->q_value->feature) == 0) {
         leaves.push_back(*fringe);
@@ -78,21 +151,13 @@ namespace Carli {
     /** Step 2: For each new leaf...
      *          ...create it, clone remaining fringe entries below the new leaf, and destroy the old fringe node
      */
-    auto filter_blink = make_filter(*m_wme_blink);
+    std::vector<Node_Ptr> new_leaves;
     for(auto &leaf : leaves) {
       //auto leaf_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(leaf);
       auto leaf_feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(leaf->q_value->feature.get());
 
-  //    if(leaf_node_ranged) {
-  //      for(auto &line : leaf_node_ranged->lines)
-  //        m_lines[action].insert(line);
-  //    }
-      assert(!((leaf_node_ranged.get() != nullptr) ^ (leaf_feature_ranged_data != nullptr)));
-
-      Node_Unsplit::Fringe_Values new_fringe;
-
       if(leaf->q_value->depth <= m_split_max) {
-        Node_Unsplit::Fringe_Values node_unsplit_fringe;
+        Fringe_Values node_unsplit_fringe;
 
         if(leaf->q_value->depth < m_split_max) {
           auto refined = leaf->q_value->feature->refined();
@@ -100,30 +165,9 @@ namespace Carli {
             for(auto &refined_feature : refined) {
               auto refined_ranged_data = dynamic_cast<Feature_Ranged_Data *>(refined_feature);
               assert(refined_ranged_data);
-              //Node_Ranged::Range range(leaf_node_ranged->range);
-              //Node_Ranged::Lines lines;
-              //if(m_generate_line_segments) {
-              //  if(refined_ranged_data->axis.first == 0) {
-              //    if(!refined_ranged_data->upper) {
-              //      range.second.first = refined_ranged_data->bound_upper;
-              //      lines.push_back(Node_Ranged::Line(std::make_pair(range.second.first, range.first.second), std::make_pair(range.second.first, range.second.second)));
-              //    }
-              //    else {
-              //      range.first.first = refined_ranged_data->bound_lower;
-              //    }
-              //  }
-              //  else {
-              //    if(!refined_ranged_data->upper) {
-              //      range.second.second = refined_ranged_data->bound_upper;
-              //      lines.push_back(Node_Ranged::Line(std::make_pair(range.first.first, range.second.second), std::make_pair(range.second.first, range.second.second)));
-              //    }
-              //    else {
-              //      range.first.second = refined_ranged_data->bound_lower;
-              //    }
-              //  }
-              //}
+
               /** Step 2.1a: Create new ranged fringe nodes if the new leaf is refineable. */
-              auto predicate = make_predicate_vc(refined_ranged_data->predicate(), leaf_feature_ranged_data->axis, refined_ranged_data->symbol_constant(), leaf->rete_action.parent());
+              auto predicate = make_predicate_vc(refined_ranged_data->predicate(), leaf_feature_ranged_data->axis, refined_ranged_data->symbol_constant(), leaf->rete_action.parent_left());
               auto new_action = make_standard_action(predicate);
               auto new_node = std::make_shared<Node_Fringe>(*this, *new_action, general.get_action, leaf->q_value->depth + 1, refined_feature);
               new_action->data = new_node;
@@ -135,93 +179,45 @@ namespace Carli {
             assert(refined.empty());
           }
 
-          for(auto &fringe : general.fringe_values) {
-            //auto fringe_node_ranged = std::dynamic_pointer_cast<Node_Fringe_Ranged>(fringe);
-            auto fringe_feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(fringe->q_value->feature.get());
-            auto &fringe_action = fringe->rete_action;
-
-            Rete::Rete_Node_Ptr new_test;
-
-            if(leaf_feature_ranged_data && fringe_feature_ranged_data) {
-              /** Step 2.2a: Create the range test for the new fringe node. */
-              new_test = make_predicate_vc(fringe_feature_ranged_data->predicate(), fringe_feature_ranged_data->axis, fringe_feature_ranged_data->symbol_constant(), leaf->rete_action.parent());
-            }
-            else {
-              /** Step 2.2b: Verify any necessary binding(s) for the new fringe node. */
-              new_test = make_existential_join(fringe->q_value->feature->bindings(), leaf->rete_action.parent(), fringe_action.parent());
-            }
-
-            /** Step 2.3: Create the actual action for the new fringe node. */
-            auto new_action = make_standard_action(new_test);
-            Node_Fringe_Ptr new_action_data;
-
-            //if(leaf_feature_ranged_data && fringe_feature_ranged_data) {
-            //  Node_Ranged::Range range(fringe_node_ranged->range);
-            //  Node_Ranged::Lines lines;
-            //  if(m_generate_line_segments) {
-            //    if(leaf_feature_ranged_data->axis.first == 0) {
-            //      range.first.first = leaf_node_ranged->range.first.first;
-            //      range.second.first = leaf_node_ranged->range.second.first;
-            //      for(auto &line : fringe_node_ranged->lines)
-            //        lines.push_back(Node_Ranged::Line(std::make_pair(range.first.first, line.first.second), std::make_pair(range.second.first, line.second.second)));
-            //    }
-            //    else {
-            //      range.first.second = leaf_node_ranged->range.first.second;
-            //      range.second.second = leaf_node_ranged->range.second.second;
-            //      for(auto &line : fringe_node_ranged->lines)
-            //        lines.push_back(Node_Ranged::Line(std::make_pair(line.first.first, range.first.second), std::make_pair(line.second.first, range.second.second)));
-            //    }
-            //  }
-            //  /** Step 2.4a: Create the new ranged fringe node. */
-            //  new_action_data = std::make_shared<Node_Fringe_Ranged>(*this, *new_action, general.get_action, leaf->q_value->depth + 1, fringe->q_value->feature->clone(), range, lines);
-            //}
-            //else
-            {
-              //if(fringe_feature_ranged_data) {
-              //  /** Step 2.4b: Create the new ranged fringe node. */
-              //  new_action_data = std::make_shared<Node_Fringe_Ranged>(*this, *new_action, general.get_action, leaf->q_value->depth + 1, fringe->q_value->feature->clone(), fringe_node_ranged->range, fringe_node_ranged->lines);
-              //}
-              //else
-              {
-                /** Step 2.2c: Create the new non-ranged fringe node. */
-                new_action_data = std::make_shared<Node_Fringe>(*this, *new_action, general.get_action, leaf->q_value->depth + 1, fringe->q_value->feature->clone());
-              }
-            }
-
-            new_action->data = new_action_data;
-            node_unsplit_fringe.push_back(new_action_data);
-          }
+          /** Step 2.2 Create new fringe nodes. **/
+          for(auto &fringe : general.fringe_values)
+            node_unsplit_fringe.push_back(fringe->create_fringe(*this, *leaf));
         }
-
-        if(node_unsplit_fringe.empty()) {
-          /** Step 2.5a: Create the terminal leaf. */
-          auto new_leaf = make_standard_action(leaf->rete_action.parent());
-          new_leaf->data = std::make_shared<Node_Split>(*this, *new_leaf, general.get_action, new Q_Value(0.0, Q_Value::Type::SPLIT, leaf->q_value->depth, leaf->q_value->feature->clone()));
-        }
-        else {
-          /** Step 2.5b: Create the leaf associated with the new fringe. */
-          auto join_blink = make_existential_join(Rete::WME_Bindings(), leaf->rete_action.parent(), filter_blink);
-          auto new_leaf = make_standard_action(join_blink);
-          auto new_leaf_data = std::make_shared<Node_Unsplit>(*this, *new_leaf, general.get_action, leaf->q_value->depth, leaf->q_value->feature->clone());
-          new_leaf->data = new_leaf_data;
-          new_leaf_data->fringe_values.swap(node_unsplit_fringe);
-        }
+        
+        /** Step 2.3: Create a new split/unsplit node depending on the existence of a new fringe. */
+        if(node_unsplit_fringe.empty())
+          new_leaves.push_back(leaf->create_split(*this, m_wme_blink));
+        else
+          new_leaves.push_back(leaf->create_unsplit(*this, m_wme_blink, node_unsplit_fringe));
       }
 
-      /** Step 2.6: Untrack the old fringe node. */
+      /** Step 2.4: Untrack the old fringe node. */
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
       m_mean_mabe.uncontribute(leaf->q_value->mabe);
 #endif
       if(!m_mean_cabe_queue_size)
         m_mean_cabe.uncontribute(leaf->q_value->cabe);
 
-      /** Step 2.7: Destroy the old leaf node. */
-      excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(leaf->rete_action.shared()));
+      /** Step 2.5: Destroy the old leaf node. */
+      if(!g_undo_specialization)
+        excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(leaf->rete_action.shared()));
     }
 
     /** Step 3: Excise all old fringe rules from the system */
-    for(auto &fringe : general.fringe_values)
-      excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(fringe->rete_action.shared()));
+    if(!g_undo_specialization) {
+      for(auto &fringe : general.fringe_values)
+        excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(fringe->rete_action.shared()));
+    }
+    else {
+      for(auto &new_leaf : new_leaves) {
+        if(auto new_unsplit = std::dynamic_pointer_cast<Node_Unsplit>(new_leaf)) {
+          for(auto &new_fringe : new_unsplit->fringe_values)
+            excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(new_fringe->rete_action.shared()));
+        }
+
+        excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(new_leaf->rete_action.shared()));
+      }
+    }
   }
 
   void Agent::collapse_rete(Rete::Rete_Action &rete_action) {
@@ -229,48 +225,67 @@ namespace Carli {
     auto split = debuggable_pointer_cast<Node_Split>(rete_action.data);
     assert(split);
 
-    struct {
-      std::multiset<tracked_ptr<Feature>, compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> features;
+#ifndef NDEBUG
+    std::cerr << "Rete size before collapse: " << rete_size() << std::endl;
+#endif
 
-      void operator()(Rete::Rete_Node &rete_node) {
-        if(rete_node.data && rete_node.data != root) {
-          auto &node = debuggable_cast<Carli::Node &>(*rete_node.data);
-          auto &feature = node.q_value->feature;
-          if(!feature)
-            return;
+    auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector(split));
 
-          auto found = features.equal_range(feature);
-          if(found.first != found.second) {
-            if((*found.first)->get_depth() < feature->get_depth())
-              return;
-            else if((*found.first)->get_depth() > feature->get_depth()) {
-              do {
-                found.first = features.erase(found.first);
-              } while(found.first != found.second);
-            }
-            else {
-              do {
-                if(feature->compare_value(**found.first) == 0)
-                  return;
-              } while(++found.first != found.second);
-            }
-          }
+#ifndef NDEBUG
+    std::cerr << "Features: ";
+    for(const auto &feature_axis : fringe_collector.features)
+      for(const auto &feature_node : feature_axis.second)
+        std::cerr << ' ' << *feature_node.first;
+    std::cerr << std::endl;
+#endif
 
-          features.insert(feature);
-        }
+    assert(!fringe_collector.features.empty());
+
+    /// Make new fringe
+    Fringe_Values node_unsplit_fringe;
+    for(const auto &feature_axis : fringe_collector.features) {
+      for(const auto &feature_node : feature_axis.second) {
+        auto &node = debuggable_cast<Node &>(*feature_node.second->data.get());
+
+        auto new_fringe = node.create_fringe(*this, *split);
+        node_unsplit_fringe.push_back(new_fringe);
+        
+        //std::cerr << "Collapsing: ";
+        //node.rete_action.output_name(std::cerr);
+        //std::cerr << std::endl;
+
+        //std::cerr << "Creating  : ";
+        //new_fringe->rete_action.output_name(std::cerr);
+        //std::cerr << std::endl;
       }
+    }
 
-      Node_Ptr root;
-    } fringe_collector;
-
-    fringe_collector.root = split;
-
-    fringe_collector = rete_action.parent()->visit_preorder(fringe_collector);
-
-    //std::cerr << "Features: ";
-    //for(auto &feature : fringe_collector.features)
-    //  std::cerr << ' ' << *feature;
+    /// Make new unsplit node
+    const auto unsplit = split->create_unsplit(*this, m_wme_blink, node_unsplit_fringe);
+    
+    //std::cerr << "Collapsing: ";
+    //rete_action.output_name(std::cerr);
     //std::cerr << std::endl;
+
+    //std::cerr << "Creating  : ";
+    //unsplit->rete_action.output_name(std::cerr);
+    //std::cerr << std::endl;
+
+    //unsplit->q_value.delete_and_zero();
+    //unsplit->q_value = split->q_value;
+    //split->delete_q_value = false;
+    //unsplit->q_value->type = Q_Value::Type::UNSPLIT;
+    
+#ifndef NDEBUG
+    std::cerr << "Excising " << fringe_collector.excise.size() << " actions." << std::endl;
+#endif
+
+    for(const auto &excise : fringe_collector.excise)
+      excise_rule(excise);
+
+#ifndef NDEBUG
+    std::cerr << "Rete size after collapse: " << rete_size() << std::endl;
+#endif
   }
 
   Agent::Agent(const std::shared_ptr<Environment> &environment)
@@ -911,7 +926,7 @@ namespace Carli {
     if(m_value_function_map_mode == "in") {
       for(auto &fringe : general.fringe_values) {
         std::ostringstream oss;
-        fringe->rete_action.output_name(oss);
+        fringe->rete_action.output_name(oss, 0);
         if(m_value_function_map.find(oss.str()) != m_value_function_map.end())
           return fringe;
       }
@@ -974,7 +989,7 @@ namespace Carli {
     }
 
     if(m_value_function_map_mode == "out") {
-      chosen->rete_action.output_name(m_value_function_out);
+      chosen->rete_action.output_name(m_value_function_out, 0);
       m_value_function_out << std::endl;
     }
 

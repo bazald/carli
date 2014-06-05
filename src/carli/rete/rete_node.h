@@ -89,9 +89,11 @@ namespace Rete {
     const Outputs & get_outputs() const {
       return outputs;
     }
-
-    virtual Rete_Node_Ptr_C parent() const = 0;
-    virtual Rete_Node_Ptr parent() = 0;
+    
+    virtual Rete_Node_Ptr_C parent_left() const = 0;
+    virtual Rete_Node_Ptr_C parent_right() const = 0;
+    virtual Rete_Node_Ptr parent_left() = 0;
+    virtual Rete_Node_Ptr parent_right() = 0;
 
     virtual void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0;
     virtual bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0; ///< Returns true if removed the last
@@ -127,7 +129,7 @@ namespace Rete {
       --outputs_disabled;
     }
 
-    virtual void output_name(std::ostream &os) const = 0;
+    virtual void output_name(std::ostream &os, const int64_t &depth) const = 0;
 
     virtual bool is_active() const = 0; ///< Has the node matched and forwarded at least one token?
     

@@ -23,8 +23,13 @@ namespace Rete {
 
   void Rete_Predicate::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs.empty() && !outputs_disabled)
+    if(outputs.empty() && !outputs_disabled) {
+      //std::cerr << "Destroying: ";
+      //output_name(std::cerr, 3);
+      //std::cerr << std::endl;
+
       input->destroy(filters, shared());
+    }
   }
 
   void Rete_Predicate::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
@@ -91,7 +96,7 @@ namespace Rete {
     return false;
   }
 
-  void Rete_Predicate::output_name(std::ostream &os) const {
+  void Rete_Predicate::output_name(std::ostream &os, const int64_t &depth) const {
     switch(m_predicate) {
       case EQ: os << "EQ"; break;
       case NEQ: os << "NEQ"; break;
@@ -107,8 +112,8 @@ namespace Rete {
     else
       os << m_rhs_index;
     os << ',';
-    if(input)
-      input->output_name(os);
+    if(input && depth > 0)
+      input->output_name(os, depth - 1);
     os << ')';
   }
   

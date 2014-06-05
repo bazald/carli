@@ -27,6 +27,8 @@ namespace Carli {
   typedef std::shared_ptr<Node_Unsplit> Node_Unsplit_Ptr;
   typedef std::shared_ptr<Node_Fringe> Node_Fringe_Ptr;
 
+  typedef std::list<std::shared_ptr<Node_Fringe>> Fringe_Values;
+
   class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Unsplit>, public Rete::Rete_Data {
     Node(const Node &) = delete;
     Node & operator=(const Node &) = delete;
@@ -46,6 +48,10 @@ namespace Carli {
 
     virtual void action(Agent &agent, const Rete::WME_Token &token) = 0;
     virtual void retraction(Agent &agent, const Rete::WME_Token &token);
+    
+    Node_Split_Ptr create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink);
+    Node_Unsplit_Ptr create_unsplit(Agent &agent, const Rete::WME_Ptr_C &wme_blink, Fringe_Values &node_unsplit_fringe);
+    Node_Fringe_Ptr create_fringe(Agent &agent, Node &leaf);
 
     Agent &agent;
     Rete::Rete_Action &rete_action;
@@ -74,9 +80,13 @@ namespace Carli {
     Node_Unsplit & operator=(const Node_Unsplit &) = delete;
 
   public:
-    typedef std::list<std::shared_ptr<Node_Fringe>> Fringe_Values;
-
     Node_Unsplit(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_);
+
+    Node_Unsplit(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_)
+      : Node(agent_, rete_action_, get_action_, q_value_)
+    {
+    }
+
     ~Node_Unsplit();
 
     Node_Unsplit * clone() const override {
@@ -86,12 +96,6 @@ namespace Carli {
     void action(Agent &agent, const Rete::WME_Token &token) override;
 
     Fringe_Values fringe_values; ///< Not cloned
-
-  protected:
-    Node_Unsplit(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_)
-      : Node(agent_, rete_action_, get_action_, q_value_)
-    {
-    }
   };
 
   class CARLI_LINKAGE Node_Fringe : public Node {

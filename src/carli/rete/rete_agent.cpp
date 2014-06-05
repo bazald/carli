@@ -162,16 +162,10 @@ namespace Rete {
   }
 
   size_t Rete_Agent::rete_size() const {
-    std::unordered_set<Rete_Node_Ptr_C> nodes;
-    std::function<void (const Rete_Node_Ptr_C &node)> grow_rete_size;
-    grow_rete_size = [&](const Rete_Node_Ptr_C &node) {
-      nodes.insert(node);
-      for(const auto &n : node->get_outputs())
-        grow_rete_size(n);
-    };
-    for(const auto &filter : filters)
-      grow_rete_size(filter);
-    return nodes.size();
+    size_t size = 0;
+    auto size_ptr = &size;
+    const_cast<Rete_Agent *>(this)->visit_preorder([size_ptr](const Rete_Node &){++*size_ptr;});
+    return size;
   }
 
   void Rete_Agent::destroy() {

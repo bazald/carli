@@ -15,9 +15,11 @@ namespace Rete {
     const WME & get_wme() const;
 
     void destroy(Filters &filters, const Rete_Node_Ptr &output) override;
-
-    Rete_Node_Ptr_C parent() const override {abort();}
-    Rete_Node_Ptr parent() override {abort();}
+    
+    Rete_Node_Ptr_C parent_left() const override {abort();}
+    Rete_Node_Ptr_C parent_right() const override {abort();}
+    Rete_Node_Ptr parent_left() override {abort();}
+    Rete_Node_Ptr parent_right() override {abort();}
 
     void insert_wme(const WME_Ptr_C &wme);
     void remove_wme(const WME_Ptr_C &wme);
@@ -30,7 +32,7 @@ namespace Rete {
 
     bool operator==(const Rete_Node &rhs) const override;
 
-    void output_name(std::ostream &os) const override;
+    void output_name(std::ostream &os, const int64_t &depth) const override;
 
     bool is_active() const override;
 

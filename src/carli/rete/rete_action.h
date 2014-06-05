@@ -23,9 +23,12 @@ namespace Rete {
     ~Rete_Action();
 
     void destroy(Filters &filters, const Rete_Node_Ptr &output = Rete_Node_Ptr()) override;
-
-    Rete_Node_Ptr_C parent() const override {return input->shared();}
-    Rete_Node_Ptr parent() override {return input->shared();}
+    bool is_excised() const {return excised;}
+    
+    Rete_Node_Ptr_C parent_left() const override {return input->shared();}
+    Rete_Node_Ptr_C parent_right() const override {return input->shared();}
+    Rete_Node_Ptr parent_left() override {return input->shared();}
+    Rete_Node_Ptr parent_right() override {return input->shared();}
 
     void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
     bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
@@ -35,7 +38,7 @@ namespace Rete {
 
     bool operator==(const Rete_Node &/*rhs*/) const override;
 
-    void output_name(std::ostream &os) const override;
+    void output_name(std::ostream &os, const int64_t &depth) const override;
 
     bool is_active() const override;
 
@@ -55,6 +58,7 @@ namespace Rete {
     Action action;
     Action retraction;
     Agenda &agenda;
+    bool excised = false;
   };
 
   RETE_LINKAGE void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);

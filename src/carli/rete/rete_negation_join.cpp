@@ -10,11 +10,16 @@ namespace Rete {
   void Rete_Negation_Join::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
     if(outputs.empty() && !outputs_disabled) {
+      //std::cerr << "Destroying: ";
+      //output_name(std::cerr, 3);
+      //std::cerr << std::endl;
+
       auto i0 = input0;
       auto i1 = input1;
-      i0->destroy(filters, shared());
+      auto o = shared();
+      i0->destroy(filters, o);
       if(i0 != i1)
-        i1->destroy(filters, shared());
+        i1->destroy(filters, o);
     }
   }
 
@@ -94,13 +99,13 @@ namespace Rete {
     return false;
   }
 
-  void Rete_Negation_Join::output_name(std::ostream &os) const {
+  void Rete_Negation_Join::output_name(std::ostream &os, const int64_t &depth) const {
     os << "nj(" << bindings << ',';
-    if(input0)
-      input0->output_name(os);
+    if(input0 && depth > 0)
+      input0->output_name(os, depth - 1);
     os << ',';
-    if(input1)
-      input1->output_name(os);
+    if(input1 && depth > 0)
+      input1->output_name(os, depth - 1);
     os << ')';
   }
   
@@ -153,16 +158,17 @@ namespace Rete {
   }
 
   void Rete_Negation_Join::disconnect(const Rete_Node * const &from) {
-    assert(input0 != input1);
-    if(from == input0) {
-      assert(data.connected1);
-      data.connected1 = false;
-      input1->disable_output(shared());
-    }
-    else {
-      assert(data.connected0);
-      data.connected0 = false;
-      input0->disable_output(shared());
+    if(input0 != input1) {
+      if(from == input0) {
+        assert(data.connected1);
+        data.connected1 = false;
+        input1->disable_output(shared());
+      }
+      else {
+        assert(data.connected0);
+        data.connected0 = false;
+        input0->disable_output(shared());
+      }
     }
     assert(data.connected0 || data.connected1);
   }

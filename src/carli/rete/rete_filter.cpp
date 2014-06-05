@@ -90,7 +90,7 @@ namespace Rete {
     return false;
   }
 
-  void Rete_Filter::output_name(std::ostream &os) const {
+  void Rete_Filter::output_name(std::ostream &os, const int64_t &) const {
     os << 'f' << m_wme;
   }
 
