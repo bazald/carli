@@ -166,7 +166,7 @@ namespace Rete {
   size_t Rete_Agent::rete_size() const {
     size_t size = 0;
     auto size_ptr = &size;
-    const_cast<Rete_Agent *>(this)->visit_preorder([size_ptr](const Rete_Node &){++*size_ptr;});
+    const_cast<Rete_Agent *>(this)->visit_preorder([size_ptr](const Rete_Node &){++*size_ptr;}, true);
     return size;
   }
 
@@ -180,7 +180,7 @@ namespace Rete {
         ranks[node.data->rank()].push_back(node.shared());
     };
 
-    const_cast<Rete_Agent *>(this)->visit_preorder(visitor);
+    const_cast<Rete_Agent *>(this)->visit_preorder(visitor, false);
 
     if(!filters.empty()) {
       os << "  { rank=source;";

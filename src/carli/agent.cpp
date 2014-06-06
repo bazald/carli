@@ -52,11 +52,8 @@ namespace Carli {
   };
 
   bool Agent::respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
-    if(debuggable_cast<Node_Split &>(*rete_action.data).q_value->depth == 1)
+    if(random.rand_lt(20))
       return false;
-
-    //if(random.rand_lt(20))
-    //  return false;
     else {
       collapse_rete(rete_action);
       return true;
@@ -93,7 +90,7 @@ namespace Carli {
     excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(rete_action.shared()));
     
     if(g_undo_specialization) {
-      auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector(new_node));
+      auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector(new_node), true);
       Fringe_Values old_fringe_values;
       for(auto &fringe_axis : fringe_collector.features) {
         for(auto &value_node : fringe_axis.second) {
@@ -259,7 +256,7 @@ namespace Carli {
     fout.close();
 #endif
 
-    auto fringe_collector = rete_action.parent_left()->visit_preorder(Fringe_Collector(split));
+    auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector(split), true);
     
 #ifdef DEBUG_OUTPUT
     std::cerr << "Features: ";
@@ -594,7 +591,7 @@ namespace Carli {
         auto &node = debuggable_cast<Carli::Node &>(*rete_node.data);
         ++node.q_value->depth;
       }
-    });
+    }, true);
   }
 
   void Agent::visit_reset_update_count() {
@@ -603,7 +600,7 @@ namespace Carli {
         auto &node = debuggable_cast<Carli::Node &>(*rete_node.data);
         node.q_value->update_count = 0;
       }
-    });
+    }, true);
   }
 
   Carli::Action_Ptr_C Agent::choose_epsilon_greedy(const double &epsilon) {

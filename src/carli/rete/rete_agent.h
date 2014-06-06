@@ -38,11 +38,11 @@ namespace Rete {
     void rete_print(std::ostream &os) const; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
     template <typename VISITOR>
-    VISITOR visit_preorder(VISITOR visitor) {
+    VISITOR visit_preorder(VISITOR visitor, const bool &strict) {
       visitor_value = visitor_value != 1 ? 1 : 2;
 
       for(auto &o : filters)
-        visitor = o->visit_preorder(visitor, visitor_value);
+        visitor = o->visit_preorder(visitor, strict, visitor_value);
       return visitor;
     }
 

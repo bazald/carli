@@ -142,17 +142,17 @@ namespace Rete {
     virtual bool is_active() const = 0; ///< Has the node matched and forwarded at least one token?
     
     template <typename VISITOR>
-    VISITOR visit_preorder(VISITOR visitor) {
+    VISITOR visit_preorder(VISITOR visitor, const bool &strict) {
       visitor_value = (intptr_t(this) & ~intptr_t(3)) | ((visitor_value & 3) != 1 ? 1 : 2);
-      return visit_preorder_tail(visitor);
+      return visit_preorder_tail(visitor, strict);
     }
     
     template <typename VISITOR>
-    VISITOR visit_preorder(VISITOR visitor, const intptr_t &visitor_value_) {
+    VISITOR visit_preorder(VISITOR visitor, const bool &strict, const intptr_t &visitor_value_) {
       if(visitor_value == visitor_value_)
         return visitor;
       visitor_value = visitor_value_;
-      return visit_preorder_tail(visitor);
+      return visit_preorder_tail(visitor, strict);
     }
     
     Rete_Data_Ptr data;
@@ -181,14 +181,14 @@ namespace Rete {
 
   private:
     template <typename VISITOR>
-    VISITOR visit_preorder_tail(VISITOR visitor) {
-      if(!dynamic_cast<Rete_Filter *>(this)) {
-        visitor = parent_left()->visit_preorder(visitor, visitor_value);
-        visitor = parent_right()->visit_preorder(visitor, visitor_value);
+    VISITOR visit_preorder_tail(VISITOR visitor, const bool &strict) {
+      if(!strict && !dynamic_cast<Rete_Filter *>(this)) {
+        visitor = parent_left()->visit_preorder(visitor, strict, visitor_value);
+        visitor = parent_right()->visit_preorder(visitor, strict, visitor_value);
       }
       visitor(*this);
       for(auto &o : outputs)
-        visitor = o->visit_preorder(visitor, visitor_value);
+        visitor = o->visit_preorder(visitor, strict,  visitor_value);
       return visitor;
     }
 
