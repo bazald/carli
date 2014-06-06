@@ -87,7 +87,7 @@ namespace Rete {
   }
 
   void Rete_Action::print_details(std::ostream &os) const {
-    os << "  " << intptr_t(this) << " [label=\"Action\"];" << std::endl;
+    os << "  " << intptr_t(this) << " [label=\"Act\"];" << std::endl;
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
   }
   

@@ -42,9 +42,9 @@ namespace Carli {
     {
     }
 
-    virtual Node * clone() const = 0;
-
     virtual ~Node();
+
+    int64_t rank() const override;
 
     virtual void action(Agent &agent, const Rete::WME_Token &token) = 0;
     virtual void retraction(Agent &agent, const Rete::WME_Token &token);

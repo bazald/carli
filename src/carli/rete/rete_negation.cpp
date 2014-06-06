@@ -71,7 +71,7 @@ namespace Rete {
   }
   
   void Rete_Negation::print_details(std::ostream &os) const {
-    os << "  " << intptr_t(this) << " [label=\"Negation\"];" << std::endl;
+    os << "  " << intptr_t(this) << " [label=\"&not;&exist;\"];" << std::endl;
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
   }
 

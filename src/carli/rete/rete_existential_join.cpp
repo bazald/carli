@@ -100,7 +100,7 @@ namespace Rete {
   }
 
   void Rete_Existential_Join::print_details(std::ostream &os) const {
-    os << "  " << intptr_t(this) << " [label=\"Existential_Join" << bindings << "\"];" << std::endl;
+    os << "  " << intptr_t(this) << " [label=\"&exist;J" << bindings << "\"];" << std::endl;
     os << "  " << intptr_t(input0) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
     os << "  " << intptr_t(input1) << " -> " << intptr_t(this) << " [color=blue];" << std::endl;
   }

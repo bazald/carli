@@ -92,7 +92,7 @@ namespace Rete {
   }
 
   void Rete_Filter::print_details(std::ostream &os) const {
-    os << "  " << intptr_t(this) << " [label=\"Filter" << m_wme << "\"];" << std::endl;
+    os << "  " << intptr_t(this) << " [label=\"F" << m_wme << "\"];" << std::endl;
   }
 
   void Rete_Filter::output_name(std::ostream &os, const int64_t &) const {

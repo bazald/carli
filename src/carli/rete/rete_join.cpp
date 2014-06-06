@@ -134,7 +134,7 @@ namespace Rete {
   }
 
   void Rete_Join::print_details(std::ostream &os) const {
-    os << "  " << intptr_t(this) << " [label=\"Join" << bindings << "\"];" << std::endl;
+    os << "  " << intptr_t(this) << " [label=\"J" << bindings << "\"];" << std::endl;
     os << "  " << intptr_t(input0) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
     os << "  " << intptr_t(input1) << " -> " << intptr_t(this) << " [color=blue];" << std::endl;
   }

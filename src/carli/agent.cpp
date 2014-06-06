@@ -52,11 +52,11 @@ namespace Carli {
   };
 
   bool Agent::respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
-    if(debuggable_cast<Node_Split &>(*rete_action.data).q_value->depth != 1)
+    if(debuggable_cast<Node_Split &>(*rete_action.data).q_value->depth == 1)
       return false;
 
-    if(random.rand_lt(20))
-      return false;
+    //if(random.rand_lt(20))
+    //  return false;
     else {
       collapse_rete(rete_action);
       return true;
@@ -118,6 +118,9 @@ namespace Carli {
     
 #ifdef DEBUG_OUTPUT
     std::cerr << "Rete size after expansion: " << rete_size() << std::endl;
+
+    fout.open("post-expansion.dot");
+    rete_print(fout);
 #endif
 
     return true;
@@ -250,9 +253,13 @@ namespace Carli {
     
 #ifdef DEBUG_OUTPUT
     std::cerr << "Rete size before collapse: " << rete_size() << std::endl;
+
+    std::ofstream fout("pre-collapse.dot");
+    rete_print(fout);
+    fout.close();
 #endif
 
-    auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector(split));
+    auto fringe_collector = rete_action.parent_left()->visit_preorder(Fringe_Collector(split));
     
 #ifdef DEBUG_OUTPUT
     std::cerr << "Features: ";
@@ -318,7 +325,7 @@ namespace Carli {
 #ifdef DEBUG_OUTPUT
     std::cerr << "Rete size after collapse: " << rete_size() << std::endl;
 
-    std::ofstream fout("post-collapse.dot");
+    fout.open("post-collapse.dot");
     rete_print(fout);
 #endif
   }

@@ -55,6 +55,8 @@ namespace Rete {
     virtual ~Rete_Data() {}
 
     virtual Rete_Data * clone() const = 0;
+    
+    virtual int64_t rank() const {return 0;}
   };
 
   class RETE_LINKAGE Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<char [256]>

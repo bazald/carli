@@ -98,17 +98,16 @@ namespace Rete {
   }
   
   void Rete_Predicate::print_details(std::ostream &os) const {
-    os << "  " << intptr_t(this) << " [label=\"";
+    os << "  " << intptr_t(this) << " [label=\"" << m_lhs_index;
     switch(m_predicate) {
-      case EQ: os << "EQ"; break;
-      case NEQ: os << "NEQ"; break;
-      case GT: os << "GT"; break;
-      case GTE: os << "GTE"; break;
-      case LT: os << "LT"; break;
-      case LTE: os << "LTE"; break;
+      case EQ: os << " == "; break;
+      case NEQ: os << " != "; break;
+      case GT: os << " > "; break;
+      case GTE: os << " >= "; break;
+      case LT: os << " < "; break;
+      case LTE: os << " <= "; break;
       default: abort();
     }
-    os << '(' << m_lhs_index << ',';
     if(m_rhs)
       os << *m_rhs;
     else

@@ -12,6 +12,10 @@ namespace Carli {
     }
   }
 
+  int64_t Node::rank() const {
+    return q_value->depth;
+  }
+
   void Node::retraction(Agent &agent, const Rete::WME_Token &token) {
     agent.purge_q_value_next(get_action(token), q_value);
   }
@@ -80,32 +84,28 @@ namespace Carli {
       return new_leaf_data;
     }
     else {
-      assert(q_value->depth == leaf.q_value->depth && leaf.q_value->type == Q_Value::Type::FRINGE); ///< Untested
       auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(q_value->feature.get());
 
       Rete::Rete_Node_Ptr new_test;
 
       auto ancestor_left = leaf.rete_action.parent_left();
-      if(leaf.q_value->type != Q_Value::Type::FRINGE) {
-        assert(false); ///< Untested
+      if(leaf.q_value->type != Q_Value::Type::FRINGE)
         ancestor_left = ancestor_left->parent_left(); ///< Skip blink node
-      }
 
       if(feature_ranged_data)
         new_test = agent.make_predicate_vc(feature_ranged_data->predicate(), feature_ranged_data->axis, feature_ranged_data->symbol_constant(), ancestor_left);
       else {
         auto ancestor_right = rete_action.parent_left();
-        
-        if(q_value->type != Q_Value::Type::FRINGE) {
-          assert(false); ///< Untested
-          ancestor_right = ancestor_right->parent_left(); ///< Skip blink node
-        }
 
-        for(int64_t d = q_value->depth; d != leaf.q_value->depth; --d) {
-          assert(false); ///< Untested
-          assert(dynamic_cast<Rete::Rete_Predicate *>(ancestor_right.get()) ||
-            dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get()));
-          ancestor_right = ancestor_right->parent_right(); ///< Pass through extra tests
+        if(leaf.q_value->type != Q_Value::Type::FRINGE) {
+          if(q_value->type != Q_Value::Type::FRINGE)
+            ancestor_right = ancestor_right->parent_left(); ///< Skip blink node
+
+          for(int64_t d = q_value->depth; d != leaf.q_value->depth; --d) {
+            assert(dynamic_cast<Rete::Rete_Predicate *>(ancestor_right.get()) ||
+              dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get()));
+            ancestor_right = ancestor_right->parent_right(); ///< Pass through extra tests
+          }
         }
 
         new_test = agent.make_existential_join(q_value->feature->bindings(), ancestor_left, ancestor_right);

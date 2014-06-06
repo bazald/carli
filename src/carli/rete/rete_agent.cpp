@@ -1,5 +1,7 @@
 #include "rete_agent.h"
 
+#include <map>
+
 namespace Rete {
 
   Rete_Agent::Rete_Agent()
@@ -170,11 +172,43 @@ namespace Rete {
 
   void Rete_Agent::rete_print(std::ostream &os) const {
     os << "digraph Rete {" << std::endl;
+    
+    std::map<int64_t, std::list<Rete_Node_Ptr>> ranks;
+    std::function<void (Rete_Node &)> visitor = [&os, &ranks](Rete_Node &node) {
+      node.print_details(os);
+      if(node.data)
+        ranks[node.data->rank()].push_back(node.shared());
+    };
 
-    auto os_ptr = &os;
-    const_cast<Rete_Agent *>(this)->visit_preorder([os_ptr](Rete_Node &node) {
-      node.print_details(*os_ptr);
-    });
+    const_cast<Rete_Agent *>(this)->visit_preorder(visitor);
+
+    if(!filters.empty()) {
+      os << "  { rank=source;";
+      for(const auto &filter : filters)
+        os << ' ' << intptr_t(filter.get());
+      os << " }" << std::endl;
+    }
+
+    if(ranks.size() > 1) {
+      auto prev = ranks.begin();
+      for(auto cur = ++ranks.begin(); cur != ranks.end(); prev = cur, ++cur) {
+        for(const auto &node0 : prev->second) {
+          for(const auto &node1 : cur->second) {
+            os << "  " << intptr_t(node0.get()) << " -> "
+                       << intptr_t(node1.get()) << " [style=\"invis\"]" << std::endl;
+          }
+        }
+      }
+
+      os << "  subgraph {" << std::endl << "    rankdir=\"TB\"" << std::endl;
+      for(const auto &rank : ranks) {
+        os << "    subgraph cluster" << rank.first << "{ rank=same;";
+        for(const auto &node : rank.second)
+          os << ' ' << intptr_t(node.get());
+        os << " }" << std::endl;
+      }
+      os << "  }" << std::endl;
+    }
 
     os << "}" << std::endl;
   }
