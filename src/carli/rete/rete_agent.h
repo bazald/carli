@@ -35,6 +35,7 @@ namespace Rete {
     void clear_wmes();
 
     size_t rete_size() const;
+    void rete_print(std::ostream &os) const; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
     template <typename VISITOR>
     VISITOR visit_preorder(VISITOR visitor) {

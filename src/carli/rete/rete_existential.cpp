@@ -5,6 +5,7 @@ namespace Rete {
   Rete_Existential::Rete_Existential() : output_token(std::make_shared<WME_Token>()) {}
 
   void Rete_Existential::destroy(Filters &filters, const Rete_Node_Ptr &output) {
+    outputs_disabled -= output->disabled_input(shared());
     erase_output(output);
     if(outputs.empty() && !outputs_disabled) {
       //std::cerr << "Destroying: ";
@@ -73,9 +74,14 @@ namespace Rete {
     return false;
   }
 
+  void Rete_Existential::print_details(std::ostream &os) const {
+    os << "  " << intptr_t(this) << " [label=\"Existential\"];" << std::endl;
+    os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
+  }
+
   void Rete_Existential::output_name(std::ostream &os, const int64_t &depth) const {
     os << "e(";
-    if(input && depth > 0)
+    if(input && depth)
       input->output_name(os, depth - 1);
     os << ')';
   }

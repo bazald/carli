@@ -22,6 +22,7 @@ namespace Rete {
   }
 
   void Rete_Predicate::destroy(Filters &filters, const Rete_Node_Ptr &output) {
+    outputs_disabled -= output->disabled_input(shared());
     erase_output(output);
     if(outputs.empty() && !outputs_disabled) {
       //std::cerr << "Destroying: ";
@@ -95,6 +96,27 @@ namespace Rete {
     }
     return false;
   }
+  
+  void Rete_Predicate::print_details(std::ostream &os) const {
+    os << "  " << intptr_t(this) << " [label=\"";
+    switch(m_predicate) {
+      case EQ: os << "EQ"; break;
+      case NEQ: os << "NEQ"; break;
+      case GT: os << "GT"; break;
+      case GTE: os << "GTE"; break;
+      case LT: os << "LT"; break;
+      case LTE: os << "LTE"; break;
+      default: abort();
+    }
+    os << '(' << m_lhs_index << ',';
+    if(m_rhs)
+      os << *m_rhs;
+    else
+      os << m_rhs_index;
+    os << "\"];" << std::endl;
+
+    os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
+  }
 
   void Rete_Predicate::output_name(std::ostream &os, const int64_t &depth) const {
     switch(m_predicate) {
@@ -112,7 +134,7 @@ namespace Rete {
     else
       os << m_rhs_index;
     os << ',';
-    if(input && depth > 0)
+    if(input && depth)
       input->output_name(os, depth - 1);
     os << ')';
   }

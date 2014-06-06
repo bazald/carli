@@ -81,12 +81,7 @@ namespace Carli {
 
   public:
     Node_Unsplit(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_);
-
-    Node_Unsplit(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_)
-      : Node(agent_, rete_action_, get_action_, q_value_)
-    {
-    }
-
+    Node_Unsplit(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_);
     ~Node_Unsplit();
 
     Node_Unsplit * clone() const override {

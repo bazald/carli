@@ -95,6 +95,8 @@ namespace Rete {
     virtual Rete_Node_Ptr parent_left() = 0;
     virtual Rete_Node_Ptr parent_right() = 0;
 
+    virtual int64_t height() const = 0;
+
     virtual void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0;
     virtual bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0; ///< Returns true if removed the last
 
@@ -117,6 +119,8 @@ namespace Rete {
         outputs.erase(found);
     }
 
+    virtual bool disabled_input(const Rete_Node_Ptr &) {return false;}
+
     void disable_output(const Rete_Node_Ptr &output) {
       ++outputs_disabled;
       unpass_tokens(output);
@@ -128,6 +132,8 @@ namespace Rete {
       pass_tokens(output);
       --outputs_disabled;
     }
+
+    virtual void print_details(std::ostream &os) const = 0; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
     virtual void output_name(std::ostream &os, const int64_t &depth) const = 0;
 
@@ -146,7 +152,7 @@ namespace Rete {
       visitor_value = visitor_value_;
       return visit_preorder_tail(visitor);
     }
-
+    
     Rete_Data_Ptr data;
 
   protected:
@@ -174,6 +180,10 @@ namespace Rete {
   private:
     template <typename VISITOR>
     VISITOR visit_preorder_tail(VISITOR visitor) {
+      if(!dynamic_cast<Rete_Filter *>(this)) {
+        visitor = parent_left()->visit_preorder(visitor, visitor_value);
+        visitor = parent_right()->visit_preorder(visitor, visitor_value);
+      }
       visitor(*this);
       for(auto &o : outputs)
         visitor = o->visit_preorder(visitor, visitor_value);

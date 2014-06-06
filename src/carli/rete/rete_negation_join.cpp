@@ -8,6 +8,7 @@ namespace Rete {
   Rete_Negation_Join::Rete_Negation_Join(WME_Bindings bindings_) : bindings(bindings_) {}
 
   void Rete_Negation_Join::destroy(Filters &filters, const Rete_Node_Ptr &output) {
+    outputs_disabled -= output->disabled_input(shared());
     erase_output(output);
     if(outputs.empty() && !outputs_disabled) {
       //std::cerr << "Destroying: ";
@@ -98,13 +99,28 @@ namespace Rete {
       return bindings == join->bindings && input0 == join->input0 && input1 == join->input1;
     return false;
   }
+  
+  bool Rete_Negation_Join::disabled_input(const Rete_Node_Ptr &input) {
+    if(input.get() == input0)
+      return !data.connected0;
+    else {
+      assert(input.get() == input1);
+      return !data.connected1;
+    }
+  }
+
+  void Rete_Negation_Join::print_details(std::ostream &os) const {
+    os << "  " << intptr_t(this) << " [label=\"Negation_Join" << bindings << "\"];" << std::endl;
+    os << "  " << intptr_t(input0) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
+    os << "  " << intptr_t(input1) << " -> " << intptr_t(this) << " [color=blue];" << std::endl;
+  }
 
   void Rete_Negation_Join::output_name(std::ostream &os, const int64_t &depth) const {
     os << "nj(" << bindings << ',';
-    if(input0 && depth > 0)
+    if(input0 && depth)
       input0->output_name(os, depth - 1);
     os << ',';
-    if(input1 && depth > 0)
+    if(input1 && depth)
       input1->output_name(os, depth - 1);
     os << ')';
   }

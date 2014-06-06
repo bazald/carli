@@ -5,6 +5,7 @@ namespace Rete {
   Rete_Negation::Rete_Negation() : output_token(std::make_shared<WME_Token>()) {}
 
   void Rete_Negation::destroy(Filters &filters, const Rete_Node_Ptr &output) {
+    outputs_disabled -= output->disabled_input(shared());
     erase_output(output);
     if(outputs.empty() && !outputs_disabled) {
       //std::cerr << "Destroying: ";
@@ -68,10 +69,15 @@ namespace Rete {
       return input == negation->input;
     return false;
   }
+  
+  void Rete_Negation::print_details(std::ostream &os) const {
+    os << "  " << intptr_t(this) << " [label=\"Negation\"];" << std::endl;
+    os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
+  }
 
   void Rete_Negation::output_name(std::ostream &os, const int64_t &depth) const {
     os << "n(";
-    if(input && depth > 0)
+    if(input && depth)
       input->output_name(os, depth - 1);
     os << ')';
   }

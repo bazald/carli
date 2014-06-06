@@ -85,10 +85,15 @@ namespace Rete {
 //         return action == rete_action->action && retraction == rete_action->retraction && input == rete_action->input;
     return false;
   }
+
+  void Rete_Action::print_details(std::ostream &os) const {
+    os << "  " << intptr_t(this) << " [label=\"Action\"];" << std::endl;
+    os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
+  }
   
   void Rete_Action::output_name(std::ostream &os, const int64_t &depth) const {
     os << "a(";
-    if(input && depth > 0)
+    if(input && depth)
       input->output_name(os, depth - 1);
     os << ')';
   }

@@ -21,6 +21,8 @@ namespace Rete {
     Rete_Node_Ptr parent_left() override {return input->shared();}
     Rete_Node_Ptr parent_right() override {return input->shared();}
 
+    int64_t height() const override {return input->height() + 1;}
+
     void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
     bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
 
@@ -28,6 +30,8 @@ namespace Rete {
     void unpass_tokens(const Rete_Node_Ptr &output) override;
 
     bool operator==(const Rete_Node &rhs) const override;
+
+    void print_details(std::ostream &os) const override; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
     void output_name(std::ostream &os, const int64_t &depth) const override;
 

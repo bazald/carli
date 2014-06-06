@@ -14,6 +14,7 @@ namespace Rete {
   }
 
   void Rete_Filter::destroy(Filters &filters, const Rete_Node_Ptr &output) {
+    outputs_disabled -= output->disabled_input(shared());
     erase_output(output);
     if(outputs.empty() && !outputs_disabled)
       filters.erase(std::find(filters.begin(), filters.end(), std::static_pointer_cast<Rete_Filter>(shared())));
@@ -88,6 +89,10 @@ namespace Rete {
       return true;
     }
     return false;
+  }
+
+  void Rete_Filter::print_details(std::ostream &os) const {
+    os << "  " << intptr_t(this) << " [label=\"Filter" << m_wme << "\"];" << std::endl;
   }
 
   void Rete_Filter::output_name(std::ostream &os, const int64_t &) const {

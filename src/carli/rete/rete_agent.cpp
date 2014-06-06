@@ -168,6 +168,17 @@ namespace Rete {
     return size;
   }
 
+  void Rete_Agent::rete_print(std::ostream &os) const {
+    os << "digraph Rete {" << std::endl;
+
+    auto os_ptr = &os;
+    const_cast<Rete_Agent *>(this)->visit_preorder([os_ptr](Rete_Node &node) {
+      node.print_details(*os_ptr);
+    });
+
+    os << "}" << std::endl;
+  }
+
   void Rete_Agent::destroy() {
     agenda.lock();
     filters.clear();
