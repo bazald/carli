@@ -190,7 +190,7 @@ namespace Rete {
       }
       visitor(*this);
       for(auto &o : outputs)
-        visitor = o->visit_preorder(visitor, strict,  visitor_value);
+        visitor = o->visit_preorder(visitor, strict, visitor_value);
       return visitor;
     }
 

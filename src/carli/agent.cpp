@@ -2,10 +2,6 @@
 
 //#include "../infinite_mario/infinite_mario.h"
 
-#ifndef NDEBUG
-#define DEBUG_OUTPUT
-#endif
-
 namespace Carli {
 
   struct Fringe_Collector {
@@ -525,21 +521,25 @@ namespace Carli {
   //  }
 
   void Agent::visit_increment_depth() {
-    visit_preorder([](Rete::Rete_Node &rete_node) {
+    std::function<void (Rete::Rete_Node &)> visitor = [](Rete::Rete_Node &rete_node) {
       if(rete_node.data) {
         auto &node = debuggable_cast<Carli::Node &>(*rete_node.data);
         ++node.q_value->depth;
       }
-    }, true);
+    };
+
+    visit_preorder(visitor, true);
   }
 
   void Agent::visit_reset_update_count() {
-    visit_preorder([](Rete::Rete_Node &rete_node) {
+    std::function<void (Rete::Rete_Node &)> visitor = [](Rete::Rete_Node &rete_node) {
       if(rete_node.data) {
         auto &node = debuggable_cast<Carli::Node &>(*rete_node.data);
         node.q_value->update_count = 0;
       }
-    }, true);
+    };
+
+    visit_preorder(visitor, true);
   }
 
   Carli::Action_Ptr_C Agent::choose_epsilon_greedy(const double &epsilon) {

@@ -165,8 +165,8 @@ namespace Rete {
 
   size_t Rete_Agent::rete_size() const {
     size_t size = 0;
-    auto size_ptr = &size;
-    const_cast<Rete_Agent *>(this)->visit_preorder([size_ptr](const Rete_Node &){++*size_ptr;}, true);
+    std::function<void (const Rete_Node &)> visitor = [&size](const Rete_Node &){++size;};
+    const_cast<Rete_Agent *>(this)->visit_preorder(visitor, true);
     return size;
   }
 
