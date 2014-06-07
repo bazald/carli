@@ -50,9 +50,9 @@ namespace Carli {
   };
 
   bool Agent::respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
-    if(random.rand_lt(1000))
-      return false;
-    return collapse_rete(rete_action);
+    //if(random.rand_lt(1000))
+    return false;
+    //return collapse_rete(rete_action);
   }
 
   bool Agent::specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
