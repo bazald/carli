@@ -40,7 +40,7 @@ namespace Carli {
     bool respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token);
     bool specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token);
     void expand_fringe(Rete::Rete_Action &rete_action, const Rete::WME_Token &token, const Feature * const &specialization);
-    void collapse_rete(Rete::Rete_Action &rete_action);
+    bool collapse_rete(Rete::Rete_Action &rete_action); ///< Collapses and returns true unless there exist no nodes to collapse into a new fringe
 
     Agent(const std::shared_ptr<Environment> &environment);
 

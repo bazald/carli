@@ -8,8 +8,6 @@
 
 namespace Carli {
 
-  static const bool g_undo_specialization = false;
-
   struct Fringe_Collector {
     std::unordered_set<Rete::Rete_Action_Ptr> excise;
     std::map<tracked_ptr<Feature>,
@@ -52,12 +50,9 @@ namespace Carli {
   };
 
   bool Agent::respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
-    if(random.rand_lt(20))
+    if(random.rand_lt(1000))
       return false;
-    else {
-      collapse_rete(rete_action);
-      return true;
-    }
+    return collapse_rete(rete_action);
   }
 
   bool Agent::specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
@@ -89,30 +84,6 @@ namespace Carli {
 
     excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(rete_action.shared()));
     
-    if(g_undo_specialization) {
-      auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector(new_node), true);
-      Fringe_Values old_fringe_values;
-      for(auto &fringe_axis : fringe_collector.features) {
-        for(auto &value_node : fringe_axis.second) {
-          auto fringe = std::dynamic_pointer_cast<Node_Fringe>(value_node.second->data);
-          assert(fringe);
-          old_fringe_values.push_back(fringe);
-          
-          fringe->q_value->update_count = 0;
-          fringe->q_value->pseudoepisode_count = 0;
-        }
-      }
-
-      assert(!old_fringe_values.empty());
-
-      auto old_node = new_node->create_unsplit(*this, m_wme_blink, old_fringe_values);
-
-      excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(new_node->rete_action.shared()));
-      
-      old_node->q_value->update_count = 0;
-      old_node->q_value->pseudoepisode_count = 0;
-    }
-    
 #ifdef DEBUG_OUTPUT
     std::cerr << "Rete size after expansion: " << rete_size() << std::endl;
 
@@ -134,14 +105,8 @@ namespace Carli {
     /** Step 1: Collect new leaves from the fringe
      *          They'll have to be modified / replaced, but it's good to separate them from the remainder of the fringe
      */
-#ifdef DEBUG_OUTPUT
-    std::cerr << "Old fringe heights:";
-#endif
     Fringe_Values leaves;
     for(auto fringe = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe != fend; ) {
-#ifdef DEBUG_OUTPUT
-    std::cerr << ' ' << (*fringe)->rete_action.parent_left()->parent_left()->height() << ':' << (*fringe)->rete_action.parent_left()->parent_right()->height();
-#endif
       if(specialization->compare_axis(*(*fringe)->q_value->feature) == 0) {
         leaves.push_back(*fringe);
         general.fringe_values.erase(fringe++);
@@ -149,9 +114,6 @@ namespace Carli {
       else
         ++fringe;
     }
-#ifdef DEBUG_OUTPUT
-    std::cerr << std::endl;
-#endif
 
 #ifdef DEBUG_OUTPUT
     std::cerr << "Refining:";
@@ -222,31 +184,23 @@ namespace Carli {
         m_mean_cabe.uncontribute(leaf->q_value->cabe);
 
       /** Step 2.5: Destroy the old leaf node. */
-      if(!g_undo_specialization)
-        excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(leaf->rete_action.shared()));
+      excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(leaf->rete_action.shared()));
     }
 
     /** Step 3: Excise all old fringe rules from the system */
-    if(!g_undo_specialization) {
-      for(auto &fringe : general.fringe_values)
-        excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(fringe->rete_action.shared()));
-    }
-    else {
-      for(auto &new_leaf : new_leaves) {
-        if(auto new_unsplit = std::dynamic_pointer_cast<Node_Unsplit>(new_leaf)) {
-          for(auto &new_fringe : new_unsplit->fringe_values)
-            excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(new_fringe->rete_action.shared()));
-        }
-
-        excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(new_leaf->rete_action.shared()));
-      }
-    }
+    for(auto &fringe : general.fringe_values)
+      excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(fringe->rete_action.shared()));
   }
 
-  void Agent::collapse_rete(Rete::Rete_Action &rete_action) {
+  bool Agent::collapse_rete(Rete::Rete_Action &rete_action) {
     assert(rete_action.data);
     auto split = debuggable_pointer_cast<Node_Split>(rete_action.data);
     assert(split);
+    
+    auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector(split), true);
+    
+    if(fringe_collector.features.empty())
+      return false;
     
 #ifdef DEBUG_OUTPUT
     std::cerr << "Rete size before collapse: " << rete_size() << std::endl;
@@ -254,11 +208,7 @@ namespace Carli {
     std::ofstream fout("pre-collapse.dot");
     rete_print(fout);
     fout.close();
-#endif
 
-    auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector(split), true);
-    
-#ifdef DEBUG_OUTPUT
     std::cerr << "Features: ";
     for(const auto &feature_axis : fringe_collector.features)
       for(const auto &feature_node : feature_axis.second)
@@ -266,21 +216,13 @@ namespace Carli {
     std::cerr << std::endl;
 #endif
 
-    assert(!fringe_collector.features.empty());
-
     /// Make new fringe
-#ifdef DEBUG_OUTPUT
-    std::cerr << "New fringe heights:";
-#endif
     Fringe_Values node_unsplit_fringe;
     for(const auto &feature_axis : fringe_collector.features) {
       for(const auto &feature_node : feature_axis.second) {
         auto &node = debuggable_cast<Node &>(*feature_node.second->data.get());
 
         auto new_fringe = node.create_fringe(*this, *split);
-#ifdef DEBUG_OUTPUT
-        std::cerr << ' ' << new_fringe->rete_action.parent_left()->parent_left()->height() << ':' << new_fringe->rete_action.parent_left()->parent_right()->height();
-#endif
         node_unsplit_fringe.push_back(new_fringe);
         
         //std::cerr << "Collapsing: ";
@@ -292,9 +234,6 @@ namespace Carli {
         //std::cerr << std::endl;
       }
     }
-#ifdef DEBUG_OUTPUT
-    std::cerr << std::endl;
-#endif
 
     /// Make new unsplit node
     const auto unsplit = split->create_unsplit(*this, m_wme_blink, node_unsplit_fringe);
@@ -307,10 +246,8 @@ namespace Carli {
     //unsplit->rete_action.output_name(std::cerr);
     //std::cerr << std::endl;
 
-    //unsplit->q_value.delete_and_zero();
-    //unsplit->q_value = split->q_value;
-    //split->delete_q_value = false;
-    //unsplit->q_value->type = Q_Value::Type::UNSPLIT;
+    /// Preserve some learning
+    unsplit->q_value->value = split->q_value->value;
     
 #ifdef DEBUG_OUTPUT
     std::cerr << "Excising " << fringe_collector.excise.size() << " actions." << std::endl;
@@ -325,6 +262,8 @@ namespace Carli {
     fout.open("post-collapse.dot");
     rete_print(fout);
 #endif
+
+    return true;
   }
 
   Agent::Agent(const std::shared_ptr<Environment> &environment)

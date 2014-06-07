@@ -173,11 +173,17 @@ namespace Rete {
   void Rete_Agent::rete_print(std::ostream &os) const {
     os << "digraph Rete {" << std::endl;
     
-    std::map<int64_t, std::list<Rete_Node_Ptr>> ranks;
-    std::function<void (Rete_Node &)> visitor = [&os, &ranks](Rete_Node &node) {
+    std::map<int64_t, std::list<Rete_Node_Ptr_C>> clusters;
+    std::map<int64_t, Rete_Node_Ptr_C> cluster_owners;
+    std::map<int64_t, std::list<Rete_Node_Ptr_C>> ranks;
+    std::function<void (Rete_Node &)> visitor = [&os, &clusters, &cluster_owners, &ranks](Rete_Node &node) {
       node.print_details(os);
-      if(node.data)
+      if(node.data) {
+        if(node.data->cluster())
+          clusters[node.data->cluster()].push_back(node.shared());
+        cluster_owners[node.data->cluster_owner()] = node.shared();
         ranks[node.data->rank()].push_back(node.shared());
+      }
     };
 
     const_cast<Rete_Agent *>(this)->visit_preorder(visitor, false);
@@ -186,6 +192,18 @@ namespace Rete {
       os << "  { rank=source;";
       for(const auto &filter : filters)
         os << ' ' << intptr_t(filter.get());
+      os << " }" << std::endl;
+    }
+
+    for(const auto &cluster : clusters) {
+      for(const auto &node : cluster.second) {
+        os << "  " << intptr_t(cluster_owners[cluster.first].get()) << " -> "
+                    << intptr_t(node.get()) << " [style=\"dashed\"]" << std::endl;
+      }
+
+      os << "  subgraph cluster" << cluster.first << "{ rank=same;";
+      for(const auto &node : cluster.second)
+        os << ' ' << intptr_t(node.get());
       os << " }" << std::endl;
     }
 
@@ -199,15 +217,6 @@ namespace Rete {
           }
         }
       }
-
-      os << "  subgraph {" << std::endl << "    rankdir=\"TB\"" << std::endl;
-      for(const auto &rank : ranks) {
-        os << "    subgraph cluster" << rank.first << "{ rank=same;";
-        for(const auto &node : rank.second)
-          os << ' ' << intptr_t(node.get());
-        os << " }" << std::endl;
-      }
-      os << "  }" << std::endl;
     }
 
     os << "}" << std::endl;

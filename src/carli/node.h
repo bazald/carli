@@ -43,8 +43,10 @@ namespace Carli {
     }
 
     virtual ~Node();
-
+    
     int64_t rank() const override;
+    int64_t cluster() const override;
+    int64_t cluster_owner() const override;
 
     virtual void action(Agent &agent, const Rete::WME_Token &token) = 0;
     virtual void retraction(Agent &agent, const Rete::WME_Token &token);

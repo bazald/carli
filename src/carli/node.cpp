@@ -11,9 +11,23 @@ namespace Carli {
       q_value.delete_and_zero();
     }
   }
-
+  
   int64_t Node::rank() const {
     return q_value->depth;
+  }
+  
+  int64_t Node::cluster() const {
+    if(q_value->depth < 2)
+      return 0;
+    if(q_value->type == Q_Value::Type::FRINGE)
+      return intptr_t(rete_action.parent_left()->parent_left().get());
+    return intptr_t(rete_action.parent_left()->parent_left()->parent_left().get());
+  }
+
+  int64_t Node::cluster_owner() const {
+    if(q_value->type == Q_Value::Type::FRINGE)
+      return intptr_t(rete_action.parent_left().get());
+    return intptr_t(rete_action.parent_left()->parent_left().get());
   }
 
   void Node::retraction(Agent &agent, const Rete::WME_Token &token) {
