@@ -194,13 +194,13 @@ namespace Mountain_Car {
       //Node_Ranged::Lines lines;
       //lines.push_back(Node_Ranged::Line(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)));
       auto feature = new Position(m_min_x, m_half_x, 2, false);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::index, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::index, 2), feature->symbol_constant(), root_action_data->rete_action.parent_left());
       make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)), lines);
     }
 
     {
       auto feature = new Position(m_half_x, m_max_x, 2, true);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::index, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::index, 2), feature->symbol_constant(), root_action_data->rete_action.parent_left());
       make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_max_x, m_max_x_dot)), Node_Ranged::Lines());
     }
 
@@ -208,13 +208,13 @@ namespace Mountain_Car {
       //Node_Ranged::Lines lines;
       //lines.push_back(Node_Ranged::Line(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_half_x_dot)));
       auto feature = new Velocity(m_min_x_dot, m_half_x_dot, 2, false);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Velocity::index, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Velocity::index, 2), feature->symbol_constant(), root_action_data->rete_action.parent_left());
       make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_max_x, m_half_x_dot)), lines);
     }
 
     {
       auto feature = new Velocity(m_half_x_dot, m_max_x_dot, 2, true);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Velocity::index, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Velocity::index, 2), feature->symbol_constant(), root_action_data->rete_action.parent_left());
       make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_max_x_dot)), Node_Ranged::Lines());
     }
   }

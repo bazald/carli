@@ -512,7 +512,7 @@ namespace Tetris {
 
     for(int i = 0; i != 2; ++i) {
       auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->rete_action.parent());
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->rete_action.parent_left());
       make_standard_fringe(predicate, node_unsplit, feature); //, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
     }
   }
@@ -573,7 +573,7 @@ namespace Tetris {
         for(uint8_t orientation = 0, oend = num_types(super); orientation != oend; ++orientation) {
           const auto type = super_to_type(super, orientation);
           auto feature = new Type(axis, type);
-          auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+          auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), root_action_data->rete_action.parent_left());
           make_standard_fringe(predicate, root_action_data, feature);
         }
       }
@@ -583,7 +583,7 @@ namespace Tetris {
 //      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
 //      auto feature = new X_Odd(value);
 //      node_fringe->feature = feature;
-//      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(X_Odd::AXIS, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+//      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(X_Odd::AXIS, 2), feature->symbol_constant(), root_action_data->rete_action.parent_left());
 //      make_standard_fringe(predicate, root_action_data, feature);
 //    }
 

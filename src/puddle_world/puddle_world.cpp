@@ -290,13 +290,13 @@ namespace Puddle_World {
       //Node_Ranged::Lines lines;
       //lines.push_back(Node_Ranged::Line(std::make_pair(0.5, 0.0), std::make_pair(0.5, 1.0)));
       auto feature = new Position(Position::X, 0.0, 0.5, 2, false);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), root_action_data->rete_action.parent_left());
       make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(0.5, 1.0)), lines);
     }
 
     {
       auto feature = new Position(Position::X, 0.5, 1.0, 2, true);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), root_action_data->rete_action.parent_left());
       make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.5, 0.0), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
     }
 
@@ -304,13 +304,13 @@ namespace Puddle_World {
       //Node_Ranged::Lines lines;
       //lines.push_back(Node_Ranged::Line(std::make_pair(0.0, 0.5), std::make_pair(1.0, 0.5)));
       auto feature = new Position(Position::Y, 0.0, 0.5, 2, false);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), root_action_data->rete_action.parent_left());
       make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 0.5)), lines);
     }
 
     {
       auto feature = new Position(Position::Y, 0.5, 1.0, 2, true);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), root_action_data->rete_action.parent());
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), root_action_data->rete_action.parent_left());
       make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.5), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
     }
   }
