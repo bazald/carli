@@ -197,15 +197,21 @@ namespace Rete {
     for(const auto &cluster : clusters) {
       if(cluster.first) {
         for(const auto &node : cluster.second) {
-          os << "  " << intptr_t(cluster_owners[cluster.first].get()) << " -> "
-                      << intptr_t(node->parent_left().get()) << " [arrowhead=\"none\",style=\"dashed\"]" << std::endl;
+          os << "  " << intptr_t(cluster_owners[cluster.first].get()) << " -> ";
+          if(node->data->attached_parent())
+            os << intptr_t(node->parent_left().get());
+          else
+            os << intptr_t(node.get());
+          os << " [arrowhead=\"none\",style=\"dashed\"]" << std::endl;
         }
       }
 
       os << "  subgraph cluster" << cluster.first << " {" << std::endl;
       os << "    { rank=same;";
-      for(const auto &node : cluster.second)
-        os << ' ' << intptr_t(node->parent_left().get());
+      for(const auto &node : cluster.second) {
+        if(node->data->attached_parent())
+          os << ' ' << intptr_t(node->parent_left().get());
+      }
       os << " }" << std::endl << "    { rank=same;";
       for(const auto &node : cluster.second)
         os << ' ' << intptr_t(node.get());
@@ -218,8 +224,12 @@ namespace Rete {
       for(auto cur = ++ranks.begin(); cur != ranks.end(); prev = cur, ++cur) {
         for(const auto &node0 : prev->second) {
           for(const auto &node1 : cur->second) {
-            os << "  " << intptr_t(node0.get()) << " -> "
-                       << intptr_t(node1->parent_left().get()) << " [style=\"invis\"]" << std::endl;
+            os << "  " << intptr_t(node0.get()) << " -> ";
+            if(node1->data->attached_parent())
+              os << intptr_t(node1->parent_left().get());
+            else
+              os << intptr_t(node1.get());
+            os << " [style=\"invis\"]" << std::endl;
           }
         }
       }

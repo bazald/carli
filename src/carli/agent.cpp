@@ -46,8 +46,11 @@ namespace Carli {
   };
 
   bool Agent::respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
-    //if(random.rand_lt(1000))
     return false;
+    //if(debuggable_cast<Node *>(rete_action.data.get())->q_value->depth < 3)
+    //  return false;
+    //if(random.rand_lt(1000))
+    //  return false;
     //return collapse_rete(rete_action);
   }
 
@@ -76,7 +79,7 @@ namespace Carli {
 
     expand_fringe(rete_action, token, chosen->q_value->feature.get());
 
-    auto new_node = general.create_split(*this, m_wme_blink);
+    auto new_node = general.create_split(*this, m_wme_blink, false);
 
     excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(rete_action.shared()));
     
@@ -167,7 +170,7 @@ namespace Carli {
         
         /** Step 2.3: Create a new split/unsplit node depending on the existence of a new fringe. */
         if(node_unsplit_fringe.empty())
-          new_leaves.push_back(leaf->create_split(*this, m_wme_blink));
+          new_leaves.push_back(leaf->create_split(*this, m_wme_blink, true));
         else
           new_leaves.push_back(leaf->create_unsplit(*this, m_wme_blink, node_unsplit_fringe));
       }

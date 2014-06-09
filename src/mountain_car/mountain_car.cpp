@@ -165,7 +165,7 @@ namespace Mountain_Car {
           //}
           
           auto action = make_standard_action(xdotlt);
-          action->data = std::make_shared<Node_Split>(*this, *action, get_action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr));
+          action->data = std::make_shared<Node_Split>(*this, *action, get_action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr), true);
         }
       }
     }

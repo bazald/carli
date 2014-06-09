@@ -16,42 +16,36 @@ namespace Carli {
     return q_value->depth;
   }
   
-  int64_t Node::cluster() const {
-    if(q_value->depth < 2)
-      return 0;
-    if(q_value->type == Q_Value::Type::FRINGE)
-      return intptr_t(rete_action.parent_left()->parent_left().get());
-    return intptr_t(rete_action.parent_left()->parent_left()->parent_left().get());
-  }
-
-  int64_t Node::cluster_owner() const {
-    if(q_value->type == Q_Value::Type::FRINGE)
-      return intptr_t(rete_action.parent_left().get());
-    return intptr_t(rete_action.parent_left()->parent_left().get());
+  bool Node::attached_parent() const {
+    return true;
   }
 
   void Node::retraction(Agent &agent, const Rete::WME_Token &token) {
     agent.purge_q_value_next(get_action(token), q_value);
   }
   
-  Node_Split_Ptr Node::create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink) {
+  Node_Split_Ptr Node::create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink, const bool &terminal) {
     auto parent = rete_action.parent_left();
     tracked_ptr<Q_Value> new_q_value;
 
     if(q_value->type == Q_Value::Type::FRINGE) {
-      auto filter_blink = agent.make_filter(*wme_blink);
-      parent = agent.make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
+      if(!terminal) {
+        const auto filter_blink = agent.make_filter(*wme_blink);
+        parent = agent.make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
+      }
 
       new_q_value = new Q_Value(0.0, Q_Value::Type::SPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr);
     }
     else {
+      assert(!terminal);
+
       delete_q_value = false;
       q_value->type = Q_Value::Type::SPLIT;
       new_q_value = q_value;
     }
 
     auto new_leaf = agent.make_standard_action(parent);
-    auto new_leaf_data = std::make_shared<Node_Split>(agent, *new_leaf, get_action, new_q_value);
+    auto new_leaf_data = std::make_shared<Node_Split>(agent, *new_leaf, get_action, new_q_value, terminal);
     new_leaf->data = new_leaf_data;
 
     return new_leaf_data;
@@ -61,12 +55,15 @@ namespace Carli {
     auto parent = rete_action.parent_left();
     tracked_ptr<Q_Value> new_q_value;
 
-    if(q_value->type == Q_Value::Type::FRINGE) {
+    if(q_value->type == Q_Value::Type::FRINGE ||
+       q_value->type == Q_Value::Type::SPLIT && debuggable_cast<Node_Split *>(this)->terminal)
+    {
       auto filter_blink = agent.make_filter(*wme_blink);
       parent = agent.make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
-
-      new_q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr);
     }
+      
+    if(q_value->type == Q_Value::Type::FRINGE)
+      new_q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr);
     else {
       delete_q_value = false;
       q_value->type = Q_Value::Type::UNSPLIT;
@@ -84,8 +81,11 @@ namespace Carli {
   Node_Fringe_Ptr Node::create_fringe(Agent &agent, Node &leaf) {
     if(leaf.q_value->depth == 1) {
       auto ancestor = rete_action.parent_left();
-      if(q_value->type != Q_Value::Type::FRINGE)
+      if(q_value->type == Q_Value::Type::UNSPLIT ||
+         q_value->type == Q_Value::Type::SPLIT && !debuggable_cast<Node_Split *>(this)->terminal)
+      {
         ancestor = ancestor->parent_left();
+      }
       for(int64_t d = q_value->depth; d != 2; --d) {
         assert(dynamic_cast<Rete::Rete_Predicate *>(ancestor.get()) ||
           dynamic_cast<Rete::Rete_Existential_Join *>(ancestor.get()));
@@ -103,8 +103,10 @@ namespace Carli {
       Rete::Rete_Node_Ptr new_test;
 
       auto ancestor_left = leaf.rete_action.parent_left();
-      if(leaf.q_value->type != Q_Value::Type::FRINGE)
+      if(leaf.q_value->type != Q_Value::Type::FRINGE) {
+        assert(leaf.q_value->type == Q_Value::Type::UNSPLIT || !debuggable_cast<Node_Split &>(leaf).terminal);
         ancestor_left = ancestor_left->parent_left(); ///< Skip blink node
+      }
 
       if(feature_ranged_data)
         new_test = agent.make_predicate_vc(feature_ranged_data->predicate(), feature_ranged_data->axis, feature_ranged_data->symbol_constant(), ancestor_left);
@@ -112,8 +114,11 @@ namespace Carli {
         auto ancestor_right = rete_action.parent_left();
 
         if(leaf.q_value->type != Q_Value::Type::FRINGE) {
-          if(q_value->type != Q_Value::Type::FRINGE)
+          if(q_value->type == Q_Value::Type::UNSPLIT ||
+             q_value->type == Q_Value::Type::SPLIT && !debuggable_cast<Node_Split *>(this)->terminal)
+          {
             ancestor_right = ancestor_right->parent_left(); ///< Skip blink node
+          }
 
           for(int64_t d = q_value->depth; d != leaf.q_value->depth; --d) {
             assert(dynamic_cast<Rete::Rete_Predicate *>(ancestor_right.get()) ||
@@ -121,7 +126,7 @@ namespace Carli {
             ancestor_right = ancestor_right->parent_right(); ///< Pass through extra tests
           }
         }
-
+        
         new_test = agent.make_existential_join(q_value->feature->bindings(), ancestor_left, ancestor_right);
       }
 
@@ -134,8 +139,8 @@ namespace Carli {
     }
   }
 
-  Node_Split::Node_Split(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_)
-   : Node(agent_, rete_action_, get_action_, q_value_)
+  Node_Split::Node_Split(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_, const bool &terminal_)
+    : Node(agent_, rete_action_, get_action_, q_value_), terminal(terminal_)
   {
     ++agent.q_value_count;
   }
@@ -144,13 +149,31 @@ namespace Carli {
     --agent.q_value_count;
   }
   
+  int64_t Node_Split::cluster() const {
+    if(q_value->depth < 2)
+      return 0;
+    if(terminal)
+      return intptr_t(rete_action.parent_left()->parent_left().get());
+    return intptr_t(rete_action.parent_left()->parent_left()->parent_left().get());
+  }
+  
+  int64_t Node_Split::cluster_owner() const {
+    if(terminal)
+      return intptr_t(rete_action.parent_left().get());
+    return intptr_t(rete_action.parent_left()->parent_left().get());
+  }
+
+  bool Node_Split::attached_parent() const {
+    return !terminal;
+  }
+
   void Node_Split::action(Agent &agent, const Rete::WME_Token &token) {
-    if(!rete_action.is_excised() && !agent.respecialize(rete_action, token))
+    if(!rete_action.is_excised() && (terminal || !agent.respecialize(rete_action, token)))
       agent.insert_q_value_next(get_action(token), q_value);
   }
 
   Node_Unsplit::Node_Unsplit(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
-   : Node(agent_, rete_action_, get_action_, new Q_Value(0.0, Q_Value::Type::UNSPLIT, depth_, feature_))
+    : Node(agent_, rete_action_, get_action_, new Q_Value(0.0, Q_Value::Type::UNSPLIT, depth_, feature_))
   {
     ++agent.q_value_count;
   }
@@ -165,6 +188,16 @@ namespace Carli {
     --agent.q_value_count;
   }
   
+  int64_t Node_Unsplit::cluster() const {
+    if(q_value->depth < 2)
+      return 0;
+    return intptr_t(rete_action.parent_left()->parent_left()->parent_left().get());
+  }
+  
+  int64_t Node_Unsplit::cluster_owner() const {
+    return intptr_t(rete_action.parent_left()->parent_left().get());
+  }
+
   void Node_Unsplit::action(Agent &agent, const Rete::WME_Token &token) {
     if(!rete_action.is_excised() && !agent.specialize(rete_action, token))
       agent.insert_q_value_next(get_action(token), q_value);
@@ -174,4 +207,13 @@ namespace Carli {
     if(!rete_action.is_excised())
       agent.insert_q_value_next(get_action(token), q_value);
   }
+  
+  int64_t Node_Fringe::cluster() const {
+    return intptr_t(rete_action.parent_left()->parent_left().get());
+  }
+
+  int64_t Node_Fringe::cluster_owner() const {
+    return intptr_t(rete_action.parent_left().get());
+  }
+
 }

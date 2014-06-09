@@ -45,13 +45,12 @@ namespace Carli {
     virtual ~Node();
     
     int64_t rank() const override;
-    int64_t cluster() const override;
-    int64_t cluster_owner() const override;
+    bool attached_parent() const override;
 
     virtual void action(Agent &agent, const Rete::WME_Token &token) = 0;
     virtual void retraction(Agent &agent, const Rete::WME_Token &token);
     
-    Node_Split_Ptr create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink);
+    Node_Split_Ptr create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink, const bool &terminal);
     Node_Unsplit_Ptr create_unsplit(Agent &agent, const Rete::WME_Ptr_C &wme_blink, Fringe_Values &node_unsplit_fringe);
     Node_Fringe_Ptr create_fringe(Agent &agent, Node &leaf);
 
@@ -61,20 +60,26 @@ namespace Carli {
     tracked_ptr<Q_Value> q_value;
     bool delete_q_value = true;
   };
-
+  
   class CARLI_LINKAGE Node_Split : public Node {
     Node_Split(const Node_Split &) = delete;
     Node_Split & operator=(const Node_Split &) = delete;
 
   public:
-    Node_Split(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_);
+    Node_Split(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_, const bool &terminal_);
     ~Node_Split();
 
     Node_Split * clone() const override {
-      return new Node_Split(agent, rete_action, get_action, q_value->clone());
+      return new Node_Split(agent, rete_action, get_action, q_value->clone(), terminal);
     }
+    
+    int64_t cluster() const override;
+    int64_t cluster_owner() const override;
+    bool attached_parent() const override;
 
     void action(Agent &agent, const Rete::WME_Token &token) override;
+
+    bool terminal;
   };
 
   class CARLI_LINKAGE Node_Unsplit : public Node {
@@ -89,6 +94,9 @@ namespace Carli {
     Node_Unsplit * clone() const override {
       return new Node_Unsplit(agent, rete_action, get_action, q_value->clone());
     }
+
+    int64_t cluster() const override;
+    int64_t cluster_owner() const override;
 
     void action(Agent &agent, const Rete::WME_Token &token) override;
 
@@ -108,6 +116,9 @@ namespace Carli {
     Node_Fringe * clone() const override {
       return new Node_Fringe(agent, rete_action, get_action, q_value->clone());
     }
+    
+    int64_t cluster() const override;
+    int64_t cluster_owner() const override;
 
     void action(Agent &agent, const Rete::WME_Token &token) override;
 
