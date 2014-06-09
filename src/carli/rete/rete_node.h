@@ -57,9 +57,7 @@ namespace Rete {
     virtual Rete_Data * clone() const = 0;
 
     virtual int64_t rank() const = 0;
-    virtual int64_t cluster() const = 0;
-    virtual int64_t cluster_owner() const = 0;
-    virtual bool attached_parent() const = 0;
+    virtual Rete_Node_Ptr cluster_root_ancestor() const = 0;
   };
 
   class RETE_LINKAGE Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<char [256]>

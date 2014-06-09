@@ -173,19 +173,46 @@ namespace Rete {
   void Rete_Agent::rete_print(std::ostream &os) const {
     os << "digraph Rete {" << std::endl;
     
-    std::map<int64_t, std::list<Rete_Node_Ptr_C>> clusters;
-    std::map<int64_t, Rete_Node_Ptr_C> cluster_owners;
+    std::map<Rete_Node_Ptr_C, std::map<int64_t, std::list<Rete_Node_Ptr_C>>> clusters;
+    std::map<Rete_Node_Ptr_C, std::list<Rete_Node_Ptr_C>> cluster_children;
     std::map<int64_t, std::list<Rete_Node_Ptr_C>> ranks;
-    std::function<void (Rete_Node &)> visitor = [&os, &clusters, &cluster_owners, &ranks](Rete_Node &node) {
+    
+    std::function<void (Rete_Node &)> visitor = [&os, &clusters, &ranks](Rete_Node &node) {
       node.print_details(os);
       if(node.data) {
-        clusters[node.data->cluster()].push_back(node.shared());
-        cluster_owners[node.data->cluster_owner()] = node.shared();
+        clusters[node.data->cluster_root_ancestor()];
         ranks[node.data->rank()].push_back(node.shared());
       }
     };
-
     const_cast<Rete_Agent *>(this)->visit_preorder(visitor, false);
+
+    visitor = [&clusters, &cluster_children](Rete_Node &node) {
+      if(dynamic_cast<Rete_Filter *>(&node))
+        return;
+      const auto found = clusters.find(node.shared());
+      if(found == clusters.end()) {
+        int64_t i = 1;
+        for(auto ancestor = node.parent_left(); !dynamic_cast<Rete_Filter *>(ancestor.get()); ancestor = ancestor->parent_left(), ++i) {
+          const auto found2 = clusters.find(ancestor);
+          if(found2 != clusters.end()) {
+            found2->second[i].push_back(node.shared());
+            break;
+          }
+        }
+      }
+      else {
+        found->second[0].push_back(node.shared());
+        for(auto ancestor = node.parent_left(); !dynamic_cast<Rete_Filter *>(ancestor.get()); ancestor = ancestor->parent_left()) {
+          const auto found2 = clusters.find(ancestor);
+          if(found2 != clusters.end()) {
+            cluster_children[found2->first].push_back(found->first);
+            break;
+          }
+        }
+      }
+
+    };
+    const_cast<Rete_Agent *>(this)->visit_preorder(visitor, true);
 
     if(!filters.empty()) {
       os << "  { rank=source;";
@@ -195,41 +222,24 @@ namespace Rete {
     }
 
     for(const auto &cluster : clusters) {
-      if(cluster.first) {
-        for(const auto &node : cluster.second) {
-          os << "  " << intptr_t(cluster_owners[cluster.first].get()) << " -> ";
-          if(node->data->attached_parent())
-            os << intptr_t(node->parent_left().get());
-          else
-            os << intptr_t(node.get());
-          os << " [arrowhead=\"none\",style=\"dashed\"]" << std::endl;
-        }
+      os << "  subgraph cluster" << intptr_t(cluster.first.get()) << " {" << std::endl;
+      for(const auto &rank_cluster : cluster.second) {
+        os << "    { rank=same;";
+        for(const auto &node : rank_cluster.second)
+          os << ' ' << intptr_t(node.get());
+        os << " }" << std::endl;
       }
-
-      os << "  subgraph cluster" << cluster.first << " {" << std::endl;
-      os << "    { rank=same;";
-      for(const auto &node : cluster.second) {
-        if(node->data->attached_parent())
-          os << ' ' << intptr_t(node->parent_left().get());
-      }
-      os << " }" << std::endl << "    { rank=same;";
-      for(const auto &node : cluster.second)
-        os << ' ' << intptr_t(node.get());
-      os << " }" << std::endl;
       os << "  }" << std::endl;
     }
 
-    if(ranks.size() > 1) {
-      auto prev = ranks.begin();
-      for(auto cur = ++ranks.begin(); cur != ranks.end(); prev = cur, ++cur) {
-        for(const auto &node0 : prev->second) {
-          for(const auto &node1 : cur->second) {
-            os << "  " << intptr_t(node0.get()) << " -> ";
-            if(node1->data->attached_parent())
-              os << intptr_t(node1->parent_left().get());
-            else
-              os << intptr_t(node1.get());
-            os << " [style=\"invis\"]" << std::endl;
+    ///// Force ranks to be top to bottom
+    for(const auto &cluster : clusters) {
+      const auto found = cluster_children.find(cluster.first);
+      if(found != cluster_children.end()) {
+        for(const auto &src : cluster.second.rbegin()->second) {
+          for(const auto dest : found->second) {
+            for(const auto &dest2 : clusters[dest].begin()->second)
+              os << "  " << intptr_t(src.get()) << " -> " << intptr_t(dest2.get()) << " [style=\"invis\"]" << std::endl;
           }
         }
       }

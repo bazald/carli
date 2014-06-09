@@ -15,10 +15,6 @@ namespace Carli {
   int64_t Node::rank() const {
     return q_value->depth;
   }
-  
-  bool Node::attached_parent() const {
-    return true;
-  }
 
   void Node::retraction(Agent &agent, const Rete::WME_Token &token) {
     agent.purge_q_value_next(get_action(token), q_value);
@@ -82,7 +78,7 @@ namespace Carli {
     if(leaf.q_value->depth == 1) {
       auto ancestor = rete_action.parent_left();
       if(q_value->type == Q_Value::Type::UNSPLIT ||
-         q_value->type == Q_Value::Type::SPLIT && !debuggable_cast<Node_Split *>(this)->terminal)
+        (q_value->type == Q_Value::Type::SPLIT && !debuggable_cast<Node_Split *>(this)->terminal))
       {
         ancestor = ancestor->parent_left();
       }
@@ -115,7 +111,7 @@ namespace Carli {
 
         if(leaf.q_value->type != Q_Value::Type::FRINGE) {
           if(q_value->type == Q_Value::Type::UNSPLIT ||
-             q_value->type == Q_Value::Type::SPLIT && !debuggable_cast<Node_Split *>(this)->terminal)
+            (q_value->type == Q_Value::Type::SPLIT && !debuggable_cast<Node_Split *>(this)->terminal))
           {
             ancestor_right = ancestor_right->parent_left(); ///< Skip blink node
           }
@@ -149,22 +145,8 @@ namespace Carli {
     --agent.q_value_count;
   }
   
-  int64_t Node_Split::cluster() const {
-    if(q_value->depth < 2)
-      return 0;
-    if(terminal)
-      return intptr_t(rete_action.parent_left()->parent_left().get());
-    return intptr_t(rete_action.parent_left()->parent_left()->parent_left().get());
-  }
-  
-  int64_t Node_Split::cluster_owner() const {
-    if(terminal)
-      return intptr_t(rete_action.parent_left().get());
-    return intptr_t(rete_action.parent_left()->parent_left().get());
-  }
-
-  bool Node_Split::attached_parent() const {
-    return !terminal;
+  Rete::Rete_Node_Ptr Node_Split::cluster_root_ancestor() const {
+    return terminal ? rete_action.parent_left() : rete_action.parent_left()->parent_left();
   }
 
   void Node_Split::action(Agent &agent, const Rete::WME_Token &token) {
@@ -188,14 +170,8 @@ namespace Carli {
     --agent.q_value_count;
   }
   
-  int64_t Node_Unsplit::cluster() const {
-    if(q_value->depth < 2)
-      return 0;
-    return intptr_t(rete_action.parent_left()->parent_left()->parent_left().get());
-  }
-  
-  int64_t Node_Unsplit::cluster_owner() const {
-    return intptr_t(rete_action.parent_left()->parent_left().get());
+  Rete::Rete_Node_Ptr Node_Unsplit::cluster_root_ancestor() const {
+    return rete_action.parent_left()->parent_left();
   }
 
   void Node_Unsplit::action(Agent &agent, const Rete::WME_Token &token) {
@@ -208,12 +184,8 @@ namespace Carli {
       agent.insert_q_value_next(get_action(token), q_value);
   }
   
-  int64_t Node_Fringe::cluster() const {
-    return intptr_t(rete_action.parent_left()->parent_left().get());
-  }
-
-  int64_t Node_Fringe::cluster_owner() const {
-    return intptr_t(rete_action.parent_left().get());
+  Rete::Rete_Node_Ptr Node_Fringe::cluster_root_ancestor() const {
+    return rete_action.parent_left();
   }
 
 }
