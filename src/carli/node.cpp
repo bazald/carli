@@ -52,7 +52,7 @@ namespace Carli {
     tracked_ptr<Q_Value> new_q_value;
 
     if(q_value->type == Q_Value::Type::FRINGE ||
-       q_value->type == Q_Value::Type::SPLIT && debuggable_cast<Node_Split *>(this)->terminal)
+      (q_value->type == Q_Value::Type::SPLIT && debuggable_cast<Node_Split *>(this)->terminal))
     {
       auto filter_blink = agent.make_filter(*wme_blink);
       parent = agent.make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
