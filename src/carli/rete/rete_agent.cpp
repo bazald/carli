@@ -175,13 +175,11 @@ namespace Rete {
     
     std::map<Rete_Node_Ptr_C, std::map<int64_t, std::list<Rete_Node_Ptr_C>>> clusters;
     std::map<Rete_Node_Ptr_C, std::list<Rete_Node_Ptr_C>> cluster_children;
-    std::map<int64_t, std::list<Rete_Node_Ptr_C>> ranks;
     
-    std::function<void (Rete_Node &)> visitor = [&os, &clusters, &ranks](Rete_Node &node) {
+    std::function<void (Rete_Node &)> visitor = [&os, &clusters](Rete_Node &node) {
       node.print_details(os);
       if(node.data) {
         clusters[node.data->cluster_root_ancestor()];
-        ranks[node.data->rank()].push_back(node.shared());
       }
     };
     const_cast<Rete_Agent *>(this)->visit_preorder(visitor, false);
