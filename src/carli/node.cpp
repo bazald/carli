@@ -185,7 +185,7 @@ namespace Carli {
   }
   
   Rete::Rete_Node_Ptr Node_Fringe::cluster_root_ancestor() const {
-    return rete_action.parent_left();
+    return rete_action.parent_left()->parent_left();
   }
 
 }
