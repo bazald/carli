@@ -100,12 +100,12 @@ namespace Rete {
   void Rete_Predicate::print_details(std::ostream &os) const {
     os << "  " << intptr_t(this) << " [label=\"" << m_lhs_index;
     switch(m_predicate) {
-      case EQ: os << " == "; break;
-      case NEQ: os << " != "; break;
-      case GT: os << " > "; break;
-      case GTE: os << " >= "; break;
-      case LT: os << " < "; break;
-      case LTE: os << " <= "; break;
+      case EQ: os << '='; break;
+      case NEQ: os << "&ne;"; break;
+      case GT: os << '>'; break;
+      case GTE: os << "&ge;"; break;
+      case LT: os << '<'; break;
+      case LTE: os << "&le"; break;
       default: abort();
     }
     if(m_rhs)

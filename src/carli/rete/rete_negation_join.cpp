@@ -110,7 +110,17 @@ namespace Rete {
   }
 
   void Rete_Negation_Join::print_details(std::ostream &os) const {
-    os << "  " << intptr_t(this) << " [label=\"&not;&exist;J" << bindings << "\"];" << std::endl;
+    os << "  " << intptr_t(this) << " [label=\"&not;&exist;J\\n";
+    if(bindings.empty())
+      os << "&empty;";
+    else {
+      auto bt = bindings.begin();
+      os << *bt++;
+      while(bt != bindings.end())
+        os << "\\n" << *bt++;
+    }
+    os << "\"];" << std::endl;
+
     os << "  " << intptr_t(input0) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
     os << "  " << intptr_t(input1) << " -> " << intptr_t(this) << " [color=blue];" << std::endl;
   }
