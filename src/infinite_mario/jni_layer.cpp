@@ -255,12 +255,12 @@ JNIEXPORT void JNICALL Java_ch_idsia_ai_agents_ai_JNIAgent_c_1reset(JNIEnv *, jo
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM * /*vm*/, void * /*pvt*/) {
-#ifndef NDEBUG
-  static volatile bool test = true;
-  while(test) {
-    continue;
-  }
-#endif
+//#ifndef NDEBUG
+//  static volatile bool test = true;
+//  while(test) {
+//    continue;
+//  }
+//#endif
 
   try {
     Carli::Experiment experiment; ///< Set up global Options

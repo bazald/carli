@@ -244,6 +244,11 @@ namespace Carli {
     std::string m_value_function_map_filename = dynamic_cast<const Option_String &>(Options::get_global()["value-function-map-filename"]).get_value();
     std::unordered_set<std::string> m_value_function_map;
     mutable std::ofstream m_value_function_out;
+
+#ifndef NO_COLLAPSE_DETECTION_HACK
+    size_t m_positive_rewards_in_a_row = 0;
+    bool m_experienced_n_positive_rewards_in_a_row = false;
+#endif
   };
 
 }

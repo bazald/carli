@@ -105,8 +105,11 @@ solution "carli"
     end
   end
 
-  includedirs { "C:\\Program Files\\Java\\jdk1.7.0_40\\include", "C:\\Program Files\\Java\\jdk1.7.0_40\\include\\win32",
-                "/usr/lib/jvm/java-7-openjdk-amd64/include" }
+  configuration "linux"
+    includedirs { "/usr/lib/jvm/java-7-openjdk-amd64/include" }
+  configuration "windows"
+    includedirs { "C:\\Program Files\\Java\\jdk1.8.0_05\\include",
+                  "C:\\Program Files\\Java\\jdk1.8.0_05\\include\\win32" }
 
   include "src/blocks_world"
   include "src/infinite_mario"

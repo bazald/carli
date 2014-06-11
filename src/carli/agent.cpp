@@ -46,12 +46,16 @@ namespace Carli {
   };
 
   bool Agent::respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
-    return false;
+    //if(m_experienced_n_positive_rewards_in_a_row)
+      return false;
     //if(debuggable_cast<Node *>(rete_action.data.get())->q_value->depth < 3)
     //  return false;
-    //if(random.rand_lt(1000))
+    //if(random.rand_lt(1000) || !collapse_rete(rete_action))
     //  return false;
-    //return collapse_rete(rete_action);
+    //else {
+    //  m_positive_rewards_in_a_row = 0;
+    //  return true;
+    //}
   }
 
   bool Agent::specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
@@ -383,6 +387,13 @@ namespace Carli {
 
     const reward_type reward = m_environment->transition(*m_current);
 
+    if(reward > 0.0) {
+      if(++m_positive_rewards_in_a_row > 30)
+        m_experienced_n_positive_rewards_in_a_row = true;
+    }
+    else
+      m_positive_rewards_in_a_row = 0;
+
     update();
 
     if(m_metastate == Metastate::NON_TERMINAL) {
@@ -390,11 +401,11 @@ namespace Carli {
       clean_features();
 
       m_next = m_target_policy();
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
   //      for(auto &next_q : m_next_q_values)
   //        std::cerr << "   " << *next_q.first << " is an option." << std::endl;
       std::cerr << "   " << *m_next << " is next." << std::endl;
-  #endif
+#endif
       auto &value_best = m_next_q_values[m_next];
       td_update(m_current_q_value, reward, value_best);
 
@@ -407,9 +418,9 @@ namespace Carli {
           m_next = next;
         }
 
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
         std::cerr << "   " << *m_next << " is next." << std::endl;
-  #endif
+#endif
       }
     }
     else {
@@ -455,10 +466,10 @@ namespace Carli {
   //  std::cerr << "Inserting next value " << q_value << " for action " << *action << std::endl;
   //#endif
     auto &q_values = m_next_q_values[action];
-  #ifndef NDEBUG
+#ifndef NDEBUG
     if(std::find(q_values.begin(), q_values.end(), q_value) != q_values.end())
       increment_badness();
-  #endif
+#endif
     q_values.push_back(q_value);
   }
 
@@ -471,10 +482,10 @@ namespace Carli {
     auto found = std::find(q_values.begin(), q_values.end(), q_value);
     if(found != q_values.end()) {
       q_values.erase(found);
-  #ifndef NDEBUG
+#ifndef NDEBUG
       if(std::find(q_values.begin(), q_values.end(), q_value) != q_values.end())
         decrement_badness();
-  #endif
+#endif
     }
   }
 
@@ -553,9 +564,9 @@ namespace Carli {
   }
 
   Carli::Action_Ptr_C Agent::choose_greedy() {
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
     std::cerr << "  choose_greedy" << std::endl;
-  #endif
+#endif
 
     int32_t count = 0;
     double value = double();
@@ -576,9 +587,9 @@ namespace Carli {
   }
 
   Carli::Action_Ptr_C Agent::choose_randomly() {
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
     std::cerr << "  choose_randomly" << std::endl;
-  #endif
+#endif
 
     int32_t counter = int32_t(m_next_q_values.size());
   //    for(const auto &action_q : m_next_q_values) {
@@ -603,20 +614,20 @@ namespace Carli {
     const double target_value = reward + target_next;
 
     double q_old = double();
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
     std::cerr << " current :";
-  #endif
+#endif
     for(const auto &q : current) {
       ++q->update_count;
 
       if(q->type != Q_Value::Type::FRINGE) {
         q_old += q->value /* * q.weight */;
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
         std::cerr << ' ' << q;
-  #endif
+#endif
       }
     }
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
     std::cerr << std::endl;
     std::cerr << " fringe  :";
     for(const auto &q : current) {
@@ -630,7 +641,7 @@ namespace Carli {
         std::cerr << ' ' << q;
     }
     std::cerr << std::endl;
-  #endif
+#endif
 
     m_credit_assignment(current);
 
@@ -649,15 +660,15 @@ namespace Carli {
       }
     }
 
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
     double q_new = 0.0;
-  #endif
+#endif
     const double delta = target_value - q_old;
-  #ifdef ENABLE_WEIGHT
+#ifdef ENABLE_WEIGHT
     const bool weight_assignment_all = m_weight_assignment_code == "all";
-  #else
+#else
     const bool weight_assignment_all = true;
-  #endif
+#endif
     for(Q_Value::List * q_ptr = m_eligible; q_ptr; ) {
       Q_Value &q = **q_ptr;
       q_ptr = q.eligible.next();
@@ -666,9 +677,9 @@ namespace Carli {
       const double edelta = q.eligibility * ldelta;
 
       q.value += edelta;
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
       q_new += q.value /* * q.weight */;
-  #endif
+#endif
 
       if(q.type == Q_Value::Type::FRINGE) {
         const double abs_edelta = std::abs(edelta);
@@ -682,7 +693,7 @@ namespace Carli {
             ++q.pseudoepisode_count;
           q.last_step_fired = this->m_step_count;
 
-  #ifdef WHITESON_ADAPTIVE_TILE
+#ifdef WHITESON_ADAPTIVE_TILE
           if(q.type == Q_Value::Type::UNSPLIT) {
             if(abs_edelta < q.minbe) {
               q.minbe = abs_edelta;
@@ -691,13 +702,13 @@ namespace Carli {
             else
               ++this->m_steps_since_minbe;
           }
-  #endif
+#endif
         }
 
         q.cabe += abs_edelta;
-  #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
         q.mabe.set_value(q.cabe / q.update_count);
-  #endif
+#endif
 
         if(q.update_count > m_contribute_update_count) {
           if(m_mean_cabe_queue_size) {
@@ -708,9 +719,9 @@ namespace Carli {
           else
             this->m_mean_cabe.contribute(q.cabe);
 
-  #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
           this->m_mean_mabe.contribute(q.mabe);
-  #endif
+#endif
         }
       }
 
@@ -723,7 +734,7 @@ namespace Carli {
       }
     }
 
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
     std::cerr.unsetf(std::ios_base::floatfield);
     std::cerr << " td_update: " << q_old << " <" << m_learning_rate << "= " << reward << " + " << m_discount_rate << " * " << target_next << std::endl;
     std::cerr << "            " << delta << " = " << target_value << " - " << q_old << std::endl;
@@ -737,12 +748,12 @@ namespace Carli {
           std::cerr << " cabe q:   " << q->cabe << " of " << this->m_mean_cabe_queue.mean() << ':' << this->m_mean_cabe_queue.mean().get_stddev() << std::endl;
         else
           std::cerr << " cabe:     " << q->cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl;
-  #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
         std::cerr << " mabe:     " << q->mabe << " of " << this->m_mean_mabe << ':' << this->m_mean_mabe.get_stddev() << std::endl;
-  #endif
+#endif
       }
     }
-  #endif
+#endif
   }
 
   void Agent::clear_eligibility_trace() {
@@ -978,22 +989,22 @@ namespace Carli {
   }
 
   double Agent::sum_value(const action_type * const &
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
                                                      action
-  #endif
+#endif
                                                            , const Q_Value_List &value_list) {
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
     if(action) {
       std::cerr.unsetf(std::ios_base::floatfield);
       std::cerr << "   sum_value(" << *action << ") = {";
     }
-  #endif
+#endif
 
   //    assert((&value_list - static_cast<Q_Value::List *>(nullptr)) > ptrdiff_t(sizeof(Q_Value)));
 
     double sum = double();
     for(auto &q : value_list) {
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
       if(action) {
         std::cerr << ' ' << q->value /* * q.weight */ << ':' << q->depth;
         if(q->type == Q_Value::Type::FRINGE)
@@ -1001,17 +1012,17 @@ namespace Carli {
         if(q->feature)
           std::cerr << ':' << *q->feature;
       }
-  #endif
+#endif
       if(q->type != Q_Value::Type::FRINGE)
         sum += q->value /* * q->weight */;
     }
 
-  #ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
     if(action) {
       std::cerr << " } = " << sum << std::endl;
       std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
     }
-  #endif
+#endif
 
     return sum;
   }
