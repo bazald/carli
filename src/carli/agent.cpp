@@ -46,16 +46,21 @@ namespace Carli {
   };
 
   bool Agent::respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
-    //if(m_experienced_n_positive_rewards_in_a_row)
+    return false;
+#ifndef NO_COLLAPSE_DETECTION_HACK
+    if(m_experienced_n_positive_rewards_in_a_row)
       return false;
+#endif
     //if(debuggable_cast<Node *>(rete_action.data.get())->q_value->depth < 3)
     //  return false;
-    //if(random.rand_lt(1000) || !collapse_rete(rete_action))
-    //  return false;
-    //else {
-    //  m_positive_rewards_in_a_row = 0;
-    //  return true;
-    //}
+    if(random.rand_lt(1000) || !collapse_rete(rete_action))
+      return false;
+    else {
+#ifndef NO_COLLAPSE_DETECTION_HACK
+      m_positive_rewards_in_a_row = 0;
+#endif
+      return true;
+    }
   }
 
   bool Agent::specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
@@ -110,6 +115,7 @@ namespace Carli {
      */
     Fringe_Values leaves;
     for(auto fringe = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe != fend; ) {
+      assert(!(*fringe)->rete_action.expired());
       if(specialization->compare_axis(*(*fringe)->q_value->feature) == 0) {
         leaves.push_back(*fringe);
         general.fringe_values.erase(fringe++);
@@ -155,9 +161,9 @@ namespace Carli {
               assert(refined_ranged_data);
 
               /** Step 2.1a: Create new ranged fringe nodes if the new leaf is refineable. */
-              auto predicate = make_predicate_vc(refined_ranged_data->predicate(), leaf_feature_ranged_data->axis, refined_ranged_data->symbol_constant(), leaf->rete_action.parent_left());
+              auto predicate = make_predicate_vc(refined_ranged_data->predicate(), leaf_feature_ranged_data->axis, refined_ranged_data->symbol_constant(), leaf->rete_action.lock()->parent_left());
               auto new_action = make_standard_action(predicate);
-              auto new_node = std::make_shared<Node_Fringe>(*this, *new_action, general.get_action, leaf->q_value->depth + 1, refined_feature);
+              auto new_node = std::make_shared<Node_Fringe>(*this, new_action, general.get_action, leaf->q_value->depth + 1, refined_feature);
               new_action->data = new_node;
               node_unsplit_fringe.push_back(new_node);
             }
@@ -187,12 +193,12 @@ namespace Carli {
         m_mean_cabe.uncontribute(leaf->q_value->cabe);
 
       /** Step 2.5: Destroy the old leaf node. */
-      excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(leaf->rete_action.shared()));
+      excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(leaf->rete_action.lock()));
     }
 
     /** Step 3: Excise all old fringe rules from the system */
     for(auto &fringe : general.fringe_values)
-      excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(fringe->rete_action.shared()));
+      excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(fringe->rete_action.lock()));
   }
 
   bool Agent::collapse_rete(Rete::Rete_Action &rete_action) {
@@ -386,13 +392,15 @@ namespace Carli {
     assert(m_current);
 
     const reward_type reward = m_environment->transition(*m_current);
-
+    
+#ifndef NO_COLLAPSE_DETECTION_HACK
     if(reward > 0.0) {
       if(++m_positive_rewards_in_a_row > 30)
         m_experienced_n_positive_rewards_in_a_row = true;
     }
     else
       m_positive_rewards_in_a_row = 0;
+#endif
 
     update();
 
@@ -443,7 +451,7 @@ namespace Carli {
   
   Rete::Rete_Action_Ptr Agent::make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature) {
     auto new_leaf = make_standard_action(parent);
-    auto new_leaf_data = std::make_shared<Node_Fringe>(*this, *new_leaf, root_action_data->get_action, 2, feature);
+    auto new_leaf_data = std::make_shared<Node_Fringe>(*this, new_leaf, root_action_data->get_action, 2, feature);
     new_leaf->data = new_leaf_data;
     root_action_data->fringe_values.push_back(new_leaf_data);
     return new_leaf;
@@ -669,7 +677,7 @@ namespace Carli {
 #else
     const bool weight_assignment_all = true;
 #endif
-    for(Q_Value::List * q_ptr = m_eligible; q_ptr; ) {
+    for(tracked_ptr<Q_Value::List> q_ptr = m_eligible; q_ptr; ) {
       Q_Value &q = **q_ptr;
       q_ptr = q.eligible.next();
 
@@ -918,7 +926,7 @@ namespace Carli {
     if(m_value_function_map_mode == "in") {
       for(auto &fringe : general.fringe_values) {
         std::ostringstream oss;
-        fringe->rete_action.output_name(oss, -1);
+        fringe->rete_action.lock()->output_name(oss, -1);
         if(m_value_function_map.find(oss.str()) != m_value_function_map.end())
           return fringe;
       }
@@ -981,7 +989,7 @@ namespace Carli {
     }
 
     if(m_value_function_map_mode == "out") {
-      chosen->rete_action.output_name(m_value_function_out, -1);
+      chosen->rete_action.lock()->output_name(m_value_function_out, -1);
       m_value_function_out << std::endl;
     }
 

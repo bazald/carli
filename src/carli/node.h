@@ -34,7 +34,7 @@ namespace Carli {
     Node & operator=(const Node &) = delete;
 
   public:
-    Node(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_)
+    Node(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_)
      : agent(agent_),
      rete_action(rete_action_),
      get_action(get_action_),
@@ -54,7 +54,7 @@ namespace Carli {
     Node_Fringe_Ptr create_fringe(Agent &agent, Node &leaf);
 
     Agent &agent;
-    Rete::Rete_Action &rete_action;
+    std::weak_ptr<Rete::Rete_Action> rete_action;
     std::function<Action_Ptr_C (const Rete::WME_Token &)> get_action;
     tracked_ptr<Q_Value> q_value;
     bool delete_q_value = true;
@@ -65,11 +65,11 @@ namespace Carli {
     Node_Split & operator=(const Node_Split &) = delete;
 
   public:
-    Node_Split(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_, const bool &terminal_);
+    Node_Split(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_, const bool &terminal_);
     ~Node_Split();
 
     Node_Split * clone() const override {
-      return new Node_Split(agent, rete_action, get_action, q_value->clone(), terminal);
+      return new Node_Split(agent, rete_action.lock(), get_action, q_value->clone(), terminal);
     }
     
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
@@ -84,12 +84,12 @@ namespace Carli {
     Node_Unsplit & operator=(const Node_Unsplit &) = delete;
 
   public:
-    Node_Unsplit(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_);
-    Node_Unsplit(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_);
+    Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_);
+    Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_);
     ~Node_Unsplit();
 
     Node_Unsplit * clone() const override {
-      return new Node_Unsplit(agent, rete_action, get_action, q_value->clone());
+      return new Node_Unsplit(agent, rete_action.lock(), get_action, q_value->clone());
     }
     
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
@@ -104,13 +104,13 @@ namespace Carli {
     Node_Fringe & operator=(const Node_Fringe &) = delete;
     
   public:
-    Node_Fringe(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
+    Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
      : Node(agent_, rete_action_, get_action_, new Q_Value(0.0, Q_Value::Type::FRINGE, depth_, feature_))
     {
     }
 
     Node_Fringe * clone() const override {
-      return new Node_Fringe(agent, rete_action, get_action, q_value->clone());
+      return new Node_Fringe(agent, rete_action.lock(), get_action, q_value->clone());
     }
     
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
@@ -118,7 +118,7 @@ namespace Carli {
     void action(Agent &agent, const Rete::WME_Token &token) override;
 
   protected:
-    Node_Fringe(Agent &agent_, Rete::Rete_Action &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_)
+    Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_)
       : Node(agent_, rete_action_, get_action_, q_value_)
     {
     }

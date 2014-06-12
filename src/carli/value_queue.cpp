@@ -25,7 +25,7 @@ namespace Carli {
 
       m_mean.uncontribute(m_value_list->get()->value);
       
-      Value_List::List * head = m_value_list;
+      tracked_ptr<Value_List::List> head = m_value_list;
 
       head->erase_from(m_value_list);
       head->destroy(head);

@@ -42,7 +42,7 @@ public:
   /** Delete the pointer and zero out the pointer. **/
   void delete_and_zero();
   /** Zero out the pointer without deleting it. **/
-  void zero();
+  void zero(const bool &deleteable = true);
 
   void swap(tracked_ptr<T, Deleter> &rhs) {
     tracked_ptr<T, Deleter> temp(rhs);
@@ -98,11 +98,11 @@ class UTILITY_LINKAGE pointer_tracker {
 
 #ifdef NDEBUG
   inline static void set_pointer(const void *, const void *) {}
-  inline static void clear_pointer(const void *, const void *) {}
+  inline static void clear_pointer(const void *, const void *, const bool & = true) {}
   inline static size_t count(const void *) {return 0;}
 #else
   static void set_pointer(const void * to, const void * from);
-  static void clear_pointer(const void * to, const void * from);
+  static void clear_pointer(const void * to, const void * from, const bool &deleteable = true);
   static size_t count(const void * to);
   static void print(const void * to);
 #endif
@@ -131,12 +131,7 @@ tracked_ptr<T, Deleter> & tracked_ptr<T, Deleter>::operator=(const tracked_ptr<T
 #endif
   {
     pointer_tracker::clear_pointer(ptr, this);
-#ifndef NDEBUG
-    if(ptr && pointer_tracker::count(ptr) == 0) {
-      pointer_tracker::print(ptr);
-      assert(!ptr || pointer_tracker::count(ptr) != 0);
-    }
-#endif
+    assert(!ptr || pointer_tracker::count(ptr) != 0);
     ptr = rhs.ptr;
     pointer_tracker::set_pointer(ptr, this);
   }
@@ -152,25 +147,25 @@ void tracked_ptr<T, Deleter>::delete_and_zero() {
   {
 #ifndef NDEBUG
     if(pointer_tracker::count(ptr) != 1) {
-      pointer_tracker::clear_pointer(ptr, this);
+      pointer_tracker::clear_pointer(ptr, this, true);
       pointer_tracker::print(ptr);
       assert(pointer_tracker::count(ptr) == 1);
     }
 #endif
     deleter_type()(ptr);
-    pointer_tracker::clear_pointer(ptr, this);
+    pointer_tracker::clear_pointer(ptr, this, true);
     ptr = nullptr;
   }
 }
 
 template <typename T, typename Deleter>
-void tracked_ptr<T, Deleter>::zero() {
+void tracked_ptr<T, Deleter>::zero(const bool &deleteable) {
 #ifndef NDEBUG
   if(ptr)
 #endif
   {
-    pointer_tracker::clear_pointer(ptr, this);
-    assert(pointer_tracker::count(ptr) != 0);
+    pointer_tracker::clear_pointer(ptr, this, deleteable);
+    assert(!deleteable || pointer_tracker::count(ptr) != 0);
     ptr = nullptr;
   }
 }

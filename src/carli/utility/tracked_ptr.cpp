@@ -37,17 +37,24 @@ class UTILITY_LINKAGE pointer_tracker_impl {
     }
   }
 
-  void clear_pointer(const void * to, const void * from) {
+  void clear_pointer(const void * to, const void * from, const bool &
+#ifndef NDEBUG
+                                                                     deleteable
+#endif
+                                                                               ) {
     if(to) {
       if(++g_tracked_ptr_count == g_tracked_ptr_break)
         assert(g_tracked_ptr_count != g_tracked_ptr_break);
       auto found_to = address_to_pointer.find(to);
-      assert(found_to != address_to_pointer.end());
-      auto found_from = found_to->second.find(from);
-      assert(found_from != found_to->second.end());
-      found_to->second.erase(found_from);
-      if(found_to->second.empty())
-        address_to_pointer.erase(found_to);
+      if(found_to != address_to_pointer.end()) {
+        auto found_from = found_to->second.find(from);
+        assert(found_from != found_to->second.end());
+        found_to->second.erase(found_from);
+        if(found_to->second.empty())
+          address_to_pointer.erase(found_to);
+      }
+      else
+        assert(!deleteable || found_to != address_to_pointer.end());
     }
   }
 
@@ -75,8 +82,8 @@ void pointer_tracker::set_pointer(const void * to, const void * from) {
   return pointer_tracker_impl::get().set_pointer(to, from);
 }
 
-void pointer_tracker::clear_pointer(const void * to, const void * from) {
-  return pointer_tracker_impl::get().clear_pointer(to, from);
+void pointer_tracker::clear_pointer(const void * to, const void * from, const bool &deleteable) {
+  return pointer_tracker_impl::get().clear_pointer(to, from, deleteable);
 }
 
 size_t pointer_tracker::count(const void * to) {

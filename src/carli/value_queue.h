@@ -47,8 +47,8 @@ namespace Carli {
     }
 
   private:
-    Value_List::List * m_value_list = nullptr;
-    Value_List::List * m_value_list_tail = nullptr;
+    tracked_ptr<Value_List::List> m_value_list;
+    tracked_ptr<Value_List::List> m_value_list_tail;
     Mean m_mean;
     size_t m_size = 0lu;
   };

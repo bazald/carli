@@ -1,7 +1,8 @@
 #ifndef ZENI_LINKED_LIST_H
 #define ZENI_LINKED_LIST_H
 
-#include <cassert>
+#include "tracked_ptr.h"
+
 #include <cstddef>
 #include <algorithm>
 #include <functional>
@@ -25,12 +26,12 @@ namespace Zeni {
 
   public:
     typedef TYPE value_type;
-    typedef value_type * value_pointer_type;
+    typedef tracked_ptr<value_type> value_pointer_type;
     typedef value_type & value_reference_type;
     typedef const Linked_List<TYPE> const_list_value_type;
     typedef Linked_List<TYPE> list_value_type;
-    typedef const_list_value_type * const_list_pointer_type;
-    typedef list_value_type * list_pointer_type;
+    typedef tracked_ptr<const_list_value_type> const_list_pointer_type;
+    typedef tracked_ptr<list_value_type> list_pointer_type;
     typedef std::less<value_type> compare_default;
 
     class iterator : public std::iterator<std::bidirectional_iterator_tag, value_type> {
@@ -123,12 +124,12 @@ namespace Zeni {
 
     class iterator_const : public std::iterator<std::bidirectional_iterator_tag, value_type> {
     public:
-      typedef TYPE * pointer;
+      typedef tracked_ptr<value_type> pointer;
       typedef TYPE & reference;
 
-      typedef const value_type * value_pointer_type;
+      typedef tracked_ptr<const value_type> value_pointer_type;
       typedef const value_type & value_reference_type;
-      typedef const list_value_type * list_pointer_type;
+      typedef tracked_ptr<list_value_type> list_pointer_type;
 
       iterator_const(const ptrdiff_t &m_offset_ = 0lu)
         : m_offset(m_offset_),
@@ -225,7 +226,7 @@ namespace Zeni {
       list_pointer_type m_pointer;
     };
 
-    Linked_List(value_pointer_type value)
+    Linked_List(value_type * value)
       : m_offset(reinterpret_cast<char *>(this) - reinterpret_cast<char *>(value)),
       m_prev(nullptr),
       m_next(nullptr)
@@ -234,7 +235,7 @@ namespace Zeni {
     }
 
     value_pointer_type get() const {
-      return reinterpret_cast<value_pointer_type>((reinterpret_cast<char *>(const_cast<Zeni::Linked_List<value_type> *>(this)) - m_offset));
+      return reinterpret_cast<value_type *>((reinterpret_cast<char *>(const_cast<Zeni::Linked_List<value_type> *>(this)) - m_offset));
     }
     const value_reference_type operator*() const {
       return *get();
@@ -252,10 +253,10 @@ namespace Zeni {
     ptrdiff_t offset() const {
       return m_offset;
     }
-    Linked_List * prev() const {
+    list_pointer_type prev() const {
       return m_prev;
     }
-    Linked_List * next() const {
+    list_pointer_type next() const {
       return m_next;
     }
 
@@ -415,20 +416,32 @@ namespace Zeni {
 
     /// erase this entry from this list
     void erase_from(list_pointer_type &ptr) {
-      if(ptr == this)
+      if(ptr == this) {
+#ifndef NDEBUG
+        ptr.zero(false);
+#endif
         ptr = m_next;
-
-      if(m_prev)
+      }
+      
+      if(m_prev) {
+#ifndef NDEBUG
+        m_prev->m_next.zero(false);
+#endif
         m_prev->m_next = m_next;
-      if(m_next)
+      }
+      if(m_next) {
+#ifndef NDEBUG
+        m_next->m_prev.zero(false);
+#endif
         m_next->m_prev = m_prev;
+      }
 
       erase_hard();
     }
 
     void erase_hard() {
-      m_prev = nullptr;
-      m_next = nullptr;
+      m_prev.zero(false);
+      m_next.zero(false);
     }
 
     /// delete every entry in the list between begin() and end(), inclusive
@@ -442,7 +455,7 @@ namespace Zeni {
         while(ptr) {
           auto tptr = ptr->get();
           ptr = ptr->m_next;
-          delete tptr;
+          tptr.delete_and_zero();
         }
         ptr_ = nullptr;
       }

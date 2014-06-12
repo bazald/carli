@@ -232,7 +232,7 @@ namespace Carli {
     const bool m_fringe = get_Option_Ranged<bool>(Options::get_global(), "fringe");
     const double m_fringe_learning_scale = get_Option_Ranged<double>(Options::get_global(), "fringe-learning-scale");
 
-    Q_Value::List * m_eligible = nullptr;
+    tracked_ptr<Q_Value::List> m_eligible;
 
   #ifndef NDEBUG
     void increment_badness() {++m_badness; assert(m_badness);}
@@ -246,6 +246,7 @@ namespace Carli {
     mutable std::ofstream m_value_function_out;
 
 #ifndef NO_COLLAPSE_DETECTION_HACK
+  protected:
     size_t m_positive_rewards_in_a_row = 0;
     bool m_experienced_n_positive_rewards_in_a_row = false;
 #endif
