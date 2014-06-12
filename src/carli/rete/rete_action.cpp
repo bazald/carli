@@ -12,15 +12,17 @@ namespace Rete {
   }
 
   Rete_Action::~Rete_Action() {
-    for(auto &wme_token : input_tokens)
-      retraction(*this, *wme_token);
+    if(!excised) {
+      for(auto &wme_token : input_tokens)
+        retraction(*this, *wme_token);
+    }
   }
 
   void Rete_Action::destroy(Filters &filters, const Rete_Node_Ptr &
 #ifndef NDEBUG
-                                                                    output
+                                                                   output
 #endif
-                                                                          ) {
+                                                                         ) {
     assert(!output);
 
     if(!excised) {
@@ -29,6 +31,9 @@ namespace Rete {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr);
       //std::cerr << std::endl;
+
+      for(auto &wme_token : input_tokens)
+        retraction(*this, *wme_token);
 
       input->destroy(filters, shared());
     }

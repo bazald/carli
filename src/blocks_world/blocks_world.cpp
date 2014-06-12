@@ -115,7 +115,7 @@ namespace Blocks_World {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_dest_name, filter_blink);
       
       auto root_action = make_standard_action(join_blink);
-      root_action_data = std::make_shared<Node_Unsplit>(*this, *root_action, get_action, 1, nullptr);
+      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, get_action, 1, nullptr);
       root_action->data = root_action_data;
     }
 
