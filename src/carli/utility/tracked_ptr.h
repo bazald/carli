@@ -21,12 +21,18 @@
 
 #include "linkage.h"
 
-template <typename T, typename Deleter = std::default_delete<T>>
+template <typename T>
+struct null_delete {
+  void operator()(const T * const &) {}
+};
+
+template <typename T, typename Deleter = std::default_delete<T>, bool Deleteable = true>
 class tracked_ptr {
 public:
   typedef T element_type;
   typedef Deleter deleter_type;
   typedef element_type * pointer;
+  enum {deleteable = Deleteable};
 
   tracked_ptr(const pointer ptr_ = nullptr);
 
@@ -36,15 +42,15 @@ public:
 #endif
   }
 
-  tracked_ptr(const tracked_ptr<T, Deleter> &rhs);
-  tracked_ptr<T, Deleter> & operator=(const tracked_ptr<T, Deleter> &rhs);
+  tracked_ptr(const tracked_ptr<T, Deleter, Deleteable> &rhs);
+  tracked_ptr<T, Deleter, Deleteable> & operator=(const tracked_ptr<T, Deleter, Deleteable> &rhs);
 
   /** Delete the pointer and zero out the pointer. **/
   void delete_and_zero();
   /** Zero out the pointer without deleting it. **/
-  void zero(const bool &deleteable = true);
+  void zero();
 
-  void swap(tracked_ptr<T, Deleter> &rhs) {
+  void swap(tracked_ptr<T, Deleter, Deleteable> &rhs) {
     tracked_ptr<T, Deleter> temp(rhs);
     rhs = *this;
     *this = temp;
@@ -79,30 +85,32 @@ private:
   pointer ptr;
 };
 
-template <typename T, typename Deleter>
-inline bool operator==(const T * const lhs, const tracked_ptr<T, Deleter> &rhs) {return lhs == rhs.get();}
-template <typename T, typename Deleter>
-inline bool operator!=(const T * const lhs, const tracked_ptr<T, Deleter> &rhs) {return lhs != rhs.get();}
-template <typename T, typename Deleter>
-inline bool operator<(const T * const lhs, const tracked_ptr<T, Deleter> &rhs) {return lhs < rhs.get();}
-template <typename T, typename Deleter>
-inline bool operator<=(const T * const lhs, const tracked_ptr<T, Deleter> &rhs) {return lhs <= rhs.get();}
-template <typename T, typename Deleter>
-inline bool operator>(const T * const lhs, const tracked_ptr<T, Deleter> &rhs) {return lhs > rhs.get();}
-template <typename T, typename Deleter>
-inline bool operator>=(const T * const lhs, const tracked_ptr<T, Deleter> &rhs) {return lhs >= rhs.get();}
+template <typename T, typename Deleter, bool Deleteable>
+inline bool operator==(const T * const lhs, const tracked_ptr<T, Deleter, Deleteable> &rhs) {return lhs == rhs.get();}
+template <typename T, typename Deleter, bool Deleteable>
+inline bool operator!=(const T * const lhs, const tracked_ptr<T, Deleter, Deleteable> &rhs) {return lhs != rhs.get();}
+template <typename T, typename Deleter, bool Deleteable>
+inline bool operator<(const T * const lhs, const tracked_ptr<T, Deleter, Deleteable> &rhs) {return lhs < rhs.get();}
+template <typename T, typename Deleter, bool Deleteable>
+inline bool operator<=(const T * const lhs, const tracked_ptr<T, Deleter, Deleteable> &rhs) {return lhs <= rhs.get();}
+template <typename T, typename Deleter, bool Deleteable>
+inline bool operator>(const T * const lhs, const tracked_ptr<T, Deleter, Deleteable> &rhs) {return lhs > rhs.get();}
+template <typename T, typename Deleter, bool Deleteable>
+inline bool operator>=(const T * const lhs, const tracked_ptr<T, Deleter, Deleteable> &rhs) {return lhs >= rhs.get();}
 
 class UTILITY_LINKAGE pointer_tracker {
-  template <typename T, typename Deleter>
+  template <typename T, typename Deleter, bool Deleteable>
   friend class tracked_ptr;
 
 #ifdef NDEBUG
   inline static void set_pointer(const void *, const void *) {}
   inline static void clear_pointer(const void *, const void *, const bool & = true) {}
+public:
   inline static size_t count(const void *) {return 0;}
 #else
   static void set_pointer(const void * to, const void * from);
-  static void clear_pointer(const void * to, const void * from, const bool &deleteable = true);
+  static void clear_pointer(const void * to, const void * from, const bool &deleteable);
+public:
   static size_t count(const void * to);
   static void print(const void * to);
 #endif
@@ -110,28 +118,28 @@ class UTILITY_LINKAGE pointer_tracker {
   void break_on(const size_t &count);
 };
 
-template <typename T, typename Deleter>
-tracked_ptr<T, Deleter>::tracked_ptr(const pointer ptr_)
+template <typename T, typename Deleter, bool Deleteable>
+tracked_ptr<T, Deleter, Deleteable>::tracked_ptr(const pointer ptr_)
   : ptr(ptr_)
 {
   pointer_tracker::set_pointer(ptr, this);
 }
 
-template <typename T, typename Deleter>
-tracked_ptr<T, Deleter>::tracked_ptr(const tracked_ptr<T, Deleter> &rhs)
+template <typename T, typename Deleter, bool Deleteable>
+tracked_ptr<T, Deleter, Deleteable>::tracked_ptr(const tracked_ptr<T, Deleter, Deleteable> &rhs)
   : ptr(rhs.ptr)
 {
   pointer_tracker::set_pointer(ptr, this);
 }
 
-template <typename T, typename Deleter>
-tracked_ptr<T, Deleter> & tracked_ptr<T, Deleter>::operator=(const tracked_ptr<T, Deleter> &rhs) {
+template <typename T, typename Deleter, bool Deleteable>
+tracked_ptr<T, Deleter, Deleteable> & tracked_ptr<T, Deleter, Deleteable>::operator=(const tracked_ptr<T, Deleter, Deleteable> &rhs) {
 #ifndef NDEBUG
   if(ptr != rhs.ptr)
 #endif
   {
-    pointer_tracker::clear_pointer(ptr, this);
-    assert(!ptr || pointer_tracker::count(ptr) != 0);
+    pointer_tracker::clear_pointer(ptr, this, deleteable);
+    assert(!deleteable || !ptr || pointer_tracker::count(ptr) != 0);
     ptr = rhs.ptr;
     pointer_tracker::set_pointer(ptr, this);
   }
@@ -139,27 +147,28 @@ tracked_ptr<T, Deleter> & tracked_ptr<T, Deleter>::operator=(const tracked_ptr<T
   return *this;
 }
 
-template <typename T, typename Deleter>
-void tracked_ptr<T, Deleter>::delete_and_zero() {
+template <typename T, typename Deleter, bool Deleteable>
+void tracked_ptr<T, Deleter, Deleteable>::delete_and_zero() {
 #ifndef NDEBUG
+  assert(deleteable);
   if(ptr)
 #endif
   {
 #ifndef NDEBUG
     if(pointer_tracker::count(ptr) != 1) {
-      pointer_tracker::clear_pointer(ptr, this, true);
+      pointer_tracker::clear_pointer(ptr, this, deleteable);
       pointer_tracker::print(ptr);
       assert(pointer_tracker::count(ptr) == 1);
     }
 #endif
     deleter_type()(ptr);
-    pointer_tracker::clear_pointer(ptr, this, true);
+    pointer_tracker::clear_pointer(ptr, this, deleteable);
     ptr = nullptr;
   }
 }
 
-template <typename T, typename Deleter>
-void tracked_ptr<T, Deleter>::zero(const bool &deleteable) {
+template <typename T, typename Deleter, bool Deleteable>
+void tracked_ptr<T, Deleter, Deleteable>::zero() {
 #ifndef NDEBUG
   if(ptr)
 #endif
@@ -170,7 +179,7 @@ void tracked_ptr<T, Deleter>::zero(const bool &deleteable) {
   }
 }
 
-template <typename T, typename Deleter>
+template <typename T, typename Deleter, bool Deleteable>
 std::ostream & operator<<(std::ostream &os, const tracked_ptr<T, Deleter> &ptr) {
   return os << ptr.get();
 }

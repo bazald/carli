@@ -658,10 +658,8 @@ namespace Carli {
   //       const double credit_accum = credit + (q.eligibility < 0.0 ? 0.0 : q.eligibility);
 
       if(credit >= q->eligibility) {
-        if(q->eligibility < 0.0) {
-          q->eligible.erase_hard();
-          q->eligible.insert_before(this->m_eligible);
-        }
+        if(q->eligibility < 0.0)
+          q->eligible.insert_before(m_eligible);
 
         q->eligibility_init = true;
         q->eligibility = credit;
@@ -677,9 +675,9 @@ namespace Carli {
 #else
     const bool weight_assignment_all = true;
 #endif
-    for(tracked_ptr<Q_Value::List> q_ptr = m_eligible; q_ptr; ) {
+    for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; ) {
       Q_Value &q = **q_ptr;
-      q_ptr = q.eligible.next();
+      const auto next = q_ptr->next();
 
       const double ldelta = weight_assignment_all && q.type != Q_Value::Type::FRINGE ? delta : target_value - q.value;
       const double edelta = q.eligibility * ldelta;
@@ -735,11 +733,13 @@ namespace Carli {
 
       assert(q.eligibility >= 0.0);
       q.eligibility_init = false;
-      q.eligibility *= this->m_eligibility_trace_decay_rate;
+      q.eligibility *= m_eligibility_trace_decay_rate;
       if(q.eligibility < m_eligibility_trace_decay_threshold) {
-        q.eligible.erase_from(this->m_eligible);
+        q.eligible.erase_from(m_eligible);
         q.eligibility = -1.0;
       }
+
+      q_ptr = next;
     }
 
 #ifdef DEBUG_OUTPUT
@@ -765,12 +765,14 @@ namespace Carli {
   }
 
   void Agent::clear_eligibility_trace() {
-    for(Q_Value &q : *m_eligible) {
-      q.eligibility_init = false;
-      q.eligibility = -1.0;
+    for(auto q = m_eligible->begin(), next = q; q != m_eligible->end(); q = next) {
+      ++next;
+      q->eligible.erase_hard();
+      q->eligibility_init = false;
+      q->eligibility = -1.0;
     }
 
-    m_eligible = nullptr;
+    m_eligible.zero();
   }
 
   //#ifdef ENABLE_WEIGHT

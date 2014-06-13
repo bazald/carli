@@ -232,7 +232,7 @@ namespace Carli {
     const bool m_fringe = get_Option_Ranged<bool>(Options::get_global(), "fringe");
     const double m_fringe_learning_scale = get_Option_Ranged<double>(Options::get_global(), "fringe-learning-scale");
 
-    tracked_ptr<Q_Value::List> m_eligible;
+    Q_Value::List::list_pointer_type m_eligible;
 
   #ifndef NDEBUG
     void increment_badness() {++m_badness; assert(m_badness);}

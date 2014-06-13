@@ -26,12 +26,12 @@ namespace Zeni {
 
   public:
     typedef TYPE value_type;
-    typedef tracked_ptr<value_type> value_pointer_type;
+    typedef tracked_ptr<value_type, null_delete<value_type>, false> value_pointer_type;
     typedef value_type & value_reference_type;
     typedef const Linked_List<TYPE> const_list_value_type;
     typedef Linked_List<TYPE> list_value_type;
-    typedef tracked_ptr<const_list_value_type> const_list_pointer_type;
-    typedef tracked_ptr<list_value_type> list_pointer_type;
+    typedef tracked_ptr<const_list_value_type, null_delete<const_list_value_type>, false> const_list_pointer_type;
+    typedef tracked_ptr<list_value_type, null_delete<const_list_value_type>, false> list_pointer_type;
     typedef std::less<value_type> compare_default;
 
     class iterator : public std::iterator<std::bidirectional_iterator_tag, value_type> {
@@ -234,6 +234,13 @@ namespace Zeni {
 //      assert(m_offset < sizeof(value_type));
     }
 
+    ~Linked_List() {
+#ifndef NDEBUG
+      const auto count = pointer_tracker::count(this);
+      assert(!count);
+#endif
+    }
+
     value_pointer_type get() const {
       return reinterpret_cast<value_type *>((reinterpret_cast<char *>(const_cast<Zeni::Linked_List<value_type> *>(this)) - m_offset));
     }
@@ -416,32 +423,20 @@ namespace Zeni {
 
     /// erase this entry from this list
     void erase_from(list_pointer_type &ptr) {
-      if(ptr == this) {
-#ifndef NDEBUG
-        ptr.zero(false);
-#endif
+      if(ptr == this)
         ptr = m_next;
-      }
       
-      if(m_prev) {
-#ifndef NDEBUG
-        m_prev->m_next.zero(false);
-#endif
+      if(m_prev)
         m_prev->m_next = m_next;
-      }
-      if(m_next) {
-#ifndef NDEBUG
-        m_next->m_prev.zero(false);
-#endif
+      if(m_next)
         m_next->m_prev = m_prev;
-      }
 
       erase_hard();
     }
 
     void erase_hard() {
-      m_prev.zero(false);
-      m_next.zero(false);
+      m_prev.zero();
+      m_next.zero();
     }
 
     /// delete every entry in the list between begin() and end(), inclusive
