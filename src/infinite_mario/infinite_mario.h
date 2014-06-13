@@ -57,6 +57,13 @@ namespace Mario {
     virtual int64_t compare_axis(const Feature_Flag &rhs) const = 0;
     virtual int64_t compare_axis(const Feature_Numeric &rhs) const = 0;
     virtual int64_t compare_axis(const Feature_Button &rhs) const = 0;
+
+    enum {ACTION_INDEX = 21};
+    Rete::WME_Bindings bindings() const override {
+      Rete::WME_Bindings bindings;
+      bindings.insert(std::make_pair(Rete::WME_Token_Index(ACTION_INDEX, 2), Rete::WME_Token_Index(ACTION_INDEX, 2)));
+      return bindings;
+    }
   };
   
   class Feature_Position : public Carli::Feature_Ranged<Feature> {
@@ -280,6 +287,7 @@ namespace Mario {
     Feature_Button(const Axis &axis_, const int64_t &flag)
      : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), flag)
     {
+      static_assert(ACTION_INDEX == OUT_JOIN, "ACTION_INDEX is misspecified in Mario::Feature");
     }
 
     Feature_Button * clone() const {
@@ -298,13 +306,6 @@ namespace Mario {
       return axis.first - rhs.axis.first;
     }
     
-    Rete::WME_Bindings bindings() const override {
-      const auto binding = axis.first < OUT_JOIN ? IN_JOIN : OUT_JOIN;
-      Rete::WME_Bindings bindings;
-      bindings.insert(std::make_pair(Rete::WME_Token_Index(binding, 2), Rete::WME_Token_Index(binding, 2)));
-      return bindings;
-    }
-
     void print(ostream &os) const {
       switch(axis.first) {
       case IN_DPAD:

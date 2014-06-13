@@ -71,6 +71,11 @@ namespace Carli {
     new_leaf->data = new_leaf_data;
     new_leaf_data->fringe_values.swap(node_unsplit_fringe);
 
+//#ifndef NDEBUG
+//    for(const auto &fringe : new_leaf_data->fringe_values)
+//      assert(!fringe->rete_action.expired());
+//#endif
+
     return new_leaf_data;
   }
 
@@ -91,6 +96,7 @@ namespace Carli {
       auto new_leaf = agent.make_standard_action(ancestor);
       auto new_leaf_data = std::make_shared<Node_Fringe>(agent, new_leaf, get_action, 2, q_value->feature ? q_value->feature->clone() : nullptr);
       new_leaf->data = new_leaf_data;
+
       return new_leaf_data;
     }
     else {

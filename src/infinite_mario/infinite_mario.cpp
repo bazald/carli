@@ -320,7 +320,7 @@ namespace Mario {
 
     for(int i = 0; i != 2; ++i) {
       auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->rete_action.lock()->parent_left());
+      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->rete_action.lock()->parent_left()->parent_left());
       make_standard_fringe(predicate, node_unsplit, feature); //, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
     }
   }
@@ -415,7 +415,7 @@ namespace Mario {
                            /*Feature_Flag::PIT_RIGHT,*/ Feature_Flag::OBSTACLE_RIGHT}) {
       for(const auto value : {false, true}) {
         auto feature = new Feature_Flag(flag, value);
-        auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left());
+        auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), join_last);
         make_standard_fringe(predicate, root_action_data, feature);
       }
     }
@@ -432,14 +432,14 @@ namespace Mario {
 
     for(const auto dpad : {BUTTON_NONE, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_DOWN}) {
       auto feature = new Feature_Button(Feature_Button::OUT_DPAD, dpad);
-      auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left());
+      auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), join_last);
       make_standard_fringe(predicate, root_action_data, feature);
     }
 
     for(const auto button : {Feature_Button::OUT_JUMP, Feature_Button::OUT_SPEED}) {
       for(const auto down : {false, true}) {
         auto feature = new Feature_Button(button, down);
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(button, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left());
+        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(button, 2), feature->symbol_constant(), join_last);
         make_standard_fringe(predicate, root_action_data, feature);
       }
     }

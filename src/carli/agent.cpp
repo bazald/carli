@@ -4,6 +4,18 @@
 
 namespace Carli {
 
+  //struct Expiration_Detector {
+  //  void operator()(Rete::Rete_Node &rete_node) {
+  //    if(!rete_node.data)
+  //      return;
+  //    const Node_Unsplit * const unsplit_node = dynamic_cast<Node_Unsplit *>(rete_node.data.get());
+  //    if(!unsplit_node)
+  //      return;
+  //    for(const auto &fringe : unsplit_node->fringe_values)
+  //      assert(!fringe->rete_action.expired());
+  //  }
+  //};
+
   struct Fringe_Collector {
     std::unordered_set<Rete::Rete_Action_Ptr> excise;
     std::map<tracked_ptr<Feature>,
@@ -206,6 +218,10 @@ namespace Carli {
     auto split = debuggable_pointer_cast<Node_Split>(rete_action.data);
     assert(split);
     
+//#ifndef NDEBUG
+//    rete_action.visit_preorder(Expiration_Detector(), false);
+//#endif
+
     auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector(split), true);
     
     if(fringe_collector.features.empty())
@@ -244,6 +260,8 @@ namespace Carli {
       }
     }
 
+    fringe_collector.features.clear();
+
     /// Make new unsplit node
     const auto unsplit = split->create_unsplit(*this, m_wme_blink, node_unsplit_fringe);
     
@@ -257,13 +275,14 @@ namespace Carli {
 
     /// Preserve some learning
     unsplit->q_value->value = split->q_value->value;
-    
+
 #ifdef DEBUG_OUTPUT
     std::cerr << "Excising " << fringe_collector.excise.size() << " actions." << std::endl;
 #endif
 
     for(const auto &excise : fringe_collector.excise)
       excise_rule(excise);
+    fringe_collector.excise.clear();
     
 #ifdef DEBUG_OUTPUT
     std::cerr << "Rete size after collapse: " << rete_size() << std::endl;
@@ -271,6 +290,10 @@ namespace Carli {
     fout.open("post-collapse.dot");
     rete_print(fout);
 #endif
+
+//#ifndef NDEBUG
+//    unsplit->rete_action.lock()->visit_preorder(Expiration_Detector(), false);
+//#endif
 
     return true;
   }
