@@ -305,7 +305,7 @@ namespace Mario {
     int64_t compare_axis(const Feature_Button &rhs) const {
       return axis.first - rhs.axis.first;
     }
-    
+
     void print(ostream &os) const {
       switch(axis.first) {
       case IN_DPAD:

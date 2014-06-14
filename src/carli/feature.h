@@ -195,9 +195,13 @@ namespace Carli {
     }
 
     bool matches(const Rete::WME_Token &token) const override {
-      const Rete::Symbol &symbol = debuggable_cast<const Rete::Symbol &>(*token[wme_token_index()]);
-      const Rete::Symbol_Constant_Float &symbol_cf = debuggable_cast<const Rete::Symbol_Constant_Float &>(symbol);
-      return bound_lower <= symbol_cf.value && symbol_cf.value < bound_upper;
+      const Rete::Symbol * const symbol = debuggable_cast<const Rete::Symbol * const>(token[wme_token_index()].get());
+      if(const auto symbol_cf = dynamic_cast<const Rete::Symbol_Constant_Float *>(symbol))
+        return bound_lower <= symbol_cf->value && symbol_cf->value < bound_upper;
+      else {
+        const auto &symbol_ci = debuggable_cast<const Rete::Symbol_Constant_Int &>(*symbol);
+        return bound_lower <= symbol_ci.value && symbol_ci.value < bound_upper;
+      }
     }
 
     std::vector<Carli::Feature *> refined() const override {

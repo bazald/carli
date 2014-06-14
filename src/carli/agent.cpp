@@ -4,11 +4,6 @@
 
 namespace Carli {
 
-#ifdef DOT_OUTPUT
-  static bool g_expanding = false;
-  static size_t g_expcon_count = 0u;
-#endif
-
   //struct Expiration_Detector {
   //  void operator()(Rete::Rete_Node &rete_node) {
   //    if(!rete_node.data)
@@ -97,18 +92,16 @@ namespace Carli {
   //  std::cerr << "Refining : " << chosen << std::endl;
   //#endif
     
-#ifdef DOT_OUTPUT
-    std::cerr << "Rete size before expansion: " << rete_size() << std::endl;
+    if(m_output_dot) {
+      std::cerr << "Rete size before expansion: " << rete_size() << std::endl;
 
-    std::ostringstream fname;
-    g_expcon_count = g_expanding ? g_expcon_count + 1 : 0;
-    g_expanding = true;
-    fname << "pre-expansion-" << g_expcon_count << ".dot";
-    std::ofstream fout(fname.str());
-    rete_print(fout);
-    fout.close();
-    fname.str("");
-#endif
+      std::ostringstream fname;
+      g_output_dot_expcon_count = m_output_dot_expanding ? g_output_dot_expcon_count + 1 : 0;
+      m_output_dot_expanding = true;
+      fname << "pre-expansion-" << g_output_dot_expcon_count << ".dot";
+      std::ofstream fout(fname.str());
+      rete_print(fout);
+    }
 
     expand_fringe(rete_action, token, chosen->q_value->feature.get());
 
@@ -116,13 +109,14 @@ namespace Carli {
 
     excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(rete_action.shared()));
     
-#ifdef DOT_OUTPUT
-    std::cerr << "Rete size after expansion: " << rete_size() << std::endl;
-    
-    fname << "post-expansion-" << g_expcon_count << ".dot";
-    fout.open(fname.str());
-    rete_print(fout);
-#endif
+    if(m_output_dot) {
+      std::cerr << "Rete size after expansion: " << rete_size() << std::endl;
+
+      std::ostringstream fname;
+      fname << "post-expansion-" << g_output_dot_expcon_count << ".dot";
+      std::ofstream fout(fname.str());
+      rete_print(fout);
+    }
 
     return true;
   }
@@ -240,18 +234,17 @@ namespace Carli {
     if(fringe_collector.features.empty())
       return false;
     
-#ifdef DOT_OUTPUT
-    std::cerr << "Rete size before collapse: " << rete_size() << std::endl;
+    if(m_output_dot) {
+      std::cerr << "Rete size before collapse: " << rete_size() << std::endl;
     
-    std::ostringstream fname;
-    g_expcon_count = g_expanding ? 0 : g_expcon_count + 1;
-    g_expanding = false;
-    fname << "pre-collapse-" << g_expcon_count << ".dot";
-    std::ofstream fout(fname.str());
-    rete_print(fout);
-    fout.close();
-    fname.str("");
-#endif
+      std::ostringstream fname;
+      g_output_dot_expcon_count = m_output_dot_expanding ? 0 : g_output_dot_expcon_count + 1;
+      m_output_dot_expanding = false;
+      fname << "pre-collapse-" << g_output_dot_expcon_count << ".dot";
+      std::ofstream fout(fname.str());
+      rete_print(fout);
+    }
+
 #ifdef DEBUG_OUTPUT
     std::cerr << "Features: ";
     for(const auto &feature_axis : fringe_collector.features)
@@ -303,13 +296,14 @@ namespace Carli {
       excise_rule(excise);
     fringe_collector.excise.clear();
     
-#ifdef DOT_OUTPUT
-    std::cerr << "Rete size after collapse: " << rete_size() << std::endl;
+    if(m_output_dot) {
+      std::cerr << "Rete size after collapse: " << rete_size() << std::endl;
     
-    fname << "post-collapse-" << g_expcon_count << ".dot";
-    fout.open(fname.str());
-    rete_print(fout);
-#endif
+      std::ostringstream fname;
+      fname << "post-collapse-" << g_output_dot_expcon_count << ".dot";
+      std::ofstream fout(fname.str());
+      rete_print(fout);
+    }
 
 //#ifndef NDEBUG
 //    unsplit->rete_action.lock()->visit_preorder(Expiration_Detector(), false);
@@ -990,9 +984,10 @@ namespace Carli {
         continue;
       ++matches;
 
-      if(fringe->q_value->update_count > m_split_update_count &&
+      if(general.q_value->depth < m_split_min ||
+        (fringe->q_value->update_count > m_split_update_count &&
          fringe->q_value->pseudoepisode_count > m_split_pseudoepisodes &&
-         (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean() : m_mean_cabe).outlier_above(fringe->q_value->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count))
+        (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean() : m_mean_cabe).outlier_above(fringe->q_value->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)))
       {
 //#ifndef NDEBUG
 //        std::cerr << " matches: " << *fringe->q_value->feature << std::endl;

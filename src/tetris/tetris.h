@@ -72,6 +72,12 @@ namespace Tetris {
     virtual int64_t compare_axis(const Gaps &rhs) const = 0;
     virtual int64_t compare_axis(const Clears &rhs) const = 0;
     virtual int64_t compare_axis(const X_Odd &rhs) const = 0;
+
+    Rete::WME_Bindings bindings() const override {
+      Rete::WME_Bindings bindings;
+      bindings.insert(std::make_pair(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 2)));
+      return bindings;
+    }
   };
 
   class Type : public Carli::Feature_Enumerated<Feature> {

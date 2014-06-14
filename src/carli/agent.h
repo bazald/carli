@@ -240,10 +240,14 @@ namespace Carli {
     size_t m_badness = 0u;
   #endif
 
-    std::string m_value_function_map_mode = dynamic_cast<const Option_Itemized &>(Options::get_global()["value-function-map-mode"]).get_value();
-    std::string m_value_function_map_filename = dynamic_cast<const Option_String &>(Options::get_global()["value-function-map-filename"]).get_value();
+    const std::string m_value_function_map_mode = dynamic_cast<const Option_Itemized &>(Options::get_global()["value-function-map-mode"]).get_value();
+    const std::string m_value_function_map_filename = dynamic_cast<const Option_String &>(Options::get_global()["value-function-map-filename"]).get_value();
     std::unordered_set<std::string> m_value_function_map;
     mutable std::ofstream m_value_function_out;
+
+    const bool m_output_dot = get_Option_Ranged<bool>(Options::get_global(), "output-dot");
+    bool m_output_dot_expanding = false;
+    size_t g_output_dot_expcon_count = 0u;
 
 #ifndef NO_COLLAPSE_DETECTION_HACK
   protected:
