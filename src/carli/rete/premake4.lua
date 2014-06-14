@@ -20,7 +20,7 @@ project "rete"
     os.mkdir("obj")
     local f = assert(io.open("../obj/scu_rete.cpp", "w"))
     for i, filename in ipairs(matches) do
-      f:write("#include \"../"..filename.."\"\n")
+      f:write("#include \"../rete/"..filename.."\"\n")
     end
     f:close()
 

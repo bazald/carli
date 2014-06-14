@@ -11,7 +11,7 @@ if [ $RV -ne 0 ]; then
 fi
 
 SEED=$RANDOM
-ENVIRONMENT=tetris_p
+ENVIRONMENT=puddle_world_p
 #HEAPCHECK=normal         $CMD -n 1000   "$@"
 #HEAPPROFILE=$ENVIRONMENT.heap $CMD -n 1000   "$@"
 # CPUPROFILE=$ENVIRONMENT.prof CPUPROFILE_FREQUENCY=100000 \

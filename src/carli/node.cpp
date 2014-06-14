@@ -106,7 +106,7 @@ namespace Carli {
           ancestor_right = ancestor_right->parent_left(); ///< Skip blink node
         }
 
-        const int64_t dend = std::max(2ll, leaf.q_value->depth);
+        const int64_t dend = std::max(int64_t(2), leaf.q_value->depth);
         for(int64_t d = q_value->depth; d != dend; --d) {
           assert(dynamic_cast<Rete::Rete_Predicate *>(ancestor_right.get()) ||
             dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get()));

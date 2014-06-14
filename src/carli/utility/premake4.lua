@@ -11,7 +11,7 @@ project "utility"
     os.mkdir("obj")
     local f = assert(io.open("../obj/scu_utility.cpp", "w"))
     for i, filename in ipairs(matches) do
-      f:write("#include \"../"..filename.."\"\n")
+      f:write("#include \"../utility/"..filename.."\"\n")
     end
     f:close()
 

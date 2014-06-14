@@ -287,7 +287,7 @@ namespace Mario {
     Feature_Button(const Axis &axis_, const int64_t &flag)
      : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), flag)
     {
-      static_assert(ACTION_INDEX == OUT_JOIN, "ACTION_INDEX is misspecified in Mario::Feature");
+      static_assert(int(ACTION_INDEX) == int(OUT_JOIN), "ACTION_INDEX is misspecified in Mario::Feature");
     }
 
     Feature_Button * clone() const {
