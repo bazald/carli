@@ -22,9 +22,8 @@ namespace Rete {
   }
 
   void Rete_Predicate::destroy(Filters &filters, const Rete_Node_Ptr &output) {
-    outputs_disabled -= output->disabled_input(shared());
     erase_output(output);
-    if(outputs.empty() && !outputs_disabled) {
+    if(outputs.empty() && outputs_disabled.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;

@@ -8,9 +8,8 @@ namespace Rete {
   Rete_Existential_Join::Rete_Existential_Join(WME_Bindings bindings_) : bindings(bindings_) {}
 
   void Rete_Existential_Join::destroy(Filters &filters, const Rete_Node_Ptr &output) {
-    outputs_disabled -= output->disabled_input(shared());
     erase_output(output);
-    if(outputs.empty() && !outputs_disabled) {
+    if(outputs.empty() && outputs_disabled.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
@@ -29,8 +28,8 @@ namespace Rete {
 
     if(from == input0 && find_key(input0_tokens, wme_token) == input0_tokens.end()) {
       if(!data.connected1) {
-        data.connected1 = true;
         input1->enable_output(shared());
+        data.connected1 = true;
       }
 
 //      assert(find_key(input0_tokens, wme_token) == input0_tokens.end());
@@ -41,8 +40,8 @@ namespace Rete {
     }
     if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
       if(!data.connected0) {
-        data.connected0 = true;
         input0->enable_output(shared());
+        data.connected0 = true;
       }
 
 //      assert(find(input1_tokens, wme_token) == input1_tokens.end());
@@ -191,13 +190,13 @@ namespace Rete {
     if(input0 != input1) {
       if(from == input0) {
         assert(data.connected1);
-        data.connected1 = false;
         input1->disable_output(shared());
+        data.connected1 = false;
       }
       else {
         assert(data.connected0);
-        data.connected0 = false;
         input0->disable_output(shared());
+        data.connected0 = false;
       }
     }
     assert(data.connected0 || data.connected1);
@@ -211,11 +210,12 @@ namespace Rete {
     join->input1 = out1.get();
 
     out0->insert_output(join);
-    out0->pass_tokens(join);
     if(out0 != out1)
-      ++out1->outputs_disabled;
+      out1->insert_output_disabled(join);
     else
       join->data.connected1 = true;
+
+    out0->pass_tokens(join);
   }
 
 }

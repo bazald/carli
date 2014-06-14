@@ -206,19 +206,21 @@ namespace Carli {
       const double mpt = midpt();
 
       if(bound_lower != mpt) {
-        const auto refined_feature = clone();
-        refined_feature->bound_upper = mpt;
-        ++refined_feature->depth;
-        refined_feature->upper = false;
-        refined_features.push_back(refined_feature);
-      }
+        {
+          const auto refined_feature = clone();
+          refined_feature->bound_upper = mpt;
+          ++refined_feature->depth;
+          refined_feature->upper = false;
+          refined_features.push_back(refined_feature);
+        }
 
-      if(mpt != bound_upper) {
-        const auto refined_feature = clone();
-        refined_feature->bound_lower = mpt;
-        ++refined_feature->depth;
-        refined_feature->upper = true;
-        refined_features.push_back(refined_feature);
+        {
+          const auto refined_feature = clone();
+          refined_feature->bound_lower = mpt;
+          ++refined_feature->depth;
+          refined_feature->upper = true;
+          refined_features.push_back(refined_feature);
+        }
       }
 
       return refined_features;

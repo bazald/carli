@@ -14,9 +14,8 @@ namespace Rete {
   }
 
   void Rete_Filter::destroy(Filters &filters, const Rete_Node_Ptr &output) {
-    outputs_disabled -= output->disabled_input(shared());
     erase_output(output);
-    if(outputs.empty() && !outputs_disabled)
+    if(outputs.empty() && outputs_disabled.empty())
       filters.erase(std::find(filters.begin(), filters.end(), std::static_pointer_cast<Rete_Filter>(shared())));
   }
 

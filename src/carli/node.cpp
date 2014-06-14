@@ -80,65 +80,52 @@ namespace Carli {
   }
 
   Node_Fringe_Ptr Node::create_fringe(Agent &agent, Node &leaf) {
-    if(leaf.q_value->depth == 1) {
-      auto ancestor = rete_action.lock()->parent_left();
-      if(q_value->type == Q_Value::Type::UNSPLIT ||
-        (q_value->type == Q_Value::Type::SPLIT && !debuggable_cast<Node_Split *>(this)->terminal))
-      {
-        ancestor = ancestor->parent_left();
-      }
-      for(int64_t d = q_value->depth; d != 2; --d) {
-        assert(dynamic_cast<Rete::Rete_Predicate *>(ancestor.get()) ||
-          dynamic_cast<Rete::Rete_Existential_Join *>(ancestor.get()));
-        ancestor = ancestor->parent_right();
-      }
+    auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(q_value->feature.get());
 
-      auto new_leaf = agent.make_standard_action(ancestor);
-      auto new_leaf_data = std::make_shared<Node_Fringe>(agent, new_leaf, get_action, 2, q_value->feature ? q_value->feature->clone() : nullptr);
-      new_leaf->data = new_leaf_data;
-
-      return new_leaf_data;
+    auto ancestor_left = leaf.rete_action.lock()->parent_left();
+    if(leaf.q_value->type != Q_Value::Type::FRINGE) {
+      assert(leaf.q_value->type == Q_Value::Type::UNSPLIT || !debuggable_cast<Node_Split &>(leaf).terminal);
+      ancestor_left = ancestor_left->parent_left(); ///< Skip blink node
     }
+    else
+      assert(leaf.q_value->depth == q_value->depth);
+
+    Rete::Rete_Node_Ptr new_test;
+
+    if(feature_ranged_data)
+      new_test = agent.make_predicate_vc(feature_ranged_data->predicate(), feature_ranged_data->axis, feature_ranged_data->symbol_constant(), ancestor_left);
     else {
-      auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(q_value->feature.get());
+      Rete::Rete_Node_Ptr ancestor_right = rete_action.lock()->parent_left();
 
-      Rete::Rete_Node_Ptr new_test;
-
-      auto ancestor_left = leaf.rete_action.lock()->parent_left();
       if(leaf.q_value->type != Q_Value::Type::FRINGE) {
-        assert(leaf.q_value->type == Q_Value::Type::UNSPLIT || !debuggable_cast<Node_Split &>(leaf).terminal);
-        ancestor_left = ancestor_left->parent_left(); ///< Skip blink node
-      }
+        /// Collapsing rather the fringe rather than expanding it
 
-      if(feature_ranged_data)
-        new_test = agent.make_predicate_vc(feature_ranged_data->predicate(), feature_ranged_data->axis, feature_ranged_data->symbol_constant(), ancestor_left);
-      else {
-        auto ancestor_right = rete_action.lock()->parent_left();
-
-        if(leaf.q_value->type != Q_Value::Type::FRINGE) {
-          if(q_value->type == Q_Value::Type::UNSPLIT ||
-            (q_value->type == Q_Value::Type::SPLIT && !debuggable_cast<Node_Split *>(this)->terminal))
-          {
-            ancestor_right = ancestor_right->parent_left(); ///< Skip blink node
-          }
-
-          for(int64_t d = q_value->depth; d != leaf.q_value->depth; --d) {
-            assert(dynamic_cast<Rete::Rete_Predicate *>(ancestor_right.get()) ||
-              dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get()));
-            ancestor_right = ancestor_right->parent_right(); ///< Pass through extra tests
-          }
+        if(q_value->type == Q_Value::Type::UNSPLIT ||
+          (q_value->type == Q_Value::Type::SPLIT && !debuggable_cast<Node_Split *>(this)->terminal))
+        {
+          ancestor_right = ancestor_right->parent_left(); ///< Skip blink node
         }
-        
-        new_test = agent.make_existential_join(q_value->feature->bindings(), ancestor_left, ancestor_right);
+
+        const int64_t dend = std::max(2ll, leaf.q_value->depth);
+        for(int64_t d = q_value->depth; d != dend; --d) {
+          assert(dynamic_cast<Rete::Rete_Predicate *>(ancestor_right.get()) ||
+            dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get()));
+          ancestor_right = ancestor_right->parent_right(); ///< Pass through extra tests
+        }
       }
 
-      /** Step 2.3: Create the actual action for the new fringe node. */
-      auto new_action = agent.make_standard_action(new_test);
-      auto new_action_data = std::make_shared<Node_Fringe>(agent, new_action, leaf.get_action, leaf.q_value->depth + 1, q_value->feature->clone());
-      new_action->data = new_action_data;
-
-      return new_action_data;
+       if(leaf.q_value->depth == 1)
+        new_test = ancestor_right;
+      else
+        new_test = agent.make_existential_join(q_value->feature->bindings(), ancestor_left, ancestor_right);
     }
+
+    /// Create the actual action for the new fringe node
+    auto new_action = agent.make_standard_action(new_test);
+    auto new_action_data = std::make_shared<Node_Fringe>(agent, new_action, leaf.get_action, leaf.q_value->depth + 1, q_value->feature ? q_value->feature->clone() : nullptr);
+    new_action->data = new_action_data;
+
+    return new_action_data;
   }
 
   Node_Split::Node_Split(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_, const bool &terminal_)

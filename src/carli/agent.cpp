@@ -4,6 +4,11 @@
 
 namespace Carli {
 
+#ifdef DOT_OUTPUT
+  static bool g_expanding = false;
+  static size_t g_expcon_count = 0u;
+#endif
+
   //struct Expiration_Detector {
   //  void operator()(Rete::Rete_Node &rete_node) {
   //    if(!rete_node.data)
@@ -28,8 +33,10 @@ namespace Carli {
     }
 
     void operator()(Rete::Rete_Node &rete_node) {
-      if(!rete_node.data)
+      if(!rete_node.data) {
+        assert(!dynamic_cast<Rete::Rete_Action *>(&rete_node));
         return;
+      }
 
       excise.insert(debuggable_pointer_cast<Rete::Rete_Action>(rete_node.shared()));
 
@@ -90,12 +97,17 @@ namespace Carli {
   //  std::cerr << "Refining : " << chosen << std::endl;
   //#endif
     
-#ifdef DEBUG_OUTPUT
+#ifdef DOT_OUTPUT
     std::cerr << "Rete size before expansion: " << rete_size() << std::endl;
 
-    std::ofstream fout("pre-expansion.dot");
+    std::ostringstream fname;
+    g_expcon_count = g_expanding ? g_expcon_count + 1 : 0;
+    g_expanding = true;
+    fname << "pre-expansion-" << g_expcon_count << ".dot";
+    std::ofstream fout(fname.str());
     rete_print(fout);
     fout.close();
+    fname.str("");
 #endif
 
     expand_fringe(rete_action, token, chosen->q_value->feature.get());
@@ -104,10 +116,11 @@ namespace Carli {
 
     excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(rete_action.shared()));
     
-#ifdef DEBUG_OUTPUT
+#ifdef DOT_OUTPUT
     std::cerr << "Rete size after expansion: " << rete_size() << std::endl;
-
-    fout.open("post-expansion.dot");
+    
+    fname << "post-expansion-" << g_expcon_count << ".dot";
+    fout.open(fname.str());
     rete_print(fout);
 #endif
 
@@ -227,13 +240,19 @@ namespace Carli {
     if(fringe_collector.features.empty())
       return false;
     
-#ifdef DEBUG_OUTPUT
+#ifdef DOT_OUTPUT
     std::cerr << "Rete size before collapse: " << rete_size() << std::endl;
-
-    std::ofstream fout("pre-collapse.dot");
+    
+    std::ostringstream fname;
+    g_expcon_count = g_expanding ? 0 : g_expcon_count + 1;
+    g_expanding = false;
+    fname << "pre-collapse-" << g_expcon_count << ".dot";
+    std::ofstream fout(fname.str());
     rete_print(fout);
     fout.close();
-
+    fname.str("");
+#endif
+#ifdef DEBUG_OUTPUT
     std::cerr << "Features: ";
     for(const auto &feature_axis : fringe_collector.features)
       for(const auto &feature_node : feature_axis.second)
@@ -284,10 +303,11 @@ namespace Carli {
       excise_rule(excise);
     fringe_collector.excise.clear();
     
-#ifdef DEBUG_OUTPUT
+#ifdef DOT_OUTPUT
     std::cerr << "Rete size after collapse: " << rete_size() << std::endl;
-
-    fout.open("post-collapse.dot");
+    
+    fname << "post-collapse-" << g_expcon_count << ".dot";
+    fout.open(fname.str());
     rete_print(fout);
 #endif
 

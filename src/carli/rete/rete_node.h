@@ -115,25 +115,43 @@ namespace Rete {
       outputs.push_back(output);
     }
 
+    void insert_output_disabled(const Rete_Node_Ptr &output) {
+//      outputs.insert(output);
+      outputs_disabled.push_back(output);
+    }
+
     void erase_output(const Rete_Node_Ptr &output) {
 //      outputs.erase(output);
+      if(output->disabled_input(shared()))
+        erase_output_disabled(output);
+      else
+        erase_output_enabled(output);
+    }
+
+    void erase_output_enabled(const Rete_Node_Ptr &output) {
       const auto found = std::find(outputs.begin(), outputs.end(), output);
-      if(found != outputs.end())
-        outputs.erase(found);
+      assert(found != outputs.end());
+      outputs.erase(found);
+    }
+
+    void erase_output_disabled(const Rete_Node_Ptr &output) {
+      const auto found = std::find(outputs_disabled.begin(), outputs_disabled.end(), output);
+      assert(found != outputs_disabled.end());
+      outputs_disabled.erase(found);
     }
 
     virtual bool disabled_input(const Rete_Node_Ptr &) {return false;}
 
     void disable_output(const Rete_Node_Ptr &output) {
-      ++outputs_disabled;
+      erase_output_enabled(output);
+      insert_output_disabled(output);
       unpass_tokens(output);
-      erase_output(output);
     }
 
     void enable_output(const Rete_Node_Ptr &output) {
+      erase_output_disabled(output);
       insert_output(output);
       pass_tokens(output);
-      --outputs_disabled;
     }
 
     virtual void print_details(std::ostream &os) const = 0; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
@@ -178,7 +196,7 @@ namespace Rete {
     }
 
     Outputs outputs;
-    size_t outputs_disabled = 0u;
+    Outputs outputs_disabled;
 
   private:
     template <typename VISITOR>
@@ -189,6 +207,8 @@ namespace Rete {
       }
       visitor(*this);
       for(auto &o : outputs)
+        visitor = o->visit_preorder(visitor, strict, visitor_value);
+      for(auto &o : outputs_disabled)
         visitor = o->visit_preorder(visitor, strict, visitor_value);
       return visitor;
     }
