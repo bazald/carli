@@ -15,7 +15,7 @@ namespace Rete {
 
   void Rete_Filter::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs.empty() && outputs_disabled.empty())
+    if(outputs_all.empty())
       filters.erase(std::find(filters.begin(), filters.end(), std::static_pointer_cast<Rete_Filter>(shared())));
   }
 
@@ -33,7 +33,7 @@ namespace Rete {
 
     if(std::find_if(tokens.begin(), tokens.end(), [&wme](const WME_Token_Ptr_C &token)->bool{return *wme == *token->get_wme();}) == tokens.end()) {
       tokens.push_back(std::make_shared<WME_Token>(wme));
-      for(auto &output : outputs)
+      for(auto &output : outputs_enabled)
         output->insert_wme_token(tokens.back(), this);
     }
   }
@@ -41,7 +41,7 @@ namespace Rete {
   void Rete_Filter::remove_wme(const WME_Ptr_C &wme) {
     auto found = std::find_if(tokens.begin(), tokens.end(), [&wme](const WME_Token_Ptr_C &token)->bool{return *wme == *token->get_wme();});
     if(found != tokens.end()) {
-      for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+      for(auto ot = outputs_enabled.begin(), oend = outputs_enabled.end(); ot != oend; ) {
         if((*ot)->remove_wme_token(*found, this))
           (*ot++)->disconnect(this);
         else

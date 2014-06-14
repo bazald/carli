@@ -9,7 +9,7 @@ namespace Rete {
 
   void Rete_Negation_Join::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs.empty() && outputs_disabled.empty()) {
+    if(outputs_all.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
@@ -39,7 +39,7 @@ namespace Rete {
         join_tokens(input0_tokens.back(), other);
 
       if(input0_tokens.back().second == 0u) {
-        for(auto &output : outputs)
+        for(auto &output : outputs_enabled)
           output->insert_wme_token(wme_token, this);
       }
     }
@@ -66,7 +66,7 @@ namespace Rete {
       auto found = find_key(input0_tokens, wme_token);
       if(found != input0_tokens.end()) {
         if(found->second == 0u) {
-          for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+          for(auto ot = outputs_enabled.begin(), oend = outputs_enabled.end(); ot != oend; ) {
             if((*ot)->remove_wme_token(wme_token, this))
               (*ot++)->disconnect(this);
             else
@@ -142,9 +142,9 @@ namespace Rete {
   }
   
   Rete_Negation_Join_Ptr Rete_Negation_Join::find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
-    for(auto &o0 : out0->get_outputs()) {
+    for(auto &o0 : out0->get_outputs_all()) {
       if(auto existing_negation_join = std::dynamic_pointer_cast<Rete_Negation_Join>(o0)) {
-        if(std::find(out1->get_outputs().begin(), out1->get_outputs().end(), existing_negation_join) != out1->get_outputs().end()) {
+        if(std::find(out1->get_outputs_all().begin(), out1->get_outputs_all().end(), existing_negation_join) != out1->get_outputs_all().end()) {
           if(bindings == existing_negation_join->bindings)
             return existing_negation_join;
         }
@@ -161,7 +161,7 @@ namespace Rete {
     }
 
     if(++lhs.second == 1) {
-      for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+      for(auto ot = outputs_enabled.begin(), oend = outputs_enabled.end(); ot != oend; ) {
         if((*ot)->remove_wme_token(lhs.first, this))
           (*ot++)->disconnect(this);
         else
@@ -177,7 +177,7 @@ namespace Rete {
     }
 
     if(--lhs.second == 0) {
-      for(auto &output : outputs)
+      for(auto &output : outputs_enabled)
         output->insert_wme_token(lhs.first, this);
     }
   }

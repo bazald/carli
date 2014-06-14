@@ -9,7 +9,7 @@ namespace Rete {
 
   void Rete_Existential_Join::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs.empty() && outputs_disabled.empty()) {
+    if(outputs_all.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
@@ -132,9 +132,9 @@ namespace Rete {
   }
   
   Rete_Existential_Join_Ptr Rete_Existential_Join::find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
-    for(auto &o0 : out0->get_outputs()) {
+    for(auto &o0 : out0->get_outputs_all()) {
       if(auto existing_existential_join = std::dynamic_pointer_cast<Rete_Existential_Join>(o0)) {
-        if(std::find(out1->get_outputs().begin(), out1->get_outputs().end(), existing_existential_join) != out1->get_outputs().end()) {
+        if(std::find(out1->get_outputs_all().begin(), out1->get_outputs_all().end(), existing_existential_join) != out1->get_outputs_all().end()) {
           if(bindings == existing_existential_join->bindings)
             return existing_existential_join;
         }
@@ -151,7 +151,7 @@ namespace Rete {
     }
 
     if(++lhs.second == 1u) {
-      for(auto &output : outputs)
+      for(auto &output : outputs_enabled)
         output->insert_wme_token(lhs.first, this);
     }
   }
@@ -163,7 +163,7 @@ namespace Rete {
     }
 
     if(--lhs.second == 0) {
-      for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+      for(auto ot = outputs_enabled.begin(), oend = outputs_enabled.end(); ot != oend; ) {
         if((*ot)->remove_wme_token(lhs.first, this))
           (*ot++)->disconnect(this);
         else

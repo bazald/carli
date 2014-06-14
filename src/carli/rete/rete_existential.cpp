@@ -6,7 +6,7 @@ namespace Rete {
 
   void Rete_Existential::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs.empty() && outputs_disabled.empty()) {
+    if(outputs_all.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
@@ -25,7 +25,7 @@ namespace Rete {
     input_tokens.push_back(wme_token);
 
     if(input_tokens.size() == 1) {
-      for(auto &output : outputs)
+      for(auto &output : outputs_enabled)
         output->insert_wme_token(output_token, this);
     }
 
@@ -43,7 +43,7 @@ namespace Rete {
     if(found != input_tokens.end()) {
       input_tokens.erase(found);
       if(input_tokens.empty()) {
-        for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+        for(auto ot = outputs_enabled.begin(), oend = outputs_enabled.end(); ot != oend; ) {
           if((*ot)->remove_wme_token(output_token, this))
             (*ot++)->disconnect(this);
           else
@@ -90,7 +90,7 @@ namespace Rete {
   }
 
   Rete_Existential_Ptr Rete_Existential::find_existing(const Rete_Node_Ptr &out) {
-    for(auto &o : out->get_outputs()) {
+    for(auto &o : out->get_outputs_all()) {
       if(auto existing_existential = std::dynamic_pointer_cast<Rete_Existential>(o))
         return existing_existential;
     }

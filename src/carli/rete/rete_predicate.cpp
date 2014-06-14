@@ -23,7 +23,7 @@ namespace Rete {
 
   void Rete_Predicate::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs.empty() && outputs_disabled.empty()) {
+    if(outputs_all.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
@@ -50,7 +50,7 @@ namespace Rete {
 
     tokens.push_back(wme_token);
 
-    for(auto &output : outputs)
+    for(auto &output : outputs_enabled)
       output->insert_wme_token(wme_token, this);
   }
 
@@ -64,7 +64,7 @@ namespace Rete {
     auto found = find(tokens, wme_token);
     if(found != tokens.end()) {
       tokens.erase(found);
-      for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+      for(auto ot = outputs_enabled.begin(), oend = outputs_enabled.end(); ot != oend; ) {
         if((*ot)->remove_wme_token(wme_token, this))
           (*ot++)->disconnect(this);
         else
@@ -142,7 +142,7 @@ namespace Rete {
   }
   
   Rete_Predicate_Ptr Rete_Predicate::find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out) {
-    for(auto &o : out->get_outputs()) {
+    for(auto &o : out->get_outputs_all()) {
       if(auto existing_predicate = std::dynamic_pointer_cast<Rete_Predicate>(o)) {
         if(predicate == existing_predicate->m_predicate &&
            lhs_index == existing_predicate->m_lhs_index &&
@@ -157,7 +157,7 @@ namespace Rete {
   }
 
   Rete_Predicate_Ptr Rete_Predicate::find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out) {
-    for(auto &o : out->get_outputs()) {
+    for(auto &o : out->get_outputs_all()) {
       if(auto existing_predicate = std::dynamic_pointer_cast<Rete_Predicate>(o)) {
         if(predicate == existing_predicate->m_predicate &&
            lhs_index == existing_predicate->m_lhs_index &&

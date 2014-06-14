@@ -75,7 +75,8 @@ namespace Rete {
 
   public:
     typedef std::list<Rete_Filter_Ptr, Zeni::Pool_Allocator<Rete_Filter_Ptr>> Filters;
-    typedef std::list<Rete_Node_Ptr, Zeni::Pool_Allocator<Rete_Node_Ptr>> Outputs;
+    typedef std::list<Rete_Node_Ptr, Zeni::Pool_Allocator<Rete_Node_Ptr>> Output_Ptrs;
+    typedef std::list<Rete_Node *> Outputs;
 
     Rete_Node() {}
     virtual ~Rete_Node() {}
@@ -89,8 +90,8 @@ namespace Rete {
       return shared_from_this();
     }
 
-    const Outputs & get_outputs() const {
-      return outputs;
+    const Output_Ptrs & get_outputs_all() const {
+      return outputs_all;
     }
     
     virtual Rete_Node_Ptr_C parent_left() const = 0;
@@ -109,49 +110,49 @@ namespace Rete {
     virtual void unpass_tokens(const Rete_Node_Ptr &output) = 0;
 
     virtual bool operator==(const Rete_Node &rhs) const = 0;
-
-    void insert_output(const Rete_Node_Ptr &output) {
-//      outputs.insert(output);
-      outputs.push_back(output);
-    }
-
-    void insert_output_disabled(const Rete_Node_Ptr &output) {
-//      outputs.insert(output);
-      outputs_disabled.push_back(output);
-    }
-
-    void erase_output(const Rete_Node_Ptr &output) {
-//      outputs.erase(output);
-      if(output->disabled_input(shared()))
-        erase_output_disabled(output);
-      else
-        erase_output_enabled(output);
-    }
-
-    void erase_output_enabled(const Rete_Node_Ptr &output) {
-      const auto found = std::find(outputs.begin(), outputs.end(), output);
-      assert(found != outputs.end());
-      outputs.erase(found);
-    }
-
-    void erase_output_disabled(const Rete_Node_Ptr &output) {
-      const auto found = std::find(outputs_disabled.begin(), outputs_disabled.end(), output);
-      assert(found != outputs_disabled.end());
-      outputs_disabled.erase(found);
-    }
-
+    
     virtual bool disabled_input(const Rete_Node_Ptr &) {return false;}
 
     void disable_output(const Rete_Node_Ptr &output) {
       erase_output_enabled(output);
-      insert_output_disabled(output);
+      outputs_disabled.push_front(output.get());
       unpass_tokens(output);
     }
 
     void enable_output(const Rete_Node_Ptr &output) {
       erase_output_disabled(output);
-      insert_output(output);
+      outputs_enabled.push_back(output.get());
       pass_tokens(output);
+    }
+
+    void insert_output(const Rete_Node_Ptr &output) {
+      outputs_all.push_back(output);
+      outputs_enabled.push_back(output.get());
+    }
+
+    void insert_output_disabled(const Rete_Node_Ptr &output) {
+      outputs_all.push_front(output);
+      outputs_disabled.push_front(output.get());
+    }
+
+    void erase_output(const Rete_Node_Ptr &output) {
+      if(output->disabled_input(shared()))
+        erase_output_disabled(output);
+      else
+        erase_output_enabled(output);
+      outputs_all.erase(std::find(outputs_all.begin(), outputs_all.end(), output));
+    }
+
+    void erase_output_enabled(const Rete_Node_Ptr &output) {
+      const auto found = std::find(outputs_enabled.rbegin(), outputs_enabled.rend(), output.get());
+      assert(found != outputs_enabled.rend());
+      outputs_enabled.erase(--found.base());
+    }
+
+    void erase_output_disabled(const Rete_Node_Ptr &output) {
+      const auto found = std::find(outputs_disabled.begin(), outputs_disabled.end(), output.get());
+      assert(found != outputs_disabled.end());
+      outputs_disabled.erase(found);
     }
 
     virtual void print_details(std::ostream &os) const = 0; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
@@ -195,7 +196,8 @@ namespace Rete {
       return std::find_if(tokens.begin(), tokens.end(), [&token](const typename CONTAINER::value_type &tok){return tok.first == token;});
     }
 
-    Outputs outputs;
+    Output_Ptrs outputs_all;
+    Outputs outputs_enabled;
     Outputs outputs_disabled;
 
   private:
@@ -206,9 +208,7 @@ namespace Rete {
         visitor = parent_right()->visit_preorder(visitor, strict, visitor_value);
       }
       visitor(*this);
-      for(auto &o : outputs)
-        visitor = o->visit_preorder(visitor, strict, visitor_value);
-      for(auto &o : outputs_disabled)
+      for(auto &o : outputs_all)
         visitor = o->visit_preorder(visitor, strict, visitor_value);
       return visitor;
     }

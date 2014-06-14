@@ -9,7 +9,7 @@ namespace Rete {
 
   void Rete_Join::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs.empty() && outputs_disabled.empty()) {
+    if(outputs_all.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
@@ -79,7 +79,7 @@ namespace Rete {
         for(const auto &other : input1_tokens) {
           auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
           if(found_output != output_tokens.end()) {
-            for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+            for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
               if((*ot)->remove_wme_token(*found_output, this))
                 (*ot++)->disconnect(this);
               else
@@ -100,7 +100,7 @@ namespace Rete {
         for(const auto &other : input0_tokens) {
           auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
           if(found_output != output_tokens.end()) {
-            for(auto ot = outputs.begin(), oend = outputs.end(); ot != oend; ) {
+            for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
               if((*ot)->remove_wme_token(*found_output, this))
                 (*ot++)->disconnect(this);
               else
@@ -163,9 +163,9 @@ namespace Rete {
   }
   
   Rete_Join_Ptr Rete_Join::find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
-    for(auto &o0 : out0->get_outputs()) {
+    for(auto &o0 : out0->get_outputs_all()) {
       if(auto existing_join = std::dynamic_pointer_cast<Rete_Join>(o0)) {
-        if(std::find(out1->get_outputs().begin(), out1->get_outputs().end(), existing_join) != out1->get_outputs().end()) {
+        if(std::find(out1->get_outputs_all().begin(), out1->get_outputs_all().end(), existing_join) != out1->get_outputs_all().end()) {
           if(bindings == existing_join->bindings)
             return existing_join;
         }
@@ -188,7 +188,7 @@ namespace Rete {
     assert(find_deref(output_tokens, join_wme_tokens(lhs, rhs)) == output_tokens.end());
 
     output_tokens.push_back(join_wme_tokens(lhs, rhs));
-    for(auto &output : outputs)
+    for(auto &output : outputs_enabled)
       output->insert_wme_token(output_tokens.back(), this);
   }
 
