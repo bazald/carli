@@ -50,8 +50,8 @@ namespace Rete {
 
     tokens.push_back(wme_token);
 
-    for(auto &output : outputs_enabled)
-      output->insert_wme_token(wme_token, this);
+    for(auto &output : *outputs_enabled)
+      output.ptr->insert_wme_token(wme_token, this);
   }
 
   bool Rete_Predicate::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
@@ -64,7 +64,7 @@ namespace Rete {
     auto found = find(tokens, wme_token);
     if(found != tokens.end()) {
       tokens.erase(found);
-      for(auto ot = outputs_enabled.begin(), oend = outputs_enabled.end(); ot != oend; ) {
+      for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
         if((*ot)->remove_wme_token(wme_token, this))
           (*ot++)->disconnect(this);
         else
@@ -189,7 +189,7 @@ namespace Rete {
     assert(!std::dynamic_pointer_cast<Rete_Negation>(out));
     predicate->input = out.get();
 
-    out->insert_output(predicate);
+    out->insert_output_enabled(predicate);
     out->pass_tokens(predicate.get());
   }
 

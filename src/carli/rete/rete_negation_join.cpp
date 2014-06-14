@@ -39,8 +39,8 @@ namespace Rete {
         join_tokens(input0_tokens.back(), other);
 
       if(input0_tokens.back().second == 0u) {
-        for(auto &output : outputs_enabled)
-          output->insert_wme_token(wme_token, this);
+        for(auto &output : *outputs_enabled)
+          output.ptr->insert_wme_token(wme_token, this);
       }
     }
     if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
@@ -66,7 +66,7 @@ namespace Rete {
       auto found = find_key(input0_tokens, wme_token);
       if(found != input0_tokens.end()) {
         if(found->second == 0u) {
-          for(auto ot = outputs_enabled.begin(), oend = outputs_enabled.end(); ot != oend; ) {
+          for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
             if((*ot)->remove_wme_token(wme_token, this))
               (*ot++)->disconnect(this);
             else
@@ -161,7 +161,7 @@ namespace Rete {
     }
 
     if(++lhs.second == 1) {
-      for(auto ot = outputs_enabled.begin(), oend = outputs_enabled.end(); ot != oend; ) {
+      for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
         if((*ot)->remove_wme_token(lhs.first, this))
           (*ot++)->disconnect(this);
         else
@@ -177,8 +177,8 @@ namespace Rete {
     }
 
     if(--lhs.second == 0) {
-      for(auto &output : outputs_enabled)
-        output->insert_wme_token(lhs.first, this);
+      for(auto &output : *outputs_enabled)
+        output.ptr->insert_wme_token(lhs.first, this);
     }
   }
 
@@ -219,7 +219,7 @@ namespace Rete {
     join->input0 = out0.get();
     join->input1 = out1.get();
 
-    out0->insert_output(join);
+    out0->insert_output_enabled(join);
     if(out0 != out1)
       out1->insert_output_disabled(join);
     else

@@ -122,7 +122,7 @@ namespace Rete {
     assert(action && !action->input);
     action->input = out.get();
 
-    out->insert_output(action);
+    out->insert_output_enabled(action);
     out->pass_tokens(action.get());
   }
 

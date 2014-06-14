@@ -89,17 +89,6 @@ namespace Carli {
 
     List eligible;
 
-    static size_t eligible_offset() {
-      union {
-        const List Q_Value:: * m;
-        const char * c;
-      } u;
-
-      u.c = nullptr;
-      u.m = &Q_Value::eligible;
-      return u.c - static_cast<char *>(nullptr);
-    }
-
     tracked_ptr<Feature> feature;
   };
 

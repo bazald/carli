@@ -25,7 +25,7 @@ namespace Rete {
     input_tokens.push_back(wme_token);
 
     if(input_tokens.size() == 1) {
-      for(auto ot = outputs_enabled.begin(), oend = outputs_enabled.end(); ot != oend; ) {
+      for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
         if((*ot)->remove_wme_token(output_token, this))
           (*ot++)->disconnect(this);
         else
@@ -45,8 +45,8 @@ namespace Rete {
     if(found != input_tokens.end()) {
       input_tokens.erase(found);
       if(input_tokens.empty()) {
-        for(auto &output : outputs_enabled)
-          output->insert_wme_token(output_token, this);
+        for(auto &output : *outputs_enabled)
+          output.ptr->insert_wme_token(output_token, this);
       }
     }
 
@@ -98,7 +98,7 @@ namespace Rete {
     assert(negation);
     negation->input = out.get();
 
-    out->insert_output(negation);
+    out->insert_output_enabled(negation);
     out->pass_tokens(negation.get());
   }
 

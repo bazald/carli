@@ -25,8 +25,8 @@ namespace Rete {
     input_tokens.push_back(wme_token);
 
     if(input_tokens.size() == 1) {
-      for(auto &output : outputs_enabled)
-        output->insert_wme_token(output_token, this);
+      for(auto &output : *outputs_enabled)
+        output.ptr->insert_wme_token(output_token, this);
     }
 
     std::cerr << "input_tokens.size() == " << input_tokens.size() << std::endl;
@@ -43,7 +43,7 @@ namespace Rete {
     if(found != input_tokens.end()) {
       input_tokens.erase(found);
       if(input_tokens.empty()) {
-        for(auto ot = outputs_enabled.begin(), oend = outputs_enabled.end(); ot != oend; ) {
+        for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
           if((*ot)->remove_wme_token(output_token, this))
             (*ot++)->disconnect(this);
           else
@@ -102,7 +102,7 @@ namespace Rete {
     assert(existential);
     existential->input = out.get();
 
-    out->insert_output(existential);
+    out->insert_output_enabled(existential);
     out->pass_tokens(existential.get());
   }
 

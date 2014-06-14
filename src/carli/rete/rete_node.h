@@ -1,6 +1,7 @@
 #ifndef RETE_NODE_H
 #define RETE_NODE_H
 
+#include "../utility/linked_list.h"
 #include "wme_token.h"
 
 #include <algorithm>
@@ -76,7 +77,35 @@ namespace Rete {
   public:
     typedef std::list<Rete_Filter_Ptr, Zeni::Pool_Allocator<Rete_Filter_Ptr>> Filters;
     typedef std::list<Rete_Node_Ptr, Zeni::Pool_Allocator<Rete_Node_Ptr>> Output_Ptrs;
-    typedef std::list<Rete_Node *, Zeni::Pool_Allocator<Rete_Node *>> Outputs;
+
+    class Output;
+    class Output : public Zeni::Pool_Allocator<Output> {
+      Output(const Output &);
+      Output & operator=(const Output &);
+
+    public:
+      typedef Zeni::Linked_List<Output> List;
+
+      Rete_Node * const ptr;
+
+      Output(Rete_Node * const &ptr_)
+        : ptr(ptr_),
+        list(this)
+      {
+      }
+      
+      operator Rete_Node * const & () const {return ptr;}
+      
+      Rete_Node & operator*() const {return *ptr;}
+      Rete_Node * operator->() const {return ptr;}
+
+      bool operator<(const Output &rhs) const {
+        return ptr < rhs.ptr;
+      }
+
+      List list;
+    };
+    typedef Output::List::list_pointer_type Outputs;
 
     Rete_Node() {}
     virtual ~Rete_Node() {}
@@ -114,45 +143,50 @@ namespace Rete {
     virtual bool disabled_input(const Rete_Node_Ptr &) {return false;}
 
     void disable_output(Rete_Node * const &output) {
-      erase_output_enabled(output);
-      outputs_disabled.push_front(output);
+      erase_output_enabled(output)->insert_before(outputs_disabled);
       unpass_tokens(output);
     }
 
     void enable_output(Rete_Node * const &output) {
-      erase_output_disabled(output);
-      outputs_enabled.push_back(output);
+      erase_output_disabled(output)->insert_before(outputs_enabled);
       pass_tokens(output);
     }
 
-    void insert_output(const Rete_Node_Ptr &output) {
+    void insert_output_enabled(const Rete_Node_Ptr &output) {
       outputs_all.push_back(output);
-      outputs_enabled.push_back(output.get());
+      (new Output(output.get()))->list.insert_before(outputs_enabled);
     }
 
     void insert_output_disabled(const Rete_Node_Ptr &output) {
       outputs_all.push_front(output);
-      outputs_disabled.push_front(output.get());
+      (new Output(output.get()))->list.insert_before(outputs_disabled);
     }
 
     void erase_output(const Rete_Node_Ptr &output) {
+      Output::List::list_pointer_type found;
       if(output->disabled_input(shared()))
-        erase_output_disabled(output.get());
+        found = erase_output_disabled(output.get());
       else
-        erase_output_enabled(output.get());
+        found = erase_output_enabled(output.get());
+      Output * const ptr = &**found;
+      found.zero();
+      delete ptr;
+
       outputs_all.erase(std::find(outputs_all.begin(), outputs_all.end(), output));
     }
 
-    void erase_output_enabled(const Rete_Node * const &output) {
-      const auto found = std::find(outputs_enabled.rbegin(), outputs_enabled.rend(), output);
-      assert(found != outputs_enabled.rend());
-      outputs_enabled.erase(--found.base());
+    Output::List::list_pointer_type erase_output_enabled(Rete_Node * const &output) {
+      const Output::List::list_pointer_type found = outputs_enabled->find(Output(output));
+      assert(found);
+      found->erase_from(outputs_enabled);
+      return found;
     }
 
-    void erase_output_disabled(const Rete_Node * const &output) {
-      const auto found = std::find(outputs_disabled.begin(), outputs_disabled.end(), output);
-      assert(found != outputs_disabled.end());
-      outputs_disabled.erase(found);
+    Output::List::list_pointer_type erase_output_disabled(Rete_Node * const &output) {
+      const Output::List::list_pointer_type found = outputs_disabled->find(Output(output));
+      assert(found);
+      found->erase_from(outputs_disabled);
+      return found;
     }
 
     virtual void print_details(std::ostream &os) const = 0; ///< Formatted for dot: http://www.graphviz.org/content/dot-language

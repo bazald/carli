@@ -188,8 +188,8 @@ namespace Rete {
     assert(find_deref(output_tokens, join_wme_tokens(lhs, rhs)) == output_tokens.end());
 
     output_tokens.push_back(join_wme_tokens(lhs, rhs));
-    for(auto &output : outputs_enabled)
-      output->insert_wme_token(output_tokens.back(), this);
+    for(auto &output : *outputs_enabled)
+      output.ptr->insert_wme_token(output_tokens.back(), this);
   }
 
   WME_Token_Ptr_C Rete_Join::join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs) {
@@ -237,7 +237,7 @@ namespace Rete {
     join->input0 = out0.get();
     join->input1 = out1.get();
 
-    out0->insert_output(join);
+    out0->insert_output_enabled(join);
     if(out0 != out1)
       out1->insert_output_disabled(join);
     else

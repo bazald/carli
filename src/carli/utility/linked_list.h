@@ -319,7 +319,7 @@ namespace Zeni {
       ptr = this;
     }
 
-    template <typename COMPARE>
+    template <typename COMPARE = std::less<TYPE>>
     list_pointer_type find_gte(const value_type &value, const COMPARE &compare = COMPARE(), list_pointer_type * const &pptr = nullptr) {
       if(pptr)
         *pptr = nullptr;
@@ -333,7 +333,7 @@ namespace Zeni {
       return pp;
     }
 
-    template <typename COMPARE>
+    template <typename COMPARE = std::less<TYPE>>
     list_pointer_type find_in_order(const value_type &value, const COMPARE &compare = COMPARE(), list_pointer_type * const &pptr = nullptr) {
       const list_pointer_type pp = find_gte(value, compare, pptr);
 
@@ -343,7 +343,7 @@ namespace Zeni {
       return nullptr;
     }
 
-    template <typename COMPARE>
+    template <typename COMPARE = std::less<TYPE>>
     list_pointer_type find(const value_type &value, const COMPARE &compare = COMPARE()) {
       if(this)
         if(compare(value, **this) || compare(**this, value))
@@ -355,7 +355,7 @@ namespace Zeni {
     /** insert this list entry into the list; requires this to have !prev() && !next()
      *  return same pointer if inserted, different pointer (moved to front) if already exists, and deleted
      */
-    template <typename COMPARE>
+    template <typename COMPARE = std::less<TYPE>>
     list_pointer_type insert_before_unique(list_pointer_type &ptr, const COMPARE &compare = COMPARE()) {
       assert(!m_prev && !m_next);
 
@@ -390,7 +390,7 @@ namespace Zeni {
     /** insert this list entry into the list; requires this to have !prev() && !next()
      *  return same pointer if inserted, different pointer if already exists, duplicate == false, and deleted
      */
-    template <typename COMPARE>
+    template <typename COMPARE = std::less<TYPE>>
     list_pointer_type insert_in_order(list_pointer_type &ptr, const bool &duplicate = true, const COMPARE &compare = COMPARE()) {
       assert(!m_prev && !m_next);
 
