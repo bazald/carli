@@ -75,12 +75,12 @@ namespace Rete {
     return tokens.empty();
   }
 
-  void Rete_Predicate::pass_tokens(const Rete_Node_Ptr &output) {
+  void Rete_Predicate::pass_tokens(Rete_Node * const &output) {
     for(auto &wme_token : tokens)
       output->insert_wme_token(wme_token, this);
   }
 
-  void Rete_Predicate::unpass_tokens(const Rete_Node_Ptr &output) {
+  void Rete_Predicate::unpass_tokens(Rete_Node * const &output) {
     for(auto &wme_token : tokens)
       output->remove_wme_token(wme_token, this);
   }
@@ -190,7 +190,7 @@ namespace Rete {
     predicate->input = out.get();
 
     out->insert_output(predicate);
-    out->pass_tokens(predicate);
+    out->pass_tokens(predicate.get());
   }
 
 }

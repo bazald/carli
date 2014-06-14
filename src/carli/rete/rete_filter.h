@@ -29,8 +29,8 @@ namespace Rete {
     void insert_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &) override;
     bool remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &) override;
 
-    void pass_tokens(const Rete_Node_Ptr &output) override;
-    void unpass_tokens(const Rete_Node_Ptr &output) override;
+    void pass_tokens(Rete_Node * const &output) override;
+    void unpass_tokens(Rete_Node * const &output) override;
 
     bool operator==(const Rete_Node &rhs) const override;
 

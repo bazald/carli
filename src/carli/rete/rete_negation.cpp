@@ -53,12 +53,12 @@ namespace Rete {
     return input_tokens.empty();
   }
 
-  void Rete_Negation::pass_tokens(const Rete_Node_Ptr &output) {
+  void Rete_Negation::pass_tokens(Rete_Node * const &output) {
     if(input_tokens.empty())
       output->insert_wme_token(output_token, this);
   }
 
-  void Rete_Negation::unpass_tokens(const Rete_Node_Ptr &output) {
+  void Rete_Negation::unpass_tokens(Rete_Node * const &output) {
     if(input_tokens.empty())
       output->remove_wme_token(output_token, this);
   }
@@ -99,7 +99,7 @@ namespace Rete {
     negation->input = out.get();
 
     out->insert_output(negation);
-    out->pass_tokens(negation);
+    out->pass_tokens(negation.get());
   }
 
 }

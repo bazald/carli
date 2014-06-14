@@ -76,7 +76,7 @@ namespace Rete {
   public:
     typedef std::list<Rete_Filter_Ptr, Zeni::Pool_Allocator<Rete_Filter_Ptr>> Filters;
     typedef std::list<Rete_Node_Ptr, Zeni::Pool_Allocator<Rete_Node_Ptr>> Output_Ptrs;
-    typedef std::list<Rete_Node *> Outputs;
+    typedef std::list<Rete_Node *, Zeni::Pool_Allocator<Rete_Node *>> Outputs;
 
     Rete_Node() {}
     virtual ~Rete_Node() {}
@@ -106,22 +106,22 @@ namespace Rete {
 
     virtual void disconnect(const Rete_Node * const &/*from*/) {}
 
-    virtual void pass_tokens(const Rete_Node_Ptr &output) = 0;
-    virtual void unpass_tokens(const Rete_Node_Ptr &output) = 0;
+    virtual void pass_tokens(Rete_Node * const &output) = 0;
+    virtual void unpass_tokens(Rete_Node * const &output) = 0;
 
     virtual bool operator==(const Rete_Node &rhs) const = 0;
     
     virtual bool disabled_input(const Rete_Node_Ptr &) {return false;}
 
-    void disable_output(const Rete_Node_Ptr &output) {
+    void disable_output(Rete_Node * const &output) {
       erase_output_enabled(output);
-      outputs_disabled.push_front(output.get());
+      outputs_disabled.push_front(output);
       unpass_tokens(output);
     }
 
-    void enable_output(const Rete_Node_Ptr &output) {
+    void enable_output(Rete_Node * const &output) {
       erase_output_disabled(output);
-      outputs_enabled.push_back(output.get());
+      outputs_enabled.push_back(output);
       pass_tokens(output);
     }
 
@@ -137,20 +137,20 @@ namespace Rete {
 
     void erase_output(const Rete_Node_Ptr &output) {
       if(output->disabled_input(shared()))
-        erase_output_disabled(output);
+        erase_output_disabled(output.get());
       else
-        erase_output_enabled(output);
+        erase_output_enabled(output.get());
       outputs_all.erase(std::find(outputs_all.begin(), outputs_all.end(), output));
     }
 
-    void erase_output_enabled(const Rete_Node_Ptr &output) {
-      const auto found = std::find(outputs_enabled.rbegin(), outputs_enabled.rend(), output.get());
+    void erase_output_enabled(const Rete_Node * const &output) {
+      const auto found = std::find(outputs_enabled.rbegin(), outputs_enabled.rend(), output);
       assert(found != outputs_enabled.rend());
       outputs_enabled.erase(--found.base());
     }
 
-    void erase_output_disabled(const Rete_Node_Ptr &output) {
-      const auto found = std::find(outputs_disabled.begin(), outputs_disabled.end(), output.get());
+    void erase_output_disabled(const Rete_Node * const &output) {
+      const auto found = std::find(outputs_disabled.begin(), outputs_disabled.end(), output);
       assert(found != outputs_disabled.end());
       outputs_disabled.erase(found);
     }

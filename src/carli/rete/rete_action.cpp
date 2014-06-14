@@ -77,11 +77,11 @@ namespace Rete {
     return input_tokens.empty();
   }
 
-  void Rete_Action::pass_tokens(const Rete_Node_Ptr &) {
+  void Rete_Action::pass_tokens(Rete_Node * const &) {
     abort();
   }
 
-  void Rete_Action::unpass_tokens(const Rete_Node_Ptr &) {
+  void Rete_Action::unpass_tokens(Rete_Node * const &) {
     abort();
   }
 
@@ -123,7 +123,7 @@ namespace Rete {
     action->input = out.get();
 
     out->insert_output(action);
-    out->pass_tokens(action);
+    out->pass_tokens(action.get());
   }
 
 }

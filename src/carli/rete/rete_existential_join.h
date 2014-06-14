@@ -44,8 +44,8 @@ namespace Rete {
 
     void disconnect(const Rete_Node * const &from);
 
-    void pass_tokens(const Rete_Node_Ptr &output);
-    void unpass_tokens(const Rete_Node_Ptr &output);
+    void pass_tokens(Rete_Node * const &output) override;
+    void unpass_tokens(Rete_Node * const &output) override;
 
     WME_Bindings bindings;
     Rete_Node * input0 = nullptr;

@@ -35,7 +35,7 @@ namespace Rete {
 //        std::cerr << this << " Connecting right" << std::endl;
 //#endif
         assert(input1_tokens.empty());
-        input1->enable_output(shared());
+        input1->enable_output(this);
         data.connected1 = true;
       }
 
@@ -54,7 +54,7 @@ namespace Rete {
 //        std::cerr << this << " Connecting left" << std::endl;
 //#endif
         assert(input0_tokens.empty());
-        input0->enable_output(shared());
+        input0->enable_output(this);
         data.connected0 = true;
       }
 
@@ -206,7 +206,7 @@ namespace Rete {
 //      std::cerr << this << " Disconnecting right" << std::endl;
 //#endif
       assert(data.connected1);
-      input1->disable_output(shared());
+      input1->disable_output(this);
       data.connected1 = false;
     }
     else {
@@ -214,18 +214,18 @@ namespace Rete {
 //      std::cerr << this << " Disconnecting left" << std::endl;
 //#endif
       assert(data.connected0);
-      input0->disable_output(shared());
+      input0->disable_output(this);
       data.connected0 = false;
     }
     assert(data.connected0 || data.connected1);
   }
 
-  void Rete_Join::pass_tokens(const Rete_Node_Ptr &output) {
+  void Rete_Join::pass_tokens(Rete_Node * const &output) {
     for(auto &wme_token : output_tokens)
       output->insert_wme_token(wme_token, this);
   }
 
-  void Rete_Join::unpass_tokens(const Rete_Node_Ptr &output) {
+  void Rete_Join::unpass_tokens(Rete_Node * const &output) {
     for(auto &wme_token : output_tokens)
       output->remove_wme_token(wme_token, this);
   }
@@ -243,7 +243,7 @@ namespace Rete {
     else
       join->data.connected1 = true;
 
-    out0->pass_tokens(join);
+    out0->pass_tokens(join.get());
   }
 
 }
