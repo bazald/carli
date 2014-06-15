@@ -9,6 +9,7 @@
 #include <functional>
 #include <list>
 #include <unordered_set>
+#include <deque>
 
 namespace Rete {
 
@@ -158,7 +159,7 @@ namespace Rete {
     }
 
     void insert_output_disabled(const Rete_Node_Ptr &output) {
-      outputs_all.push_front(output);
+      outputs_all.push_back(output);
       (new Output(output.get()))->list.insert_before(outputs_disabled);
     }
 
@@ -197,16 +198,39 @@ namespace Rete {
     
     template <typename VISITOR>
     VISITOR visit_preorder(VISITOR visitor, const bool &strict) {
-      visitor_value = (intptr_t(this) & ~intptr_t(3)) | ((visitor_value & 3) != 1 ? 1 : 2);
-      return visit_preorder_tail(visitor, strict);
+      return visit_preorder(visitor, strict, (intptr_t(this) & ~intptr_t(3)) | ((visitor_value & 3) != 1 ? 1 : 2));
     }
     
     template <typename VISITOR>
     VISITOR visit_preorder(VISITOR visitor, const bool &strict, const intptr_t &visitor_value_) {
-      if(visitor_value == visitor_value_)
-        return visitor;
-      visitor_value = visitor_value_;
-      return visit_preorder_tail(visitor, strict);
+      std::deque<Rete_Node *> nodes;
+      nodes.push_back(this);
+
+      while(!nodes.empty()) {
+        Rete_Node * const node = nodes.front();
+        nodes.pop_front();
+
+        if(node->visitor_value == visitor_value_)
+          continue;
+
+        if(!strict && !dynamic_cast<Rete_Filter *>(node)) {
+          if(node->parent_left()->visitor_value != visitor_value_) {
+            nodes.push_front(node->parent_left().get());
+            continue;
+          }
+          else if(node->parent_right()->visitor_value != visitor_value_) {
+            nodes.push_front(node->parent_right().get());
+            continue;
+          }
+        }
+
+        node->visitor_value = visitor_value_;
+        visitor(*node);
+        for(auto &o : node->outputs_all)
+          nodes.push_back(o.get());
+      }
+
+      return visitor;
     }
     
     Rete_Data_Ptr data;
@@ -235,18 +259,6 @@ namespace Rete {
     Outputs outputs_disabled;
 
   private:
-    template <typename VISITOR>
-    VISITOR visit_preorder_tail(VISITOR visitor, const bool &strict) {
-      if(!strict && !dynamic_cast<Rete_Filter *>(this)) {
-        visitor = parent_left()->visit_preorder(visitor, strict, visitor_value);
-        visitor = parent_right()->visit_preorder(visitor, strict, visitor_value);
-      }
-      visitor(*this);
-      for(auto &o : outputs_all)
-        visitor = o->visit_preorder(visitor, strict, visitor_value);
-      return visitor;
-    }
-
     intptr_t visitor_value = 0;
   };
 

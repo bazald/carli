@@ -98,7 +98,7 @@ namespace Carli {
       std::ostringstream fname;
       g_output_dot_expcon_count = m_output_dot_expanding ? g_output_dot_expcon_count + 1 : 0;
       m_output_dot_expanding = true;
-      fname << "pre-expansion-" << g_output_dot_expcon_count << ".dot";
+      fname << "pre-expansion-" << (g_output_dot_expcon_count % 4) << ".dot";
       std::ofstream fout(fname.str());
       rete_print(fout);
     }
@@ -113,7 +113,7 @@ namespace Carli {
       std::cerr << "Rete size after expansion: " << rete_size() << std::endl;
 
       std::ostringstream fname;
-      fname << "post-expansion-" << g_output_dot_expcon_count << ".dot";
+      fname << "post-expansion-" << (g_output_dot_expcon_count % 4) << ".dot";
       std::ofstream fout(fname.str());
       rete_print(fout);
     }
@@ -240,7 +240,7 @@ namespace Carli {
       std::ostringstream fname;
       g_output_dot_expcon_count = m_output_dot_expanding ? 0 : g_output_dot_expcon_count + 1;
       m_output_dot_expanding = false;
-      fname << "pre-collapse-" << g_output_dot_expcon_count << ".dot";
+      fname << "pre-collapse-" << (g_output_dot_expcon_count % 4) << ".dot";
       std::ofstream fout(fname.str());
       rete_print(fout);
     }
@@ -300,7 +300,7 @@ namespace Carli {
       std::cerr << "Rete size after collapse: " << rete_size() << std::endl;
     
       std::ostringstream fname;
-      fname << "post-collapse-" << g_output_dot_expcon_count << ".dot";
+      fname << "post-collapse-" << (g_output_dot_expcon_count % 4) << ".dot";
       std::ofstream fout(fname.str());
       rete_print(fout);
     }
