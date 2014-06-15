@@ -25,13 +25,14 @@ namespace Zeni {
     Linked_List operator=(const Linked_List &) = delete;
 
   public:
+    static const tracked_ptr_mode tpm = TPM_UNDEL_UNTRA;
     typedef TYPE value_type;
-    typedef tracked_ptr<value_type, null_delete<value_type>, false> value_pointer_type;
+    typedef tracked_ptr<value_type, null_delete<value_type>, tpm> value_pointer_type;
     typedef value_type & value_reference_type;
     typedef const Linked_List<TYPE> const_list_value_type;
     typedef Linked_List<TYPE> list_value_type;
-    typedef tracked_ptr<const_list_value_type, null_delete<const_list_value_type>, false> const_list_pointer_type;
-    typedef tracked_ptr<list_value_type, null_delete<const_list_value_type>, false> list_pointer_type;
+    typedef tracked_ptr<const_list_value_type, null_delete<const_list_value_type>, tpm> const_list_pointer_type;
+    typedef tracked_ptr<list_value_type, null_delete<const_list_value_type>, tpm> list_pointer_type;
     typedef std::less<value_type> compare_default;
 
     class iterator : public std::iterator<std::bidirectional_iterator_tag, value_type> {
@@ -236,7 +237,7 @@ namespace Zeni {
 
     ~Linked_List() {
 #ifndef NDEBUG
-      const auto count = pointer_tracker::count(this);
+      const auto count = pointer_tracker<value_pointer_type::tracked>::count(this);
       assert(!count);
 #endif
     }

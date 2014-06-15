@@ -7,7 +7,6 @@
 #include <map>
 #include <unordered_map>
 
-#ifndef NDEBUG
 static size_t g_tracked_ptr_break = 0;
 static size_t g_tracked_ptr_count = 0;
 
@@ -15,7 +14,7 @@ class UTILITY_LINKAGE pointer_tracker_impl {
   pointer_tracker_impl(const pointer_tracker_impl &);
   pointer_tracker_impl & operator=(const pointer_tracker_impl &);
 
-  friend class pointer_tracker;
+  friend class pointer_tracker<true>;
 
   pointer_tracker_impl() {}
 
@@ -78,25 +77,24 @@ class UTILITY_LINKAGE pointer_tracker_impl {
   std::unordered_map<const void *, std::map<const void *, size_t>> address_to_pointer;
 };
 
-void pointer_tracker::set_pointer(const void * to, const void * from) {
+#ifndef NDEBUG
+void pointer_tracker<true>::set_pointer(const void * to, const void * from) {
   return pointer_tracker_impl::get().set_pointer(to, from);
 }
 
-void pointer_tracker::clear_pointer(const void * to, const void * from, const bool &deleteable) {
+void pointer_tracker<true>::clear_pointer(const void * to, const void * from, const bool &deleteable) {
   return pointer_tracker_impl::get().clear_pointer(to, from, deleteable);
 }
 
-size_t pointer_tracker::count(const void * to) {
+size_t pointer_tracker<true>::count(const void * to) {
   return pointer_tracker_impl::get().count(to);
 }
 
-void pointer_tracker::print(const void * to) {
+void pointer_tracker<true>::print(const void * to) {
   return pointer_tracker_impl::get().print(to);
 }
+#endif
 
-void pointer_tracker::break_on(const size_t &count) {
+void pointer_tracker<true>::break_on(const size_t &count) {
   g_tracked_ptr_break = count;
 }
-#else
-void pointer_tracker::break_on(const size_t &) {}
-#endif
