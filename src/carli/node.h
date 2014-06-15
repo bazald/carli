@@ -7,6 +7,8 @@
 #include "feature.h"
 #include "q_value.h"
 
+#include <map>
+
 namespace Carli {
 
   class Agent;
@@ -27,7 +29,9 @@ namespace Carli {
   typedef std::shared_ptr<Node_Unsplit> Node_Unsplit_Ptr;
   typedef std::shared_ptr<Node_Fringe> Node_Fringe_Ptr;
 
-  typedef std::list<std::shared_ptr<Node_Fringe>> Fringe_Values;
+  typedef std::map<tracked_ptr<Feature>,
+                   std::list<Node_Fringe_Ptr>, 
+                   compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> Fringe_Values;
 
   class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Unsplit>, public Rete::Rete_Data {
     Node(const Node &) = delete;

@@ -82,10 +82,14 @@ namespace Carli {
 
     if(general.q_value->type == Q_Value::Type::SPLIT)
       return true;
+#ifndef NDEBUG
+    if(general.q_value->depth >= m_split_max)
+      return false;
+#endif
 
-    const Node_Fringe_Ptr chosen = m_split_test(token, general);
+    const Fringe_Values::iterator chosen = m_split_test(token, general);
 
-    if(!chosen)
+    if(chosen == general.fringe_values.end())
       return false;
 
   //#ifdef DEBUG_OUTPUT
@@ -103,7 +107,7 @@ namespace Carli {
       rete_print(fout);
     }
 
-    expand_fringe(rete_action, token, chosen->q_value->feature.get());
+    expand_fringe(rete_action, token, chosen);
 
     auto new_node = general.create_split(*this, m_wme_blink, false);
 
@@ -125,23 +129,16 @@ namespace Carli {
 #ifdef DEBUG_OUTPUT
                                                                                               token
 #endif
-                                                                                                   , const Feature * const &specialization)
+                                                                                                   , const Fringe_Values::iterator &specialization)
   {
     auto &general = debuggable_cast<Node_Unsplit &>(*rete_action.data);
 
     /** Step 1: Collect new leaves from the fringe
      *          They'll have to be modified / replaced, but it's good to separate them from the remainder of the fringe
      */
-    Fringe_Values leaves;
-    for(auto fringe = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe != fend; ) {
-      assert(!(*fringe)->rete_action.expired());
-      if(specialization->compare_axis(*(*fringe)->q_value->feature) == 0) {
-        leaves.push_back(*fringe);
-        general.fringe_values.erase(fringe++);
-      }
-      else
-        ++fringe;
-    }
+    std::list<Node_Fringe_Ptr> leaves;
+    leaves.swap(specialization->second);
+    general.fringe_values.erase(specialization);
 
 #ifdef DEBUG_OUTPUT
     std::cerr << "Refining:";
@@ -152,11 +149,13 @@ namespace Carli {
       std::cerr << *leaf->q_value->feature;
     }
     std::cerr << std::endl << "Carrying over detected:";
-    for(auto &fringe : general.fringe_values) {
-      std::cerr << ' ';
-      if(fringe->q_value->feature->matches(token))
-        std::cerr << '*';
-      std::cerr << *fringe->q_value->feature;
+    for(auto &fringe_axis : general.fringe_values) {
+      for(auto &fringe : fringe_axis.second) {
+        std::cerr << ' ';
+        if(fringe->q_value->feature->matches(token))
+          std::cerr << '*';
+        std::cerr << *fringe->q_value->feature;
+      }
     }
     std::cerr << std::endl;
 #endif
@@ -184,7 +183,7 @@ namespace Carli {
               auto new_action = make_standard_action(predicate);
               auto new_node = std::make_shared<Node_Fringe>(*this, new_action, general.get_action, leaf->q_value->depth + 1, refined_feature);
               new_action->data = new_node;
-              node_unsplit_fringe.push_back(new_node);
+              node_unsplit_fringe[new_node->q_value->feature].push_back(new_node);
             }
           }
           else {
@@ -193,8 +192,12 @@ namespace Carli {
           }
 
           /** Step 2.2 Create new fringe nodes. **/
-          for(auto &fringe : general.fringe_values)
-            node_unsplit_fringe.push_back(fringe->create_fringe(*this, *leaf));
+          for(auto &fringe_axis : general.fringe_values) {
+            for(auto &fringe : fringe_axis.second) {
+              auto new_fringe = fringe->create_fringe(*this, *leaf);
+              node_unsplit_fringe[new_fringe->q_value->feature].push_back(new_fringe);
+            }
+          }
         }
         
         /** Step 2.3: Create a new split/unsplit node depending on the existence of a new fringe. */
@@ -216,8 +219,9 @@ namespace Carli {
     }
 
     /** Step 3: Excise all old fringe rules from the system */
-    for(auto &fringe : general.fringe_values)
-      excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(fringe->rete_action.lock()));
+    for(auto &fringe_axis : general.fringe_values)
+      for(auto &fringe : fringe_axis.second)
+        excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(fringe->rete_action.lock()));
   }
 
   bool Agent::collapse_rete(Rete::Rete_Action &rete_action) {
@@ -260,7 +264,7 @@ namespace Carli {
         auto &node = debuggable_cast<Node &>(*feature_node.second->data.get());
 
         auto new_fringe = node.create_fringe(*this, *split);
-        node_unsplit_fringe.push_back(new_fringe);
+        node_unsplit_fringe[new_fringe->q_value->feature].push_back(new_fringe);
         
         //std::cerr << "Collapsing: ";
         //node.rete_action.output_name(std::cerr);
@@ -315,7 +319,7 @@ namespace Carli {
   Agent::Agent(const std::shared_ptr<Environment> &environment)
     : m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy();}),
     m_exploration_policy([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(m_epsilon);}),
-    m_split_test([this](const Rete::WME_Token &token, const Node_Unsplit &general)->Node_Fringe_Ptr{return this->split_test(token, general);}),
+    m_split_test([this](const Rete::WME_Token &token, Node_Unsplit &general)->Fringe_Values::iterator{return this->split_test(token, general);}),
     m_environment(environment),
     m_credit_assignment(
       m_credit_assignment_code == "all" ?
@@ -490,7 +494,7 @@ namespace Carli {
     auto new_leaf = make_standard_action(parent);
     auto new_leaf_data = std::make_shared<Node_Fringe>(*this, new_leaf, root_action_data->get_action, 2, feature);
     new_leaf->data = new_leaf_data;
-    root_action_data->fringe_values.push_back(new_leaf_data);
+    root_action_data->fringe_values[new_leaf_data->q_value->feature].push_back(new_leaf_data);
     return new_leaf;
   }
 
@@ -954,55 +958,63 @@ namespace Carli {
     }
   }
 
-  Node_Fringe_Ptr Agent::split_test(const Rete::WME_Token &token, const Node_Unsplit &general) {
+  Fringe_Values::iterator Agent::split_test(const Rete::WME_Token &token, Node_Unsplit &general) {
     assert(general.q_value);
     assert(general.q_value->type != Q_Value::Type::SPLIT);
 
     /// Must obey the value function cap unless below the minimum split depth
     if(general.q_value->depth >= m_split_min && m_value_function_cap && q_value_count >= m_value_function_cap)
-      return nullptr;
+      return general.fringe_values.end();
 
     if(m_value_function_map_mode == "in") {
-      for(auto &fringe : general.fringe_values) {
-        std::ostringstream oss;
-        fringe->rete_action.lock()->output_name(oss, -1);
-        if(m_value_function_map.find(oss.str()) != m_value_function_map.end())
-          return fringe;
+      for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+        for(auto &fringe : fringe_axis->second) {
+          std::ostringstream oss;
+          fringe->rete_action.lock()->output_name(oss, -1);
+          if(m_value_function_map.find(oss.str()) != m_value_function_map.end())
+            return fringe_axis;
+        }
       }
     }
 
     /// Classic CATDE criterion
 //    if(!(m_mean_cabe_queue_size ? m_mean_cabe_queue.mean() : m_mean_cabe).outlier_above(general.q_value->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count))
 //      return nullptr;
-
+    
+    assert(general.q_value->depth < m_split_min);
     assert(!general.fringe_values.empty());
+    Fringe_Values::iterator chosen_axis = general.fringe_values.end();
     Node_Fringe_Ptr chosen;
     size_t count = 0;
     size_t matches = 0;
-    for(auto &fringe : general.fringe_values) {
-      if(!fringe->q_value->feature->matches(token))
-        continue;
-      ++matches;
+    for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+      for(auto &fringe : fringe_axis->second) {
+        if(!fringe->q_value->feature->matches(token))
+          continue;
+        ++matches;
 
-      if(general.q_value->depth < m_split_min ||
-        (fringe->q_value->update_count > m_split_update_count &&
-         fringe->q_value->pseudoepisode_count > m_split_pseudoepisodes &&
-        (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean() : m_mean_cabe).outlier_above(fringe->q_value->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)))
-      {
+        if(fringe->q_value->pseudoepisode_count > m_split_pseudoepisodes &&
+          (fringe->q_value->update_count > m_split_update_count &&
+          (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean() : m_mean_cabe).outlier_above(fringe->q_value->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)))
+        {
 //#ifndef NDEBUG
-//        std::cerr << " matches: " << *fringe->q_value->feature << std::endl;
+//          std::cerr << " matches: " << *fringe->q_value->feature << std::endl;
 //#endif
-        if(!chosen || fringe->q_value->cabe > chosen->q_value->cabe) {
-          chosen = fringe;
-          count = 1;
+          if(!chosen || fringe->q_value->cabe > chosen->q_value->cabe) {
+            chosen_axis = fringe_axis;
+            chosen = fringe;
+            count = 1;
+          }
+          else if(fringe->q_value->cabe == chosen->q_value->cabe && random.frand_lt() < 1.0 / ++count) {
+            chosen_axis = fringe_axis;
+            chosen = fringe;
+          }
         }
-        else if(fringe->q_value->cabe == chosen->q_value->cabe && random.frand_lt() < 1.0 / ++count)
-          chosen = fringe;
-      }
 //#ifndef NDEBUG
-//      else
-//        std::cerr << "!matches: " << *fringe->q_value->feature << std::endl;
+//        else
+//          std::cerr << "!matches: " << *fringe->q_value->feature << std::endl;
 //#endif
+      }
     }
 
     //for(auto &fringe : general.fringe_values) {
@@ -1025,7 +1037,7 @@ namespace Carli {
 #endif
       }
 
-      return nullptr;
+      return general.fringe_values.end();
     }
 
     if(m_value_function_map_mode == "out") {
@@ -1033,7 +1045,7 @@ namespace Carli {
       m_value_function_out << std::endl;
     }
 
-    return chosen;
+    return chosen_axis;
   }
 
   double Agent::sum_value(const action_type * const &

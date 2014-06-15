@@ -39,7 +39,7 @@ namespace Carli {
     
     bool respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token);
     bool specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token);
-    void expand_fringe(Rete::Rete_Action &rete_action, const Rete::WME_Token &token, const Feature * const &specialization);
+    void expand_fringe(Rete::Rete_Action &rete_action, const Rete::WME_Token &token, const Fringe_Values::iterator &specialization);
     bool collapse_rete(Rete::Rete_Action &rete_action); ///< Collapses and returns true unless there exist no nodes to collapse into a new fringe
 
     Agent(const std::shared_ptr<Environment> &environment);
@@ -134,7 +134,7 @@ namespace Carli {
 
     void assign_credit_normalize(const Q_Value_List &value_list, const double &sum);
 
-    Node_Fringe_Ptr split_test(const Rete::WME_Token &token, const Node_Unsplit &general);
+    Fringe_Values::iterator split_test(const Rete::WME_Token &token, Node_Unsplit &general);
 
     static double sum_value(const action_type * const &action, const Q_Value_List &value_list);
 
@@ -163,7 +163,7 @@ namespace Carli {
     std::map<Action_Ptr_C, Q_Value_List, compare_deref_lt, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, Q_Value_List>>> m_next_q_values;
     std::function<Action_Ptr_C ()> m_target_policy; ///< Sarsa/Q-Learning selector
     std::function<Action_Ptr_C ()> m_exploration_policy; ///< Exploration policy
-    std::function<Node_Fringe_Ptr (const Rete::WME_Token &, const Node_Unsplit &)> m_split_test; ///< true if too general, false if sufficiently general
+    std::function<Fringe_Values::iterator (const Rete::WME_Token &, Node_Unsplit &)> m_split_test; ///< true if too general, false if sufficiently general
     //std::map<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<Action_Ptr_C>, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
     Rete::Symbol_Identifier_Ptr_C m_s_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("S1"));
@@ -229,7 +229,6 @@ namespace Carli {
 
     const int64_t m_contribute_update_count = get_Option_Ranged<int64_t>(Options::get_global(), "contribute-update-count");
     const bool m_dynamic_midpoint = get_Option_Ranged<bool>(Options::get_global(), "dynamic-midpoint");
-    const bool m_fringe = get_Option_Ranged<bool>(Options::get_global(), "fringe");
     const double m_fringe_learning_scale = get_Option_Ranged<double>(Options::get_global(), "fringe-learning-scale");
 
     Q_Value::List::list_pointer_type m_eligible;
