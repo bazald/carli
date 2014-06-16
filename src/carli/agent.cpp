@@ -137,7 +137,7 @@ namespace Carli {
      *          They'll have to be modified / replaced, but it's good to separate them from the remainder of the fringe
      */
     std::list<Node_Fringe_Ptr> leaves;
-    leaves.swap(specialization->second);
+    leaves.swap(specialization->second.values);
     general.fringe_values.erase(specialization);
 
 #ifdef DEBUG_OUTPUT
@@ -150,7 +150,7 @@ namespace Carli {
     }
     std::cerr << std::endl << "Carrying over detected:";
     for(auto &fringe_axis : general.fringe_values) {
-      for(auto &fringe : fringe_axis.second) {
+      for(auto &fringe : fringe_axis.second.values) {
         std::cerr << ' ';
         if(fringe->q_value->feature->matches(token))
           std::cerr << '*';
@@ -183,7 +183,7 @@ namespace Carli {
               auto new_action = make_standard_action(predicate);
               auto new_node = std::make_shared<Node_Fringe>(*this, new_action, general.get_action, leaf->q_value->depth + 1, refined_feature);
               new_action->data = new_node;
-              node_unsplit_fringe[new_node->q_value->feature.get()].push_back(new_node);
+              node_unsplit_fringe[new_node->q_value->feature.get()].values.push_back(new_node);
             }
           }
           else {
@@ -193,9 +193,9 @@ namespace Carli {
 
           /** Step 2.2 Create new fringe nodes. **/
           for(auto &fringe_axis : general.fringe_values) {
-            for(auto &fringe : fringe_axis.second) {
+            for(auto &fringe : fringe_axis.second.values) {
               auto new_fringe = fringe->create_fringe(*this, *leaf);
-              node_unsplit_fringe[new_fringe->q_value->feature.get()].push_back(new_fringe);
+              node_unsplit_fringe[new_fringe->q_value->feature.get()].values.push_back(new_fringe);
             }
           }
         }
@@ -220,7 +220,7 @@ namespace Carli {
 
     /** Step 3: Excise all old fringe rules from the system */
     for(auto &fringe_axis : general.fringe_values)
-      for(auto &fringe : fringe_axis.second)
+      for(auto &fringe : fringe_axis.second.values)
         excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(fringe->rete_action.lock()));
   }
 
@@ -264,7 +264,7 @@ namespace Carli {
         auto &node = debuggable_cast<Node &>(*feature_node.second->data.get());
 
         auto new_fringe = node.create_fringe(*this, *split);
-        node_unsplit_fringe[new_fringe->q_value->feature.get()].push_back(new_fringe);
+        node_unsplit_fringe[new_fringe->q_value->feature.get()].values.push_back(new_fringe);
         
         //std::cerr << "Collapsing: ";
         //node.rete_action.output_name(std::cerr);
@@ -494,7 +494,7 @@ namespace Carli {
     auto new_leaf = make_standard_action(parent);
     auto new_leaf_data = std::make_shared<Node_Fringe>(*this, new_leaf, root_action_data->get_action, 2, feature);
     new_leaf->data = new_leaf_data;
-    root_action_data->fringe_values[new_leaf_data->q_value->feature.get()].push_back(new_leaf_data);
+    root_action_data->fringe_values[new_leaf_data->q_value->feature.get()].values.push_back(new_leaf_data);
     return new_leaf;
   }
 
@@ -968,7 +968,7 @@ namespace Carli {
 
     if(m_value_function_map_mode == "in") {
       for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
-        for(auto &fringe : fringe_axis->second) {
+        for(auto &fringe : fringe_axis->second.values) {
           std::ostringstream oss;
           fringe->rete_action.lock()->output_name(oss, -1);
           if(m_value_function_map.find(oss.str()) != m_value_function_map.end())
@@ -988,7 +988,7 @@ namespace Carli {
     size_t count = 0;
     size_t matches = 0;
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
-      for(auto &fringe : fringe_axis->second) {
+      for(auto &fringe : fringe_axis->second.values) {
         if(!fringe->q_value->feature->matches(token))
           continue;
         ++matches;
@@ -1061,7 +1061,7 @@ namespace Carli {
     size_t matches = 0;
     std::unordered_set<tracked_ptr<Feature>> touched;
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
-      for(auto &fringe : fringe_axis->second) {
+      for(auto &fringe : fringe_axis->second.values) {
         if(!fringe->q_value->feature->matches(token))
           continue;
         ++matches;
@@ -1086,21 +1086,21 @@ namespace Carli {
 
       double lowest = std::numeric_limits<double>::max();
       double highest = std::numeric_limits<double>::lowest();
-      for(auto &fringe : fringe_axis->second) {
+      for(auto &fringe : fringe_axis->second.values) {
         lowest = std::min(lowest, fringe->q_value->value);
         highest = std::max(highest, fringe->q_value->value);
       }
-      fringe_axis->first->value_delta_max = m_learning_rate * (highest - lowest) + (1 - m_learning_rate) * fringe_axis->first->value_delta_max;
+      fringe_axis->second.value_delta_max = m_learning_rate * (highest - lowest) + (1 - m_learning_rate) * fringe_axis->second.value_delta_max;
 
       //++fringe_axis->first->value_delta_update_count;
       //if(fringe_axis->first->value_delta_update_count <= m_split_update_count)
       //  continue;
 
-      if(chosen_axis == general.fringe_values.end() || delta_max < fringe_axis->first->value_delta_max) {
+      if(chosen_axis == general.fringe_values.end() || delta_max < fringe_axis->second.value_delta_max) {
         chosen_axis = fringe_axis;
         count = 1;
       }
-      else if(delta_max == fringe_axis->first->value_delta_max && random.frand_lt() < 1.0 / ++count)
+      else if(delta_max == fringe_axis->second.value_delta_max && random.frand_lt() < 1.0 / ++count)
         chosen_axis = fringe_axis;
     }
 

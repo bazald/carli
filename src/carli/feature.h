@@ -61,9 +61,6 @@ namespace Carli {
       print(oss);
       return oss.str();
     }
-
-    double value_delta_max = 0.0;
-    int64_t value_delta_update_count = 0;
   };
 
 }

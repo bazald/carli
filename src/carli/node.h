@@ -29,9 +29,12 @@ namespace Carli {
   typedef std::shared_ptr<Node_Unsplit> Node_Unsplit_Ptr;
   typedef std::shared_ptr<Node_Fringe> Node_Fringe_Ptr;
 
-  typedef std::map<Feature *,
-                   std::list<Node_Fringe_Ptr>, 
-                   compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> Fringe_Values;
+  struct Fringe_Value_Data {
+    std::list<Node_Fringe_Ptr> values;
+    double value_delta_max = 0.0;
+    int64_t value_delta_update_count = 0;
+  };
+  typedef std::map<Feature *, Fringe_Value_Data, compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> Fringe_Values;
 
   class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Unsplit>, public Rete::Rete_Data {
     Node(const Node &) = delete;
