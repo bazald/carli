@@ -29,7 +29,7 @@ namespace Carli {
   typedef std::shared_ptr<Node_Unsplit> Node_Unsplit_Ptr;
   typedef std::shared_ptr<Node_Fringe> Node_Fringe_Ptr;
 
-  typedef std::map<tracked_ptr<Feature>,
+  typedef std::map<Feature *,
                    std::list<Node_Fringe_Ptr>, 
                    compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> Fringe_Values;
 

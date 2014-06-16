@@ -90,9 +90,9 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<double>>("credit-assignment-log-base", 0.0, false, numeric_limits<double>::infinity(), false, 2.71828182846), "Which log to perform for inv-log-update-count.");
     options.add(     make_shared<Option_Ranged<double>>("credit-assignment-root", 1.0, false, numeric_limits<double>::infinity(), false, 2.0), "Which root to perform for inv-root-update-count.");
     options.add(     make_shared<Option_Ranged<bool>>("credit-assignment-normalize", false, true, true, true, true), "Ensure credit assignment sums to *at most* 1.");
-    options.add_line("\n  CABE Options:");
-    options.add(     make_shared<Option_Ranged<double>>("split-cabe", 0.0, true, numeric_limits<double>::infinity(), false, 0.84155), "How many standard deviations above the mean to refine.");
-    options.add(     make_shared<Option_Ranged<double>>("split-cabe-qmult", 0.0, true, numeric_limits<double>::infinity(), false, 0.0), "Increase split-cabe by this factor of the number of weights.");
+    options.add_line("\n  CATDE Options:");
+    options.add(     make_shared<Option_Ranged<double>>("split-catde", 0.0, true, numeric_limits<double>::infinity(), false, 0.84155), "How many standard deviations above the mean to refine.");
+    options.add(     make_shared<Option_Ranged<double>>("split-catde-qmult", 0.0, true, numeric_limits<double>::infinity(), false, 0.0), "Increase split-catde by this factor of the number of weights.");
     options.add(     make_shared<Option_Ranged<int64_t>>("split-min", 0, true, numeric_limits<int64_t>::max(), true, 0), "Refinement is assured through this depth.");
     options.add(     make_shared<Option_Ranged<int64_t>>("split-max", 0, true, numeric_limits<int64_t>::max(), true, numeric_limits<int64_t>::max()), "Refinement is strictly prohibited from this depth.");
     options.add_line("\n  Pseudoepisode Options:");
@@ -111,7 +111,7 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<int64_t>>("contribute-update-count", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more update than this to count toward means and variances.");
     options.add(     make_shared<Option_Ranged<bool>>("dynamic-midpoint", false, true, true, true, false), "Dynamically modify midpoint values for features to better balance refinements.");
     options.add(     make_shared<Option_Ranged<double>>("fringe-learning-scale", 0.0, false, 1.0, true, 0.3), "How quickly should the fringe learn relative to rest of the value function? (1.0 == same)");
-    options.add(     make_shared<Option_Ranged<int64_t>>("mean-cabe-queue-size", 0, true, numeric_limits<int64_t>::max(), true, 0), "How large of a working set to use for means and variances; 0 disables.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("mean-catde-queue-size", 0, true, numeric_limits<int64_t>::max(), true, 0), "How large of a working set to use for means and variances; 0 disables.");
     options.add(     make_shared<Option_Ranged<bool>>("null-q-values", false, true, true, true, false), "Set Q-values preceding the minimum depth to nullptr.");
     options.add(     make_shared<Option_Ranged<bool>>("output-dot", false, true, true, true, false), "Generate .dot files for the rete [pre/post]-[expansion/collapse].");
     options.add(     make_shared<Option_Ranged<int64_t>>("value-function-cap", 0, true, numeric_limits<int64_t>::max(), true, 0), "The maximum number of weights allowed in the value functions; 0 disables.");

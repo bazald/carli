@@ -106,6 +106,15 @@ inline bool operator>(const T * const lhs, const tracked_ptr<T, Deleter, TPM> &r
 template <typename T, typename Deleter, tracked_ptr_mode TPM>
 inline bool operator>=(const T * const lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs >= rhs.get();}
 
+namespace std {
+  template <typename T, typename Deleter, tracked_ptr_mode TPM>
+  struct hash<tracked_ptr<T, Deleter, TPM>> {
+    size_t operator()(const tracked_ptr<T, Deleter, TPM> &tptr) const {
+      return hash<T *>()(tptr.get());
+    }
+  };
+}
+
 template <bool Tracked>
 class UTILITY_LINKAGE pointer_tracker {};
 

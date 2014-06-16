@@ -183,7 +183,7 @@ namespace Carli {
               auto new_action = make_standard_action(predicate);
               auto new_node = std::make_shared<Node_Fringe>(*this, new_action, general.get_action, leaf->q_value->depth + 1, refined_feature);
               new_action->data = new_node;
-              node_unsplit_fringe[new_node->q_value->feature].push_back(new_node);
+              node_unsplit_fringe[new_node->q_value->feature.get()].push_back(new_node);
             }
           }
           else {
@@ -195,7 +195,7 @@ namespace Carli {
           for(auto &fringe_axis : general.fringe_values) {
             for(auto &fringe : fringe_axis.second) {
               auto new_fringe = fringe->create_fringe(*this, *leaf);
-              node_unsplit_fringe[new_fringe->q_value->feature].push_back(new_fringe);
+              node_unsplit_fringe[new_fringe->q_value->feature.get()].push_back(new_fringe);
             }
           }
         }
@@ -209,10 +209,10 @@ namespace Carli {
 
       /** Step 2.4: Untrack the old fringe node. */
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-      m_mean_mabe.uncontribute(leaf->q_value->mabe);
+      m_mean_matde.uncontribute(leaf->q_value->matde);
 #endif
-      if(!m_mean_cabe_queue_size)
-        m_mean_cabe.uncontribute(leaf->q_value->cabe);
+      if(!m_mean_catde_queue_size)
+        m_mean_catde.uncontribute(leaf->q_value->catde);
 
       /** Step 2.5: Destroy the old leaf node. */
       excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(leaf->rete_action.lock()));
@@ -264,7 +264,7 @@ namespace Carli {
         auto &node = debuggable_cast<Node &>(*feature_node.second->data.get());
 
         auto new_fringe = node.create_fringe(*this, *split);
-        node_unsplit_fringe[new_fringe->q_value->feature].push_back(new_fringe);
+        node_unsplit_fringe[new_fringe->q_value->feature.get()].push_back(new_fringe);
         
         //std::cerr << "Collapsing: ";
         //node.rete_action.output_name(std::cerr);
@@ -319,7 +319,7 @@ namespace Carli {
   Agent::Agent(const std::shared_ptr<Environment> &environment)
     : m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy();}),
     m_exploration_policy([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(m_epsilon);}),
-    m_split_test([this](const Rete::WME_Token &token, Node_Unsplit &general)->Fringe_Values::iterator{return this->split_test(token, general);}),
+    m_split_test([this](const Rete::WME_Token &token, Node_Unsplit &general)->Fringe_Values::iterator{return this->split_test_value(token, general);}),
     m_environment(environment),
     m_credit_assignment(
       m_credit_assignment_code == "all" ?
@@ -494,7 +494,7 @@ namespace Carli {
     auto new_leaf = make_standard_action(parent);
     auto new_leaf_data = std::make_shared<Node_Fringe>(*this, new_leaf, root_action_data->get_action, 2, feature);
     new_leaf->data = new_leaf_data;
-    root_action_data->fringe_values[new_leaf_data->q_value->feature].push_back(new_leaf_data);
+    root_action_data->fringe_values[new_leaf_data->q_value->feature.get()].push_back(new_leaf_data);
     return new_leaf;
   }
 
@@ -752,22 +752,22 @@ namespace Carli {
 #endif
         }
 
-        q.cabe += abs_edelta;
+        q.catde += abs_edelta;
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-        q.mabe.set_value(q.cabe / q.update_count);
+        q.matde.set_value(q.catde / q.update_count);
 #endif
 
         if(q.update_count > m_contribute_update_count) {
-          if(m_mean_cabe_queue_size) {
-            if(this->m_mean_cabe_queue.size() == uint64_t(m_mean_cabe_queue_size))
-              this->m_mean_cabe_queue.pop();
-            this->m_mean_cabe_queue.push(q.cabe);
+          if(m_mean_catde_queue_size) {
+            if(this->m_mean_catde_queue.size() == uint64_t(m_mean_catde_queue_size))
+              this->m_mean_catde_queue.pop();
+            this->m_mean_catde_queue.push(q.catde);
           }
           else
-            this->m_mean_cabe.contribute(q.cabe);
+            this->m_mean_catde.contribute(q.catde);
 
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-          this->m_mean_mabe.contribute(q.mabe);
+          this->m_mean_matde.contribute(q.matde);
 #endif
         }
       }
@@ -793,12 +793,12 @@ namespace Carli {
     for(const auto &q : current) {
       if(q->type == Q_Value::Type::UNSPLIT) {
         std::cerr << " updates:  " << q->update_count << std::endl;
-        if(m_mean_cabe_queue_size)
-          std::cerr << " cabe q:   " << q->cabe << " of " << this->m_mean_cabe_queue.mean() << ':' << this->m_mean_cabe_queue.mean().get_stddev() << std::endl;
+        if(m_mean_catde_queue_size)
+          std::cerr << " catde q:   " << q->catde << " of " << this->m_mean_catde_queue.mean() << ':' << this->m_mean_catde_queue.mean().get_stddev() << std::endl;
         else
-          std::cerr << " cabe:     " << q->cabe << " of " << this->m_mean_cabe << ':' << this->m_mean_cabe.get_stddev() << std::endl;
+          std::cerr << " catde:     " << q->catde << " of " << this->m_mean_catde << ':' << this->m_mean_catde.get_stddev() << std::endl;
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-        std::cerr << " mabe:     " << q->mabe << " of " << this->m_mean_mabe << ':' << this->m_mean_mabe.get_stddev() << std::endl;
+        std::cerr << " matde:     " << q->matde << " of " << this->m_mean_matde << ':' << this->m_mean_matde.get_stddev() << std::endl;
 #endif
       }
     }
@@ -958,7 +958,7 @@ namespace Carli {
     }
   }
 
-  Fringe_Values::iterator Agent::split_test(const Rete::WME_Token &token, Node_Unsplit &general) {
+  Fringe_Values::iterator Agent::split_test_catde(const Rete::WME_Token &token, Node_Unsplit &general) {
     assert(general.q_value);
     assert(general.q_value->type != Q_Value::Type::SPLIT);
 
@@ -978,10 +978,10 @@ namespace Carli {
     }
 
     /// Classic CATDE criterion
-//    if(!(m_mean_cabe_queue_size ? m_mean_cabe_queue.mean() : m_mean_cabe).outlier_above(general.q_value->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count))
+//    if(!(m_mean_catde_queue_size ? m_mean_catde_queue.mean() : m_mean_catde).outlier_above(general.q_value->catde, m_split_catde + m_split_catde_qmult * q_value_count))
 //      return nullptr;
     
-    assert(general.q_value->depth < m_split_min);
+    assert(general.q_value->depth < m_split_max);
     assert(!general.fringe_values.empty());
     Fringe_Values::iterator chosen_axis = general.fringe_values.end();
     Node_Fringe_Ptr chosen;
@@ -995,17 +995,17 @@ namespace Carli {
 
         if(fringe->q_value->pseudoepisode_count > m_split_pseudoepisodes &&
           (fringe->q_value->update_count > m_split_update_count &&
-          (m_mean_cabe_queue_size ? m_mean_cabe_queue.mean() : m_mean_cabe).outlier_above(fringe->q_value->cabe, m_split_cabe + m_split_cabe_qmult * q_value_count)))
+          (m_mean_catde_queue_size ? m_mean_catde_queue.mean() : m_mean_catde).outlier_above(fringe->q_value->catde, m_split_catde + m_split_catde_qmult * q_value_count)))
         {
 //#ifndef NDEBUG
 //          std::cerr << " matches: " << *fringe->q_value->feature << std::endl;
 //#endif
-          if(!chosen || fringe->q_value->cabe > chosen->q_value->cabe) {
+          if(!chosen || fringe->q_value->catde > chosen->q_value->catde) {
             chosen_axis = fringe_axis;
             chosen = fringe;
             count = 1;
           }
-          else if(fringe->q_value->cabe == chosen->q_value->cabe && random.frand_lt() < 1.0 / ++count) {
+          else if(fringe->q_value->catde == chosen->q_value->catde && random.frand_lt() < 1.0 / ++count) {
             chosen_axis = fringe_axis;
             chosen = fringe;
           }
@@ -1043,6 +1043,76 @@ namespace Carli {
     if(m_value_function_map_mode == "out") {
       chosen->rete_action.lock()->output_name(m_value_function_out, -1);
       m_value_function_out << std::endl;
+    }
+
+    return chosen_axis;
+  }
+
+  Fringe_Values::iterator Agent::split_test_value(const Rete::WME_Token &token, Node_Unsplit &general) {
+    assert(general.q_value);
+    assert(general.q_value->type != Q_Value::Type::SPLIT);
+
+    /// Must obey the value function cap unless below the minimum split depth
+    if(general.q_value->depth >= m_split_min && m_value_function_cap && q_value_count >= m_value_function_cap)
+      return general.fringe_values.end();
+
+    assert(general.q_value->depth < m_split_max);
+    assert(!general.fringe_values.empty());
+    size_t matches = 0;
+    std::unordered_set<tracked_ptr<Feature>> touched;
+    for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+      for(auto &fringe : fringe_axis->second) {
+        if(!fringe->q_value->feature->matches(token))
+          continue;
+        ++matches;
+
+        if(fringe->q_value->pseudoepisode_count <= m_split_pseudoepisodes ||
+           fringe->q_value->update_count <= m_split_update_count)
+        {
+          return general.fringe_values.end(); ///< Wait to gather more data
+        }
+
+        touched.insert(fringe_axis->first);
+      }
+    }
+    
+    Fringe_Values::iterator chosen_axis = general.fringe_values.end();
+    size_t count = 0;
+    double delta_max = std::numeric_limits<double>::lowest();
+    for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+      const auto found = touched.find(fringe_axis->first);
+      if(found == touched.end())
+        continue;
+
+      double lowest = std::numeric_limits<double>::max();
+      double highest = std::numeric_limits<double>::lowest();
+      for(auto &fringe : fringe_axis->second) {
+        lowest = std::min(lowest, fringe->q_value->value);
+        highest = std::max(highest, fringe->q_value->value);
+      }
+      fringe_axis->first->value_delta_max = m_learning_rate * (highest - lowest) + (1 - m_learning_rate) * fringe_axis->first->value_delta_max;
+
+      //++fringe_axis->first->value_delta_update_count;
+      //if(fringe_axis->first->value_delta_update_count <= m_split_update_count)
+      //  continue;
+
+      if(chosen_axis == general.fringe_values.end() || delta_max < fringe_axis->first->value_delta_max) {
+        chosen_axis = fringe_axis;
+        count = 1;
+      }
+      else if(delta_max == fringe_axis->first->value_delta_max && random.frand_lt() < 1.0 / ++count)
+        chosen_axis = fringe_axis;
+    }
+
+    if(chosen_axis == general.fringe_values.end()) {
+      if(!matches) {
+        std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
+#if !defined(NDEBUG) && defined(_WINDOWS)
+        __debugbreak();
+#endif
+      }
+
+      return general.fringe_values.end();
     }
 
     return chosen_axis;
@@ -1120,8 +1190,8 @@ namespace Carli {
   //        for(feature_trie_type &node : *leaf_fringe) {
   //          std::cerr << "         " << node.get() << ' ' << *node.get_key() << " = " << node->value;
   //          std::cerr << "; update_count = " << node->update_count;
-  //          std::cerr << "; cabe = " << node->cabe;
-  //          std::cerr << "; mabe = " << node->cabe / node->update_count;
+  //          std::cerr << "; catde = " << node->catde;
+  //          std::cerr << "; matde = " << node->catde / node->update_count;
   //          if(auto ranged = dynamic_cast<Feature_Ranged_Data *>(node.get_key().get()))
   //            std::cerr << "; split = " << fabs(ranged->midpt_raw - 0.5);
   //          std::cerr << std::endl;

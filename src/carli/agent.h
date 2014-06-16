@@ -68,11 +68,11 @@ namespace Carli {
     int64_t get_pseudoepisode_threshold() const {return m_pseudoepisode_threshold;}
     int64_t get_split_pseudoepisodes() const {return m_split_pseudoepisodes;}
     int64_t get_split_update_count() const {return m_split_update_count;}
-    double get_split_cabe() const {return m_split_cabe;}
-    double get_split_cabe_qmult() const {return m_split_cabe_qmult;}
+    double get_split_catde() const {return m_split_catde;}
+    double get_split_catde_qmult() const {return m_split_catde_qmult;}
     int64_t get_contribute_update_count() const {return m_contribute_update_count;}
     int64_t get_value_function_cap() const {return m_value_function_cap;}
-    int64_t get_mean_cabe_queue_size() const {return m_mean_cabe_queue_size;}
+    int64_t get_mean_catde_queue_size() const {return m_mean_catde_queue_size;}
 
     std::shared_ptr<const Environment> get_env() const {return m_environment;}
     const std::shared_ptr<Environment> & get_env() {return m_environment;}
@@ -80,9 +80,9 @@ namespace Carli {
     int64_t get_episode_number() const {return m_episode_number;}
     int64_t get_step_count() const {return m_step_count;}
     reward_type get_total_reward() const {return m_total_reward;}
-  //  Mean get_mean_cabe() const {return m_mean_cabe;}
+  //  Mean get_mean_catde() const {return m_mean_catde;}
   //#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-  //  Mean get_mean_mabe() const {return m_mean_mabe;}
+  //  Mean get_mean_matde() const {return m_mean_matde;}
   //#endif
 
     void reset_statistics();
@@ -133,8 +133,9 @@ namespace Carli {
     void assign_credit_inv_depth(const Q_Value_List &value_list);
 
     void assign_credit_normalize(const Q_Value_List &value_list, const double &sum);
-
-    Fringe_Values::iterator split_test(const Rete::WME_Token &token, Node_Unsplit &general);
+    
+    Fringe_Values::iterator split_test_catde(const Rete::WME_Token &token, Node_Unsplit &general);
+    Fringe_Values::iterator split_test_value(const Rete::WME_Token &token, Node_Unsplit &general);
 
     static double sum_value(const action_type * const &action, const Q_Value_List &value_list);
 
@@ -173,12 +174,12 @@ namespace Carli {
     virtual void generate_features() = 0;
     virtual void update() = 0;
 
-    Mean m_mean_cabe;
-    Value_Queue m_mean_cabe_queue;
-    const int64_t m_mean_cabe_queue_size = get_Option_Ranged<int64_t>(Options::get_global(), "mean-cabe-queue-size");
+    Mean m_mean_catde;
+    Value_Queue m_mean_catde_queue;
+    const int64_t m_mean_catde_queue_size = get_Option_Ranged<int64_t>(Options::get_global(), "mean-catde-queue-size");
 
   #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-    Mean m_mean_mabe;
+    Mean m_mean_matde;
   #endif
 
   #ifdef WHITESON_ADAPTIVE_TILE
@@ -220,8 +221,8 @@ namespace Carli {
 
     const int64_t m_split_min = get_Option_Ranged<int64_t>(Options::get_global(), "split-min");
     const int64_t m_split_max = get_Option_Ranged<int64_t>(Options::get_global(), "split-max");
-    const double m_split_cabe = get_Option_Ranged<double>(Options::get_global(), "split-cabe");
-    const double m_split_cabe_qmult = get_Option_Ranged<double>(Options::get_global(), "split-cabe-qmult");
+    const double m_split_catde = get_Option_Ranged<double>(Options::get_global(), "split-catde");
+    const double m_split_catde_qmult = get_Option_Ranged<double>(Options::get_global(), "split-catde-qmult");
 
     const int64_t m_pseudoepisode_threshold = get_Option_Ranged<int64_t>(Options::get_global(), "pseudoepisode-threshold"); ///< For deciding how many steps indicates a pseudoepisode
     const int64_t m_split_pseudoepisodes = get_Option_Ranged<int64_t>(Options::get_global(), "split-pseudoepisodes");

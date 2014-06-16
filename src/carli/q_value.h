@@ -43,8 +43,8 @@ namespace Carli {
       lhs->depth = depth;
       lhs->update_count = update_count;
 
-      lhs->cabe = cabe;
-      lhs->mabe = mabe;
+      lhs->catde = catde;
+      lhs->matde = matde;
       
 #ifdef WHITESON_ADAPTIVE_TILE
       lhs->minbe = minbe;
@@ -78,8 +78,8 @@ namespace Carli {
   //  double weight = 1.0;
 
     double value;
-    Value cabe; ///< Cumulative Absolute Bellman Error
-    Value mabe; ///< Mean Absolute Bellman Error (cabe / update_count)
+    Value catde; ///< Cumulative Absolute Bellman Error
+    Value matde; ///< Mean Absolute Bellman Error (catde / update_count)
 
 #ifdef WHITESON_ADAPTIVE_TILE
     double minbe = DBL_MAX; ///< Minimum Bellman Error experienced
