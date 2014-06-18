@@ -73,6 +73,7 @@ namespace Carli {
       cout.rdbuf(this->cout2file.rdbuf());
     }), "<file> Redirect stdout to <file>");
     options.add_line("\n  Environment Options:");
+    options.add(     make_shared<Option_Ranged<bool>>("enable-distractors", false, true, true, true, false), "Turn on extra distractor features in blocks-world.");
     options.add(     make_shared<Option_Ranged<bool>>("ignore-x", false, true, true, true, false), "Simplify cart-pole from 4D to 2D, eliminating x and x-dot.");
     options.add(     make_shared<Option_Ranged<bool>>("random-start", false, true, true, true, false), "Should starting positions be randomized in mountain-car and puddle-world.");
     options.add(     make_shared<Option_Ranged<bool>>("reward-negative", false, true, true, true, true), "Use negative rewards per step in mountain-car rather than positive terminal rewards.");
@@ -90,14 +91,14 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<double>>("credit-assignment-log-base", 0.0, false, numeric_limits<double>::infinity(), false, 2.71828182846), "Which log to perform for inv-log-update-count.");
     options.add(     make_shared<Option_Ranged<double>>("credit-assignment-root", 1.0, false, numeric_limits<double>::infinity(), false, 2.0), "Which root to perform for inv-root-update-count.");
     options.add(     make_shared<Option_Ranged<bool>>("credit-assignment-normalize", false, true, true, true, true), "Ensure credit assignment sums to *at most* 1.");
-    options.add_line("\n  CATDE Options:");
+    options.add_line("\n  Refinement Options:");
+    options.add(     make_shared<Option_Ranged<int64_t>>("pseudoepisode-threshold", 0, true, numeric_limits<int64_t>::max(), true, 20), "How any steps must separate updates for it to count as a pseudoepisode.");
     options.add(     make_shared<Option_Ranged<double>>("split-catde", 0.0, true, numeric_limits<double>::infinity(), false, 0.84155), "How many standard deviations above the mean to refine.");
     options.add(     make_shared<Option_Ranged<double>>("split-catde-qmult", 0.0, true, numeric_limits<double>::infinity(), false, 0.0), "Increase split-catde by this factor of the number of weights.");
-    options.add(     make_shared<Option_Ranged<int64_t>>("split-min", 0, true, numeric_limits<int64_t>::max(), true, 0), "Refinement is assured through this depth.");
     options.add(     make_shared<Option_Ranged<int64_t>>("split-max", 0, true, numeric_limits<int64_t>::max(), true, numeric_limits<int64_t>::max()), "Refinement is strictly prohibited from this depth.");
-    options.add_line("\n  Pseudoepisode Options:");
-    options.add(     make_shared<Option_Ranged<int64_t>>("pseudoepisode-threshold", 0, true, numeric_limits<int64_t>::max(), true, 20), "How any steps must separate updates for it to count as a pseudoepisode.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("split-min", 0, true, numeric_limits<int64_t>::max(), true, 0), "Refinement is assured through this depth.");
     options.add(     make_shared<Option_Ranged<int64_t>>("split-pseudoepisodes", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more pseudoepisode than this to allow refinement.");
+    options.add(     make_shared<Option_Itemized>("split-test", set<string>({"catde", "value"}), "catde"), "'catde' splits based on TD error. 'value' splits on maximal value difference between fringe nodes.");
     options.add(     make_shared<Option_Ranged<int64_t>>("split-update-count", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more update than this to allow refinement.");
     options.add_line("\n  Rete Representation Saving and Loading:");
     options.add(     make_shared<Option_Itemized>("value-function-map-mode", set<string>({"null", "in", "out"}), "null"), "'in' reads in a file written with 'out', resulting in a fixed hierarchical representation.");

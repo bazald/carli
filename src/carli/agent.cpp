@@ -87,7 +87,7 @@ namespace Carli {
       return false;
 #endif
 
-    const Fringe_Values::iterator chosen = m_split_test(token, general);
+    const Fringe_Values::iterator chosen = m_split_criterion(token, general);
 
     if(chosen == general.fringe_values.end())
       return false;
@@ -319,7 +319,6 @@ namespace Carli {
   Agent::Agent(const std::shared_ptr<Environment> &environment)
     : m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy();}),
     m_exploration_policy([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(m_epsilon);}),
-    m_split_test([this](const Rete::WME_Token &token, Node_Unsplit &general)->Fringe_Values::iterator{return this->split_test_value(token, general);}),
     m_environment(environment),
     m_credit_assignment(
       m_credit_assignment_code == "all" ?
@@ -373,6 +372,19 @@ namespace Carli {
   {
     if(m_on_policy)
       m_target_policy = m_exploration_policy;
+
+    if(m_split_test == "catde") {
+      m_split_criterion = [this](const Rete::WME_Token &token, Node_Unsplit &general)->Fringe_Values::iterator{
+        return this->split_test_catde(token, general);
+      };
+    }
+    else if(m_split_test == "value") {
+      m_split_criterion = [this](const Rete::WME_Token &token, Node_Unsplit &general)->Fringe_Values::iterator{
+        return this->split_test_value(token, general);
+      };
+    }
+    else
+      abort();
 
     if(m_value_function_map_mode == "in") {
       std::ifstream fin(m_value_function_map_filename);

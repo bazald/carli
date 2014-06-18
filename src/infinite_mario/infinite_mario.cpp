@@ -247,7 +247,8 @@ namespace Mario {
     //const reward_type reward_jumping = 0; // legal_jump ? 30 : continued_high_jump ? 30 : stopped_high_jump ? -50 : 0;
     const reward_type reward =
       m_current_state->getLevelSceneObservation[OBSERVATION_HEIGHT / 2][OBSERVATION_WIDTH / 2 - 1].detail.pit
-        ? -10000.0 : 100.0 * delta_x - 100.0;
+        ? (m_current_state->getMarioFloatPos.second < m_prev_state->getMarioFloatPos.second ? 10.0 : -10000.0)
+        : 100.0 * delta_x - 110.0;
 
     std::cerr << "Reward = " << reward << std::endl;
 

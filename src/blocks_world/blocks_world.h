@@ -19,6 +19,7 @@ namespace Blocks_World {
   class Clear;
   class In_Place;
   class Name;
+  class Height;
 
   class Feature;
   class Feature : public Carli::Feature{
@@ -35,6 +36,7 @@ namespace Blocks_World {
     virtual int64_t compare_axis(const Clear &rhs) const = 0;
     virtual int64_t compare_axis(const In_Place &rhs) const = 0;
     virtual int64_t compare_axis(const Name &rhs) const = 0;
+    virtual int64_t compare_axis(const Height &rhs) const = 0;
 
     Rete::WME_Bindings bindings() const override {
       Rete::WME_Bindings bindings_;
@@ -65,6 +67,9 @@ namespace Blocks_World {
       return -1;
     }
     int64_t compare_axis(const Name &) const {
+      return -1;
+    }
+    int64_t compare_axis(const Height &) const {
       return -1;
     }
 
@@ -99,6 +104,9 @@ namespace Blocks_World {
       return block - rhs.block;
     }
     int64_t compare_axis(const Name &) const {
+      return -1;
+    }
+    int64_t compare_axis(const Height &) const {
       return -1;
     }
 
@@ -136,6 +144,9 @@ namespace Blocks_World {
     int64_t compare_axis(const Name &rhs) const {
       return block - rhs.block;
     }
+    int64_t compare_axis(const Height &) const {
+      return -1;
+    }
 
     int64_t compare_value(const Carli::Feature &rhs) const {
       return name - debuggable_cast<const Name &>(rhs).name;
@@ -150,6 +161,49 @@ namespace Blocks_World {
     Which block;
     block_id name;
   };
+
+  class Height : public Carli::Feature_Ranged<Feature> {
+  public:
+    Height(const Which &block_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
+     : Carli::Feature_Ranged<Feature>(Rete::WME_Token_Index(5 + block_, 2), bound_lower_, bound_upper_, depth_, upper_, true),
+     block(block_)
+    {
+    }
+
+    Height * clone() const {
+      return new Height(axis.first == 5 ? BLOCK : DEST, bound_lower, bound_upper, depth, upper);
+    }
+
+    int64_t compare_axis(const Feature &rhs) const {
+      return -rhs.compare_axis(*this);
+    }
+    int64_t compare_axis(const Clear &) const {
+      return 1;
+    }
+    int64_t compare_axis(const In_Place &) const {
+      return 1;
+    }
+    int64_t compare_axis(const Name &) const {
+      return 1;
+    }
+    int64_t compare_axis(const Height &rhs) const {
+      return Feature_Ranged_Data::compare_axis(rhs);
+    }
+
+    bool matches(const Rete::WME_Token &) const override {return true;}
+
+    void print(ostream &os) const {
+      os << "height(" << Which(axis.first - 5) << ',' << bound_lower << ',' << bound_upper << ':' << depth << ')';
+    }
+
+    Which block;
+  };
+
+  /** Stupid features:
+    * BLOCK ^column C
+    * BLOCK ^height H
+    * SRC ^right-of DEST
+    */
 
   class Move : public Carli::Action {
   public:
@@ -201,6 +255,8 @@ namespace Blocks_World {
     const Stacks & get_blocks() const {return m_blocks;}
     const Stacks & get_goal() const {return m_goal;}
 
+    int64_t num_blocks() const;
+
   private:
     void init_impl();
 
@@ -235,6 +291,7 @@ namespace Blocks_World {
     const Rete::Symbol_Constant_String_Ptr_C m_clear_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("clear"));
     const Rete::Symbol_Constant_String_Ptr_C m_in_place_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("in-place"));
 //    const Rete::Symbol_Constant_String_Ptr_C m_on_top_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("on-top"));
+    const Rete::Symbol_Constant_String_Ptr_C m_height_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("height"));
     const Rete::Symbol_Constant_String_Ptr_C m_name_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("name"));
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
 

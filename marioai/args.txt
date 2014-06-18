@@ -1,7 +1,7 @@
 --split-min
 1
 --split-update-count
-5
+3
 --discount-rate
 0.9
 --learning-rate
@@ -12,3 +12,7 @@
 on-policy
 --epsilon-greedy
 0.1
+--split-test
+value
+--seed
+936652118

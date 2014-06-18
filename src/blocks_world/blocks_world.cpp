@@ -22,6 +22,13 @@ namespace Blocks_World {
     }
   }
 
+  int64_t Environment::num_blocks() const {
+    int64_t nb = 0;
+    for(const auto &blocks : m_blocks)
+      nb += blocks.size();
+    return nb;
+  }
+
   void Environment::init_impl() {
     m_blocks.clear();
 
@@ -63,7 +70,7 @@ namespace Blocks_World {
   }
 
   void Environment::print_impl(ostream &os) const {
-    os << "Blocks World:" << endl;
+    os << "Blocks World (Table is Left):" << endl;
     for(const Stack &stack : m_blocks) {
       for(const block_id &id : stack)
         os << ' ' << id;
@@ -84,6 +91,8 @@ namespace Blocks_World {
   }
 
   void Agent::generate_rete() {
+    auto env = dynamic_pointer_cast<const Environment>(get_env());
+
     Rete::WME_Bindings state_bindings;
 
     auto filter_action = make_filter(Rete::WME(m_first_var, m_action_attr, m_third_var));
@@ -102,6 +111,16 @@ namespace Blocks_World {
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(2, 2), Rete::WME_Token_Index(0, 0)));
     auto join_dest_name = make_join(state_bindings, join_block_name, filter_name);
 
+    auto filter_height = make_filter(Rete::WME(m_first_var, m_height_attr, m_third_var));
+    state_bindings.clear();
+    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(1, 2), Rete::WME_Token_Index(0, 0)));
+    auto join_block_height = make_join(state_bindings, join_dest_name, filter_height);
+    state_bindings.clear();
+    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(2, 2), Rete::WME_Token_Index(0, 0)));
+    auto join_dest_height = make_join(state_bindings, join_block_height, filter_height);
+
+    auto &join_last = join_dest_height;
+
     auto filter_blink = make_filter(*m_wme_blink);
     auto filter_clear = make_filter(Rete::WME(m_first_var, m_clear_attr, m_third_var));
     auto filter_in_place = make_filter(Rete::WME(m_first_var, m_in_place_attr, m_third_var));
@@ -112,80 +131,70 @@ namespace Blocks_World {
 
     Carli::Node_Unsplit_Ptr root_action_data;
     {
-      auto join_blink = make_existential_join(Rete::WME_Bindings(), join_dest_name, filter_blink);
+      auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
       
       auto root_action = make_standard_action(join_blink);
       root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, get_action, 1, nullptr);
       root_action->data = root_action_data;
     }
 
+    const bool enable_distractors = get_Option_Ranged<bool>(Options::get_global(), "enable-distractors");
+
     std::vector<Feature::Which> blocks = {{Feature::BLOCK, Feature::DEST}};
-    const bool disable_distractors = true;
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4127)
-#endif
-    if(disable_distractors)
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+    if(!enable_distractors)
       blocks = {Feature::BLOCK};
-
     for(const auto &block : blocks) {
       auto feature = new Clear(block, true);
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
-      auto join_block_clear = make_existential_join(state_bindings, join_dest_name, filter_clear);
+      auto join_block_clear = make_existential_join(state_bindings, join_last, filter_clear);
       make_standard_fringe(join_block_clear, root_action_data, feature);
 
       feature = new Clear(block, false);
-      auto neg = make_negation_join(state_bindings, join_dest_name, filter_clear);
+      auto neg = make_negation_join(state_bindings, join_last, filter_clear);
       make_standard_fringe(neg, root_action_data, feature);
     }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4127)
-#endif
-    if(disable_distractors)
+    if(!enable_distractors)
       blocks = {Feature::DEST};
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
     for(const auto &block : blocks) {
       auto feature = new In_Place(block, true);
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
-      auto join_block_in_place = make_existential_join(state_bindings, join_dest_name, filter_in_place);
+      auto join_block_in_place = make_existential_join(state_bindings, join_last, filter_in_place);
       make_standard_fringe(join_block_in_place, root_action_data, feature);
 
       feature = new In_Place(block, false);
-      auto neg = make_negation_join(state_bindings, join_dest_name, filter_in_place);
+      auto neg = make_negation_join(state_bindings, join_last, filter_in_place);
       make_standard_fringe(neg, root_action_data, feature);
     }
 
     for(size_t block = 1; block != m_block_ids.size(); ++block) {
       auto feature = new Name(Feature::BLOCK, m_block_names[block]->value);
-      auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_dest_name);
+      auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_last);
       make_standard_fringe(name_is, root_action_data, feature);
     }
 
     for(size_t block = 0; block != m_block_ids.size(); ++block) {
       auto feature = new Name(Feature::DEST, m_block_names[block]->value);
-      auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_dest_name);
+      auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_last);
       make_standard_fringe(name_is, root_action_data, feature);
     }
+    
+    if(enable_distractors) {
+      const int64_t num_blocks = env->num_blocks();
+      for(const auto &block : blocks) {
+        auto feature = new Height(block, 1.0, double(num_blocks / 2), 2, false);
+        auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), join_last);
+        make_standard_fringe(predicate, root_action_data, feature);
+        
+        feature = new Height(block, double(num_blocks / 2), double(num_blocks), 2, true);
+        predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), join_last);
+        make_standard_fringe(predicate, root_action_data, feature);
+      }
+    }
 
-//    state_bindings.clear();
-//    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(2, 2), Rete::WME_Token_Index(0, 0)));
-//    auto join_block_clear = make_existential_join(state_bindings, join_dest_name, filter_clear);
-//
-//    state_bindings.clear();
-//    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(3, 2), Rete::WME_Token_Index(0, 0)));
-//    auto join_dest_in_place = make_existential_join(state_bindings, join_block_clear, filter_in_place);
-//
 //    for(int i = 1; i != 4; ++i) {
 //      auto block_name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(4, 2), get_block_name(i), join_dest_in_place);
 //
@@ -228,9 +237,11 @@ namespace Blocks_World {
     }
 
     for(auto bt = blocks.begin(), bend = blocks.end(); bt != bend; ++bt) {
+      int64_t height = 0;
       for(auto st = bt->begin(), send = bt->end(); st != send; ++st) {
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_block_attr, m_block_ids[*st]));
         wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[*st], m_name_attr, m_block_names[*st]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[*st], m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
       }
 
       wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[*bt->begin()], m_clear_attr, m_true_value));
