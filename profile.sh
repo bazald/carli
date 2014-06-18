@@ -16,7 +16,7 @@ ENVIRONMENT=puddle_world_p
 #HEAPPROFILE=$ENVIRONMENT.heap $CMD -n 1000   "$@"
 # CPUPROFILE=$ENVIRONMENT.prof CPUPROFILE_FREQUENCY=100000 \
 valgrind --tool=callgrind -v --dump-every-bb=100000000 \
-  ./$ENVIRONMENT -o null --seed $SEED --num-steps 10 --split-min 9 --split-max 9 "$@"
+  ./$ENVIRONMENT -o null --seed $SEED --num-steps 10000 --split-min 9 --split-max 9 "$@"
 #  ./$ENVIRONMENT -o null --seed $SEED --num-steps 10000 --random-start true --learning-rate 0.1 --discount-rate 0.999 --epsilon-greedy 0.1 --policy off-policy --pseudoepisode-threshold 20 --credit-assignment even --split-min 5 --split-max 11 "$@"
 #pprof --gv ./$ENVIRONMENT ./$ENVIRONMENT.prof
 #pprof --callgrind ./$ENVIRONMENT ./$ENVIRONMENT.prof > $ENVIRONMENT.callgrind
