@@ -1,0 +1,12 @@
+source rules.soar
+source rules/rules.soar
+wme-add (nil,state,S1)
+wme-add (S1,name,blocks-world)
+wme-add (S1,block,A)
+wme-add (S1,block,B)
+wme-add (S1,block,C)
+wme-add (A,name,a)
+wme-add (B,name,b)
+wme-add (C,name,c)
+wme-add (A,on,B)
+wme-add (B,on,C)

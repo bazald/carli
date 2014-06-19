@@ -39,8 +39,8 @@ public:
   typedef T element_type;
   typedef Deleter deleter_type;
   typedef element_type * pointer;
-  static const bool deleteable = !(TPM & TPM_UNDELETEABLE);
-  static const bool tracked = !(TPM & TPM_UNTRACKED);
+  enum {deleteable = !(TPM & TPM_UNDELETEABLE)};
+  enum {tracked = !(TPM & TPM_UNTRACKED)};
 
   tracked_ptr(const pointer ptr_ = nullptr);
 

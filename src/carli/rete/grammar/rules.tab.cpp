@@ -1,8 +1,3 @@
-#ifdef _MSC_VER
-#pragma warning(push, 1)
-#pragma warning(disable : 4702)
-#endif
-
 /* A Bison parser, made by GNU Bison 2.7.12-4996.  */
 
 /* Bison implementation for Yacc-like parsers in C
@@ -2072,23 +2067,23 @@ static void rete_error(Rete::Rete_Agent &, const char *s) {
   exit(-1);
 }
 
-void rete_parse_file(Rete::Rete_Agent &agent, const string &filename) {
+int rete_parse_file(Rete::Rete_Agent &agent, const string &filename) {
   FILE * file = fopen(filename.c_str(), "r");
   if(!file)
-    abort();
+    return -1;
 
   rete_in = file;
 
   // rete_lex();
   do {
-    if(rete_parse(agent))
-      abort();
+    const int rv = rete_parse(agent);
+    if(rv) {
+      fclose(file);
+      return rv;
+    }
   } while (!feof(rete_in));
 
   rete_in = stdin;
   fclose(file);
+  return 0;
 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif

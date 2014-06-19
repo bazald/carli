@@ -112,6 +112,7 @@ solution "carli"
                   "C:\\Program Files\\Java\\jdk1.8.0_05\\include\\win32" }
 
   include "src/blocks_world"
+  include "src/demo"
   include "src/infinite_mario"
   include "src/mountain_car"
   include "src/puddle_world"

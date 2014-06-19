@@ -1,3 +1,4 @@
+src/carli/obj
 *~
 *.7z
 *.a
@@ -9,11 +10,13 @@
 *.cache
 *.cbTemp
 *.cbp
+*.cscope_file_list
 *.d
 *.depend
 *.dll
 *.dvi
 *.exe
+*.exp
 *.filters
 *.idb
 *.ilk
@@ -21,6 +24,7 @@
 *.kate-swp
 *.lastbuildstate
 *.layout
+*.lib
 *.lof
 *.log
 *.make
@@ -50,13 +54,15 @@
 *_d
 *_p
 *_r
+blocks_world
 callgrind.out.*
 core
 carli.workspace
+demo
 dump.txt
 git.h
 Makefile
+mountain_car
+puddle_world
+tetris
 !src/carli
-*.cscope_file_list
-*.exp
-*.lib
