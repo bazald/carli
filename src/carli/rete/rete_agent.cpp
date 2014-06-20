@@ -133,6 +133,8 @@ namespace Rete {
       return;
     }
 
+    //const auto wme_clone = std::make_shared<WME>(Symbol_Ptr_C(wme->symbols[0]->clone()), Symbol_Ptr_C(wme->symbols[1]->clone()), Symbol_Ptr_C(wme->symbols[2]->clone()));
+
     agenda.lock();
     working_memory.wmes.insert(wme);
 #ifdef DEBUG_OUTPUT

@@ -68,9 +68,9 @@ namespace Mountain_Car {
     auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
     auto x_dot_attr = std::make_shared<Rete::Symbol_Constant_String>("x-dot");
     auto acceleration_attr = std::make_shared<Rete::Symbol_Constant_String>("acceleration");
-    const std::array<Rete::Symbol_Constant_Int_Ptr, 3> acceleration_values = {{std::make_shared<Rete::Symbol_Constant_Int>(LEFT),
-                                                                               std::make_shared<Rete::Symbol_Constant_Int>(IDLE),
-                                                                               std::make_shared<Rete::Symbol_Constant_Int>(RIGHT)}};
+    const std::array<Rete::Symbol_Constant_Int_Ptr_C, 3> acceleration_values = {{std::make_shared<Rete::Symbol_Constant_Int>(LEFT),
+                                                                                 std::make_shared<Rete::Symbol_Constant_Int>(IDLE),
+                                                                                 std::make_shared<Rete::Symbol_Constant_Int>(RIGHT)}};
 
     Rete::WME_Bindings state_bindings;
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
@@ -225,12 +225,12 @@ namespace Mountain_Car {
     remove_wme(m_wme_blink);
     if(m_x_value->value != env->get_x()) {
       remove_wme(m_x_wme);
-      m_x_value->value = env->get_x();
+      m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(env->get_x());
       insert_wme(m_x_wme);
     }
     if(m_x_dot_value->value != env->get_x_dot()) {
       remove_wme(m_x_dot_wme);
-      m_x_dot_value->value = env->get_x_dot();
+      m_x_dot_value = std::make_shared<Rete::Symbol_Constant_Float>(env->get_x_dot());
       insert_wme(m_x_dot_wme);
     }
     insert_wme(m_wme_blink);

@@ -28,14 +28,6 @@ namespace Rete {
   typedef std::shared_ptr<const Symbol_Identifier> Symbol_Identifier_Ptr_C;
   typedef std::shared_ptr<const Symbol_Variable> Symbol_Variable_Ptr_C;
 
-  typedef std::shared_ptr<Symbol> Symbol_Ptr;
-  typedef std::shared_ptr<Symbol_Constant> Symbol_Constant_Ptr;
-  typedef std::shared_ptr<Symbol_Constant_Float> Symbol_Constant_Float_Ptr;
-  typedef std::shared_ptr<Symbol_Constant_Int> Symbol_Constant_Int_Ptr;
-  typedef std::shared_ptr<Symbol_Constant_String> Symbol_Constant_String_Ptr;
-  typedef std::shared_ptr<Symbol_Identifier> Symbol_Identifier_Ptr;
-  typedef std::shared_ptr<Symbol_Variable> Symbol_Variable_Ptr;
-
   class RETE_LINKAGE Symbol : public Zeni::Pool_Allocator<char [48]>
   {
     Symbol(const Symbol &);
@@ -44,6 +36,8 @@ namespace Rete {
   public:
     Symbol() {}
     virtual ~Symbol() {}
+
+    virtual Symbol * clone() const = 0;
 
     virtual bool operator==(const Symbol &rhs) const = 0;
     virtual bool operator!=(const Symbol &rhs) const = 0;
@@ -110,6 +104,8 @@ namespace Rete {
   public:
     Symbol_Constant_Float(const double &value_) : value(value_) {}
 
+    Symbol_Constant_Float * clone() const override {return new Symbol_Constant_Float(value);}
+
     bool operator==(const Symbol &rhs) const override {return rhs == *this;}
     bool operator!=(const Symbol &rhs) const override {return rhs != *this;}
     bool operator>(const Symbol &rhs) const override {return rhs < *this;}
@@ -141,7 +137,7 @@ namespace Rete {
       return os << value;
     }
 
-    double value;
+    const double value;
   };
 
   class RETE_LINKAGE Symbol_Constant_Int : public Symbol_Constant {
@@ -150,6 +146,8 @@ namespace Rete {
 
   public:
     Symbol_Constant_Int(const int64_t &value_) : value(value_) {}
+
+    Symbol_Constant_Int * clone() const override {return new Symbol_Constant_Int(value);}
 
     bool operator==(const Symbol &rhs) const override {return rhs == *this;}
     bool operator!=(const Symbol &rhs) const override {return rhs != *this;}
@@ -182,7 +180,7 @@ namespace Rete {
       return os << value;
     }
 
-    int64_t value;
+    const int64_t value;
   };
 
   bool Symbol_Constant_Float::operator==(const Symbol_Constant_Int &rhs) const {return value == rhs.value;}
@@ -198,6 +196,8 @@ namespace Rete {
 
   public:
     Symbol_Constant_String(const std::string &value_) : value(value_) {}
+
+    Symbol_Constant_String * clone() const override {return new Symbol_Constant_String(value);}
 
     bool operator==(const Symbol &rhs) const override {return rhs == *this;}
     bool operator!=(const Symbol &rhs) const override {return rhs != *this;}
@@ -226,7 +226,7 @@ namespace Rete {
         return os << '|' << value << '|';
     }
 
-    std::string value;
+    const std::string value;
   };
 
   class RETE_LINKAGE Symbol_Identifier : public Symbol {
@@ -235,6 +235,8 @@ namespace Rete {
 
   public:
     Symbol_Identifier(const std::string &value_) : value(value_) {}
+
+    Symbol_Identifier * clone() const override {return new Symbol_Identifier(value);}
 
     bool operator==(const Symbol &rhs) const override {return rhs == *this;}
     bool operator!=(const Symbol &rhs) const override {return rhs != *this;}
@@ -260,7 +262,7 @@ namespace Rete {
       return os << value;
     }
 
-    std::string value;
+    const std::string value;
   };
 
   class RETE_LINKAGE Symbol_Variable : public Symbol {
@@ -271,6 +273,8 @@ namespace Rete {
     enum Variable {First, Second, Third};
 
     Symbol_Variable(const Variable &value_) : value(value_) {}
+
+    Symbol_Variable * clone() const override {return new Symbol_Variable(value);}
 
     bool operator==(const Symbol &rhs) const override {return rhs == *this;}
     bool operator!=(const Symbol &rhs) const override {return rhs != *this;}
@@ -297,7 +301,7 @@ namespace Rete {
       return os;
     }
 
-    Variable value;
+    const Variable value;
   };
 
   inline void __symbol_size_check() {

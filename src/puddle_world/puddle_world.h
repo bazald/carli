@@ -230,8 +230,8 @@ namespace Puddle_World {
     const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
     const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
 
-    const Rete::Symbol_Constant_Float_Ptr m_x_value = Rete::Symbol_Constant_Float_Ptr(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_position().first));
-    const Rete::Symbol_Constant_Float_Ptr m_y_value = Rete::Symbol_Constant_Float_Ptr(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_position().second));
+    Rete::Symbol_Constant_Float_Ptr_C m_x_value = Rete::Symbol_Constant_Float_Ptr_C(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_position().first));
+    Rete::Symbol_Constant_Float_Ptr_C m_y_value = Rete::Symbol_Constant_Float_Ptr_C(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_position().second));
 
     Rete::WME_Ptr_C m_x_wme;
     Rete::WME_Ptr_C m_y_wme;

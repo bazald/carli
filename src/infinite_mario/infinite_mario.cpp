@@ -421,13 +421,13 @@ namespace Mario {
       }
     }
 
-    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, Feature_Position::X, 0.0f, 4000.0f);
-    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(node_unsplit, Feature_Position::Y, 0.0f, 352.0f);
+    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(root_action_data, Feature_Position::X, 0.0f, 4000.0f);
+    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(root_action_data, Feature_Position::Y, 0.0f, 352.0f);
 
     generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(root_action_data, Feature_Numeric::RIGHT_PIT_DIST, 0.0f, 12.0f);
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, Feature_Numeric::RIGHT_PIT_WIDTH, 0.0f, 12.0f);
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, Feature_Numeric::RIGHT_JUMP_DIST, 0.0f, 12.0f);
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(node_unsplit, Feature_Numeric::RIGHT_JUMP_HEIGHT, 0.0f, 12.0f);
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(root_action_data, Feature_Numeric::RIGHT_PIT_WIDTH, 0.0f, 12.0f);
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(root_action_data, Feature_Numeric::RIGHT_JUMP_DIST, 0.0f, 12.0f);
+    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(root_action_data, Feature_Numeric::RIGHT_JUMP_HEIGHT, 0.0f, 12.0f);
 
     /*** Output Buttons ***/
 

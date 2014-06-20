@@ -170,10 +170,10 @@ namespace Puddle_World {
     auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
     auto y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
     auto move_attr = std::make_shared<Rete::Symbol_Constant_String>("move");
-    const std::array<Rete::Symbol_Constant_Int_Ptr, 4> move_values = {{std::make_shared<Rete::Symbol_Constant_Int>(NORTH),
-                                                                       std::make_shared<Rete::Symbol_Constant_Int>(SOUTH),
-                                                                       std::make_shared<Rete::Symbol_Constant_Int>(EAST),
-                                                                       std::make_shared<Rete::Symbol_Constant_Int>(WEST)}};
+    const std::array<Rete::Symbol_Constant_Int_Ptr_C, 4> move_values = {{std::make_shared<Rete::Symbol_Constant_Int>(NORTH),
+                                                                         std::make_shared<Rete::Symbol_Constant_Int>(SOUTH),
+                                                                         std::make_shared<Rete::Symbol_Constant_Int>(EAST),
+                                                                         std::make_shared<Rete::Symbol_Constant_Int>(WEST)}};
 
     Rete::WME_Bindings state_bindings;
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
@@ -322,12 +322,12 @@ namespace Puddle_World {
     remove_wme(m_wme_blink);
     if(m_x_value->value != pos.first) {
       remove_wme(m_x_wme);
-      m_x_value->value = pos.first;
+      m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(pos.first);
       insert_wme(m_x_wme);
     }
     if(m_y_value->value != pos.second) {
       remove_wme(m_y_wme);
-      m_y_value->value = pos.second;
+      m_y_value = std::make_shared<Rete::Symbol_Constant_Float>(pos.first);
       insert_wme(m_y_wme);
     }
     insert_wme(m_wme_blink);
