@@ -1,6 +1,32 @@
+%output "rules.tab.cpp"
+%defines "rules.tab.hpp"
 %error-verbose
 %locations
 %name-prefix "rete"
+%define api.pure full
+%lex-param { yyscan_t yyscanner }
+%parse-param { yyscan_t yyscanner }
+%parse-param { Rete::Rete_Agent &agent }
+
+%code requires {
+#ifndef YY_TYPEDEF_YY_SCANNER_T
+#define YY_TYPEDEF_YY_SCANNER_T
+typedef void *yyscan_t;
+struct YYLTYPE;
+#endif
+}
+
+%code {
+#include "lex.rete.hpp"
+int reteerror(const yyscan_t yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
+  cout << "Source error, line " << reteget_lineno(yyscanner) << ": " << msg << endl;
+  return -1;
+}
+int reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
+  cout << "Source error, line " << reteget_lineno(yyscanner) << ": " << msg << endl;
+  return -1;
+}
+}
 
 %{
 #include <cstdio>
@@ -9,17 +35,6 @@
 #define YYDEBUG 1
 
 using namespace std;
-
-typedef struct yy_buffer_state *YY_BUFFER_STATE;
-void reteerror(Rete::Rete_Agent &, const char *s);
-int reteget_lineno();
-int retelex();
-int retelex_destroy();
-int reteparse(Rete::Rete_Agent &agent);
-void reteset_lineno(int line_number);
-void rete_delete_buffer(YY_BUFFER_STATE b);
-YY_BUFFER_STATE rete_scan_string(const char *s);
-extern FILE *retein;
 
 static list<string> * Flags(const string &flag, list<string> * flags = nullptr) {
   if(!flags)
@@ -78,6 +93,7 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
 %token <csval> COMMAND_EXIT
 %token <csval> COMMAND_INSERT_WME
 %token <csval> COMMAND_REMOVE_WME
+%token <csval> COMMAND_SOURCE
 %token <csval> COMMAND_SP
 %token <sval> FLAG
 %token <fval> FLOAT
@@ -94,13 +110,9 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
 %type <symbol_ptr> symbol_constant
 %type <sval> string_or_literal literal literal_parts
 
-%parse-param {Rete::Rete_Agent &agent}
-
 %%
-
 commands:
-  commands command
-  | command
+  | commands command
   ;
 command:
   COMMAND_EXCISE STRING { agent.excise_rule(*$2);
@@ -116,6 +128,10 @@ command:
                                                                                      delete $3;
                                                                                      delete $5;
                                                                                      delete $6; }
+  | COMMAND_SOURCE string_or_literal { const int rv = rete_parse_file(agent, *$2);
+                                       delete $2;
+                                       if(rv)
+                                         reteerror(yyscanner, agent, "Error sourcing recursively."); }
   | COMMAND_SP rule { string name = get<1>(*$2);
                       auto node = agent.make_action_retraction([name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
                                                                  cout << wme_vector << "->" << name << endl;
@@ -214,7 +230,7 @@ conditions:
                               delete $2; }
   | conditions '(' VARIABLE PREDICATE symbol_constant ')' { auto lhs_index = find_index($1->second, *$3);
                                                             if(lhs_index.second > 2)
-                                                              reteerror(agent, "Unbound variable tested by predicate.");
+                                                              reteerror(yyscanner, agent, "Unbound variable tested by predicate.");
                                                             $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vc($4, lhs_index, *$5, $1->first)), $1->second);
                                                             delete $1;
                                                             delete $3;
@@ -222,7 +238,7 @@ conditions:
   | conditions '(' VARIABLE PREDICATE VARIABLE ')' { auto lhs_index = find_index($1->second, *$3);
                                                      auto rhs_index = find_index($1->second, *$5);
                                                      if(lhs_index.second > 2 || rhs_index.second > 2)
-                                                       reteerror(agent, "Unbound variable tested by predicate.");
+                                                       reteerror(yyscanner, agent, "Unbound variable tested by predicate.");
                                                      $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vv($4, lhs_index, rhs_index, $1->first)), $1->second);
                                                      delete $1;
                                                      delete $3;
@@ -261,43 +277,45 @@ literal_parts:
 
 %%
 
-void reteerror(Rete::Rete_Agent &, const char *s) {
-  cout << "Parse error, line " << reteget_lineno() << ": " << s << endl;
-  exit(-1);
-}
-
 int rete_parse_file(Rete::Rete_Agent &agent, const string &filename) {
   FILE * file = fopen(filename.c_str(), "r");
   if(!file)
     return -1;
 
-  int rv = 0;
-  reteset_lineno(1);
-  retein = file;
+  yyscan_t yyscanner;
+  if(retelex_init(&yyscanner)) {
+    fclose(file);
+    return -1;
+  }
 
+  int rv = 0;
+
+  reteset_in(file, yyscanner);
   // retelex();
   do {
-    rv = reteparse(agent);
+    rv = reteparse(yyscanner, agent);
     if(rv)
       break;
-  } while (!feof(retein));
+  } while (!feof(reteget_in(yyscanner)));
 
-  retelex_destroy();
-  retein = stdin;
+  retelex_destroy(yyscanner);
   fclose(file);
   return rv;
 }
 
 int rete_parse_string(Rete::Rete_Agent &agent, const string &str) {
   int rv = 0;
-  //retelex_init();
-  reteset_lineno(0);
-  YY_BUFFER_STATE buf = rete_scan_string(str.c_str());
+
+  yyscan_t yyscanner;
+  if(retelex_init(&yyscanner))
+    return -1;
+
+  YY_BUFFER_STATE buf = rete_scan_string(str.c_str(), yyscanner);
 
   // retelex();
-  rv = reteparse(agent);
+  rv = reteparse(yyscanner, agent);
 
-  rete_delete_buffer(buf);
-  retelex_destroy();
+  rete_delete_buffer(buf, yyscanner);
+  retelex_destroy(yyscanner);
   return rv;
 }

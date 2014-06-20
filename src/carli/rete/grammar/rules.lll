@@ -1,6 +1,8 @@
+%option outfile="lex.rete.cpp" header-file="lex.rete.hpp"
 %option never-interactive
 %option prefix="rete"
-%option noyywrap
+%option reentrant bison-bridge
+%option noyywrap nounput noinput
 %option yylineno
 
 %{
@@ -13,43 +15,46 @@ struct Rule;
 
 #include "rules.tab.hpp"
 
-#define YY_DECL int retelex()
+#define YY_DECL int retelex(YYSTYPE * yylval_param, YYLTYPE * yyltype_param, yyscan_t yyscanner)
+
+extern YY_DECL;
 
 using namespace std;
 %}
 
 %x READ_STRING
 %%
-[ \t\r]                                   ;
-#.*                                       ;
-<INITIAL,READ_STRING>\n                   { }
-excise                                    { retelval.csval = "excise"; return COMMAND_EXCISE; }
-exit                                      { retelval.csval = "exit"; return COMMAND_EXIT; }
-insert-wme                                { retelval.csval = "insert-wme"; return COMMAND_INSERT_WME; }
-remove-wme                                { retelval.csval = "remove-wme"; return COMMAND_REMOVE_WME; }
-sp                                        { retelval.csval = "sp"; return COMMAND_SP; }
-:filter                                   { retelval.sval = new string(retetext); return FLAG; }
--?[0-9]+\.[0-9]+                          { retelval.fval = atof(retetext); return FLOAT; }
--?[0-9]+                                  { retelval.ival = atoi(retetext); return INT; }
-\<[a-zA-Z0-9\-\*]+\>                      { retelval.sval = new string(retetext + 1);
-                                            retelval.sval->resize(retelval.sval->size() - 1);
-                                            return VARIABLE;
-                                          }
-[a-zA-Z0-9]+                              { retelval.sval = new string(retetext); return STRING; }
-[a-zA-Z0-9]+[a-zA-Z0-9\-*]*[a-zA-Z0-9]+   { retelval.sval = new string(retetext); return STRING; }
-[\^\(\)\{\}+-]                            { return retetext[0]; }
-==                                        { retelval.predicate = Rete::Rete_Predicate::EQ; return PREDICATE; }
-!=                                        { retelval.predicate = Rete::Rete_Predicate::NEQ; return PREDICATE; }
->                                         { retelval.predicate = Rete::Rete_Predicate::GT; return PREDICATE; }
->=                                        { retelval.predicate = Rete::Rete_Predicate::GTE; return PREDICATE; }
-\<                                        { retelval.predicate = Rete::Rete_Predicate::LT; return PREDICATE; }
-\<=                                       { retelval.predicate = Rete::Rete_Predicate::LTE; return PREDICATE; }
-\|                                        { BEGIN(READ_STRING); return '|'; }
-<READ_STRING>\\\|                         { retelval.sval = new string("\\|"); return STRING_PART_S; }
-<READ_STRING>\\t                          { retelval.sval = new string("\\t"); return STRING_PART_S; }
-<READ_STRING>\\r                          { retelval.sval = new string("\\r"); return STRING_PART_S; }
-<READ_STRING>\\n                          { retelval.sval = new string("\\n"); return STRING_PART_S; }
-<READ_STRING>\|                           { BEGIN(INITIAL); return '|'; }
-<READ_STRING>\r                           ;
-<READ_STRING>[^\|\r\n]                    { retelval.cval = retetext[0]; return STRING_PART_C; }
+[ \t\r]                                               ;
+#.*                                                   ;
+<INITIAL,READ_STRING>\n                               { }
+excise                                                { yylval->csval = "excise"; return COMMAND_EXCISE; }
+exit                                                  { yylval->csval = "exit"; return COMMAND_EXIT; }
+insert-wme                                            { yylval->csval = "insert-wme"; return COMMAND_INSERT_WME; }
+remove-wme                                            { yylval->csval = "remove-wme"; return COMMAND_REMOVE_WME; }
+source                                                { yylval->csval = "source"; return COMMAND_SOURCE; }
+sp                                                    { yylval->csval = "sp"; return COMMAND_SP; }
+:filter                                               { yylval->sval = new string(yytext); return FLAG; }
+-?[0-9]+\.[0-9]+                                      { yylval->fval = atof(yytext); return FLOAT; }
+-?[0-9]+                                              { yylval->ival = atoi(yytext); return INT; }
+\<[a-zA-Z0-9\-\*]+\>                                  { yylval->sval = new string(yytext + 1);
+                                                        yylval->sval->resize(yylval->sval->size() - 1);
+                                                        return VARIABLE;
+                                                      }
+[a-zA-Z0-9]+                                          { yylval->sval = new string(yytext); return STRING; }
+[a-zA-Z0-9./\\]+[a-zA-Z0-9./\\\-*]*[a-zA-Z0-9./\\]+   { yylval->sval = new string(yytext); return STRING; }
+[\^\(\)\{\}+-]                                        { return yytext[0]; }
+==                                                    { yylval->predicate = Rete::Rete_Predicate::EQ; return PREDICATE; }
+!=                                                    { yylval->predicate = Rete::Rete_Predicate::NEQ; return PREDICATE; }
+>                                                     { yylval->predicate = Rete::Rete_Predicate::GT; return PREDICATE; }
+>=                                                    { yylval->predicate = Rete::Rete_Predicate::GTE; return PREDICATE; }
+\<                                                    { yylval->predicate = Rete::Rete_Predicate::LT; return PREDICATE; }
+\<=                                                   { yylval->predicate = Rete::Rete_Predicate::LTE; return PREDICATE; }
+\|                                                    { BEGIN(READ_STRING); return '|'; }
+<READ_STRING>\\\|                                     { yylval->sval = new string("\\|"); return STRING_PART_S; }
+<READ_STRING>\\t                                      { yylval->sval = new string("\\t"); return STRING_PART_S; }
+<READ_STRING>\\r                                      { yylval->sval = new string("\\r"); return STRING_PART_S; }
+<READ_STRING>\\n                                      { yylval->sval = new string("\\n"); return STRING_PART_S; }
+<READ_STRING>\|                                       { BEGIN(INITIAL); return '|'; }
+<READ_STRING>\r                                       ;
+<READ_STRING>[^\|\r\n]                                { yylval->cval = yytext[0]; return STRING_PART_C; }
 %%

@@ -39,6 +39,19 @@
 #if YYDEBUG
 extern int retedebug;
 #endif
+/* "%code requires" blocks.  */
+/* Line 2053 of yacc.c  */
+#line 11 "rules.yyy"
+
+#ifndef YY_TYPEDEF_YY_SCANNER_T
+#define YY_TYPEDEF_YY_SCANNER_T
+typedef void *yyscan_t;
+struct YYLTYPE;
+#endif
+
+
+/* Line 2053 of yacc.c  */
+#line 55 "rules.tab.hpp"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -50,15 +63,16 @@ extern int retedebug;
      COMMAND_EXIT = 259,
      COMMAND_INSERT_WME = 260,
      COMMAND_REMOVE_WME = 261,
-     COMMAND_SP = 262,
-     FLAG = 263,
-     FLOAT = 264,
-     INT = 265,
-     STRING = 266,
-     STRING_PART_C = 267,
-     STRING_PART_S = 268,
-     VARIABLE = 269,
-     PREDICATE = 270
+     COMMAND_SOURCE = 262,
+     COMMAND_SP = 263,
+     FLAG = 264,
+     FLOAT = 265,
+     INT = 266,
+     STRING = 267,
+     STRING_PART_C = 268,
+     STRING_PART_S = 269,
+     VARIABLE = 270,
+     PREDICATE = 271
    };
 #endif
 
@@ -67,7 +81,7 @@ extern int retedebug;
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 64 "rules.yyy"
+#line 79 "rules.yyy"
 
   char cval;
   const char *csval;
@@ -82,7 +96,7 @@ typedef union YYSTYPE
 
 
 /* Line 2053 of yacc.c  */
-#line 86 "rules.tab.hpp"
+#line 100 "rules.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -102,8 +116,7 @@ typedef struct YYLTYPE
 # define YYLTYPE_IS_TRIVIAL 1
 #endif
 
-extern YYSTYPE retelval;
-extern YYLTYPE retelloc;
+
 #ifdef YYPARSE_PARAM
 #if defined __STDC__ || defined __cplusplus
 int reteparse (void *YYPARSE_PARAM);
@@ -112,7 +125,7 @@ int reteparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int reteparse (Rete::Rete_Agent &agent);
+int reteparse (yyscan_t yyscanner, Rete::Rete_Agent &agent);
 #else
 int reteparse ();
 #endif
