@@ -1,6 +1,6 @@
 %error-verbose
 %locations
-%name-prefix "rete_"
+%name-prefix "rete"
 
 %{
 #include <cstdio>
@@ -10,9 +10,23 @@
 
 using namespace std;
 
-int rete_lex();
-int rete_parse();
-extern FILE *rete_in;
+typedef struct yy_buffer_state *YY_BUFFER_STATE;
+void reteerror(Rete::Rete_Agent &, const char *s);
+int reteget_lineno();
+int retelex();
+int retelex_destroy();
+int reteparse(Rete::Rete_Agent &agent);
+void reteset_lineno(int line_number);
+void rete_delete_buffer(YY_BUFFER_STATE b);
+YY_BUFFER_STATE rete_scan_string(const char *s);
+extern FILE *retein;
+
+static list<string> * Flags(const string &flag, list<string> * flags = nullptr) {
+  if(!flags)
+    flags = new list<string>;
+  flags->push_back(flag);
+  return flags;
+}
 
 static array<string, 3> Variable(const string &s0, const string &s1, const string &s2) {
   array<string, 3> variable;
@@ -45,20 +59,26 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
   return Rete::WME_Token_Index(size_t(-1), uint8_t(-1));
 }
 
-static void rete_error(Rete::Rete_Agent &agent, const char *s);
-
 %}
 
 %union {
   char cval;
+  const char *csval;
+  std::list<std::string> *flags_ptr;
   double fval;
   int64_t ival;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
+  std::tuple<Rete::Rete_Node_Ptr, std::string, std::list<std::string>> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 }
 
+%token <csval> COMMAND_EXIT
+%token <csval> COMMAND_INSERT_WME
+%token <csval> COMMAND_REMOVE_WME
+%token <csval> COMMAND_SP
+%token <sval> FLAG
 %token <fval> FLOAT
 %token <ival> INT
 %token <sval> STRING
@@ -67,7 +87,9 @@ static void rete_error(Rete::Rete_Agent &agent, const char *s);
 %token <sval> VARIABLE
 %token <predicate> PREDICATE
 
+%type <flags_ptr> flags
 %type <rete_node_ptr> final_conditions conditions condition_group condition_type condition
+%type <rule_ptr> rule
 %type <symbol_ptr> symbol_constant
 %type <sval> string_or_literal literal literal_parts
 
@@ -75,20 +97,44 @@ static void rete_error(Rete::Rete_Agent &agent, const char *s);
 
 %%
 
-rules:
-  rules rule
-  | rule
+commands:
+  commands command
+  | command
   ;
+command:
+  COMMAND_EXIT { exit(0); }
+  | COMMAND_INSERT_WME '(' symbol_constant '^' symbol_constant symbol_constant ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
+                                                                                         agent.insert_wme(wme);
+                                                                                         delete $3;
+                                                                                         delete $5;
+                                                                                         delete $6; }
+  | COMMAND_REMOVE_WME '(' symbol_constant '^' symbol_constant symbol_constant ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
+                                                                                         agent.remove_wme(wme);
+                                                                                         delete $3;
+                                                                                         delete $5;
+                                                                                         delete $6; }
+  | COMMAND_SP rule { string name = get<1>(*$2);
+                      auto node = agent.make_action_retraction([name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
+                                                                 cout << wme_vector << "->" << name << endl;
+                                                               }, [name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
+                                                                 cout << wme_vector << "<-" << name << endl;
+                                                               }, get<0>(*$2));
+                      agent.source_rule(name, node);
+                      delete $2; }
 rule:
-  STRING '{' final_conditions '}' { string name = *$1;
-                                    auto node = agent.make_action_retraction([name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
-                                                                               cout << wme_vector << "->" << name << endl;
-                                                                             }, [name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
-                                                                                  cout << wme_vector << "<-" << name << endl;
-                                                                                }, $3->first);
-                                    agent.source_rule(name, node);
-                                    delete $1;
-                                    delete $3; }
+  '{' STRING flags final_conditions '}' { $$ = new tuple<Rete::Rete_Node_Ptr, std::string, std::list<std::string>>($4->first, *$2, *$3);
+                                          delete $2;
+                                          delete $3;
+                                          delete $4; }
+  | '{' STRING final_conditions '}' { $$ = new tuple<Rete::Rete_Node_Ptr, std::string, std::list<std::string>>($3->first, *$2, list<string>());
+                                      delete $2;
+                                      delete $3; }
+  ;
+flags:
+  flags FLAG { $$ = Flags(*$2, $1);
+               delete $2; }
+  | FLAG { $$ = Flags(*$1);
+           delete $1; }
   ;
 final_conditions:
   conditions { $$ = $1; }
@@ -165,7 +211,7 @@ conditions:
                               delete $2; }
   | conditions '(' VARIABLE PREDICATE symbol_constant ')' { auto lhs_index = find_index($1->second, *$3);
                                                             if(lhs_index.second > 2)
-                                                              rete_error(agent, "Unbound variable tested by predicate.");
+                                                              reteerror(agent, "Unbound variable tested by predicate.");
                                                             $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vc($4, lhs_index, *$5, $1->first)), $1->second);
                                                             delete $1;
                                                             delete $3;
@@ -173,7 +219,7 @@ conditions:
   | conditions '(' VARIABLE PREDICATE VARIABLE ')' { auto lhs_index = find_index($1->second, *$3);
                                                      auto rhs_index = find_index($1->second, *$5);
                                                      if(lhs_index.second > 2 || rhs_index.second > 2)
-                                                       rete_error(agent, "Unbound variable tested by predicate.");
+                                                       reteerror(agent, "Unbound variable tested by predicate.");
                                                      $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vv($4, lhs_index, rhs_index, $1->first)), $1->second);
                                                      delete $1;
                                                      delete $3;
@@ -212,10 +258,8 @@ literal_parts:
 
 %%
 
-extern size_t g_line_number;
-
-static void rete_error(Rete::Rete_Agent &, const char *s) {
-  cout << "Parse error, line " << g_line_number << ": " << s << endl;
+void reteerror(Rete::Rete_Agent &, const char *s) {
+  cout << "Parse error, line " << reteget_lineno() << ": " << s << endl;
   exit(-1);
 }
 
@@ -224,18 +268,34 @@ int rete_parse_file(Rete::Rete_Agent &agent, const string &filename) {
   if(!file)
     return -1;
 
-  rete_in = file;
+  int rv = 0;
+  reteset_lineno(1);
+  retein = file;
 
-  // rete_lex();
+  // retelex();
   do {
-    const int rv = rete_parse(agent);
-    if(rv) {
-      fclose(file);
-      return rv;
-    }
-  } while (!feof(rete_in));
+    rv = reteparse(agent);
+    if(rv)
+      break;
+  } while (!feof(retein));
 
-  rete_in = stdin;
+  retein = stdin;
   fclose(file);
-  return 0;
+  return rv;
+}
+
+int rete_parse_string(Rete::Rete_Agent &agent, const string &str) {
+  int rv = 0;
+  //retelex_init();
+  reteset_lineno(0);
+  YY_BUFFER_STATE buf = rete_scan_string(str.c_str());
+
+  cerr << "Parsing: " << str << endl;
+
+  // retelex();
+  rv = reteparse(agent);
+
+  rete_delete_buffer(buf);
+  retelex_destroy();
+  return rv;
 }

@@ -109,7 +109,20 @@ namespace Rete {
     typedef Output::List::list_pointer_type Outputs;
 
     Rete_Node() {}
-    virtual ~Rete_Node() {}
+
+    virtual ~Rete_Node() {
+      while(outputs_enabled) {
+        auto oe = outputs_enabled;
+        oe->erase_from(outputs_enabled);
+        delete &**oe;
+      }
+
+      while(outputs_disabled) {
+        auto od = outputs_disabled;
+        od->erase_from(outputs_disabled);
+        delete &**od;
+      }
+    }
 
     virtual void destroy(Filters &filters, const Rete_Node_Ptr &output) = 0;
 

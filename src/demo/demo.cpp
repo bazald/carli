@@ -5,10 +5,7 @@
 #include <sstream>
 
 static void execute(Rete::Rete_Agent &ragent, const std::string &line);
-
-static void exit(const std::vector<std::string> &args);
 static void source(Rete::Rete_Agent &ragent, const std::vector<std::string> &args);
-static void wme_toggle(Rete::Rete_Agent &ragent, const std::vector<std::string> &args, const bool &insert);
 
 int main(int /*argc*/, char ** /*argv*/) {
   Rete::Rete_Agent ragent;
@@ -44,30 +41,10 @@ void execute(Rete::Rete_Agent &ragent, const std::string &line) {
     };
   }
   
-  if(command == "exit")
-    exit(args);
-  else if(command == "source")
+  if(command == "source")
     source(ragent, args);
-  else if(command == "wme-add")
-    wme_toggle(ragent, args, true);
-  else if(command == "wme-remove")
-    wme_toggle(ragent, args, false);
   else
-    std::cerr << "Unknown command: " << command << std::endl;
-}
-
-void exit(const std::vector<std::string> &args) {
-  if(args.empty())
-    exit(0);
-  else {
-    std::istringstream iss(args[0]);
-    int i;
-    iss >> i;
-    if(iss)
-      exit(i);
-    else
-      exit(-1);
-  }
+    rete_parse_string(ragent, line);
 }
 
 void source(Rete::Rete_Agent &ragent, const std::vector<std::string> &args) {
@@ -79,42 +56,6 @@ void source(Rete::Rete_Agent &ragent, const std::vector<std::string> &args) {
         std::cerr << "Failed to source: " << arg << std::endl;
         return;
       }
-    }
-  }
-}
-
-void wme_toggle(Rete::Rete_Agent &ragent, const std::vector<std::string> &args, const bool &insert) {
-  if(args.empty())
-    std::cerr << "wme-add usage: wme-" << (insert ? "add" : "remove") << " (sym1,sym2,sym3) [...]" << std::endl;
-  else {
-    for(const auto &arg : args) {
-      const size_t paren_open = arg.find('(');
-      const size_t comma1 = arg.find(',', paren_open + 1);
-      const size_t comma2 = arg.find(',', comma1 + 1);
-      const size_t paren_close = arg.find(')', comma2 + 1);
-      if(paren_open > comma1 || comma1 > comma2 || comma2 > paren_close || paren_close == std::string::npos) {
-        std::cerr << "Invalid WME: " << arg << std::endl;
-        return;
-      }
-      
-      std::vector<std::string> syms = {{arg.substr(paren_open + 1, comma1      - paren_open  - 1),
-                                        arg.substr(comma1     + 1, comma2      - comma1      - 1),
-                                        arg.substr(comma2     + 1, paren_close - comma2      - 1)}};
-      std::array<Rete::Symbol_Ptr_C, 3> sym_ptrs;
-      
-      for(int i = 0; i != 3; ++i) {
-        if(syms[i].find_first_not_of("-0.123456789") == std::string::npos)
-          sym_ptrs[i] = std::make_shared<Rete::Symbol_Constant_Float>(atof(syms[i].c_str()));
-        else
-          sym_ptrs[i] = std::make_shared<Rete::Symbol_Constant_String>(syms[i]);
-      }
-      
-      const auto wme = std::make_shared<Rete::WME>(sym_ptrs[0], sym_ptrs[1], sym_ptrs[2]);
-
-      if(insert)
-        ragent.insert_wme(wme);
-      else
-        ragent.remove_wme(wme);
     }
   }
 }

@@ -1,6 +1,7 @@
 %option never-interactive
-%option prefix="rete_"
+%option prefix="rete"
 %option noyywrap
+%option yylineno
 
 %{
 #include <cstdio>
@@ -12,39 +13,42 @@ struct Rule;
 
 #include "rules.tab.hpp"
 
-#define YY_DECL int rete_lex()
+#define YY_DECL int retelex()
 
 using namespace std;
-
-size_t g_line_number = 1u;
 %}
 
 %x READ_STRING
 %%
 [ \t\r]                                   ;
 #.*                                       ;
-<INITIAL,READ_STRING>\n                   { ++g_line_number; }
--?[0-9]+\.[0-9]+                          { rete_lval.fval = atof(rete_text); return FLOAT; }
--?[0-9]+                                  { rete_lval.ival = atoi(rete_text); return INT; }
-\<[a-zA-Z0-9\-\*]+\>                      { rete_lval.sval = new string(rete_text + 1);
-                                            rete_lval.sval->resize(rete_lval.sval->size() - 1);
+<INITIAL,READ_STRING>\n                   { }
+exit                                      { retelval.csval = "exit"; return COMMAND_EXIT; }
+insert-wme                                { retelval.csval = "insert-wme"; return COMMAND_INSERT_WME; }
+remove-wme                                { retelval.csval = "remove-wme"; return COMMAND_REMOVE_WME; }
+sp                                        { retelval.csval = "sp"; return COMMAND_SP; }
+:filter                                   { retelval.sval = new string(retetext); return FLAG; }
+-?[0-9]+\.[0-9]+                          { retelval.fval = atof(retetext); return FLOAT; }
+-?[0-9]+                                  { retelval.ival = atoi(retetext); return INT; }
+\<[a-zA-Z0-9\-\*]+\>                      { retelval.sval = new string(retetext + 1);
+                                            retelval.sval->resize(retelval.sval->size() - 1);
                                             return VARIABLE;
                                           }
-[a-zA-Z0-9]+                              { rete_lval.sval = new string(rete_text); return STRING; }
-[a-zA-Z0-9]+[a-zA-Z0-9\-*]*[a-zA-Z0-9]+   { rete_lval.sval = new string(rete_text); return STRING; }
-[\^\(\)\{\}+-]                            { return rete_text[0]; }
-==                                        { rete_lval.predicate = Rete::Rete_Predicate::EQ; return PREDICATE; }
-!=                                        { rete_lval.predicate = Rete::Rete_Predicate::NEQ; return PREDICATE; }
->                                         { rete_lval.predicate = Rete::Rete_Predicate::GT; return PREDICATE; }
->=                                        { rete_lval.predicate = Rete::Rete_Predicate::GTE; return PREDICATE; }
-\<                                        { rete_lval.predicate = Rete::Rete_Predicate::LT; return PREDICATE; }
-\<=                                       { rete_lval.predicate = Rete::Rete_Predicate::LTE; return PREDICATE; }
+[a-zA-Z0-9]+                              { retelval.sval = new string(retetext); return STRING; }
+[a-zA-Z0-9]+[a-zA-Z0-9\-*]*[a-zA-Z0-9]+   { retelval.sval = new string(retetext); return STRING; }
+[\^\(\)\{\}+-]                            { return retetext[0]; }
+==                                        { retelval.predicate = Rete::Rete_Predicate::EQ; return PREDICATE; }
+!=                                        { retelval.predicate = Rete::Rete_Predicate::NEQ; return PREDICATE; }
+>                                         { retelval.predicate = Rete::Rete_Predicate::GT; return PREDICATE; }
+>=                                        { retelval.predicate = Rete::Rete_Predicate::GTE; return PREDICATE; }
+\<                                        { retelval.predicate = Rete::Rete_Predicate::LT; return PREDICATE; }
+\<=                                       { retelval.predicate = Rete::Rete_Predicate::LTE; return PREDICATE; }
 \|                                        { BEGIN(READ_STRING); return '|'; }
-<READ_STRING>\\\|                         { rete_lval.sval = new string("\\|"); return STRING_PART_S; }
-<READ_STRING>\\t                          { rete_lval.sval = new string("\\t"); return STRING_PART_S; }
-<READ_STRING>\\r                          { rete_lval.sval = new string("\\r"); return STRING_PART_S; }
-<READ_STRING>\\n                          { rete_lval.sval = new string("\\n"); return STRING_PART_S; }
+<READ_STRING>\\\|                         { retelval.sval = new string("\\|"); return STRING_PART_S; }
+<READ_STRING>\\t                          { retelval.sval = new string("\\t"); return STRING_PART_S; }
+<READ_STRING>\\r                          { retelval.sval = new string("\\r"); return STRING_PART_S; }
+<READ_STRING>\\n                          { retelval.sval = new string("\\n"); return STRING_PART_S; }
 <READ_STRING>\|                           { BEGIN(INITIAL); return '|'; }
 <READ_STRING>\r                           ;
-<READ_STRING>[^\|\r\n]                    { rete_lval.cval = rete_text[0]; return STRING_PART_C; }
+<READ_STRING>[^\|\r\n]                    { retelval.cval = retetext[0]; return STRING_PART_C; }
 %%

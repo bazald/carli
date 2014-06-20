@@ -37,7 +37,7 @@
 # define YYDEBUG 0
 #endif
 #if YYDEBUG
-extern int rete_debug;
+extern int retedebug;
 #endif
 
 /* Tokens.  */
@@ -46,13 +46,18 @@ extern int rete_debug;
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     FLOAT = 258,
-     INT = 259,
-     STRING = 260,
-     STRING_PART_C = 261,
-     STRING_PART_S = 262,
-     VARIABLE = 263,
-     PREDICATE = 264
+     COMMAND_EXIT = 258,
+     COMMAND_INSERT_WME = 259,
+     COMMAND_REMOVE_WME = 260,
+     COMMAND_SP = 261,
+     FLAG = 262,
+     FLOAT = 263,
+     INT = 264,
+     STRING = 265,
+     STRING_PART_C = 266,
+     STRING_PART_S = 267,
+     VARIABLE = 268,
+     PREDICATE = 269
    };
 #endif
 
@@ -61,19 +66,22 @@ extern int rete_debug;
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 52 "rules.yyy"
+#line 64 "rules.yyy"
 
   char cval;
+  const char *csval;
+  std::list<std::string> *flags_ptr;
   double fval;
   int64_t ival;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
+  std::tuple<Rete::Rete_Node_Ptr, std::string, std::list<std::string>> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 
 
 /* Line 2053 of yacc.c  */
-#line 77 "rules.tab.hpp"
+#line 85 "rules.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -93,19 +101,19 @@ typedef struct YYLTYPE
 # define YYLTYPE_IS_TRIVIAL 1
 #endif
 
-extern YYSTYPE rete_lval;
-extern YYLTYPE rete_lloc;
+extern YYSTYPE retelval;
+extern YYLTYPE retelloc;
 #ifdef YYPARSE_PARAM
 #if defined __STDC__ || defined __cplusplus
-int rete_parse (void *YYPARSE_PARAM);
+int reteparse (void *YYPARSE_PARAM);
 #else
-int rete_parse ();
+int reteparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int rete_parse (Rete::Rete_Agent &agent);
+int reteparse (Rete::Rete_Agent &agent);
 #else
-int rete_parse ();
+int reteparse ();
 #endif
 #endif /* ! YYPARSE_PARAM */
 
