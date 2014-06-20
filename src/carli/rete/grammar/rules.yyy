@@ -279,6 +279,7 @@ int rete_parse_file(Rete::Rete_Agent &agent, const string &filename) {
       break;
   } while (!feof(retein));
 
+  retelex_destroy();
   retein = stdin;
   fclose(file);
   return rv;

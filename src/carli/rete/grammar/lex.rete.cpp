@@ -1,3 +1,8 @@
+#ifdef _MSC_VER
+#pragma warning(push, 1)
+#pragma warning(disable : 4003)
+#pragma warning(disable : 4702)
+#endif
 #line 2 "lex.rete.cpp"
 
 #line 4 "lex.rete.cpp"
@@ -2004,3 +2009,6 @@ void retefree (void * ptr )
 
 
 
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif

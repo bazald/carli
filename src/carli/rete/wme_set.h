@@ -8,7 +8,7 @@ namespace Rete {
 
   class RETE_LINKAGE WME_Set {
   public:
-    std::unordered_set<WME_Ptr_C> wmes;
+    std::unordered_set<WME_Ptr_C, hash_deref<Rete::WME>, compare_deref_eq> wmes;
   };
 
 }
@@ -24,7 +24,7 @@ inline std::ostream & operator<<(std::ostream &os, const Rete::WME_Set &wme_set)
 namespace std {
   template <> struct hash<Rete::WME_Set> {
     size_t operator()(const Rete::WME_Set &wme_set) const {
-      return hash<std::unordered_set<Rete::WME_Ptr_C>>()(wme_set.wmes);
+      return hash<std::unordered_set<Rete::WME_Ptr_C, hash_deref<Rete::WME>, compare_deref_eq>>()(wme_set.wmes);
     }
   };
 }

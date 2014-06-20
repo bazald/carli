@@ -220,7 +220,10 @@ namespace Rete {
     }
 
     virtual std::ostream & print(std::ostream &os) const override {
-      return os << value;
+      if(value.find_first_of(" \t\r\n") == std::string::npos)
+        return os << value;
+      else
+        return os << '|' << value << '|';
     }
 
     std::string value;
