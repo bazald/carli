@@ -74,6 +74,7 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
   Rete::Rete_Predicate::Predicate predicate;
 }
 
+%token <csval> COMMAND_EXCISE
 %token <csval> COMMAND_EXIT
 %token <csval> COMMAND_INSERT_WME
 %token <csval> COMMAND_REMOVE_WME
@@ -102,17 +103,19 @@ commands:
   | command
   ;
 command:
-  COMMAND_EXIT { exit(0); }
+  COMMAND_EXCISE STRING { agent.excise_rule(*$2);
+                          delete $2; }
+  | COMMAND_EXIT { exit(0); }
   | COMMAND_INSERT_WME '(' symbol_constant '^' symbol_constant symbol_constant ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
-                                                                                         agent.insert_wme(wme);
-                                                                                         delete $3;
-                                                                                         delete $5;
-                                                                                         delete $6; }
+                                                                                     agent.insert_wme(wme);
+                                                                                     delete $3;
+                                                                                     delete $5;
+                                                                                     delete $6; }
   | COMMAND_REMOVE_WME '(' symbol_constant '^' symbol_constant symbol_constant ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
-                                                                                         agent.remove_wme(wme);
-                                                                                         delete $3;
-                                                                                         delete $5;
-                                                                                         delete $6; }
+                                                                                     agent.remove_wme(wme);
+                                                                                     delete $3;
+                                                                                     delete $5;
+                                                                                     delete $6; }
   | COMMAND_SP rule { string name = get<1>(*$2);
                       auto node = agent.make_action_retraction([name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
                                                                  cout << wme_vector << "->" << name << endl;

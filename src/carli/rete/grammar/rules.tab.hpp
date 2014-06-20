@@ -46,18 +46,19 @@ extern int retedebug;
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     COMMAND_EXIT = 258,
-     COMMAND_INSERT_WME = 259,
-     COMMAND_REMOVE_WME = 260,
-     COMMAND_SP = 261,
-     FLAG = 262,
-     FLOAT = 263,
-     INT = 264,
-     STRING = 265,
-     STRING_PART_C = 266,
-     STRING_PART_S = 267,
-     VARIABLE = 268,
-     PREDICATE = 269
+     COMMAND_EXCISE = 258,
+     COMMAND_EXIT = 259,
+     COMMAND_INSERT_WME = 260,
+     COMMAND_REMOVE_WME = 261,
+     COMMAND_SP = 262,
+     FLAG = 263,
+     FLOAT = 264,
+     INT = 265,
+     STRING = 266,
+     STRING_PART_C = 267,
+     STRING_PART_S = 268,
+     VARIABLE = 269,
+     PREDICATE = 270
    };
 #endif
 
@@ -81,7 +82,7 @@ typedef union YYSTYPE
 
 
 /* Line 2053 of yacc.c  */
-#line 85 "rules.tab.hpp"
+#line 86 "rules.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

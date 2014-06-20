@@ -23,6 +23,7 @@ using namespace std;
 [ \t\r]                                   ;
 #.*                                       ;
 <INITIAL,READ_STRING>\n                   { }
+excise                                    { retelval.csval = "excise"; return COMMAND_EXCISE; }
 exit                                      { retelval.csval = "exit"; return COMMAND_EXIT; }
 insert-wme                                { retelval.csval = "insert-wme"; return COMMAND_INSERT_WME; }
 remove-wme                                { retelval.csval = "remove-wme"; return COMMAND_REMOVE_WME; }

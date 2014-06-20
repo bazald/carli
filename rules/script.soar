@@ -10,4 +10,5 @@ insert-wme (B2 ^name B)
 insert-wme (B3 ^name C)
 insert-wme (B1 ^on B2)
 insert-wme (B2 ^on B3)
+excise blocks-world*block-name-less-than-c
 remove-wme (S1 ^name blocks-world)
