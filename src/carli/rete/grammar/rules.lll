@@ -1,9 +1,7 @@
-%option outfile="lex.rete.cpp" header-file="lex.rete.hpp"
-%option never-interactive
+%option outfile="lex.rete.cpp" header-file="lex.rete.hh"
 %option prefix="rete"
-%option reentrant bison-bridge
+%option bison-bridge bison-locations interactive reentrant yylineno
 %option noyywrap nounput noinput
-%option yylineno
 
 %{
 #include <cstdio>
@@ -13,13 +11,7 @@
 struct Condition_Base;
 struct Rule;
 
-#include "rules.tab.hpp"
-
-#undef YY_DECL
-union YYSTYPE;
-struct YYLTYPE;
-#define YY_DECL int retelex(YYSTYPE * yylval_param, YYLTYPE * yyltype_param, yyscan_t yyscanner)
-extern YY_DECL;
+#include "rules.tab.hh"
 
 using namespace std;
 %}

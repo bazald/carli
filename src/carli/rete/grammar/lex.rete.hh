@@ -2,9 +2,9 @@
 #define reteHEADER_H 1
 #define reteIN_HEADER 1
 
-#line 6 "lex.rete.hpp"
+#line 6 "lex.rete.hh"
 
-#line 8 "lex.rete.hpp"
+#line 8 "lex.rete.hh"
 
 #define  YY_INT_ALIGNED short int
 
@@ -233,6 +233,14 @@ void retefree (void * ,yyscan_t yyscanner );
 
 #endif
 
+#ifndef YY_NO_UNISTD_H
+/* Special case for "unistd.h", since it is non-ANSI. We include it way
+ * down here because we want the user's section 1 to have been scanned first.
+ * The user has a chance to override it with an option.
+ */
+#include <unistd.h>
+#endif
+
 #ifndef YY_EXTRA_TYPE
 #define YY_EXTRA_TYPE void *
 #endif
@@ -278,6 +286,10 @@ YYSTYPE * reteget_lval (yyscan_t yyscanner );
 
 void reteset_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
 
+       YYLTYPE *reteget_lloc (yyscan_t yyscanner );
+    
+        void reteset_lloc (YYLTYPE * yylloc_param ,yyscan_t yyscanner );
+    
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
  */
@@ -324,10 +336,10 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #define YY_DECL_IS_OURS 1
 
 extern int retelex \
-               (YYSTYPE * yylval_param ,yyscan_t yyscanner);
+               (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
 
 #define YY_DECL int retelex \
-               (YYSTYPE * yylval_param , yyscan_t yyscanner)
+               (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
 /* yy_get_previous_state - get the state just before the EOB char was reached */
@@ -344,9 +356,9 @@ extern int retelex \
 #undef YY_DECL
 #endif
 
-#line 62 "rules.lll"
+#line 54 "rules.lll"
 
 
-#line 351 "lex.rete.hpp"
+#line 363 "lex.rete.hh"
 #undef reteIN_HEADER
 #endif /* reteHEADER_H */

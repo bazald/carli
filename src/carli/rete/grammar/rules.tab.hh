@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_RETE_RULES_TAB_HPP_INCLUDED
-# define YY_RETE_RULES_TAB_HPP_INCLUDED
+#ifndef YY_RETE_RULES_TAB_HH_INCLUDED
+# define YY_RETE_RULES_TAB_HH_INCLUDED
 /* Enabling traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -41,7 +41,7 @@ extern int retedebug;
 #endif
 /* "%code requires" blocks.  */
 /* Line 2053 of yacc.c  */
-#line 11 "rules.yyy"
+#line 12 "rules.yyy"
 
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
@@ -50,7 +50,7 @@ typedef void *yyscan_t;
 
 
 /* Line 2053 of yacc.c  */
-#line 54 "rules.tab.hpp"
+#line 54 "rules.tab.hh"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -80,7 +80,7 @@ typedef void *yyscan_t;
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 85 "rules.yyy"
+#line 78 "rules.yyy"
 
   char cval;
   const char *csval;
@@ -95,7 +95,7 @@ typedef union YYSTYPE
 
 
 /* Line 2053 of yacc.c  */
-#line 99 "rules.tab.hpp"
+#line 99 "rules.tab.hh"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -130,4 +130,4 @@ int reteparse ();
 #endif
 #endif /* ! YYPARSE_PARAM */
 
-#endif /* !YY_RETE_RULES_TAB_HPP_INCLUDED  */
+#endif /* !YY_RETE_RULES_TAB_HH_INCLUDED  */

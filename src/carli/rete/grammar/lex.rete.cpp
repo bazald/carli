@@ -535,7 +535,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[32] =
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "rules.lll"
 #define YY_NO_INPUT 1
-#line 9 "rules.lll"
+#line 7 "rules.lll"
 #include <cstdio>
 #include <cstring>
 #include "rete_parser.h"
@@ -543,20 +543,22 @@ static yyconst flex_int32_t yy_rule_can_match_eol[32] =
 struct Condition_Base;
 struct Rule;
 
-#include "rules.tab.hpp"
-
-#undef YY_DECL
-union YYSTYPE;
-struct YYLTYPE;
-#define YY_DECL int retelex(YYSTYPE * yylval_param, YYLTYPE * yyltype_param, yyscan_t yyscanner)
-extern YY_DECL;
+#include "rules.tab.hh"
 
 using namespace std;
 
-#line 552 "lex.rete.cpp"
+#line 546 "lex.rete.cpp"
 
 #define INITIAL 0
 #define READ_STRING 1
+
+#ifndef YY_NO_UNISTD_H
+/* Special case for "unistd.h", since it is non-ANSI. We include it way
+ * down here because we want the user's section 1 to have been scanned first.
+ * The user has a chance to override it with an option.
+ */
+#include <unistd.h>
+#endif
 
 #ifndef YY_EXTRA_TYPE
 #define YY_EXTRA_TYPE void *
@@ -596,6 +598,8 @@ struct yyguts_t
 
     YYSTYPE * yylval_r;
 
+    YYLTYPE * yylloc_r;
+
     }; /* end struct yyguts_t */
 
 static int yy_init_globals (yyscan_t yyscanner );
@@ -603,6 +607,8 @@ static int yy_init_globals (yyscan_t yyscanner );
     /* This must go here because YYSTYPE and YYLTYPE are included
      * from bison output in section 1.*/
     #    define yylval yyg->yylval_r
+    
+    #    define yylloc yyg->yylloc_r
     
 int retelex_init (yyscan_t* scanner);
 
@@ -645,6 +651,10 @@ YYSTYPE * reteget_lval (yyscan_t yyscanner );
 
 void reteset_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
 
+       YYLTYPE *reteget_lloc (yyscan_t yyscanner );
+    
+        void reteset_lloc (YYLTYPE * yylloc_param ,yyscan_t yyscanner );
+    
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
  */
@@ -756,10 +766,10 @@ static int input (yyscan_t yyscanner );
 #define YY_DECL_IS_OURS 1
 
 extern int retelex \
-               (YYSTYPE * yylval_param ,yyscan_t yyscanner);
+               (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
 
 #define YY_DECL int retelex \
-               (YYSTYPE * yylval_param , yyscan_t yyscanner)
+               (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
 /* Code executed at the beginning of each rule, after yytext and yyleng
@@ -786,11 +796,13 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 28 "rules.lll"
+#line 20 "rules.lll"
 
-#line 787 "lex.rete.cpp"
+#line 797 "lex.rete.cpp"
 
     yylval = yylval_param;
+
+    yylloc = yylloc_param;
 
 	if ( !yyg->yy_init )
 		{
@@ -849,12 +861,16 @@ yy_match:
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_current_state != 87 );
-		yy_cp = yyg->yy_last_accepting_cpos;
-		yy_current_state = yyg->yy_last_accepting_state;
+		while ( yy_base[yy_current_state] != 157 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
+		if ( yy_act == 0 )
+			{ /* have to back up */
+			yy_cp = yyg->yy_last_accepting_cpos;
+			yy_current_state = yyg->yy_last_accepting_state;
+			yy_act = yy_accept[yy_current_state];
+			}
 
 		YY_DO_BEFORE_ACTION;
 
@@ -883,68 +899,68 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 29 "rules.lll"
+#line 21 "rules.lll"
 ;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 30 "rules.lll"
+#line 22 "rules.lll"
 ;
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 31 "rules.lll"
+#line 23 "rules.lll"
 { }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 32 "rules.lll"
+#line 24 "rules.lll"
 { yylval->csval = "excise"; return COMMAND_EXCISE; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 33 "rules.lll"
+#line 25 "rules.lll"
 { yylval->csval = "exit"; return COMMAND_EXIT; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 34 "rules.lll"
+#line 26 "rules.lll"
 { yylval->csval = "insert-wme"; return COMMAND_INSERT_WME; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 35 "rules.lll"
+#line 27 "rules.lll"
 { yylval->csval = "remove-wme"; return COMMAND_REMOVE_WME; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 36 "rules.lll"
+#line 28 "rules.lll"
 { yylval->csval = "source"; return COMMAND_SOURCE; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 37 "rules.lll"
+#line 29 "rules.lll"
 { yylval->csval = "sp"; return COMMAND_SP; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 38 "rules.lll"
+#line 30 "rules.lll"
 { yylval->sval = new string(yytext); return FLAG; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 39 "rules.lll"
+#line 31 "rules.lll"
 { yylval->fval = atof(yytext); return FLOAT; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 40 "rules.lll"
+#line 32 "rules.lll"
 { yylval->ival = atoi(yytext); return INT; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 41 "rules.lll"
+#line 33 "rules.lll"
 { yylval->sval = new string(yytext + 1);
                                                         yylval->sval->resize(yylval->sval->size() - 1);
                                                         return VARIABLE;
@@ -952,95 +968,95 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 45 "rules.lll"
+#line 37 "rules.lll"
 { yylval->sval = new string(yytext); return STRING; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 46 "rules.lll"
+#line 38 "rules.lll"
 { yylval->sval = new string(yytext); return STRING; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 47 "rules.lll"
+#line 39 "rules.lll"
 { return yytext[0]; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 48 "rules.lll"
+#line 40 "rules.lll"
 { yylval->predicate = Rete::Rete_Predicate::EQ; return PREDICATE; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 49 "rules.lll"
+#line 41 "rules.lll"
 { yylval->predicate = Rete::Rete_Predicate::NEQ; return PREDICATE; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 50 "rules.lll"
+#line 42 "rules.lll"
 { yylval->predicate = Rete::Rete_Predicate::GT; return PREDICATE; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 51 "rules.lll"
+#line 43 "rules.lll"
 { yylval->predicate = Rete::Rete_Predicate::GTE; return PREDICATE; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 52 "rules.lll"
+#line 44 "rules.lll"
 { yylval->predicate = Rete::Rete_Predicate::LT; return PREDICATE; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 53 "rules.lll"
+#line 45 "rules.lll"
 { yylval->predicate = Rete::Rete_Predicate::LTE; return PREDICATE; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 54 "rules.lll"
+#line 46 "rules.lll"
 { BEGIN(READ_STRING); return '|'; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 55 "rules.lll"
+#line 47 "rules.lll"
 { yylval->sval = new string("\\|"); return STRING_PART_S; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 56 "rules.lll"
+#line 48 "rules.lll"
 { yylval->sval = new string("\\t"); return STRING_PART_S; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 57 "rules.lll"
+#line 49 "rules.lll"
 { yylval->sval = new string("\\r"); return STRING_PART_S; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 58 "rules.lll"
+#line 50 "rules.lll"
 { yylval->sval = new string("\\n"); return STRING_PART_S; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 59 "rules.lll"
+#line 51 "rules.lll"
 { BEGIN(INITIAL); return '|'; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 60 "rules.lll"
+#line 52 "rules.lll"
 ;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 61 "rules.lll"
+#line 53 "rules.lll"
 { yylval->cval = yytext[0]; return STRING_PART_C; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 62 "rules.lll"
+#line 54 "rules.lll"
 ECHO;
 	YY_BREAK
-#line 1039 "lex.rete.cpp"
+#line 1055 "lex.rete.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(READ_STRING):
 	yyterminate();
@@ -1108,8 +1124,7 @@ case YY_STATE_EOF(READ_STRING):
 
 			else
 				{
-				yy_cp = yyg->yy_last_accepting_cpos;
-				yy_current_state = yyg->yy_last_accepting_state;
+				yy_cp = yyg->yy_c_buf_p;
 				goto yy_find_action;
 				}
 			}
@@ -1570,6 +1585,10 @@ static void rete_load_buffer_state  (yyscan_t yyscanner)
 	retefree((void *) b ,yyscanner );
 }
 
+#ifndef __cplusplus
+extern int isatty (int );
+#endif /* __cplusplus */
+    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a reterestart() or at EOF.
@@ -1594,7 +1613,7 @@ static void rete_load_buffer_state  (yyscan_t yyscanner)
         b->yy_bs_column = 0;
     }
 
-        b->yy_is_interactive = 0;
+        b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
     
 	errno = oerrno;
 }
@@ -1999,6 +2018,18 @@ void reteset_lval (YYSTYPE *  yylval_param , yyscan_t yyscanner)
     yylval = yylval_param;
 }
 
+YYLTYPE *reteget_lloc  (yyscan_t yyscanner)
+{
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    return yylloc;
+}
+    
+void reteset_lloc (YYLTYPE *  yylloc_param , yyscan_t yyscanner)
+{
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    yylloc = yylloc_param;
+}
+    
 /* User-visible API */
 
 /* retelex_init is special because it creates the scanner itself, so it is
@@ -2174,7 +2205,7 @@ void retefree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 62 "rules.lll"
+#line 54 "rules.lll"
 
 
 

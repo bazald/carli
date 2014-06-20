@@ -1,9 +1,10 @@
 %output "rules.tab.cpp"
-%defines "rules.tab.hpp"
-%error-verbose
-%locations
+%defines "rules.tab.hh"
 %name-prefix "rete"
 %define api.pure full
+%error-verbose
+%locations
+
 %lex-param { yyscan_t yyscanner }
 %parse-param { yyscan_t yyscanner }
 %parse-param { Rete::Rete_Agent &agent }
@@ -16,13 +17,7 @@ typedef void *yyscan_t;
 }
 
 %code {
-#include "lex.rete.hpp"
-
-#undef YY_DECL
-union YYSTYPE;
-struct YYLTYPE;
-#define YY_DECL int retelex(YYSTYPE * yylval_param, YYLTYPE * yyltype_param, yyscan_t yyscanner)
-extern YY_DECL;
+#include "lex.rete.hh"
 
 int reteerror(const yyscan_t yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
   cout << "Source error, line " << reteget_lineno(yyscanner) << ": " << msg << endl;
@@ -37,8 +32,6 @@ int reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::
 %{
 #include <cstdio>
 #include "rete_parser.h"
-
-#define YYDEBUG 1
 
 using namespace std;
 
@@ -118,7 +111,7 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
 
 %%
 commands:
-  | commands command
+  | commands command { cerr << "Read in rule on line " << reteget_lineno(yyscanner) << " or " << @2.first_line << endl; }
   ;
 command:
   COMMAND_EXCISE STRING { agent.excise_rule(*$2);
