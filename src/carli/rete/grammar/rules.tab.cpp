@@ -2206,8 +2206,6 @@ int rete_parse_string(Rete::Rete_Agent &agent, const string &str) {
   reteset_lineno(0);
   YY_BUFFER_STATE buf = rete_scan_string(str.c_str());
 
-  cerr << "Parsing: " << str << endl;
-
   // retelex();
   rv = reteparse(agent);
 
