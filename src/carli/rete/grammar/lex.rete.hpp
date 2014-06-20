@@ -323,9 +323,11 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int retelex(YYSTYPE * yylval_param, YYLTYPE * yyltype_param, yyscan_t yyscanner);
+extern int retelex \
+               (YYSTYPE * yylval_param ,yyscan_t yyscanner);
 
-#define YY_DECL int retelex(YYSTYPE * yylval_param, YYLTYPE * yyltype_param, yyscan_t yyscanner)
+#define YY_DECL int retelex \
+               (YYSTYPE * yylval_param , yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
 /* yy_get_previous_state - get the state just before the EOB char was reached */
@@ -342,7 +344,7 @@ extern int retelex(YYSTYPE * yylval_param, YYLTYPE * yyltype_param, yyscan_t yys
 #undef YY_DECL
 #endif
 
-#line 60 "rules.lll"
+#line 62 "rules.lll"
 
 
 #line 351 "lex.rete.hpp"

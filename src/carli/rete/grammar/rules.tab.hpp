@@ -46,12 +46,11 @@ extern int retedebug;
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
 typedef void *yyscan_t;
-struct YYLTYPE;
 #endif
 
 
 /* Line 2053 of yacc.c  */
-#line 55 "rules.tab.hpp"
+#line 54 "rules.tab.hpp"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -81,7 +80,7 @@ struct YYLTYPE;
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 79 "rules.yyy"
+#line 85 "rules.yyy"
 
   char cval;
   const char *csval;
@@ -96,7 +95,7 @@ typedef union YYSTYPE
 
 
 /* Line 2053 of yacc.c  */
-#line 100 "rules.tab.hpp"
+#line 99 "rules.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

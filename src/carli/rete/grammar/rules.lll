@@ -15,8 +15,10 @@ struct Rule;
 
 #include "rules.tab.hpp"
 
+#undef YY_DECL
+union YYSTYPE;
+struct YYLTYPE;
 #define YY_DECL int retelex(YYSTYPE * yylval_param, YYLTYPE * yyltype_param, yyscan_t yyscanner)
-
 extern YY_DECL;
 
 using namespace std;

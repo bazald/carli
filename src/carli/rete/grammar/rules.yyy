@@ -12,12 +12,18 @@
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
 typedef void *yyscan_t;
-struct YYLTYPE;
 #endif
 }
 
 %code {
 #include "lex.rete.hpp"
+
+#undef YY_DECL
+union YYSTYPE;
+struct YYLTYPE;
+#define YY_DECL int retelex(YYSTYPE * yylval_param, YYLTYPE * yyltype_param, yyscan_t yyscanner)
+extern YY_DECL;
+
 int reteerror(const yyscan_t yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
   cout << "Source error, line " << reteget_lineno(yyscanner) << ": " << msg << endl;
   return -1;
