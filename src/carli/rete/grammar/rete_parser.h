@@ -4,6 +4,11 @@
 #include "../rete_agent.h"
 
 RETE_LINKAGE int rete_parse_file(Rete::Rete_Agent &agent, const std::string &filename);
-RETE_LINKAGE int rete_parse_string(Rete::Rete_Agent &agent, const std::string &str, const int &line_number = 1);
+RETE_LINKAGE int rete_parse_string(Rete::Rete_Agent &agent, const std::string &str, int &line_number);
+
+inline int rete_parse_string(Rete::Rete_Agent &agent, const std::string &str) {
+  int line_number = 1;
+  return rete_parse_string(agent, str, line_number);
+}
 
 #endif

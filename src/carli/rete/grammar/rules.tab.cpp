@@ -2256,7 +2256,7 @@ int rete_parse_file(Rete::Rete_Agent &agent, const string &filename) {
   return rv;
 }
 
-int rete_parse_string(Rete::Rete_Agent &agent, const string &str, const int &line_number) {
+int rete_parse_string(Rete::Rete_Agent &agent, const string &str, int &line_number) {
   int rv = 0;
 
   yyscan_t yyscanner;
@@ -2268,6 +2268,8 @@ int rete_parse_string(Rete::Rete_Agent &agent, const string &str, const int &lin
 
   // retelex();
   rv = reteparse(yyscanner, agent);
+
+  line_number = reteget_lineno(yyscanner) + 1;
 
   rete_delete_buffer(buf, yyscanner);
   retelex_destroy(yyscanner);
