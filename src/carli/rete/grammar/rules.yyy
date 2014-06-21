@@ -106,7 +106,7 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
 %type <flags_ptr> flags
 %type <rete_node_ptr> final_conditions conditions condition_group condition_type condition
 %type <rule_ptr> rule
-%type <symbol_ptr> symbol_constant
+%type <symbol_ptr> symbol identifier symbol_constant
 %type <sval> string_or_literal literal literal_parts
 
 %%
@@ -117,16 +117,16 @@ command:
   COMMAND_EXCISE STRING { agent.excise_rule(*$2);
                           delete $2; }
   | COMMAND_EXIT { exit(0); }
-  | COMMAND_INSERT_WME '(' symbol_constant '^' symbol_constant symbol_constant ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
-                                                                                     agent.insert_wme(wme);
-                                                                                     delete $3;
-                                                                                     delete $5;
-                                                                                     delete $6; }
-  | COMMAND_REMOVE_WME '(' symbol_constant '^' symbol_constant symbol_constant ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
-                                                                                     agent.remove_wme(wme);
-                                                                                     delete $3;
-                                                                                     delete $5;
-                                                                                     delete $6; }
+  | COMMAND_INSERT_WME '(' symbol '^' symbol symbol ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
+                                                          agent.insert_wme(wme);
+                                                          delete $3;
+                                                          delete $5;
+                                                          delete $6; }
+  | COMMAND_REMOVE_WME '(' symbol '^' symbol symbol ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
+                                                          agent.remove_wme(wme);
+                                                          delete $3;
+                                                          delete $5;
+                                                          delete $6; }
   | COMMAND_SOURCE string_or_literal { const int rv = rete_parse_file(agent, *$2, source_path);
                                        delete $2;
                                        if(rv) {
@@ -148,6 +148,7 @@ command:
                       parent->suppress_destruction(false);
                       agent.source_rule(name, node);
                       delete $2; }
+  ;
 rule:
   '{' STRING flags final_conditions '}' { $$ = new tuple<Rete::Rete_Node_Ptr, std::string, std::list<std::string>>($4->first, *$2, *$3);
                                           delete $2;
@@ -211,6 +212,7 @@ final_conditions:
                                           $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(bindings, $1->first, $3->first)), $1->second);
                                           delete $1;
                                           delete $3; }
+  ;
 conditions:
   conditions condition_type { Rete::WME_Bindings bindings;
                               unordered_set<string> joined;
@@ -263,16 +265,25 @@ condition_group:
 condition_type:
   condition { $$ = $1; }
   | condition_group { $$ = $1; }
+  ;
 condition:
   '(' VARIABLE '^' symbol_constant symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *$4, *$5))), Variables(Variable(*$2, "", ""))); delete $2; delete $4; delete $5; }
   | '(' VARIABLE '^' symbol_constant VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *$4, make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Third)))), Variables(Variable(*$2, "", *$5))); delete $2; delete $4; delete $5; }
   | '(' VARIABLE '^' VARIABLE symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), *$5))), Variables(Variable(*$2, *$4, ""))); delete $2; delete $4; delete $5; }
   | '(' VARIABLE '^' VARIABLE VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : *$4 == *$5 ? Rete::Symbol_Variable::Second : Rete::Symbol_Variable::Third)))), Variables(Variable(*$2, *$4, *$5))); delete $2; delete $4; delete $5; }
   ;
+symbol:
+  symbol_constant { $$ = $1; }
+  | identifier { $$ = $1; }
+  ;
+identifier:
+  '@' STRING { $$ = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Identifier>(*$2)); delete $2; }
+  ;
 symbol_constant:
   FLOAT { $$ = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Float>($1)); }
   | INT { $$ = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Int>($1)); }
   | string_or_literal { $$ = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_String>(*$1)); delete $1; }
+  ;
 string_or_literal:
   STRING { $$ = $1; }
   | literal { $$ = $1; }

@@ -36,7 +36,7 @@ sp                                                    { yylval->csval = "sp"; re
                                                       }
 [a-zA-Z0-9]+                                          { yylval->sval = new string(yytext); return STRING; }
 [a-zA-Z0-9./\\]+[a-zA-Z0-9./\\\-*]*[a-zA-Z0-9./\\]+   { yylval->sval = new string(yytext); return STRING; }
-[\^\(\)\{\}+-]                                        { return yytext[0]; }
+[\^\(\)\{\}+\-\@]                                     { return yytext[0]; }
 ==                                                    { yylval->predicate = Rete::Rete_Predicate::EQ; return PREDICATE; }
 !=                                                    { yylval->predicate = Rete::Rete_Predicate::NEQ; return PREDICATE; }
 >                                                     { yylval->predicate = Rete::Rete_Predicate::GT; return PREDICATE; }
