@@ -535,6 +535,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[32] =
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "rules.lll"
 #define YY_NO_INPUT 1
+#define YY_NO_UNISTD_H 1
 #line 7 "rules.lll"
 #include <cstdio>
 #include <cstring>
@@ -547,7 +548,7 @@ struct Rule;
 
 using namespace std;
 
-#line 546 "lex.rete.cpp"
+#line 547 "lex.rete.cpp"
 
 #define INITIAL 0
 #define READ_STRING 1
@@ -798,7 +799,7 @@ YY_DECL
 
 #line 20 "rules.lll"
 
-#line 797 "lex.rete.cpp"
+#line 798 "lex.rete.cpp"
 
     yylval = yylval_param;
 
@@ -861,16 +862,12 @@ yy_match:
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 157 );
+		while ( yy_current_state != 87 );
+		yy_cp = yyg->yy_last_accepting_cpos;
+		yy_current_state = yyg->yy_last_accepting_state;
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
-		if ( yy_act == 0 )
-			{ /* have to back up */
-			yy_cp = yyg->yy_last_accepting_cpos;
-			yy_current_state = yyg->yy_last_accepting_state;
-			yy_act = yy_accept[yy_current_state];
-			}
 
 		YY_DO_BEFORE_ACTION;
 
@@ -1056,7 +1053,7 @@ YY_RULE_SETUP
 #line 54 "rules.lll"
 ECHO;
 	YY_BREAK
-#line 1055 "lex.rete.cpp"
+#line 1052 "lex.rete.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(READ_STRING):
 	yyterminate();
@@ -1124,7 +1121,8 @@ case YY_STATE_EOF(READ_STRING):
 
 			else
 				{
-				yy_cp = yyg->yy_c_buf_p;
+				yy_cp = yyg->yy_last_accepting_cpos;
+				yy_current_state = yyg->yy_last_accepting_state;
 				goto yy_find_action;
 				}
 			}
@@ -1585,10 +1583,6 @@ static void rete_load_buffer_state  (yyscan_t yyscanner)
 	retefree((void *) b ,yyscanner );
 }
 
-#ifndef __cplusplus
-extern int isatty (int );
-#endif /* __cplusplus */
-    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a reterestart() or at EOF.
@@ -1613,7 +1607,7 @@ extern int isatty (int );
         b->yy_bs_column = 0;
     }
 
-        b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+        b->yy_is_interactive = 0;
     
 	errno = oerrno;
 }

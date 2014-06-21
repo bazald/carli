@@ -1,7 +1,7 @@
 %option outfile="lex.rete.cpp" header-file="lex.rete.hh"
 %option prefix="rete"
-%option bison-bridge bison-locations interactive reentrant yylineno
-%option noyywrap nounput noinput
+%option bison-bridge bison-locations reentrant yylineno
+%option never-interactive noinput nounput nounistd noyywrap
 
 %{
 #include <cstdio>
