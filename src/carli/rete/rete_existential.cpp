@@ -29,7 +29,7 @@ namespace Rete {
         output.ptr->insert_wme_token(output_token, this);
     }
 
-    std::cerr << "input_tokens.size() == " << input_tokens.size() << std::endl;
+    //std::cerr << "input_tokens.size() == " << input_tokens.size() << std::endl;
   }
 
   bool Rete_Existential::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
@@ -52,7 +52,7 @@ namespace Rete {
       }
     }
 
-    std::cerr << "input_tokens.size() == " << input_tokens.size() << std::endl;
+    //std::cerr << "input_tokens.size() == " << input_tokens.size() << std::endl;
 
     return input_tokens.empty();
   }

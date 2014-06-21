@@ -105,8 +105,10 @@ namespace Rete {
     else {
 //        std::cerr << "Rule '" << name << "' replaced." << std::endl;
       found->second->destroy(filters);
+      std::cerr << '#';
       found->second = action;
     }
+    std::cerr << '*';
   }
 
   void Rete_Agent::excise_rule(const std::string &name) {
@@ -118,11 +120,13 @@ namespace Rete {
 //        std::cerr << "Rule '" << name << "' excised." << std::endl;
       found->second->destroy(filters);
       rules.erase(found);
+      std::cerr << '#';
     }
   }
 
   void Rete_Agent::excise_rule(const Rete_Action_Ptr &action) {
     action->destroy(filters);
+    std::cerr << '#';
   }
 
   Rete_Action_Ptr Rete_Agent::unname_rule(const std::string &name) {
@@ -197,10 +201,10 @@ namespace Rete {
 
   void Rete_Agent::rete_print(std::ostream &os) const {
     os << "digraph Rete {" << std::endl;
-    
+
     std::map<Rete_Node_Ptr_C, std::map<int64_t, std::list<Rete_Node_Ptr_C>>> clusters;
     std::map<Rete_Node_Ptr_C, std::list<Rete_Node_Ptr_C>> cluster_children;
-    
+
     std::function<void (Rete_Node &)> visitor = [&os, &clusters](Rete_Node &node) {
       node.print_details(os);
       if(node.data) {

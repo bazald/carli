@@ -21,7 +21,7 @@ void signal_handler(int sig) {
     std::cerr << std::endl << "Ctrl+" << (sig == SIGINT ? "C" : "Break") <<" captured. Call 'exit' to quit." << std::endl;
 }
 
-int main(int /*argc*/, char ** /*argv*/) {
+int main(int argc, char **argv) {
   signal(SIGINT, signal_handler);
   signal(SIGTERM, signal_handler);
 #ifdef SIGBREAK
@@ -32,10 +32,16 @@ int main(int /*argc*/, char ** /*argv*/) {
   std::string line;
   int line_number = 1;
 
+  for(int i = 1; !g_quit && i < argc; ++i)
+    rete_parse_file(ragent, argv[i]);
+
   while(!g_quit) {
+    std::cout << "carli % ";
     getline(std::cin, line);
-    if(std::cin)
+    if(std::cin) {
       rete_parse_string(ragent, line, line_number);
+      std::cout << std::endl;
+    }
 #ifdef _WINDOWS
     else if(!_isatty(_fileno(stdin)))
 #else

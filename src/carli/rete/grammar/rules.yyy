@@ -8,6 +8,7 @@
 %lex-param { yyscan_t yyscanner }
 %parse-param { yyscan_t yyscanner }
 %parse-param { Rete::Rete_Agent &agent }
+%parse-param { const std::string &source_path }
 
 %code requires {
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -20,13 +21,11 @@ typedef void *yyscan_t;
 #define YY_NO_UNISTD_H 1
 #include "lex.rete.hh"
 
-int reteerror(const yyscan_t yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
+void reteerror(const yyscan_t yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
   cout << "Source error, line " << reteget_lineno(yyscanner) << ": " << msg << endl;
-  return -1;
 }
-int reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
+void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::Rete_Agent &/*agent*/, const std::string &source_path, const char *msg) {
   cout << "Source error, line " << reteget_lineno(yyscanner) << ": " << msg << endl;
-  return -1;
 }
 }
 
@@ -112,7 +111,7 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
 
 %%
 commands:
-  | commands command { cerr << "Read in rule on line " << reteget_lineno(yyscanner) << " or " << @2.first_line << endl; }
+  | commands command { /*cerr << "Read in rule on line " << reteget_lineno(yyscanner) << endl;*/ }
   ;
 command:
   COMMAND_EXCISE STRING { agent.excise_rule(*$2);
@@ -128,10 +127,12 @@ command:
                                                                                      delete $3;
                                                                                      delete $5;
                                                                                      delete $6; }
-  | COMMAND_SOURCE string_or_literal { const int rv = rete_parse_file(agent, *$2);
+  | COMMAND_SOURCE string_or_literal { const int rv = rete_parse_file(agent, *$2, source_path);
                                        delete $2;
-                                       if(rv)
-                                         reteerror(yyscanner, agent, "Error sourcing recursively."); }
+                                       if(rv) {
+                                         reteerror(yyscanner, agent, "Error sourcing recursively.");
+                                         YYABORT;
+                                       } }
   | COMMAND_SP rule { auto &parent = get<0>(*$2);
                       const string name = get<1>(*$2);
                       const auto existing = agent.unname_rule(name);
@@ -236,16 +237,20 @@ conditions:
                               delete $1;
                               delete $2; }
   | conditions '(' VARIABLE PREDICATE symbol_constant ')' { auto lhs_index = find_index($1->second, *$3);
-                                                            if(lhs_index.second > 2)
+                                                            if(lhs_index.second > 2) {
                                                               reteerror(yyscanner, agent, "Unbound variable tested by predicate.");
+                                                              YYABORT;
+                                                            }
                                                             $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vc($4, lhs_index, *$5, $1->first)), $1->second);
                                                             delete $1;
                                                             delete $3;
                                                             delete $5; }
   | conditions '(' VARIABLE PREDICATE VARIABLE ')' { auto lhs_index = find_index($1->second, *$3);
                                                      auto rhs_index = find_index($1->second, *$5);
-                                                     if(lhs_index.second > 2 || rhs_index.second > 2)
+                                                     if(lhs_index.second > 2 || rhs_index.second > 2) {
                                                        reteerror(yyscanner, agent, "Unbound variable tested by predicate.");
+                                                       YYABORT;
+                                                     }
                                                      $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vv($4, lhs_index, rhs_index, $1->first)), $1->second);
                                                      delete $1;
                                                      delete $3;
@@ -284,8 +289,25 @@ literal_parts:
 
 %%
 
-int rete_parse_file(Rete::Rete_Agent &agent, const string &filename) {
-  FILE * file = fopen(filename.c_str(), "r");
+int rete_parse_file(Rete::Rete_Agent &agent, const string &filename, const std::string &source_path) {
+  if(filename.empty())
+    return -1;
+
+  string source_path_full = source_path;
+  string filename_part = filename;
+  string filename_full;
+  const size_t filename_slash_pos = filename.find_last_of("/\\");
+  if(filename_slash_pos != string::npos) {
+    if(filename[0] == '/' || filename[0] == '\\')
+      source_path_full.clear();
+    source_path_full += filename.substr(0, filename_slash_pos + 1);
+    filename_part = filename.substr(filename_slash_pos + 1);
+  }
+  filename_full = source_path_full + filename_part;
+
+  //cerr << "Sourcing '" << filename_part << "' from '" << source_path_full << '\'' << endl;
+
+  FILE * file = fopen(filename_full.c_str(), "r");
   if(!file)
     return -1;
 
@@ -302,7 +324,7 @@ int rete_parse_file(Rete::Rete_Agent &agent, const string &filename) {
 
   // retelex();
   do {
-    rv = reteparse(yyscanner, agent);
+    rv = reteparse(yyscanner, agent, source_path_full);
     if(rv)
       break;
   } while (!feof(reteget_in(yyscanner)));
@@ -323,7 +345,7 @@ int rete_parse_string(Rete::Rete_Agent &agent, const string &str, int &line_numb
   reteset_lineno(line_number, yyscanner);
 
   // retelex();
-  rv = reteparse(yyscanner, agent);
+  rv = reteparse(yyscanner, agent, "");
 
   line_number = reteget_lineno(yyscanner) + 1;
 

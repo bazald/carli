@@ -1,5 +1,4 @@
 source rules.carli
-source rules/rules.carli
 insert-wme (nil ^state S1)
 insert-wme (S1 ^name blocks-world)
 insert-wme (S1 ^block B1)
