@@ -290,7 +290,9 @@ int rete_parse_file(Rete::Rete_Agent &agent, const string &filename) {
 
   int rv = 0;
 
-  reteset_in(file, yyscanner);
+  reterestart(file, yyscanner);
+  reteset_lineno(1, yyscanner);
+
   // retelex();
   do {
     rv = reteparse(yyscanner, agent);
@@ -303,7 +305,7 @@ int rete_parse_file(Rete::Rete_Agent &agent, const string &filename) {
   return rv;
 }
 
-int rete_parse_string(Rete::Rete_Agent &agent, const string &str) {
+int rete_parse_string(Rete::Rete_Agent &agent, const string &str, const int &line_number) {
   int rv = 0;
 
   yyscan_t yyscanner;
@@ -311,6 +313,7 @@ int rete_parse_string(Rete::Rete_Agent &agent, const string &str) {
     return -1;
 
   YY_BUFFER_STATE buf = rete_scan_string(str.c_str(), yyscanner);
+  reteset_lineno(line_number, yyscanner);
 
   // retelex();
   rv = reteparse(yyscanner, agent);
