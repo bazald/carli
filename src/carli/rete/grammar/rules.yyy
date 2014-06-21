@@ -17,6 +17,7 @@ typedef void *yyscan_t;
 }
 
 %code {
+#define YY_NO_UNISTD_H 1
 #include "lex.rete.hh"
 
 int reteerror(const yyscan_t yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
