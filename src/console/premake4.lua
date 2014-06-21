@@ -1,4 +1,4 @@
-project "demo"
+project "console"
   kind "ConsoleApp"
   language "C++"
 

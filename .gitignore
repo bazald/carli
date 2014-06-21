@@ -56,9 +56,9 @@ src/carli/obj
 *_r
 blocks_world
 callgrind.out.*
-core
 carli.workspace
-demo
+console
+core
 dump.txt
 git.h
 Makefile
