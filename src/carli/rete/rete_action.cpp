@@ -25,7 +25,7 @@ namespace Rete {
                                                                          ) {
     assert(!output);
 
-    if(!excised) {
+    if(!destruction_suppressed && !excised) {
       excised = true;
 
       //std::cerr << "Destroying: ";
@@ -95,7 +95,7 @@ namespace Rete {
     os << "  " << intptr_t(this) << " [label=\"Act\"];" << std::endl;
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
   }
-  
+
   void Rete_Action::output_name(std::ostream &os, const int64_t &depth) const {
     os << "a(";
     if(input && depth)

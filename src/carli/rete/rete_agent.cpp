@@ -125,6 +125,16 @@ namespace Rete {
     action->destroy(filters);
   }
 
+  Rete_Action_Ptr Rete_Agent::unname_rule(const std::string &name) {
+    Rete_Action_Ptr ptr;
+    auto found = rules.find(name);
+    if(found != rules.end()) {
+      ptr = found->second;
+      rules.erase(found);
+    }
+    return ptr;
+  }
+
   void Rete_Agent::insert_wme(const WME_Ptr_C &wme) {
     if(working_memory.wmes.find(wme) != working_memory.wmes.end()) {
 #ifdef DEBUG_OUTPUT

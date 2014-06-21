@@ -6,7 +6,7 @@ namespace Rete {
 
   void Rete_Negation::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs_all.empty()) {
+    if(!destruction_suppressed && outputs_all.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
@@ -68,7 +68,7 @@ namespace Rete {
       return input == negation->input;
     return false;
   }
-  
+
   void Rete_Negation::print_details(std::ostream &os) const {
     os << "  " << intptr_t(this) << " [label=\"&not;&exist;\"];" << std::endl;
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
@@ -80,11 +80,11 @@ namespace Rete {
       input->output_name(os, depth - 1);
     os << ')';
   }
-  
+
   bool Rete_Negation::is_active() const {
     return input_tokens.empty();
   }
-  
+
   Rete_Negation_Ptr Rete_Negation::find_existing(const Rete_Node_Ptr &out) {
     for(auto &o : out->get_outputs_all()) {
       if(auto existing_negation = std::dynamic_pointer_cast<Rete_Negation>(o))

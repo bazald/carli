@@ -94,9 +94,9 @@ namespace Rete {
         list(this)
       {
       }
-      
+
       operator Rete_Node * const & () const {return ptr;}
-      
+
       Rete_Node & operator*() const {return *ptr;}
       Rete_Node * operator->() const {return ptr;}
 
@@ -126,6 +126,10 @@ namespace Rete {
 
     virtual void destroy(Filters &filters, const Rete_Node_Ptr &output) = 0;
 
+    void suppress_destruction(const bool &suppress) {
+      destruction_suppressed = suppress;
+    }
+
     std::shared_ptr<const Rete_Node> shared() const {
       return shared_from_this();
     }
@@ -136,7 +140,7 @@ namespace Rete {
     const Output_Ptrs & get_outputs_all() const {
       return outputs_all;
     }
-    
+
     virtual Rete_Node_Ptr_C parent_left() const = 0;
     virtual Rete_Node_Ptr_C parent_right() const = 0;
     virtual Rete_Node_Ptr parent_left() = 0;
@@ -153,7 +157,7 @@ namespace Rete {
     virtual void unpass_tokens(Rete_Node * const &output) = 0;
 
     virtual bool operator==(const Rete_Node &rhs) const = 0;
-    
+
     virtual bool disabled_input(const Rete_Node_Ptr &) {return false;}
 
     void disable_output(Rete_Node * const &output) {
@@ -208,12 +212,12 @@ namespace Rete {
     virtual void output_name(std::ostream &os, const int64_t &depth) const = 0;
 
     virtual bool is_active() const = 0; ///< Has the node matched and forwarded at least one token?
-    
+
     template <typename VISITOR>
     VISITOR visit_preorder(VISITOR visitor, const bool &strict) {
       return visit_preorder(visitor, strict, (intptr_t(this) & ~intptr_t(3)) | ((visitor_value & 3) != 1 ? 1 : 2));
     }
-    
+
     template <typename VISITOR>
     VISITOR visit_preorder(VISITOR visitor, const bool &strict, const intptr_t &visitor_value_) {
       std::deque<Rete_Node *> nodes;
@@ -245,7 +249,7 @@ namespace Rete {
 
       return visitor;
     }
-    
+
     Rete_Data_Ptr data;
 
   protected:
@@ -267,6 +271,7 @@ namespace Rete {
       return std::find_if(tokens.begin(), tokens.end(), [&token](const typename CONTAINER::value_type &tok){return tok.first == token;});
     }
 
+    bool destruction_suppressed = false;
     Output_Ptrs outputs_all;
     Outputs outputs_enabled;
     Outputs outputs_disabled;

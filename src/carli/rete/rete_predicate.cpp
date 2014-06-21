@@ -23,7 +23,7 @@ namespace Rete {
 
   void Rete_Predicate::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs_all.empty()) {
+    if(!destruction_suppressed && outputs_all.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
@@ -95,7 +95,7 @@ namespace Rete {
     }
     return false;
   }
-  
+
   void Rete_Predicate::print_details(std::ostream &os) const {
     os << "  " << intptr_t(this) << " [label=\"" << m_lhs_index;
     switch(m_predicate) {
@@ -136,11 +136,11 @@ namespace Rete {
       input->output_name(os, depth - 1);
     os << ')';
   }
-  
+
   bool Rete_Predicate::is_active() const {
     return !tokens.empty();
   }
-  
+
   Rete_Predicate_Ptr Rete_Predicate::find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out) {
     for(auto &o : out->get_outputs_all()) {
       if(auto existing_predicate = std::dynamic_pointer_cast<Rete_Predicate>(o)) {

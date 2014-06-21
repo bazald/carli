@@ -9,7 +9,7 @@ namespace Rete {
 
   void Rete_Existential_Join::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs_all.empty()) {
+    if(!destruction_suppressed && outputs_all.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
@@ -123,14 +123,14 @@ namespace Rete {
       input1->output_name(os, depth - 1);
     os << ')';
   }
-  
+
   bool Rete_Existential_Join::is_active() const {
     for(auto &wme_token : input0_tokens)
       if(wme_token.second)
         return true;
     return false;
   }
-  
+
   Rete_Existential_Join_Ptr Rete_Existential_Join::find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
     for(auto &o0 : out0->get_outputs_all()) {
       if(auto existing_existential_join = std::dynamic_pointer_cast<Rete_Existential_Join>(o0)) {

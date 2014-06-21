@@ -29,6 +29,7 @@ namespace Rete {
 
     void excise_rule(const std::string &name);
     void excise_rule(const Rete_Action_Ptr &action);
+    Rete_Action_Ptr unname_rule(const std::string &name);
 
     void insert_wme(const WME_Ptr_C &wme);
     void remove_wme(const WME_Ptr_C &wme);

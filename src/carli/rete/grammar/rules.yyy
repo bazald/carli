@@ -132,12 +132,19 @@ command:
                                        delete $2;
                                        if(rv)
                                          reteerror(yyscanner, agent, "Error sourcing recursively."); }
-  | COMMAND_SP rule { string name = get<1>(*$2);
+  | COMMAND_SP rule { auto &parent = get<0>(*$2);
+                      const string name = get<1>(*$2);
+                      const auto existing = agent.unname_rule(name);
+                      if(existing) {
+                        parent->suppress_destruction(true);
+                        agent.excise_rule(existing);
+                      }
                       auto node = agent.make_action_retraction([name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
                                                                  cout << wme_vector << "->" << name << endl;
                                                                }, [name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
                                                                  cout << wme_vector << "<-" << name << endl;
-                                                               }, get<0>(*$2));
+                                                               }, parent);
+                      parent->suppress_destruction(false);
                       agent.source_rule(name, node);
                       delete $2; }
 rule:

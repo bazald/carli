@@ -6,7 +6,7 @@ namespace Rete {
 
   void Rete_Existential::destroy(Filters &filters, const Rete_Node_Ptr &output) {
     erase_output(output);
-    if(outputs_all.empty()) {
+    if(!destruction_suppressed && outputs_all.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
