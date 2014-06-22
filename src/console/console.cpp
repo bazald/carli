@@ -33,8 +33,10 @@ int main(int argc, char **argv) {
   std::string line;
   int line_number = 1;
 
-  for(int i = 1; !rete_get_exit() && i < argc; ++i)
+  for(int i = 1; !rete_get_exit() && i < argc; ++i) {
     rete_parse_file(ragent, argv[i]);
+    std::cout << std::endl;
+  }
 
   while(!rete_get_exit()) {
     std::cout << "carli % ";
