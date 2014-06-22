@@ -1,0 +1,214 @@
+sp {blocks-world*rl*action
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
+}
+
+sp {blocks-world*rl-fringe*block-clear
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  +(<block> ^clear true)
+}
+
+sp {blocks-world*rl-fringe*block-not-clear
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  -(<block> ^clear true)
+}
+
+sp {blocks-world*rl-fringe*dest-clear
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  +(<dest> ^clear true)
+}
+
+sp {blocks-world*rl-fringe*dest-not-clear
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  -(<dest> ^clear true)
+}
+
+sp {blocks-world*rl-fringe*block-in-place
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  +(<block> ^in-place true)
+}
+
+sp {blocks-world*rl-fringe*block-not-in-place
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  -(<block> ^in-place true)
+}
+
+sp {blocks-world*rl-fringe*dest-in-place
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  +(<dest> ^in-place true)
+}
+
+sp {blocks-world*rl-fringe*dest-not-in-place
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  -(<dest> ^in-place true)
+}
+
+sp {blocks-world*rl-fringe*block-name*1
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  (<block-name> == 1)
+}
+
+sp {blocks-world*rl-fringe*block-name*2
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  (<block-name> == 2)
+}
+
+sp {blocks-world*rl-fringe*block-name*3
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  (<block-name> == 3)
+}
+
+sp {blocks-world*rl-fringe*dest-name*0
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  (<dest-name> == 0)
+}
+
+sp {blocks-world*rl-fringe*dest-name*1
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  (<dest-name> == 1)
+}
+
+sp {blocks-world*rl-fringe*dest-name*2
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  (<dest-name> == 2)
+}
+
+sp {blocks-world*rl-fringe*dest-name*3
+  :fringe
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  (<dest-name> == 3)
+}
+
+sp {blocks-world*rl-fringe*height-lower
+  :fringe 1 3
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  (<height> < 3)
+}
+
+sp {blocks-world*rl-fringe*height-upper
+  :fringe 1 3
+  (<s> ^action <a>)
+  (<a> ^block <block>)
+  (<a> ^block <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block> ^height <block-height>)
+  (<dest> ^height <dest-height>)
+  (<height> >= 3)
+}

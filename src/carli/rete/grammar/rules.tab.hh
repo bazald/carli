@@ -84,18 +84,19 @@ typedef union YYSTYPE
 
   char cval;
   const char *csval;
-  std::list<std::string> *flags_ptr;
+  std::pair<std::string, std::shared_ptr<std::tuple<double, double, bool>>> *flag_ptr;
+  std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>> *flags_ptr;
   double fval;
   int64_t ival;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<Rete::Rete_Node_Ptr, std::string, std::list<std::string>> *rule_ptr;
+  std::tuple<Rete::Rete_Node_Ptr, std::string, std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 
 
 /* Line 2053 of yacc.c  */
-#line 99 "rules.tab.hh"
+#line 100 "rules.tab.hh"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

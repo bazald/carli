@@ -19,9 +19,6 @@ typedef void *yyscan_t;
 }
 
 %code {
-#define YY_NO_UNISTD_H 1
-#include <csignal>
-#include <sstream>
 #include "lex.rete.hh"
 
 static volatile sig_atomic_t g_rete_exit = false;
@@ -38,15 +35,18 @@ void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete:
 }
 
 %{
+#define YY_NO_UNISTD_H 1
+#include <csignal>
 #include <cstdio>
+#include <sstream>
 #include "rete_parser.h"
 
 using namespace std;
 
-static list<string> * Flags(const string &flag, list<string> * flags = nullptr) {
+static unordered_map<string, shared_ptr<tuple<double, double, bool>>> * Flags(const string &flag, const shared_ptr<tuple<double, double, bool>> &value, std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>> * flags = nullptr) {
   if(!flags)
-    flags = new list<string>;
-  flags->push_back(flag);
+    flags = new std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>;
+  (*flags)[flag] = value;
   return flags;
 }
 
@@ -86,12 +86,13 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
 %union {
   char cval;
   const char *csval;
-  std::list<std::string> *flags_ptr;
+  std::pair<std::string, std::shared_ptr<std::tuple<double, double, bool>>> *flag_ptr;
+  std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>> *flags_ptr;
   double fval;
   int64_t ival;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<Rete::Rete_Node_Ptr, std::string, std::list<std::string>> *rule_ptr;
+  std::tuple<Rete::Rete_Node_Ptr, std::string, std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 }
@@ -111,6 +112,7 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
 %token <sval> VARIABLE
 %token <predicate> PREDICATE
 
+%type <flag_ptr> flag
 %type <flags_ptr> flags
 %type <rete_node_ptr> final_conditions conditions condition_group condition_type condition
 %type <rule_ptr> rule
@@ -165,18 +167,23 @@ command:
                       delete $2; }
   ;
 rule:
-  '{' STRING flags final_conditions '}' { $$ = new tuple<Rete::Rete_Node_Ptr, std::string, std::list<std::string>>($4->first, *$2, *$3);
+  '{' STRING flags final_conditions '}' { $$ = new tuple<Rete::Rete_Node_Ptr, std::string, std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>>($4->first, *$2, *$3);
                                           delete $2;
                                           delete $3;
                                           delete $4; }
-  | '{' STRING final_conditions '}' { $$ = new tuple<Rete::Rete_Node_Ptr, std::string, std::list<std::string>>($3->first, *$2, list<string>());
-                                      delete $2;
-                                      delete $3; }
   ;
 flags:
-  flags FLAG { $$ = Flags(*$2, $1);
-               delete $2; }
-  | FLAG { $$ = Flags(*$1);
+  { $$ = new std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>; }
+  | flags flag { $$ = $1;
+                 (*$$)[$2->first] = $2->second;
+                 delete $2; }
+  ;
+flag:
+  FLAG FLOAT FLOAT { $$ = new pair<string, shared_ptr<tuple<double, double, bool>>>(*$1, make_shared<tuple<double, double, bool>>($2, $3, false));
+                     delete $1; }
+  | FLAG INT INT { $$ = new pair<string, shared_ptr<tuple<double, double, bool>>>(*$1, make_shared<tuple<double, double, bool>>($2, $3, true));
+                   delete $1; }
+  | FLAG { $$ = new pair<string, shared_ptr<tuple<double, double, bool>>>(*$1, nullptr);
            delete $1; }
   ;
 final_conditions:

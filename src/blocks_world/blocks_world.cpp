@@ -132,7 +132,7 @@ namespace Blocks_World {
     Carli::Node_Unsplit_Ptr root_action_data;
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
-      
+
       auto root_action = make_standard_action(join_blink);
       root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, get_action, 1, nullptr);
       root_action->data = root_action_data;
@@ -181,15 +181,15 @@ namespace Blocks_World {
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_last);
       make_standard_fringe(name_is, root_action_data, feature);
     }
-    
+
     if(enable_distractors) {
       const int64_t num_blocks = env->num_blocks();
       for(const auto &block : blocks) {
-        auto feature = new Height(block, 1.0, double(num_blocks / 2), 2, false);
+        auto feature = new Height(block, 1.0, double(num_blocks / 2) + 2, 2, false);
         auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), join_last);
         make_standard_fringe(predicate, root_action_data, feature);
-        
-        feature = new Height(block, double(num_blocks / 2), double(num_blocks), 2, true);
+
+        feature = new Height(block, double(num_blocks / 2) + 2, double(num_blocks), 2, true);
         predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), join_last);
         make_standard_fringe(predicate, root_action_data, feature);
       }

@@ -76,17 +76,20 @@
 
 /* Copy the first part of user declarations.  */
 /* Line 371 of yacc.c  */
-#line 40 "rules.yyy"
+#line 37 "rules.yyy"
 
+#define YY_NO_UNISTD_H 1
+#include <csignal>
 #include <cstdio>
+#include <sstream>
 #include "rete_parser.h"
 
 using namespace std;
 
-static list<string> * Flags(const string &flag, list<string> * flags = nullptr) {
+static unordered_map<string, shared_ptr<tuple<double, double, bool>>> * Flags(const string &flag, const shared_ptr<tuple<double, double, bool>> &value, std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>> * flags = nullptr) {
   if(!flags)
-    flags = new list<string>;
-  flags->push_back(flag);
+    flags = new std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>;
+  (*flags)[flag] = value;
   return flags;
 }
 
@@ -123,7 +126,7 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
 
 
 /* Line 371 of yacc.c  */
-#line 122 "rules.tab.cpp"
+#line 125 "rules.tab.cpp"
 
 # ifndef YY_NULL
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -163,7 +166,7 @@ typedef void *yyscan_t;
 
 
 /* Line 387 of yacc.c  */
-#line 162 "rules.tab.cpp"
+#line 165 "rules.tab.cpp"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -197,18 +200,19 @@ typedef union YYSTYPE
 
   char cval;
   const char *csval;
-  std::list<std::string> *flags_ptr;
+  std::pair<std::string, std::shared_ptr<std::tuple<double, double, bool>>> *flag_ptr;
+  std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>> *flags_ptr;
   double fval;
   int64_t ival;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<Rete::Rete_Node_Ptr, std::string, std::list<std::string>> *rule_ptr;
+  std::tuple<Rete::Rete_Node_Ptr, std::string, std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 
 
 /* Line 387 of yacc.c  */
-#line 207 "rules.tab.cpp"
+#line 211 "rules.tab.cpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -248,14 +252,11 @@ int reteparse ();
 /* Copy the second part of user declarations.  */
 
 /* Line 390 of yacc.c  */
-#line 247 "rules.tab.cpp"
+#line 251 "rules.tab.cpp"
 /* Unqualified %code blocks.  */
 /* Line 391 of yacc.c  */
 #line 21 "rules.yyy"
 
-#define YY_NO_UNISTD_H 1
-#include <csignal>
-#include <sstream>
 #include "lex.rete.hh"
 
 static volatile sig_atomic_t g_rete_exit = false;
@@ -272,7 +273,7 @@ void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete:
 
 
 /* Line 391 of yacc.c  */
-#line 271 "rules.tab.cpp"
+#line 272 "rules.tab.cpp"
 
 #ifdef short
 # undef short
@@ -503,16 +504,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   106
+#define YYLAST   101
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  26
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  16
+#define YYNNTS  17
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  42
+#define YYNRULES  44
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  86
+#define YYNSTATES  88
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -560,41 +561,41 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyprhs[] =
 {
        0,     0,     3,     4,     7,    10,    12,    20,    28,    31,
-      34,    40,    45,    48,    50,    52,    55,    58,    62,    66,
-      69,    76,    83,    85,    89,    91,    93,   100,   107,   114,
-     121,   123,   125,   128,   130,   132,   134,   136,   138,   142,
-     145,   148,   150
+      34,    40,    41,    44,    48,    52,    54,    56,    59,    62,
+      66,    70,    73,    80,    87,    89,    93,    95,    97,   104,
+     111,   118,   125,   127,   129,   132,   134,   136,   138,   140,
+     142,   146,   149,   152,   154
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
       27,     0,    -1,    -1,    27,    28,    -1,     3,    12,    -1,
-       4,    -1,     5,    17,    36,    18,    36,    36,    19,    -1,
-       6,    17,    36,    18,    36,    36,    19,    -1,     7,    39,
-      -1,     8,    29,    -1,    20,    12,    30,    31,    21,    -1,
-      20,    12,    31,    21,    -1,    30,     9,    -1,     9,    -1,
-      32,    -1,    22,    32,    -1,    23,    32,    -1,    31,    22,
-      34,    -1,    31,    23,    34,    -1,    32,    34,    -1,    32,
-      17,    15,    16,    38,    19,    -1,    32,    17,    15,    16,
-      15,    19,    -1,    34,    -1,    20,    31,    21,    -1,    35,
-      -1,    33,    -1,    17,    15,    18,    38,    38,    19,    -1,
-      17,    15,    18,    38,    15,    19,    -1,    17,    15,    18,
-      15,    38,    19,    -1,    17,    15,    18,    15,    15,    19,
-      -1,    38,    -1,    37,    -1,    24,    12,    -1,    10,    -1,
-      11,    -1,    39,    -1,    12,    -1,    40,    -1,    25,    41,
-      25,    -1,    41,    13,    -1,    41,    14,    -1,    13,    -1,
-      14,    -1
+       4,    -1,     5,    17,    37,    18,    37,    37,    19,    -1,
+       6,    17,    37,    18,    37,    37,    19,    -1,     7,    40,
+      -1,     8,    29,    -1,    20,    12,    30,    32,    21,    -1,
+      -1,    30,    31,    -1,     9,    10,    10,    -1,     9,    11,
+      11,    -1,     9,    -1,    33,    -1,    22,    33,    -1,    23,
+      33,    -1,    32,    22,    35,    -1,    32,    23,    35,    -1,
+      33,    35,    -1,    33,    17,    15,    16,    39,    19,    -1,
+      33,    17,    15,    16,    15,    19,    -1,    35,    -1,    20,
+      32,    21,    -1,    36,    -1,    34,    -1,    17,    15,    18,
+      39,    39,    19,    -1,    17,    15,    18,    39,    15,    19,
+      -1,    17,    15,    18,    15,    39,    19,    -1,    17,    15,
+      18,    15,    15,    19,    -1,    39,    -1,    38,    -1,    24,
+      12,    -1,    10,    -1,    11,    -1,    40,    -1,    12,    -1,
+      41,    -1,    25,    42,    25,    -1,    42,    13,    -1,    42,
+      14,    -1,    13,    -1,    14,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   121,   121,   122,   125,   127,   129,   134,   139,   151,
-     168,   172,   177,   179,   183,   184,   185,   186,   208,   232,
-     256,   265,   275,   278,   281,   282,   285,   286,   287,   288,
-     291,   292,   295,   298,   299,   300,   303,   304,   307,   310,
-     311,   312,   313
+       0,   123,   123,   124,   127,   129,   131,   136,   141,   153,
+     170,   176,   177,   182,   184,   186,   190,   191,   192,   193,
+     215,   239,   263,   272,   282,   285,   288,   289,   292,   293,
+     294,   295,   298,   299,   302,   305,   306,   307,   310,   311,
+     314,   317,   318,   319,   320
 };
 #endif
 
@@ -608,9 +609,9 @@ static const char *const yytname[] =
   "COMMAND_SP", "FLAG", "FLOAT", "INT", "STRING", "STRING_PART_C",
   "STRING_PART_S", "VARIABLE", "PREDICATE", "'('", "'^'", "')'", "'{'",
   "'}'", "'+'", "'-'", "'@'", "'|'", "$accept", "commands", "command",
-  "rule", "flags", "final_conditions", "conditions", "condition_group",
-  "condition_type", "condition", "symbol", "identifier", "symbol_constant",
-  "string_or_literal", "literal", "literal_parts", YY_NULL
+  "rule", "flags", "flag", "final_conditions", "conditions",
+  "condition_group", "condition_type", "condition", "symbol", "identifier",
+  "symbol_constant", "string_or_literal", "literal", "literal_parts", YY_NULL
 };
 #endif
 
@@ -629,20 +630,20 @@ static const yytype_uint16 yytoknum[] =
 static const yytype_uint8 yyr1[] =
 {
        0,    26,    27,    27,    28,    28,    28,    28,    28,    28,
-      29,    29,    30,    30,    31,    31,    31,    31,    31,    32,
-      32,    32,    32,    33,    34,    34,    35,    35,    35,    35,
-      36,    36,    37,    38,    38,    38,    39,    39,    40,    41,
-      41,    41,    41
+      29,    30,    30,    31,    31,    31,    32,    32,    32,    32,
+      32,    33,    33,    33,    33,    34,    35,    35,    36,    36,
+      36,    36,    37,    37,    38,    39,    39,    39,    40,    40,
+      41,    42,    42,    42,    42
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     0,     2,     2,     1,     7,     7,     2,     2,
-       5,     4,     2,     1,     1,     2,     2,     3,     3,     2,
-       6,     6,     1,     3,     1,     1,     6,     6,     6,     6,
-       1,     1,     2,     1,     1,     1,     1,     1,     3,     2,
-       2,     1,     1
+       5,     0,     2,     3,     3,     1,     1,     2,     2,     3,
+       3,     2,     6,     6,     1,     3,     1,     1,     6,     6,
+       6,     6,     1,     1,     2,     1,     1,     1,     1,     1,
+       3,     2,     2,     1,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
@@ -651,44 +652,44 @@ static const yytype_uint8 yyr2[] =
 static const yytype_uint8 yydefact[] =
 {
        2,     0,     1,     0,     5,     0,     0,     0,     0,     3,
-       4,     0,     0,    36,     0,     8,    37,     0,     9,    33,
-      34,     0,     0,    31,    30,    35,     0,    41,    42,     0,
-       0,    32,     0,     0,    39,    40,    38,    13,     0,     0,
-       0,     0,     0,     0,    14,    25,    22,    24,     0,     0,
-       0,     0,    15,    16,    12,     0,    11,     0,     0,     0,
-      19,     0,     0,     0,    23,    10,    17,    18,     0,     6,
-       7,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      29,    28,    27,    26,    21,    20
+       4,     0,     0,    38,     0,     8,    39,     0,     9,    35,
+      36,     0,     0,    33,    32,    37,     0,    43,    44,     0,
+      11,    34,     0,     0,    41,    42,    40,     0,     0,     0,
+      15,     0,     0,     0,     0,    12,     0,    16,    27,    24,
+      26,     0,     0,     0,     0,     0,     0,    17,    18,    10,
+       0,     0,     0,    21,     6,     7,    13,    14,     0,    25,
+      19,    20,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,    31,    30,    29,    28,    23,    22
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     1,     9,    18,    42,    43,    44,    45,    46,    47,
-      22,    23,    24,    25,    16,    29
+      -1,     1,     9,    18,    37,    45,    46,    47,    48,    49,
+      50,    22,    23,    24,    25,    16,    29
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -32
+#define YYPACT_NINF -62
 static const yytype_int8 yypact[] =
 {
-     -32,    70,   -32,     6,   -32,     9,    16,    10,    38,   -32,
-     -32,    -9,    -9,   -32,    28,   -32,   -32,    59,   -32,   -32,
-     -32,    60,    63,   -32,   -32,   -32,    77,   -32,   -32,    41,
-      23,   -32,    -9,    -9,   -32,   -32,   -32,   -32,    81,    62,
-     -10,   -10,    30,    65,    43,   -32,   -32,   -32,    -9,    -9,
-      79,    68,    43,    43,   -32,    71,   -32,   -10,   -10,    83,
-     -32,    61,    64,    -6,   -32,   -32,   -32,   -32,    33,   -32,
-     -32,     2,    13,    19,    80,    82,    84,    85,    86,    87,
-     -32,   -32,   -32,   -32,   -32,   -32
+     -62,    58,   -62,    -4,   -62,    16,    22,    35,    48,   -62,
+     -62,    -9,    -9,   -62,     4,   -62,   -62,    57,   -62,   -62,
+     -62,    59,    66,   -62,   -62,   -62,    67,   -62,   -62,    -3,
+     -62,   -62,    -9,    -9,   -62,   -62,   -62,    32,    -9,    -9,
+      70,    71,    50,    31,    31,   -62,    53,    36,   -62,   -62,
+     -62,    68,    69,    79,    80,    72,    56,    36,    36,   -62,
+      31,    31,    77,   -62,   -62,   -62,   -62,   -62,    -6,   -62,
+     -62,   -62,    41,    13,    19,    25,    74,    75,    76,    78,
+      81,    82,   -62,   -62,   -62,   -62,   -62,   -62
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -32,   -32,   -32,   -32,   -32,   -31,    24,   -32,     4,   -32,
-     -12,   -32,    -4,    93,   -32,   -32
+     -62,   -62,   -62,   -62,   -62,   -62,    54,    39,   -62,   -15,
+     -62,   -12,   -62,   -61,    91,   -62,   -62
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -697,38 +698,38 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-      26,    19,    20,    13,    19,    20,    13,    38,    51,    71,
-      39,    55,    19,    20,    13,    21,    14,    74,    10,    14,
-      48,    49,    13,    19,    20,    13,    11,    14,    76,    19,
-      20,    13,    37,    12,    78,    14,    61,    62,    14,    54,
-      38,    27,    28,    39,    14,    40,    41,    38,    60,    73,
-      39,    63,    40,    41,    34,    35,    60,    60,    17,    72,
-      59,    66,    67,    39,    52,    53,    36,    75,    77,    79,
-       2,    30,    31,     3,     4,     5,     6,     7,     8,    38,
-      69,    32,    39,    70,    40,    41,    56,    57,    58,    64,
-      57,    58,    65,    57,    58,    33,    50,    63,    68,    80,
-      15,    81,     0,    82,    83,    84,    85
+      26,    19,    20,    13,    19,    20,    13,    74,    10,    73,
+      34,    35,    77,    79,    81,    21,    14,    27,    28,    14,
+      38,    39,    36,    19,    20,    13,    51,    52,    76,    19,
+      20,    13,    63,    11,    78,    19,    20,    13,    14,    12,
+      80,    40,    63,    63,    14,    70,    71,    13,    41,    41,
+      14,    42,    42,    62,    43,    44,    42,    75,     2,    68,
+      14,     3,     4,     5,     6,     7,     8,    41,    17,    30,
+      42,    31,    43,    44,    59,    60,    61,    69,    60,    61,
+      53,    54,    57,    58,    32,    33,    55,    64,    65,    66,
+      68,    67,    72,    82,    83,    84,    56,    85,    15,     0,
+      86,    87
 };
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-32)))
+  (!!((Yystate) == (-62)))
 
 #define yytable_value_is_error(Yytable_value) \
   YYID (0)
 
 static const yytype_int8 yycheck[] =
 {
-      12,    10,    11,    12,    10,    11,    12,    17,    39,    15,
-      20,    42,    10,    11,    12,    24,    25,    15,    12,    25,
-      32,    33,    12,    10,    11,    12,    17,    25,    15,    10,
-      11,    12,     9,    17,    15,    25,    48,    49,    25,     9,
-      17,    13,    14,    20,    25,    22,    23,    17,    44,    16,
-      20,    18,    22,    23,    13,    14,    52,    53,    20,    63,
-      17,    57,    58,    20,    40,    41,    25,    71,    72,    73,
-       0,    12,    12,     3,     4,     5,     6,     7,     8,    17,
-      19,    18,    20,    19,    22,    23,    21,    22,    23,    21,
-      22,    23,    21,    22,    23,    18,    15,    18,    15,    19,
-       7,    19,    -1,    19,    19,    19,    19
+      12,    10,    11,    12,    10,    11,    12,    68,    12,    15,
+      13,    14,    73,    74,    75,    24,    25,    13,    14,    25,
+      32,    33,    25,    10,    11,    12,    38,    39,    15,    10,
+      11,    12,    47,    17,    15,    10,    11,    12,    25,    17,
+      15,     9,    57,    58,    25,    60,    61,    12,    17,    17,
+      25,    20,    20,    17,    22,    23,    20,    16,     0,    18,
+      25,     3,     4,     5,     6,     7,     8,    17,    20,    12,
+      20,    12,    22,    23,    21,    22,    23,    21,    22,    23,
+      10,    11,    43,    44,    18,    18,    15,    19,    19,    10,
+      18,    11,    15,    19,    19,    19,    42,    19,     7,    -1,
+      19,    19
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -736,14 +737,14 @@ static const yytype_int8 yycheck[] =
 static const yytype_uint8 yystos[] =
 {
        0,    27,     0,     3,     4,     5,     6,     7,     8,    28,
-      12,    17,    17,    12,    25,    39,    40,    20,    29,    10,
-      11,    24,    36,    37,    38,    39,    36,    13,    14,    41,
-      12,    12,    18,    18,    13,    14,    25,     9,    17,    20,
-      22,    23,    30,    31,    32,    33,    34,    35,    36,    36,
-      15,    31,    32,    32,     9,    31,    21,    22,    23,    17,
-      34,    36,    36,    18,    21,    21,    34,    34,    15,    19,
-      19,    15,    38,    16,    15,    38,    15,    38,    15,    38,
-      19,    19,    19,    19,    19,    19
+      12,    17,    17,    12,    25,    40,    41,    20,    29,    10,
+      11,    24,    37,    38,    39,    40,    37,    13,    14,    42,
+      12,    12,    18,    18,    13,    14,    25,    30,    37,    37,
+       9,    17,    20,    22,    23,    31,    32,    33,    34,    35,
+      36,    37,    37,    10,    11,    15,    32,    33,    33,    21,
+      22,    23,    17,    35,    19,    19,    10,    11,    18,    21,
+      35,    35,    15,    15,    39,    16,    15,    39,    15,    39,
+      15,    39,    19,    19,    19,    19,    19,    19
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1684,27 +1685,27 @@ yyreduce:
     {
         case 3:
 /* Line 1787 of yacc.c  */
-#line 122 "rules.yyy"
+#line 124 "rules.yyy"
     { /*cerr << "Read in rule on line " << reteget_lineno(yyscanner) << endl;*/ }
     break;
 
   case 4:
 /* Line 1787 of yacc.c  */
-#line 125 "rules.yyy"
+#line 127 "rules.yyy"
     { agent.excise_rule(*(yyvsp[(2) - (2)].sval));
                           delete (yyvsp[(2) - (2)].sval); }
     break;
 
   case 5:
 /* Line 1787 of yacc.c  */
-#line 127 "rules.yyy"
+#line 129 "rules.yyy"
     { g_rete_exit = true;
                    YYACCEPT; }
     break;
 
   case 6:
 /* Line 1787 of yacc.c  */
-#line 129 "rules.yyy"
+#line 131 "rules.yyy"
     { const auto wme = std::make_shared<Rete::WME>(*(yyvsp[(3) - (7)].symbol_ptr), *(yyvsp[(5) - (7)].symbol_ptr), *(yyvsp[(6) - (7)].symbol_ptr));
                                                           agent.insert_wme(wme);
                                                           delete (yyvsp[(3) - (7)].symbol_ptr);
@@ -1714,7 +1715,7 @@ yyreduce:
 
   case 7:
 /* Line 1787 of yacc.c  */
-#line 134 "rules.yyy"
+#line 136 "rules.yyy"
     { const auto wme = std::make_shared<Rete::WME>(*(yyvsp[(3) - (7)].symbol_ptr), *(yyvsp[(5) - (7)].symbol_ptr), *(yyvsp[(6) - (7)].symbol_ptr));
                                                           agent.remove_wme(wme);
                                                           delete (yyvsp[(3) - (7)].symbol_ptr);
@@ -1724,7 +1725,7 @@ yyreduce:
 
   case 8:
 /* Line 1787 of yacc.c  */
-#line 139 "rules.yyy"
+#line 141 "rules.yyy"
     { const int rv = rete_parse_file(agent, *(yyvsp[(2) - (2)].sval), source_path);
                                        if(rv) {
                                          ostringstream oss;
@@ -1741,7 +1742,7 @@ yyreduce:
 
   case 9:
 /* Line 1787 of yacc.c  */
-#line 151 "rules.yyy"
+#line 153 "rules.yyy"
     { auto &parent = get<0>(*(yyvsp[(2) - (2)].rule_ptr));
                       const string name = get<1>(*(yyvsp[(2) - (2)].rule_ptr));
                       const auto existing = agent.unname_rule(name);
@@ -1761,8 +1762,8 @@ yyreduce:
 
   case 10:
 /* Line 1787 of yacc.c  */
-#line 168 "rules.yyy"
-    { (yyval.rule_ptr) = new tuple<Rete::Rete_Node_Ptr, std::string, std::list<std::string>>((yyvsp[(4) - (5)].rete_node_ptr)->first, *(yyvsp[(2) - (5)].sval), *(yyvsp[(3) - (5)].flags_ptr));
+#line 170 "rules.yyy"
+    { (yyval.rule_ptr) = new tuple<Rete::Rete_Node_Ptr, std::string, std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>>((yyvsp[(4) - (5)].rete_node_ptr)->first, *(yyvsp[(2) - (5)].sval), *(yyvsp[(3) - (5)].flags_ptr));
                                           delete (yyvsp[(2) - (5)].sval);
                                           delete (yyvsp[(3) - (5)].flags_ptr);
                                           delete (yyvsp[(4) - (5)].rete_node_ptr); }
@@ -1770,47 +1771,60 @@ yyreduce:
 
   case 11:
 /* Line 1787 of yacc.c  */
-#line 172 "rules.yyy"
-    { (yyval.rule_ptr) = new tuple<Rete::Rete_Node_Ptr, std::string, std::list<std::string>>((yyvsp[(3) - (4)].rete_node_ptr)->first, *(yyvsp[(2) - (4)].sval), list<string>());
-                                      delete (yyvsp[(2) - (4)].sval);
-                                      delete (yyvsp[(3) - (4)].rete_node_ptr); }
+#line 176 "rules.yyy"
+    { (yyval.flags_ptr) = new std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>; }
     break;
 
   case 12:
 /* Line 1787 of yacc.c  */
 #line 177 "rules.yyy"
-    { (yyval.flags_ptr) = Flags(*(yyvsp[(2) - (2)].sval), (yyvsp[(1) - (2)].flags_ptr));
-               delete (yyvsp[(2) - (2)].sval); }
+    { (yyval.flags_ptr) = (yyvsp[(1) - (2)].flags_ptr);
+                 (*(yyval.flags_ptr))[(yyvsp[(2) - (2)].flag_ptr)->first] = (yyvsp[(2) - (2)].flag_ptr)->second;
+                 delete (yyvsp[(2) - (2)].flag_ptr); }
     break;
 
   case 13:
 /* Line 1787 of yacc.c  */
-#line 179 "rules.yyy"
-    { (yyval.flags_ptr) = Flags(*(yyvsp[(1) - (1)].sval));
-           delete (yyvsp[(1) - (1)].sval); }
+#line 182 "rules.yyy"
+    { (yyval.flag_ptr) = new pair<string, shared_ptr<tuple<double, double, bool>>>(*(yyvsp[(1) - (3)].sval), make_shared<tuple<double, double, bool>>((yyvsp[(2) - (3)].fval), (yyvsp[(3) - (3)].fval), false));
+                     delete (yyvsp[(1) - (3)].sval); }
     break;
 
   case 14:
 /* Line 1787 of yacc.c  */
-#line 183 "rules.yyy"
-    { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
+#line 184 "rules.yyy"
+    { (yyval.flag_ptr) = new pair<string, shared_ptr<tuple<double, double, bool>>>(*(yyvsp[(1) - (3)].sval), make_shared<tuple<double, double, bool>>((yyvsp[(2) - (3)].ival), (yyvsp[(3) - (3)].ival), true));
+                   delete (yyvsp[(1) - (3)].sval); }
     break;
 
   case 15:
 /* Line 1787 of yacc.c  */
-#line 184 "rules.yyy"
-    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential((yyvsp[(2) - (2)].rete_node_ptr)->first)), Variables()); delete (yyvsp[(2) - (2)].rete_node_ptr); }
+#line 186 "rules.yyy"
+    { (yyval.flag_ptr) = new pair<string, shared_ptr<tuple<double, double, bool>>>(*(yyvsp[(1) - (1)].sval), nullptr);
+           delete (yyvsp[(1) - (1)].sval); }
     break;
 
   case 16:
 /* Line 1787 of yacc.c  */
-#line 185 "rules.yyy"
-    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation((yyvsp[(2) - (2)].rete_node_ptr)->first)), Variables()); delete (yyvsp[(2) - (2)].rete_node_ptr); }
+#line 190 "rules.yyy"
+    { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
     break;
 
   case 17:
 /* Line 1787 of yacc.c  */
-#line 186 "rules.yyy"
+#line 191 "rules.yyy"
+    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential((yyvsp[(2) - (2)].rete_node_ptr)->first)), Variables()); delete (yyvsp[(2) - (2)].rete_node_ptr); }
+    break;
+
+  case 18:
+/* Line 1787 of yacc.c  */
+#line 192 "rules.yyy"
+    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation((yyvsp[(2) - (2)].rete_node_ptr)->first)), Variables()); delete (yyvsp[(2) - (2)].rete_node_ptr); }
+    break;
+
+  case 19:
+/* Line 1787 of yacc.c  */
+#line 193 "rules.yyy"
     { Rete::WME_Bindings bindings;
                                           unordered_set<string> joined;
                                           for(size_t i = 0; i != (yyvsp[(1) - (3)].rete_node_ptr)->second.size(); ++i) {
@@ -1835,9 +1849,9 @@ yyreduce:
                                           delete (yyvsp[(3) - (3)].rete_node_ptr); }
     break;
 
-  case 18:
+  case 20:
 /* Line 1787 of yacc.c  */
-#line 208 "rules.yyy"
+#line 215 "rules.yyy"
     { Rete::WME_Bindings bindings;
                                           unordered_set<string> joined;
                                           for(size_t i = 0; i != (yyvsp[(1) - (3)].rete_node_ptr)->second.size(); ++i) {
@@ -1862,9 +1876,9 @@ yyreduce:
                                           delete (yyvsp[(3) - (3)].rete_node_ptr); }
     break;
 
-  case 19:
+  case 21:
 /* Line 1787 of yacc.c  */
-#line 232 "rules.yyy"
+#line 239 "rules.yyy"
     { Rete::WME_Bindings bindings;
                               unordered_set<string> joined;
                               for(size_t i = 0; i != (yyvsp[(1) - (2)].rete_node_ptr)->second.size(); ++i) {
@@ -1891,9 +1905,9 @@ yyreduce:
                               delete (yyvsp[(2) - (2)].rete_node_ptr); }
     break;
 
-  case 20:
+  case 22:
 /* Line 1787 of yacc.c  */
-#line 256 "rules.yyy"
+#line 263 "rules.yyy"
     { auto lhs_index = find_index((yyvsp[(1) - (6)].rete_node_ptr)->second, *(yyvsp[(3) - (6)].sval));
                                                             if(lhs_index.second > 2) {
                                                               reteerror(yyscanner, agent, "Unbound variable tested by predicate.");
@@ -1905,9 +1919,9 @@ yyreduce:
                                                             delete (yyvsp[(5) - (6)].symbol_ptr); }
     break;
 
-  case 21:
+  case 23:
 /* Line 1787 of yacc.c  */
-#line 265 "rules.yyy"
+#line 272 "rules.yyy"
     { auto lhs_index = find_index((yyvsp[(1) - (6)].rete_node_ptr)->second, *(yyvsp[(3) - (6)].sval));
                                                      auto rhs_index = find_index((yyvsp[(1) - (6)].rete_node_ptr)->second, *(yyvsp[(5) - (6)].sval));
                                                      if(lhs_index.second > 2 || rhs_index.second > 2) {
@@ -1920,135 +1934,135 @@ yyreduce:
                                                      delete (yyvsp[(5) - (6)].sval); }
     break;
 
-  case 22:
-/* Line 1787 of yacc.c  */
-#line 275 "rules.yyy"
-    { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
-    break;
-
-  case 23:
-/* Line 1787 of yacc.c  */
-#line 278 "rules.yyy"
-    { (yyval.rete_node_ptr) = (yyvsp[(2) - (3)].rete_node_ptr); }
-    break;
-
   case 24:
-/* Line 1787 of yacc.c  */
-#line 281 "rules.yyy"
-    { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
-    break;
-
-  case 25:
 /* Line 1787 of yacc.c  */
 #line 282 "rules.yyy"
     { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
     break;
 
-  case 26:
+  case 25:
 /* Line 1787 of yacc.c  */
 #line 285 "rules.yyy"
-    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *(yyvsp[(4) - (6)].symbol_ptr), *(yyvsp[(5) - (6)].symbol_ptr)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), "", ""))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].symbol_ptr); delete (yyvsp[(5) - (6)].symbol_ptr); }
+    { (yyval.rete_node_ptr) = (yyvsp[(2) - (3)].rete_node_ptr); }
+    break;
+
+  case 26:
+/* Line 1787 of yacc.c  */
+#line 288 "rules.yyy"
+    { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
     break;
 
   case 27:
 /* Line 1787 of yacc.c  */
-#line 286 "rules.yyy"
-    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *(yyvsp[(4) - (6)].symbol_ptr), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Third)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), "", *(yyvsp[(5) - (6)].sval)))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].symbol_ptr); delete (yyvsp[(5) - (6)].sval); }
+#line 289 "rules.yyy"
+    { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
     break;
 
   case 28:
 /* Line 1787 of yacc.c  */
-#line 287 "rules.yyy"
-    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(4) - (6)].sval) ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), *(yyvsp[(5) - (6)].symbol_ptr)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), *(yyvsp[(4) - (6)].sval), ""))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].sval); delete (yyvsp[(5) - (6)].symbol_ptr); }
+#line 292 "rules.yyy"
+    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *(yyvsp[(4) - (6)].symbol_ptr), *(yyvsp[(5) - (6)].symbol_ptr)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), "", ""))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].symbol_ptr); delete (yyvsp[(5) - (6)].symbol_ptr); }
     break;
 
   case 29:
 /* Line 1787 of yacc.c  */
-#line 288 "rules.yyy"
-    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(4) - (6)].sval) ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Rete::Symbol_Variable::First : *(yyvsp[(4) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Rete::Symbol_Variable::Second : Rete::Symbol_Variable::Third)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), *(yyvsp[(4) - (6)].sval), *(yyvsp[(5) - (6)].sval)))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].sval); delete (yyvsp[(5) - (6)].sval); }
+#line 293 "rules.yyy"
+    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *(yyvsp[(4) - (6)].symbol_ptr), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Third)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), "", *(yyvsp[(5) - (6)].sval)))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].symbol_ptr); delete (yyvsp[(5) - (6)].sval); }
     break;
 
   case 30:
 /* Line 1787 of yacc.c  */
-#line 291 "rules.yyy"
-    { (yyval.symbol_ptr) = (yyvsp[(1) - (1)].symbol_ptr); }
+#line 294 "rules.yyy"
+    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(4) - (6)].sval) ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), *(yyvsp[(5) - (6)].symbol_ptr)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), *(yyvsp[(4) - (6)].sval), ""))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].sval); delete (yyvsp[(5) - (6)].symbol_ptr); }
     break;
 
   case 31:
 /* Line 1787 of yacc.c  */
-#line 292 "rules.yyy"
-    { (yyval.symbol_ptr) = (yyvsp[(1) - (1)].symbol_ptr); }
+#line 295 "rules.yyy"
+    { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(4) - (6)].sval) ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Rete::Symbol_Variable::First : *(yyvsp[(4) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Rete::Symbol_Variable::Second : Rete::Symbol_Variable::Third)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), *(yyvsp[(4) - (6)].sval), *(yyvsp[(5) - (6)].sval)))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].sval); delete (yyvsp[(5) - (6)].sval); }
     break;
 
   case 32:
 /* Line 1787 of yacc.c  */
-#line 295 "rules.yyy"
-    { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Identifier>(*(yyvsp[(2) - (2)].sval))); delete (yyvsp[(2) - (2)].sval); }
+#line 298 "rules.yyy"
+    { (yyval.symbol_ptr) = (yyvsp[(1) - (1)].symbol_ptr); }
     break;
 
   case 33:
 /* Line 1787 of yacc.c  */
-#line 298 "rules.yyy"
-    { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Float>((yyvsp[(1) - (1)].fval))); }
+#line 299 "rules.yyy"
+    { (yyval.symbol_ptr) = (yyvsp[(1) - (1)].symbol_ptr); }
     break;
 
   case 34:
 /* Line 1787 of yacc.c  */
-#line 299 "rules.yyy"
-    { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Int>((yyvsp[(1) - (1)].ival))); }
+#line 302 "rules.yyy"
+    { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Identifier>(*(yyvsp[(2) - (2)].sval))); delete (yyvsp[(2) - (2)].sval); }
     break;
 
   case 35:
 /* Line 1787 of yacc.c  */
-#line 300 "rules.yyy"
-    { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_String>(*(yyvsp[(1) - (1)].sval))); delete (yyvsp[(1) - (1)].sval); }
+#line 305 "rules.yyy"
+    { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Float>((yyvsp[(1) - (1)].fval))); }
     break;
 
   case 36:
 /* Line 1787 of yacc.c  */
-#line 303 "rules.yyy"
-    { (yyval.sval) = (yyvsp[(1) - (1)].sval); }
+#line 306 "rules.yyy"
+    { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Int>((yyvsp[(1) - (1)].ival))); }
     break;
 
   case 37:
 /* Line 1787 of yacc.c  */
-#line 304 "rules.yyy"
-    { (yyval.sval) = (yyvsp[(1) - (1)].sval); }
+#line 307 "rules.yyy"
+    { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_String>(*(yyvsp[(1) - (1)].sval))); delete (yyvsp[(1) - (1)].sval); }
     break;
 
   case 38:
 /* Line 1787 of yacc.c  */
-#line 307 "rules.yyy"
-    { (yyval.sval) = (yyvsp[(2) - (3)].sval); }
+#line 310 "rules.yyy"
+    { (yyval.sval) = (yyvsp[(1) - (1)].sval); }
     break;
 
   case 39:
 /* Line 1787 of yacc.c  */
-#line 310 "rules.yyy"
-    { (yyval.sval) = (yyvsp[(1) - (2)].sval); *(yyval.sval) += (yyvsp[(2) - (2)].cval); }
+#line 311 "rules.yyy"
+    { (yyval.sval) = (yyvsp[(1) - (1)].sval); }
     break;
 
   case 40:
 /* Line 1787 of yacc.c  */
-#line 311 "rules.yyy"
-    { (yyval.sval) = (yyvsp[(1) - (2)].sval); *(yyval.sval) += *(yyvsp[(2) - (2)].sval); delete (yyvsp[(2) - (2)].sval); }
+#line 314 "rules.yyy"
+    { (yyval.sval) = (yyvsp[(2) - (3)].sval); }
     break;
 
   case 41:
 /* Line 1787 of yacc.c  */
-#line 312 "rules.yyy"
-    { (yyval.sval) = new string; *(yyval.sval) += (yyvsp[(1) - (1)].cval); }
+#line 317 "rules.yyy"
+    { (yyval.sval) = (yyvsp[(1) - (2)].sval); *(yyval.sval) += (yyvsp[(2) - (2)].cval); }
     break;
 
   case 42:
 /* Line 1787 of yacc.c  */
-#line 313 "rules.yyy"
+#line 318 "rules.yyy"
+    { (yyval.sval) = (yyvsp[(1) - (2)].sval); *(yyval.sval) += *(yyvsp[(2) - (2)].sval); delete (yyvsp[(2) - (2)].sval); }
+    break;
+
+  case 43:
+/* Line 1787 of yacc.c  */
+#line 319 "rules.yyy"
+    { (yyval.sval) = new string; *(yyval.sval) += (yyvsp[(1) - (1)].cval); }
+    break;
+
+  case 44:
+/* Line 1787 of yacc.c  */
+#line 320 "rules.yyy"
     { (yyval.sval) = (yyvsp[(1) - (1)].sval); }
     break;
 
 
 /* Line 1787 of yacc.c  */
-#line 2047 "rules.tab.cpp"
+#line 2061 "rules.tab.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2287,7 +2301,7 @@ yyreturn:
 
 
 /* Line 2050 of yacc.c  */
-#line 316 "rules.yyy"
+#line 323 "rules.yyy"
 
 
 bool rete_get_exit() {
