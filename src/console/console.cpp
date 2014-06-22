@@ -13,12 +13,11 @@ inline bool redirected_cin() {return !_isatty(_fileno(stdin));}
 inline bool redirected_cin() {return !isatty(STDIN_FILENO);}
 #endif
 
-volatile sig_atomic_t g_exit = 0;
 void signal_handler(int sig) {
-  if(!g_exit)
+  if(!rete_get_exit())
     signal(sig, signal_handler);
   if(sig == SIGTERM)
-    g_exit = true;
+    rete_set_exit();
   else
     std::cerr << std::endl << "Ctrl+" << (sig == SIGINT ? "C" : "Break") <<" captured. Call 'exit' to quit." << std::endl;
 }
@@ -34,10 +33,10 @@ int main(int argc, char **argv) {
   std::string line;
   int line_number = 1;
 
-  for(int i = 1; !g_exit && i < argc; ++i)
+  for(int i = 1; !rete_get_exit() && i < argc; ++i)
     rete_parse_file(ragent, argv[i]);
 
-  while(!g_exit) {
+  while(!rete_get_exit()) {
     std::cout << "carli % ";
     getline(std::cin, line);
     if(std::cin) {
@@ -45,7 +44,7 @@ int main(int argc, char **argv) {
       std::cout << std::endl;
     }
     else if(redirected_cin())
-      g_exit = true;
+      rete_set_exit();
     else
       std::cin.clear();
   }

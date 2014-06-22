@@ -19,7 +19,10 @@ typedef void *yyscan_t;
 
 %code {
 #define YY_NO_UNISTD_H 1
+#include <csignal>
 #include "lex.rete.hh"
+
+static volatile sig_atomic_t g_rete_exit = false;
 
 void reteerror(const yyscan_t yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
   cout << "Source error, line " << reteget_lineno(yyscanner) << ": " << msg << endl;
@@ -116,7 +119,7 @@ commands:
 command:
   COMMAND_EXCISE STRING { agent.excise_rule(*$2);
                           delete $2; }
-  | COMMAND_EXIT { exit(0); }
+  | COMMAND_EXIT { g_rete_exit = true; }
   | COMMAND_INSERT_WME '(' symbol '^' symbol symbol ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
                                                           agent.insert_wme(wme);
                                                           delete $3;
@@ -300,6 +303,10 @@ literal_parts:
 
 %%
 
+bool rete_get_exit() {
+  return g_rete_exit;
+}
+
 int rete_parse_file(Rete::Rete_Agent &agent, const string &filename, const std::string &source_path) {
   if(filename.empty())
     return -1;
@@ -363,4 +370,8 @@ int rete_parse_string(Rete::Rete_Agent &agent, const string &str, int &line_numb
   rete_delete_buffer(buf, yyscanner);
   retelex_destroy(yyscanner);
   return rv;
+}
+
+void rete_set_exit() {
+  g_rete_exit = true;
 }

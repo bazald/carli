@@ -80,7 +80,7 @@ typedef void *yyscan_t;
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 78 "rules.yyy"
+#line 81 "rules.yyy"
 
   char cval;
   const char *csval;
