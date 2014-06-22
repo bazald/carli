@@ -41,7 +41,7 @@ extern int retedebug;
 #endif
 /* "%code requires" blocks.  */
 /* Line 2053 of yacc.c  */
-#line 13 "rules.yyy"
+#line 14 "rules.yyy"
 
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
@@ -80,7 +80,7 @@ typedef void *yyscan_t;
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 81 "rules.yyy"
+#line 86 "rules.yyy"
 
   char cval;
   const char *csval;
@@ -124,7 +124,7 @@ int reteparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int reteparse (yyscan_t yyscanner, Rete::Rete_Agent &agent, const std::string &source_path);
+int reteparse (yyscan_t yyscanner, Rete::Rete_Agent &agent, const std::string &filename, const std::string &source_path);
 #else
 int reteparse ();
 #endif

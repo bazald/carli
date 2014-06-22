@@ -8,6 +8,7 @@
 %lex-param { yyscan_t yyscanner }
 %parse-param { yyscan_t yyscanner }
 %parse-param { Rete::Rete_Agent &agent }
+%parse-param { const std::string &filename }
 %parse-param { const std::string &source_path }
 
 %code requires {
@@ -20,15 +21,19 @@ typedef void *yyscan_t;
 %code {
 #define YY_NO_UNISTD_H 1
 #include <csignal>
+#include <sstream>
 #include "lex.rete.hh"
 
 static volatile sig_atomic_t g_rete_exit = false;
 
 void reteerror(const yyscan_t yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
-  cout << "Source error, line " << reteget_lineno(yyscanner) << ": " << msg << endl;
+  cout << "rete-parse error: " << msg << endl;
 }
-void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::Rete_Agent &/*agent*/, const std::string &source_path, const char *msg) {
-  cout << "Source error, line " << reteget_lineno(yyscanner) << ": " << msg << endl;
+void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::Rete_Agent &/*agent*/, const std::string &filename, const std::string &/*source_path*/, const char *msg) {
+  if(filename.empty())
+    cout << "rete-parse error: " << msg << endl;
+  else
+    cout << "rete-parse error " << filename << '(' << reteget_lineno(yyscanner) << "): " << msg << endl;
 }
 }
 
@@ -119,7 +124,8 @@ commands:
 command:
   COMMAND_EXCISE STRING { agent.excise_rule(*$2);
                           delete $2; }
-  | COMMAND_EXIT { g_rete_exit = true; }
+  | COMMAND_EXIT { g_rete_exit = true;
+                   YYACCEPT; }
   | COMMAND_INSERT_WME '(' symbol '^' symbol symbol ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
                                                           agent.insert_wme(wme);
                                                           delete $3;
@@ -131,10 +137,16 @@ command:
                                                           delete $5;
                                                           delete $6; }
   | COMMAND_SOURCE string_or_literal { const int rv = rete_parse_file(agent, *$2, source_path);
-                                       delete $2;
                                        if(rv) {
-                                         reteerror(yyscanner, agent, "Error sourcing recursively.");
+                                         ostringstream oss;
+                                         oss << "Error sourcing '" << *$2 << "'.";
+                                         reteerror(yyscanner, agent, oss.str().c_str());
+                                         delete $2;
                                          YYABORT;
+                                       }
+                                       delete $2;
+                                       if(g_rete_exit) {
+                                         YYACCEPT;
                                        } }
   | COMMAND_SP rule { auto &parent = get<0>(*$2);
                       const string name = get<1>(*$2);
@@ -342,7 +354,7 @@ int rete_parse_file(Rete::Rete_Agent &agent, const string &filename, const std::
 
   // retelex();
   do {
-    rv = reteparse(yyscanner, agent, source_path_full);
+    rv = reteparse(yyscanner, agent, filename_full, source_path_full);
     if(rv)
       break;
   } while (!feof(reteget_in(yyscanner)));
@@ -363,7 +375,7 @@ int rete_parse_string(Rete::Rete_Agent &agent, const string &str, int &line_numb
   reteset_lineno(line_number, yyscanner);
 
   // retelex();
-  rv = reteparse(yyscanner, agent, "");
+  rv = reteparse(yyscanner, agent, "", "");
 
   line_number = reteget_lineno(yyscanner) + 1;
 
