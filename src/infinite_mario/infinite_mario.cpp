@@ -318,11 +318,14 @@ namespace Mario {
     const double midpt = floor((lower_bound + upper_bound) / 2.0);
     const double values[][2] = {{lower_bound, midpt},
                                 {midpt, upper_bound}};
+    std::ostringstream oss;
 
     for(int i = 0; i != 2; ++i) {
       auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, node_unsplit, feature); //, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
+      oss.str("infinite-mario*rl-action*f");
+      oss << intptr_t(predicate.get());
+      make_standard_fringe(predicate, oss.str(), node_unsplit, feature); //, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
     }
   }
 
@@ -395,16 +398,17 @@ namespace Mario {
     //auto &join_enemy_last = join_enemy_y;
 
     auto filter_blink = make_filter(*m_wme_blink);
+    std::ostringstream oss;
 
     auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
       return std::make_shared<Button_Presses>(token);
     };
-    
+
     Carli::Node_Unsplit_Ptr root_action_data;
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
-      
-      auto root_action = make_standard_action(join_blink);
+
+      auto root_action = make_standard_action(join_blink, "infinite-mario*rl-action*general");
       root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, get_action, 1, nullptr);
       root_action->data = root_action_data;
     }
@@ -417,7 +421,9 @@ namespace Mario {
       for(const auto value : {false, true}) {
         auto feature = new Feature_Flag(flag, value);
         auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), join_last);
-        make_standard_fringe(predicate, root_action_data, feature);
+        oss.str("infinite-mario*rl-action*f");
+        oss << intptr_t(predicate.get());
+        make_standard_fringe(predicate, oss.str(), root_action_data, feature);
       }
     }
 
@@ -434,14 +440,18 @@ namespace Mario {
     for(const auto dpad : {BUTTON_NONE, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_DOWN}) {
       auto feature = new Feature_Button(Feature_Button::OUT_DPAD, dpad);
       auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), join_last);
-      make_standard_fringe(predicate, root_action_data, feature);
+      oss.str("infinite-mario*rl-action*f");
+      oss << intptr_t(predicate.get());
+      make_standard_fringe(predicate, oss.str(), root_action_data, feature);
     }
 
     for(const auto button : {Feature_Button::OUT_JUMP, Feature_Button::OUT_SPEED}) {
       for(const auto down : {false, true}) {
         auto feature = new Feature_Button(button, down);
         auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(button, 2), feature->symbol_constant(), join_last);
-        make_standard_fringe(predicate, root_action_data, feature);
+        oss.str("infinite-mario*rl-action*f");
+        oss << intptr_t(predicate.get());
+        make_standard_fringe(predicate, oss.str(), root_action_data, feature);
       }
     }
   }

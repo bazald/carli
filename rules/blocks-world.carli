@@ -1,4 +1,4 @@
-sp {blocks-world*rl*action
+sp {blocks-world*rl-action*general
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)

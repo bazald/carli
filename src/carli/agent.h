@@ -36,7 +36,7 @@ namespace Carli {
     typedef Action action_type;
     typedef double reward_type;
     typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
-    
+
     bool respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token);
     bool specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token);
     void expand_fringe(Rete::Rete_Action &rete_action, const Rete::WME_Token &token, const Fringe_Values::iterator &specialization);
@@ -90,9 +90,9 @@ namespace Carli {
     void init();
 
     reward_type act();
-    
-    Rete::Rete_Action_Ptr make_standard_action(const Rete::Rete_Node_Ptr &parent);
-    Rete::Rete_Action_Ptr make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature);
+
+    Rete::Rete_Action_Ptr make_standard_action(const Rete::Rete_Node_Ptr &parent, const std::string &name);
+    Rete::Rete_Action_Ptr make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const std::string &name, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature);
 
     void purge_q_value(const tracked_ptr<Q_Value> &q_value);
 
@@ -102,7 +102,7 @@ namespace Carli {
     void purge_q_value_eligible(const tracked_ptr<Q_Value> &q_value);
 
     void print(std::ostream &os) const;
-    
+
     //void print_value_function_grid(std::ostream &os) const;
 
     void visit_increment_depth();
@@ -133,7 +133,7 @@ namespace Carli {
     void assign_credit_inv_depth(const Q_Value_List &value_list);
 
     void assign_credit_normalize(const Q_Value_List &value_list, const double &sum);
-    
+
     Fringe_Values::iterator split_test_catde(const Rete::WME_Token &token, Node_Unsplit &general);
     Fringe_Values::iterator split_test_value(const Rete::WME_Token &token, Node_Unsplit &general);
 

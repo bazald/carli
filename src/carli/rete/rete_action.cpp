@@ -3,9 +3,11 @@
 namespace Rete {
 
   Rete_Action::Rete_Action(Agenda &agenda_,
+                           const std::string &name_,
                            const Action &action_,
                            const Action &retraction_)
-    : action(action_),
+    : name(name_),
+    action(action_),
     retraction(retraction_),
     agenda(agenda_)
   {

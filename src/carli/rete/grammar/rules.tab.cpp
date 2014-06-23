@@ -1750,13 +1750,13 @@ yyreduce:
                         parent->suppress_destruction(true);
                         agent.excise_rule(existing);
                       }
-                      auto node = agent.make_action_retraction([name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
-                                                                 cout << wme_vector << "->" << name << endl;
-                                                               }, [name](const Rete::Rete_Action &, const Rete::WME_Token &wme_vector) {
-                                                                 cout << wme_vector << "<-" << name << endl;
+                      auto node = agent.make_action_retraction(name,
+                                                               [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
+                                                                 cout << wme_vector << "->" << action.get_name() << endl;
+                                                               }, [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
+                                                                 cout << wme_vector << "<-" << action.get_name() << endl;
                                                                }, parent);
                       parent->suppress_destruction(false);
-                      agent.source_rule(name, node);
                       delete (yyvsp[(2) - (2)].rule_ptr); }
     break;
 

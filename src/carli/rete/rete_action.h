@@ -17,6 +17,7 @@ namespace Rete {
     typedef std::function<void (const Rete_Action &rete_action, const WME_Token &wme_token)> Action;
 
     Rete_Action(Agenda &agenda_,
+                const std::string &name_,
                 const Action &action_ = [](const Rete_Action &, const WME_Token &){},
                 const Action &retraction_ = [](const Rete_Action &, const WME_Token &){});
 
@@ -24,7 +25,7 @@ namespace Rete {
 
     void destroy(Filters &filters, const Rete_Node_Ptr &output = Rete_Node_Ptr()) override;
     bool is_excised() const {return excised;}
-    
+
     Rete_Node_Ptr_C parent_left() const override {return input->shared();}
     Rete_Node_Ptr_C parent_right() const override {return input->shared();}
     Rete_Node_Ptr parent_left() override {return input->shared();}
@@ -48,6 +49,8 @@ namespace Rete {
 
     static Rete_Action_Ptr find_existing(const Action &/*action_*/, const Action &/*retraction_*/, const Rete_Node_Ptr &/*out*/);
 
+    const std::string & get_name() const {return name;}
+
     void set_action(const Action &action_) {
       action = action_;
     }
@@ -59,6 +62,7 @@ namespace Rete {
   private:
     Rete_Node * input = nullptr;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input_tokens;
+    std::string name;
     Action action;
     Action retraction;
     Agenda &agenda;

@@ -31,7 +31,6 @@ sp {blocks-world*top-on-bottom
 }
 
 sp {blocks-world*on-b
-  :filter
   (<s> ^name blocks-world)
   (<s> ^block <top>)
   (<s> ^block <bottom>)

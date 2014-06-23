@@ -14,8 +14,8 @@ namespace Rete {
   public:
     Rete_Agent();
 
-    Rete_Action_Ptr make_action(const Rete_Action::Action &action, const Rete_Node_Ptr &out);
-    Rete_Action_Ptr make_action_retraction(const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out);
+    Rete_Action_Ptr make_action(const std::string &name, const Rete_Action::Action &action, const Rete_Node_Ptr &out);
+    Rete_Action_Ptr make_action_retraction(const std::string &name, const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out);
     Rete_Existential_Ptr make_existential(const Rete_Node_Ptr &out);
     Rete_Existential_Join_Ptr make_existential_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
     Rete_Filter_Ptr make_filter(const WME &wme);
@@ -25,8 +25,7 @@ namespace Rete {
     Rete_Predicate_Ptr make_predicate_vc(const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out);
     Rete_Predicate_Ptr make_predicate_vv(const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out);
 
-    void source_rule(const std::string &name, const Rete_Action_Ptr &action);
-
+    void excise_all();
     void excise_rule(const std::string &name);
     void excise_rule(const Rete_Action_Ptr &action);
     Rete_Action_Ptr unname_rule(const std::string &name);
@@ -51,6 +50,8 @@ namespace Rete {
     void destroy();
 
   private:
+    void source_rule(const std::string &name, const Rete_Action_Ptr &action);
+
     Rete_Node::Filters filters;
     std::unordered_map<std::string, Rete_Action_Ptr> rules;
     WME_Set working_memory;

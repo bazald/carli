@@ -8,21 +8,25 @@ namespace Rete {
   {
   }
 
-  Rete_Action_Ptr Rete_Agent::make_action(const Rete_Action::Action &action, const Rete_Node_Ptr &out) {
+  Rete_Action_Ptr Rete_Agent::make_action(const std::string &name, const Rete_Action::Action &action, const Rete_Node_Ptr &out) {
     if(auto existing = Rete_Action::find_existing(action, [](const Rete_Action &, const WME_Token &){}, out))
       return existing;
 //      std::cerr << "DEBUG: make_action" << std::endl;
-    auto action_fun = std::make_shared<Rete_Action>(this->agenda, action, [](const Rete_Action &, const WME_Token &){});
+    auto action_fun = std::make_shared<Rete_Action>(this->agenda, name, action, [](const Rete_Action &, const WME_Token &){});
     bind_to_action(action_fun, out);
 //      std::cerr << "END: make_action" << std::endl;
+    if(!name.empty())
+      source_rule(name, action_fun);
     return action_fun;
   }
 
-  Rete_Action_Ptr Rete_Agent::make_action_retraction(const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out) {
+  Rete_Action_Ptr Rete_Agent::make_action_retraction(const std::string &name, const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out) {
     if(auto existing = Rete_Action::find_existing(action, retraction, out))
       return existing;
-    auto action_fun = std::make_shared<Rete_Action>(this->agenda, action, retraction);
+    auto action_fun = std::make_shared<Rete_Action>(this->agenda, name, action, retraction);
     bind_to_action(action_fun, out);
+    if(!name.empty())
+      source_rule(name, action_fun);
     return action_fun;
   }
 
@@ -96,19 +100,12 @@ namespace Rete {
     return predicate;
   }
 
-  void Rete_Agent::source_rule(const std::string &name, const Rete_Action_Ptr &action) {
-    auto found = rules.find(name);
-    if(found == rules.end()) {
-//        std::cerr << "Rule '" << name << "' sourced." << std::endl;
-      rules[name] = action;
-    }
-    else {
-//        std::cerr << "Rule '" << name << "' replaced." << std::endl;
-      found->second->destroy(filters);
-      std::cerr << '#';
-      found->second = action;
-    }
-    std::cerr << '*';
+  void Rete_Agent::excise_all() {
+    agenda.lock();
+    rules.clear();
+    filters.clear();
+    agenda.unlock();
+    agenda.run();
   }
 
   void Rete_Agent::excise_rule(const std::string &name) {
@@ -275,11 +272,20 @@ namespace Rete {
     os << "}" << std::endl;
   }
 
-  void Rete_Agent::destroy() {
-    agenda.lock();
-    filters.clear();
-    agenda.unlock();
-    agenda.run();
+  void Rete_Agent::source_rule(const std::string &name, const Rete_Action_Ptr &action) {
+    auto found = rules.find(name);
+    if(found == rules.end()) {
+//        std::cerr << "Rule '" << name << "' sourced." << std::endl;
+      rules[name] = action;
+    }
+    else {
+//        std::cerr << "Rule '" << name << "' replaced." << std::endl;
+      assert(found->second != action);
+      found->second->destroy(filters);
+      std::cerr << '#';
+      found->second = action;
+    }
+    std::cerr << '*';
   }
 
 }

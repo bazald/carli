@@ -11,7 +11,7 @@ namespace Carli {
       q_value.delete_and_zero();
     }
   }
-  
+
   int64_t Node::rank() const {
     return q_value->depth;
   }
@@ -19,9 +19,12 @@ namespace Carli {
   void Node::retraction(Agent &agent, const Rete::WME_Token &token) {
     agent.purge_q_value_next(get_action(token), q_value);
   }
-  
+
   Node_Split_Ptr Node::create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink, const bool &terminal) {
-    auto parent = rete_action.lock()->parent_left();
+    const auto ra_lock = rete_action.lock();
+    const auto node_name = ra_lock->get_name();
+    const auto node_name_prefix = node_name.substr(0, node_name.find_last_of('*'));
+    auto parent = ra_lock->parent_left();
     tracked_ptr<Q_Value> new_q_value;
 
     if(q_value->type == Q_Value::Type::FRINGE) {
@@ -40,7 +43,9 @@ namespace Carli {
       new_q_value = q_value;
     }
 
-    auto new_leaf = agent.make_standard_action(parent);
+    std::ostringstream oss;
+    oss << node_name_prefix << "*s" << intptr_t(parent.get());
+    auto new_leaf = agent.make_standard_action(parent, oss.str());
     auto new_leaf_data = std::make_shared<Node_Split>(agent, new_leaf, get_action, new_q_value, terminal);
     new_leaf->data = new_leaf_data;
 
@@ -48,7 +53,10 @@ namespace Carli {
   }
 
   Node_Unsplit_Ptr Node::create_unsplit(Agent &agent, const Rete::WME_Ptr_C &wme_blink, Fringe_Values &node_unsplit_fringe) {
-    auto parent = rete_action.lock()->parent_left();
+    const auto ra_lock = rete_action.lock();
+    const auto node_name = ra_lock->get_name();
+    const auto node_name_prefix = node_name.substr(0, node_name.find_last_of('*'));
+    auto parent = ra_lock->parent_left();
     tracked_ptr<Q_Value> new_q_value;
 
     if(q_value->type == Q_Value::Type::FRINGE ||
@@ -57,7 +65,7 @@ namespace Carli {
       auto filter_blink = agent.make_filter(*wme_blink);
       parent = agent.make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
     }
-      
+
     if(q_value->type == Q_Value::Type::FRINGE)
       new_q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr);
     else {
@@ -66,7 +74,9 @@ namespace Carli {
       new_q_value = q_value;
     }
 
-    auto new_leaf = agent.make_standard_action(parent);
+    std::ostringstream oss;
+    oss << node_name_prefix << "*u" << intptr_t(parent.get());
+    auto new_leaf = agent.make_standard_action(parent, oss.str());
     auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, new_leaf, get_action, new_q_value);
     new_leaf->data = new_leaf_data;
     new_leaf_data->fringe_values.swap(node_unsplit_fringe);
@@ -80,9 +90,12 @@ namespace Carli {
   }
 
   Node_Fringe_Ptr Node::create_fringe(Agent &agent, Node &leaf) {
+    const auto lra_lock = leaf.rete_action.lock();
+    const auto leaf_node_name = lra_lock->get_name();
+    const auto leaf_node_name_prefix = leaf_node_name.substr(0, leaf_node_name.find_last_of('*'));
     auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(q_value->feature.get());
 
-    auto ancestor_left = leaf.rete_action.lock()->parent_left();
+    auto ancestor_left = lra_lock->parent_left();
     if(leaf.q_value->type != Q_Value::Type::FRINGE) {
       assert(leaf.q_value->type == Q_Value::Type::UNSPLIT || !debuggable_cast<Node_Split &>(leaf).terminal);
       ancestor_left = ancestor_left->parent_left(); ///< Skip blink node
@@ -121,7 +134,9 @@ namespace Carli {
     }
 
     /// Create the actual action for the new fringe node
-    auto new_action = agent.make_standard_action(new_test);
+    std::ostringstream oss;
+    oss << leaf_node_name_prefix << "*f" << intptr_t(new_test.get());
+    auto new_action = agent.make_standard_action(new_test, oss.str());
     auto new_action_data = std::make_shared<Node_Fringe>(agent, new_action, leaf.get_action, leaf.q_value->depth + 1, q_value->feature ? q_value->feature->clone() : nullptr);
     new_action->data = new_action_data;
 
@@ -137,7 +152,7 @@ namespace Carli {
   Node_Split::~Node_Split() {
     --agent.q_value_count;
   }
-  
+
   Rete::Rete_Node_Ptr Node_Split::cluster_root_ancestor() const {
     return terminal ? rete_action.lock()->parent_left() : rete_action.lock()->parent_left()->parent_left();
   }
@@ -162,7 +177,7 @@ namespace Carli {
   Node_Unsplit::~Node_Unsplit() {
     --agent.q_value_count;
   }
-  
+
   Rete::Rete_Node_Ptr Node_Unsplit::cluster_root_ancestor() const {
     return rete_action.lock()->parent_left()->parent_left();
   }
@@ -171,12 +186,12 @@ namespace Carli {
     if(!rete_action.lock()->is_excised() && !agent.specialize(*rete_action.lock(), token))
       agent.insert_q_value_next(get_action(token), q_value);
   }
-  
+
   void Node_Fringe::action(Agent &agent, const Rete::WME_Token &token) {
     if(!rete_action.lock()->is_excised())
       agent.insert_q_value_next(get_action(token), q_value);
   }
-  
+
   Rete::Rete_Node_Ptr Node_Fringe::cluster_root_ancestor() const {
     return rete_action.lock()->parent_left()->parent_left();
   }

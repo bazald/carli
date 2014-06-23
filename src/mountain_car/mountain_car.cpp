@@ -140,6 +140,7 @@ namespace Mountain_Car {
     assert(cmac_offset < cmac_tilings);
     const double x_size = (m_max_x - m_min_x) / cmac_resolution;
     const double xdot_size = (m_max_x_dot - m_min_x_dot) / cmac_resolution;
+    std::ostringstream oss;
 
     for(int64_t tiling = -cmac_offset, tend = tiling + cmac_tilings; tiling != tend; ++tiling) {
       const double x_offset = x_size * tiling;
@@ -163,8 +164,10 @@ namespace Mountain_Car {
           //  m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, bottom), std::make_pair(right, top)));
           //  m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
           //}
-          
-          auto action = make_standard_action(xdotlt);
+
+          oss.str("puddle-world*rl-action*cmac-");
+          oss << i << '-' << j;
+          auto action = make_standard_action(xdotlt, oss.str());
           action->data = std::make_shared<Node_Split>(*this, action, get_action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr), true);
         }
       }
@@ -177,15 +180,16 @@ namespace Mountain_Car {
     };
 
     auto filter_blink = make_filter(*m_wme_blink);
+    std::ostringstream oss;
 
     const double m_half_x = (m_min_x + m_max_x) / 2.0;
     const double m_half_x_dot = (m_min_x_dot + m_max_x_dot) / 2.0;
-    
+
     Carli::Node_Unsplit_Ptr root_action_data;
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
-      
-      auto root_action = make_standard_action(join_blink);
+
+      auto root_action = make_standard_action(join_blink, "mountain-car*rl-action*general");
       root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, get_action, 1, nullptr);
       root_action->data = root_action_data;
     }
@@ -195,13 +199,17 @@ namespace Mountain_Car {
       //lines.push_back(Node_Ranged::Line(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)));
       auto feature = new Position(m_min_x, m_half_x, 2, false);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::index, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)), lines);
+      oss.str("mountain-car*rl-action*f");
+      oss << intptr_t(predicate.get());
+      make_standard_fringe(predicate, oss.str(), root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)), lines);
     }
 
     {
       auto feature = new Position(m_half_x, m_max_x, 2, true);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::index, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_max_x, m_max_x_dot)), Node_Ranged::Lines());
+      oss.str("mountain-car*rl-action*f");
+      oss << intptr_t(predicate.get());
+      make_standard_fringe(predicate, oss.str(), root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_max_x, m_max_x_dot)), Node_Ranged::Lines());
     }
 
     {
@@ -209,13 +217,17 @@ namespace Mountain_Car {
       //lines.push_back(Node_Ranged::Line(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_half_x_dot)));
       auto feature = new Velocity(m_min_x_dot, m_half_x_dot, 2, false);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Velocity::index, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_max_x, m_half_x_dot)), lines);
+      oss.str("mountain-car*rl-action*f");
+      oss << intptr_t(predicate.get());
+      make_standard_fringe(predicate, oss.str(), root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_max_x, m_half_x_dot)), lines);
     }
 
     {
       auto feature = new Velocity(m_half_x_dot, m_max_x_dot, 2, true);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Velocity::index, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_max_x_dot)), Node_Ranged::Lines());
+      oss.str("mountain-car*rl-action*f");
+      oss << intptr_t(predicate.get());
+      make_standard_fringe(predicate, oss.str(), root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_max_x_dot)), Node_Ranged::Lines());
     }
   }
 
