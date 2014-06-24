@@ -7,7 +7,7 @@
 
 %lex-param { yyscan_t yyscanner }
 %parse-param { yyscan_t yyscanner }
-%parse-param { Rete::Rete_Agent &agent }
+%parse-param { Carli::Agent &agent }
 %parse-param { const std::string &filename }
 %parse-param { const std::string &source_path }
 
@@ -184,12 +184,34 @@ command:
                         parent->suppress_destruction(true);
                         agent.excise_rule(existing->get_name(), true);
                       }
-                      auto node = agent.make_action_retraction(name, true,
-                                                               [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
-                                                                 cout << wme_vector << "->" << action.get_name() << endl;
-                                                               }, [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
-                                                                 cout << wme_vector << "<-" << action.get_name() << endl;
-                                                               }, parent);
+                      if(std::get<2>(*$2).empty()) {
+                        /// Non-fringe node
+                        auto node = agent.make_action_retraction(name, true,
+                                                                 [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
+                                                                   cout << wme_vector << "->" << action.get_name() << endl;
+                                                                 }, [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
+                                                                   cout << wme_vector << "<-" << action.get_name() << endl;
+                                                                 }, parent);
+                      }
+                      else {
+                        Carli::Node_Unsplit_Ptr node_unsplit_ptr; ///< TODO
+                        const auto &flag = *std::get<2>(*$2).begin();
+                        assert(flag.first == ":fringe");
+                        Carli::Feature * feature = nullptr;
+                        const Rete::WME_Token_Index axis; ///< TODO
+                        if(flag.second) {
+                          /// Ranged feature
+                          const int64_t depth = 0; ///< TODO
+                          const bool upper = false; ///< TODO
+                          feature = new Carli::Feature_Ranged<Carli::Feature>(axis, std::get<0>(*flag.second), std::get<1>(*flag.second), depth, upper, std::get<2>(*flag.second));
+                        }
+                        else {
+                          /// Enumerated feature
+                          const int64_t value = 0; ///< TODO
+                          feature = new Carli::Feature_Enumerated<Carli::Feature>(axis, value);
+                        }
+                        agent.make_standard_fringe(parent, name, true, node_unsplit_ptr, feature);
+                      }
                       parent->suppress_destruction(false);
                       delete $2; }
   ;
@@ -296,7 +318,7 @@ bool rete_get_exit() {
   return g_rete_exit;
 }
 
-int rete_parse_file(Rete::Rete_Agent &agent, const string &filename, const std::string &source_path) {
+int rete_parse_file(Carli::Agent &agent, const string &filename, const std::string &source_path) {
   if(filename.empty())
     return -1;
 
@@ -341,7 +363,7 @@ int rete_parse_file(Rete::Rete_Agent &agent, const string &filename, const std::
   return rv;
 }
 
-int rete_parse_string(Rete::Rete_Agent &agent, const string &str, int &line_number) {
+int rete_parse_string(Carli::Agent &agent, const string &str, int &line_number) {
   int rv = 0;
 
   yyscan_t yyscanner;

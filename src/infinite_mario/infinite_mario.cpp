@@ -415,7 +415,7 @@ namespace Mario {
                            /*Feature_Flag::PIT_RIGHT,*/ Feature_Flag::OBSTACLE_RIGHT}) {
       for(const auto value : {false, true}) {
         auto feature = new Feature_Flag(flag, value);
-        auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), join_last);
+        auto predicate = make_predicate_vc(feature->predicate(), feature->axis, feature->symbol_constant(), join_last);
         make_standard_fringe(predicate, next_rule_name("infinite-mario*rl-action*f"), false, root_action_data, feature);
       }
     }
@@ -432,7 +432,7 @@ namespace Mario {
 
     for(const auto dpad : {BUTTON_NONE, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_DOWN}) {
       auto feature = new Feature_Button(Feature_Button::OUT_DPAD, dpad);
-      auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), join_last);
+      auto predicate = make_predicate_vc(feature->predicate(), feature->axis, feature->symbol_constant(), join_last);
       make_standard_fringe(predicate, next_rule_name("infinite-mario*rl-action*f"), false, root_action_data, feature);
     }
 

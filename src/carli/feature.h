@@ -19,7 +19,7 @@ namespace Carli {
     Feature & operator=(const Feature &) = delete;
 
   public:
-    Feature() {}
+    Feature(const Rete::WME_Token_Index &axis_) : axis(axis_) {}
 
     virtual ~Feature() {}
 
@@ -42,15 +42,16 @@ namespace Carli {
       return compare_value(rhs);
     }
 
+    int64_t compare_axis(const Feature &rhs) const {
+      return axis.first != rhs.axis.first ? axis.first - rhs.axis.first : axis.second - rhs.axis.second;
+    }
+
     virtual int64_t get_depth() const = 0;
-    virtual int64_t compare_axis(const Feature &rhs) const = 0;
     virtual int64_t compare_value(const Feature &rhs) const = 0;
 
     virtual bool matches(const Rete::WME_Token &token) const = 0;
 
     virtual Rete::WME_Bindings bindings() const {return Rete::WME_Bindings();}
-
-    virtual Rete::WME_Token_Index wme_token_index() const = 0;
 
     virtual std::vector<Feature *> refined() const {return std::vector<Feature *>();}
 
@@ -61,6 +62,8 @@ namespace Carli {
       print(oss);
       return oss.str();
     }
+
+    const Rete::WME_Token_Index axis;
   };
 
 }
@@ -77,8 +80,8 @@ namespace Carli {
     Feature_Enumerated_Data & operator=(const Feature_Enumerated_Data &) = delete;
 
   public:
-    Feature_Enumerated_Data(const Rete::WME_Token_Index &axis_, const int64_t &value_)
-     : axis(axis_), value(value_)
+    Feature_Enumerated_Data(const int64_t &value_)
+     : value(value_)
     {
     }
 
@@ -94,8 +97,6 @@ namespace Carli {
       return std::make_shared<Rete::Symbol_Constant_Int>(value);
     }
 
-    Rete::WME_Token_Index axis;
-
     int64_t value;
   };
 
@@ -106,8 +107,13 @@ namespace Carli {
 
   public:
     Feature_Enumerated(const Rete::WME_Token_Index &axis_, const int64_t &value_)
-     : Feature_Enumerated_Data(axis_, value_)
+     : FEATURE(axis_),
+     Feature_Enumerated_Data(value_)
     {
+    }
+
+    Feature_Enumerated * clone() const override {
+      return new Feature_Enumerated(this->axis, value);
     }
 
     int64_t get_depth() const override {return 1;}
@@ -117,19 +123,18 @@ namespace Carli {
     }
 
     bool matches(const Rete::WME_Token &token) const override {
-      return *token[this->wme_token_index()] == value;
+      return *token[this->axis] == value;
     }
 
-    Rete::WME_Token_Index wme_token_index() const override {
-      return axis;
+    void print(std::ostream &os) const override {
+      os << this->axis << '(' << value << ')';
     }
   };
 
   class CARLI_LINKAGE Feature_Ranged_Data {
   public:
-    Feature_Ranged_Data(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_, const bool &integer_locked_)
-     : axis(axis_),
-     bound_lower(bound_lower_),
+    Feature_Ranged_Data(const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_, const bool &integer_locked_)
+     : bound_lower(bound_lower_),
      bound_upper(bound_upper_),
      depth(depth_),
      upper(upper_),
@@ -142,16 +147,8 @@ namespace Carli {
       return integer_locked ? floor(mpt) : mpt;
     }
 
-    int64_t compare_axis(const Feature_Ranged_Data &rhs) const {
-      return axis.first != rhs.axis.first ? axis.first - rhs.axis.first : axis.second - rhs.axis.second;
-    }
-
     int64_t compare_value(const Feature_Ranged_Data &rhs) const {
       return upper - rhs.upper;
-    }
-
-    void print(std::ostream &os) const {
-      os << axis << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
     }
 
     Rete::Rete_Predicate::Predicate predicate() const {
@@ -161,8 +158,6 @@ namespace Carli {
     Rete::Symbol_Ptr_C symbol_constant() const {
       return std::make_shared<Rete::Symbol_Constant_Float>(upper ? bound_lower : bound_upper);
     }
-
-    Rete::WME_Token_Index axis;
 
     double bound_lower; ///< inclusive
     double bound_upper; ///< exclusive
@@ -180,11 +175,14 @@ namespace Carli {
 
   public:
     Feature_Ranged(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_, const bool &integer_locked_)
-     : Feature_Ranged_Data(axis_, bound_lower_, bound_upper_, depth_, upper_, integer_locked_)
+     : FEATURE(axis_),
+     Feature_Ranged_Data(bound_lower_, bound_upper_, depth_, upper_, integer_locked_)
     {
     }
 
-    virtual Feature_Ranged * clone() const override = 0;
+    Feature_Ranged * clone() const override {
+      return new Feature_Ranged(this->axis, bound_lower, bound_upper, depth, upper, integer_locked);
+    }
 
     int64_t get_depth() const override {return depth;}
 
@@ -193,7 +191,7 @@ namespace Carli {
     }
 
     bool matches(const Rete::WME_Token &token) const override {
-      const Rete::Symbol * const symbol = debuggable_cast<const Rete::Symbol * const>(token[wme_token_index()].get());
+      const Rete::Symbol * const symbol = debuggable_cast<const Rete::Symbol * const>(token[this->axis].get());
       if(const auto symbol_cf = dynamic_cast<const Rete::Symbol_Constant_Float *>(symbol))
         return bound_lower <= symbol_cf->value && symbol_cf->value < bound_upper;
       else {
@@ -228,12 +226,8 @@ namespace Carli {
       return refined_features;
     }
 
-    Rete::WME_Token_Index wme_token_index() const override {
-      return axis;
-    }
-
-    void print(std::ostream &os) const override {
-      Feature_Ranged_Data::print(os);
+    void print(std::ostream &os) const {
+      os << this->axis << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
     }
   };
 

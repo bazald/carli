@@ -34,17 +34,9 @@ namespace Puddle_World {
 
   class Feature : public Carli::Feature {
   public:
-    Feature() {}
+    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
 
     virtual Feature * clone() const = 0;
-
-    int64_t compare_axis(const Carli::Feature &rhs) const {
-      return compare_axis(debuggable_cast<const Feature &>(rhs));
-    }
-
-    virtual int64_t compare_axis(const Feature &rhs) const = 0;
-    virtual int64_t compare_axis(const Position &rhs) const = 0;
-    virtual int64_t compare_axis(const Move_Direction &rhs) const = 0;
   };
 
   class Position : public Carli::Feature_Ranged<Feature> {
@@ -58,16 +50,6 @@ namespace Puddle_World {
 
     Position * clone() const {
       return new Position(Axis(axis.first), bound_lower, bound_upper, depth, upper);
-    }
-
-    int64_t compare_axis(const Puddle_World::Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Position &rhs) const {
-      return Feature_Ranged_Data::compare_axis(rhs);
-    }
-    int64_t compare_axis(const Move_Direction &) const {
-      return -1;
     }
 
     void print(ostream &os) const {
@@ -95,20 +77,6 @@ namespace Puddle_World {
     }
 
     int64_t get_depth() const {
-      return 0;
-    }
-
-    int64_t compare_axis(const Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Position &) const {
-      return 1;
-    }
-    int64_t compare_axis(const Move_Direction &rhs) const {
-      return value - debuggable_cast<const Move_Direction &>(rhs).value;
-    }
-
-    int64_t compare_value(const Carli::Feature &) const {
       return 0;
     }
 

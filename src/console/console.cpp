@@ -1,5 +1,8 @@
 #include "carli/rete/grammar/rete_parser.h"
 
+#include "carli/experiment.h"
+#include "blocks_world/blocks_world.h"
+
 #include <array>
 #include <csignal>
 #include <sstream>
@@ -29,12 +32,16 @@ int main(int argc, char **argv) {
   signal(SIGINT, signal_handler);
   signal(SIGTERM, signal_handler);
 
-  Rete::Rete_Agent ragent;
+  Carli::Experiment experiment;
+  //experiment.take_args(argc, argv);
+  std::shared_ptr<Carli::Environment> env = std::make_shared<Blocks_World::Environment>();
+  std::shared_ptr<Carli::Agent> agent = std::make_shared<Blocks_World::Agent>(env);
+
   std::string line;
   int line_number = 1;
 
   for(int i = 1; !rete_get_exit() && i < argc; ++i) {
-    rete_parse_file(ragent, argv[i]);
+    rete_parse_file(*agent, argv[i]);
     std::cout << std::endl;
   }
 
@@ -42,7 +49,7 @@ int main(int argc, char **argv) {
     std::cout << "carli % ";
     getline(std::cin, line);
     if(std::cin) {
-      rete_parse_string(ragent, line, line_number);
+      rete_parse_string(*agent, line, line_number);
       std::cout << std::endl;
     }
     else if(redirected_cin())

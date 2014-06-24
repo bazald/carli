@@ -126,7 +126,7 @@ int reteparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int reteparse (yyscan_t yyscanner, Rete::Rete_Agent &agent, const std::string &filename, const std::string &source_path);
+int reteparse (yyscan_t yyscanner, Carli::Agent &agent, const std::string &filename, const std::string &source_path);
 #else
 int reteparse ();
 #endif

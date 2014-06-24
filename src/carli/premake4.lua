@@ -8,16 +8,16 @@ project "carli"
 
   if _OPTIONS["scu"] == "true" then
     matches = os.matchfiles("*.cpp")
-    os.mkdir("obj")
-    local f = assert(io.open("obj/scu.cpp", "w"))
+    os.mkdir("../../obj")
+    local f = assert(io.open("../../obj/scu.cpp", "w"))
     for i, filename in ipairs(matches) do
       if filename ~= "git.cpp" and filename ~= "obj/scu.cpp" then
-        f:write("#include \"../"..filename.."\"\n")
+        f:write("#include \"carli/"..filename.."\"\n")
       end
     end
     f:close()
 
-    files { "git.cpp", "obj/scu.cpp" }
+    files { "git.cpp", "../../obj/scu.cpp" }
   else
     files { "*.h", "*.cpp" }
     excludes { "obj/scu.cpp" }

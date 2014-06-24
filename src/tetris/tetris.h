@@ -57,21 +57,9 @@ namespace Tetris {
 
   class Feature : public Carli::Feature {
   public:
-    Feature() {}
+    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
 
     virtual Feature * clone() const = 0;
-
-    int64_t compare_axis(const Carli::Feature &rhs) const {
-      return compare_axis(debuggable_cast<const Feature &>(rhs));
-    }
-
-    virtual int64_t compare_axis(const Feature &rhs) const = 0;
-    virtual int64_t compare_axis(const Type &rhs) const = 0;
-    virtual int64_t compare_axis(const Size &rhs) const = 0;
-    virtual int64_t compare_axis(const Position &rhs) const = 0;
-    virtual int64_t compare_axis(const Gaps &rhs) const = 0;
-    virtual int64_t compare_axis(const Clears &rhs) const = 0;
-    virtual int64_t compare_axis(const X_Odd &rhs) const = 0;
 
     Rete::WME_Bindings bindings() const override {
       Rete::WME_Bindings bindings;
@@ -93,18 +81,6 @@ namespace Tetris {
       return new Type(axis, Tetromino_Type(value));
     }
 
-    int64_t compare_axis(const Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Type &rhs) const {
-      return axis - rhs.axis;
-    }
-    int64_t compare_axis(const Size &) const {return -1;}
-    int64_t compare_axis(const Position &) const {return -1;}
-    int64_t compare_axis(const Gaps &) const {return -1;}
-    int64_t compare_axis(const Clears &) const {return -1;}
-    int64_t compare_axis(const X_Odd &) const {return -1;}
-
     void print(ostream &os) const {
       os << "type(" << (axis == CURRENT ? "current" : "next") << ':' << value << ')';
     }
@@ -124,18 +100,6 @@ namespace Tetris {
     Size * clone() const {
       return new Size(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
-
-    int64_t compare_axis(const Tetris::Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Type &) const {return 1;}
-    int64_t compare_axis(const Size &rhs) const {
-      return Feature_Ranged_Data::compare_axis(rhs);
-    }
-    int64_t compare_axis(const Position &) const {return -1;}
-    int64_t compare_axis(const Gaps &) const {return -1;}
-    int64_t compare_axis(const Clears &) const {return -1;}
-    int64_t compare_axis(const X_Odd &) const {return -1;}
 
     void print(ostream &os) const {
       switch(axis.first) {
@@ -161,18 +125,6 @@ namespace Tetris {
       return new Position(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
-    int64_t compare_axis(const Tetris::Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Type &) const {return 1;}
-    int64_t compare_axis(const Size &) const {return 1;}
-    int64_t compare_axis(const Position &rhs) const {
-      return Feature_Ranged_Data::compare_axis(rhs);
-    }
-    int64_t compare_axis(const Gaps &) const {return -1;}
-    int64_t compare_axis(const Clears &) const {return -1;}
-    int64_t compare_axis(const X_Odd &) const {return -1;}
-
     void print(ostream &os) const {
       switch(axis.first) {
         case X: os << 'x'; break;
@@ -196,18 +148,6 @@ namespace Tetris {
     Gaps * clone() const {
       return new Gaps(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
-
-    int64_t compare_axis(const Tetris::Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Type &) const {return 1;}
-    int64_t compare_axis(const Size &) const {return 1;}
-    int64_t compare_axis(const Position &) const {return 1;}
-    int64_t compare_axis(const Gaps &rhs) const {
-      return Feature_Ranged_Data::compare_axis(rhs);
-    }
-    int64_t compare_axis(const Clears &) const {return -1;}
-    int64_t compare_axis(const X_Odd &) const {return -1;}
 
     void print(ostream &os) const {
       switch(axis.first) {
@@ -233,18 +173,6 @@ namespace Tetris {
       return new Clears(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
-    int64_t compare_axis(const Tetris::Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Type &) const {return 1;}
-    int64_t compare_axis(const Size &) const {return 1;}
-    int64_t compare_axis(const Position &) const {return 1;}
-    int64_t compare_axis(const Gaps &) const {return 1;}
-    int64_t compare_axis(const Clears &rhs) const {
-      return Feature_Ranged_Data::compare_axis(rhs);
-    }
-    int64_t compare_axis(const X_Odd &) const {return -1;}
-
     void print(ostream &os) const {
       switch(axis.first) {
         case CLEARS: os << "clears"; break;
@@ -268,18 +196,6 @@ namespace Tetris {
 
     X_Odd * clone() const {
       return new X_Odd(value != 0);
-    }
-
-    int64_t compare_axis(const Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Type &) const {return -1;}
-    int64_t compare_axis(const Size &) const {return -1;}
-    int64_t compare_axis(const Position &) const {return -1;}
-    int64_t compare_axis(const Gaps &) const {return -1;}
-    int64_t compare_axis(const Clears &) const {return -1;}
-    int64_t compare_axis(const X_Odd &) const {
-      return 0;
     }
 
     void print(ostream &os) const {

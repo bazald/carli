@@ -42,21 +42,9 @@ namespace Mario {
 
   class Feature : public Carli::Feature {
   public:
-    Feature() {}
+    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
 
     virtual Feature * clone() const = 0;
-
-    int64_t compare_axis(const Carli::Feature &rhs) const {
-      return compare_axis(debuggable_cast<const Feature &>(rhs));
-    }
-
-    virtual int64_t compare_axis(const Feature &rhs) const = 0;
-    virtual int64_t compare_axis(const Feature_Position &rhs) const = 0;
-    virtual int64_t compare_axis(const Feature_Velocity &rhs) const = 0;
-    virtual int64_t compare_axis(const Feature_Mode &rhs) const = 0;
-    virtual int64_t compare_axis(const Feature_Flag &rhs) const = 0;
-    virtual int64_t compare_axis(const Feature_Numeric &rhs) const = 0;
-    virtual int64_t compare_axis(const Feature_Button &rhs) const = 0;
 
     enum {ACTION_INDEX = 21};
     Rete::WME_Bindings bindings() const override {
@@ -79,18 +67,6 @@ namespace Mario {
     Feature_Position * clone() const {
       return new Feature_Position(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
-
-    int64_t compare_axis(const Mario::Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Feature_Position &rhs) const {
-      return Feature_Ranged_Data::compare_axis(rhs);
-    }
-    int64_t compare_axis(const Feature_Velocity &) const {return -1;}
-    int64_t compare_axis(const Feature_Mode &) const {return -1;}
-    int64_t compare_axis(const Feature_Flag &) const {return -1;}
-    int64_t compare_axis(const Feature_Numeric &) const {return -1;}
-    int64_t compare_axis(const Feature_Button &) const {return -1;}
 
     void print(ostream &os) const {
       switch(axis.first) {
@@ -117,18 +93,6 @@ namespace Mario {
       return new Feature_Velocity(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
 
-    int64_t compare_axis(const Mario::Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Feature_Position &) const {return 1;}
-    int64_t compare_axis(const Feature_Velocity &rhs) const {
-      return Feature_Ranged_Data::compare_axis(rhs);
-    }
-    int64_t compare_axis(const Feature_Mode &) const {return -1;}
-    int64_t compare_axis(const Feature_Flag &) const {return -1;}
-    int64_t compare_axis(const Feature_Numeric &) const {return -1;}
-    int64_t compare_axis(const Feature_Button &) const {return -1;}
-
     void print(ostream &os) const {
       switch(axis.first) {
         case X_DOT: os << "x-dot"; break;
@@ -153,16 +117,6 @@ namespace Mario {
       return new Feature_Mode(Mode(value));
     }
 
-    int64_t compare_axis(const Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Feature_Position &) const {return 1;}
-    int64_t compare_axis(const Feature_Velocity &) const {return 1;}
-    int64_t compare_axis(const Feature_Mode &) const {return 0;}
-    int64_t compare_axis(const Feature_Flag &) const {return -1;}
-    int64_t compare_axis(const Feature_Numeric &) const {return -1;}
-    int64_t compare_axis(const Feature_Button &) const {return -1;}
-    
     void print(ostream &os) const {
       os << "mode(" << value << ')';
     }
@@ -192,18 +146,6 @@ namespace Mario {
       return new Feature_Flag(Axis(axis.first), value != 0);
     }
 
-    int64_t compare_axis(const Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Feature_Position &) const {return 1;}
-    int64_t compare_axis(const Feature_Velocity &) const {return 1;}
-    int64_t compare_axis(const Feature_Mode &) const {return 1;}
-    int64_t compare_axis(const Feature_Flag &rhs) const {
-      return axis.first - rhs.axis.first;
-    }
-    int64_t compare_axis(const Feature_Numeric &) const {return -1;}
-    int64_t compare_axis(const Feature_Button &) const {return -1;}
-    
     void print(ostream &os) const {
       switch(axis.first) {
       case ON_GROUND       : os << "on-ground";       break;
@@ -240,18 +182,6 @@ namespace Mario {
     Feature_Numeric * clone() const {
       return new Feature_Numeric(Axis(axis.first), bound_lower, bound_upper, depth, upper);
     }
-
-    int64_t compare_axis(const Mario::Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Feature_Position &) const {return 1;}
-    int64_t compare_axis(const Feature_Velocity &) const {return 1;}
-    int64_t compare_axis(const Feature_Mode &) const {return 1;}
-    int64_t compare_axis(const Feature_Flag &) const {return 1;}
-    int64_t compare_axis(const Feature_Numeric &rhs) const {
-      return Feature_Ranged_Data::compare_axis(rhs);
-    }
-    int64_t compare_axis(const Feature_Button &) const {return -1;}
 
     void print(ostream &os) const {
       switch(axis.first) {
@@ -292,18 +222,6 @@ namespace Mario {
 
     Feature_Button * clone() const {
       return new Feature_Button(Axis(axis.first), value);
-    }
-
-    int64_t compare_axis(const Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Feature_Position &) const {return 1;}
-    int64_t compare_axis(const Feature_Velocity &) const {return 1;}
-    int64_t compare_axis(const Feature_Mode &) const {return 1;}
-    int64_t compare_axis(const Feature_Flag &) const {return 1;}
-    int64_t compare_axis(const Feature_Numeric &) const {return 1;}
-    int64_t compare_axis(const Feature_Button &rhs) const {
-      return axis.first - rhs.axis.first;
     }
 
     void print(ostream &os) const {

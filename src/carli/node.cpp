@@ -102,7 +102,7 @@ namespace Carli {
     Rete::Rete_Node_Ptr new_test;
 
     if(feature_ranged_data)
-      new_test = agent.make_predicate_vc(feature_ranged_data->predicate(), feature_ranged_data->axis, feature_ranged_data->symbol_constant(), ancestor_left);
+      new_test = agent.make_predicate_vc(feature_ranged_data->predicate(), q_value->feature->axis, feature_ranged_data->symbol_constant(), ancestor_left);
     else {
       Rete::Rete_Node_Ptr ancestor_right = rete_action.lock()->parent_left();
 

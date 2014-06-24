@@ -181,7 +181,7 @@ namespace Carli {
               assert(refined_ranged_data);
 
               /** Step 2.1a: Create new ranged fringe nodes if the new leaf is refineable. */
-              auto predicate = make_predicate_vc(refined_ranged_data->predicate(), leaf_feature_ranged_data->axis, refined_ranged_data->symbol_constant(), leaf->rete_action.lock()->parent_left());
+              auto predicate = make_predicate_vc(refined_ranged_data->predicate(), leaf->q_value->feature->axis, refined_ranged_data->symbol_constant(), leaf->rete_action.lock()->parent_left());
               std::ostringstream oss;
               oss << general_name_prefix << "*f" << intptr_t(predicate.get());
               auto new_action = make_standard_action(predicate, oss.str(), false);

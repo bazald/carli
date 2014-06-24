@@ -6,4 +6,4 @@ project "console"
 
   files { "*.h", "*.cpp" }
 
-  links { "carli", "rete", "utility" }
+  links { "env_blocks_world", "carli", "rete", "utility" }

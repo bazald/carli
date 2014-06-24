@@ -34,18 +34,9 @@ namespace Mountain_Car {
 
   class Feature : public Carli::Feature {
   public:
-    Feature() {}
+    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
 
     virtual Feature * clone() const = 0;
-
-    int64_t compare_axis(const Carli::Feature &rhs) const {
-      return compare_axis(debuggable_cast<const Feature &>(rhs));
-    }
-
-    virtual int64_t compare_axis(const Feature &rhs) const = 0;
-    virtual int64_t compare_axis(const Position &rhs) const = 0;
-    virtual int64_t compare_axis(const Velocity &rhs) const = 0;
-    virtual int64_t compare_axis(const Acceleration_Direction &rhs) const = 0;
   };
 
   class Position : public Carli::Feature_Ranged<Feature> {
@@ -59,19 +50,6 @@ namespace Mountain_Car {
 
     Position * clone() const {
       return new Position(bound_lower, bound_upper, depth, upper);
-    }
-
-    int64_t compare_axis(const Mountain_Car::Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Position &rhs) const {
-      return Feature_Ranged_Data::compare_axis(rhs);
-    }
-    int64_t compare_axis(const Velocity &) const {
-      return -1;
-    }
-    int64_t compare_axis(const Acceleration_Direction &) const {
-      return -1;
     }
 
     void print(ostream &os) const {
@@ -90,19 +68,6 @@ namespace Mountain_Car {
 
     Velocity * clone() const {
       return new Velocity(bound_lower, bound_upper, depth, upper);
-    }
-
-    int64_t compare_axis(const Mountain_Car::Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Position &) const {
-      return 1;
-    }
-    int64_t compare_axis(const Velocity &rhs) const {
-      return Feature_Ranged_Data::compare_axis(rhs);
-    }
-    int64_t compare_axis(const Acceleration_Direction &) const {
-      return -1;
     }
 
     void print(ostream &os) const {
@@ -125,19 +90,6 @@ namespace Mountain_Car {
 
     int64_t get_depth() const {
       return 0;
-    }
-
-    int64_t compare_axis(const Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Position &) const {
-      return 1;
-    }
-    int64_t compare_axis(const Velocity &) const {
-      return 1;
-    }
-    int64_t compare_axis(const Acceleration_Direction &rhs) const {
-      return value - debuggable_cast<const Acceleration_Direction &>(rhs).value;
     }
 
     int64_t compare_value(const Carli::Feature &) const {

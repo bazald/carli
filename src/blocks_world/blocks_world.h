@@ -8,6 +8,14 @@
 #include <list>
 #include <stdexcept>
 
+#if !defined(_WINDOWS)
+#define BLOCKS_WORLD_LINKAGE
+#elif !defined(BLOCKS_WORLD_INTERNAL)
+#define BLOCKS_WORLD_LINKAGE __declspec(dllimport)
+#else
+#define BLOCKS_WORLD_LINKAGE __declspec(dllexport)
+#endif
+
 namespace Blocks_World {
 
   using std::dynamic_pointer_cast;
@@ -22,21 +30,13 @@ namespace Blocks_World {
   class Height;
 
   class Feature;
-  class Feature : public Carli::Feature{
+  class BLOCKS_WORLD_LINKAGE Feature : public Carli::Feature {
   public:
     enum Which {BLOCK = 0, DEST = 1};
+    
+    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
 
     virtual Feature * clone() const = 0;
-
-    int64_t compare_axis(const Carli::Feature &rhs) const {
-      return compare_axis(debuggable_cast<const Feature &>(rhs));
-    }
-
-    virtual int64_t compare_axis(const Feature &rhs) const = 0;
-    virtual int64_t compare_axis(const Clear &rhs) const = 0;
-    virtual int64_t compare_axis(const In_Place &rhs) const = 0;
-    virtual int64_t compare_axis(const Name &rhs) const = 0;
-    virtual int64_t compare_axis(const Height &rhs) const = 0;
 
     Rete::WME_Bindings bindings() const override {
       Rete::WME_Bindings bindings_;
@@ -45,7 +45,7 @@ namespace Blocks_World {
     }
   };
 
-  class Clear : public Carli::Feature_Enumerated<Feature> {
+  class BLOCKS_WORLD_LINKAGE Clear : public Carli::Feature_Enumerated<Feature> {
   public:
     Clear(const Which &block_, const bool &present_)
      : Feature_Enumerated<Feature>(Rete::WME_Token_Index(1 + block_, 2), present_),
@@ -57,22 +57,6 @@ namespace Blocks_World {
       return new Clear(block, this->value != 0);
     }
 
-    int64_t compare_axis(const Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Clear &rhs) const {
-      return block - rhs.block;
-    }
-    int64_t compare_axis(const In_Place &) const {
-      return -1;
-    }
-    int64_t compare_axis(const Name &) const {
-      return -1;
-    }
-    int64_t compare_axis(const Height &) const {
-      return -1;
-    }
-
     bool matches(const Rete::WME_Token &) const override {return true;}
 
     void print(ostream &os) const {
@@ -82,7 +66,7 @@ namespace Blocks_World {
     Which block;
   };
 
-  class In_Place : public Carli::Feature_Enumerated<Feature> {
+  class BLOCKS_WORLD_LINKAGE In_Place : public Carli::Feature_Enumerated<Feature> {
   public:
     In_Place(const Which &block_, const bool &present_)
      : Feature_Enumerated<Feature>(Rete::WME_Token_Index(1 + block_, 2), present_),
@@ -94,22 +78,6 @@ namespace Blocks_World {
       return new In_Place(block, this->value != 0);
     }
 
-    int64_t compare_axis(const Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Clear &) const {
-      return 1;
-    }
-    int64_t compare_axis(const In_Place &rhs) const {
-      return block - rhs.block;
-    }
-    int64_t compare_axis(const Name &) const {
-      return -1;
-    }
-    int64_t compare_axis(const Height &) const {
-      return -1;
-    }
-
     bool matches(const Rete::WME_Token &) const override {return true;}
 
     void print(ostream &os) const {
@@ -119,7 +87,7 @@ namespace Blocks_World {
     Which block;
   };
 
-  class Name : public Carli::Feature_Enumerated<Feature> {
+  class BLOCKS_WORLD_LINKAGE Name : public Carli::Feature_Enumerated<Feature> {
   public:
     Name(const Which &block_, const block_id &name_)
      : Feature_Enumerated<Feature>(Rete::WME_Token_Index(3 + block_, 2), true),
@@ -130,22 +98,6 @@ namespace Blocks_World {
 
     Name * clone() const {
       return new Name(block, name);
-    }
-
-    int64_t compare_axis(const Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Clear &) const {
-      return 1;
-    }
-    int64_t compare_axis(const In_Place &) const {
-      return 1;
-    }
-    int64_t compare_axis(const Name &rhs) const {
-      return block - rhs.block;
-    }
-    int64_t compare_axis(const Height &) const {
-      return -1;
     }
 
     int64_t compare_value(const Carli::Feature &rhs) const {
@@ -162,7 +114,7 @@ namespace Blocks_World {
     block_id name;
   };
 
-  class Height : public Carli::Feature_Ranged<Feature> {
+  class BLOCKS_WORLD_LINKAGE Height : public Carli::Feature_Ranged<Feature> {
   public:
     Height(const Which &block_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
      : Carli::Feature_Ranged<Feature>(Rete::WME_Token_Index(5 + block_, 2), bound_lower_, bound_upper_, depth_, upper_, true),
@@ -172,22 +124,6 @@ namespace Blocks_World {
 
     Height * clone() const {
       return new Height(axis.first == 5 ? BLOCK : DEST, bound_lower, bound_upper, depth, upper);
-    }
-
-    int64_t compare_axis(const Feature &rhs) const {
-      return -rhs.compare_axis(*this);
-    }
-    int64_t compare_axis(const Clear &) const {
-      return 1;
-    }
-    int64_t compare_axis(const In_Place &) const {
-      return 1;
-    }
-    int64_t compare_axis(const Name &) const {
-      return 1;
-    }
-    int64_t compare_axis(const Height &rhs) const {
-      return Feature_Ranged_Data::compare_axis(rhs);
     }
 
     bool matches(const Rete::WME_Token &) const override {return true;}
@@ -205,7 +141,7 @@ namespace Blocks_World {
     * SRC ^right-of DEST
     */
 
-  class Move : public Carli::Action {
+  class BLOCKS_WORLD_LINKAGE Move : public Carli::Action {
   public:
     Move()
      : block(block_id()),
@@ -245,7 +181,7 @@ namespace Blocks_World {
     block_id dest;
   };
 
-  class Environment : public Carli::Environment {
+  class BLOCKS_WORLD_LINKAGE Environment : public Carli::Environment {
   public:
     Environment();
 
@@ -268,7 +204,7 @@ namespace Blocks_World {
     Stacks m_goal;
   };
 
-  class Agent : public Carli::Agent {
+  class BLOCKS_WORLD_LINKAGE Agent : public Carli::Agent {
   public:
     Agent(const std::shared_ptr<Carli::Environment> &env);
     ~Agent();

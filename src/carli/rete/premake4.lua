@@ -17,16 +17,16 @@ project "rete"
 
   if _OPTIONS["scu"] == "true" then
     matches = os.matchfiles("**.cpp")
-    os.mkdir("obj")
-    local f = assert(io.open("../obj/scu_rete.cpp", "w"))
+    os.mkdir("../../../obj")
+    local f = assert(io.open("../../../obj/scu_rete.cpp", "w"))
     for i, filename in ipairs(matches) do
-      f:write("#include \"../rete/"..filename.."\"\n")
+      f:write("#include \"carli/rete/"..filename.."\"\n")
     end
     f:close()
 
-    files { "../obj/scu_rete.cpp" }
+    files { "../../../obj/scu_rete.cpp" }
   else
-    files { "**.h", "**.hpp", "**.cpp", "**.lll", "**.yyy" }
+    files { "**.h", "**.hh", "**.cpp", "**.lll", "**.yyy" }
   end
 
   links { "utility" }
