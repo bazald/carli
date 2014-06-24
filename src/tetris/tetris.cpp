@@ -509,14 +509,11 @@ namespace Tetris {
     const double midpt = floor((lower_bound + upper_bound) / 2.0);
     const double values[][2] = {{lower_bound, midpt},
                                 {midpt, upper_bound}};
-    std::ostringstream oss;
 
     for(int i = 0; i != 2; ++i) {
       auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->rete_action.lock()->parent_left()->parent_left());
-      oss.str("tetris*rl-action*f");
-      oss << intptr_t(predicate.get());
-      make_standard_fringe(predicate, oss.str(), node_unsplit, feature); //, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
+      make_standard_fringe(predicate, next_rule_name("tetris*rl-action*f"), node_unsplit, feature); //, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
     }
   }
 
@@ -557,7 +554,6 @@ namespace Tetris {
     auto &join_last = join_x_odd;
 
     auto filter_blink = make_filter(*m_wme_blink);
-    std::ostringstream oss;
 
     auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
       return std::make_shared<Place>(token);
@@ -578,9 +574,7 @@ namespace Tetris {
           const auto type = super_to_type(super, orientation);
           auto feature = new Type(axis, type);
           auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), join_last);
-          oss.str("tetris*rl-action*f");
-          oss << intptr_t(predicate.get());
-          make_standard_fringe(predicate, oss.str(), root_action_data, feature);
+          make_standard_fringe(predicate, next_rule_name("tetris*rl-action*f"), root_action_data, feature);
         }
       }
     }
@@ -590,9 +584,7 @@ namespace Tetris {
 //      auto feature = new X_Odd(value);
 //      node_fringe->feature = feature;
 //      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(X_Odd::AXIS, 2), feature->symbol_constant(), join_last);
-//      oss.str("tetris*rl-action*f");
-//      oss << intptr_t(predicate.get());
-//      make_standard_fringe(predicate, oss.str(), root_action_data, feature);
+//      make_standard_fringe(predicate, next_rule_name("tetris*rl-action*f"), root_action_data, feature);
 //    }
 
     generate_rete_continuous<Size, Size::Axis>(root_action_data, Size::WIDTH, 0.0f, 4.0f);

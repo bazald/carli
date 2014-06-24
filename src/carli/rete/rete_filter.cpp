@@ -1,5 +1,7 @@
 #include "rete_filter.h"
 
+#include "rete_agent.h"
+
 namespace Rete {
 
   Rete_Filter::Rete_Filter(const WME &wme_)
@@ -13,13 +15,13 @@ namespace Rete {
     return m_wme;
   }
 
-  void Rete_Filter::destroy(Filters &filters, const Rete_Node_Ptr &output) {
+  void Rete_Filter::destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) {
     erase_output(output);
     if(!destruction_suppressed && outputs_all.empty())
-      filters.erase(std::find(filters.begin(), filters.end(), std::static_pointer_cast<Rete_Filter>(shared())));
+      agent.excise_filter(std::static_pointer_cast<Rete_Filter>(shared()));
   }
 
-  void Rete_Filter::insert_wme(const WME_Ptr_C &wme) {
+  void Rete_Filter::insert_wme(Rete_Agent &agent, const WME_Ptr_C &wme) {
     for(int i = 0; i != 3; ++i)
       if(!m_variable[i] && *m_wme.symbols[i] != *wme->symbols[i])
         return;
@@ -34,16 +36,16 @@ namespace Rete {
     if(std::find_if(tokens.begin(), tokens.end(), [&wme](const WME_Token_Ptr_C &token)->bool{return *wme == *token->get_wme();}) == tokens.end()) {
       tokens.push_back(std::make_shared<WME_Token>(wme));
       for(auto &output : *outputs_enabled)
-        output.ptr->insert_wme_token(tokens.back(), this);
+        output.ptr->insert_wme_token(agent, tokens.back(), this);
     }
   }
 
-  void Rete_Filter::remove_wme(const WME_Ptr_C &wme) {
+  void Rete_Filter::remove_wme(Rete_Agent &agent, const WME_Ptr_C &wme) {
     auto found = std::find_if(tokens.begin(), tokens.end(), [&wme](const WME_Token_Ptr_C &token)->bool{return *wme == *token->get_wme();});
     if(found != tokens.end()) {
       for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
-        if((*ot)->remove_wme_token(*found, this))
-          (*ot++)->disconnect(this);
+        if((*ot)->remove_wme_token(agent, *found, this))
+          (*ot++)->disconnect(agent, this);
         else
           ++ot;
       }
@@ -51,22 +53,22 @@ namespace Rete {
     }
   }
 
-  void Rete_Filter::insert_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &) {
+  void Rete_Filter::insert_wme_token(Rete_Agent &, const WME_Token_Ptr_C &, const Rete_Node * const &) {
     abort();
   }
 
-  bool Rete_Filter::remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &) {
+  bool Rete_Filter::remove_wme_token(Rete_Agent &, const WME_Token_Ptr_C &, const Rete_Node * const &) {
     abort();
   }
 
-  void Rete_Filter::pass_tokens(Rete_Node * const &output) {
+  void Rete_Filter::pass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
     for(auto &token : tokens)
-      output->insert_wme_token(token, this);
+      output->insert_wme_token(agent, token, this);
   }
 
-  void Rete_Filter::unpass_tokens(Rete_Node * const &output) {
+  void Rete_Filter::unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
     for(auto &token : tokens)
-      output->remove_wme_token(token, this);
+      output->remove_wme_token(agent, token, this);
   }
 
   bool Rete_Filter::operator==(const Rete_Node &rhs) const {

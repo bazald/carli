@@ -14,8 +14,8 @@ namespace Rete {
 
     const WME & get_wme() const;
 
-    void destroy(Filters &filters, const Rete_Node_Ptr &output) override;
-    
+    void destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) override;
+
     Rete_Node_Ptr_C parent_left() const override {abort();}
     Rete_Node_Ptr_C parent_right() const override {abort();}
     Rete_Node_Ptr parent_left() override {abort();}
@@ -23,14 +23,14 @@ namespace Rete {
 
     int64_t height() const override {return 1;}
 
-    void insert_wme(const WME_Ptr_C &wme);
-    void remove_wme(const WME_Ptr_C &wme);
+    void insert_wme(Rete_Agent &agent, const WME_Ptr_C &wme);
+    void remove_wme(Rete_Agent &agent, const WME_Ptr_C &wme);
 
-    void insert_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &) override;
-    bool remove_wme_token(const WME_Token_Ptr_C &, const Rete_Node * const &) override;
+    void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &, const Rete_Node * const &) override;
+    bool remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &, const Rete_Node * const &) override;
 
-    void pass_tokens(Rete_Node * const &output) override;
-    void unpass_tokens(Rete_Node * const &output) override;
+    void pass_tokens(Rete_Agent &agent, Rete_Node * const &output) override;
+    void unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) override;
 
     bool operator==(const Rete_Node &rhs) const override;
 

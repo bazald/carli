@@ -1,16 +1,17 @@
 #include "rete_action.h"
 
+#include "rete_agent.h"
+
 namespace Rete {
 
-  Rete_Action::Rete_Action(Agenda &agenda_,
-                           const std::string &name_,
+  Rete_Action::Rete_Action(const std::string &name_,
                            const Action &action_,
                            const Action &retraction_)
     : name(name_),
     action(action_),
-    retraction(retraction_),
-    agenda(agenda_)
+    retraction(retraction_)
   {
+    assert(!name.empty());
   }
 
   Rete_Action::~Rete_Action() {
@@ -20,15 +21,16 @@ namespace Rete {
     }
   }
 
-  void Rete_Action::destroy(Filters &filters, const Rete_Node_Ptr &
+  void Rete_Action::destroy(Rete_Agent &agent, const Rete_Node_Ptr &
 #ifndef NDEBUG
-                                                                   output
+                                                                    output
 #endif
-                                                                         ) {
+                                                                          ) {
     assert(!output);
 
     if(!destruction_suppressed && !excised) {
       excised = true;
+      agent.excise_rule(name);
 
       //std::cerr << "Destroying: ";
       //output_name(std::cerr);
@@ -37,11 +39,11 @@ namespace Rete {
       for(auto &wme_token : input_tokens)
         retraction(*this, *wme_token);
 
-      input->destroy(filters, shared());
+      input->destroy(agent, shared());
     }
   }
 
-  void Rete_Action::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
+  void Rete_Action::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                               from
 #endif
@@ -56,10 +58,10 @@ namespace Rete {
 //    std::cerr << std::endl;
 //#endif
 
-    agenda.insert_action(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
+    agent.get_agenda().insert_action(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
   }
 
-  bool Rete_Action::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
+  bool Rete_Action::remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                               from
 #endif
@@ -71,7 +73,7 @@ namespace Rete {
     // TODO: change from the 'if' to the 'assert', ensuring that we're not wasting time on non-existent removals
     //assert(found != input_tokens.end());
     {
-      agenda.insert_retraction(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
+      agent.get_agenda().insert_retraction(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
 
       input_tokens.erase(found);
     }
@@ -79,11 +81,11 @@ namespace Rete {
     return input_tokens.empty();
   }
 
-  void Rete_Action::pass_tokens(Rete_Node * const &) {
+  void Rete_Action::pass_tokens(Rete_Agent &, Rete_Node * const &) {
     abort();
   }
 
-  void Rete_Action::unpass_tokens(Rete_Node * const &) {
+  void Rete_Action::unpass_tokens(Rete_Agent &, Rete_Node * const &) {
     abort();
   }
 
@@ -120,12 +122,12 @@ namespace Rete {
     return nullptr;
   }
 
-  void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out) {
+  void bind_to_action(Rete_Agent &agent, const Rete_Action_Ptr &action, const Rete_Node_Ptr &out) {
     assert(action && !action->input);
     action->input = out.get();
 
     out->insert_output_enabled(action);
-    out->pass_tokens(action.get());
+    out->pass_tokens(agent, action.get());
   }
 
 }

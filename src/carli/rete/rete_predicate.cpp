@@ -21,22 +21,22 @@ namespace Rete {
   {
   }
 
-  void Rete_Predicate::destroy(Filters &filters, const Rete_Node_Ptr &output) {
+  void Rete_Predicate::destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) {
     erase_output(output);
     if(!destruction_suppressed && outputs_all.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
 
-      input->destroy(filters, shared());
+      input->destroy(agent, shared());
     }
   }
 
-  void Rete_Predicate::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
+  void Rete_Predicate::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
-                                                                                 from
+                                                                                                                      from
 #endif
-                                                                                     ) {
+                                                                                                                          ) {
     assert(from == input);
 
     if(m_rhs) {
@@ -51,22 +51,22 @@ namespace Rete {
     tokens.push_back(wme_token);
 
     for(auto &output : *outputs_enabled)
-      output.ptr->insert_wme_token(wme_token, this);
+      output.ptr->insert_wme_token(agent, wme_token, this);
   }
 
-  bool Rete_Predicate::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
+  bool Rete_Predicate::remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
-                                                                                 from
+                                                                                                                      from
 #endif
-                                                                                     ) {
+                                                                                                                          ) {
     assert(from == input);
 
     auto found = find(tokens, wme_token);
     if(found != tokens.end()) {
       tokens.erase(found);
       for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
-        if((*ot)->remove_wme_token(wme_token, this))
-          (*ot++)->disconnect(this);
+        if((*ot)->remove_wme_token(agent, wme_token, this))
+          (*ot++)->disconnect(agent, this);
         else
           ++ot;
       }
@@ -75,14 +75,14 @@ namespace Rete {
     return tokens.empty();
   }
 
-  void Rete_Predicate::pass_tokens(Rete_Node * const &output) {
+  void Rete_Predicate::pass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
     for(auto &wme_token : tokens)
-      output->insert_wme_token(wme_token, this);
+      output->insert_wme_token(agent, wme_token, this);
   }
 
-  void Rete_Predicate::unpass_tokens(Rete_Node * const &output) {
+  void Rete_Predicate::unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
     for(auto &wme_token : tokens)
-      output->remove_wme_token(wme_token, this);
+      output->remove_wme_token(agent, wme_token, this);
   }
 
   bool Rete_Predicate::operator==(const Rete_Node &rhs) const {
@@ -183,14 +183,14 @@ namespace Rete {
     }
   }
 
-  void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out) {
+  void bind_to_predicate(Rete_Agent &agent, const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out) {
     assert(predicate);
     assert(!std::dynamic_pointer_cast<Rete_Existential>(out));
     assert(!std::dynamic_pointer_cast<Rete_Negation>(out));
     predicate->input = out.get();
 
     out->insert_output_enabled(predicate);
-    out->pass_tokens(predicate.get());
+    out->pass_tokens(agent, predicate.get());
   }
 
 }

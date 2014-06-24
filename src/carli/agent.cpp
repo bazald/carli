@@ -401,11 +401,11 @@ namespace Carli {
   }
 
   Agent::~Agent() {
-    Rete_Agent::excise_all();
+    excise_all();
   }
 
   void Agent::destroy() {
-    Rete_Agent::excise_all();
+    excise_all();
   //#ifdef DEBUG_OUTPUT
   //  std::cerr << *this << std::endl;
   //  for(const auto &action_value : m_next_q_values)

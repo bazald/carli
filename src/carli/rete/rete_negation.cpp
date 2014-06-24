@@ -4,41 +4,41 @@ namespace Rete {
 
   Rete_Negation::Rete_Negation() : output_token(std::make_shared<WME_Token>()) {}
 
-  void Rete_Negation::destroy(Filters &filters, const Rete_Node_Ptr &output) {
+  void Rete_Negation::destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) {
     erase_output(output);
     if(!destruction_suppressed && outputs_all.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
 
-      input->destroy(filters, shared());
+      input->destroy(agent, shared());
     }
   }
 
-  void Rete_Negation::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
+  void Rete_Negation::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
-                                                                                 from
+                                                                                                                     from
 #endif
-                                                                                     ) {
+                                                                                                                         ) {
     assert(from == input);
 
     input_tokens.push_back(wme_token);
 
     if(input_tokens.size() == 1) {
       for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
-        if((*ot)->remove_wme_token(output_token, this))
-          (*ot++)->disconnect(this);
+        if((*ot)->remove_wme_token(agent, output_token, this))
+          (*ot++)->disconnect(agent, this);
         else
           ++ot;
       }
     }
   }
 
-  bool Rete_Negation::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
+  bool Rete_Negation::remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
-                                                                                 from
+                                                                                                                     from
 #endif
-                                                                                     ) {
+                                                                                                                        ) {
     assert(from == input);
 
     auto found = find(input_tokens, wme_token);
@@ -46,21 +46,21 @@ namespace Rete {
       input_tokens.erase(found);
       if(input_tokens.empty()) {
         for(auto &output : *outputs_enabled)
-          output.ptr->insert_wme_token(output_token, this);
+          output.ptr->insert_wme_token(agent, output_token, this);
       }
     }
 
     return input_tokens.empty();
   }
 
-  void Rete_Negation::pass_tokens(Rete_Node * const &output) {
+  void Rete_Negation::pass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
     if(input_tokens.empty())
-      output->insert_wme_token(output_token, this);
+      output->insert_wme_token(agent, output_token, this);
   }
 
-  void Rete_Negation::unpass_tokens(Rete_Node * const &output) {
+  void Rete_Negation::unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
     if(input_tokens.empty())
-      output->remove_wme_token(output_token, this);
+      output->remove_wme_token(agent, output_token, this);
   }
 
   bool Rete_Negation::operator==(const Rete_Node &rhs) const {
@@ -94,12 +94,12 @@ namespace Rete {
     return nullptr;
   }
 
-  void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out) {
+  void bind_to_negation(Rete_Agent &agent, const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out) {
     assert(negation);
     negation->input = out.get();
 
     out->insert_output_enabled(negation);
-    out->pass_tokens(negation.get());
+    out->pass_tokens(agent, negation.get());
   }
 
 }

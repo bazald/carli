@@ -23,7 +23,7 @@ namespace Carli {
   Node_Split_Ptr Node::create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink, const bool &terminal) {
     const auto ra_lock = rete_action.lock();
     const auto node_name = ra_lock->get_name();
-    const auto node_name_prefix = node_name.substr(0, node_name.find_last_of('*'));
+    const auto new_name = agent.next_rule_name(node_name.substr(0, node_name.find_last_of('*') + 1) + "s");
     auto parent = ra_lock->parent_left();
     tracked_ptr<Q_Value> new_q_value;
 
@@ -43,9 +43,8 @@ namespace Carli {
       new_q_value = q_value;
     }
 
-    std::ostringstream oss;
-    oss << node_name_prefix << "*s" << intptr_t(parent.get());
-    auto new_leaf = agent.make_standard_action(parent, oss.str());
+    std::cerr << new_name << std::endl;
+    auto new_leaf = agent.make_standard_action(parent, new_name);
     auto new_leaf_data = std::make_shared<Node_Split>(agent, new_leaf, get_action, new_q_value, terminal);
     new_leaf->data = new_leaf_data;
 
@@ -55,7 +54,7 @@ namespace Carli {
   Node_Unsplit_Ptr Node::create_unsplit(Agent &agent, const Rete::WME_Ptr_C &wme_blink, Fringe_Values &node_unsplit_fringe) {
     const auto ra_lock = rete_action.lock();
     const auto node_name = ra_lock->get_name();
-    const auto node_name_prefix = node_name.substr(0, node_name.find_last_of('*'));
+    const auto new_name = agent.next_rule_name(node_name.substr(0, node_name.find_last_of('*') + 1) + "u");
     auto parent = ra_lock->parent_left();
     tracked_ptr<Q_Value> new_q_value;
 
@@ -74,9 +73,8 @@ namespace Carli {
       new_q_value = q_value;
     }
 
-    std::ostringstream oss;
-    oss << node_name_prefix << "*u" << intptr_t(parent.get());
-    auto new_leaf = agent.make_standard_action(parent, oss.str());
+    std::cerr << new_name << std::endl;
+    auto new_leaf = agent.make_standard_action(parent, new_name);
     auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, new_leaf, get_action, new_q_value);
     new_leaf->data = new_leaf_data;
     new_leaf_data->fringe_values.swap(node_unsplit_fringe);
@@ -92,7 +90,7 @@ namespace Carli {
   Node_Fringe_Ptr Node::create_fringe(Agent &agent, Node &leaf) {
     const auto lra_lock = leaf.rete_action.lock();
     const auto leaf_node_name = lra_lock->get_name();
-    const auto leaf_node_name_prefix = leaf_node_name.substr(0, leaf_node_name.find_last_of('*'));
+    const auto new_name = agent.next_rule_name(leaf_node_name.substr(0, leaf_node_name.find_last_of('*') + 1) + "f");
     auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(q_value->feature.get());
 
     auto ancestor_left = lra_lock->parent_left();
@@ -134,9 +132,8 @@ namespace Carli {
     }
 
     /// Create the actual action for the new fringe node
-    std::ostringstream oss;
-    oss << leaf_node_name_prefix << "*f" << intptr_t(new_test.get());
-    auto new_action = agent.make_standard_action(new_test, oss.str());
+    std::cerr << new_name << std::endl;
+    auto new_action = agent.make_standard_action(new_test, new_name);
     auto new_action_data = std::make_shared<Node_Fringe>(agent, new_action, leaf.get_action, leaf.q_value->depth + 1, q_value->feature ? q_value->feature->clone() : nullptr);
     new_action->data = new_action_data;
 

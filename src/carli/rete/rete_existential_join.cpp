@@ -7,7 +7,7 @@ namespace Rete {
 
   Rete_Existential_Join::Rete_Existential_Join(WME_Bindings bindings_) : bindings(bindings_) {}
 
-  void Rete_Existential_Join::destroy(Filters &filters, const Rete_Node_Ptr &output) {
+  void Rete_Existential_Join::destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) {
     erase_output(output);
     if(!destruction_suppressed && outputs_all.empty()) {
       //std::cerr << "Destroying: ";
@@ -17,18 +17,18 @@ namespace Rete {
       auto i0 = input0->shared();
       auto i1 = input1->shared();
       auto o = shared();
-      i0->destroy(filters, o);
+      i0->destroy(agent, o);
       if(i0 != i1)
-        i1->destroy(filters, o);
+        i1->destroy(agent, o);
     }
   }
 
-  void Rete_Existential_Join::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
+  void Rete_Existential_Join::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
     assert(from == input0 || from == input1);
 
     if(from == input0 && find_key(input0_tokens, wme_token) == input0_tokens.end()) {
       if(!data.connected1) {
-        input1->enable_output(this);
+        input1->enable_output(agent, this);
         data.connected1 = true;
       }
 
@@ -36,11 +36,11 @@ namespace Rete {
       input0_tokens.emplace_back(wme_token, 0u);
 
       for(const auto &other : input1_tokens)
-        join_tokens(input0_tokens.back(), other);
+        join_tokens(agent, input0_tokens.back(), other);
     }
     if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
       if(!data.connected0) {
-        input0->enable_output(this);
+        input0->enable_output(agent, this);
         data.connected0 = true;
       }
 
@@ -48,11 +48,11 @@ namespace Rete {
       input1_tokens.push_back(wme_token);
 
       for(auto &other : input0_tokens)
-        join_tokens(other, wme_token);
+        join_tokens(agent, other, wme_token);
     }
   }
 
-  bool Rete_Existential_Join::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
+  bool Rete_Existential_Join::remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
     assert(from == input0 || from == input1);
 
     bool emptied = false;
@@ -62,7 +62,7 @@ namespace Rete {
       if(found != input0_tokens.end()) {
         // TODO: Avoid looping through non-existent pairs?
         for(const auto &other : input1_tokens)
-          unjoin_tokens(*found, other);
+          unjoin_tokens(agent, *found, other);
         input0_tokens.erase(found);
 
         emptied ^= input0_tokens.empty();
@@ -74,7 +74,7 @@ namespace Rete {
         // TODO: Avoid looping through non-existent pairs?
         input1_tokens.erase(found);
         for(auto &other : input0_tokens)
-          unjoin_tokens(other, wme_token);
+          unjoin_tokens(agent, other, wme_token);
 
         emptied ^= input1_tokens.empty();
       }
@@ -144,7 +144,7 @@ namespace Rete {
     return nullptr;
   }
 
-  void Rete_Existential_Join::join_tokens(std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs) {
+  void Rete_Existential_Join::join_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs) {
     for(auto &binding : bindings) {
       if(*(*lhs.first)[binding.first] != *(*rhs)[binding.second])
         return;
@@ -152,11 +152,11 @@ namespace Rete {
 
     if(++lhs.second == 1u) {
       for(auto &output : *outputs_enabled)
-        output.ptr->insert_wme_token(lhs.first, this);
+        output.ptr->insert_wme_token(agent, lhs.first, this);
     }
   }
 
-  void Rete_Existential_Join::unjoin_tokens(std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs) {
+  void Rete_Existential_Join::unjoin_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs) {
     for(auto &binding : bindings) {
       if(*(*lhs.first)[binding.first] != *(*rhs)[binding.second])
         return;
@@ -164,45 +164,45 @@ namespace Rete {
 
     if(--lhs.second == 0) {
       for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
-        if((*ot)->remove_wme_token(lhs.first, this))
-          (*ot++)->disconnect(this);
+        if((*ot)->remove_wme_token(agent, lhs.first, this))
+          (*ot++)->disconnect(agent, this);
         else
           ++ot;
       }
     }
   }
 
-  void Rete_Existential_Join::pass_tokens(Rete_Node * const &output) {
+  void Rete_Existential_Join::pass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
     for(auto &wme_token : input0_tokens) {
       if(wme_token.second)
-        output->insert_wme_token(wme_token.first, this);
+        output->insert_wme_token(agent, wme_token.first, this);
     }
   }
 
-  void Rete_Existential_Join::unpass_tokens(Rete_Node * const &output) {
+  void Rete_Existential_Join::unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
     for(auto &wme_token : input0_tokens) {
       if(wme_token.second)
-        output->remove_wme_token(wme_token.first, this);
+        output->remove_wme_token(agent, wme_token.first, this);
     }
   }
 
-  void Rete_Existential_Join::disconnect(const Rete_Node * const &from) {
+  void Rete_Existential_Join::disconnect(Rete_Agent &agent, const Rete_Node * const &from) {
     if(input0 != input1) {
       if(from == input0) {
         assert(data.connected1);
-        input1->disable_output(this);
+        input1->disable_output(agent, this);
         data.connected1 = false;
       }
       else {
         assert(data.connected0);
-        input0->disable_output(this);
+        input0->disable_output(agent, this);
         data.connected0 = false;
       }
     }
     assert(data.connected0 || data.connected1);
   }
 
-  void bind_to_existential_join(const Rete_Existential_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
+  void bind_to_existential_join(Rete_Agent &agent, const Rete_Existential_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
     assert(join && !join->input0 && !join->input1);
     assert(!std::dynamic_pointer_cast<Rete_Existential>(out0));
     assert(!std::dynamic_pointer_cast<Rete_Negation>(out0));
@@ -215,7 +215,7 @@ namespace Rete {
     else
       join->data.connected1 = true;
 
-    out0->pass_tokens(join.get());
+    out0->pass_tokens(agent, join.get());
   }
 
 }

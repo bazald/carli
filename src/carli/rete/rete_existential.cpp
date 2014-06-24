@@ -4,18 +4,18 @@ namespace Rete {
 
   Rete_Existential::Rete_Existential() : output_token(std::make_shared<WME_Token>()) {}
 
-  void Rete_Existential::destroy(Filters &filters, const Rete_Node_Ptr &output) {
+  void Rete_Existential::destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) {
     erase_output(output);
     if(!destruction_suppressed && outputs_all.empty()) {
       //std::cerr << "Destroying: ";
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
 
-      input->destroy(filters, shared());
+      input->destroy(agent, shared());
     }
   }
 
-  void Rete_Existential::insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
+  void Rete_Existential::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                     from
 #endif
@@ -26,13 +26,13 @@ namespace Rete {
 
     if(input_tokens.size() == 1) {
       for(auto &output : *outputs_enabled)
-        output.ptr->insert_wme_token(output_token, this);
+        output.ptr->insert_wme_token(agent, output_token, this);
     }
 
     //std::cerr << "input_tokens.size() == " << input_tokens.size() << std::endl;
   }
 
-  bool Rete_Existential::remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
+  bool Rete_Existential::remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                  from
 #endif
@@ -44,8 +44,8 @@ namespace Rete {
       input_tokens.erase(found);
       if(input_tokens.empty()) {
         for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
-          if((*ot)->remove_wme_token(output_token, this))
-            (*ot++)->disconnect(this);
+          if((*ot)->remove_wme_token(agent, output_token, this))
+            (*ot++)->disconnect(agent, this);
           else
             ++ot;
         }
@@ -57,14 +57,14 @@ namespace Rete {
     return input_tokens.empty();
   }
 
-  void Rete_Existential::pass_tokens(Rete_Node * const &output) {
+  void Rete_Existential::pass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
     if(!input_tokens.empty())
-      output->insert_wme_token(output_token, this);
+      output->insert_wme_token(agent, output_token, this);
   }
 
-  void Rete_Existential::unpass_tokens(Rete_Node * const &output) {
+  void Rete_Existential::unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
     if(!input_tokens.empty())
-      output->remove_wme_token(output_token, this);
+      output->remove_wme_token(agent, output_token, this);
   }
 
   bool Rete_Existential::operator==(const Rete_Node &rhs) const {
@@ -98,12 +98,12 @@ namespace Rete {
     return nullptr;
   }
 
-  void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out) {
+  void bind_to_existential(Rete_Agent &agent, const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out) {
     assert(existential);
     existential->input = out.get();
 
     out->insert_output_enabled(existential);
-    out->pass_tokens(existential.get());
+    out->pass_tokens(agent, existential.get());
   }
 
 }

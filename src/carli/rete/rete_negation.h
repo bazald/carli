@@ -9,13 +9,13 @@ namespace Rete {
     Rete_Negation(const Rete_Negation &);
     Rete_Negation & operator=(const Rete_Negation &);
 
-    friend RETE_LINKAGE void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
+    friend RETE_LINKAGE void bind_to_negation(Rete_Agent &agent, const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
 
   public:
     Rete_Negation();
 
-    void destroy(Filters &filters, const Rete_Node_Ptr &output) override;
-    
+    void destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) override;
+
     Rete_Node_Ptr_C parent_left() const override {return input->shared();}
     Rete_Node_Ptr_C parent_right() const override {return input->shared();}
     Rete_Node_Ptr parent_left() override {return input->shared();}
@@ -23,11 +23,11 @@ namespace Rete {
 
     int64_t height() const override {return input->height() + 1;}
 
-    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
-    bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
+    void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
+    bool remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
 
-    void pass_tokens(Rete_Node * const &output) override;
-    void unpass_tokens(Rete_Node * const &output) override;
+    void pass_tokens(Rete_Agent &agent, Rete_Node * const &output) override;
+    void unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) override;
 
     bool operator==(const Rete_Node &rhs) const override;
 
@@ -45,7 +45,7 @@ namespace Rete {
     WME_Token_Ptr_C output_token;
   };
 
-  RETE_LINKAGE void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
+  RETE_LINKAGE void bind_to_negation(Rete_Agent &agent, const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
 
 }
 

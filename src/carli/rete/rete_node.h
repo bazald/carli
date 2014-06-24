@@ -15,6 +15,7 @@ namespace Rete {
 
   class Agenda;
   class Rete_Action;
+  class Rete_Agent;
   class Rete_Data;
   class Rete_Existential;
   class Rete_Existential_Join;
@@ -124,7 +125,7 @@ namespace Rete {
       }
     }
 
-    virtual void destroy(Filters &filters, const Rete_Node_Ptr &output) = 0;
+    virtual void destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) = 0;
 
     void suppress_destruction(const bool &suppress) {
       destruction_suppressed = suppress;
@@ -148,26 +149,26 @@ namespace Rete {
 
     virtual int64_t height() const = 0;
 
-    virtual void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0;
-    virtual bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0; ///< Returns true if removed the last
+    virtual void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0;
+    virtual bool remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0; ///< Returns true if removed the last
 
-    virtual void disconnect(const Rete_Node * const &/*from*/) {}
+    virtual void disconnect(Rete_Agent &/*agent*/, const Rete_Node * const &/*from*/) {}
 
-    virtual void pass_tokens(Rete_Node * const &output) = 0;
-    virtual void unpass_tokens(Rete_Node * const &output) = 0;
+    virtual void pass_tokens(Rete_Agent &agent, Rete_Node * const &output) = 0;
+    virtual void unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) = 0;
 
     virtual bool operator==(const Rete_Node &rhs) const = 0;
 
     virtual bool disabled_input(const Rete_Node_Ptr &) {return false;}
 
-    void disable_output(Rete_Node * const &output) {
+    void disable_output(Rete_Agent &agent, Rete_Node * const &output) {
       erase_output_enabled(output)->insert_before(outputs_disabled);
-      unpass_tokens(output);
+      unpass_tokens(agent, output);
     }
 
-    void enable_output(Rete_Node * const &output) {
+    void enable_output(Rete_Agent &agent, Rete_Node * const &output) {
       erase_output_disabled(output)->insert_before(outputs_enabled);
-      pass_tokens(output);
+      pass_tokens(agent, output);
     }
 
     void insert_output_enabled(const Rete_Node_Ptr &output) {

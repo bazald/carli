@@ -1,6 +1,7 @@
 #ifndef RETE_AGENT_H
 #define RETE_AGENT_H
 
+#include "agenda.h"
 #include "rete.h"
 #include "wme_set.h"
 #include <unordered_map>
@@ -25,9 +26,13 @@ namespace Rete {
     Rete_Predicate_Ptr make_predicate_vc(const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out);
     Rete_Predicate_Ptr make_predicate_vv(const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out);
 
+    Agenda & get_agenda() {return agenda;}
+
     void excise_all();
+    void excise_filter(const Rete_Filter_Ptr &filter);
     void excise_rule(const std::string &name);
     void excise_rule(const Rete_Action_Ptr &action);
+    std::string next_rule_name(const std::string &prefix);
     Rete_Action_Ptr unname_rule(const std::string &name);
 
     void insert_wme(const WME_Ptr_C &wme);
@@ -50,10 +55,11 @@ namespace Rete {
     void destroy();
 
   private:
-    void source_rule(const std::string &name, const Rete_Action_Ptr &action);
+    void source_rule(const Rete_Action_Ptr &action);
 
     Rete_Node::Filters filters;
     std::unordered_map<std::string, Rete_Action_Ptr> rules;
+    int64_t rule_name_index = 0;
     WME_Set working_memory;
     Agenda agenda;
     intptr_t visitor_value = 0;

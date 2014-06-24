@@ -1,6 +1,7 @@
 #include "rete_agent.h"
 
 #include <map>
+#include <sstream>
 
 namespace Rete {
 
@@ -12,21 +13,19 @@ namespace Rete {
     if(auto existing = Rete_Action::find_existing(action, [](const Rete_Action &, const WME_Token &){}, out))
       return existing;
 //      std::cerr << "DEBUG: make_action" << std::endl;
-    auto action_fun = std::make_shared<Rete_Action>(this->agenda, name, action, [](const Rete_Action &, const WME_Token &){});
-    bind_to_action(action_fun, out);
+    auto action_fun = std::make_shared<Rete_Action>(name, action, [](const Rete_Action &, const WME_Token &){});
+    bind_to_action(*this, action_fun, out);
 //      std::cerr << "END: make_action" << std::endl;
-    if(!name.empty())
-      source_rule(name, action_fun);
+    source_rule(action_fun);
     return action_fun;
   }
 
   Rete_Action_Ptr Rete_Agent::make_action_retraction(const std::string &name, const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out) {
     if(auto existing = Rete_Action::find_existing(action, retraction, out))
       return existing;
-    auto action_fun = std::make_shared<Rete_Action>(this->agenda, name, action, retraction);
-    bind_to_action(action_fun, out);
-    if(!name.empty())
-      source_rule(name, action_fun);
+    auto action_fun = std::make_shared<Rete_Action>(name, action, retraction);
+    bind_to_action(*this, action_fun, out);
+    source_rule(action_fun);
     return action_fun;
   }
 
@@ -34,7 +33,7 @@ namespace Rete {
     if(auto existing = Rete_Existential::find_existing(out))
       return existing;
     auto existential = std::make_shared<Rete_Existential>();
-    bind_to_existential(existential, out);
+    bind_to_existential(*this, existential, out);
     return existential;
   }
 
@@ -42,7 +41,7 @@ namespace Rete {
     if(auto existing = Rete_Existential_Join::find_existing(bindings, out0, out1))
       return existing;
     auto existential_join = std::make_shared<Rete_Existential_Join>(bindings);
-    bind_to_existential_join(existential_join, out0, out1);
+    bind_to_existential_join(*this, existential_join, out0, out1);
     return existential_join;
   }
 
@@ -56,7 +55,7 @@ namespace Rete {
 
     this->filters.push_back(filter);
     for(auto &wme : this->working_memory.wmes)
-      filter->insert_wme(wme);
+      filter->insert_wme(*this, wme);
     return filter;
   }
 
@@ -64,7 +63,7 @@ namespace Rete {
     if(auto existing = Rete_Join::find_existing(bindings, out0, out1))
       return existing;
     auto join = std::make_shared<Rete_Join>(bindings);
-    bind_to_join(join, out0, out1);
+    bind_to_join(*this, join, out0, out1);
     return join;
   }
 
@@ -72,7 +71,7 @@ namespace Rete {
     if(auto existing = Rete_Negation::find_existing(out))
       return existing;
     auto negation = std::make_shared<Rete_Negation>();
-    bind_to_negation(negation, out);
+    bind_to_negation(*this, negation, out);
     return negation;
   }
 
@@ -80,7 +79,7 @@ namespace Rete {
     if(auto existing = Rete_Negation_Join::find_existing(bindings, out0, out1))
       return existing;
     auto negation_join = std::make_shared<Rete_Negation_Join>(bindings);
-    bind_to_negation_join(negation_join, out0, out1);
+    bind_to_negation_join(*this, negation_join, out0, out1);
     return negation_join;
   }
 
@@ -88,7 +87,7 @@ namespace Rete {
     if(auto existing = Rete_Predicate::find_existing(pred, lhs_index, rhs, out))
       return existing;
     auto predicate = std::make_shared<Rete_Predicate>(pred, lhs_index, rhs);
-    bind_to_predicate(predicate, out);
+    bind_to_predicate(*this, predicate, out);
     return predicate;
   }
 
@@ -96,16 +95,22 @@ namespace Rete {
     if(auto existing = Rete_Predicate::find_existing(pred, lhs_index, rhs_index, out))
       return existing;
     auto predicate = std::make_shared<Rete_Predicate>(pred, lhs_index, rhs_index);
-    bind_to_predicate(predicate, out);
+    bind_to_predicate(*this, predicate, out);
     return predicate;
   }
 
   void Rete_Agent::excise_all() {
     agenda.lock();
-    rules.clear();
     filters.clear();
+    rules.clear();
     agenda.unlock();
     agenda.run();
+  }
+
+  void Rete_Agent::excise_filter(const Rete_Filter_Ptr &filter) {
+    const auto found = std::find(filters.begin(), filters.end(), filter);
+    if(found != filters.end())
+      filters.erase(found);
   }
 
   void Rete_Agent::excise_rule(const std::string &name) {
@@ -115,15 +120,26 @@ namespace Rete {
     }
     else {
 //        std::cerr << "Rule '" << name << "' excised." << std::endl;
-      found->second->destroy(filters);
+      found->second->destroy(*this);
       rules.erase(found);
       std::cerr << '#';
     }
   }
 
   void Rete_Agent::excise_rule(const Rete_Action_Ptr &action) {
-    action->destroy(filters);
+    if(!action->get_name().empty())
+      unname_rule(action->get_name());
+    action->destroy(*this);
     std::cerr << '#';
+  }
+
+  std::string Rete_Agent::next_rule_name(const std::string &prefix) {
+    std::ostringstream oss;
+    do {
+      oss.str("");
+      oss << prefix << ++rule_name_index;
+    } while(rules.find(oss.str()) != rules.end());
+    return oss.str();
   }
 
   Rete_Action_Ptr Rete_Agent::unname_rule(const std::string &name) {
@@ -152,7 +168,7 @@ namespace Rete {
     std::cerr << "rete.insert" << *wme << std::endl;
 #endif
     for(auto &filter : filters)
-      filter->insert_wme(wme);
+      filter->insert_wme(*this, wme);
     agenda.unlock();
     agenda.run();
   }
@@ -173,7 +189,7 @@ namespace Rete {
     std::cerr << "rete.remove" << *wme << std::endl;
 #endif
     for(auto &filter : filters)
-      filter->remove_wme(wme);
+      filter->remove_wme(*this, wme);
     agenda.unlock();
     agenda.run();
   }
@@ -182,7 +198,7 @@ namespace Rete {
     agenda.lock();
     for(auto &wme : working_memory.wmes) {
       for(auto &filter : filters)
-        filter->remove_wme(wme);
+        filter->remove_wme(*this, wme);
     }
     working_memory.wmes.clear();
     agenda.unlock();
@@ -272,16 +288,16 @@ namespace Rete {
     os << "}" << std::endl;
   }
 
-  void Rete_Agent::source_rule(const std::string &name, const Rete_Action_Ptr &action) {
-    auto found = rules.find(name);
+  void Rete_Agent::source_rule(const Rete_Action_Ptr &action) {
+    auto found = rules.find(action->get_name());
     if(found == rules.end()) {
 //        std::cerr << "Rule '" << name << "' sourced." << std::endl;
-      rules[name] = action;
+      rules[action->get_name()] = action;
     }
     else {
 //        std::cerr << "Rule '" << name << "' replaced." << std::endl;
       assert(found->second != action);
-      found->second->destroy(filters);
+      found->second->destroy(*this);
       std::cerr << '#';
       found->second = action;
     }

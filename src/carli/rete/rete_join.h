@@ -9,13 +9,13 @@ namespace Rete {
     Rete_Join(const Rete_Join &);
     Rete_Join & operator=(const Rete_Join &);
 
-    friend RETE_LINKAGE void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+    friend RETE_LINKAGE void bind_to_join(Rete_Agent &agent, const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
   public:
     Rete_Join(WME_Bindings bindings_);
 
-    void destroy(Filters &filters, const Rete_Node_Ptr &output) override;
-    
+    void destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) override;
+
     Rete_Node_Ptr_C parent_left() const override {return input0->shared();}
     Rete_Node_Ptr_C parent_right() const override {return input1->shared();}
     Rete_Node_Ptr parent_left() override {return input0->shared();}
@@ -23,8 +23,8 @@ namespace Rete {
 
     int64_t height() const override {return std::max(input0->height(), input1->height()) + 1;}
 
-    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
-    bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
+    void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
+    bool remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
 
     bool operator==(const Rete_Node &rhs) const override;
 
@@ -39,14 +39,14 @@ namespace Rete {
     static Rete_Join_Ptr find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
   private:
-    void join_tokens(const WME_Token_Ptr_C &lhs, const WME_Token_Ptr_C &rhs);
+    void join_tokens(Rete_Agent &agent, const WME_Token_Ptr_C &lhs, const WME_Token_Ptr_C &rhs);
 
     WME_Token_Ptr_C join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs);
 
-    void disconnect(const Rete_Node * const &from);
+    void disconnect(Rete_Agent &agent, const Rete_Node * const &from);
 
-    void pass_tokens(Rete_Node * const &output) override;
-    void unpass_tokens(Rete_Node * const &output) override;
+    void pass_tokens(Rete_Agent &agent, Rete_Node * const &output) override;
+    void unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) override;
 
     WME_Bindings bindings;
     Rete_Node * input0 = nullptr;
@@ -63,7 +63,7 @@ namespace Rete {
     } data;
   };
 
-  RETE_LINKAGE void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+  RETE_LINKAGE void bind_to_join(Rete_Agent &agent, const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
 }
 

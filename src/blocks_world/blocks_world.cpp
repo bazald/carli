@@ -141,7 +141,6 @@ namespace Blocks_World {
     const bool enable_distractors = get_Option_Ranged<bool>(Options::get_global(), "enable-distractors");
 
     std::vector<Feature::Which> blocks = {{Feature::BLOCK, Feature::DEST}};
-    std::ostringstream oss;
 
     if(!enable_distractors)
       blocks = {Feature::BLOCK};
@@ -150,15 +149,11 @@ namespace Blocks_World {
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
       auto join_block_clear = make_existential_join(state_bindings, join_last, filter_clear);
-      oss.str("blocks-world*rl-action*f");
-      oss << intptr_t(join_block_clear.get());
-      make_standard_fringe(join_block_clear, oss.str(), root_action_data, feature);
+      make_standard_fringe(join_block_clear, next_rule_name("blocks-world*rl-action*f"), root_action_data, feature);
 
       feature = new Clear(block, false);
       auto neg = make_negation_join(state_bindings, join_last, filter_clear);
-      oss.str("blocks-world*rl-action*f");
-      oss << intptr_t(neg.get());
-      make_standard_fringe(neg, oss.str(), root_action_data, feature);
+      make_standard_fringe(neg, next_rule_name("blocks-world*rl-action*f"), root_action_data, feature);
     }
 
     if(!enable_distractors)
@@ -168,31 +163,23 @@ namespace Blocks_World {
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->wme_token_index(), Rete::WME_Token_Index(0, 0)));
       auto join_block_in_place = make_existential_join(state_bindings, join_last, filter_in_place);
-      oss.str("blocks-world*rl-action*f");
-      oss << intptr_t(join_block_in_place.get());
-      make_standard_fringe(join_block_in_place, oss.str(), root_action_data, feature);
+      make_standard_fringe(join_block_in_place, next_rule_name("blocks-world*rl-action*f"), root_action_data, feature);
 
       feature = new In_Place(block, false);
       auto neg = make_negation_join(state_bindings, join_last, filter_in_place);
-      oss.str("blocks-world*rl-action*f");
-      oss << intptr_t(neg.get());
-      make_standard_fringe(neg, oss.str(), root_action_data, feature);
+      make_standard_fringe(neg, next_rule_name("blocks-world*rl-action*f"), root_action_data, feature);
     }
 
     for(size_t block = 1; block != m_block_ids.size(); ++block) {
       auto feature = new Name(Feature::BLOCK, m_block_names[block]->value);
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_last);
-      oss.str("blocks-world*rl-action*f");
-      oss << intptr_t(name_is.get());
-      make_standard_fringe(name_is, oss.str(), root_action_data, feature);
+      make_standard_fringe(name_is, next_rule_name("blocks-world*rl-action*f"), root_action_data, feature);
     }
 
     for(size_t block = 0; block != m_block_ids.size(); ++block) {
       auto feature = new Name(Feature::DEST, m_block_names[block]->value);
       auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->wme_token_index(), m_block_names[block], join_last);
-      oss.str("blocks-world*rl-action*f");
-      oss << intptr_t(name_is.get());
-      make_standard_fringe(name_is, oss.str(), root_action_data, feature);
+      make_standard_fringe(name_is, next_rule_name("blocks-world*rl-action*f"), root_action_data, feature);
     }
 
     if(enable_distractors) {
@@ -200,15 +187,11 @@ namespace Blocks_World {
       for(const auto &block : blocks) {
         auto feature = new Height(block, 1.0, double(num_blocks / 2) + 2, 2, false);
         auto predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), join_last);
-        oss.str("blocks-world*rl-action*f");
-        oss << intptr_t(predicate.get());
-        make_standard_fringe(predicate, oss.str(), root_action_data, feature);
+        make_standard_fringe(predicate, next_rule_name("blocks-world*rl-action*f"), root_action_data, feature);
 
         feature = new Height(block, double(num_blocks / 2) + 2, double(num_blocks), 2, true);
         predicate = make_predicate_vc(feature->predicate(), feature->wme_token_index(), feature->symbol_constant(), join_last);
-        oss.str("blocks-world*rl-action*f");
-        oss << intptr_t(predicate.get());
-        make_standard_fringe(predicate, oss.str(), root_action_data, feature);
+        make_standard_fringe(predicate, next_rule_name("blocks-world*rl-action*f"), root_action_data, feature);
       }
     }
 

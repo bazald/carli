@@ -1,7 +1,6 @@
 #ifndef RETE_ACTION_H
 #define RETE_ACTION_H
 
-#include "agenda.h"
 #include "rete_node.h"
 
 namespace Rete {
@@ -10,20 +9,19 @@ namespace Rete {
     Rete_Action(const Rete_Action &);
     Rete_Action & operator=(const Rete_Action &);
 
-    friend RETE_LINKAGE void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
+    friend RETE_LINKAGE void bind_to_action(Rete_Agent &agent, const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
     friend class Rete_Action_to_Agenda;
 
   public:
     typedef std::function<void (const Rete_Action &rete_action, const WME_Token &wme_token)> Action;
 
-    Rete_Action(Agenda &agenda_,
-                const std::string &name_,
+    Rete_Action(const std::string &name_,
                 const Action &action_ = [](const Rete_Action &, const WME_Token &){},
                 const Action &retraction_ = [](const Rete_Action &, const WME_Token &){});
 
     ~Rete_Action();
 
-    void destroy(Filters &filters, const Rete_Node_Ptr &output = Rete_Node_Ptr()) override;
+    void destroy(Rete_Agent &agent, const Rete_Node_Ptr &output = Rete_Node_Ptr()) override;
     bool is_excised() const {return excised;}
 
     Rete_Node_Ptr_C parent_left() const override {return input->shared();}
@@ -33,11 +31,11 @@ namespace Rete {
 
     int64_t height() const override {return input->height() + 1;}
 
-    void insert_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
-    bool remove_wme_token(const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
+    void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
+    bool remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
 
-    void pass_tokens(Rete_Node * const &) override;
-    void unpass_tokens(Rete_Node * const &) override;
+    void pass_tokens(Rete_Agent &agent, Rete_Node * const &) override;
+    void unpass_tokens(Rete_Agent &agent, Rete_Node * const &) override;
 
     bool operator==(const Rete_Node &/*rhs*/) const override;
 
@@ -49,7 +47,7 @@ namespace Rete {
 
     static Rete_Action_Ptr find_existing(const Action &/*action_*/, const Action &/*retraction_*/, const Rete_Node_Ptr &/*out*/);
 
-    const std::string & get_name() const {return name;}
+    std::string get_name() const {return name;}
 
     void set_action(const Action &action_) {
       action = action_;
@@ -62,14 +60,13 @@ namespace Rete {
   private:
     Rete_Node * input = nullptr;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input_tokens;
-    std::string name;
+    const std::string name;
     Action action;
     Action retraction;
-    Agenda &agenda;
     bool excised = false;
   };
 
-  RETE_LINKAGE void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
+  RETE_LINKAGE void bind_to_action(Rete_Agent &agent, const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
 
   class RETE_LINKAGE Rete_Action_to_Agenda {
     friend class Agenda;
