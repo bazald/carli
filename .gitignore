@@ -1,4 +1,3 @@
-obj
 *~
 *.7z
 *.a
@@ -54,15 +53,15 @@ obj
 *_d
 *_p
 *_r
-blocks_world
+/blocks_world
+/console
+/mountain_car
+/obj
+/puddle_world
+/tetris
 callgrind.out.*
 carli.workspace
-console
 core
 dump.txt
 git.h
 Makefile
-mountain_car
-puddle_world
-tetris
-!src/carli
