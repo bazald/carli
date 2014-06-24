@@ -233,8 +233,8 @@ namespace Puddle_World {
     Rete::Symbol_Constant_Float_Ptr_C m_x_value = Rete::Symbol_Constant_Float_Ptr_C(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_position().first));
     Rete::Symbol_Constant_Float_Ptr_C m_y_value = Rete::Symbol_Constant_Float_Ptr_C(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_position().second));
 
-    Rete::WME_Ptr_C m_x_wme;
-    Rete::WME_Ptr_C m_y_wme;
+    Rete::WME_Ptr m_x_wme;
+    Rete::WME_Ptr m_y_wme;
 
     std::array<std::shared_ptr<const Carli::Action>, 4> m_action = {{std::shared_ptr<const Carli::Action>(new Move(NORTH)),
                                                                      std::shared_ptr<const Carli::Action>(new Move(SOUTH)),

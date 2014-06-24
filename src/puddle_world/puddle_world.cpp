@@ -322,12 +322,12 @@ namespace Puddle_World {
     remove_wme(m_wme_blink);
     if(m_x_value->value != pos.first) {
       remove_wme(m_x_wme);
-      m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(pos.first);
+      m_x_wme->symbols[2] = m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(pos.first);
       insert_wme(m_x_wme);
     }
     if(m_y_value->value != pos.second) {
       remove_wme(m_y_wme);
-      m_y_value = std::make_shared<Rete::Symbol_Constant_Float>(pos.first);
+      m_y_wme->symbols[2] = m_y_value = std::make_shared<Rete::Symbol_Constant_Float>(pos.second);
       insert_wme(m_y_wme);
     }
     insert_wme(m_wme_blink);

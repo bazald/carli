@@ -257,8 +257,8 @@ namespace Mountain_Car {
     Rete::Symbol_Constant_Float_Ptr_C m_x_value = Rete::Symbol_Constant_Float_Ptr_C(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_x()));
     Rete::Symbol_Constant_Float_Ptr_C m_x_dot_value = Rete::Symbol_Constant_Float_Ptr_C(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_x_dot()));
 
-    Rete::WME_Ptr_C m_x_wme;
-    Rete::WME_Ptr_C m_x_dot_wme;
+    Rete::WME_Ptr m_x_wme;
+    Rete::WME_Ptr m_x_dot_wme;
 
     std::array<std::shared_ptr<const Carli::Action>, 3> m_action = {{std::shared_ptr<const Carli::Action>(new Acceleration(LEFT)),
                                                                      std::shared_ptr<const Carli::Action>(new Acceleration(IDLE)),

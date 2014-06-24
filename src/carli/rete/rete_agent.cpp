@@ -120,8 +120,9 @@ namespace Rete {
     }
     else {
 //        std::cerr << "Rule '" << name << "' excised." << std::endl;
-      found->second->destroy(*this);
+      auto action = found->second;
       rules.erase(found);
+      found->second->destroy(*this);
       std::cerr << '#';
     }
   }

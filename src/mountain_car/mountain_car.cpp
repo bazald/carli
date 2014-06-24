@@ -225,12 +225,12 @@ namespace Mountain_Car {
     remove_wme(m_wme_blink);
     if(m_x_value->value != env->get_x()) {
       remove_wme(m_x_wme);
-      m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(env->get_x());
+      m_x_wme->symbols[2] = m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(env->get_x());
       insert_wme(m_x_wme);
     }
     if(m_x_dot_value->value != env->get_x_dot()) {
       remove_wme(m_x_dot_wme);
-      m_x_dot_value = std::make_shared<Rete::Symbol_Constant_Float>(env->get_x_dot());
+      m_x_dot_wme->symbols[2] = m_x_dot_value = std::make_shared<Rete::Symbol_Constant_Float>(env->get_x_dot());
       insert_wme(m_x_dot_wme);
     }
     insert_wme(m_wme_blink);
