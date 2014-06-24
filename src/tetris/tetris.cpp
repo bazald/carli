@@ -513,7 +513,7 @@ namespace Tetris {
     for(int i = 0; i != 2; ++i) {
       auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("tetris*rl-action*f"), node_unsplit, feature); //, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
+      make_standard_fringe(predicate, next_rule_name("tetris*rl-action*f"), false, node_unsplit, feature); //, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
     }
   }
 
@@ -563,7 +563,7 @@ namespace Tetris {
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
 
-      auto root_action = make_standard_action(join_blink, "tetris*rl-action*general");
+      auto root_action = make_standard_action(join_blink, next_rule_name("tetris*rl-action*u"), false);
       root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, get_action, 1, nullptr);
       root_action->data = root_action_data;
     }
@@ -574,7 +574,7 @@ namespace Tetris {
           const auto type = super_to_type(super, orientation);
           auto feature = new Type(axis, type);
           auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), join_last);
-          make_standard_fringe(predicate, next_rule_name("tetris*rl-action*f"), root_action_data, feature);
+          make_standard_fringe(predicate, next_rule_name("tetris*rl-action*f"), false, root_action_data, feature);
         }
       }
     }
@@ -584,7 +584,7 @@ namespace Tetris {
 //      auto feature = new X_Odd(value);
 //      node_fringe->feature = feature;
 //      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(X_Odd::AXIS, 2), feature->symbol_constant(), join_last);
-//      make_standard_fringe(predicate, next_rule_name("tetris*rl-action*f"), root_action_data, feature);
+//      make_standard_fringe(predicate, next_rule_name("tetris*rl-action*f"), false, root_action_data, feature);
 //    }
 
     generate_rete_continuous<Size, Size::Axis>(root_action_data, Size::WIDTH, 0.0f, 4.0f);

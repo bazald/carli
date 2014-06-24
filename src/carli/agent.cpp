@@ -111,7 +111,7 @@ namespace Carli {
 
     auto new_node = general.create_split(*this, m_wme_blink, false);
 
-    excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(rete_action.shared()));
+    excise_rule(rete_action.get_name(), false);
 
     if(m_output_dot) {
       std::cerr << "Rete size after expansion: " << rete_size() << std::endl;
@@ -184,7 +184,7 @@ namespace Carli {
               auto predicate = make_predicate_vc(refined_ranged_data->predicate(), leaf_feature_ranged_data->axis, refined_ranged_data->symbol_constant(), leaf->rete_action.lock()->parent_left());
               std::ostringstream oss;
               oss << general_name_prefix << "*f" << intptr_t(predicate.get());
-              auto new_action = make_standard_action(predicate, oss.str());
+              auto new_action = make_standard_action(predicate, oss.str(), false);
               auto new_node = std::make_shared<Node_Fringe>(*this, new_action, general.get_action, leaf->q_value->depth + 1, refined_feature);
               new_action->data = new_node;
               node_unsplit_fringe[new_node->q_value->feature.get()].values.push_back(new_node);
@@ -219,13 +219,13 @@ namespace Carli {
         m_mean_catde.uncontribute(leaf->q_value->catde);
 
       /** Step 2.5: Destroy the old leaf node. */
-      excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(leaf->rete_action.lock()));
+      excise_rule(leaf->rete_action.lock()->get_name(), false);
     }
 
     /** Step 3: Excise all old fringe rules from the system */
     for(auto &fringe_axis : general.fringe_values)
       for(auto &fringe : fringe_axis.second.values)
-        excise_rule(debuggable_pointer_cast<Rete::Rete_Action>(fringe->rete_action.lock()));
+        excise_rule(fringe->rete_action.lock()->get_name(), false);
   }
 
   bool Agent::collapse_rete(Rete::Rete_Action &rete_action) {
@@ -301,7 +301,7 @@ namespace Carli {
 #endif
 
     for(const auto &excise : fringe_collector.excise)
-      excise_rule(excise);
+      excise_rule(excise->get_name(), false);
     fringe_collector.excise.clear();
 
     if(m_output_dot) {
@@ -498,8 +498,8 @@ namespace Carli {
     return reward;
   }
 
-  Rete::Rete_Action_Ptr Agent::make_standard_action(const Rete::Rete_Node_Ptr &parent, const std::string &name) {
-    return make_action_retraction(name,
+  Rete::Rete_Action_Ptr Agent::make_standard_action(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command) {
+    return make_action_retraction(name, user_command,
       [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
         debuggable_cast<Node *>(action.data.get())->action(*this, token);
       }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
@@ -507,8 +507,8 @@ namespace Carli {
       }, parent);
   }
 
-  Rete::Rete_Action_Ptr Agent::make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const std::string &name, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature) {
-    auto new_leaf = make_standard_action(parent, name);
+  Rete::Rete_Action_Ptr Agent::make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature) {
+    auto new_leaf = make_standard_action(parent, name, user_command);
     auto new_leaf_data = std::make_shared<Node_Fringe>(*this, new_leaf, root_action_data->get_action, 2, feature);
     new_leaf->data = new_leaf_data;
     root_action_data->fringe_values[new_leaf_data->q_value->feature.get()].values.push_back(new_leaf_data);

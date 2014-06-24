@@ -59,19 +59,20 @@ typedef void *yyscan_t;
       know about them.  */
    enum yytokentype {
      COMMAND_EXCISE = 258,
-     COMMAND_EXIT = 259,
-     COMMAND_INSERT_WME = 260,
-     COMMAND_REMOVE_WME = 261,
-     COMMAND_SOURCE = 262,
-     COMMAND_SP = 263,
-     FLAG = 264,
-     FLOAT = 265,
-     INT = 266,
-     STRING = 267,
-     STRING_PART_C = 268,
-     STRING_PART_S = 269,
-     VARIABLE = 270,
-     PREDICATE = 271
+     COMMAND_EXCISE_ALL = 259,
+     COMMAND_EXIT = 260,
+     COMMAND_INSERT_WME = 261,
+     COMMAND_REMOVE_WME = 262,
+     COMMAND_SOURCE = 263,
+     COMMAND_SP = 264,
+     FLAG = 265,
+     FLOAT = 266,
+     INT = 267,
+     STRING = 268,
+     STRING_PART_C = 269,
+     STRING_PART_S = 270,
+     VARIABLE = 271,
+     PREDICATE = 272
    };
 #endif
 
@@ -96,7 +97,7 @@ typedef union YYSTYPE
 
 
 /* Line 2053 of yacc.c  */
-#line 100 "rules.tab.hh"
+#line 101 "rules.tab.hh"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

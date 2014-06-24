@@ -91,8 +91,8 @@ namespace Carli {
 
     reward_type act();
 
-    Rete::Rete_Action_Ptr make_standard_action(const Rete::Rete_Node_Ptr &parent, const std::string &name);
-    Rete::Rete_Action_Ptr make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const std::string &name, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature);
+    Rete::Rete_Action_Ptr make_standard_action(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command);
+    Rete::Rete_Action_Ptr make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature);
 
     void purge_q_value(const tracked_ptr<Q_Value> &q_value);
 

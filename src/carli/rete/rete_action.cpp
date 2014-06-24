@@ -30,7 +30,7 @@ namespace Rete {
 
     if(!destruction_suppressed && !excised) {
       excised = true;
-      agent.excise_rule(name);
+      agent.excise_rule(name, false);
 
       //std::cerr << "Destroying: ";
       //output_name(std::cerr);

@@ -22,6 +22,7 @@ using namespace std;
 #.*                                                   ;
 <INITIAL,READ_STRING>\n                               { }
 excise                                                { yylval->csval = "excise"; return COMMAND_EXCISE; }
+excise-all                                            { yylval->csval = "excise-all"; return COMMAND_EXCISE_ALL; }
 exit                                                  { yylval->csval = "exit"; return COMMAND_EXIT; }
 quit                                                  { yylval->csval = "quit"; return COMMAND_EXIT; }
 insert-wme                                            { yylval->csval = "insert-wme"; return COMMAND_INSERT_WME; }

@@ -263,7 +263,7 @@ namespace Puddle_World {
           //  m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
           //}
 
-          auto action = make_standard_action(ylt, next_rule_name("puddle-world*rl-action*cmac-"));
+          auto action = make_standard_action(ylt, next_rule_name("puddle-world*rl-action*cmac-"), false);
           action->data = std::make_shared<Node_Split>(*this, action, get_action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr), true);
         }
       }
@@ -281,7 +281,7 @@ namespace Puddle_World {
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
 
-      auto root_action = make_standard_action(join_blink, next_rule_name("puddle-world*rl-action*u"));
+      auto root_action = make_standard_action(join_blink, next_rule_name("puddle-world*rl-action*u"), false);
       root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, get_action, 1, nullptr);
       root_action->data = root_action_data;
     }
@@ -291,13 +291,13 @@ namespace Puddle_World {
       //lines.push_back(Node_Ranged::Line(std::make_pair(0.5, 0.0), std::make_pair(0.5, 1.0)));
       auto feature = new Position(Position::X, 0.0, 0.5, 2, false);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("puddle-world*rl-action*f"), root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(0.5, 1.0)), lines);
+      make_standard_fringe(predicate, next_rule_name("puddle-world*rl-action*f"), false, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(0.5, 1.0)), lines);
     }
 
     {
       auto feature = new Position(Position::X, 0.5, 1.0, 2, true);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("puddle-world*rl-action*f"), root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.5, 0.0), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
+      make_standard_fringe(predicate, next_rule_name("puddle-world*rl-action*f"), false, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.5, 0.0), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
     }
 
     {
@@ -305,13 +305,13 @@ namespace Puddle_World {
       //lines.push_back(Node_Ranged::Line(std::make_pair(0.0, 0.5), std::make_pair(1.0, 0.5)));
       auto feature = new Position(Position::Y, 0.0, 0.5, 2, false);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("puddle-world*rl-action*f"), root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 0.5)), lines);
+      make_standard_fringe(predicate, next_rule_name("puddle-world*rl-action*f"), false, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 0.5)), lines);
     }
 
     {
       auto feature = new Position(Position::Y, 0.5, 1.0, 2, true);
       auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("puddle-world*rl-action*f"), root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.5), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
+      make_standard_fringe(predicate, next_rule_name("puddle-world*rl-action*f"), false, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.5), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
     }
   }
 

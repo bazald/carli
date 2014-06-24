@@ -9,23 +9,23 @@ namespace Rete {
   {
   }
 
-  Rete_Action_Ptr Rete_Agent::make_action(const std::string &name, const Rete_Action::Action &action, const Rete_Node_Ptr &out) {
+  Rete_Action_Ptr Rete_Agent::make_action(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Node_Ptr &out) {
     if(auto existing = Rete_Action::find_existing(action, [](const Rete_Action &, const WME_Token &){}, out))
       return existing;
 //      std::cerr << "DEBUG: make_action" << std::endl;
     auto action_fun = std::make_shared<Rete_Action>(name, action, [](const Rete_Action &, const WME_Token &){});
     bind_to_action(*this, action_fun, out);
 //      std::cerr << "END: make_action" << std::endl;
-    source_rule(action_fun);
+    source_rule(action_fun, user_action);
     return action_fun;
   }
 
-  Rete_Action_Ptr Rete_Agent::make_action_retraction(const std::string &name, const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out) {
+  Rete_Action_Ptr Rete_Agent::make_action_retraction(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out) {
     if(auto existing = Rete_Action::find_existing(action, retraction, out))
       return existing;
     auto action_fun = std::make_shared<Rete_Action>(name, action, retraction);
     bind_to_action(*this, action_fun, out);
-    source_rule(action_fun);
+    source_rule(action_fun, user_action);
     return action_fun;
   }
 
@@ -113,7 +113,7 @@ namespace Rete {
       filters.erase(found);
   }
 
-  void Rete_Agent::excise_rule(const std::string &name) {
+  void Rete_Agent::excise_rule(const std::string &name, const bool &user_command) {
     auto found = rules.find(name);
     if(found == rules.end()) {
 //        std::cerr << "Rule '" << name << "' not found." << std::endl;
@@ -122,16 +122,10 @@ namespace Rete {
 //        std::cerr << "Rule '" << name << "' excised." << std::endl;
       auto action = found->second;
       rules.erase(found);
-      found->second->destroy(*this);
-      std::cerr << '#';
+      action->destroy(*this);
+      if(user_command)
+        std::cerr << '#';
     }
-  }
-
-  void Rete_Agent::excise_rule(const Rete_Action_Ptr &action) {
-    if(!action->get_name().empty())
-      unname_rule(action->get_name());
-    action->destroy(*this);
-    std::cerr << '#';
   }
 
   std::string Rete_Agent::next_rule_name(const std::string &prefix) {
@@ -289,7 +283,7 @@ namespace Rete {
     os << "}" << std::endl;
   }
 
-  void Rete_Agent::source_rule(const Rete_Action_Ptr &action) {
+  void Rete_Agent::source_rule(const Rete_Action_Ptr &action, const bool &user_command) {
     auto found = rules.find(action->get_name());
     if(found == rules.end()) {
 //        std::cerr << "Rule '" << name << "' sourced." << std::endl;
@@ -299,10 +293,12 @@ namespace Rete {
 //        std::cerr << "Rule '" << name << "' replaced." << std::endl;
       assert(found->second != action);
       found->second->destroy(*this);
+        if(user_command)
       std::cerr << '#';
       found->second = action;
     }
-    std::cerr << '*';
+    if(user_command)
+      std::cerr << '*';
   }
 
 }

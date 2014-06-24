@@ -98,6 +98,7 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
 }
 
 %token <csval> COMMAND_EXCISE
+%token <csval> COMMAND_EXCISE_ALL
 %token <csval> COMMAND_EXIT
 %token <csval> COMMAND_INSERT_WME
 %token <csval> COMMAND_REMOVE_WME
@@ -124,8 +125,9 @@ commands:
   | commands command { /*cerr << "Read in rule on line " << reteget_lineno(yyscanner) << endl;*/ }
   ;
 command:
-  COMMAND_EXCISE STRING { agent.excise_rule(*$2);
+  COMMAND_EXCISE STRING { agent.excise_rule(*$2, true);
                           delete $2; }
+  | COMMAND_EXCISE_ALL { agent.excise_all(); }
   | COMMAND_EXIT { g_rete_exit = true;
                    YYACCEPT; }
   | COMMAND_INSERT_WME '(' symbol '^' symbol symbol ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
@@ -155,9 +157,9 @@ command:
                       const auto existing = agent.unname_rule(name);
                       if(existing) {
                         parent->suppress_destruction(true);
-                        agent.excise_rule(existing);
+                        agent.excise_rule(existing->get_name(), true);
                       }
-                      auto node = agent.make_action_retraction(name,
+                      auto node = agent.make_action_retraction(name, true,
                                                                [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
                                                                  cout << wme_vector << "->" << action.get_name() << endl;
                                                                }, [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {

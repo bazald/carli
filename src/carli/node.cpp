@@ -43,8 +43,7 @@ namespace Carli {
       new_q_value = q_value;
     }
 
-    std::cerr << new_name << std::endl;
-    auto new_leaf = agent.make_standard_action(parent, new_name);
+    auto new_leaf = agent.make_standard_action(parent, new_name, false);
     auto new_leaf_data = std::make_shared<Node_Split>(agent, new_leaf, get_action, new_q_value, terminal);
     new_leaf->data = new_leaf_data;
 
@@ -73,8 +72,7 @@ namespace Carli {
       new_q_value = q_value;
     }
 
-    std::cerr << new_name << std::endl;
-    auto new_leaf = agent.make_standard_action(parent, new_name);
+    auto new_leaf = agent.make_standard_action(parent, new_name, false);
     auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, new_leaf, get_action, new_q_value);
     new_leaf->data = new_leaf_data;
     new_leaf_data->fringe_values.swap(node_unsplit_fringe);
@@ -132,8 +130,7 @@ namespace Carli {
     }
 
     /// Create the actual action for the new fringe node
-    std::cerr << new_name << std::endl;
-    auto new_action = agent.make_standard_action(new_test, new_name);
+    auto new_action = agent.make_standard_action(new_test, new_name, false);
     auto new_action_data = std::make_shared<Node_Fringe>(agent, new_action, leaf.get_action, leaf.q_value->depth + 1, q_value->feature ? q_value->feature->clone() : nullptr);
     new_action->data = new_action_data;
 
