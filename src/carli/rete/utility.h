@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include "linkage.h"
+#include "../linkage.h"
 
 class RETE_LINKAGE compare_deref_eq {
 public:

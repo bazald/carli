@@ -36,7 +36,7 @@
 #include <random>
 #include <stdint.h>
 
-#include "linkage.h"
+#include "../linkage.h"
 
 #ifdef RANDOM_LOG
 #include <fstream>

@@ -6,4 +6,4 @@ project "puddle_world"
 
   files { "*.h", "*.cpp" }
 
-  links { "carli", "rete", "utility" }
+  links { "carli" }

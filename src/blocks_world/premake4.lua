@@ -8,7 +8,7 @@ project "env_blocks_world"
 
   files { "*.h", "blocks_world_env.cpp" }
 
-  links { "rete", "utility" }
+  links { "carli" }
 
 project "blocks_world"
   kind "ConsoleApp"
@@ -18,4 +18,4 @@ project "blocks_world"
 
   files { "*.h", "blocks_world.cpp" }
 
-  links { "env_blocks_world", "carli", "rete", "utility" }
+  links { "env_blocks_world", "carli" }

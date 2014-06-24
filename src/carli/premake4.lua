@@ -7,7 +7,7 @@ project "carli"
   defines { "CARLI_INTERNAL" }
 
   if _OPTIONS["scu"] == "true" then
-    matches = os.matchfiles("*.cpp")
+    matches = os.matchfiles("**.cpp")
     os.mkdir("../../obj")
     local f = assert(io.open("../../obj/scu.cpp", "w"))
     for i, filename in ipairs(matches) do
@@ -19,7 +19,7 @@ project "carli"
 
     files { "git.cpp", "../../obj/scu.cpp" }
   else
-    files { "*.h", "*.cpp" }
+    files { "**.h", "**.hh", "**.cpp", "**.lll", "**.yyy" }
     excludes { "obj/scu.cpp" }
   end
 
@@ -30,8 +30,6 @@ project "carli"
   end
 
 --   linkoptions { "-Wl,-rpath,'$$ORIGIN'" }
-
-  links { "rete", "utility" }
 
   if os.get() == "windows" then
     configuration "Debug"

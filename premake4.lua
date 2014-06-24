@@ -113,12 +113,9 @@ solution "carli"
                   "C:\\Program Files\\Java\\jdk1.8.0_05\\include\\win32" }
 
   include "src/blocks_world"
+  include "src/carli"
   include "src/console"
   include "src/infinite_mario"
   include "src/mountain_car"
   include "src/puddle_world"
   include "src/tetris"
-
-  include "src/carli"
-  include "src/carli/rete"
-  include "src/carli/utility"

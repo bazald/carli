@@ -8,7 +8,7 @@
 #include <limits>
 #include <unordered_map>
 
-#include "linkage.h"
+#include "../linkage.h"
 
 namespace Zeni {
 

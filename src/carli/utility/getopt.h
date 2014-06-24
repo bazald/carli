@@ -15,7 +15,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "linkage.h"
+#include "../linkage.h"
 
 template <typename FLOAT>
 std::string pretty_print(const FLOAT &value) {

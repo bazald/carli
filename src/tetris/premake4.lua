@@ -6,4 +6,4 @@ project "tetris"
 
   files { "*.h", "*.cpp" }
 
-  links { "carli", "rete", "utility" }
+  links { "carli" }

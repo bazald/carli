@@ -1,4 +1,4 @@
-#include "carli/rete/grammar/rete_parser.h"
+#include "carli/parser/rete_parser.h"
 
 #include "carli/experiment.h"
 #include "blocks_world/blocks_world.h"

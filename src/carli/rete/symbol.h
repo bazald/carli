@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-#include "linkage.h"
+#include "../linkage.h"
 
 namespace Rete {
 

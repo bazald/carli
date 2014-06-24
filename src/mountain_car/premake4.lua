@@ -6,4 +6,4 @@ project "mountain_car"
 
   files { "*.h", "*.cpp" }
 
-  links { "carli", "rete", "utility" }
+  links { "carli" }
