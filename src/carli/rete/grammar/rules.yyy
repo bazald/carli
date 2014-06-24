@@ -23,10 +23,10 @@ typedef void *yyscan_t;
 
 static volatile sig_atomic_t g_rete_exit = false;
 
-void reteerror(const yyscan_t yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
+static void reteerror(const yyscan_t yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
   cout << "rete-parse error: " << msg << endl;
 }
-void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::Rete_Agent &/*agent*/, const std::string &filename, const std::string &/*source_path*/, const char *msg) {
+static void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::Rete_Agent &/*agent*/, const std::string &filename, const std::string &/*source_path*/, const char *msg) {
   if(filename.empty())
     cout << "rete-parse error: " << msg << endl;
   else
@@ -79,6 +79,31 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
     }
   }
   return Rete::WME_Token_Index(size_t(-1), uint8_t(-1));
+}
+
+static Rete::WME_Bindings join_bindings(const std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> &lhs,
+                                        const std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> &rhs)
+{
+  Rete::WME_Bindings bindings;
+  unordered_set<string> joined;
+  for(size_t i = 0; i != lhs.second.size(); ++i) {
+    for(uint8_t ii = 0; ii != 3; ++ii) {
+      if(!lhs.second[i][ii].empty() && joined.find(lhs.second[i][ii]) == joined.end()) {
+        for(size_t j = 0; j != rhs.second.size(); ++j) {
+          for(uint8_t jj = 0; jj != 3; ++jj) {
+            if(lhs.second[i][ii] == rhs.second[j][jj]) {
+              bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
+              joined.insert(lhs.second[i][ii]);
+              goto DONE_JOINING;
+            }
+          }
+        }
+      }
+      DONE_JOINING:
+        ;
+    }
+  }
+  return bindings;
 }
 
 %}
@@ -192,77 +217,20 @@ final_conditions:
   conditions { $$ = $1; }
   | '+' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential($2->first)), Variables()); delete $2; }
   | '-' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation($2->first)), Variables()); delete $2; }
-  | final_conditions '+' condition_type { Rete::WME_Bindings bindings;
-                                          unordered_set<string> joined;
-                                          for(size_t i = 0; i != $1->second.size(); ++i) {
-                                            for(uint8_t ii = 0; ii != 3; ++ii) {
-                                              if(!$1->second[i][ii].empty() && joined.find($1->second[i][ii]) == joined.end()) {
-                                                for(size_t j = 0; j != $3->second.size(); ++j) {
-                                                  for(uint8_t jj = 0; jj != 3; ++jj) {
-                                                    if($1->second[i][ii] == $3->second[j][jj]) {
-                                                      bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
-                                                      joined.insert($1->second[i][ii]);
-                                                      goto DONE_EXISTENTIAL_JOINING;
-                                                    }
-                                                  }
-                                                }
-                                              }
-                                              DONE_EXISTENTIAL_JOINING:
-                                                ;
-                                            }
-                                          }
-                                          $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(bindings, $1->first, $3->first)), $1->second);
+  | final_conditions '+' condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings(*$1, *$3), $1->first, $3->first)), $1->second);
                                           delete $1;
                                           delete $3; }
-  | final_conditions '-' condition_type { Rete::WME_Bindings bindings;
-                                          unordered_set<string> joined;
-                                          for(size_t i = 0; i != $1->second.size(); ++i) {
-                                            for(uint8_t ii = 0; ii != 3; ++ii) {
-                                              if(!$1->second[i][ii].empty() && joined.find($1->second[i][ii]) == joined.end()) {
-                                                for(size_t j = 0; j != $3->second.size(); ++j) {
-                                                  for(uint8_t jj = 0; jj != 3; ++jj) {
-                                                    if($1->second[i][ii] == $3->second[j][jj]) {
-                                                      bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
-                                                      joined.insert($1->second[i][ii]);
-                                                      goto DONE_NEGATION_JOINING;
-                                                    }
-                                                  }
-                                                }
-                                              }
-                                              DONE_NEGATION_JOINING:
-                                                ;
-                                            }
-                                          }
-                                          $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(bindings, $1->first, $3->first)), $1->second);
+  | final_conditions '-' condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(join_bindings(*$1, *$3), $1->first, $3->first)), $1->second);
                                           delete $1;
                                           delete $3; }
   ;
 conditions:
-  conditions condition_type { Rete::WME_Bindings bindings;
-                              unordered_set<string> joined;
-                              for(size_t i = 0; i != $1->second.size(); ++i) {
-                                for(uint8_t ii = 0; ii != 3; ++ii) {
-                                  if(!$1->second[i][ii].empty() && joined.find($1->second[i][ii]) == joined.end()) {
-                                    for(size_t j = 0; j != $2->second.size(); ++j) {
-                                      for(uint8_t jj = 0; jj != 3; ++jj) {
-                                        if($1->second[i][ii] == $2->second[j][jj]) {
-                                          bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
-                                          joined.insert($1->second[i][ii]);
-                                          goto DONE_JOINING;
-                                        }
-                                      }
-                                    }
-                                  }
-                                  DONE_JOINING:
-                                    ;
-                                }
-                              }
-                              vector<array<string, 3>> variables($1->second);
+  conditions condition_type { vector<array<string, 3>> variables($1->second);
                               variables.insert(variables.end(), $2->second.begin(), $2->second.end());
-                              $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(bindings, $1->first, $2->first)), variables);
+                              $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(join_bindings(*$1, *$2), $1->first, $2->first)), variables);
                               delete $1;
                               delete $2; }
-  | conditions '(' VARIABLE PREDICATE symbol_constant ')' { auto lhs_index = find_index($1->second, *$3);
+  | conditions '(' VARIABLE PREDICATE symbol_constant ')' { const auto lhs_index = find_index($1->second, *$3);
                                                             if(lhs_index.second > 2) {
                                                               reteerror(yyscanner, agent, "Unbound variable tested by predicate.");
                                                               YYABORT;
@@ -271,8 +239,8 @@ conditions:
                                                             delete $1;
                                                             delete $3;
                                                             delete $5; }
-  | conditions '(' VARIABLE PREDICATE VARIABLE ')' { auto lhs_index = find_index($1->second, *$3);
-                                                     auto rhs_index = find_index($1->second, *$5);
+  | conditions '(' VARIABLE PREDICATE VARIABLE ')' { const auto lhs_index = find_index($1->second, *$3);
+                                                     const auto rhs_index = find_index($1->second, *$5);
                                                      if(lhs_index.second > 2 || rhs_index.second > 2) {
                                                        reteerror(yyscanner, agent, "Unbound variable tested by predicate.");
                                                        YYABORT;
