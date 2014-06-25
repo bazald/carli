@@ -16,13 +16,13 @@ namespace Carli {
   //  }
   //};
 
-  struct Fringe_Collector {
+  struct Fringe_Collector_All {
     std::unordered_set<Rete::Rete_Action_Ptr> excise;
     std::map<tracked_ptr<Feature>,
       std::map<tracked_ptr<Feature>, Rete::Rete_Node_Ptr, compare_deref_lt>,
       compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> features;
 
-    Fringe_Collector(const Node_Split_Ptr &split)
+    Fringe_Collector_All(const Node_Split_Ptr &split)
       : root(split)
     {
     }
@@ -59,6 +59,24 @@ namespace Carli {
     Node_Ptr root;
   };
 
+  struct Fringe_Collector_Immediate {
+    Fringe_Collector_Immediate(const Rete::Rete_Node_Ptr &grandparent_)
+      : grandparent(grandparent_)
+    {
+    }
+
+    void operator()(Rete::Rete_Node &rete_node) {
+      if(rete_node.data) {
+        const auto fringe = std::dynamic_pointer_cast<Node_Fringe>(rete_node.data);
+        if(fringe && fringe->rete_action.lock()->parent_left()->parent_left() == grandparent)
+          fringe_values[fringe->q_value->feature.get()].values.push_back(fringe);
+      }
+    }
+
+    Rete::Rete_Node_Ptr grandparent;
+    Fringe_Values fringe_values;
+  };
+
   bool Agent::respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
     return false;
 #ifndef NO_COLLAPSE_DETECTION_HACK
@@ -86,6 +104,13 @@ namespace Carli {
     if(general.q_value->depth >= m_split_max)
       return false;
 #endif
+    
+//     if(general.fringe_values.empty()) {
+//       const auto grandparent = rete_action.parent_left()->parent_left();
+//       auto fringe_collector = grandparent->visit_preorder(Fringe_Collector_Immediate(grandparent), true);
+//       general.fringe_values.swap(fringe_collector.fringe_values);
+//       assert(!general.fringe_values.empty());
+//     }
 
     const Fringe_Values::iterator chosen = m_split_criterion(token, general);
 
@@ -109,7 +134,7 @@ namespace Carli {
 
     expand_fringe(rete_action, token, chosen);
 
-    auto new_node = general.create_split(*this, m_wme_blink, false);
+    auto new_node = general.create_split(*this, m_wme_blink, true);
 
     excise_rule(rete_action.get_name(), false);
 
@@ -237,7 +262,7 @@ namespace Carli {
 //    rete_action.visit_preorder(Expiration_Detector(), false);
 //#endif
 
-    auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector(split), true);
+    auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector_All(split), true);
 
     if(fringe_collector.features.empty())
       return false;

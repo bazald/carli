@@ -10,12 +10,14 @@
 %parse-param { Carli::Agent &agent }
 %parse-param { const std::string &filename }
 %parse-param { const std::string &source_path }
+%parse-param { Grandparent_to_UFV &gufv }
 
 %code requires {
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
 typedef void *yyscan_t;
 #endif
+typedef std::unordered_map<Rete::Rete_Node_Ptr, std::pair<Carli::Node_Unsplit_Ptr, Carli::Fringe_Values>> Grandparent_to_UFV;
 }
 
 %code {
@@ -23,7 +25,7 @@ typedef void *yyscan_t;
 
 static volatile sig_atomic_t g_rete_exit = false;
 
-static void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::Rete_Agent &/*agent*/, const std::string &filename, const std::string &/*source_path*/, const char *msg) {
+static void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::Rete_Agent &/*agent*/, const std::string &filename, const std::string &/*source_path*/, Grandparent_to_UFV &/*gufv*/, const char *msg) {
   if(filename.empty())
     cout << "rete-parse error: " << msg << endl;
   else
@@ -176,7 +178,7 @@ command:
                                        if(rv) {
                                          ostringstream oss;
                                          oss << "Error sourcing '" << *$2 << "'.";
-                                         reteerror(&yylloc, yyscanner, agent, filename, source_path, oss.str().c_str());
+                                         reteerror(&yylloc, yyscanner, agent, filename, source_path, gufv, oss.str().c_str());
                                          delete $2;
                                          YYABORT;
                                        }
@@ -201,10 +203,13 @@ command:
 
                       Rete::Rete_Action_Ptr new_action;
                       if(!feature) {
-                        /// Root/General RL action
-                        const auto root_action = agent.make_standard_action(parent, name, true);
-                        const auto root_action_data = std::make_shared<Carli::Node_Unsplit>(agent, root_action, 1, nullptr);
-                        root_action->data = root_action_data;
+                        /// Non-RL node
+                        auto node = agent.make_action_retraction(name, true,
+                                                                 [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
+                                                                   cout << wme_vector << "->" << action.get_name() << endl;
+                                                                 }, [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
+                                                                   cout << wme_vector << "<-" << action.get_name() << endl;
+                                                                 }, parent, Rete::Variable_Indices());
                       }
                       else {
                         feature->axis = variable_indices.find((*variable_names.rbegin())[0])->second;
@@ -246,19 +251,17 @@ command:
                           new_action->data = new_action_data;
                         }
                         else if(node_type == "unsplit") {
-                          Carli::Fringe_Values node_unsplit_fringe; ///< TODO
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
                           auto new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, new_action, q_value_depth, feature);
                           new_action->data = new_action_data;
-                          new_action_data->fringe_values.swap(node_unsplit_fringe);
+                          gufv[parent->parent_left()].first = new_action_data;
                         }
                         else {
                           assert(node_type == "fringe");
-                          Carli::Node_Unsplit_Ptr node_unsplit_ptr; ///< TODO
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
                           auto new_action_data = std::make_shared<Carli::Node_Fringe>(agent, new_action, q_value_depth, feature);
                           new_action->data = new_action_data;
-                          node_unsplit_ptr->fringe_values[feature].values.push_back(new_action_data);
+                          gufv[parent->parent_left()].second[feature].values.push_back(new_action_data);
                         }
                       }
 
@@ -304,7 +307,7 @@ conditions:
                               delete $2; }
   | conditions '(' VARIABLE PREDICATE symbol_constant ')' { const auto lhs_index = find_index($1->second, *$3);
                                                             if(lhs_index.second > 2) {
-                                                              reteerror(&yylloc, yyscanner, agent, filename, source_path, "Unbound variable tested by predicate.");
+                                                              reteerror(&yylloc, yyscanner, agent, filename, source_path, gufv, "Unbound variable tested by predicate.");
                                                               YYABORT;
                                                             }
                                                             $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vc($4, lhs_index, *$5, $1->first)), $1->second);
@@ -314,7 +317,7 @@ conditions:
   | conditions '(' VARIABLE PREDICATE VARIABLE ')' { const auto lhs_index = find_index($1->second, *$3);
                                                      const auto rhs_index = find_index($1->second, *$5);
                                                      if(lhs_index.second > 2 || rhs_index.second > 2) {
-                                                       reteerror(&yylloc, yyscanner, agent, filename, source_path, "Unbound variable tested by predicate.");
+                                                       reteerror(&yylloc, yyscanner, agent, filename, source_path, gufv, "Unbound variable tested by predicate.");
                                                        YYABORT;
                                                      }
                                                      $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vv($4, lhs_index, rhs_index, $1->first)), $1->second);
@@ -397,24 +400,33 @@ int rete_parse_file(Carli::Agent &agent, const string &filename, const std::stri
   }
 
   int rv = 0;
+  Grandparent_to_UFV gufv;
 
   reterestart(file, yyscanner);
   reteset_lineno(1, yyscanner);
 
   // retelex();
   do {
-    rv = reteparse(yyscanner, agent, filename_full, source_path_full);
+    rv = reteparse(yyscanner, agent, filename_full, source_path_full, gufv);
     if(rv)
       break;
   } while (!feof(reteget_in(yyscanner)));
 
   retelex_destroy(yyscanner);
   fclose(file);
+
+  for(auto &entry : gufv) {
+    assert(entry.second.first);
+    assert(!entry.second.second.empty());
+    entry.second.first->fringe_values.swap(entry.second.second);
+  }
+
   return rv;
 }
 
 int rete_parse_string(Carli::Agent &agent, const string &str, int &line_number) {
   int rv = 0;
+  Grandparent_to_UFV gufv;
 
   yyscan_t yyscanner;
   if(retelex_init(&yyscanner))
@@ -424,12 +436,19 @@ int rete_parse_string(Carli::Agent &agent, const string &str, int &line_number) 
   reteset_lineno(line_number, yyscanner);
 
   // retelex();
-  rv = reteparse(yyscanner, agent, "", "");
+  rv = reteparse(yyscanner, agent, "", "", gufv);
 
   line_number = reteget_lineno(yyscanner) + 1;
 
   rete_delete_buffer(buf, yyscanner);
   retelex_destroy(yyscanner);
+
+  for(auto &entry : gufv) {
+    assert(entry.second.first);
+    assert(!entry.second.second.empty());
+    entry.second.first->fringe_values.swap(entry.second.second);
+  }
+
   return rv;
 }
 

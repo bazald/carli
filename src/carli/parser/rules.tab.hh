@@ -41,16 +41,17 @@ extern int retedebug;
 #endif
 /* "%code requires" blocks.  */
 /* Line 2053 of yacc.c  */
-#line 14 "rules.yyy"
+#line 15 "rules.yyy"
 
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
 typedef void *yyscan_t;
 #endif
+typedef std::unordered_map<Rete::Rete_Node_Ptr, std::pair<Carli::Node_Unsplit_Ptr, Carli::Fringe_Values>> Grandparent_to_UFV;
 
 
 /* Line 2053 of yacc.c  */
-#line 54 "rules.tab.hh"
+#line 55 "rules.tab.hh"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -82,7 +83,7 @@ typedef void *yyscan_t;
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 119 "rules.yyy"
+#line 121 "rules.yyy"
 
   char cval;
   const char *csval;
@@ -97,7 +98,7 @@ typedef union YYSTYPE
 
 
 /* Line 2053 of yacc.c  */
-#line 101 "rules.tab.hh"
+#line 102 "rules.tab.hh"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -126,7 +127,7 @@ int reteparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int reteparse (yyscan_t yyscanner, Carli::Agent &agent, const std::string &filename, const std::string &source_path);
+int reteparse (yyscan_t yyscanner, Carli::Agent &agent, const std::string &filename, const std::string &source_path, Grandparent_to_UFV &gufv);
 #else
 int reteparse ();
 #endif
