@@ -1018,15 +1018,15 @@ namespace Carli {
 //#ifndef NDEBUG
 //          std::cerr << " matches: " << *fringe->q_value->feature << std::endl;
 //#endif
-          if(!chosen || fringe->q_value->catde > chosen->q_value->catde) {
-            chosen_axis = fringe_axis;
-            chosen = fringe;
+          const int64_t depth_diff = chosen ? fringe->q_value->feature->get_depth() - chosen->q_value->feature->get_depth() : 0;
+          const double catde_diff = chosen ? fringe->q_value->catde - chosen->q_value->catde : 0.0;
+          if(!chosen || depth_diff < 0 || (depth_diff == 0 && catde_diff < 0))
             count = 1;
-          }
-          else if(fringe->q_value->catde == chosen->q_value->catde && random.frand_lt() < 1.0 / ++count) {
-            chosen_axis = fringe_axis;
-            chosen = fringe;
-          }
+          else if(depth_diff > 0 || catde_diff > 0 || random.frand_lt() >= 1.0 / ++count)
+            continue;
+
+          chosen_axis = fringe_axis;
+          chosen = fringe;
         }
 //#ifndef NDEBUG
 //        else
@@ -1096,6 +1096,7 @@ namespace Carli {
 
     Fringe_Values::iterator chosen_axis = general.fringe_values.end();
     size_t count = 0;
+    int64_t depth_min = std::numeric_limits<int64_t>::max();
     double delta_max = std::numeric_limits<double>::lowest();
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
       const auto found = touched.find(fringe_axis->first);
@@ -1114,12 +1115,16 @@ namespace Carli {
       //if(fringe_axis->first->value_delta_update_count <= m_split_update_count)
       //  continue;
 
-      if(chosen_axis == general.fringe_values.end() || delta_max < fringe_axis->second.value_delta_max) {
-        chosen_axis = fringe_axis;
+      int64_t depth_diff = fringe_axis->first->get_depth() - depth_min;
+      double delta_diff = delta_max - fringe_axis->second.value_delta_max;
+      if(chosen_axis == general.fringe_values.end() || depth_diff < 0 || (depth_diff == 0 && delta_diff < 0))
         count = 1;
-      }
-      else if(delta_max == fringe_axis->second.value_delta_max && random.frand_lt() < 1.0 / ++count)
-        chosen_axis = fringe_axis;
+      else if(depth_diff > 0 || delta_diff > 0 || random.frand_lt() >= 1.0 / ++count)
+        continue;
+
+      chosen_axis = fringe_axis;
+      depth_min = fringe_axis->first->get_depth();
+      delta_max = fringe_axis->second.value_delta_max;
     }
 
     if(chosen_axis == general.fringe_values.end()) {
