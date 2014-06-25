@@ -233,12 +233,12 @@ namespace Blocks_World {
     for(auto bt = blocks.begin(), bend = blocks.end(); bt != bend; ++bt) {
       int64_t height = 0;
       for(auto st = bt->begin(), send = bt->end(); st != send; ++st) {
-        wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_block_attr, m_block_ids[*st]));
-        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[*st], m_name_attr, m_block_names[*st]));
-        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[*st], m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_block_attr, m_block_ids[size_t(*st)]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_name_attr, m_block_names[size_t(*st)]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
       }
 
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[*bt->begin()], m_clear_attr, m_true_value));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*bt->begin())], m_clear_attr, m_true_value));
 
 //      for(auto st = bt->begin(), stn = ++bt->begin(), send = bt->end(); stn != send; st = stn, ++stn)
 //        wmes_current.push_back(std::make_shared<Rete::WME>(get_block_id(*st), m_on_top_attr, get_block_id(*stn)));
@@ -247,7 +247,7 @@ namespace Blocks_World {
       const auto stack = std::find_if(goal.begin(), goal.end(), [&base](const Environment::Stack &stack)->bool{return std::find(stack.begin(), stack.end(), *base) != stack.end();});
       assert(stack != goal.end());
       for(auto base_goal = stack->rbegin(); base != bt->rend() && base_goal != stack->rend() && *base == *base_goal; ++base, ++base_goal)
-        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[*base], m_in_place_attr, m_true_value));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*base)], m_in_place_attr, m_true_value));
     }
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_block_attr, m_block_ids[0]));
