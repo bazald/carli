@@ -298,7 +298,9 @@ namespace Mario {
   }
 
   Agent::Agent(const std::shared_ptr<State> &prev_, const std::shared_ptr<State> &current_)
-   : Carli::Agent(current_), m_current_state(current_), m_prev_state(prev_)
+   : Carli::Agent(current_, [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Button_Presses>(token);}),
+   m_current_state(current_),
+   m_prev_state(prev_)
   {
     insert_wme(m_wme_blink);
     generate_rete();
@@ -395,16 +397,12 @@ namespace Mario {
 
     auto filter_blink = make_filter(*m_wme_blink);
 
-    auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
-      return std::make_shared<Button_Presses>(token);
-    };
-
     Carli::Node_Unsplit_Ptr root_action_data;
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
 
       auto root_action = make_standard_action(join_blink, next_rule_name("infinite-mario*rl-action*u"), false);
-      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, get_action, 1, nullptr);
+      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, 1, nullptr);
       root_action->data = root_action_data;
     }
 

@@ -489,7 +489,7 @@ namespace Tetris {
   }
 
   Agent::Agent(const std::shared_ptr<Carli::Environment> &env)
-   : Carli::Agent(env)
+   : Carli::Agent(env, [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Place>(token);})
   {
     insert_wme(m_wme_blink);
     generate_rete();
@@ -555,16 +555,12 @@ namespace Tetris {
 
     auto filter_blink = make_filter(*m_wme_blink);
 
-    auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
-      return std::make_shared<Place>(token);
-    };
-
     Carli::Node_Unsplit_Ptr root_action_data;
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
 
       auto root_action = make_standard_action(join_blink, next_rule_name("tetris*rl-action*u"), false);
-      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, get_action, 1, nullptr);
+      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, 1, nullptr);
       root_action->data = root_action_data;
     }
 

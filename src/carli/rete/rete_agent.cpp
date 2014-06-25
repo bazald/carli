@@ -9,22 +9,22 @@ namespace Rete {
   {
   }
 
-  Rete_Action_Ptr Rete_Agent::make_action(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Node_Ptr &out) {
+  Rete_Action_Ptr Rete_Agent::make_action(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Node_Ptr &out, const Variable_Indices &variables) {
     if(auto existing = Rete_Action::find_existing(action, [](const Rete_Action &, const WME_Token &){}, out))
       return existing;
 //      std::cerr << "DEBUG: make_action" << std::endl;
     auto action_fun = std::make_shared<Rete_Action>(name, action, [](const Rete_Action &, const WME_Token &){});
-    bind_to_action(*this, action_fun, out);
+    bind_to_action(*this, action_fun, out, variables);
 //      std::cerr << "END: make_action" << std::endl;
     source_rule(action_fun, user_action);
     return action_fun;
   }
 
-  Rete_Action_Ptr Rete_Agent::make_action_retraction(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out) {
+  Rete_Action_Ptr Rete_Agent::make_action_retraction(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out, const Variable_Indices &variables) {
     if(auto existing = Rete_Action::find_existing(action, retraction, out))
       return existing;
     auto action_fun = std::make_shared<Rete_Action>(name, action, retraction);
-    bind_to_action(*this, action_fun, out);
+    bind_to_action(*this, action_fun, out, variables);
     source_rule(action_fun, user_action);
     return action_fun;
   }
@@ -137,12 +137,14 @@ namespace Rete {
     return oss.str();
   }
 
-  Rete_Action_Ptr Rete_Agent::unname_rule(const std::string &name) {
+  Rete_Action_Ptr Rete_Agent::unname_rule(const std::string &name, const bool &user_command) {
     Rete_Action_Ptr ptr;
     auto found = rules.find(name);
     if(found != rules.end()) {
       ptr = found->second;
       rules.erase(found);
+      if(user_command)
+        std::cerr << '#';
     }
     return ptr;
   }

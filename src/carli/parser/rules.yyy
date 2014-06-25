@@ -23,9 +23,6 @@ typedef void *yyscan_t;
 
 static volatile sig_atomic_t g_rete_exit = false;
 
-static void reteerror(const yyscan_t yyscanner, Rete::Rete_Agent &/*agent*/, const char *msg) {
-  cout << "rete-parse error: " << msg << endl;
-}
 static void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::Rete_Agent &/*agent*/, const std::string &filename, const std::string &/*source_path*/, const char *msg) {
   if(filename.empty())
     cout << "rete-parse error: " << msg << endl;
@@ -81,19 +78,19 @@ static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string
   return Rete::WME_Token_Index(size_t(-1), uint8_t(-1));
 }
 
-static Rete::WME_Bindings join_bindings(const std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> &lhs,
-                                        const std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> &rhs)
+static Rete::WME_Bindings join_bindings(const std::vector<std::array<std::string, 3>> &lhs,
+                                        const std::vector<std::array<std::string, 3>> &rhs)
 {
   Rete::WME_Bindings bindings;
   unordered_set<string> joined;
-  for(size_t i = 0; i != lhs.second.size(); ++i) {
+  for(size_t i = 0; i != lhs.size(); ++i) {
     for(uint8_t ii = 0; ii != 3; ++ii) {
-      if(!lhs.second[i][ii].empty() && joined.find(lhs.second[i][ii]) == joined.end()) {
-        for(size_t j = 0; j != rhs.second.size(); ++j) {
+      if(!lhs[i][ii].empty() && joined.find(lhs[i][ii]) == joined.end()) {
+        for(size_t j = 0; j != rhs.size(); ++j) {
           for(uint8_t jj = 0; jj != 3; ++jj) {
-            if(lhs.second[i][ii] == rhs.second[j][jj]) {
+            if(lhs[i][ii] == rhs[j][jj]) {
               bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
-              joined.insert(lhs.second[i][ii]);
+              joined.insert(lhs[i][ii]);
               goto DONE_JOINING;
             }
           }
@@ -106,18 +103,28 @@ static Rete::WME_Bindings join_bindings(const std::pair<Rete::Rete_Node_Ptr, std
   return bindings;
 }
 
+static Rete::Variable_Indices variables_to_indices(const vector<array<string, 3>> &variables) {
+  Rete::Variable_Indices indices;
+  for(size_t i = 0; i != variables.size(); ++i) {
+    for(uint8_t ii = 0; ii != 3; ++ii) {
+      if(!variables[i][ii].empty() && indices.find(variables[i][ii]) == indices.end())
+        indices[variables[i][ii]] = Rete::WME_Token_Index(i, ii);
+    }
+  }
+  return indices;
+}
+
 %}
 
 %union {
   char cval;
   const char *csval;
-  std::pair<std::string, std::shared_ptr<std::tuple<double, double, bool>>> *flag_ptr;
-  std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>> *flags_ptr;
+  std::tuple<int64_t, std::string, Carli::Feature *> *flag_ptr;
   double fval;
   int64_t ival;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<Rete::Rete_Node_Ptr, std::string, std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>> *rule_ptr;
+  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, Carli::Feature *>> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 }
@@ -129,9 +136,10 @@ static Rete::WME_Bindings join_bindings(const std::pair<Rete::Rete_Node_Ptr, std
 %token <csval> COMMAND_REMOVE_WME
 %token <csval> COMMAND_SOURCE
 %token <csval> COMMAND_SP
-%token <sval> FLAG
+%token <csval> FLAG_FEATURE
 %token <fval> FLOAT
 %token <ival> INT
+%token <sval> NODE_TYPE
 %token <sval> STRING
 %token <cval> STRING_PART_C
 %token <sval> STRING_PART_S
@@ -139,7 +147,6 @@ static Rete::WME_Bindings join_bindings(const std::pair<Rete::Rete_Node_Ptr, std
 %token <predicate> PREDICATE
 
 %type <flag_ptr> flag
-%type <flags_ptr> flags
 %type <rete_node_ptr> final_conditions conditions condition_group condition_type condition
 %type <rule_ptr> rule
 %type <symbol_ptr> symbol identifier symbol_constant
@@ -155,12 +162,12 @@ command:
   | COMMAND_EXCISE_ALL { agent.excise_all(); }
   | COMMAND_EXIT { g_rete_exit = true;
                    YYACCEPT; }
-  | COMMAND_INSERT_WME '(' symbol '^' symbol symbol ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
+  | COMMAND_INSERT_WME '(' symbol '^' symbol symbol ')' { const auto wme = make_shared<Rete::WME>(*$3, *$5, *$6);
                                                           agent.insert_wme(wme);
                                                           delete $3;
                                                           delete $5;
                                                           delete $6; }
-  | COMMAND_REMOVE_WME '(' symbol '^' symbol symbol ')' { const auto wme = std::make_shared<Rete::WME>(*$3, *$5, *$6);
+  | COMMAND_REMOVE_WME '(' symbol '^' symbol symbol ')' { const auto wme = make_shared<Rete::WME>(*$3, *$5, *$6);
                                                           agent.remove_wme(wme);
                                                           delete $3;
                                                           delete $5;
@@ -169,7 +176,7 @@ command:
                                        if(rv) {
                                          ostringstream oss;
                                          oss << "Error sourcing '" << *$2 << "'.";
-                                         reteerror(yyscanner, agent, oss.str().c_str());
+                                         reteerror(&yylloc, yyscanner, agent, filename, source_path, oss.str().c_str());
                                          delete $2;
                                          YYABORT;
                                        }
@@ -177,84 +184,127 @@ command:
                                        if(g_rete_exit) {
                                          YYACCEPT;
                                        } }
-  | COMMAND_SP rule { auto &parent = get<0>(*$2);
-                      const string name = get<1>(*$2);
-                      const auto existing = agent.unname_rule(name);
+  | COMMAND_SP rule { const auto &parent = get<0>(*$2).first;
+                      const auto &variable_names = get<0>(*$2).second;
+                      const string &name = get<1>(*$2);
+                      const int64_t &q_value_depth = get<0>(get<2>(*$2));
+                      const string &node_type = get<1>(get<2>(*$2));
+                      const auto &feature = get<2>(get<2>(*$2));
+                      const auto variable_indices = variables_to_indices(variable_names);
+
+                      agent.get_agenda().lock();
+                      const auto existing = agent.unname_rule(name, true);
                       if(existing) {
                         parent->suppress_destruction(true);
-                        agent.excise_rule(existing->get_name(), true);
+                        existing->destroy(agent);
                       }
-                      if(std::get<2>(*$2).empty()) {
-                        /// Non-fringe node
-                        auto node = agent.make_action_retraction(name, true,
-                                                                 [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
-                                                                   cout << wme_vector << "->" << action.get_name() << endl;
-                                                                 }, [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
-                                                                   cout << wme_vector << "<-" << action.get_name() << endl;
-                                                                 }, parent);
+
+                      Rete::Rete_Action_Ptr new_action;
+                      if(!feature) {
+                        /// Root/General RL action
+                        const auto root_action = agent.make_standard_action(parent, name, true);
+                        const auto root_action_data = std::make_shared<Carli::Node_Unsplit>(agent, root_action, 1, nullptr);
+                        root_action->data = root_action_data;
                       }
                       else {
-                        Carli::Node_Unsplit_Ptr node_unsplit_ptr; ///< TODO
-                        const auto &flag = *std::get<2>(*$2).begin();
-                        assert(flag.first == ":fringe");
-                        Carli::Feature * feature = nullptr;
-                        const Rete::WME_Token_Index axis; ///< TODO
-                        if(flag.second) {
-                          /// Ranged feature
-                          const int64_t depth = 0; ///< TODO
-                          const bool upper = false; ///< TODO
-                          feature = new Carli::Feature_Ranged<Carli::Feature>(axis, std::get<0>(*flag.second), std::get<1>(*flag.second), depth, upper, std::get<2>(*flag.second));
+                        feature->axis = variable_indices.find((*variable_names.rbegin())[0])->second;
+
+                        if(const auto feature_e = dynamic_cast<Carli::Feature_Enumerated<Carli::Feature> *>(feature)) {
+                          /// TODO: Handle variable-to-variable relations
+                          if(const auto predicate = dynamic_cast<Rete::Rete_Predicate *>(parent.get())) {
+                            const auto rhs = predicate->get_rhs().get();
+                            const auto symbol_i = dynamic_cast<const Rete::Symbol_Constant_Int *>(rhs);
+                            assert(symbol_i);
+                            feature_e->value = symbol_i->value;
+                          }
+                          else if(dynamic_cast<Rete::Rete_Existential_Join *>(parent.get()))
+                            feature_e->value = true;
+                          else if(dynamic_cast<Rete::Rete_Negation_Join *>(parent.get()))
+                            feature_e->value = false;
+                          else
+                            abort();
+                        }
+                        else if(const auto feature_r = dynamic_cast<Carli::Feature_Ranged<Carli::Feature> *>(feature)) {
+                          const auto &predicate = dynamic_cast<Rete::Rete_Predicate &>(*parent);
+                          feature_r->upper = predicate.get_predicate() == Rete::Rete_Predicate::GTE;
+                        }
+                        else
+                          abort();
+
+                        if(node_type == "split") {
+                          const auto filter = dynamic_cast<Rete::Rete_Filter *>(parent->parent_right().get());
+                          bool terminal = true;
+                          if(filter) {
+                            const auto &wme = filter->get_wme();
+                            terminal = !dynamic_cast<const Rete::Symbol_Variable *>(wme.symbols[0].get()) ||
+                                       wme.symbols[0] != wme.symbols[1] || wme.symbols[0] != wme.symbols[2];
+                          }
+
+                          const auto new_q_value = new Carli::Q_Value(0.0, Carli::Q_Value::Type::SPLIT, q_value_depth, feature);
+                          new_action = agent.make_standard_action(parent, name, true, variable_indices);
+                          auto new_action_data = std::make_shared<Carli::Node_Split>(agent, new_action, new_q_value, terminal);
+                          new_action->data = new_action_data;
+                        }
+                        else if(node_type == "unsplit") {
+                          Carli::Fringe_Values node_unsplit_fringe; ///< TODO
+                          new_action = agent.make_standard_action(parent, name, true, variable_indices);
+                          auto new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, new_action, q_value_depth, feature);
+                          new_action->data = new_action_data;
+                          new_action_data->fringe_values.swap(node_unsplit_fringe);
                         }
                         else {
-                          /// Enumerated feature
-                          const int64_t value = 0; ///< TODO
-                          feature = new Carli::Feature_Enumerated<Carli::Feature>(axis, value);
+                          assert(node_type == "fringe");
+                          Carli::Node_Unsplit_Ptr node_unsplit_ptr; ///< TODO
+                          new_action = agent.make_standard_action(parent, name, true, variable_indices);
+                          auto new_action_data = std::make_shared<Carli::Node_Fringe>(agent, new_action, q_value_depth, feature);
+                          new_action->data = new_action_data;
+                          node_unsplit_ptr->fringe_values[feature].values.push_back(new_action_data);
                         }
-                        agent.make_standard_fringe(parent, name, true, node_unsplit_ptr, feature);
                       }
+
                       parent->suppress_destruction(false);
+                      agent.get_agenda().unlock();
+                      agent.get_agenda().run();
                       delete $2; }
   ;
 rule:
-  '{' STRING flags final_conditions '}' { $$ = new tuple<Rete::Rete_Node_Ptr, std::string, std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>>($4->first, *$2, *$3);
-                                          delete $2;
-                                          delete $3;
-                                          delete $4; }
-  ;
-flags:
-  { $$ = new std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>; }
-  | flags flag { $$ = $1;
-                 (*$$)[$2->first] = $2->second;
-                 delete $2; }
+  '{' STRING final_conditions '}' { $$ = new tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, tuple<int64_t, string, Carli::Feature *>>(*$3, *$2, tuple<int64_t, string, Carli::Feature *>());
+                                    delete $2;
+                                    delete $3; }
+  | '{' STRING flag final_conditions '}' { $$ = new tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, tuple<int64_t, string, Carli::Feature *>>(*$4, *$2, *$3);
+                                           delete $2;
+                                           delete $3;
+                                           delete $4; }
   ;
 flag:
-  FLAG FLOAT FLOAT { $$ = new pair<string, shared_ptr<tuple<double, double, bool>>>(*$1, make_shared<tuple<double, double, bool>>($2, $3, false));
-                     delete $1; }
-  | FLAG INT INT { $$ = new pair<string, shared_ptr<tuple<double, double, bool>>>(*$1, make_shared<tuple<double, double, bool>>($2, $3, true));
-                   delete $1; }
-  | FLAG { $$ = new pair<string, shared_ptr<tuple<double, double, bool>>>(*$1, nullptr);
-           delete $1; }
+  /* :feature q_value->depth [feature->depth feature->lower_bound feature->upper_bound] */
+  FLAG_FEATURE INT NODE_TYPE INT FLOAT FLOAT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $5, $6, $4, false /*FIXUP later*/, false));
+                                               delete $3; }
+  | FLAG_FEATURE INT NODE_TYPE INT INT INT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $5, $6, $4, false /*FIXUP later*/, true));
+                                             delete $3; }
+  | FLAG_FEATURE INT NODE_TYPE { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Enumerated<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, 0 /*FIXUP later*/));
+                                 delete $3; }
   ;
 final_conditions:
   conditions { $$ = $1; }
   | '+' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential($2->first)), Variables()); delete $2; }
   | '-' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation($2->first)), Variables()); delete $2; }
-  | final_conditions '+' condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings(*$1, *$3), $1->first, $3->first)), $1->second);
+  | final_conditions '+' condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings($1->second, $3->second), $1->first, $3->first)), $1->second);
                                           delete $1;
                                           delete $3; }
-  | final_conditions '-' condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(join_bindings(*$1, *$3), $1->first, $3->first)), $1->second);
+  | final_conditions '-' condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(join_bindings($1->second, $3->second), $1->first, $3->first)), $1->second);
                                           delete $1;
                                           delete $3; }
   ;
 conditions:
   conditions condition_type { vector<array<string, 3>> variables($1->second);
                               variables.insert(variables.end(), $2->second.begin(), $2->second.end());
-                              $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(join_bindings(*$1, *$2), $1->first, $2->first)), variables);
+                              $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(join_bindings($1->second, $2->second), $1->first, $2->first)), variables);
                               delete $1;
                               delete $2; }
   | conditions '(' VARIABLE PREDICATE symbol_constant ')' { const auto lhs_index = find_index($1->second, *$3);
                                                             if(lhs_index.second > 2) {
-                                                              reteerror(yyscanner, agent, "Unbound variable tested by predicate.");
+                                                              reteerror(&yylloc, yyscanner, agent, filename, source_path, "Unbound variable tested by predicate.");
                                                               YYABORT;
                                                             }
                                                             $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vc($4, lhs_index, *$5, $1->first)), $1->second);
@@ -264,7 +314,7 @@ conditions:
   | conditions '(' VARIABLE PREDICATE VARIABLE ')' { const auto lhs_index = find_index($1->second, *$3);
                                                      const auto rhs_index = find_index($1->second, *$5);
                                                      if(lhs_index.second > 2 || rhs_index.second > 2) {
-                                                       reteerror(yyscanner, agent, "Unbound variable tested by predicate.");
+                                                       reteerror(&yylloc, yyscanner, agent, filename, source_path, "Unbound variable tested by predicate.");
                                                        YYABORT;
                                                      }
                                                      $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vv($4, lhs_index, rhs_index, $1->first)), $1->second);

@@ -17,7 +17,7 @@ namespace Carli {
   }
 
   void Node::retraction(Agent &agent, const Rete::WME_Token &token) {
-    agent.purge_q_value_next(get_action(token), q_value);
+    agent.purge_q_value_next(agent.get_action(token), q_value);
   }
 
   Node_Split_Ptr Node::create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink, const bool &terminal) {
@@ -43,8 +43,8 @@ namespace Carli {
       new_q_value = q_value;
     }
 
-    auto new_leaf = agent.make_standard_action(parent, new_name, false);
-    auto new_leaf_data = std::make_shared<Node_Split>(agent, new_leaf, get_action, new_q_value, terminal);
+    auto new_leaf = agent.make_standard_action(parent, new_name, false, ra_lock->get_variables());
+    auto new_leaf_data = std::make_shared<Node_Split>(agent, new_leaf, new_q_value, terminal);
     new_leaf->data = new_leaf_data;
 
     return new_leaf_data;
@@ -72,8 +72,8 @@ namespace Carli {
       new_q_value = q_value;
     }
 
-    auto new_leaf = agent.make_standard_action(parent, new_name, false);
-    auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, new_leaf, get_action, new_q_value);
+    auto new_leaf = agent.make_standard_action(parent, new_name, false, ra_lock->get_variables());
+    auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, new_leaf, new_q_value);
     new_leaf->data = new_leaf_data;
     new_leaf_data->fringe_values.swap(node_unsplit_fringe);
 
@@ -130,15 +130,15 @@ namespace Carli {
     }
 
     /// Create the actual action for the new fringe node
-    auto new_action = agent.make_standard_action(new_test, new_name, false);
-    auto new_action_data = std::make_shared<Node_Fringe>(agent, new_action, leaf.get_action, leaf.q_value->depth + 1, q_value->feature ? q_value->feature->clone() : nullptr);
+    auto new_action = agent.make_standard_action(new_test, new_name, false, lra_lock->get_variables()); ///< NOTE: Assumption that variable indices are static
+    auto new_action_data = std::make_shared<Node_Fringe>(agent, new_action, leaf.q_value->depth + 1, q_value->feature ? q_value->feature->clone() : nullptr);
     new_action->data = new_action_data;
 
     return new_action_data;
   }
 
-  Node_Split::Node_Split(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_, const bool &terminal_)
-    : Node(agent_, rete_action_, get_action_, q_value_), terminal(terminal_)
+  Node_Split::Node_Split(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_, const bool &terminal_)
+    : Node(agent_, rete_action_, q_value_), terminal(terminal_)
   {
     ++agent.q_value_count;
   }
@@ -153,17 +153,17 @@ namespace Carli {
 
   void Node_Split::action(Agent &agent, const Rete::WME_Token &token) {
     if(!rete_action.lock()->is_excised() && (terminal || !agent.respecialize(*rete_action.lock(), token)))
-      agent.insert_q_value_next(get_action(token), q_value);
+      agent.insert_q_value_next(agent.get_action(token), q_value);
   }
 
-  Node_Unsplit::Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
-    : Node(agent_, rete_action_, get_action_, new Q_Value(0.0, Q_Value::Type::UNSPLIT, depth_, feature_))
+  Node_Unsplit::Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
+    : Node(agent_, rete_action_, new Q_Value(0.0, Q_Value::Type::UNSPLIT, depth_, feature_))
   {
     ++agent.q_value_count;
   }
 
-  Node_Unsplit::Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const std::function<Action_Ptr_C (const Rete::WME_Token &)> &get_action_, const tracked_ptr<Q_Value> &q_value_)
-    : Node(agent_, rete_action_, get_action_, q_value_)
+  Node_Unsplit::Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_)
+    : Node(agent_, rete_action_, q_value_)
   {
     ++agent.q_value_count;
   }
@@ -178,12 +178,12 @@ namespace Carli {
 
   void Node_Unsplit::action(Agent &agent, const Rete::WME_Token &token) {
     if(!rete_action.lock()->is_excised() && !agent.specialize(*rete_action.lock(), token))
-      agent.insert_q_value_next(get_action(token), q_value);
+      agent.insert_q_value_next(agent.get_action(token), q_value);
   }
 
   void Node_Fringe::action(Agent &agent, const Rete::WME_Token &token) {
     if(!rete_action.lock()->is_excised())
-      agent.insert_q_value_next(get_action(token), q_value);
+      agent.insert_q_value_next(agent.get_action(token), q_value);
   }
 
   Rete::Rete_Node_Ptr Node_Fringe::cluster_root_ancestor() const {

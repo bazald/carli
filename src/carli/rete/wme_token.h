@@ -13,6 +13,7 @@ namespace Rete {
   typedef std::pair<int64_t, int8_t> WME_Token_Index;
   typedef std::pair<WME_Token_Index, WME_Token_Index> WME_Binding;
   typedef std::set<WME_Binding> WME_Bindings;
+  typedef std::unordered_map<std::string, WME_Token_Index> Variable_Indices;
 
   class RETE_LINKAGE WME_Token : public std::enable_shared_from_this<WME_Token>, public Zeni::Pool_Allocator<WME_Token> {
   public:

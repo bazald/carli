@@ -65,14 +65,15 @@ typedef void *yyscan_t;
      COMMAND_REMOVE_WME = 262,
      COMMAND_SOURCE = 263,
      COMMAND_SP = 264,
-     FLAG = 265,
+     FLAG_FEATURE = 265,
      FLOAT = 266,
      INT = 267,
-     STRING = 268,
-     STRING_PART_C = 269,
-     STRING_PART_S = 270,
-     VARIABLE = 271,
-     PREDICATE = 272
+     NODE_TYPE = 268,
+     STRING = 269,
+     STRING_PART_C = 270,
+     STRING_PART_S = 271,
+     VARIABLE = 272,
+     PREDICATE = 273
    };
 #endif
 
@@ -81,17 +82,16 @@ typedef void *yyscan_t;
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 111 "rules.yyy"
+#line 119 "rules.yyy"
 
   char cval;
   const char *csval;
-  std::pair<std::string, std::shared_ptr<std::tuple<double, double, bool>>> *flag_ptr;
-  std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>> *flags_ptr;
+  std::tuple<int64_t, std::string, Carli::Feature *> *flag_ptr;
   double fval;
   int64_t ival;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<Rete::Rete_Node_Ptr, std::string, std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>> *rule_ptr;
+  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, Carli::Feature *>> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 

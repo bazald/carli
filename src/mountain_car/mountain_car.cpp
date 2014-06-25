@@ -62,7 +62,7 @@ namespace Mountain_Car {
   }
 
   Agent::Agent(const shared_ptr<Carli::Environment> &env)
-   : Carli::Agent(env)
+   : Carli::Agent(env, [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Acceleration>(token);})
   {
     auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
     auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
@@ -129,10 +129,6 @@ namespace Mountain_Car {
   }
 
   void Agent::generate_cmac(const Rete::Rete_Node_Ptr &parent) {
-    auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
-      return std::make_shared<Acceleration>(token);
-    };
-
     const int64_t cmac_tilings = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["cmac-tilings"]).get_value();
     const int64_t cmac_resolution = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["cmac-resolution"]).get_value();
     const int64_t cmac_offset = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["cmac-offset"]).get_value();
@@ -165,17 +161,13 @@ namespace Mountain_Car {
           //}
 
           auto action = make_standard_action(xdotlt, next_rule_name("mountain-car*rl-action*cmac-"), false);
-          action->data = std::make_shared<Node_Split>(*this, action, get_action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr), true);
+          action->data = std::make_shared<Node_Split>(*this, action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr), true);
         }
       }
     }
   }
 
   void Agent::generate_rete(const Rete::Rete_Node_Ptr &parent) {
-    auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
-      return std::make_shared<Acceleration>(token);
-    };
-
     auto filter_blink = make_filter(*m_wme_blink);
 
     const double m_half_x = (m_min_x + m_max_x) / 2.0;
@@ -186,7 +178,7 @@ namespace Mountain_Car {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
 
       auto root_action = make_standard_action(join_blink, next_rule_name("mountain-car*rl-action*u"), false);
-      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, get_action, 1, nullptr);
+      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, 1, nullptr);
       root_action->data = root_action_data;
     }
 

@@ -122,10 +122,10 @@ namespace Rete {
     return nullptr;
   }
 
-  void bind_to_action(Rete_Agent &agent, const Rete_Action_Ptr &action, const Rete_Node_Ptr &out) {
+  void bind_to_action(Rete_Agent &agent, const Rete_Action_Ptr &action, const Rete_Node_Ptr &out, const Variable_Indices &variables) {
     assert(action && !action->input);
     action->input = out.get();
-
+    action->variables = variables;
     out->insert_output_enabled(action);
     out->pass_tokens(agent, action.get());
   }

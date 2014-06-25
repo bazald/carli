@@ -10,7 +10,7 @@ sp {blocks-world*rl-action*general
 }
 
 sp {blocks-world*rl-fringe*block-clear
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -22,7 +22,7 @@ sp {blocks-world*rl-fringe*block-clear
 }
 
 sp {blocks-world*rl-fringe*block-not-clear
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -34,7 +34,7 @@ sp {blocks-world*rl-fringe*block-not-clear
 }
 
 sp {blocks-world*rl-fringe*dest-clear
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -46,7 +46,7 @@ sp {blocks-world*rl-fringe*dest-clear
 }
 
 sp {blocks-world*rl-fringe*dest-not-clear
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -58,7 +58,7 @@ sp {blocks-world*rl-fringe*dest-not-clear
 }
 
 sp {blocks-world*rl-fringe*block-in-place
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -70,7 +70,7 @@ sp {blocks-world*rl-fringe*block-in-place
 }
 
 sp {blocks-world*rl-fringe*block-not-in-place
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -82,7 +82,7 @@ sp {blocks-world*rl-fringe*block-not-in-place
 }
 
 sp {blocks-world*rl-fringe*dest-in-place
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -94,7 +94,7 @@ sp {blocks-world*rl-fringe*dest-in-place
 }
 
 sp {blocks-world*rl-fringe*dest-not-in-place
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -106,7 +106,7 @@ sp {blocks-world*rl-fringe*dest-not-in-place
 }
 
 sp {blocks-world*rl-fringe*block-name*1
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -118,7 +118,7 @@ sp {blocks-world*rl-fringe*block-name*1
 }
 
 sp {blocks-world*rl-fringe*block-name*2
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -130,7 +130,7 @@ sp {blocks-world*rl-fringe*block-name*2
 }
 
 sp {blocks-world*rl-fringe*block-name*3
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -142,7 +142,7 @@ sp {blocks-world*rl-fringe*block-name*3
 }
 
 sp {blocks-world*rl-fringe*dest-name*0
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -154,7 +154,7 @@ sp {blocks-world*rl-fringe*dest-name*0
 }
 
 sp {blocks-world*rl-fringe*dest-name*1
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -166,7 +166,7 @@ sp {blocks-world*rl-fringe*dest-name*1
 }
 
 sp {blocks-world*rl-fringe*dest-name*2
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -178,7 +178,7 @@ sp {blocks-world*rl-fringe*dest-name*2
 }
 
 sp {blocks-world*rl-fringe*dest-name*3
-  :fringe
+  :feature 2 fringe
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -190,7 +190,7 @@ sp {blocks-world*rl-fringe*dest-name*3
 }
 
 sp {blocks-world*rl-fringe*height-lower
-  :fringe 1 3
+  :feature 2 fringe 1 1 3
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)
@@ -202,7 +202,7 @@ sp {blocks-world*rl-fringe*height-lower
 }
 
 sp {blocks-world*rl-fringe*height-upper
-  :fringe 1 3
+  :feature 2 fringe 1 1 3
   (<s> ^action <a>)
   (<a> ^block <block>)
   (<a> ^block <dest>)

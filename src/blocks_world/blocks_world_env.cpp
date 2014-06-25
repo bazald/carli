@@ -77,7 +77,7 @@ namespace Blocks_World {
   }
 
   Agent::Agent(const std::shared_ptr<Carli::Environment> &env)
-   : Carli::Agent(env)
+   : Carli::Agent(env, [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(token);})
   {
     insert_wme(m_wme_blink);
     generate_rete();
@@ -123,16 +123,12 @@ namespace Blocks_World {
     auto filter_clear = make_filter(Rete::WME(m_first_var, m_clear_attr, m_third_var));
     auto filter_in_place = make_filter(Rete::WME(m_first_var, m_in_place_attr, m_third_var));
 
-    auto get_action = [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {
-      return std::make_shared<Move>(token);
-    };
-
     Carli::Node_Unsplit_Ptr root_action_data;
     {
       auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
 
       auto root_action = make_standard_action(join_blink, next_rule_name("blocks-world*rl-action*u"), false);
-      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, get_action, 1, nullptr);
+      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, 1, nullptr);
       root_action->data = root_action_data;
     }
 

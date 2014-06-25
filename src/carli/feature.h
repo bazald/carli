@@ -63,7 +63,7 @@ namespace Carli {
       return oss.str();
     }
 
-    const Rete::WME_Token_Index axis;
+    Rete::WME_Token_Index axis;
   };
 
 }
