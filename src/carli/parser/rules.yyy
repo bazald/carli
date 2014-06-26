@@ -200,7 +200,6 @@ command:
                       const auto &q_value_value = get<4>(*$2);
                       const auto variable_indices = variables_to_indices(variable_names);
 
-                      agent.get_agenda().lock();
                       const auto existing = agent.unname_rule(name, true);
                       if(existing) {
                         parent->suppress_destruction(true);
@@ -324,8 +323,6 @@ command:
                       }
 
                       parent->suppress_destruction(false);
-                      agent.get_agenda().unlock();
-                      agent.get_agenda().run();
                       delete $2;
                       if(error)
                         YYABORT; }
@@ -479,6 +476,8 @@ int rete_parse_file(Carli::Agent &agent, const string &filename, const std::stri
   reterestart(file, yyscanner);
   reteset_lineno(1, yyscanner);
 
+  Rete::Agenda::Locker locker(agent.get_agenda());
+
   // retelex();
   do {
     rv = reteparse(yyscanner, agent, filename_full, source_path_full, gufv);
@@ -516,6 +515,8 @@ int rete_parse_string(Carli::Agent &agent, const string &str, int &line_number) 
 
   rete_delete_buffer(buf, yyscanner);
   retelex_destroy(yyscanner);
+
+  Rete::Agenda::Locker locker(agent.get_agenda());
 
   for(auto &entry : gufv) {
     assert(entry.second.first);

@@ -100,11 +100,9 @@ namespace Rete {
   }
 
   void Rete_Agent::excise_all() {
-    agenda.lock();
+    Agenda::Locker locker(agenda);
     filters.clear();
     rules.clear();
-    agenda.unlock();
-    agenda.run();
   }
 
   void Rete_Agent::excise_filter(const Rete_Filter_Ptr &filter) {
@@ -159,15 +157,13 @@ namespace Rete {
 
     //const auto wme_clone = std::make_shared<WME>(Symbol_Ptr_C(wme->symbols[0]->clone()), Symbol_Ptr_C(wme->symbols[1]->clone()), Symbol_Ptr_C(wme->symbols[2]->clone()));
 
-    agenda.lock();
+    Agenda::Locker locker(agenda);
     working_memory.wmes.insert(wme);
 #ifdef DEBUG_OUTPUT
     std::cerr << "rete.insert" << *wme << std::endl;
 #endif
     for(auto &filter : filters)
       filter->insert_wme(*this, wme);
-    agenda.unlock();
-    agenda.run();
   }
 
   void Rete_Agent::remove_wme(const WME_Ptr_C &wme) {
@@ -180,26 +176,22 @@ namespace Rete {
       return;
     }
 
-    agenda.lock();
+    Agenda::Locker locker(agenda);
     working_memory.wmes.erase(found);
 #ifdef DEBUG_OUTPUT
     std::cerr << "rete.remove" << *wme << std::endl;
 #endif
     for(auto &filter : filters)
       filter->remove_wme(*this, wme);
-    agenda.unlock();
-    agenda.run();
   }
 
   void Rete_Agent::clear_wmes() {
-    agenda.lock();
+    Agenda::Locker locker(agenda);
     for(auto &wme : working_memory.wmes) {
       for(auto &filter : filters)
         filter->remove_wme(*this, wme);
     }
     working_memory.wmes.clear();
-    agenda.unlock();
-    agenda.run();
   }
 
   size_t Rete_Agent::rete_size() const {

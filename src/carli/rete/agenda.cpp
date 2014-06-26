@@ -17,21 +17,20 @@ namespace Rete {
   }
 
   void Agenda::lock() {
-    assert(!m_locked);
-    m_locked = true;
-    m_manually_locked = true;
+    ++m_locked;
+    ++m_manually_locked;
   }
 
   void Agenda::unlock() {
     assert(m_manually_locked);
-    m_locked = false;
-    m_manually_locked = false;
+    --m_locked;
+    --m_manually_locked;
   }
 
   void Agenda::run() {
     if(m_locked)
       return;
-    m_locked = true;
+    ++m_locked;
 
     while(!agenda.empty()) {
       const auto front_iterator = agenda.begin();
@@ -44,7 +43,7 @@ namespace Rete {
     }
 
     assert(m_locked);
-    m_locked = false;
+    --m_locked;
   }
 
 }
