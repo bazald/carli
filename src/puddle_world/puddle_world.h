@@ -34,7 +34,7 @@ namespace Puddle_World {
 
   class Feature : public Carli::Feature {
   public:
-    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
+    Feature(const Rete::WME_Token_Index &axis_, const Rete::WME_Bindings &bindings_) : Carli::Feature(axis_, bindings_) {}
 
     virtual Feature * clone() const = 0;
   };
@@ -44,7 +44,7 @@ namespace Puddle_World {
     enum Axis : int64_t {X = 0, Y = 1};
 
     Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, false)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), Rete::WME_Bindings(), bound_lower_, bound_upper_, depth_, upper_, false)
     {
     }
 
@@ -68,7 +68,7 @@ namespace Puddle_World {
     enum Index {index = 2};
 
     Move_Direction(const Direction &direction)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(index, 2), direction)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(index, 2), Rete::WME_Bindings(), direction)
     {
     }
 

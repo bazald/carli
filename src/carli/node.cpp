@@ -123,10 +123,10 @@ namespace Carli {
         }
       }
 
-       if(leaf.q_value->depth == 1)
+      if(leaf.q_value->depth == 1)
         new_test = ancestor_right;
       else
-        new_test = agent.make_existential_join(q_value->feature->bindings(), ancestor_left, ancestor_right);
+        new_test = agent.make_existential_join(q_value->feature->bindings, ancestor_left, ancestor_right);
     }
 
     /// Create the actual action for the new fringe node
@@ -140,6 +140,7 @@ namespace Carli {
   Node_Split::Node_Split(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_, const bool &terminal_)
     : Node(agent_, rete_action_, q_value_), terminal(terminal_)
   {
+    assert(q_value_->type == Q_Value::Type::SPLIT);
     ++agent.q_value_count;
   }
 
@@ -165,6 +166,7 @@ namespace Carli {
   Node_Unsplit::Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_)
     : Node(agent_, rete_action_, q_value_)
   {
+    assert(q_value_->type == Q_Value::Type::UNSPLIT);
     ++agent.q_value_count;
   }
 

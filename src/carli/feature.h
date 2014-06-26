@@ -19,7 +19,7 @@ namespace Carli {
     Feature & operator=(const Feature &) = delete;
 
   public:
-    Feature(const Rete::WME_Token_Index &axis_) : axis(axis_) {}
+    Feature(const Rete::WME_Token_Index &axis_, const Rete::WME_Bindings &bindings_) : axis(axis_), bindings(bindings_) {}
 
     virtual ~Feature() {}
 
@@ -51,8 +51,6 @@ namespace Carli {
 
     virtual bool matches(const Rete::WME_Token &token) const = 0;
 
-    virtual Rete::WME_Bindings bindings() const {return Rete::WME_Bindings();}
-
     virtual std::vector<Feature *> refined() const {return std::vector<Feature *>();}
 
     virtual void print(std::ostream &os) const = 0;
@@ -64,6 +62,7 @@ namespace Carli {
     }
 
     Rete::WME_Token_Index axis;
+    Rete::WME_Bindings bindings;
   };
 
 }
@@ -106,14 +105,14 @@ namespace Carli {
     Feature_Enumerated & operator=(const Feature_Enumerated &) = delete;
 
   public:
-    Feature_Enumerated(const Rete::WME_Token_Index &axis_, const int64_t &value_)
-     : FEATURE(axis_),
+    Feature_Enumerated(const Rete::WME_Token_Index &axis_, const Rete::WME_Bindings &bindings_, const int64_t &value_)
+     : FEATURE(axis_, bindings_),
      Feature_Enumerated_Data(value_)
     {
     }
 
     Feature_Enumerated * clone() const override {
-      return new Feature_Enumerated(this->axis, value);
+      return new Feature_Enumerated(this->axis, this->bindings, value);
     }
 
     int64_t get_depth() const override {return 1;}
@@ -174,14 +173,14 @@ namespace Carli {
     Feature_Ranged & operator=(const Feature_Ranged &) = delete;
 
   public:
-    Feature_Ranged(const Rete::WME_Token_Index &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_, const bool &integer_locked_)
-     : FEATURE(axis_),
+    Feature_Ranged(const Rete::WME_Token_Index &axis_, const Rete::WME_Bindings &bindings_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_, const bool &integer_locked_)
+     : FEATURE(axis_, bindings_),
      Feature_Ranged_Data(bound_lower_, bound_upper_, depth_, upper_, integer_locked_)
     {
     }
 
     Feature_Ranged * clone() const override {
-      return new Feature_Ranged(this->axis, bound_lower, bound_upper, depth, upper, integer_locked);
+      return new Feature_Ranged(this->axis, this->bindings, bound_lower, bound_upper, depth, upper, integer_locked);
     }
 
     int64_t get_depth() const override {return depth;}

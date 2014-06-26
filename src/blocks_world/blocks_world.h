@@ -34,11 +34,12 @@ namespace Blocks_World {
   public:
     enum Which {BLOCK = 0, DEST = 1};
     
-    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
+    Feature(const Rete::WME_Token_Index &axis_, const Rete::WME_Bindings &bindings_) : Carli::Feature(axis_, bindings_) {}
 
     virtual Feature * clone() const = 0;
 
-    Rete::WME_Bindings bindings() const override {
+  protected:
+    static Rete::WME_Bindings make_bindings() {
       Rete::WME_Bindings bindings_;
       bindings_.insert(std::make_pair(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 2)));
       return bindings_;
@@ -48,7 +49,7 @@ namespace Blocks_World {
   class BLOCKS_WORLD_LINKAGE Clear : public Carli::Feature_Enumerated<Feature> {
   public:
     Clear(const Which &block_, const bool &present_)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(1 + block_, 2), present_),
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(1 + block_, 2), make_bindings(), present_),
      block(block_)
     {
     }
@@ -69,7 +70,7 @@ namespace Blocks_World {
   class BLOCKS_WORLD_LINKAGE In_Place : public Carli::Feature_Enumerated<Feature> {
   public:
     In_Place(const Which &block_, const bool &present_)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(1 + block_, 2), present_),
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(1 + block_, 2), make_bindings(), present_),
      block(block_)
     {
     }
@@ -90,7 +91,7 @@ namespace Blocks_World {
   class BLOCKS_WORLD_LINKAGE Name : public Carli::Feature_Enumerated<Feature> {
   public:
     Name(const Which &block_, const block_id &name_)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(3 + block_, 2), true),
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(3 + block_, 2), make_bindings(), true),
      block(block_),
      name(name_)
     {
@@ -117,7 +118,7 @@ namespace Blocks_World {
   class BLOCKS_WORLD_LINKAGE Height : public Carli::Feature_Ranged<Feature> {
   public:
     Height(const Which &block_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Carli::Feature_Ranged<Feature>(Rete::WME_Token_Index(5 + block_, 2), bound_lower_, bound_upper_, depth_, upper_, true),
+     : Carli::Feature_Ranged<Feature>(Rete::WME_Token_Index(5 + block_, 2), make_bindings(), bound_lower_, bound_upper_, depth_, upper_, true),
      block(block_)
     {
     }

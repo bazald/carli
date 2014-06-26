@@ -57,11 +57,12 @@ namespace Tetris {
 
   class Feature : public Carli::Feature {
   public:
-    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
+    Feature(const Rete::WME_Token_Index &axis_, const Rete::WME_Bindings &bindings_) : Carli::Feature(axis_, bindings_) {}
 
     virtual Feature * clone() const = 0;
 
-    Rete::WME_Bindings bindings() const override {
+  protected:
+    static Rete::WME_Bindings make_bindings() {
       Rete::WME_Bindings bindings;
       bindings.insert(std::make_pair(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 2)));
       return bindings;
@@ -73,7 +74,7 @@ namespace Tetris {
     enum Axis : size_t {CURRENT = 1, NEXT = 2};
 
     Type(const Axis &axis_, const Tetromino_Type &type_)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), type_), axis(axis_)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), make_bindings(), type_), axis(axis_)
     {
     }
 
@@ -93,7 +94,7 @@ namespace Tetris {
     enum Axis : size_t {WIDTH = 3, HEIGHT = 4};
 
     Size(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), make_bindings(), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
 
@@ -117,7 +118,7 @@ namespace Tetris {
     enum Axis : size_t {X = 5, Y = 6};
 
     Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), make_bindings(), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
 
@@ -141,7 +142,7 @@ namespace Tetris {
     enum Axis : size_t {BENEATH = 7, CREATED = 8, DEPTH = 9};
 
     Gaps(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), make_bindings(), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
 
@@ -165,7 +166,7 @@ namespace Tetris {
     enum Axis : size_t {CLEARS = 10, ENABLES = 11, PROHIBITS = 12};
 
     Clears(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), make_bindings(), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
 
@@ -190,7 +191,7 @@ namespace Tetris {
     enum Axis : size_t {AXIS = 13};
 
     X_Odd(const bool &value_)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(AXIS, 2), value_)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(AXIS, 2), make_bindings(), value_)
     {
     }
 

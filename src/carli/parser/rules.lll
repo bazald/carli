@@ -21,6 +21,14 @@ using namespace std;
 [ \t\r]                                               ;
 #.*                                                   ;
 <INITIAL,READ_STRING>\n                               { }
+-->                                                   { yylval->csval = "-->"; return ARROW_RIGHT; }
+==                                                    { yylval->predicate = Rete::Rete_Predicate::EQ; return PREDICATE; }
+!=                                                    { yylval->predicate = Rete::Rete_Predicate::NEQ; return PREDICATE; }
+>                                                     { yylval->predicate = Rete::Rete_Predicate::GT; return PREDICATE; }
+>=                                                    { yylval->predicate = Rete::Rete_Predicate::GTE; return PREDICATE; }
+\<                                                    { yylval->predicate = Rete::Rete_Predicate::LT; return PREDICATE; }
+\<=                                                   { yylval->predicate = Rete::Rete_Predicate::LTE; return PREDICATE; }
+=                                                     { yylval->csval = "="; return ASSIGNMENT; }
 excise                                                { yylval->csval = "excise"; return COMMAND_EXCISE; }
 excise-all                                            { yylval->csval = "excise-all"; return COMMAND_EXCISE_ALL; }
 exit                                                  { yylval->csval = "exit"; return COMMAND_EXIT; }
@@ -42,12 +50,6 @@ fringe                                                { yylval->sval = new strin
 [a-zA-Z0-9]+                                          { yylval->sval = new string(yytext); return STRING; }
 [a-zA-Z0-9./\\]+[a-zA-Z0-9./\\\-*]*[a-zA-Z0-9./\\]+   { yylval->sval = new string(yytext); return STRING; }
 [\^\(\)\{\}+\-\@]                                     { return yytext[0]; }
-==                                                    { yylval->predicate = Rete::Rete_Predicate::EQ; return PREDICATE; }
-!=                                                    { yylval->predicate = Rete::Rete_Predicate::NEQ; return PREDICATE; }
->                                                     { yylval->predicate = Rete::Rete_Predicate::GT; return PREDICATE; }
->=                                                    { yylval->predicate = Rete::Rete_Predicate::GTE; return PREDICATE; }
-\<                                                    { yylval->predicate = Rete::Rete_Predicate::LT; return PREDICATE; }
-\<=                                                   { yylval->predicate = Rete::Rete_Predicate::LTE; return PREDICATE; }
 \|                                                    { BEGIN(READ_STRING); return '|'; }
 <READ_STRING>\\\|                                     { yylval->sval = new string("\\|"); return STRING_PART_S; }
 <READ_STRING>\\t                                      { yylval->sval = new string("\\t"); return STRING_PART_S; }

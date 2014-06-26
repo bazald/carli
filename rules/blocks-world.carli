@@ -1,239 +1,279 @@
 sp {blocks-world*rl-action*general
   :feature 1 unsplit
-  (<s> ^action <a>)
-  (<a> ^block <block>)
-  (<a> ^dest <dest>)
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block> ^height <block-height>)
   (<dest> ^height <dest-height>)
   +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
+-->
+  = 0.0                            # The root is fixed and featureless--it will not be involved in future joins
 }
 
 sp {blocks-world*rl-fringe*block-clear
   :feature 2 fringe
-  (<s> ^action <a>)
-  (<a> ^block <block>)
-  (<a> ^dest <dest>)
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block> ^height <block-height>)
   (<dest> ^height <dest-height>)
   +(<block> ^clear true)
+-->
+  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 }
 
 sp {blocks-world*rl-fringe*block-not-clear
   :feature 2 fringe
-  (<s> ^action <a>)
-  (<a> ^block <block>)
-  (<a> ^dest <dest>)
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block> ^height <block-height>)
   (<dest> ^height <dest-height>)
   -(<block> ^clear true)
+-->
+  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 }
 
 #sp {blocks-world*rl-fringe*dest-clear
 #  :feature 2 fringe
-#  (<s> ^action <a>)
-#  (<a> ^block <block>)
-#  (<a> ^dest <dest>)
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<action> ^dest <dest>)
 #  (<block> ^name <block-name>)
 #  (<dest> ^name <dest-name>)
 #  (<block> ^height <block-height>)
 #  (<dest> ^height <dest-height>)
 #  +(<dest> ^clear true)
+#-->
+#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 #}
 
 #sp {blocks-world*rl-fringe*dest-not-clear
 #  :feature 2 fringe
-#  (<s> ^action <a>)
-#  (<a> ^block <block>)
-#  (<a> ^dest <dest>)
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<action> ^dest <dest>)
 #  (<block> ^name <block-name>)
 #  (<dest> ^name <dest-name>)
 #  (<block> ^height <block-height>)
 #  (<dest> ^height <dest-height>)
 #  -(<dest> ^clear true)
+#-->
+#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 #}
 
 #sp {blocks-world*rl-fringe*block-in-place
 #  :feature 2 fringe
-#  (<s> ^action <a>)
-#  (<a> ^block <block>)
-#  (<a> ^dest <dest>)
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<action> ^dest <dest>)
 #  (<block> ^name <block-name>)
 #  (<dest> ^name <dest-name>)
 #  (<block> ^height <block-height>)
 #  (<dest> ^height <dest-height>)
 #  +(<block> ^in-place true)
+#-->
+#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 #}
 
 #sp {blocks-world*rl-fringe*block-not-in-place
 #  :feature 2 fringe
-#  (<s> ^action <a>)
-#  (<a> ^block <block>)
-#  (<a> ^dest <dest>)
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<action> ^dest <dest>)
 #  (<block> ^name <block-name>)
 #  (<dest> ^name <dest-name>)
 #  (<block> ^height <block-height>)
 #  (<dest> ^height <dest-height>)
 #  -(<block> ^in-place true)
+#-->
+#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 #}
 
 sp {blocks-world*rl-fringe*dest-in-place
   :feature 2 fringe
-  (<s> ^action <a>)
-  (<a> ^block <block>)
-  (<a> ^dest <dest>)
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block> ^height <block-height>)
   (<dest> ^height <dest-height>)
   +(<dest> ^in-place true)
+-->
+  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 }
 
 sp {blocks-world*rl-fringe*dest-not-in-place
   :feature 2 fringe
-  (<s> ^action <a>)
-  (<a> ^block <block>)
-  (<a> ^dest <dest>)
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block> ^height <block-height>)
   (<dest> ^height <dest-height>)
   -(<dest> ^in-place true)
+-->
+  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 }
 
 sp {blocks-world*rl-fringe*block-name*1
   :feature 2 fringe
-  (<s> ^action <a>)
-  (<a> ^block <block>)
-  (<a> ^dest <dest>)
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block> ^height <block-height>)
   (<dest> ^height <dest-height>)
   (<block-name> == 1)
+-->
+  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 }
 
 sp {blocks-world*rl-fringe*block-name*2
   :feature 2 fringe
-  (<s> ^action <a>)
-  (<a> ^block <block>)
-  (<a> ^dest <dest>)
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block> ^height <block-height>)
   (<dest> ^height <dest-height>)
   (<block-name> == 2)
+-->
+  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 }
 
 sp {blocks-world*rl-fringe*block-name*3
   :feature 2 fringe
-  (<s> ^action <a>)
-  (<a> ^block <block>)
-  (<a> ^dest <dest>)
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block> ^height <block-height>)
   (<dest> ^height <dest-height>)
   (<block-name> == 3)
+-->
+  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 }
 
 sp {blocks-world*rl-fringe*dest-name*0
   :feature 2 fringe
-  (<s> ^action <a>)
-  (<a> ^block <block>)
-  (<a> ^dest <dest>)
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block> ^height <block-height>)
   (<dest> ^height <dest-height>)
   (<dest-name> == 0)
+-->
+  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 }
 
 sp {blocks-world*rl-fringe*dest-name*1
   :feature 2 fringe
-  (<s> ^action <a>)
-  (<a> ^block <block>)
-  (<a> ^dest <dest>)
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block> ^height <block-height>)
   (<dest> ^height <dest-height>)
   (<dest-name> == 1)
+-->
+  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 }
 
 sp {blocks-world*rl-fringe*dest-name*2
   :feature 2 fringe
-  (<s> ^action <a>)
-  (<a> ^block <block>)
-  (<a> ^dest <dest>)
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block> ^height <block-height>)
   (<dest> ^height <dest-height>)
   (<dest-name> == 2)
+-->
+  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 }
 
 sp {blocks-world*rl-fringe*dest-name*3
   :feature 2 fringe
-  (<s> ^action <a>)
-  (<a> ^block <block>)
-  (<a> ^dest <dest>)
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block> ^height <block-height>)
   (<dest> ^height <dest-height>)
   (<dest-name> == 3)
+-->
+  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 }
 
 #sp {blocks-world*rl-fringe*block-height-lower
 #  :feature 2 fringe 1 1 3
-#  (<s> ^action <a>)
-#  (<a> ^block <block>)
-#  (<a> ^dest <dest>)
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<action> ^dest <dest>)
 #  (<block> ^name <block-name>)
 #  (<dest> ^name <dest-name>)
 #  (<block> ^height <block-height>)
 #  (<dest> ^height <dest-height>)
 #  (<block-height> < 3)
+#-->
+#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 #}
 
 #sp {blocks-world*rl-fringe*block-height-upper
 #  :feature 2 fringe 1 1 3
-#  (<s> ^action <a>)
-#  (<a> ^block <block>)
-#  (<a> ^dest <dest>)
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<action> ^dest <dest>)
 #  (<block> ^name <block-name>)
 #  (<dest> ^name <dest-name>)
 #  (<block> ^height <block-height>)
 #  (<dest> ^height <dest-height>)
 #  (<block-height> >= 3)
+#-->
+#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 #}
 
 #sp {blocks-world*rl-fringe*dest-height-lower
 #  :feature 2 fringe 1 1 3
-#  (<s> ^action <a>)
-#  (<a> ^block <block>)
-#  (<a> ^dest <dest>)
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<action> ^dest <dest>)
 #  (<block> ^name <block-name>)
 #  (<dest> ^name <dest-name>)
 #  (<block> ^height <block-height>)
 #  (<dest> ^height <dest-height>)
 #  (<dest-height> < 3)
+#-->
+#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 #}
 
 #sp {blocks-world*rl-fringe*dest-height-upper
 #  :feature 2 fringe 1 1 3
-#  (<s> ^action <a>)
-#  (<a> ^block <block>)
-#  (<a> ^dest <dest>)
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<action> ^dest <dest>)
 #  (<block> ^name <block-name>)
 #  (<dest> ^name <dest-name>)
 #  (<block> ^height <block-height>)
 #  (<dest> ^height <dest-height>)
 #  (<dest-height> >= 3)
+#-->
+#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
 #}

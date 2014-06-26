@@ -34,7 +34,7 @@ namespace Mountain_Car {
 
   class Feature : public Carli::Feature {
   public:
-    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
+    Feature(const Rete::WME_Token_Index &axis_, const Rete::WME_Bindings &bindings_) : Carli::Feature(axis_, bindings_) {}
 
     virtual Feature * clone() const = 0;
   };
@@ -44,7 +44,7 @@ namespace Mountain_Car {
     enum Index {index = 0};
 
     Position(const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_, false)
+     : Feature_Ranged(Rete::WME_Token_Index(index, 2), Rete::WME_Bindings(), bound_lower_, bound_upper_, depth_, upper_, false)
     {
     }
 
@@ -62,7 +62,7 @@ namespace Mountain_Car {
     enum Index {index = 1};
 
     Velocity(const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_, false)
+     : Feature_Ranged(Rete::WME_Token_Index(index, 2), Rete::WME_Bindings(), bound_lower_, bound_upper_, depth_, upper_, false)
     {
     }
 
@@ -80,7 +80,7 @@ namespace Mountain_Car {
     enum Index {index = 2};
 
     Acceleration_Direction(const Direction &direction)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(index, 2), direction)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(index, 2), Rete::WME_Bindings(), direction)
     {
     }
 

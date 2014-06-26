@@ -42,12 +42,13 @@ namespace Mario {
 
   class Feature : public Carli::Feature {
   public:
-    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
+    Feature(const Rete::WME_Token_Index &axis_, const Rete::WME_Bindings &bindings_) : Carli::Feature(axis_, bindings_) {}
 
     virtual Feature * clone() const = 0;
 
+  protected:
     enum {ACTION_INDEX = 21};
-    Rete::WME_Bindings bindings() const override {
+    static Rete::WME_Bindings make_bindings() {
       Rete::WME_Bindings bindings;
       bindings.insert(std::make_pair(Rete::WME_Token_Index(ACTION_INDEX, 2), Rete::WME_Token_Index(ACTION_INDEX, 2)));
       return bindings;
@@ -60,7 +61,7 @@ namespace Mario {
                         Y = X + 1};
 
     Feature_Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), make_bindings(), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
 
@@ -85,7 +86,7 @@ namespace Mario {
                         Y_DOT = X_DOT + 1};
 
     Feature_Velocity(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), make_bindings(), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
 
@@ -109,7 +110,7 @@ namespace Mario {
     enum Axis : size_t {MODE = Feature_Velocity::Y_DOT + 1};
 
     Feature_Mode(const Mode &mode)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(MODE, 2), mode)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(MODE, 2), make_bindings(), mode)
     {
     }
 
@@ -138,7 +139,7 @@ namespace Mario {
     };
 
     Feature_Flag(const Axis &axis_, const bool &flag)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), flag)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), make_bindings(), flag)
     {
     }
 
@@ -175,7 +176,7 @@ namespace Mario {
     };
 
     Feature_Numeric(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
+     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), make_bindings(), bound_lower_, bound_upper_, depth_, upper_, true)
     {
     }
 
@@ -215,7 +216,7 @@ namespace Mario {
     };
 
     Feature_Button(const Axis &axis_, const int64_t &flag)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), flag)
+     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), make_bindings(), flag)
     {
       static_assert(int(ACTION_INDEX) == int(OUT_JOIN), "ACTION_INDEX is misspecified in Mario::Feature");
     }

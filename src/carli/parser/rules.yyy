@@ -124,13 +124,16 @@ static Rete::Variable_Indices variables_to_indices(const vector<array<string, 3>
   std::tuple<int64_t, std::string, Carli::Feature *> *flag_ptr;
   double fval;
   int64_t ival;
+  std::list<std::string> *slist;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, Carli::Feature *>> *rule_ptr;
+  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, Carli::Feature *>, std::list<std::string>, double> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 }
 
+%token <csval> ARROW_RIGHT
+%token <csval> ASSIGNMENT
 %token <csval> COMMAND_EXCISE
 %token <csval> COMMAND_EXCISE_ALL
 %token <csval> COMMAND_EXIT
@@ -151,8 +154,9 @@ static Rete::Variable_Indices variables_to_indices(const vector<array<string, 3>
 %type <flag_ptr> flag
 %type <rete_node_ptr> final_conditions conditions condition_group condition_type condition
 %type <rule_ptr> rule
-%type <symbol_ptr> symbol identifier symbol_constant
+%type <slist> variable_list
 %type <sval> string_or_literal literal literal_parts
+%type <symbol_ptr> symbol identifier symbol_constant
 
 %%
 commands:
@@ -192,6 +196,8 @@ command:
                       const int64_t &q_value_depth = get<0>(get<2>(*$2));
                       const string &node_type = get<1>(get<2>(*$2));
                       const auto &feature = get<2>(get<2>(*$2));
+                      const auto &binding_list = get<3>(*$2);
+                      const auto &q_value_value = get<4>(*$2);
                       const auto variable_indices = variables_to_indices(variable_names);
 
                       agent.get_agenda().lock();
@@ -283,47 +289,72 @@ command:
                         }
 
                         if(node_type == "split") {
-                          const auto new_q_value = new Carli::Q_Value(0.0, Carli::Q_Value::Type::SPLIT, q_value_depth, feature);
+                          const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::SPLIT, q_value_depth, feature);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
                           auto new_action_data = std::make_shared<Carli::Node_Split>(agent, new_action, new_q_value, terminal);
                           new_action->data = new_action_data;
                         }
                         else if(node_type == "unsplit") {
+                          const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::UNSPLIT, q_value_depth, feature);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, new_action, q_value_depth, feature);
+                          auto new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, new_action, new_q_value);
                           new_action->data = new_action_data;
                           gufv[test_node].first = new_action_data;
                         }
                         else {
                           assert(node_type == "fringe");
+                          const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::FRINGE, q_value_depth, feature);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Fringe>(agent, new_action, q_value_depth, feature);
+                          auto new_action_data = std::make_shared<Carli::Node_Fringe>(agent, new_action, new_q_value);
                           new_action->data = new_action_data;
                           gufv[test_node->parent_left()].second[feature].values.push_back(new_action_data);
+                        }
+                      }
+
+                      bool error = false;
+                      for(const auto &binding : binding_list) {
+                        if(feature) {
+                          const auto &index = variable_indices.find(binding)->second;
+                          feature->bindings.insert(Rete::WME_Binding(index, index));
+                        }
+                        else {
+                          reteerror(&yylloc, yyscanner, agent, filename, source_path, gufv, "Bindings specified for rule with no feature.");
+                          error = true;
                         }
                       }
 
                       parent->suppress_destruction(false);
                       agent.get_agenda().unlock();
                       agent.get_agenda().run();
-                      delete $2; }
+                      delete $2;
+                      if(error)
+                        YYABORT; }
   ;
 rule:
-  '{' STRING final_conditions '}' { $$ = new tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, tuple<int64_t, string, Carli::Feature *>>(*$3, *$2, tuple<int64_t, string, Carli::Feature *>());
+  '{' STRING final_conditions '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, Carli::Feature *>, list<string>, double>(*$3, *$2, tuple<int64_t, string, Carli::Feature *>(), list<string>(), 0.0);
                                     delete $2;
                                     delete $3; }
-  | '{' STRING flag final_conditions '}' { $$ = new tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, tuple<int64_t, string, Carli::Feature *>>(*$4, *$2, *$3);
+  | '{' STRING flag final_conditions '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, Carli::Feature *>, list<string>, double>(*$4, *$2, *$3, list<string>(), 0.0);
                                            delete $2;
                                            delete $3;
                                            delete $4; }
+  | '{' STRING final_conditions ARROW_RIGHT variable_list ASSIGNMENT FLOAT '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, Carli::Feature *>, list<string>, double>(*$3, *$2, tuple<int64_t, string, Carli::Feature *>(), *$5, $7);
+                                                                                 delete $2;
+                                                                                 delete $3;
+                                                                                 delete $5; }
+  | '{' STRING flag final_conditions ARROW_RIGHT variable_list ASSIGNMENT FLOAT '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, Carli::Feature *>, list<string>, double>(*$4, *$2, *$3, *$6, $8);
+                                                                                      delete $2;
+                                                                                      delete $3;
+                                                                                      delete $4;
+                                                                                      delete $6; }
   ;
 flag:
   /* :feature q_value->depth [feature->depth feature->lower_bound feature->upper_bound] */
-  FLAG_FEATURE INT NODE_TYPE INT FLOAT FLOAT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $5, $6, $4, false /*FIXUP later*/, false));
+  FLAG_FEATURE INT NODE_TYPE INT FLOAT FLOAT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, Rete::WME_Bindings() /*FIXUP later*/, $5, $6, $4, false /*FIXUP later*/, false));
                                                delete $3; }
-  | FLAG_FEATURE INT NODE_TYPE INT INT INT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $5, $6, $4, false /*FIXUP later*/, true));
+  | FLAG_FEATURE INT NODE_TYPE INT INT INT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, Rete::WME_Bindings() /*FIXUP later*/, $5, $6, $4, false /*FIXUP later*/, true));
                                              delete $3; }
-  | FLAG_FEATURE INT NODE_TYPE { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
+  | FLAG_FEATURE INT NODE_TYPE { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, Rete::WME_Bindings() /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
                                  delete $3; }
   ;
 final_conditions:
@@ -377,6 +408,11 @@ condition:
   | '(' VARIABLE '^' VARIABLE symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), *$5))), Variables(Variable(*$2, *$4, ""))); delete $2; delete $4; delete $5; }
   | '(' VARIABLE '^' VARIABLE VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : *$4 == *$5 ? Rete::Symbol_Variable::Second : Rete::Symbol_Variable::Third)))), Variables(Variable(*$2, *$4, *$5))); delete $2; delete $4; delete $5; }
   ;
+variable_list:
+  { $$ = new list<string>; }
+  | variable_list VARIABLE { $1->push_back(*$2);
+                             $$ = $1;
+                             delete $2; }
 symbol:
   symbol_constant { $$ = $1; }
   | identifier { $$ = $1; }

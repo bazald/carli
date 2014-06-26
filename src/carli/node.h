@@ -114,6 +114,12 @@ namespace Carli {
     {
     }
 
+    Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_)
+      : Node(agent_, rete_action_, q_value_)
+    {
+      assert(q_value_->type == Q_Value::Type::FRINGE);
+    }
+
     Node_Fringe * clone() const override {
       return new Node_Fringe(agent, rete_action.lock(), q_value->clone());
     }
@@ -121,12 +127,6 @@ namespace Carli {
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
 
     void action(Agent &agent, const Rete::WME_Token &token) override;
-
-  protected:
-    Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_)
-      : Node(agent_, rete_action_, q_value_)
-    {
-    }
   };
 
   inline void __node_size_check() {

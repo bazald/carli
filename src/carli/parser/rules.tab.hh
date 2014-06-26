@@ -59,22 +59,24 @@ typedef std::unordered_map<Rete::Rete_Node_Ptr, std::pair<Carli::Node_Unsplit_Pt
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     COMMAND_EXCISE = 258,
-     COMMAND_EXCISE_ALL = 259,
-     COMMAND_EXIT = 260,
-     COMMAND_INSERT_WME = 261,
-     COMMAND_REMOVE_WME = 262,
-     COMMAND_SOURCE = 263,
-     COMMAND_SP = 264,
-     FLAG_FEATURE = 265,
-     FLOAT = 266,
-     INT = 267,
-     NODE_TYPE = 268,
-     STRING = 269,
-     STRING_PART_C = 270,
-     STRING_PART_S = 271,
-     VARIABLE = 272,
-     PREDICATE = 273
+     ARROW_RIGHT = 258,
+     ASSIGNMENT = 259,
+     COMMAND_EXCISE = 260,
+     COMMAND_EXCISE_ALL = 261,
+     COMMAND_EXIT = 262,
+     COMMAND_INSERT_WME = 263,
+     COMMAND_REMOVE_WME = 264,
+     COMMAND_SOURCE = 265,
+     COMMAND_SP = 266,
+     FLAG_FEATURE = 267,
+     FLOAT = 268,
+     INT = 269,
+     NODE_TYPE = 270,
+     STRING = 271,
+     STRING_PART_C = 272,
+     STRING_PART_S = 273,
+     VARIABLE = 274,
+     PREDICATE = 275
    };
 #endif
 
@@ -90,15 +92,16 @@ typedef union YYSTYPE
   std::tuple<int64_t, std::string, Carli::Feature *> *flag_ptr;
   double fval;
   int64_t ival;
+  std::list<std::string> *slist;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, Carli::Feature *>> *rule_ptr;
+  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, Carli::Feature *>, std::list<std::string>, double> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 
 
 /* Line 2053 of yacc.c  */
-#line 102 "rules.tab.hh"
+#line 105 "rules.tab.hh"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
