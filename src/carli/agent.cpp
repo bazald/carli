@@ -134,7 +134,7 @@ namespace Carli {
 
     expand_fringe(rete_action, token, chosen);
 
-    auto new_node = general.create_split(*this, m_wme_blink, true);
+    auto new_node = general.create_split(*this, m_wme_blink, false);
 
     excise_rule(rete_action.get_name(), false);
 

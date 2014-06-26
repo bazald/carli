@@ -236,7 +236,8 @@ command:
                             abort();
                         }
 
-                        Rete::Rete_Node_Ptr_C test_node = parent;
+                        Rete::Rete_Node_Ptr test_node = parent;
+                        bool terminal = true;
                         if(node_type == "split") {
                           const auto filter = dynamic_cast<Rete::Rete_Filter *>(parent->parent_right().get());
                           bool terminal = true;
@@ -246,29 +247,11 @@ command:
                                        wme.symbols[0] != wme.symbols[1] || wme.symbols[0] != wme.symbols[2];
                           }
 
-                          const auto new_q_value = new Carli::Q_Value(0.0, Carli::Q_Value::Type::SPLIT, q_value_depth, feature);
-                          new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Split>(agent, new_action, new_q_value, terminal);
-                          new_action->data = new_action_data;
-
                           if(!terminal)
                             test_node = test_node->parent_left();
                         }
-                        else if(node_type == "unsplit") {
-                          new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, new_action, q_value_depth, feature);
-                          new_action->data = new_action_data;
-                          gufv[parent->parent_left()].first = new_action_data;
-
+                        else if(node_type == "unsplit")
                           test_node = test_node->parent_left();
-                        }
-                        else {
-                          assert(node_type == "fringe");
-                          new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Fringe>(agent, new_action, q_value_depth, feature);
-                          new_action->data = new_action_data;
-                          gufv[parent->parent_left()].second[feature].values.push_back(new_action_data);
-                        }
 
                         if(feature) {
                           if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node.get()))
@@ -297,6 +280,26 @@ command:
                             AXIS_FOUND:
                               ;
                           }
+                        }
+
+                        if(node_type == "split") {
+                          const auto new_q_value = new Carli::Q_Value(0.0, Carli::Q_Value::Type::SPLIT, q_value_depth, feature);
+                          new_action = agent.make_standard_action(parent, name, true, variable_indices);
+                          auto new_action_data = std::make_shared<Carli::Node_Split>(agent, new_action, new_q_value, terminal);
+                          new_action->data = new_action_data;
+                        }
+                        else if(node_type == "unsplit") {
+                          new_action = agent.make_standard_action(parent, name, true, variable_indices);
+                          auto new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, new_action, q_value_depth, feature);
+                          new_action->data = new_action_data;
+                          gufv[test_node].first = new_action_data;
+                        }
+                        else {
+                          assert(node_type == "fringe");
+                          new_action = agent.make_standard_action(parent, name, true, variable_indices);
+                          auto new_action_data = std::make_shared<Carli::Node_Fringe>(agent, new_action, q_value_depth, feature);
+                          new_action->data = new_action_data;
+                          gufv[test_node->parent_left()].second[feature].values.push_back(new_action_data);
                         }
                       }
 
