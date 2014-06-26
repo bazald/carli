@@ -1,5 +1,7 @@
 #include "blocks_world.h"
 
+#include "../carli/parser/rete_parser.h"
+
 namespace Blocks_World {
 
   using Carli::Metastate;
@@ -89,6 +91,9 @@ namespace Blocks_World {
   }
 
   void Agent::generate_rete() {
+#if 1
+    rete_parse_file(*this, "rules/blocks-world.carli");
+#else
     auto env = dynamic_pointer_cast<const Environment>(get_env());
 
     Rete::WME_Bindings state_bindings;
@@ -206,6 +211,7 @@ namespace Blocks_World {
 //        }, join_blink).get();
 //      }
 //    }
+#endif
   }
 
   void Agent::generate_features() {
@@ -215,7 +221,6 @@ namespace Blocks_World {
     const auto &goal = env->get_goal();
     std::list<Rete::WME_Ptr_C> wmes_current;
 
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_input_attr, m_input_id));
     std::ostringstream oss;
     for(size_t block = 1; block != m_block_ids.size(); ++block) {
       for(size_t dest = 0; dest != m_block_ids.size(); ++dest) {
@@ -224,7 +229,7 @@ namespace Blocks_World {
         oss << "move-" << block << '-' << dest;
         Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
         oss.str("");
-        wmes_current.push_back(std::make_shared<Rete::WME>(m_input_id, m_action_attr, action_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, action_id));
         wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_block_attr, m_block_ids[block]));
         wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_dest_attr, m_block_ids[dest]));
       }
