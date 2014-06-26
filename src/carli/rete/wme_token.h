@@ -21,6 +21,9 @@ namespace Rete {
     WME_Token(const WME_Ptr_C &wme);
     WME_Token(const WME_Token_Ptr_C &first, const WME_Token_Ptr_C &second);
 
+    WME_Token_Ptr_C shared() const {return shared_from_this();}
+    WME_Token_Ptr shared() {return shared_from_this();}
+
     const WME_Ptr_C & get_wme() const {
       assert(m_size == 1);
       return m_wme;

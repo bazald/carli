@@ -152,9 +152,9 @@ namespace Carli {
 
   void Agent::expand_fringe(Rete::Rete_Action &rete_action, const Rete::WME_Token &
 #ifdef DEBUG_OUTPUT
-                                                                                              token
+                                                                                   token
 #endif
-                                                                                                   , const Fringe_Values::iterator &specialization)
+                                                                                        , const Fringe_Values::iterator &specialization)
   {
     auto &general = debuggable_cast<Node_Unsplit &>(*rete_action.data);
     const std::string general_name = general.rete_action.lock()->get_name();
@@ -171,7 +171,7 @@ namespace Carli {
     std::cerr << "Refining:";
     for(auto &leaf : leaves) {
       std::cerr << ' ';
-      if(leaf->q_value->feature->matches(token))
+      if(leaf->rete_action.lock()->matches_wme_token(token.shared()))
         std::cerr << '*';
       std::cerr << *leaf->q_value->feature;
     }
@@ -179,7 +179,7 @@ namespace Carli {
     for(auto &fringe_axis : general.fringe_values) {
       for(auto &fringe : fringe_axis.second.values) {
         std::cerr << ' ';
-        if(fringe->q_value->feature->matches(token))
+        if(fringe->rete_action.lock()->matches_wme_token(token.shared()))
           std::cerr << '*';
         std::cerr << *fringe->q_value->feature;
       }
@@ -1032,7 +1032,7 @@ namespace Carli {
     size_t matches = 0;
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
       for(auto &fringe : fringe_axis->second.values) {
-        if(!fringe->q_value->feature->matches(token))
+        if(!fringe->rete_action.lock()->matches_wme_token(token.shared()))
           continue;
         ++matches;
 
@@ -1105,7 +1105,7 @@ namespace Carli {
     std::unordered_set<tracked_ptr<Feature>> touched;
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
       for(auto &fringe : fringe_axis->second.values) {
-        if(!fringe->q_value->feature->matches(token))
+        if(!fringe->rete_action.lock()->matches_wme_token(token.shared()))
           continue;
         ++matches;
 

@@ -255,15 +255,33 @@ namespace Rete {
 
   protected:
     template<typename CONTAINER, typename KEY>
+    typename CONTAINER::const_iterator find(CONTAINER &tokens, const KEY &token) const {
+//      return tokens.find(token);
+      return std::find(tokens.begin(), tokens.end(), token);
+    }
+
+    template<typename CONTAINER, typename KEY>
     typename CONTAINER::iterator find(CONTAINER &tokens, const KEY &token) {
 //      return tokens.find(token);
       return std::find(tokens.begin(), tokens.end(), token);
     }
 
     template<typename CONTAINER, typename KEY>
+    typename CONTAINER::const_iterator find_deref(CONTAINER &tokens, const KEY &token) const {
+//      return tokens.find(token);
+      return std::find_if(tokens.begin(), tokens.end(), [&token](const WME_Token_Ptr_C &tok){return *tok == *token;});
+    }
+
+    template<typename CONTAINER, typename KEY>
     typename CONTAINER::iterator find_deref(CONTAINER &tokens, const KEY &token) {
 //      return tokens.find(token);
       return std::find_if(tokens.begin(), tokens.end(), [&token](const WME_Token_Ptr_C &tok){return *tok == *token;});
+    }
+
+    template<typename CONTAINER, typename KEY>
+    typename CONTAINER::const_iterator find_key(CONTAINER &tokens, const KEY &token) const {
+//      return tokens.find(token);
+      return std::find_if(tokens.begin(), tokens.end(), [&token](const typename CONTAINER::value_type &tok){return tok.first == token;});
     }
 
     template<typename CONTAINER, typename KEY>

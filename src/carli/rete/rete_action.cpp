@@ -81,6 +81,10 @@ namespace Rete {
     return input_tokens.empty();
   }
 
+  bool Rete_Action::matches_wme_token(const WME_Token_Ptr_C &wme_token) const {
+    return find(input_tokens, wme_token) != input_tokens.end();
+  }
+
   void Rete_Action::pass_tokens(Rete_Agent &, Rete_Node * const &) {
     abort();
   }

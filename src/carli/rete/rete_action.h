@@ -33,6 +33,7 @@ namespace Rete {
 
     void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
     bool remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
+    bool matches_wme_token(const WME_Token_Ptr_C &wme_token) const;
 
     void pass_tokens(Rete_Agent &agent, Rete_Node * const &) override;
     void unpass_tokens(Rete_Agent &agent, Rete_Node * const &) override;

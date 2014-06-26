@@ -202,7 +202,7 @@ command:
                       }
 
                       Rete::Rete_Action_Ptr new_action;
-                      if(!feature) {
+                      if(node_type.empty()) {
                         /// Non-RL node
                         auto node = agent.make_action_retraction(name, true,
                                                                  [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
@@ -212,30 +212,31 @@ command:
                                                                  }, parent, Rete::Variable_Indices());
                       }
                       else {
-                        feature->axis = variable_indices.find((*variable_names.rbegin())[0])->second;
-
-                        if(const auto feature_e = dynamic_cast<Carli::Feature_Enumerated<Carli::Feature> *>(feature)) {
-                          /// TODO: Handle variable-to-variable relations
-                          if(const auto predicate = dynamic_cast<Rete::Rete_Predicate *>(parent.get())) {
-                            const auto rhs = predicate->get_rhs().get();
-                            const auto symbol_i = dynamic_cast<const Rete::Symbol_Constant_Int *>(rhs);
-                            assert(symbol_i);
-                            feature_e->value = symbol_i->value;
+                        if(feature) {
+                          if(const auto feature_e = dynamic_cast<Carli::Feature_Enumerated<Carli::Feature> *>(feature)) {
+                            /// TODO: Handle variable-to-variable relations
+                            if(const auto predicate = dynamic_cast<Rete::Rete_Predicate *>(parent.get())) {
+                              const auto rhs = predicate->get_rhs().get();
+                              const auto symbol_i = dynamic_cast<const Rete::Symbol_Constant_Int *>(rhs);
+                              assert(symbol_i);
+                              feature_e->value = symbol_i->value;
+                            }
+                            else if(dynamic_cast<Rete::Rete_Existential_Join *>(parent.get()))
+                              feature_e->value = true;
+                            else if(dynamic_cast<Rete::Rete_Negation_Join *>(parent.get()))
+                              feature_e->value = false;
+                            else
+                              abort();
                           }
-                          else if(dynamic_cast<Rete::Rete_Existential_Join *>(parent.get()))
-                            feature_e->value = true;
-                          else if(dynamic_cast<Rete::Rete_Negation_Join *>(parent.get()))
-                            feature_e->value = false;
+                          else if(const auto feature_r = dynamic_cast<Carli::Feature_Ranged<Carli::Feature> *>(feature)) {
+                            const auto &predicate = dynamic_cast<Rete::Rete_Predicate &>(*parent);
+                            feature_r->upper = predicate.get_predicate() == Rete::Rete_Predicate::GTE;
+                          }
                           else
                             abort();
                         }
-                        else if(const auto feature_r = dynamic_cast<Carli::Feature_Ranged<Carli::Feature> *>(feature)) {
-                          const auto &predicate = dynamic_cast<Rete::Rete_Predicate &>(*parent);
-                          feature_r->upper = predicate.get_predicate() == Rete::Rete_Predicate::GTE;
-                        }
-                        else
-                          abort();
 
+                        Rete::Rete_Node_Ptr_C test_node = parent;
                         if(node_type == "split") {
                           const auto filter = dynamic_cast<Rete::Rete_Filter *>(parent->parent_right().get());
                           bool terminal = true;
@@ -249,12 +250,17 @@ command:
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
                           auto new_action_data = std::make_shared<Carli::Node_Split>(agent, new_action, new_q_value, terminal);
                           new_action->data = new_action_data;
+
+                          if(!terminal)
+                            test_node = test_node->parent_left();
                         }
                         else if(node_type == "unsplit") {
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
                           auto new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, new_action, q_value_depth, feature);
                           new_action->data = new_action_data;
                           gufv[parent->parent_left()].first = new_action_data;
+
+                          test_node = test_node->parent_left();
                         }
                         else {
                           assert(node_type == "fringe");
@@ -262,6 +268,35 @@ command:
                           auto new_action_data = std::make_shared<Carli::Node_Fringe>(agent, new_action, q_value_depth, feature);
                           new_action->data = new_action_data;
                           gufv[parent->parent_left()].second[feature].values.push_back(new_action_data);
+                        }
+
+                        if(feature) {
+                          if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node.get()))
+                            feature->axis = predicate->get_lhs_index();
+                          else {
+                            while(!dynamic_cast<const Rete::Rete_Filter *>(test_node->parent_right().get()))
+                              test_node = test_node->parent_right();
+
+                            if(const auto join = dynamic_cast<const Rete::Rete_Existential_Join *>(test_node.get())) {
+                              for(const auto binding : join->get_bindings()) {
+                                if(binding.second == Rete::WME_Token_Index(0, 0)) {
+                                  feature->axis = binding.first;
+                                  goto AXIS_FOUND;
+                                }
+                              }
+                            }
+                            else if(const auto join = dynamic_cast<const Rete::Rete_Negation_Join *>(test_node.get())) {
+                              for(const auto binding : join->get_bindings()) {
+                                if(binding.second == Rete::WME_Token_Index(0, 0)) {
+                                  feature->axis = binding.first;
+                                  goto AXIS_FOUND;
+                                }
+                              }
+                            }
+                            abort();
+                            AXIS_FOUND:
+                              ;
+                          }
                         }
                       }
 
@@ -285,7 +320,7 @@ flag:
                                                delete $3; }
   | FLAG_FEATURE INT NODE_TYPE INT INT INT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $5, $6, $4, false /*FIXUP later*/, true));
                                              delete $3; }
-  | FLAG_FEATURE INT NODE_TYPE { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Enumerated<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, 0 /*FIXUP later*/));
+  | FLAG_FEATURE INT NODE_TYPE { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
                                  delete $3; }
   ;
 final_conditions:
