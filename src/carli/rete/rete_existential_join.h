@@ -12,7 +12,7 @@ namespace Rete {
     friend RETE_LINKAGE void bind_to_existential_join(Rete_Agent &agent, const Rete_Existential_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
   public:
-    Rete_Existential_Join(WME_Bindings bindings_);
+    Rete_Existential_Join(WME_Bindings bindings_, const bool &match_tokens_);
 
     void destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) override;
 
@@ -36,7 +36,7 @@ namespace Rete {
 
     bool is_active() const override;
 
-    static Rete_Existential_Join_Ptr find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+    static Rete_Existential_Join_Ptr find_existing(const WME_Bindings &bindings, const bool &match_tokens, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
     const WME_Bindings & get_bindings() const {return bindings;}
 
@@ -55,11 +55,12 @@ namespace Rete {
     std::list<std::pair<WME_Token_Ptr_C, size_t>, Zeni::Pool_Allocator<std::pair<WME_Token_Ptr_C, size_t>>> input0_tokens;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input1_tokens;
 
-    struct Connected {
-      Connected() : connected0(true), connected1(false) {}
+    struct Data {
+      Data(const bool &match_tokens_) : connected0(true), connected1(false), match_tokens(match_tokens_) {}
 
       bool connected0 : 1;
       bool connected1 : 1;
+      bool match_tokens : 1;
     } data;
   };
 

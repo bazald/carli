@@ -1,3 +1,8 @@
+# Blocks world
+# Blocks world with irrelevant objects (blocks)
+# Blocks world with irrelevant features
+# Blocks world with randomly shifting features (irrelevant changes)
+
 sp {blocks-world*rl-action*general
   :feature 1 unsplit
   (<s> ^action <action>)
@@ -9,7 +14,7 @@ sp {blocks-world*rl-action*general
   (<dest> ^height <dest-height>)
   +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
-  = 0.0                            # The root is fixed and featureless--it will not be involved in future joins
+  = 0.0
 }
 
 sp {blocks-world*rl-fringe*block-clear
@@ -23,7 +28,7 @@ sp {blocks-world*rl-fringe*block-clear
   (<dest> ^height <dest-height>)
   +(<block> ^clear true)
 -->
-  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+  = 0.0
 }
 
 sp {blocks-world*rl-fringe*block-not-clear
@@ -37,7 +42,7 @@ sp {blocks-world*rl-fringe*block-not-clear
   (<dest> ^height <dest-height>)
   -(<block> ^clear true)
 -->
-  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+  = 0.0
 }
 
 #sp {blocks-world*rl-fringe*dest-clear
@@ -51,7 +56,7 @@ sp {blocks-world*rl-fringe*block-not-clear
 #  (<dest> ^height <dest-height>)
 #  +(<dest> ^clear true)
 #-->
-#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+#  = 0.0
 #}
 
 #sp {blocks-world*rl-fringe*dest-not-clear
@@ -65,7 +70,7 @@ sp {blocks-world*rl-fringe*block-not-clear
 #  (<dest> ^height <dest-height>)
 #  -(<dest> ^clear true)
 #-->
-#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+#  = 0.0
 #}
 
 #sp {blocks-world*rl-fringe*block-in-place
@@ -79,7 +84,7 @@ sp {blocks-world*rl-fringe*block-not-clear
 #  (<dest> ^height <dest-height>)
 #  +(<block> ^in-place true)
 #-->
-#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+#  = 0.0
 #}
 
 #sp {blocks-world*rl-fringe*block-not-in-place
@@ -93,7 +98,7 @@ sp {blocks-world*rl-fringe*block-not-clear
 #  (<dest> ^height <dest-height>)
 #  -(<block> ^in-place true)
 #-->
-#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+#  = 0.0
 #}
 
 sp {blocks-world*rl-fringe*dest-in-place
@@ -107,7 +112,7 @@ sp {blocks-world*rl-fringe*dest-in-place
   (<dest> ^height <dest-height>)
   +(<dest> ^in-place true)
 -->
-  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+  = 0.0
 }
 
 sp {blocks-world*rl-fringe*dest-not-in-place
@@ -121,7 +126,7 @@ sp {blocks-world*rl-fringe*dest-not-in-place
   (<dest> ^height <dest-height>)
   -(<dest> ^in-place true)
 -->
-  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+  = 0.0
 }
 
 sp {blocks-world*rl-fringe*block-name*1
@@ -135,7 +140,7 @@ sp {blocks-world*rl-fringe*block-name*1
   (<dest> ^height <dest-height>)
   (<block-name> == 1)
 -->
-  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+  = 0.0
 }
 
 sp {blocks-world*rl-fringe*block-name*2
@@ -149,7 +154,7 @@ sp {blocks-world*rl-fringe*block-name*2
   (<dest> ^height <dest-height>)
   (<block-name> == 2)
 -->
-  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+  = 0.0
 }
 
 sp {blocks-world*rl-fringe*block-name*3
@@ -163,7 +168,7 @@ sp {blocks-world*rl-fringe*block-name*3
   (<dest> ^height <dest-height>)
   (<block-name> == 3)
 -->
-  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+  = 0.0
 }
 
 sp {blocks-world*rl-fringe*dest-name*0
@@ -177,7 +182,7 @@ sp {blocks-world*rl-fringe*dest-name*0
   (<dest> ^height <dest-height>)
   (<dest-name> == 0)
 -->
-  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+  = 0.0
 }
 
 sp {blocks-world*rl-fringe*dest-name*1
@@ -191,7 +196,7 @@ sp {blocks-world*rl-fringe*dest-name*1
   (<dest> ^height <dest-height>)
   (<dest-name> == 1)
 -->
-  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+  = 0.0
 }
 
 sp {blocks-world*rl-fringe*dest-name*2
@@ -205,7 +210,7 @@ sp {blocks-world*rl-fringe*dest-name*2
   (<dest> ^height <dest-height>)
   (<dest-name> == 2)
 -->
-  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+  = 0.0
 }
 
 sp {blocks-world*rl-fringe*dest-name*3
@@ -219,7 +224,7 @@ sp {blocks-world*rl-fringe*dest-name*3
   (<dest> ^height <dest-height>)
   (<dest-name> == 3)
 -->
-  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+  = 0.0
 }
 
 #sp {blocks-world*rl-fringe*block-height-lower
@@ -233,7 +238,7 @@ sp {blocks-world*rl-fringe*dest-name*3
 #  (<dest> ^height <dest-height>)
 #  (<block-height> < 3)
 #-->
-#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+#  = 0.0
 #}
 
 #sp {blocks-world*rl-fringe*block-height-upper
@@ -247,7 +252,7 @@ sp {blocks-world*rl-fringe*dest-name*3
 #  (<dest> ^height <dest-height>)
 #  (<block-height> >= 3)
 #-->
-#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+#  = 0.0
 #}
 
 #sp {blocks-world*rl-fringe*dest-height-lower
@@ -261,7 +266,7 @@ sp {blocks-world*rl-fringe*dest-name*3
 #  (<dest> ^height <dest-height>)
 #  (<dest-height> < 3)
 #-->
-#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+#  = 0.0
 #}
 
 #sp {blocks-world*rl-fringe*dest-height-upper
@@ -275,5 +280,5 @@ sp {blocks-world*rl-fringe*dest-name*3
 #  (<dest> ^height <dest-height>)
 #  (<dest-height> >= 3)
 #-->
-#  <action> = 0.0                   # List multivalued attributes for bindings in future joins
+#  = 0.0
 #}

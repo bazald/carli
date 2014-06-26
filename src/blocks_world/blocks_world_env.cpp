@@ -130,7 +130,7 @@ namespace Blocks_World {
 
     Carli::Node_Unsplit_Ptr root_action_data;
     {
-      auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
+      auto join_blink = make_existential_join(Rete::WME_Bindings(), false, join_last, filter_blink);
 
       auto root_action = make_standard_action(join_blink, next_rule_name("blocks-world*rl-action*u"), false);
       root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, 1, nullptr);
@@ -161,7 +161,7 @@ namespace Blocks_World {
       auto feature = new In_Place(block, true);
       state_bindings.clear();
       state_bindings.insert(Rete::WME_Binding(feature->axis, Rete::WME_Token_Index(0, 0)));
-      auto join_block_in_place = make_existential_join(state_bindings, join_last, filter_in_place);
+      auto join_block_in_place = make_existential_join(state_bindings, false, join_last, filter_in_place);
       make_standard_fringe(join_block_in_place, next_rule_name("blocks-world*rl-action*f"), false, root_action_data, feature);
 
       feature = new In_Place(block, false);
@@ -199,7 +199,7 @@ namespace Blocks_World {
 //
 //      for(int j = 0; j != 4; ++j) {
 //        auto dest_name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(5, 2), get_block_name(j), block_name_is);
-//        auto join_blink = make_existential_join(Rete::WME_Bindings(), dest_name_is, filter_blink);
+//        auto join_blink = make_existential_join(Rete::WME_Bindings(), false, dest_name_is, filter_blink);
 //
 //        auto rl = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, 1));
 //        rl->action = make_action_retraction([this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {

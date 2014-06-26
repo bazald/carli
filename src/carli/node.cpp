@@ -30,7 +30,7 @@ namespace Carli {
     if(q_value->type == Q_Value::Type::FRINGE) {
       if(!terminal) {
         const auto filter_blink = agent.make_filter(*wme_blink);
-        parent = agent.make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
+        parent = agent.make_existential_join(Rete::WME_Bindings(), false, parent, filter_blink);
       }
 
       new_q_value = new Q_Value(0.0, Q_Value::Type::SPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr);
@@ -61,7 +61,7 @@ namespace Carli {
       (q_value->type == Q_Value::Type::SPLIT && debuggable_cast<Node_Split *>(this)->terminal))
     {
       auto filter_blink = agent.make_filter(*wme_blink);
-      parent = agent.make_existential_join(Rete::WME_Bindings(), parent, filter_blink);
+      parent = agent.make_existential_join(Rete::WME_Bindings(), false, parent, filter_blink);
     }
 
     if(q_value->type == Q_Value::Type::FRINGE)
@@ -126,7 +126,7 @@ namespace Carli {
       if(leaf.q_value->depth == 1)
         new_test = ancestor_right;
       else
-        new_test = agent.make_existential_join(q_value->feature->bindings, ancestor_left, ancestor_right);
+        new_test = agent.make_existential_join(q_value->feature->bindings, true, ancestor_left, ancestor_right);
     }
 
     /// Create the actual action for the new fringe node

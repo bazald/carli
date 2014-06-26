@@ -5,7 +5,12 @@
 
 namespace Rete {
 
-  Rete_Existential_Join::Rete_Existential_Join(WME_Bindings bindings_) : bindings(bindings_) {}
+  Rete_Existential_Join::Rete_Existential_Join(WME_Bindings bindings_, const bool &match_tokens_)
+   : bindings(bindings_),
+   data(match_tokens_)
+  {
+    assert(bindings.empty() || !data.match_tokens);
+  }
 
   void Rete_Existential_Join::destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) {
     erase_output(output);
@@ -131,11 +136,11 @@ namespace Rete {
     return false;
   }
 
-  Rete_Existential_Join_Ptr Rete_Existential_Join::find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
+  Rete_Existential_Join_Ptr Rete_Existential_Join::find_existing(const WME_Bindings &bindings, const bool &match_tokens, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
     for(auto &o0 : out0->get_outputs_all()) {
       if(auto existing_existential_join = std::dynamic_pointer_cast<Rete_Existential_Join>(o0)) {
         if(std::find(out1->get_outputs_all().begin(), out1->get_outputs_all().end(), existing_existential_join) != out1->get_outputs_all().end()) {
-          if(bindings == existing_existential_join->bindings)
+          if(bindings == existing_existential_join->bindings && match_tokens == existing_existential_join->data.match_tokens)
             return existing_existential_join;
         }
       }
@@ -145,9 +150,15 @@ namespace Rete {
   }
 
   void Rete_Existential_Join::join_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs) {
-    for(auto &binding : bindings) {
-      if(*(*lhs.first)[binding.first] != *(*rhs)[binding.second])
+    if(data.match_tokens) {
+      if(lhs.first != rhs)
         return;
+    }
+    else {
+      for(auto &binding : bindings) {
+        if(*(*lhs.first)[binding.first] != *(*rhs)[binding.second])
+          return;
+      }
     }
 
     if(++lhs.second == 1u) {
@@ -157,9 +168,15 @@ namespace Rete {
   }
 
   void Rete_Existential_Join::unjoin_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs) {
-    for(auto &binding : bindings) {
-      if(*(*lhs.first)[binding.first] != *(*rhs)[binding.second])
+    if(data.match_tokens) {
+      if(lhs.first != rhs)
         return;
+    }
+    else {
+      for(auto &binding : bindings) {
+        if(*(*lhs.first)[binding.first] != *(*rhs)[binding.second])
+          return;
+      }
     }
 
     if(--lhs.second == 0) {

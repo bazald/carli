@@ -399,7 +399,7 @@ namespace Mario {
 
     Carli::Node_Unsplit_Ptr root_action_data;
     {
-      auto join_blink = make_existential_join(Rete::WME_Bindings(), join_last, filter_blink);
+      auto join_blink = make_existential_join(Rete::WME_Bindings(), false, join_last, filter_blink);
 
       auto root_action = make_standard_action(join_blink, next_rule_name("infinite-mario*rl-action*u"), false);
       root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, 1, nullptr);

@@ -68,15 +68,16 @@ typedef std::unordered_map<Rete::Rete_Node_Ptr, std::pair<Carli::Node_Unsplit_Pt
      COMMAND_REMOVE_WME = 264,
      COMMAND_SOURCE = 265,
      COMMAND_SP = 266,
-     FLAG_FEATURE = 267,
-     FLOAT = 268,
-     INT = 269,
-     NODE_TYPE = 270,
-     STRING = 271,
-     STRING_PART_C = 272,
-     STRING_PART_S = 273,
-     VARIABLE = 274,
-     PREDICATE = 275
+     EXISTENTIAL_MATCH = 267,
+     FLAG_FEATURE = 268,
+     FLOAT = 269,
+     INT = 270,
+     NODE_TYPE = 271,
+     STRING = 272,
+     STRING_PART_C = 273,
+     STRING_PART_S = 274,
+     VARIABLE = 275,
+     PREDICATE = 276
    };
 #endif
 
@@ -95,13 +96,13 @@ typedef union YYSTYPE
   std::list<std::string> *slist;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, Carli::Feature *>, std::list<std::string>, double> *rule_ptr;
+  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, Carli::Feature *>, double> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 
 
 /* Line 2053 of yacc.c  */
-#line 105 "rules.tab.hh"
+#line 106 "rules.tab.hh"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
