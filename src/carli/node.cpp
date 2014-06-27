@@ -126,7 +126,7 @@ namespace Carli {
       if(leaf.q_value->depth == 1)
         new_test = ancestor_right;
       else
-        new_test = agent.make_existential_join(q_value->feature->bindings, true, ancestor_left, ancestor_right);
+        new_test = agent.make_existential_join(Rete::WME_Bindings(), true, ancestor_left, ancestor_right);
     }
 
     /// Create the actual action for the new fringe node

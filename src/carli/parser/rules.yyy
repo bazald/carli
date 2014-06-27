@@ -330,11 +330,11 @@ rule:
   ;
 flag:
   /* :feature q_value->depth [feature->depth feature->lower_bound feature->upper_bound] */
-  FLAG_FEATURE INT NODE_TYPE INT FLOAT FLOAT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, Rete::WME_Bindings(), $5, $6, $4, false /*FIXUP later*/, false));
+  FLAG_FEATURE INT NODE_TYPE INT FLOAT FLOAT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $5, $6, $4, false /*FIXUP later*/, false));
                                                delete $3; }
-  | FLAG_FEATURE INT NODE_TYPE INT INT INT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, Rete::WME_Bindings(), $5, $6, $4, false /*FIXUP later*/, true));
+  | FLAG_FEATURE INT NODE_TYPE INT INT INT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $5, $6, $4, false /*FIXUP later*/, true));
                                              delete $3; }
-  | FLAG_FEATURE INT NODE_TYPE { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, Rete::WME_Bindings(), 0 /*FIXUP later*/) : nullptr);
+  | FLAG_FEATURE INT NODE_TYPE { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
                                  delete $3; }
   ;
 final_conditions:

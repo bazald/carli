@@ -1971,21 +1971,21 @@ yyreduce:
   case 15:
 /* Line 1787 of yacc.c  */
 #line 333 "rules.yyy"
-    { (yyval.flag_ptr) = new tuple<int64_t, string, Carli::Feature *>((yyvsp[(2) - (6)].ival), *(yyvsp[(3) - (6)].sval), new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, Rete::WME_Bindings(), (yyvsp[(5) - (6)].fval), (yyvsp[(6) - (6)].fval), (yyvsp[(4) - (6)].ival), false /*FIXUP later*/, false));
+    { (yyval.flag_ptr) = new tuple<int64_t, string, Carli::Feature *>((yyvsp[(2) - (6)].ival), *(yyvsp[(3) - (6)].sval), new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, (yyvsp[(5) - (6)].fval), (yyvsp[(6) - (6)].fval), (yyvsp[(4) - (6)].ival), false /*FIXUP later*/, false));
                                                delete (yyvsp[(3) - (6)].sval); }
     break;
 
   case 16:
 /* Line 1787 of yacc.c  */
 #line 335 "rules.yyy"
-    { (yyval.flag_ptr) = new tuple<int64_t, string, Carli::Feature *>((yyvsp[(2) - (6)].ival), *(yyvsp[(3) - (6)].sval), new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, Rete::WME_Bindings(), (yyvsp[(5) - (6)].ival), (yyvsp[(6) - (6)].ival), (yyvsp[(4) - (6)].ival), false /*FIXUP later*/, true));
+    { (yyval.flag_ptr) = new tuple<int64_t, string, Carli::Feature *>((yyvsp[(2) - (6)].ival), *(yyvsp[(3) - (6)].sval), new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, (yyvsp[(5) - (6)].ival), (yyvsp[(6) - (6)].ival), (yyvsp[(4) - (6)].ival), false /*FIXUP later*/, true));
                                              delete (yyvsp[(3) - (6)].sval); }
     break;
 
   case 17:
 /* Line 1787 of yacc.c  */
 #line 337 "rules.yyy"
-    { (yyval.flag_ptr) = new tuple<int64_t, string, Carli::Feature *>((yyvsp[(2) - (3)].ival), *(yyvsp[(3) - (3)].sval), (yyvsp[(2) - (3)].ival) > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, Rete::WME_Bindings(), 0 /*FIXUP later*/) : nullptr);
+    { (yyval.flag_ptr) = new tuple<int64_t, string, Carli::Feature *>((yyvsp[(2) - (3)].ival), *(yyvsp[(3) - (3)].sval), (yyvsp[(2) - (3)].ival) > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
                                  delete (yyvsp[(3) - (3)].sval); }
     break;
 
