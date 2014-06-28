@@ -126,7 +126,7 @@ namespace Rete {
     return nullptr;
   }
 
-  void bind_to_action(Rete_Agent &agent, const Rete_Action_Ptr &action, const Rete_Node_Ptr &out, const Variable_Indices &variables) {
+  void bind_to_action(Rete_Agent &agent, const Rete_Action_Ptr &action, const Rete_Node_Ptr &out, const Variable_Indices_Ptr_C &variables) {
     assert(action && !action->input);
     action->input = out.get();
     action->variables = variables;

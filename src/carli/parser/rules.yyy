@@ -105,12 +105,12 @@ static Rete::WME_Bindings join_bindings(const std::vector<std::array<std::string
   return bindings;
 }
 
-static Rete::Variable_Indices variables_to_indices(const vector<array<string, 3>> &variables) {
-  Rete::Variable_Indices indices;
+static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<array<string, 3>> &variables) {
+  const auto indices = std::make_shared<Rete::Variable_Indices>();
   for(size_t i = 0; i != variables.size(); ++i) {
     for(uint8_t ii = 0; ii != 3; ++ii) {
-      if(!variables[i][ii].empty() && indices.find(variables[i][ii]) == indices.end())
-        indices[variables[i][ii]] = Rete::WME_Token_Index(i, ii);
+      if(!variables[i][ii].empty() && indices->find(variables[i][ii]) == indices->end())
+        (*indices)[variables[i][ii]] = Rete::WME_Token_Index(i, ii);
     }
   }
   return indices;
@@ -213,7 +213,7 @@ command:
                                                                    cout << wme_vector << "->" << action.get_name() << endl;
                                                                  }, [](const Rete::Rete_Action &action, const Rete::WME_Token &wme_vector) {
                                                                    cout << wme_vector << "<-" << action.get_name() << endl;
-                                                                 }, parent, Rete::Variable_Indices());
+                                                                 }, parent, make_shared<Rete::Variable_Indices>());
                       }
                       else {
                         if(feature) {

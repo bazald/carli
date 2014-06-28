@@ -24,111 +24,6 @@ namespace Blocks_World {
 
   typedef int64_t block_id;
 
-  class Clear;
-  class In_Place;
-  class Name;
-  class Height;
-
-  class Feature;
-  class BLOCKS_WORLD_LINKAGE Feature : public Carli::Feature {
-  public:
-    enum Which {BLOCK = 0, DEST = 1};
-    
-    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
-
-    virtual Feature * clone() const = 0;
-  };
-
-  class BLOCKS_WORLD_LINKAGE Clear : public Carli::Feature_Enumerated<Feature> {
-  public:
-    Clear(const Which &block_, const bool &present_)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(1 + block_, 2), present_),
-     block(block_)
-    {
-    }
-
-    Clear * clone() const {
-      return new Clear(block, this->value != 0);
-    }
-
-    bool matches(const Rete::WME_Token &) const override {return true;}
-
-    void print(ostream &os) const {
-      os << "clear(" << block << ':' << value << ')';
-    }
-
-    Which block;
-  };
-
-  class BLOCKS_WORLD_LINKAGE In_Place : public Carli::Feature_Enumerated<Feature> {
-  public:
-    In_Place(const Which &block_, const bool &present_)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(1 + block_, 2), present_),
-     block(block_)
-    {
-    }
-
-    In_Place * clone() const {
-      return new In_Place(block, this->value != 0);
-    }
-
-    bool matches(const Rete::WME_Token &) const override {return true;}
-
-    void print(ostream &os) const {
-      os << "in-place(" << block << ':' << value << ')';
-    }
-
-    Which block;
-  };
-
-  class BLOCKS_WORLD_LINKAGE Name : public Carli::Feature_Enumerated<Feature> {
-  public:
-    Name(const Which &block_, const block_id &name_)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(3 + block_, 2), true),
-     block(block_),
-     name(name_)
-    {
-    }
-
-    Name * clone() const {
-      return new Name(block, name);
-    }
-
-    int64_t compare_value(const Carli::Feature &rhs) const {
-      return name - debuggable_cast<const Name &>(rhs).name;
-    }
-
-    bool matches(const Rete::WME_Token &) const override {return true;}
-
-    void print(ostream &os) const {
-      os << "name(" << block << ',' << name << ':' << value << ')';
-    }
-
-    Which block;
-    block_id name;
-  };
-
-  class BLOCKS_WORLD_LINKAGE Height : public Carli::Feature_Ranged<Feature> {
-  public:
-    Height(const Which &block_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Carli::Feature_Ranged<Feature>(Rete::WME_Token_Index(5 + block_, 2), bound_lower_, bound_upper_, depth_, upper_, true),
-     block(block_)
-    {
-    }
-
-    Height * clone() const {
-      return new Height(axis.first == 5 ? BLOCK : DEST, bound_lower, bound_upper, depth, upper);
-    }
-
-    bool matches(const Rete::WME_Token &) const override {return true;}
-
-    void print(ostream &os) const {
-      os << "height(" << Which(axis.first - 5) << ',' << bound_lower << ',' << bound_upper << ':' << depth << ')';
-    }
-
-    Which block;
-  };
-
   /** Stupid features:
     * BLOCK ^column C
     * BLOCK ^height H
@@ -149,9 +44,9 @@ namespace Blocks_World {
     {
     }
 
-    Move(const Rete::WME_Token &token)
-     : block(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(3, 2)]).value),
-     dest(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(4, 2)]).value)
+    Move(const Rete::Variable_Indices &variables, const Rete::WME_Token &token)
+     : block(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("block-name")->second]).value),
+     dest(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("dest-name")->second]).value)
     {
     }
 
@@ -209,9 +104,6 @@ namespace Blocks_World {
     void generate_features();
 
     void update();
-
-    const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
-    const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
 
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
     const Rete::Symbol_Constant_String_Ptr_C m_dest_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("dest"));

@@ -17,7 +17,7 @@ namespace Carli {
   }
 
   void Node::retraction(Agent &agent, const Rete::WME_Token &token) {
-    agent.purge_q_value_next(agent.get_action(token), q_value);
+    agent.purge_q_value_next(agent.get_action(*variables, token), q_value);
   }
 
   Node_Split_Ptr Node::create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink, const bool &terminal) {
@@ -154,7 +154,7 @@ namespace Carli {
 
   void Node_Split::action(Agent &agent, const Rete::WME_Token &token) {
     if(!rete_action.lock()->is_excised() && (terminal || !agent.respecialize(*rete_action.lock(), token)))
-      agent.insert_q_value_next(agent.get_action(token), q_value);
+      agent.insert_q_value_next(agent.get_action(*variables, token), q_value);
   }
 
   Node_Unsplit::Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
@@ -180,12 +180,12 @@ namespace Carli {
 
   void Node_Unsplit::action(Agent &agent, const Rete::WME_Token &token) {
     if(!rete_action.lock()->is_excised() && !agent.specialize(*rete_action.lock(), token))
-      agent.insert_q_value_next(agent.get_action(token), q_value);
+      agent.insert_q_value_next(agent.get_action(*variables, token), q_value);
   }
 
   void Node_Fringe::action(Agent &agent, const Rete::WME_Token &token) {
     if(!rete_action.lock()->is_excised())
-      agent.insert_q_value_next(agent.get_action(token), q_value);
+      agent.insert_q_value_next(agent.get_action(*variables, token), q_value);
   }
 
   Rete::Rete_Node_Ptr Node_Fringe::cluster_root_ancestor() const {

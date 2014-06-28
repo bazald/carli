@@ -1,6 +1,6 @@
 #include "blocks_world.h"
 
-#include "../carli/parser/rete_parser.h"
+#include "carli/parser/rete_parser.h"
 
 namespace Blocks_World {
 
@@ -79,7 +79,7 @@ namespace Blocks_World {
   }
 
   Agent::Agent(const std::shared_ptr<Carli::Environment> &env)
-   : Carli::Agent(env, [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(token);})
+   : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(variables, token);})
   {
     insert_wme(m_wme_blink);
     generate_rete();
@@ -91,127 +91,7 @@ namespace Blocks_World {
   }
 
   void Agent::generate_rete() {
-#if 1
     rete_parse_file(*this, "rules/blocks-world.carli");
-#else
-    auto env = dynamic_pointer_cast<const Environment>(get_env());
-
-    Rete::WME_Bindings state_bindings;
-
-    auto filter_action = make_filter(Rete::WME(m_first_var, m_action_attr, m_third_var));
-//    state_bindings.clear();
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
-    auto filter_block = make_filter(Rete::WME(m_first_var, m_block_attr, m_third_var));
-    auto join_action_block = make_join(state_bindings, filter_action, filter_block);
-    auto filter_dest = make_filter(Rete::WME(m_first_var, m_dest_attr, m_third_var));
-    auto join_action_dest = make_join(state_bindings, join_action_block, filter_dest);
-
-    auto filter_name = make_filter(Rete::WME(m_first_var, m_name_attr, m_third_var));
-    state_bindings.clear();
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(1, 2), Rete::WME_Token_Index(0, 0)));
-    auto join_block_name = make_join(state_bindings, join_action_dest, filter_name);
-    state_bindings.clear();
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(2, 2), Rete::WME_Token_Index(0, 0)));
-    auto join_dest_name = make_join(state_bindings, join_block_name, filter_name);
-
-    auto filter_height = make_filter(Rete::WME(m_first_var, m_height_attr, m_third_var));
-    state_bindings.clear();
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(1, 2), Rete::WME_Token_Index(0, 0)));
-    auto join_block_height = make_join(state_bindings, join_dest_name, filter_height);
-    state_bindings.clear();
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(2, 2), Rete::WME_Token_Index(0, 0)));
-    auto join_dest_height = make_join(state_bindings, join_block_height, filter_height);
-
-    auto &join_last = join_dest_height;
-
-    auto filter_blink = make_filter(*m_wme_blink);
-    auto filter_clear = make_filter(Rete::WME(m_first_var, m_clear_attr, m_third_var));
-    auto filter_in_place = make_filter(Rete::WME(m_first_var, m_in_place_attr, m_third_var));
-
-    Carli::Node_Unsplit_Ptr root_action_data;
-    {
-      auto join_blink = make_existential_join(Rete::WME_Bindings(), false, join_last, filter_blink);
-
-      auto root_action = make_standard_action(join_blink, next_rule_name("blocks-world*rl-action*u"), false);
-      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, 1, nullptr);
-      root_action->data = root_action_data;
-    }
-
-    const bool enable_distractors = get_Option_Ranged<bool>(Options::get_global(), "enable-distractors");
-
-    std::vector<Feature::Which> blocks = {{Feature::BLOCK, Feature::DEST}};
-
-    if(!enable_distractors)
-      blocks = {Feature::BLOCK};
-    for(const auto &block : blocks) {
-      auto feature = new Clear(block, true);
-      state_bindings.clear();
-      state_bindings.insert(Rete::WME_Binding(feature->axis, Rete::WME_Token_Index(0, 0)));
-      auto join_block_clear = make_existential_join(state_bindings, join_last, filter_clear);
-      make_standard_fringe(join_block_clear, next_rule_name("blocks-world*rl-action*f"), false, root_action_data, feature);
-
-      feature = new Clear(block, false);
-      auto neg = make_negation_join(state_bindings, join_last, filter_clear);
-      make_standard_fringe(neg, next_rule_name("blocks-world*rl-action*f"), false, root_action_data, feature);
-    }
-
-    if(!enable_distractors)
-      blocks = {Feature::DEST};
-    for(const auto &block : blocks) {
-      auto feature = new In_Place(block, true);
-      state_bindings.clear();
-      state_bindings.insert(Rete::WME_Binding(feature->axis, Rete::WME_Token_Index(0, 0)));
-      auto join_block_in_place = make_existential_join(state_bindings, false, join_last, filter_in_place);
-      make_standard_fringe(join_block_in_place, next_rule_name("blocks-world*rl-action*f"), false, root_action_data, feature);
-
-      feature = new In_Place(block, false);
-      auto neg = make_negation_join(state_bindings, join_last, filter_in_place);
-      make_standard_fringe(neg, next_rule_name("blocks-world*rl-action*f"), false, root_action_data, feature);
-    }
-
-    for(size_t block = 1; block != m_block_ids.size(); ++block) {
-      auto feature = new Name(Feature::BLOCK, m_block_names[block]->value);
-      auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->axis, m_block_names[block], join_last);
-      make_standard_fringe(name_is, next_rule_name("blocks-world*rl-action*f"), false, root_action_data, feature);
-    }
-
-    for(size_t block = 0; block != m_block_ids.size(); ++block) {
-      auto feature = new Name(Feature::DEST, m_block_names[block]->value);
-      auto name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, feature->axis, m_block_names[block], join_last);
-      make_standard_fringe(name_is, next_rule_name("blocks-world*rl-action*f"), false, root_action_data, feature);
-    }
-
-    if(enable_distractors) {
-      const int64_t num_blocks = env->num_blocks();
-      for(const auto &block : blocks) {
-        auto feature = new Height(block, 1.0, double(num_blocks / 2) + 2, 2, false);
-        auto predicate = make_predicate_vc(feature->predicate(), feature->axis, feature->symbol_constant(), join_last);
-        make_standard_fringe(predicate, next_rule_name("blocks-world*rl-action*f"), false, root_action_data, feature);
-
-        feature = new Height(block, double(num_blocks / 2) + 2, double(num_blocks), 2, true);
-        predicate = make_predicate_vc(feature->predicate(), feature->axis, feature->symbol_constant(), join_last);
-        make_standard_fringe(predicate, next_rule_name("blocks-world*rl-action*f"), false, root_action_data, feature);
-      }
-    }
-
-//    for(int i = 1; i != 4; ++i) {
-//      auto block_name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(4, 2), get_block_name(i), join_dest_in_place);
-//
-//      for(int j = 0; j != 4; ++j) {
-//        auto dest_name_is = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(5, 2), get_block_name(j), block_name_is);
-//        auto join_blink = make_existential_join(Rete::WME_Bindings(), false, dest_name_is, filter_blink);
-//
-//        auto rl = std::make_shared<Node_Split>(*this, new Q_Value(0.0, Q_Value::Type::SPLIT, 1));
-//        rl->action = make_action_retraction([this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//          const auto action = get_action(token);
-//          this->insert_q_value_next(action, rl->q_value);
-//        }, [this,get_action,rl](const Rete::Rete_Action &, const Rete::WME_Token &token) {
-//          const auto action = get_action(token);
-//          this->purge_q_value_next(action, rl->q_value);
-//        }, join_blink).get();
-//      }
-//    }
-#endif
   }
 
   void Agent::generate_features() {

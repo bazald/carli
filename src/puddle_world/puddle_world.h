@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace Puddle_World {
-  enum Direction : char {NORTH, SOUTH, EAST, WEST};
+  enum Direction : char {NORTH = 0, SOUTH = 1, EAST = 2, WEST = 3};
 }
 
 inline std::ostream & operator<<(std::ostream &os, const Puddle_World::Direction &direction);
@@ -28,63 +28,6 @@ namespace Puddle_World {
   using std::set;
   using std::shared_ptr;
 
-  class Feature;
-  class Position;
-  class Move_Direction;
-
-  class Feature : public Carli::Feature {
-  public:
-    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
-
-    virtual Feature * clone() const = 0;
-  };
-
-  class Position : public Carli::Feature_Ranged<Feature> {
-  public:
-    enum Axis : int64_t {X = 0, Y = 1};
-
-    Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, false)
-    {
-    }
-
-    Position * clone() const {
-      return new Position(Axis(axis.first), bound_lower, bound_upper, depth, upper);
-    }
-
-    void print(ostream &os) const {
-      switch(axis.first) {
-        case X: os << 'x'; break;
-        case Y: os << 'y'; break;
-        default: abort();
-      }
-
-      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
-    }
-  };
-
-  class Move_Direction : public Carli::Feature_Enumerated<Feature> {
-  public:
-    enum Index {index = 2};
-
-    Move_Direction(const Direction &direction)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(index, 2), direction)
-    {
-    }
-
-    Move_Direction * clone() const {
-      return new Move_Direction(Direction(value));
-    }
-
-    int64_t get_depth() const {
-      return 0;
-    }
-
-    void print(ostream &os) const {
-      os << "move(" << Direction(value) << ')';
-    }
-  };
-
   class Move : public Carli::Action {
   public:
     Move(const Direction &direction_ = NORTH)
@@ -92,8 +35,8 @@ namespace Puddle_World {
     {
     }
 
-    Move(const Rete::WME_Token &token)
-     : direction(Direction(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Move_Direction::index, 2)]).value))
+    Move(const Rete::Variable_Indices &variables, const Rete::WME_Token &token)
+     : direction(Direction(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("move")->second]).value))
     {
     }
 
@@ -189,14 +132,9 @@ namespace Puddle_World {
   private:
     void generate_cmac(const Rete::Rete_Node_Ptr &parent);
 
-    void generate_rete(const Rete::Rete_Node_Ptr &parent);
-
     void generate_features();
 
     void update();
-
-    const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
-    const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
 
     Rete::Symbol_Constant_Float_Ptr_C m_x_value = Rete::Symbol_Constant_Float_Ptr_C(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_position().first));
     Rete::Symbol_Constant_Float_Ptr_C m_y_value = Rete::Symbol_Constant_Float_Ptr_C(new Rete::Symbol_Constant_Float(dynamic_pointer_cast<Environment>(get_env())->get_position().second));

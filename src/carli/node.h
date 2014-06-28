@@ -44,6 +44,7 @@ namespace Carli {
     Node(Agent &agent_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_)
      : agent(agent_),
      rete_action(rete_action_),
+     variables(rete_action_->get_variables()),
      q_value(q_value_)
     {
     }
@@ -61,6 +62,7 @@ namespace Carli {
 
     Agent &agent;
     std::weak_ptr<Rete::Rete_Action> rete_action;
+    Rete::Variable_Indices_Ptr_C variables;
     tracked_ptr<Q_Value> q_value;
     bool delete_q_value = true;
   };

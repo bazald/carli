@@ -1,6 +1,7 @@
 #include "puddle_world.h"
 
 #include "carli/experiment.h"
+#include "carli/parser/rete_parser.h"
 
 namespace Puddle_World {
 
@@ -164,40 +165,39 @@ namespace Puddle_World {
   }
 
   Agent::Agent(const shared_ptr<Carli::Environment> &env)
-   : Carli::Agent(env, [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(token);})
+   : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(variables, token);})
   {
-    auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
-    auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
-    auto y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
-    auto move_attr = std::make_shared<Rete::Symbol_Constant_String>("move");
+    const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
+    const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
+
+    const auto move_attr = std::make_shared<Rete::Symbol_Constant_String>("move");
+    const auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
+    const auto y_attr = std::make_shared<Rete::Symbol_Constant_String>("y");
     const std::array<Rete::Symbol_Constant_Int_Ptr_C, 4> move_values = {{std::make_shared<Rete::Symbol_Constant_Int>(NORTH),
                                                                          std::make_shared<Rete::Symbol_Constant_Int>(SOUTH),
                                                                          std::make_shared<Rete::Symbol_Constant_Int>(EAST),
                                                                          std::make_shared<Rete::Symbol_Constant_Int>(WEST)}};
 
-    Rete::WME_Bindings state_bindings;
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
-    auto x = make_filter(Rete::WME(m_first_var, x_attr, m_third_var));
-    auto y = make_filter(Rete::WME(m_first_var, y_attr, m_third_var));
-    auto move = make_filter(Rete::WME(m_first_var, move_attr, m_third_var));
-    auto xy = make_join(state_bindings, x, y);
-    state_bindings.clear();
-    const bool cmac = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value();
-    for(const auto &move_value : move_values) {
-      auto m = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(0, 2), move_value, move);
-      auto xym = make_join(state_bindings, xy, m);
-      if(cmac)
-        generate_cmac(xym);
-      else
-        generate_rete(xym);
+    if(dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value()) {
+      const auto move = make_filter(Rete::WME(m_first_var, move_attr, m_third_var));
+      const auto x = make_filter(Rete::WME(m_first_var, x_attr, m_third_var));
+      const auto y = make_filter(Rete::WME(m_first_var, y_attr, m_third_var));
+      for(const auto &move_value : move_values) {
+        const auto move_pred = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(0, 2), move_value, move);
+        const auto move_x = make_join(Rete::WME_Bindings(), move_pred, x);
+        const auto x_y = make_join(Rete::WME_Bindings(), move_x, y);
+        generate_cmac(x_y);
+      }
     }
-
-    m_x_wme = std::make_shared<Rete::WME>(s_id, x_attr, m_x_value);
-    m_y_wme = std::make_shared<Rete::WME>(s_id, y_attr, m_y_value);
+    else
+      rete_parse_file(*this, "rules/puddle-world.carli");
+    
+    m_x_wme = std::make_shared<Rete::WME>(m_s_id, x_attr, m_x_value);
+    m_y_wme = std::make_shared<Rete::WME>(m_s_id, y_attr, m_y_value);
     insert_wme(m_x_wme);
     insert_wme(m_y_wme);
     for(const auto &move_value : move_values)
-      insert_wme(std::make_shared<Rete::WME>(s_id, move_attr, move_value));
+      insert_wme(std::make_shared<Rete::WME>(m_s_id, move_attr, move_value));
     insert_wme(m_wme_blink);
   }
 
@@ -243,13 +243,13 @@ namespace Puddle_World {
       for(int64_t i = 0; i != cmac_resolution; ++i) {
         const double left = (i - xy_offset) * xy_size;
         const double right = (i + 1 - xy_offset) * xy_size;
-        auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Position::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
-        auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Position::X, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
+        auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(1, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
+        auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(1, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
         for(int64_t j = 0; j != cmac_resolution; ++j) {
           const double top = (j - xy_offset) * xy_size;
           const double bottom = (j + 1 - xy_offset) * xy_size;
-          auto ygte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Position::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
-          auto ylt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Position::Y, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), ygte);
+          auto ygte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(2, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
+          auto ylt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(2, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), ygte);
 
           ///// This does redundant work for actions after the first.
           //for(const auto &action : m_action) {
@@ -259,51 +259,10 @@ namespace Puddle_World {
           //  m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
           //}
 
-          auto action = make_standard_action(ylt, next_rule_name("puddle-world*rl-action*cmac-"), false);
+          auto action = make_standard_action(ylt, next_rule_name("puddle-world*rl-action*cmac-"), false, std::make_shared<Rete::Variable_Indices>());
           action->data = std::make_shared<Node_Split>(*this, action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr), true);
         }
       }
-    }
-  }
-
-  void Agent::generate_rete(const Rete::Rete_Node_Ptr &parent) {
-    auto filter_blink = make_filter(*m_wme_blink);
-
-    Carli::Node_Unsplit_Ptr root_action_data;
-    {
-      auto join_blink = make_existential_join(Rete::WME_Bindings(), false, parent, filter_blink);
-
-      auto root_action = make_standard_action(join_blink, next_rule_name("puddle-world*rl-action*u"), false);
-      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, 1, nullptr);
-      root_action->data = root_action_data;
-    }
-
-    {
-      //Node_Ranged::Lines lines;
-      //lines.push_back(Node_Ranged::Line(std::make_pair(0.5, 0.0), std::make_pair(0.5, 1.0)));
-      auto feature = new Position(Position::X, 0.0, 0.5, 2, false);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("puddle-world*rl-action*f"), false, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(0.5, 1.0)), lines);
-    }
-
-    {
-      auto feature = new Position(Position::X, 0.5, 1.0, 2, true);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::X, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("puddle-world*rl-action*f"), false, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.5, 0.0), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
-    }
-
-    {
-      //Node_Ranged::Lines lines;
-      //lines.push_back(Node_Ranged::Line(std::make_pair(0.0, 0.5), std::make_pair(1.0, 0.5)));
-      auto feature = new Position(Position::Y, 0.0, 0.5, 2, false);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("puddle-world*rl-action*f"), false, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.0), std::make_pair(1.0, 0.5)), lines);
-    }
-
-    {
-      auto feature = new Position(Position::Y, 0.5, 1.0, 2, true);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::Y, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("puddle-world*rl-action*f"), false, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(0.0, 0.5), std::make_pair(1.0, 1.0)), Node_Ranged::Lines());
     }
   }
 

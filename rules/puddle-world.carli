@@ -1,0 +1,219 @@
+sp {puddle-world*rl-action*north*general
+  :feature 1 unsplit
+  (<s> ^move <move>)
+  (<move> == 0)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*north*x-lower
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 0)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<x> < 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*north*x-upper
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 0)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<x> >= 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*north*y-lower
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 0)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<y> < 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*north*y-upper
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 0)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<y> >= 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-action*south*general
+  :feature 1 unsplit
+  (<s> ^move <move>)
+  (<move> == 1)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*south*x-lower
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 1)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<x> < 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*south*x-upper
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 1)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<x> >= 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*south*y-lower
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 1)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<y> < 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*south*y-upper
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 1)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<y> >= 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-action*east*general
+  :feature 1 unsplit
+  (<s> ^move <move>)
+  (<move> == 2)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*east*x-lower
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 2)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<x> < 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*east*x-upper
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 2)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<x> >= 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*east*y-lower
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 2)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<y> < 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*east*y-upper
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 2)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<y> >= 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-action*west*general
+  :feature 1 unsplit
+  (<s> ^move <move>)
+  (<move> == 3)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*west*x-lower
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 3)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<x> < 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*west*x-upper
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 3)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<x> >= 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*west*y-lower
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 3)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<y> < 0.5)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*west*y-upper
+  :feature 2 fringe 1 0.0 1.0
+  (<s> ^move <move>)
+  (<move> == 3)
+  (<s> ^x <x>)
+  (<s> ^y <y>)
+  (<y> >= 0.5)
+-->
+  = 0.0
+}

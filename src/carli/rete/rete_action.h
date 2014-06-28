@@ -9,7 +9,7 @@ namespace Rete {
     Rete_Action(const Rete_Action &);
     Rete_Action & operator=(const Rete_Action &);
 
-    friend RETE_LINKAGE void bind_to_action(Rete_Agent &agent, const Rete_Action_Ptr &action, const Rete_Node_Ptr &out, const Variable_Indices &variables);
+    friend RETE_LINKAGE void bind_to_action(Rete_Agent &agent, const Rete_Action_Ptr &action, const Rete_Node_Ptr &out, const Variable_Indices_Ptr_C &variables);
     friend class Rete_Action_to_Agenda;
 
   public:
@@ -49,7 +49,7 @@ namespace Rete {
     static Rete_Action_Ptr find_existing(const Action &/*action_*/, const Action &/*retraction_*/, const Rete_Node_Ptr &/*out*/);
 
     const std::string & get_name() const {return name;}
-    const Variable_Indices & get_variables() const {return variables;}
+    const Variable_Indices_Ptr_C & get_variables() const {return variables;}
 
     void set_action(const Action &action_) {
       action = action_;
@@ -61,7 +61,7 @@ namespace Rete {
 
   private:
     Rete_Node * input = nullptr;
-    Variable_Indices variables;
+    Variable_Indices_Ptr_C variables;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input_tokens;
     const std::string name;
     Action action;
@@ -69,7 +69,7 @@ namespace Rete {
     bool excised = false;
   };
 
-  RETE_LINKAGE void bind_to_action(Rete_Agent &agent, const Rete_Action_Ptr &action, const Rete_Node_Ptr &out, const Variable_Indices &variables = Variable_Indices());
+  RETE_LINKAGE void bind_to_action(Rete_Agent &agent, const Rete_Action_Ptr &action, const Rete_Node_Ptr &out, const Variable_Indices_Ptr_C &variables);
 
   class RETE_LINKAGE Rete_Action_to_Agenda {
     friend class Agenda;

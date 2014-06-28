@@ -209,7 +209,7 @@ namespace Carli {
               auto predicate = make_predicate_vc(refined_ranged_data->predicate(), leaf->q_value->feature->axis, refined_ranged_data->symbol_constant(), leaf->rete_action.lock()->parent_left());
               std::ostringstream oss;
               oss << general_name_prefix << "*f" << intptr_t(predicate.get());
-              auto new_action = make_standard_action(predicate, oss.str(), false);
+              auto new_action = make_standard_action(predicate, oss.str(), false, rete_action.get_variables());
               auto new_node = std::make_shared<Node_Fringe>(*this, new_action, leaf->q_value->depth + 1, refined_feature);
               new_action->data = new_node;
               node_unsplit_fringe[new_node->q_value->feature.get()].values.push_back(new_node);
@@ -345,7 +345,7 @@ namespace Carli {
     return true;
   }
 
-  Agent::Agent(const std::shared_ptr<Environment> &environment, const std::function<Carli::Action_Ptr_C (const Rete::WME_Token &token)> &get_action_)
+  Agent::Agent(const std::shared_ptr<Environment> &environment, const std::function<Carli::Action_Ptr_C (const Rete::Variable_Indices &variables, const Rete::WME_Token &token)> &get_action_)
     : get_action(get_action_),
     m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy();}),
     m_exploration_policy([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(m_epsilon);}),
@@ -524,7 +524,7 @@ namespace Carli {
     return reward;
   }
 
-  Rete::Rete_Action_Ptr Agent::make_standard_action(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command, const Rete::Variable_Indices &variables) {
+  Rete::Rete_Action_Ptr Agent::make_standard_action(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command, const Rete::Variable_Indices_Ptr_C &variables) {
     return make_action_retraction(name, user_command,
       [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
         debuggable_cast<Node *>(action.data.get())->action(*this, token);
@@ -533,7 +533,7 @@ namespace Carli {
       }, parent, variables);
   }
 
-  Rete::Rete_Action_Ptr Agent::make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature, const Rete::Variable_Indices &variables) {
+  Rete::Rete_Action_Ptr Agent::make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature, const Rete::Variable_Indices_Ptr_C &variables) {
     auto new_leaf = make_standard_action(parent, name, user_command, variables);
     auto new_leaf_data = std::make_shared<Node_Fringe>(*this, new_leaf, 2, feature);
     new_leaf->data = new_leaf_data;

@@ -41,7 +41,7 @@ namespace Carli {
     void expand_fringe(Rete::Rete_Action &rete_action, const Rete::WME_Token &token, const Fringe_Values::iterator &specialization);
     bool collapse_rete(Rete::Rete_Action &rete_action); ///< Collapses and returns true unless there exist no nodes to collapse into a new fringe
 
-    Agent(const std::shared_ptr<Environment> &environment, const std::function<Carli::Action_Ptr_C (const Rete::WME_Token &token)> &get_action_);
+    Agent(const std::shared_ptr<Environment> &environment, const std::function<Carli::Action_Ptr_C (const Rete::Variable_Indices &variables, const Rete::WME_Token &token)> &get_action_);
 
     virtual ~Agent();
 
@@ -90,8 +90,8 @@ namespace Carli {
 
     reward_type act();
 
-    Rete::Rete_Action_Ptr make_standard_action(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command, const Rete::Variable_Indices &variables = Rete::Variable_Indices());
-    Rete::Rete_Action_Ptr make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature, const Rete::Variable_Indices &variables = Rete::Variable_Indices());
+    Rete::Rete_Action_Ptr make_standard_action(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command, const Rete::Variable_Indices_Ptr_C &variables);
+    Rete::Rete_Action_Ptr make_standard_fringe(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command, const Node_Unsplit_Ptr &root_action_data, const tracked_ptr<Feature> &feature, const Rete::Variable_Indices_Ptr_C &variables);
 
     void purge_q_value(const tracked_ptr<Q_Value> &q_value);
 
@@ -107,7 +107,7 @@ namespace Carli {
     void visit_increment_depth();
     void visit_reset_update_count();
 
-    const std::function<Carli::Action_Ptr_C (const Rete::WME_Token &token)> get_action;
+    const std::function<Carli::Action_Ptr_C (const Rete::Variable_Indices &variables, const Rete::WME_Token &token)> get_action;
     int64_t q_value_count = 0;
 
   protected:

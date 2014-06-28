@@ -9,7 +9,7 @@ namespace Rete {
   {
   }
 
-  Rete_Action_Ptr Rete_Agent::make_action(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Node_Ptr &out, const Variable_Indices &variables) {
+  Rete_Action_Ptr Rete_Agent::make_action(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Node_Ptr &out, const Variable_Indices_Ptr_C &variables) {
     if(auto existing = Rete_Action::find_existing(action, [](const Rete_Action &, const WME_Token &){}, out))
       return existing;
 //      std::cerr << "DEBUG: make_action" << std::endl;
@@ -20,7 +20,7 @@ namespace Rete {
     return action_fun;
   }
 
-  Rete_Action_Ptr Rete_Agent::make_action_retraction(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out, const Variable_Indices &variables) {
+  Rete_Action_Ptr Rete_Agent::make_action_retraction(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out, const Variable_Indices_Ptr_C &variables) {
     if(auto existing = Rete_Action::find_existing(action, retraction, out))
       return existing;
     auto action_fun = std::make_shared<Rete_Action>(name, action, retraction);
