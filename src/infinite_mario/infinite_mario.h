@@ -250,13 +250,13 @@ namespace Mario {
     {
     }
 
-    Button_Presses(const Rete::WME_Token &token) {
+    Button_Presses(const Rete::Variable_Indices &variables, const Rete::WME_Token &token) {
       memset(&action, 0, sizeof(action));
-      const int64_t dpad = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Feature_Button::OUT_DPAD, 2)]).value;
+      const int64_t dpad = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("dpad")->second]).value;
       if(dpad != BUTTON_NONE)
         action.at(size_t(dpad)) = true;
-      action[BUTTON_JUMP] = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Feature_Button::OUT_JUMP, 2)]).value != 0;
-      action[BUTTON_SPEED] = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Feature_Button::OUT_SPEED, 2)]).value != 0;
+      action[BUTTON_JUMP] = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("jump")->second]).value != 0;
+      action[BUTTON_SPEED] = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("speed")->second]).value != 0;
     }
 
     Button_Presses * clone() const {

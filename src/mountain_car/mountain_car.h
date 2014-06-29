@@ -27,80 +27,6 @@ namespace Mountain_Car {
   using std::set;
   using std::shared_ptr;
 
-  class Feature;
-  class Position;
-  class Velocity;
-  class Acceleration_Direction;
-
-  class Feature : public Carli::Feature {
-  public:
-    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
-
-    virtual Feature * clone() const = 0;
-  };
-
-  class Position : public Carli::Feature_Ranged<Feature> {
-  public:
-    enum Index {index = 0};
-
-    Position(const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_, false)
-    {
-    }
-
-    Position * clone() const {
-      return new Position(bound_lower, bound_upper, depth, upper);
-    }
-
-    void print(ostream &os) const {
-      os << "x(" << bound_lower << ',' << bound_upper << ':' << depth << ')';
-    }
-  };
-
-  class Velocity : public Carli::Feature_Ranged<Feature> {
-  public:
-    enum Index {index = 1};
-
-    Velocity(const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(index, 2), bound_lower_, bound_upper_, depth_, upper_, false)
-    {
-    }
-
-    Velocity * clone() const {
-      return new Velocity(bound_lower, bound_upper, depth, upper);
-    }
-
-    void print(ostream &os) const {
-      os << "x-dot(" << bound_lower << ',' << bound_upper << ':' << depth << ')';
-    }
-  };
-
-  class Acceleration_Direction : public Carli::Feature_Enumerated<Feature> {
-  public:
-    enum Index {index = 2};
-
-    Acceleration_Direction(const Direction &direction)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(index, 2), direction)
-    {
-    }
-
-    Acceleration_Direction * clone() const {
-      return new Acceleration_Direction(Direction(value));
-    }
-
-    int64_t get_depth() const {
-      return 0;
-    }
-
-    int64_t compare_value(const Carli::Feature &) const {
-      return 0;
-    }
-
-    void print(ostream &os) const {
-      os << "acceleration(" << Direction(value) << ')';
-    }
-  };
-
   class Acceleration : public Carli::Action {
   public:
     Acceleration(const Direction &direction_ = IDLE)
@@ -108,8 +34,8 @@ namespace Mountain_Car {
     {
     }
 
-    Acceleration(const Rete::WME_Token &token)
-     : direction(Direction(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Acceleration_Direction::index, 2)]).value))
+    Acceleration(const Rete::Variable_Indices &variables, const Rete::WME_Token &token)
+     : direction(Direction(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("acceleration")->second]).value))
     {
     }
 
@@ -190,8 +116,6 @@ namespace Mountain_Car {
   private:
     void generate_cmac(const Rete::Rete_Node_Ptr &parent);
 
-    void generate_rete(const Rete::Rete_Node_Ptr &parent);
-
     void generate_features();
 
     void update();
@@ -200,9 +124,6 @@ namespace Mountain_Car {
     const double m_max_x = 0.6;
     const double m_min_x_dot = -0.07;
     const double m_max_x_dot = 0.07;
-
-    const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
-    const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
 
     const Rete::Symbol_Constant_String_Ptr_C m_x_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x"));
     const Rete::Symbol_Constant_String_Ptr_C m_x_dot_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x-dot"));

@@ -179,13 +179,15 @@ namespace Puddle_World {
                                                                          std::make_shared<Rete::Symbol_Constant_Int>(WEST)}};
 
     if(dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value()) {
+      Rete::WME_Bindings state_bindings;
+      state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
       const auto move = make_filter(Rete::WME(m_first_var, move_attr, m_third_var));
       const auto x = make_filter(Rete::WME(m_first_var, x_attr, m_third_var));
       const auto y = make_filter(Rete::WME(m_first_var, y_attr, m_third_var));
       for(const auto &move_value : move_values) {
         const auto move_pred = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(0, 2), move_value, move);
-        const auto move_x = make_join(Rete::WME_Bindings(), move_pred, x);
-        const auto x_y = make_join(Rete::WME_Bindings(), move_x, y);
+        const auto move_x = make_join(state_bindings, move_pred, x);
+        const auto x_y = make_join(state_bindings, move_x, y);
         generate_cmac(x_y);
       }
     }
@@ -237,6 +239,11 @@ namespace Puddle_World {
     assert(cmac_offset < cmac_tilings);
     const double xy_size = 1.0 / cmac_resolution;
 
+    const auto variables = std::make_shared<Rete::Variable_Indices>();
+    (*variables)["move"] = Rete::WME_Token_Index(0, 2);
+    (*variables)["x"] = Rete::WME_Token_Index(1, 2);
+    (*variables)["y"] = Rete::WME_Token_Index(2, 2);
+
     for(int64_t tiling = -cmac_offset, tend = tiling + cmac_tilings; tiling != tend; ++tiling) {
       const double xy_offset = xy_size * tiling;
 
@@ -259,7 +266,7 @@ namespace Puddle_World {
           //  m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
           //}
 
-          auto action = make_standard_action(ylt, next_rule_name("puddle-world*rl-action*cmac-"), false, std::make_shared<Rete::Variable_Indices>());
+          auto action = make_standard_action(ylt, next_rule_name("puddle-world*rl-action*cmac-"), false, variables);
           action->data = std::make_shared<Node_Split>(*this, action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr), true);
         }
       }

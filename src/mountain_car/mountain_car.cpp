@@ -1,6 +1,7 @@
 #include "mountain_car.h"
 
 #include "carli/experiment.h"
+#include "carli/parser/rete_parser.h"
 
 namespace Mountain_Car {
 
@@ -62,9 +63,11 @@ namespace Mountain_Car {
   }
 
   Agent::Agent(const shared_ptr<Carli::Environment> &env)
-   : Carli::Agent(env, [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Acceleration>(token);})
+   : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Acceleration>(variables, token);})
   {
-    auto s_id = std::make_shared<Rete::Symbol_Identifier>("S1");
+    const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
+    const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
+
     auto x_attr = std::make_shared<Rete::Symbol_Constant_String>("x");
     auto x_dot_attr = std::make_shared<Rete::Symbol_Constant_String>("x-dot");
     auto acceleration_attr = std::make_shared<Rete::Symbol_Constant_String>("acceleration");
@@ -72,29 +75,28 @@ namespace Mountain_Car {
                                                                                  std::make_shared<Rete::Symbol_Constant_Int>(IDLE),
                                                                                  std::make_shared<Rete::Symbol_Constant_Int>(RIGHT)}};
 
-    Rete::WME_Bindings state_bindings;
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
-    auto x = make_filter(Rete::WME(m_first_var, x_attr, m_third_var));
-    auto x_dot = make_filter(Rete::WME(m_first_var, x_dot_attr, m_third_var));
-    auto acceleration = make_filter(Rete::WME(m_first_var, acceleration_attr, m_third_var));
-    auto xxdot = make_join(state_bindings, x, x_dot);
-    state_bindings.clear();
-    const bool cmac = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value();
-    for(const auto &acceleration_value : acceleration_values) {
-      auto a = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(0, 2), acceleration_value, acceleration);
-      auto xxdota = make_join(state_bindings, xxdot, a);
-      if(cmac)
-        generate_cmac(xxdota);
-      else
-        generate_rete(xxdota);
+    if(dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value()) {
+      Rete::WME_Bindings state_bindings;
+      state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
+      auto acceleration = make_filter(Rete::WME(m_first_var, acceleration_attr, m_third_var));
+      auto x = make_filter(Rete::WME(m_first_var, x_attr, m_third_var));
+      auto x_dot = make_filter(Rete::WME(m_first_var, x_dot_attr, m_third_var));
+      for(const auto &acceleration_value : acceleration_values) {
+        auto acceleration_pred = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(0, 2), acceleration_value, acceleration);
+        auto acceleration_x = make_join(state_bindings, acceleration_pred, x);
+        auto x_xdot = make_join(state_bindings, acceleration_x, x_dot);
+        generate_cmac(x_xdot);
+      }
     }
+    else
+      rete_parse_file(*this, "rules/mountain-car.carli");
 
-    m_x_wme = std::make_shared<Rete::WME>(s_id, x_attr, m_x_value);
-    m_x_dot_wme = std::make_shared<Rete::WME>(s_id, x_dot_attr, m_x_dot_value);
+    m_x_wme = std::make_shared<Rete::WME>(m_s_id, x_attr, m_x_value);
+    m_x_dot_wme = std::make_shared<Rete::WME>(m_s_id, x_dot_attr, m_x_dot_value);
     insert_wme(m_x_wme);
     insert_wme(m_x_dot_wme);
     for(const auto &acceleration_value : acceleration_values)
-      insert_wme(std::make_shared<Rete::WME>(s_id, acceleration_attr, acceleration_value));
+      insert_wme(std::make_shared<Rete::WME>(m_s_id, acceleration_attr, acceleration_value));
     insert_wme(m_wme_blink);
   }
 
@@ -137,6 +139,11 @@ namespace Mountain_Car {
     const double x_size = (m_max_x - m_min_x) / cmac_resolution;
     const double xdot_size = (m_max_x_dot - m_min_x_dot) / cmac_resolution;
 
+    const auto variables = std::make_shared<Rete::Variable_Indices>();
+    (*variables)["acceleration"] = Rete::WME_Token_Index(0, 2);
+    (*variables)["x"] = Rete::WME_Token_Index(1, 2);
+    (*variables)["x-dot"] = Rete::WME_Token_Index(2, 2);
+
     for(int64_t tiling = -cmac_offset, tend = tiling + cmac_tilings; tiling != tend; ++tiling) {
       const double x_offset = x_size * tiling;
       const double xdot_offset = xdot_size * tiling;
@@ -144,13 +151,13 @@ namespace Mountain_Car {
       for(int64_t i = 0; i != cmac_resolution; ++i) {
         const double left = m_min_x + (i - x_offset) * x_size;
         const double right = m_min_x + (i + 1 - x_offset) * x_size;
-        auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Position::index, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
-        auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Position::index, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
+        auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(1, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
+        auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(1, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
         for(int64_t j = 0; j != cmac_resolution; ++j) {
           const double top = m_min_x_dot + (j - xdot_offset) * xdot_size;
           const double bottom = m_min_x_dot + (j + 1 - xdot_offset) * xdot_size;
-          auto xdotgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(Velocity::index, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
-          auto xdotlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(Velocity::index, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), xdotgte);
+          auto xdotgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(2, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
+          auto xdotlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(2, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), xdotgte);
 
           ///// This does redundant work for actions after the first.
           //for(const auto &action : m_action) {
@@ -160,54 +167,10 @@ namespace Mountain_Car {
           //  m_lines[action].insert(Node_Ranged::Line(std::make_pair(right, top), std::make_pair(left, top)));
           //}
 
-          auto action = make_standard_action(xdotlt, next_rule_name("mountain-car*rl-action*cmac-"), false);
+          auto action = make_standard_action(xdotlt, next_rule_name("mountain-car*rl-action*cmac-"), false, variables);
           action->data = std::make_shared<Node_Split>(*this, action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr), true);
         }
       }
-    }
-  }
-
-  void Agent::generate_rete(const Rete::Rete_Node_Ptr &parent) {
-    auto filter_blink = make_filter(*m_wme_blink);
-
-    const double m_half_x = (m_min_x + m_max_x) / 2.0;
-    const double m_half_x_dot = (m_min_x_dot + m_max_x_dot) / 2.0;
-
-    Carli::Node_Unsplit_Ptr root_action_data;
-    {
-      auto join_blink = make_existential_join(Rete::WME_Bindings(), false, parent, filter_blink);
-
-      auto root_action = make_standard_action(join_blink, next_rule_name("mountain-car*rl-action*u"), false);
-      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, 1, nullptr);
-      root_action->data = root_action_data;
-    }
-
-    {
-      //Node_Ranged::Lines lines;
-      //lines.push_back(Node_Ranged::Line(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)));
-      auto feature = new Position(m_min_x, m_half_x, 2, false);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::index, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("mountain-car*rl-action*f"), false, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_half_x, m_max_x_dot)), lines);
-    }
-
-    {
-      auto feature = new Position(m_half_x, m_max_x, 2, true);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Position::index, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("mountain-car*rl-action*f"), false, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_half_x, m_min_x_dot), std::make_pair(m_max_x, m_max_x_dot)), Node_Ranged::Lines());
-    }
-
-    {
-      //Node_Ranged::Lines lines;
-      //lines.push_back(Node_Ranged::Line(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_half_x_dot)));
-      auto feature = new Velocity(m_min_x_dot, m_half_x_dot, 2, false);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Velocity::index, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("mountain-car*rl-action*f"), false, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_min_x, m_min_x_dot), std::make_pair(m_max_x, m_half_x_dot)), lines);
-    }
-
-    {
-      auto feature = new Velocity(m_half_x_dot, m_max_x_dot, 2, true);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(Velocity::index, 2), feature->symbol_constant(), root_action_data->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("mountain-car*rl-action*f"), false, root_action_data, feature); //, Node_Ranged::Range(std::make_pair(m_min_x, m_half_x_dot), std::make_pair(m_max_x, m_max_x_dot)), Node_Ranged::Lines());
     }
   }
 

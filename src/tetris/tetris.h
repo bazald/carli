@@ -210,10 +210,10 @@ namespace Tetris {
     {
     }
 
-    Place(const Rete::WME_Token &token)
-     : position(int16_t(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Position::X, 2)]).value),
-                int16_t(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Position::Y, 2)]).value)),
-     type(Tetromino_Type(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[Rete::WME_Token_Index(Type::CURRENT, 2)]).value))
+    Place(const Rete::Variable_Indices &variables, const Rete::WME_Token &token)
+     : position(int16_t(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("x")->second]).value),
+                int16_t(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("y")->second]).value)),
+     type(Tetromino_Type(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("type")->second]).value))
     {
     }
 
