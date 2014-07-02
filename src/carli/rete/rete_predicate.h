@@ -25,6 +25,8 @@ namespace Rete {
     Rete_Node_Ptr parent_right() override {return input->shared();}
 
     int64_t height() const override {return input->height() + 1;}
+    Rete_Node_Ptr_C token_owner() const override {return input->token_owner();}
+    int64_t token_size() const override {return input->token_size();}
 
     void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
     bool remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;

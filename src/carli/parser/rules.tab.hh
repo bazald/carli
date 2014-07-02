@@ -41,17 +41,16 @@ extern int retedebug;
 #endif
 /* "%code requires" blocks.  */
 /* Line 2053 of yacc.c  */
-#line 15 "rules.yyy"
+#line 14 "rules.yyy"
 
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
 typedef void *yyscan_t;
 #endif
-typedef std::unordered_map<Rete::Rete_Node_Ptr, std::pair<Carli::Node_Unsplit_Ptr, Carli::Fringe_Values>> Grandparent_to_UFV;
 
 
 /* Line 2053 of yacc.c  */
-#line 55 "rules.tab.hh"
+#line 54 "rules.tab.hh"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -86,23 +85,23 @@ typedef std::unordered_map<Rete::Rete_Node_Ptr, std::pair<Carli::Node_Unsplit_Pt
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 121 "rules.yyy"
+#line 119 "rules.yyy"
 
   char cval;
   const char *csval;
-  std::tuple<int64_t, std::string, Carli::Feature *> *flag_ptr;
+  std::tuple<int64_t, std::string, std::string, Carli::Feature *> *flag_ptr;
   double fval;
   int64_t ival;
   std::list<std::string> *slist;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, Carli::Feature *>, double> *rule_ptr;
+  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, std::string, Carli::Feature *>, double> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 
 
 /* Line 2053 of yacc.c  */
-#line 106 "rules.tab.hh"
+#line 105 "rules.tab.hh"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -131,7 +130,7 @@ int reteparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int reteparse (yyscan_t yyscanner, Carli::Agent &agent, const std::string &filename, const std::string &source_path, Grandparent_to_UFV &gufv);
+int reteparse (yyscan_t yyscanner, Carli::Agent &agent, const std::string &filename, const std::string &source_path);
 #else
 int reteparse ();
 #endif

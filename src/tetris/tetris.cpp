@@ -489,7 +489,7 @@ namespace Tetris {
   }
 
   Agent::Agent(const std::shared_ptr<Carli::Environment> &env)
-   : Carli::Agent(env, [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Place>(token);})
+   : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Place>(variables, token);})
   {
     insert_wme(m_wme_blink);
     generate_rete();
@@ -523,11 +523,11 @@ namespace Tetris {
 //    state_bindings.clear();
     auto filter_action = make_filter(Rete::WME(m_first_var, m_action_attr, m_third_var));
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
-    auto filter_type_current = make_filter(Rete::WME(m_first_var, m_type_current_attr, m_third_var));
-    auto join_type_current = make_join(state_bindings, filter_action, filter_type_current);
+    auto filter_type = make_filter(Rete::WME(m_first_var, m_type_attr, m_third_var));
+    auto join_type = make_join(state_bindings, filter_action, filter_type);
     state_bindings.clear();
     auto filter_type_next = make_filter(Rete::WME(m_first_var, m_type_next_attr, m_third_var));
-    auto join_type_next = make_join(state_bindings, join_type_current, filter_type_next);
+    auto join_type_next = make_join(state_bindings, join_type, filter_type_next);
     state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
     auto filter_width = make_filter(Rete::WME(m_first_var, m_width_attr, m_third_var));
     auto join_width = make_join(state_bindings, join_type_next, filter_width);
@@ -610,7 +610,7 @@ namespace Tetris {
       Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
       oss.str("");
       wmes_current.push_back(std::make_shared<Rete::WME>(m_input_id, m_action_attr, action_id));
-      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_type_current_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.type)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.type)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_width_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.first)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.second)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.position.first)));

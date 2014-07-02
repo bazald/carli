@@ -347,7 +347,7 @@ namespace Tetris {
     const Rete::Symbol_Identifier_Ptr_C m_input_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("I1"));
     const Rete::Symbol_Constant_String_Ptr_C m_input_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("input"));
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
-    const Rete::Symbol_Constant_String_Ptr_C m_type_current_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("type-current"));
+    const Rete::Symbol_Constant_String_Ptr_C m_type_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("type"));
     const Rete::Symbol_Constant_String_Ptr_C m_type_next_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("type-next"));
     const Rete::Symbol_Constant_String_Ptr_C m_width_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("width"));
     const Rete::Symbol_Constant_String_Ptr_C m_height_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("height"));

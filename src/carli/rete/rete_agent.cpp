@@ -99,6 +99,13 @@ namespace Rete {
     return predicate;
   }
 
+  Rete_Action_Ptr Rete_Agent::get_rule(const std::string &name) {
+    const auto found = rules.find(name);
+    if(found != rules.end())
+      return found->second;
+    return Rete_Action_Ptr();
+  }
+
   void Rete_Agent::excise_all() {
     Agenda::Locker locker(agenda);
     filters.clear();

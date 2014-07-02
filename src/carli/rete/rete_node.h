@@ -63,7 +63,7 @@ namespace Rete {
     virtual Rete_Node_Ptr cluster_root_ancestor() const = 0;
   };
 
-  class RETE_LINKAGE Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<char [256]>
+  class RETE_LINKAGE Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<char [288]>
   {
     Rete_Node(const Rete_Node &);
     Rete_Node & operator=(const Rete_Node &);
@@ -148,6 +148,8 @@ namespace Rete {
     virtual Rete_Node_Ptr parent_right() = 0;
 
     virtual int64_t height() const = 0;
+    virtual Rete_Node_Ptr_C token_owner() const = 0;
+    virtual int64_t token_size() const = 0;
 
     virtual void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0;
     virtual bool remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0; ///< Returns true if removed the last
@@ -220,36 +222,7 @@ namespace Rete {
     }
 
     template <typename VISITOR>
-    VISITOR visit_preorder(VISITOR visitor, const bool &strict, const intptr_t &visitor_value_) {
-      std::deque<Rete_Node *> nodes;
-      nodes.push_back(this);
-
-      while(!nodes.empty()) {
-        Rete_Node * const node = nodes.front();
-        nodes.pop_front();
-
-        if(node->visitor_value == visitor_value_)
-          continue;
-
-        if(!strict && !dynamic_cast<Rete_Filter *>(node)) {
-          if(node->parent_left()->visitor_value != visitor_value_) {
-            nodes.push_front(node->parent_left().get());
-            continue;
-          }
-          else if(node->parent_right()->visitor_value != visitor_value_) {
-            nodes.push_front(node->parent_right().get());
-            continue;
-          }
-        }
-
-        node->visitor_value = visitor_value_;
-        visitor(*node);
-        for(auto &o : node->outputs_all)
-          nodes.push_back(o.get());
-      }
-
-      return visitor;
-    }
+    VISITOR visit_preorder(VISITOR visitor, const bool &strict, const intptr_t &visitor_value_);
 
     Rete_Data_Ptr data;
 
@@ -298,6 +271,47 @@ namespace Rete {
   private:
     intptr_t visitor_value = 0;
   };
+
+}
+
+#endif
+#include "rete_filter.h"
+#if !defined(RETE_NODE_H_PART2) && defined(RETE_FILTER_H_DONE)
+#define RETE_NODE_H_PART2
+
+namespace Rete {
+
+  template <typename VISITOR>
+  VISITOR Rete_Node::visit_preorder(VISITOR visitor, const bool &strict, const intptr_t &visitor_value_) {
+    std::deque<Rete_Node *> nodes;
+    nodes.push_back(this);
+
+    while(!nodes.empty()) {
+      Rete_Node * const node = nodes.front();
+      nodes.pop_front();
+
+      if(node->visitor_value == visitor_value_)
+        continue;
+
+      if(!strict && !dynamic_cast<Rete_Filter *>(node)) {
+        if(node->parent_left()->visitor_value != visitor_value_) {
+          nodes.push_front(node->parent_left().get());
+          continue;
+        }
+        else if(node->parent_right()->visitor_value != visitor_value_) {
+          nodes.push_front(node->parent_right().get());
+          continue;
+        }
+      }
+
+      node->visitor_value = visitor_value_;
+      visitor(*node);
+      for(auto &o : node->outputs_all)
+        nodes.push_back(o.get());
+    }
+
+    return visitor;
+  }
 
 }
 

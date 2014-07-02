@@ -27,6 +27,7 @@ namespace Rete {
     Rete_Predicate_Ptr make_predicate_vv(const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out);
 
     Agenda & get_agenda() {return agenda;}
+    Rete_Action_Ptr get_rule(const std::string &name);
 
     void excise_all();
     void excise_filter(const Rete_Filter_Ptr &filter);

@@ -22,6 +22,8 @@ namespace Rete {
     Rete_Node_Ptr parent_right() override {abort();}
 
     int64_t height() const override {return 1;}
+    Rete_Node_Ptr_C token_owner() const override {return shared();}
+    int64_t token_size() const override {return 1;}
 
     void insert_wme(Rete_Agent &agent, const WME_Ptr_C &wme);
     void remove_wme(Rete_Agent &agent, const WME_Ptr_C &wme);
@@ -48,4 +50,5 @@ namespace Rete {
 
 }
 
+#define RETE_FILTER_H_DONE
 #endif

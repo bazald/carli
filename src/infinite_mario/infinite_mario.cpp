@@ -298,7 +298,7 @@ namespace Mario {
   }
 
   Agent::Agent(const std::shared_ptr<State> &prev_, const std::shared_ptr<State> &current_)
-   : Carli::Agent(current_, [this](const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Button_Presses>(token);}),
+   : Carli::Agent(current_, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Button_Presses>(variables, token);}),
    m_current_state(current_),
    m_prev_state(prev_)
   {

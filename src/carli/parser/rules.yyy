@@ -10,14 +10,12 @@
 %parse-param { Carli::Agent &agent }
 %parse-param { const std::string &filename }
 %parse-param { const std::string &source_path }
-%parse-param { Grandparent_to_UFV &gufv }
 
 %code requires {
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
 typedef void *yyscan_t;
 #endif
-typedef std::unordered_map<Rete::Rete_Node_Ptr, std::pair<Carli::Node_Unsplit_Ptr, Carli::Fringe_Values>> Grandparent_to_UFV;
 }
 
 %code {
@@ -25,7 +23,7 @@ typedef std::unordered_map<Rete::Rete_Node_Ptr, std::pair<Carli::Node_Unsplit_Pt
 
 static volatile sig_atomic_t g_rete_exit = false;
 
-static void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::Rete_Agent &/*agent*/, const std::string &filename, const std::string &/*source_path*/, Grandparent_to_UFV &/*gufv*/, const char *msg) {
+static void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner, Rete::Rete_Agent &/*agent*/, const std::string &filename, const std::string &/*source_path*/, const char *msg) {
   if(filename.empty())
     cout << "rete-parse error: " << msg << endl;
   else
@@ -121,13 +119,13 @@ static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<array<stri
 %union {
   char cval;
   const char *csval;
-  std::tuple<int64_t, std::string, Carli::Feature *> *flag_ptr;
+  std::tuple<int64_t, std::string, std::string, Carli::Feature *> *flag_ptr;
   double fval;
   int64_t ival;
   std::list<std::string> *slist;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, Carli::Feature *>, double> *rule_ptr;
+  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, std::string, Carli::Feature *>, double> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 }
@@ -182,7 +180,7 @@ command:
                                        if(rv) {
                                          ostringstream oss;
                                          oss << "Error sourcing '" << *$2 << "'.";
-                                         reteerror(&yylloc, yyscanner, agent, filename, source_path, gufv, oss.str().c_str());
+                                         reteerror(&yylloc, yyscanner, agent, filename, source_path, oss.str().c_str());
                                          delete $2;
                                          YYABORT;
                                        }
@@ -195,7 +193,8 @@ command:
                       const string &name = get<1>(*$2);
                       const int64_t &q_value_depth = get<0>(get<2>(*$2));
                       const string &node_type = get<1>(get<2>(*$2));
-                      const auto &feature = get<2>(get<2>(*$2));
+                      const string &parent_node_name = get<2>(get<2>(*$2));
+                      const auto &feature = get<3>(get<2>(*$2));
                       const auto &q_value_value = get<3>(*$2);
                       const auto variable_indices = variables_to_indices(variable_names);
 
@@ -216,30 +215,7 @@ command:
                                                                  }, parent, make_shared<Rete::Variable_Indices>());
                       }
                       else {
-                        if(feature) {
-                          if(const auto feature_e = dynamic_cast<Carli::Feature_Enumerated<Carli::Feature> *>(feature)) {
-                            /// TODO: Handle variable-to-variable relations
-                            if(const auto predicate = dynamic_cast<Rete::Rete_Predicate *>(parent.get())) {
-                              const auto rhs = predicate->get_rhs().get();
-                              const auto symbol_i = dynamic_cast<const Rete::Symbol_Constant_Int *>(rhs);
-                              assert(symbol_i);
-                              feature_e->value = symbol_i->value;
-                            }
-                            else if(dynamic_cast<Rete::Rete_Existential_Join *>(parent.get()))
-                              feature_e->value = true;
-                            else if(dynamic_cast<Rete::Rete_Negation_Join *>(parent.get()))
-                              feature_e->value = false;
-                            else
-                              abort();
-                          }
-                          else if(const auto feature_r = dynamic_cast<Carli::Feature_Ranged<Carli::Feature> *>(feature)) {
-                            const auto &predicate = dynamic_cast<Rete::Rete_Predicate &>(*parent);
-                            feature_r->upper = predicate.get_predicate() == Rete::Rete_Predicate::GTE;
-                          }
-                          else
-                            abort();
-                        }
-
+                        /// Pass through blink nodes
                         Rete::Rete_Node_Ptr test_node = parent;
                         bool terminal = true;
                         if(node_type == "split") {
@@ -257,7 +233,37 @@ command:
                         else if(node_type == "unsplit")
                           test_node = test_node->parent_left();
 
+                        int64_t token_offset = 0;
+                        if(const auto join = dynamic_cast<Rete::Rete_Join *>(test_node.get())) {
+                          token_offset += test_node->parent_left()->token_size();
+                          test_node = test_node->parent_right(); ///< Assume more than one new WME is required for the new test
+                        }
+
                         if(feature) {
+                          /// Fill in Feature values / predicate tests
+                          if(const auto feature_e = dynamic_cast<Carli::Feature_Enumerated<Carli::Feature> *>(feature)) {
+                            /// TODO: Handle variable-to-variable relations
+                            if(const auto predicate = dynamic_cast<Rete::Rete_Predicate *>(test_node.get())) {
+                              const auto rhs = predicate->get_rhs().get();
+                              const auto symbol_i = dynamic_cast<const Rete::Symbol_Constant_Int *>(rhs);
+                              assert(symbol_i);
+                              feature_e->value = symbol_i->value;
+                            }
+                            else if(dynamic_cast<Rete::Rete_Existential_Join *>(test_node.get()))
+                              feature_e->value = true;
+                            else if(dynamic_cast<Rete::Rete_Negation_Join *>(test_node.get()))
+                              feature_e->value = false;
+                            else
+                              abort();
+                          }
+                          else if(const auto feature_r = dynamic_cast<Carli::Feature_Ranged<Carli::Feature> *>(feature)) {
+                            const auto &predicate = dynamic_cast<Rete::Rete_Predicate &>(*test_node);
+                            feature_r->upper = predicate.get_predicate() == Rete::Rete_Predicate::GTE;
+                          }
+                          else
+                            abort();
+
+                          /// Determine Feature axes
                           if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node.get()))
                             feature->axis = predicate->get_lhs_index();
                           else {
@@ -284,28 +290,34 @@ command:
                             AXIS_FOUND:
                               ;
                           }
+
+                          feature->axis.first += token_offset;
                         }
 
+                        /// Make the new action
+                        const auto parent_action = agent.get_rule(parent_node_name);
                         if(node_type == "split") {
                           const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::SPLIT, q_value_depth, feature);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Split>(agent, new_action, new_q_value, terminal);
+                          auto new_action_data = std::make_shared<Carli::Node_Split>(agent, parent_action, new_action, new_q_value, terminal);
                           new_action->data = new_action_data;
                         }
                         else if(node_type == "unsplit") {
                           const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::UNSPLIT, q_value_depth, feature);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, new_action, new_q_value);
+                          auto new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, parent_action, new_action, new_q_value);
                           new_action->data = new_action_data;
-                          gufv[test_node].first = new_action_data;
                         }
                         else {
                           assert(node_type == "fringe");
                           const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::FRINGE, q_value_depth, feature);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Fringe>(agent, new_action, new_q_value);
+                          auto new_action_data = std::make_shared<Carli::Node_Fringe>(agent, parent_action, new_action, new_q_value);
                           new_action->data = new_action_data;
-                          gufv[test_node->parent_left()].second[feature].values.push_back(new_action_data);
+                          if(parent_action) {
+                            auto &parent_data = dynamic_cast<Carli::Node_Unsplit &>(*parent_action->data);
+                            parent_data.fringe_values[feature].values.push_back(new_action_data);
+                          }
                         }
                       }
 
@@ -313,29 +325,29 @@ command:
                       delete $2; }
   ;
 rule:
-  '{' STRING final_conditions '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, Carli::Feature *>, double>(*$3, *$2, tuple<int64_t, string, Carli::Feature *>(), 0.0);
+  '{' STRING final_conditions '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*$3, *$2, tuple<int64_t, string, string, Carli::Feature *>(), 0.0);
                                     delete $2;
                                     delete $3; }
-  | '{' STRING flag final_conditions '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, Carli::Feature *>, double>(*$4, *$2, *$3, 0.0);
+  | '{' STRING flag final_conditions '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*$4, *$2, *$3, 0.0);
                                            delete $2;
                                            delete $3;
                                            delete $4; }
-  | '{' STRING final_conditions ARROW_RIGHT ASSIGNMENT FLOAT '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, Carli::Feature *>, double>(*$3, *$2, tuple<int64_t, string, Carli::Feature *>(), $6);
+  | '{' STRING final_conditions ARROW_RIGHT ASSIGNMENT FLOAT '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*$3, *$2, tuple<int64_t, string, string, Carli::Feature *>(), $6);
                                                                    delete $2;
                                                                    delete $3; }
-  | '{' STRING flag final_conditions ARROW_RIGHT ASSIGNMENT FLOAT '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, Carli::Feature *>, double>(*$4, *$2, *$3, $7);
+  | '{' STRING flag final_conditions ARROW_RIGHT ASSIGNMENT FLOAT '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*$4, *$2, *$3, $7);
                                                                         delete $2;
                                                                         delete $3;
                                                                         delete $4; }
   ;
 flag:
   /* :feature q_value->depth [feature->depth feature->lower_bound feature->upper_bound] */
-  FLAG_FEATURE INT NODE_TYPE INT FLOAT FLOAT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $5, $6, $4, false /*FIXUP later*/, false));
-                                               delete $3; }
-  | FLAG_FEATURE INT NODE_TYPE INT INT INT { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $5, $6, $4, false /*FIXUP later*/, true));
-                                             delete $3; }
-  | FLAG_FEATURE INT NODE_TYPE { $$ = new tuple<int64_t, string, Carli::Feature *>($2, *$3, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
-                                 delete $3; }
+  FLAG_FEATURE INT NODE_TYPE STRING INT FLOAT FLOAT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, false));
+                                                      delete $3; }
+  | FLAG_FEATURE INT NODE_TYPE STRING INT INT INT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, true));
+                                                    delete $3; }
+  | FLAG_FEATURE INT NODE_TYPE STRING { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
+                                        delete $3; }
   ;
 final_conditions:
   conditions { $$ = $1; }
@@ -359,7 +371,7 @@ conditions:
                               delete $2; }
   | conditions '(' VARIABLE PREDICATE symbol_constant ')' { const auto lhs_index = find_index($1->second, *$3);
                                                             if(lhs_index.second > 2) {
-                                                              reteerror(&yylloc, yyscanner, agent, filename, source_path, gufv, "Unbound variable tested by predicate.");
+                                                              reteerror(&yylloc, yyscanner, agent, filename, source_path, "Unbound variable tested by predicate.");
                                                               YYABORT;
                                                             }
                                                             $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vc($4, lhs_index, *$5, $1->first)), $1->second);
@@ -369,7 +381,7 @@ conditions:
   | conditions '(' VARIABLE PREDICATE VARIABLE ')' { const auto lhs_index = find_index($1->second, *$3);
                                                      const auto rhs_index = find_index($1->second, *$5);
                                                      if(lhs_index.second > 2 || rhs_index.second > 2) {
-                                                       reteerror(&yylloc, yyscanner, agent, filename, source_path, gufv, "Unbound variable tested by predicate.");
+                                                       reteerror(&yylloc, yyscanner, agent, filename, source_path, "Unbound variable tested by predicate.");
                                                        YYABORT;
                                                      }
                                                      $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_predicate_vv($4, lhs_index, rhs_index, $1->first)), $1->second);
@@ -452,7 +464,6 @@ int rete_parse_file(Carli::Agent &agent, const string &filename, const std::stri
   }
 
   int rv = 0;
-  Grandparent_to_UFV gufv;
 
   reterestart(file, yyscanner);
   reteset_lineno(1, yyscanner);
@@ -461,7 +472,7 @@ int rete_parse_file(Carli::Agent &agent, const string &filename, const std::stri
 
   // retelex();
   do {
-    rv = reteparse(yyscanner, agent, filename_full, source_path_full, gufv);
+    rv = reteparse(yyscanner, agent, filename_full, source_path_full);
     if(rv)
       break;
   } while (!feof(reteget_in(yyscanner)));
@@ -469,18 +480,11 @@ int rete_parse_file(Carli::Agent &agent, const string &filename, const std::stri
   retelex_destroy(yyscanner);
   fclose(file);
 
-  for(auto &entry : gufv) {
-    assert(entry.second.first);
-    assert(!entry.second.second.empty());
-    entry.second.first->fringe_values.swap(entry.second.second);
-  }
-
   return rv;
 }
 
 int rete_parse_string(Carli::Agent &agent, const string &str, int &line_number) {
   int rv = 0;
-  Grandparent_to_UFV gufv;
 
   yyscan_t yyscanner;
   if(retelex_init(&yyscanner))
@@ -490,7 +494,7 @@ int rete_parse_string(Carli::Agent &agent, const string &str, int &line_number) 
   reteset_lineno(line_number, yyscanner);
 
   // retelex();
-  rv = reteparse(yyscanner, agent, "", "", gufv);
+  rv = reteparse(yyscanner, agent, "", "");
 
   line_number = reteget_lineno(yyscanner) + 1;
 
@@ -498,12 +502,6 @@ int rete_parse_string(Carli::Agent &agent, const string &str, int &line_number) 
   retelex_destroy(yyscanner);
 
   Rete::Agenda::Locker locker(agent.get_agenda());
-
-  for(auto &entry : gufv) {
-    assert(entry.second.first);
-    assert(!entry.second.second.empty());
-    entry.second.first->fringe_values.swap(entry.second.second);
-  }
 
   return rv;
 }

@@ -267,7 +267,7 @@ namespace Puddle_World {
           //}
 
           auto action = make_standard_action(ylt, next_rule_name("puddle-world*rl-action*cmac-"), false, variables);
-          action->data = std::make_shared<Node_Split>(*this, action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr), true);
+          action->data = std::make_shared<Node_Split>(*this, Rete::Rete_Action_Ptr(), action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr), true);
         }
       }
     }
