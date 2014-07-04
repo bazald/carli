@@ -113,13 +113,12 @@ namespace Carli {
       }
     }
 
-    const auto join_right = std::dynamic_pointer_cast<Rete::Rete_Join>(ancestor_right);
     Rete::Rete_Node_Ptr new_test;
     auto old_variables = lra_lock->get_variables();
     Rete::Variable_Indices_Ptr new_variables;
 
-    if(feature_ranged_data && (feature || !join_right)) {
-      /// Ranged feature -- refining of an existing variable, or no additional conditions required
+    if(feature_ranged_data && feature) {
+      /// Ranged feature -- refining of an existing variable
       new_test = agent.make_predicate_vc(feature_ranged_data->predicate(), new_feature->axis, feature_ranged_data->symbol_constant(), ancestor_left);
     }
     else {
@@ -132,11 +131,8 @@ namespace Carli {
         new_test = agent.make_existential_join(Rete::WME_Bindings(), true, ancestor_left, ancestor_right);
       }
       else {
-        /// Things get difficult -- must duplicate additional conditions
-        const int64_t offset_right = join_right ? join_right->parent_left()->get_token_size() : 0;
-        const int64_t offset = join_right ? ancestor_left->get_token_size() - offset_right : 0;
-
-        assert(offset <= 0);
+        /// Additional conditions required -- do joins naively for now
+        new_feature->axis.first += ancestor_left->get_token_size();
 
         Rete::WME_Bindings bindings;
         for(const auto &variable : *variables) { ///< NOTE: Assume all are potentially multivalued
@@ -144,16 +140,13 @@ namespace Carli {
           if(found == variables->end()) {
             if(!new_variables)
               new_variables = std::make_shared<Rete::Variable_Indices>(*old_variables);
-            (*new_variables)[variable.first] = Rete::WME_Token_Index(variable.second.first + offset, variable.second.second);
+            (*new_variables)[variable.first] = Rete::WME_Token_Index(variable.second.first + ancestor_left->get_token_size(), variable.second.second);
           }
-          else if(variable.second.first >= offset_right)
+          else
             bindings.insert(Rete::WME_Binding(found->second, variable.second));
         }
 
-        if(join_right)
-          new_test = agent.make_join(bindings, ancestor_left, join_right->parent_right());
-        else
-          new_test = agent.make_existential_join(bindings, false, ancestor_left, ancestor_right->parent_right());
+        new_test = agent.make_join(bindings, ancestor_left, ancestor_right);
       }
     }
 

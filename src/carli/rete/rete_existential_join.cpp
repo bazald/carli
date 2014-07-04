@@ -136,6 +136,13 @@ namespace Rete {
     return false;
   }
 
+  std::vector<WME> Rete_Existential_Join::get_filter_wmes() const {
+    auto filter_wmes0 = input0->get_filter_wmes();
+    auto filter_wmes1 = input1->get_filter_wmes();
+    filter_wmes0.insert(filter_wmes0.end(), filter_wmes1.begin(), filter_wmes1.end());
+    return filter_wmes0;
+  }
+
   Rete_Existential_Join_Ptr Rete_Existential_Join::find_existing(const WME_Bindings &bindings, const bool &match_tokens, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
     for(auto &o0 : out0->get_outputs_all()) {
       if(auto existing_existential_join = std::dynamic_pointer_cast<Rete_Existential_Join>(o0)) {

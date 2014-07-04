@@ -20,6 +20,7 @@ namespace Rete {
     WME(const Symbol_Ptr_C &first, const Symbol_Ptr_C &second, const Symbol_Ptr_C &third);
 
     bool operator==(const WME &rhs) const;
+    bool operator<(const WME &rhs) const;
 
     WME_Symbols symbols;
   };

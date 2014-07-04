@@ -38,6 +38,8 @@ namespace Rete {
 
     bool is_active() const override;
 
+    std::vector<WME> get_filter_wmes() const;
+
   private:
     WME m_wme;
     std::array<Symbol_Variable_Ptr_C, 3> m_variable;

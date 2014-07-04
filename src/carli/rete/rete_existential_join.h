@@ -34,6 +34,8 @@ namespace Rete {
 
     bool is_active() const override;
 
+    std::vector<WME> get_filter_wmes() const;
+
     static Rete_Existential_Join_Ptr find_existing(const WME_Bindings &bindings, const bool &match_tokens, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
     const WME_Bindings & get_bindings() const {return bindings;}

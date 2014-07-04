@@ -85,6 +85,10 @@ namespace Rete {
     return input_tokens.empty();
   }
 
+  std::vector<WME> Rete_Negation::get_filter_wmes() const {
+    return input->get_filter_wmes();
+  }
+
   Rete_Negation_Ptr Rete_Negation::find_existing(const Rete_Node_Ptr &out) {
     for(auto &o : out->get_outputs_all()) {
       if(auto existing_negation = std::dynamic_pointer_cast<Rete_Negation>(o))

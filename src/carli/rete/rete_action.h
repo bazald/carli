@@ -44,6 +44,8 @@ namespace Rete {
 
     bool is_active() const override;
 
+    std::vector<WME> get_filter_wmes() const;
+
     static Rete_Action_Ptr find_existing(const Action &/*action_*/, const Action &/*retraction_*/, const Rete_Node_Ptr &/*out*/);
 
     const std::string & get_name() const {return name;}

@@ -127,6 +127,13 @@ namespace Rete {
     inline bool operator>(const Symbol_Constant_Int &rhs) const override;
     inline bool operator>=(const Symbol_Constant_Int &rhs) const override;
 
+    bool operator<(const Symbol_Constant_String &) const override {return true;}
+    bool operator<=(const Symbol_Constant_String &) const override {return true;}
+    bool operator<(const Symbol_Identifier &) const override {return true;}
+    bool operator<=(const Symbol_Identifier &) const override {return true;}
+    bool operator<(const Symbol_Variable &) const override {return true;}
+    bool operator<=(const Symbol_Variable &) const override {return true;}
+
     bool operator==(const double &value_) const override {return value_ == value;}
 
     size_t hash() const override {
@@ -169,6 +176,13 @@ namespace Rete {
     bool operator<=(const Symbol_Constant_Int &rhs) const override {return value <= rhs.value;}
     bool operator>(const Symbol_Constant_Int &rhs) const override {return value > rhs.value;}
     bool operator>=(const Symbol_Constant_Int &rhs) const override {return value >= rhs.value;}
+
+    bool operator<(const Symbol_Constant_String &) const override {return true;}
+    bool operator<=(const Symbol_Constant_String &) const override {return true;}
+    bool operator<(const Symbol_Identifier &) const override {return true;}
+    bool operator<=(const Symbol_Identifier &) const override {return true;}
+    bool operator<(const Symbol_Variable &) const override {return true;}
+    bool operator<=(const Symbol_Variable &) const override {return true;}
 
     bool operator==(const int64_t &value_) const override {return value_ == value;}
 
@@ -213,6 +227,15 @@ namespace Rete {
     bool operator>(const Symbol_Constant_String &rhs) const override {return value > rhs.value;}
     bool operator>=(const Symbol_Constant_String &rhs) const override {return value >= rhs.value;}
 
+    bool operator>(const Symbol_Constant_Float &) const override {return true;}
+    bool operator>=(const Symbol_Constant_Float &) const override {return true;}
+    bool operator>(const Symbol_Constant_Int &) const override {return true;}
+    bool operator>=(const Symbol_Constant_Int &) const override {return true;}
+    bool operator<(const Symbol_Identifier &) const override {return true;}
+    bool operator<=(const Symbol_Identifier &) const override {return true;}
+    bool operator<(const Symbol_Variable &) const override {return true;}
+    bool operator<=(const Symbol_Variable &) const override {return true;}
+
     bool operator==(const std::string &value_) const override {return value_ == value;}
 
     size_t hash() const override {
@@ -252,6 +275,15 @@ namespace Rete {
     bool operator>(const Symbol_Identifier &rhs) const override {return value > rhs.value;}
     bool operator>=(const Symbol_Identifier &rhs) const override {return value >= rhs.value;}
 
+    bool operator>(const Symbol_Constant_Float &) const override {return true;}
+    bool operator>=(const Symbol_Constant_Float &) const override {return true;}
+    bool operator>(const Symbol_Constant_Int &) const override {return true;}
+    bool operator>=(const Symbol_Constant_Int &) const override {return true;}
+    bool operator>(const Symbol_Constant_String &) const override {return true;}
+    bool operator>=(const Symbol_Constant_String &) const override {return true;}
+    bool operator<(const Symbol_Variable &) const override {return true;}
+    bool operator<=(const Symbol_Variable &) const override {return true;}
+
     bool operator==(const std::string &value_) const override {return value_ == value;}
 
     size_t hash() const override {
@@ -289,6 +321,15 @@ namespace Rete {
     bool operator<=(const Symbol_Variable &rhs) const override {return value <= rhs.value;}
     bool operator>(const Symbol_Variable &rhs) const override {return value > rhs.value;}
     bool operator>=(const Symbol_Variable &rhs) const override {return value >= rhs.value;}
+
+    bool operator>(const Symbol_Constant_Float &) const override {return true;}
+    bool operator>=(const Symbol_Constant_Float &) const override {return true;}
+    bool operator>(const Symbol_Constant_Int &) const override {return true;}
+    bool operator>=(const Symbol_Constant_Int &) const override {return true;}
+    bool operator>(const Symbol_Constant_String &) const override {return true;}
+    bool operator>=(const Symbol_Constant_String &) const override {return true;}
+    bool operator>(const Symbol_Identifier &) const override {return true;}
+    bool operator>=(const Symbol_Identifier &) const override {return true;}
 
     size_t hash() const override {
       return std::hash<size_t>()(value);

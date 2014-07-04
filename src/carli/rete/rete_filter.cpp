@@ -104,6 +104,10 @@ namespace Rete {
     return !tokens.empty();
   }
 
+  std::vector<WME> Rete_Filter::get_filter_wmes() const {
+    return std::vector<WME>(1, m_wme);
+  }
+
   void bind_to_filter(Rete_Agent &/*agent*/, const Rete_Filter_Ptr &filter) {
     assert(filter);
     filter->height = 1;

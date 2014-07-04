@@ -216,6 +216,8 @@ namespace Rete {
     virtual void output_name(std::ostream &os, const int64_t &depth) const = 0;
 
     virtual bool is_active() const = 0; ///< Has the node matched and forwarded at least one token?
+    
+    virtual std::vector<WME> get_filter_wmes() const = 0;
 
     template <typename VISITOR>
     VISITOR visit_preorder(VISITOR visitor, const bool &strict) {

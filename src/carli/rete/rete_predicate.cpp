@@ -141,6 +141,10 @@ namespace Rete {
     return !tokens.empty();
   }
 
+  std::vector<WME> Rete_Predicate::get_filter_wmes() const {
+    return input->get_filter_wmes();
+  }
+
   Rete_Predicate_Ptr Rete_Predicate::find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out) {
     for(auto &o : out->get_outputs_all()) {
       if(auto existing_predicate = std::dynamic_pointer_cast<Rete_Predicate>(o)) {

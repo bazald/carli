@@ -115,6 +115,10 @@ namespace Rete {
     return !input_tokens.empty();
   }
 
+  std::vector<WME> Rete_Action::get_filter_wmes() const {
+    return input->get_filter_wmes();
+  }
+
   Rete_Action_Ptr Rete_Action::find_existing(const Action &/*action_*/, const Action &/*retraction_*/, const Rete_Node_Ptr &/*out*/) {
 //       for(auto &o : out->get_outputs()) {
 //         if(auto existing_action = std::dynamic_pointer_cast<Rete_Action>(o)) {
