@@ -10,7 +10,7 @@ sp {puddle-world*rl-action*north*general
 }
 
 sp {puddle-world*rl-fringe*north*x-lower
-  :feature 2 fringe puddle-world*rl-action*north*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*north*general 1 0.0 0.5
   (<s> ^move <move>)
   (<move> == 0)
   (<s> ^x <x>)
@@ -21,7 +21,7 @@ sp {puddle-world*rl-fringe*north*x-lower
 }
 
 sp {puddle-world*rl-fringe*north*x-upper
-  :feature 2 fringe puddle-world*rl-action*north*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*north*general 1 0.5 1.0
   (<s> ^move <move>)
   (<move> == 0)
   (<s> ^x <x>)
@@ -32,7 +32,7 @@ sp {puddle-world*rl-fringe*north*x-upper
 }
 
 sp {puddle-world*rl-fringe*north*y-lower
-  :feature 2 fringe puddle-world*rl-action*north*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*north*general 1 0.0 0.5
   (<s> ^move <move>)
   (<move> == 0)
   (<s> ^x <x>)
@@ -43,7 +43,7 @@ sp {puddle-world*rl-fringe*north*y-lower
 }
 
 sp {puddle-world*rl-fringe*north*y-upper
-  :feature 2 fringe puddle-world*rl-action*north*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*north*general 1 0.5 1.0
   (<s> ^move <move>)
   (<move> == 0)
   (<s> ^x <x>)
@@ -65,7 +65,7 @@ sp {puddle-world*rl-action*south*general
 }
 
 sp {puddle-world*rl-fringe*south*x-lower
-  :feature 2 fringe puddle-world*rl-action*south*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*south*general 1 0.0 0.5
   (<s> ^move <move>)
   (<move> == 1)
   (<s> ^x <x>)
@@ -76,7 +76,7 @@ sp {puddle-world*rl-fringe*south*x-lower
 }
 
 sp {puddle-world*rl-fringe*south*x-upper
-  :feature 2 fringe puddle-world*rl-action*south*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*south*general 1 0.5 1.0
   (<s> ^move <move>)
   (<move> == 1)
   (<s> ^x <x>)
@@ -87,7 +87,7 @@ sp {puddle-world*rl-fringe*south*x-upper
 }
 
 sp {puddle-world*rl-fringe*south*y-lower
-  :feature 2 fringe puddle-world*rl-action*south*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*south*general 1 0.0 0.5
   (<s> ^move <move>)
   (<move> == 1)
   (<s> ^x <x>)
@@ -98,7 +98,7 @@ sp {puddle-world*rl-fringe*south*y-lower
 }
 
 sp {puddle-world*rl-fringe*south*y-upper
-  :feature 2 fringe puddle-world*rl-action*south*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*south*general 1 0.5 1.0
   (<s> ^move <move>)
   (<move> == 1)
   (<s> ^x <x>)
@@ -120,7 +120,7 @@ sp {puddle-world*rl-action*east*general
 }
 
 sp {puddle-world*rl-fringe*east*x-lower
-  :feature 2 fringe puddle-world*rl-action*east*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*east*general 1 0.0 0.5
   (<s> ^move <move>)
   (<move> == 2)
   (<s> ^x <x>)
@@ -131,7 +131,7 @@ sp {puddle-world*rl-fringe*east*x-lower
 }
 
 sp {puddle-world*rl-fringe*east*x-upper
-  :feature 2 fringe puddle-world*rl-action*east*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*east*general 1 0.5 1.0
   (<s> ^move <move>)
   (<move> == 2)
   (<s> ^x <x>)
@@ -142,7 +142,7 @@ sp {puddle-world*rl-fringe*east*x-upper
 }
 
 sp {puddle-world*rl-fringe*east*y-lower
-  :feature 2 fringe puddle-world*rl-action*east*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*east*general 1 0.0 0.5
   (<s> ^move <move>)
   (<move> == 2)
   (<s> ^x <x>)
@@ -153,7 +153,7 @@ sp {puddle-world*rl-fringe*east*y-lower
 }
 
 sp {puddle-world*rl-fringe*east*y-upper
-  :feature 2 fringe puddle-world*rl-action*east*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*east*general 1 0.5 1.0
   (<s> ^move <move>)
   (<move> == 2)
   (<s> ^x <x>)
@@ -175,7 +175,7 @@ sp {puddle-world*rl-action*west*general
 }
 
 sp {puddle-world*rl-fringe*west*x-lower
-  :feature 2 fringe puddle-world*rl-action*west*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*west*general 1 0.0 0.5
   (<s> ^move <move>)
   (<move> == 3)
   (<s> ^x <x>)
@@ -186,7 +186,7 @@ sp {puddle-world*rl-fringe*west*x-lower
 }
 
 sp {puddle-world*rl-fringe*west*x-upper
-  :feature 2 fringe puddle-world*rl-action*west*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*west*general 1 0.5 1.0
   (<s> ^move <move>)
   (<move> == 3)
   (<s> ^x <x>)
@@ -197,7 +197,7 @@ sp {puddle-world*rl-fringe*west*x-upper
 }
 
 sp {puddle-world*rl-fringe*west*y-lower
-  :feature 2 fringe puddle-world*rl-action*west*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*west*general 1 0.0 0.5
   (<s> ^move <move>)
   (<move> == 3)
   (<s> ^x <x>)
@@ -208,7 +208,7 @@ sp {puddle-world*rl-fringe*west*y-lower
 }
 
 sp {puddle-world*rl-fringe*west*y-upper
-  :feature 2 fringe puddle-world*rl-action*west*general 1 0.0 1.0
+  :feature 2 fringe puddle-world*rl-action*west*general 1 0.5 1.0
   (<s> ^move <move>)
   (<move> == 3)
   (<s> ^x <x>)
