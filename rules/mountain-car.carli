@@ -1,164 +1,146 @@
 sp {mountain-car*rl-action*left*general
-  :feature 1 unsplit
+  :feature 1 unsplit nil
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 0)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  +(<s> ^<s> <s>)                  # Blink node currentlx-dot required for non-fringe nodes
+  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-fringe*left*x-lower
-  :feature 2 fringe 1 -1.2 0.6
+  :feature 2 fringe mountain-car*rl-action*left*general 1 -1.2 0.6
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 0)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  (<x> < -0.3)
+  {(<s> ^x <x>)
+   (<x> < -0.3)}
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-fringe*left*x-upper
-  :feature 2 fringe 1 -1.2 0.6
+  :feature 2 fringe mountain-car*rl-action*left*general 1 -1.2 0.6
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 0)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  (<x> >= -0.3)
+  {(<s> ^x <x>)
+   (<x> >= -0.3)}
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-fringe*left*x-dot-lower
-  :feature 2 fringe 1 -0.07 0.07
+  :feature 2 fringe mountain-car*rl-action*left*general 1 -0.07 0.07
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 0)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  (<x-dot> < 0.0)
+  {(<s> ^x-dot <x-dot>)
+   (<x-dot> < 0.0)}
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-fringe*left*x-dot-upper
-  :feature 2 fringe 1 -0.07 0.07
+  :feature 2 fringe mountain-car*rl-action*left*general 1 -0.07 0.07
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 0)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  (<x-dot> >= 0.0)
+  {(<s> ^x-dot <x-dot>)
+   (<x-dot> >= 0.0)}
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-action*idle*general
-  :feature 1 unsplit
+  :feature 1 unsplit nil
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 1)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  +(<s> ^<s> <s>)                  # Blink node currentlx-dot required for non-fringe nodes
+  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-fringe*idle*x-lower
-  :feature 2 fringe 1 -1.2 0.6
+  :feature 2 fringe mountain-car*rl-action*idle*general 1 -1.2 0.6
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 1)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  (<x> < -0.3)
+  {(<s> ^x <x>)
+   (<x> < -0.3)}
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-fringe*idle*x-upper
-  :feature 2 fringe 1 -1.2 0.6
+  :feature 2 fringe mountain-car*rl-action*idle*general 1 -1.2 0.6
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 1)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  (<x> >= -0.3)
+  {(<s> ^x <x>)
+   (<x> >= -0.3)}
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-fringe*idle*x-dot-lower
-  :feature 2 fringe 1 -0.07 0.07
+  :feature 2 fringe mountain-car*rl-action*idle*general 1 -0.07 0.07
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 1)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  (<x-dot> < 0.0)
+  {(<s> ^x-dot <x-dot>)
+   (<x-dot> < 0.0)}
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-fringe*idle*x-dot-upper
-  :feature 2 fringe 1 -0.07 0.07
+  :feature 2 fringe mountain-car*rl-action*idle*general 1 -0.07 0.07
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 1)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  (<x-dot> >= 0.0)
+  {(<s> ^x-dot <x-dot>)
+   (<x-dot> >= 0.0)}
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-action*right*general
-  :feature 1 unsplit
+  :feature 1 unsplit nil
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 2)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  +(<s> ^<s> <s>)                  # Blink node currentlx-dot required for non-fringe nodes
+  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-fringe*right*x-lower
-  :feature 2 fringe 1 -1.2 0.6
+  :feature 2 fringe mountain-car*rl-action*right*general 1 -1.2 0.6
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 2)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  (<x> < -0.3)
+  {(<s> ^x <x>)
+   (<x> < -0.3)}
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-fringe*right*x-upper
-  :feature 2 fringe 1 -1.2 0.6
+  :feature 2 fringe mountain-car*rl-action*right*general 1 -1.2 0.6
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 2)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  (<x> >= -0.3)
+  {(<s> ^x <x>)
+   (<x> >= -0.3)}
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-fringe*right*x-dot-lower
-  :feature 2 fringe 1 -0.07 0.07
+  :feature 2 fringe mountain-car*rl-action*right*general 1 -0.07 0.07
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 2)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  (<x-dot> < 0.0)
+  {(<s> ^x-dot <x-dot>)
+   (<x-dot> < 0.0)}
 -->
   = 0.0
 }
 
 sp {mountain-car*rl-fringe*right*x-dot-upper
-  :feature 2 fringe 1 -0.07 0.07
+  :feature 2 fringe mountain-car*rl-action*right*general 1 -0.07 0.07
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 2)
-  (<s> ^x <x>)
-  (<s> ^x-dot <x-dot>)
-  (<x-dot> >= 0.0)
+  {(<s> ^x-dot <x-dot>)
+   (<x-dot> >= 0.0)}
 -->
   = 0.0
 }
