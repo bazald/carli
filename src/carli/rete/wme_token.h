@@ -17,6 +17,8 @@ namespace Rete {
 
   typedef std::shared_ptr<const Variable_Indices> Variable_Indices_Ptr_C;
 
+  typedef std::shared_ptr<Variable_Indices> Variable_Indices_Ptr;
+
   class RETE_LINKAGE WME_Token : public std::enable_shared_from_this<WME_Token>, public Zeni::Pool_Allocator<WME_Token> {
   public:
     WME_Token();

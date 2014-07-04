@@ -97,7 +97,9 @@ namespace Rete {
   void bind_to_negation(Rete_Agent &agent, const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out) {
     assert(negation);
     negation->input = out.get();
-
+    negation->height = out->get_height() + 1;
+    negation->token_owner = out->get_token_owner();
+    negation->token_size = out->get_token_size();
     out->insert_output_enabled(negation);
     out->pass_tokens(agent, negation.get());
   }

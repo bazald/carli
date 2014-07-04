@@ -63,18 +63,19 @@ namespace Rete {
     virtual Rete_Node_Ptr cluster_root_ancestor() const = 0;
   };
 
-  class RETE_LINKAGE Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<char [288]>
+  class RETE_LINKAGE Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<char [320]>
   {
     Rete_Node(const Rete_Node &);
     Rete_Node & operator=(const Rete_Node &);
 
-    friend RETE_LINKAGE void bind_to_action(const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
-    friend RETE_LINKAGE void bind_to_existential(const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out);
-    friend RETE_LINKAGE void bind_to_existential_join(const Rete_Existential_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
-    friend RETE_LINKAGE void bind_to_join(const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
-    friend RETE_LINKAGE void bind_to_negation(const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
-    friend RETE_LINKAGE void bind_to_negation_join(const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
-    friend RETE_LINKAGE void bind_to_predicate(const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out);
+    friend RETE_LINKAGE void bind_to_action(Rete_Agent &agent, const Rete_Action_Ptr &action, const Rete_Node_Ptr &out);
+    friend RETE_LINKAGE void bind_to_existential(Rete_Agent &agent, const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out);
+    friend RETE_LINKAGE void bind_to_existential_join(Rete_Agent &agent, const Rete_Existential_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+    friend RETE_LINKAGE void bind_to_filter(Rete_Agent &agent, const Rete_Filter_Ptr &filter);
+    friend RETE_LINKAGE void bind_to_join(Rete_Agent &agent, const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+    friend RETE_LINKAGE void bind_to_negation(Rete_Agent &agent, const Rete_Negation_Ptr &negation, const Rete_Node_Ptr &out);
+    friend RETE_LINKAGE void bind_to_negation_join(Rete_Agent &agent, const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+    friend RETE_LINKAGE void bind_to_predicate(Rete_Agent &agent, const Rete_Predicate_Ptr &predicate, const Rete_Node_Ptr &out);
 
   public:
     typedef std::list<Rete_Filter_Ptr, Zeni::Pool_Allocator<Rete_Filter_Ptr>> Filters;
@@ -147,9 +148,9 @@ namespace Rete {
     virtual Rete_Node_Ptr parent_left() = 0;
     virtual Rete_Node_Ptr parent_right() = 0;
 
-    virtual int64_t height() const = 0;
-    virtual Rete_Node_Ptr_C token_owner() const = 0;
-    virtual int64_t token_size() const = 0;
+    int64_t get_height() const {return height;}
+    Rete_Node_Ptr_C get_token_owner() const {return token_owner.lock();}
+    int64_t get_token_size() const {return token_size;}
 
     virtual void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0;
     virtual bool remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0; ///< Returns true if removed the last
@@ -267,6 +268,10 @@ namespace Rete {
     Output_Ptrs outputs_all;
     Outputs outputs_enabled;
     Outputs outputs_disabled;
+
+    int64_t height = 0;
+    std::weak_ptr<const Rete_Node> token_owner;
+    int64_t token_size = -1;
 
   private:
     intptr_t visitor_value = 0;

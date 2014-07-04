@@ -171,7 +171,7 @@ namespace Carli {
     std::cerr << "Refining:";
     for(auto &leaf : leaves) {
       std::cerr << ' ';
-      if(leaf->q_value->feature->matches(token))
+      if(leaf->rete_action.lock()->is_active())
         std::cerr << '*';
       std::cerr << *leaf->q_value->feature;
     }
@@ -179,7 +179,7 @@ namespace Carli {
     for(auto &fringe_axis : general.fringe_values) {
       for(auto &fringe : fringe_axis.second.values) {
         std::cerr << ' ';
-        if(fringe->q_value->feature->matches(token))
+        if(fringe->rete_action.lock()->is_active())
           std::cerr << '*';
         std::cerr << *fringe->q_value->feature;
       }
@@ -205,24 +205,14 @@ namespace Carli {
         else {
           const auto node_unsplit = leaf->create_unsplit(*this, m_wme_blink);
 
-          for(auto &refined_feature : refined) {
-            auto refined_ranged_data = dynamic_cast<Feature_Ranged_Data *>(refined_feature);
-            assert(refined_ranged_data);
-
-            /** Step 2.2: Create new ranged fringe nodes if the new leaf is refineable. */
-            auto predicate = make_predicate_vc(refined_ranged_data->predicate(), node_unsplit->q_value->feature->axis, refined_ranged_data->symbol_constant(), node_unsplit->rete_action.lock()->parent_left());
-            std::ostringstream oss;
-            oss << general_name_prefix << "*f" << intptr_t(predicate.get());
-            auto new_action = make_standard_action(predicate, oss.str(), false, rete_action.get_variables());
-            auto new_action_data = std::make_shared<Node_Fringe>(*this, node_unsplit->rete_action.lock(), new_action, node_unsplit->q_value->depth + 1, refined_feature);
-            new_action->data = new_action_data;
-            node_unsplit->fringe_values[new_action_data->q_value->feature.get()].values.push_back(new_action_data);
-          }
+          /** Step 2.2: Create new ranged fringe nodes if the new leaf is refineable. */
+          for(auto &refined_feature : refined)
+            node_unsplit->create_fringe(*this, *node_unsplit, refined_feature);
 
           /** Step 2.3 Create new fringe nodes. **/
           for(auto &fringe_axis : general.fringe_values) {
             for(auto &fringe : fringe_axis.second.values)
-              auto new_fringe = fringe->create_fringe(*this, *node_unsplit);
+              auto new_fringe = fringe->create_fringe(*this, *node_unsplit, nullptr);
           }
         }
       }
@@ -289,7 +279,7 @@ namespace Carli {
       for(const auto &feature_node : feature_axis.second) {
         auto &node = debuggable_cast<Node &>(*feature_node.second->data.get());
 
-        auto new_fringe = node.create_fringe(*this, *unsplit);
+        auto new_fringe = node.create_fringe(*this, *unsplit, nullptr);
 
         //std::cerr << "Collapsing: ";
         //node.rete_action.output_name(std::cerr);
@@ -1025,7 +1015,7 @@ namespace Carli {
     size_t matches = 0;
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
       for(auto &fringe : fringe_axis->second.values) {
-        if(!fringe->q_value->feature->matches(token))
+        if(!fringe->rete_action.lock()->is_active())
           continue;
         ++matches;
 
@@ -1100,7 +1090,7 @@ namespace Carli {
     std::unordered_set<tracked_ptr<Feature>> touched;
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
       for(auto &fringe : fringe_axis->second.values) {
-        if(fringe->q_value->feature->matches(token))
+        if(!fringe->rete_action.lock()->is_active())
           continue;
         ++matches;
 

@@ -101,7 +101,9 @@ namespace Rete {
   void bind_to_existential(Rete_Agent &agent, const Rete_Existential_Ptr &existential, const Rete_Node_Ptr &out) {
     assert(existential);
     existential->input = out.get();
-
+    existential->height = out->get_height() + 1;
+    existential->token_owner = out->get_token_owner();
+    existential->token_size = out->get_token_size();
     out->insert_output_enabled(existential);
     out->pass_tokens(agent, existential.get());
   }

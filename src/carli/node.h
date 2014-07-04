@@ -59,7 +59,7 @@ namespace Carli {
     
     Node_Split_Ptr create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink, const bool &terminal);
     Node_Unsplit_Ptr create_unsplit(Agent &agent, const Rete::WME_Ptr_C &wme_blink);
-    Node_Fringe_Ptr create_fringe(Agent &agent, Node_Unsplit &leaf);
+    Node_Fringe_Ptr create_fringe(Agent &agent, Node_Unsplit &leaf, Feature * const &feature);
 
     Agent &agent;
     std::weak_ptr<Rete::Rete_Action> parent_action;

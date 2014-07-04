@@ -234,8 +234,8 @@ command:
                           test_node = test_node->parent_left();
 
                         int64_t token_offset = 0;
-                        if(const auto join = dynamic_cast<Rete::Rete_Join *>(test_node.get())) {
-                          token_offset += test_node->parent_left()->token_size();
+                        if(dynamic_cast<Rete::Rete_Join *>(test_node.get())) {
+                          token_offset += test_node->parent_left()->get_token_size();
                           test_node = test_node->parent_right(); ///< Assume more than one new WME is required for the new test
                         }
 
@@ -343,11 +343,14 @@ rule:
 flag:
   /* :feature q_value->depth [feature->depth feature->lower_bound feature->upper_bound] */
   FLAG_FEATURE INT NODE_TYPE STRING INT FLOAT FLOAT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, false));
-                                                      delete $3; }
+                                                      delete $3;
+                                                      delete $4; }
   | FLAG_FEATURE INT NODE_TYPE STRING INT INT INT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, true));
-                                                    delete $3; }
+                                                    delete $3;
+                                                    delete $4; }
   | FLAG_FEATURE INT NODE_TYPE STRING { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(Rete::WME_Token_Index() /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
-                                        delete $3; }
+                                        delete $3;
+                                        delete $4; }
   ;
 final_conditions:
   conditions { $$ = $1; }

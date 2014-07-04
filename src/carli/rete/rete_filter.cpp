@@ -104,4 +104,11 @@ namespace Rete {
     return !tokens.empty();
   }
 
+  void bind_to_filter(Rete_Agent &/*agent*/, const Rete_Filter_Ptr &filter) {
+    assert(filter);
+    filter->height = 1;
+    filter->token_owner = filter;
+    filter->token_size = 1;
+  }
+
 }

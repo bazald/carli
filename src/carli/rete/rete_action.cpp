@@ -130,6 +130,9 @@ namespace Rete {
     assert(action && !action->input);
     action->input = out.get();
     action->variables = variables;
+    action->height = out->get_height() + 1;
+    action->token_owner = out->get_token_owner();
+    action->token_size = out->get_token_size();
     out->insert_output_enabled(action);
     out->pass_tokens(agent, action.get());
   }

@@ -28,6 +28,7 @@ namespace Zeni {
     static const tracked_ptr_mode tpm = TPM_UNDEL_UNTRA;
     typedef TYPE value_type;
     typedef tracked_ptr<value_type, null_delete<value_type>, tpm> value_pointer_type;
+    typedef const value_type & const_value_reference_type;
     typedef value_type & value_reference_type;
     typedef const Linked_List<TYPE> const_list_value_type;
     typedef Linked_List<TYPE> list_value_type;
@@ -245,7 +246,7 @@ namespace Zeni {
     value_pointer_type get() const {
       return reinterpret_cast<value_type *>((reinterpret_cast<char *>(const_cast<Zeni::Linked_List<value_type> *>(this)) - m_offset));
     }
-    const value_reference_type operator*() const {
+    const_value_reference_type operator*() const {
       return *get();
     }
     value_reference_type operator*() {

@@ -236,6 +236,9 @@ namespace Rete {
     assert(!std::dynamic_pointer_cast<Rete_Negation>(out0));
     join->input0 = out0.get();
     join->input1 = out1.get();
+    join->height = std::max(out0->get_height(), out1->get_height()) + 1;
+    join->token_owner = join;
+    join->token_size = out0->get_token_size() + out1->get_token_size();
 
     out0->insert_output_enabled(join);
     if(out0 != out1)

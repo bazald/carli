@@ -21,10 +21,6 @@ namespace Rete {
     Rete_Node_Ptr parent_left() override {abort();}
     Rete_Node_Ptr parent_right() override {abort();}
 
-    int64_t height() const override {return 1;}
-    Rete_Node_Ptr_C token_owner() const override {return shared();}
-    int64_t token_size() const override {return 1;}
-
     void insert_wme(Rete_Agent &agent, const WME_Ptr_C &wme);
     void remove_wme(Rete_Agent &agent, const WME_Ptr_C &wme);
 
@@ -47,6 +43,8 @@ namespace Rete {
     std::array<Symbol_Variable_Ptr_C, 3> m_variable;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> tokens;
   };
+
+  RETE_LINKAGE void bind_to_filter(Rete_Agent &agent, const Rete_Filter_Ptr &filter);
 
 }
 

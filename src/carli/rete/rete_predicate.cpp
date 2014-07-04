@@ -188,6 +188,9 @@ namespace Rete {
     assert(!std::dynamic_pointer_cast<Rete_Existential>(out));
     assert(!std::dynamic_pointer_cast<Rete_Negation>(out));
     predicate->input = out.get();
+    predicate->height = out->get_height() + 1;
+    predicate->token_owner = out->get_token_owner();
+    predicate->token_size = out->get_token_size();
 
     out->insert_output_enabled(predicate);
     out->pass_tokens(agent, predicate.get());

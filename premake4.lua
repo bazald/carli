@@ -50,6 +50,9 @@ solution "carli"
     buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
     linkoptions { "-Wl,-rpath,'$$ORIGIN'" }
   end
+  if _OPTIONS["clang"] == "true" then
+    buildoptions { "-Wno-undefined-bool-conversion" }
+  end
 
   configuration "Debug"
     defines { "_DEBUG", "DEBUG", "debuggable_cast=dynamic_cast", "debuggable_pointer_cast=std::dynamic_pointer_cast" }
