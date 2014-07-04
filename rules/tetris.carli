@@ -1,0 +1,477 @@
+sp {tetris*rl-action*general
+  :feature 1 unsplit nil
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-square
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 16)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-line-down
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 32)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-line-right
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 33)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-t
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 48)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-t-90
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 49)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-t-180
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 50)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-t-270
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 51)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-l
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 64)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-l-90
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 65)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-l-180
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 66)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-l-270
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 67)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-j
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 80)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-j-90
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 81)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-j-180
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 82)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-j-270
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 83)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-s
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 96)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-s-90
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 97)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-z
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 112)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*type-z-90
+  :feature 2 fringe tetris*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<type> == 113)
+-->
+  = 0.0
+}
+
+#sp {tetris*rl-fringe*x-odd
+#  :feature 2 fringe tetris*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^type <type>)
+#  (<action> ^x <x>)
+#  (<action> ^y <y>)
+#  +(<action> ^x-odd true)
+#-->
+#  = 0.0
+#}
+#
+#sp {tetris*rl-fringe*x-not-odd
+#  :feature 2 fringe tetris*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^type <type>)
+#  (<action> ^x <x>)
+#  (<action> ^y <y>)
+#  -(<action> ^x-odd true)
+#-->
+#  = 0.0
+#}
+
+sp {tetris*rl-fringe*width-lower
+  :feature 2 fringe tetris*rl-action*general 1 1 3
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^width <width>)
+   (<width> < 3)}
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*width-upper
+  :feature 2 fringe tetris*rl-action*general 1 3 5
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^width <width>)
+   (<width> >= 3)}
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*height-lower
+  :feature 2 fringe tetris*rl-action*general 1 1 3
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^height <height>)
+   (<height> < 3)}
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*height-upper
+  :feature 2 fringe tetris*rl-action*general 1 3 5
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^height <height>)
+   (<height> >= 3)}
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*position-x-lower
+  :feature 2 fringe tetris*rl-action*general 1 1 3
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<x> < 3)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*position-x-upper
+  :feature 2 fringe tetris*rl-action*general 1 3 5
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<x> >= 3)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*position-y-lower
+  :feature 2 fringe tetris*rl-action*general 1 1 3
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<y> < 3)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*position-y-upper
+  :feature 2 fringe tetris*rl-action*general 1 3 5
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  (<y> >= 3)
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*gaps-beneath-lower
+  :feature 2 fringe tetris*rl-action*general 1 0 76
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^gaps-beneath <gaps-beneath>)
+   (<gaps-beneath> < 38)}
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*gaps-beneath-upper
+  :feature 2 fringe tetris*rl-action*general 1 0 76
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^gaps-beneath <gaps-beneath>)
+   (<gaps-beneath> >= 38)}
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*gaps-created-lower
+  :feature 2 fringe tetris*rl-action*general 1 0 76
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^gaps-created <gaps-created>)
+   (<gaps-created> < 38)}
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*gaps-created-upper
+  :feature 2 fringe tetris*rl-action*general 1 0 76
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^gaps-created <gaps-created>)
+   (<gaps-created> >= 38)}
+-->
+  = 0.0
+}
+
+#sp {tetris*rl-fringe*depth-to-gap-lower
+#  :feature 2 fringe tetris*rl-action*general 1 0 20
+#  (<s> ^action <action>)
+#  (<action> ^type <type>)
+#  (<action> ^x <x>)
+#  (<action> ^y <y>)
+#  {(<action> ^depth-to-gap <depth-to-gap>)
+#   (<depth-to-gap> < 10)}
+#-->
+#  = 0.0
+#}
+#
+#sp {tetris*rl-fringe*depth-to-gap-upper
+#  :feature 2 fringe tetris*rl-action*general 1 0 20
+#  (<s> ^action <action>)
+#  (<action> ^type <type>)
+#  (<action> ^x <x>)
+#  (<action> ^y <y>)
+#  {(<action> ^depth-to-gap <depth-to-gap>)
+#   (<depth-to-gap> >= 10)}
+#-->
+#  = 0.0
+#}
+
+sp {tetris*rl-fringe*clears-lower
+  :feature 2 fringe tetris*rl-action*general 1 0 5
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^clears <clears>)
+   (<clears> < 2)}
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*clears-upper
+  :feature 2 fringe tetris*rl-action*general 1 0 5
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^clears <clears>)
+   (<clears> >= 2)}
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*enables-clearing-lower
+  :feature 2 fringe tetris*rl-action*general 1 0 5
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^enables-clearing <enables-clearing>)
+   (<enables-clearing> < 2)}
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*enables-clearing-upper
+  :feature 2 fringe tetris*rl-action*general 1 0 5
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^enables-clearing <enables-clearing>)
+   (<enables-clearing> >= 2)}
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*prohibits-clearing-lower
+  :feature 2 fringe tetris*rl-action*general 1 0 5
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^prohibits-clearing <prohibits-clearing>)
+   (<prohibits-clearing> < 2)}
+-->
+  = 0.0
+}
+
+sp {tetris*rl-fringe*prohibits-clearing-upper
+  :feature 2 fringe tetris*rl-action*general 1 0 5
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^x <x>)
+  (<action> ^y <y>)
+  {(<action> ^prohibits-clearing <prohibits-clearing>)
+   (<prohibits-clearing> >= 2)}
+-->
+  = 0.0
+}

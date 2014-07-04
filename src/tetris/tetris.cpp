@@ -1,6 +1,9 @@
 #include "tetris.h"
 
 #include "carli/experiment.h"
+#include "carli/parser/rete_parser.h"
+
+#define GENERATE_ONLY_LINES
 
 namespace Tetris {
 
@@ -47,8 +50,13 @@ namespace Tetris {
     for(auto &line : m_grid)
       line.second = int16_t(line.first.size());
 
+#ifdef GENERATE_ONLY_LINES
+    m_current = TETS_LINE;
+    m_next = TETS_LINE;
+#else
     m_current = Tetromino_Supertype(m_random_selection.rand_lt(7) + 1);
     m_next = Tetromino_Supertype(m_random_selection.rand_lt(7) + 1);
+#endif
 //    m_current = m_random_selection.rand_lt(2) ? TETS_LINE : TETS_SQUARE;
 //    m_next = m_random_selection.rand_lt(2) ? TETS_LINE : TETS_SQUARE;
 //    m_current = TETS_T;
@@ -64,7 +72,9 @@ namespace Tetris {
     place_Tetromino(tet, place.position);
 
     m_current = m_next;
+#ifndef GENERATE_ONLY_LINES
     m_next = Tetromino_Supertype(m_random_selection.rand_lt(7) + 1);
+#endif
 //    m_next = m_random_selection.rand_lt(2) ? TETS_LINE : TETS_SQUARE;
 
     const double score = score_line[clear_lines(place.position)];
@@ -500,99 +510,8 @@ namespace Tetris {
     destroy();
   }
 
-  template<typename SUBFEATURE, typename AXIS>
-  void Agent::generate_rete_continuous(const Carli::Node_Unsplit_Ptr &node_unsplit,
-                                       const AXIS &axis,
-                                       const double &lower_bound,
-                                       const double &upper_bound)
-  {
-    const double midpt = floor((lower_bound + upper_bound) / 2.0);
-    const double values[][2] = {{lower_bound, midpt},
-                                {midpt, upper_bound}};
-
-    for(int i = 0; i != 2; ++i) {
-      auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("tetris*rl-action*f"), false, node_unsplit, feature); //, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
-    }
-  }
-
   void Agent::generate_rete() {
-    Rete::WME_Bindings state_bindings;
-
-//    state_bindings.clear();
-    auto filter_action = make_filter(Rete::WME(m_first_var, m_action_attr, m_third_var));
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
-    auto filter_type = make_filter(Rete::WME(m_first_var, m_type_attr, m_third_var));
-    auto join_type = make_join(state_bindings, filter_action, filter_type);
-    state_bindings.clear();
-    auto filter_type_next = make_filter(Rete::WME(m_first_var, m_type_next_attr, m_third_var));
-    auto join_type_next = make_join(state_bindings, join_type, filter_type_next);
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
-    auto filter_width = make_filter(Rete::WME(m_first_var, m_width_attr, m_third_var));
-    auto join_width = make_join(state_bindings, join_type_next, filter_width);
-    auto filter_height = make_filter(Rete::WME(m_first_var, m_height_attr, m_third_var));
-    auto join_height = make_join(state_bindings, join_width, filter_height);
-    auto filter_x = make_filter(Rete::WME(m_first_var, m_x_attr, m_third_var));
-    auto join_x = make_join(state_bindings, join_height, filter_x);
-    auto filter_y = make_filter(Rete::WME(m_first_var, m_y_attr, m_third_var));
-    auto join_y = make_join(state_bindings, join_x, filter_y);
-    auto filter_gaps_beneath = make_filter(Rete::WME(m_first_var, m_gaps_beneath_attr, m_third_var));
-    auto join_gaps_beneath = make_join(state_bindings, join_y, filter_gaps_beneath);
-    auto filter_gaps_created = make_filter(Rete::WME(m_first_var, m_gaps_created_attr, m_third_var));
-    auto join_gaps_created = make_join(state_bindings, join_gaps_beneath, filter_gaps_created);
-    auto filter_depth_to_gap = make_filter(Rete::WME(m_first_var, m_depth_to_gap_attr, m_third_var));
-    auto join_depth_to_gap = make_join(state_bindings, join_gaps_created, filter_depth_to_gap);
-    auto filter_clears = make_filter(Rete::WME(m_first_var, m_clears_attr, m_third_var));
-    auto join_clears = make_join(state_bindings, join_depth_to_gap, filter_clears);
-    auto filter_enables_clearing = make_filter(Rete::WME(m_first_var, m_enables_clearing_attr, m_third_var));
-    auto join_enables_clearing = make_join(state_bindings, join_clears, filter_enables_clearing);
-    auto filter_prohibits_clearing = make_filter(Rete::WME(m_first_var, m_prohibits_clearing_attr, m_third_var));
-    auto join_prohibits_clearing = make_join(state_bindings, join_enables_clearing, filter_prohibits_clearing);
-    auto filter_x_odd = make_filter(Rete::WME(m_first_var, m_x_odd_attr, m_third_var));
-    auto join_x_odd = make_join(state_bindings, join_prohibits_clearing, filter_x_odd);
-    auto &join_last = join_x_odd;
-
-    auto filter_blink = make_filter(*m_wme_blink);
-
-    Carli::Node_Unsplit_Ptr root_action_data;
-    {
-      auto join_blink = make_existential_join(Rete::WME_Bindings(), false, join_last, filter_blink);
-
-      auto root_action = make_standard_action(join_blink, next_rule_name("tetris*rl-action*u"), false);
-      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, 1, nullptr);
-      root_action->data = root_action_data;
-    }
-
-    for(Type::Axis axis : {Type::CURRENT/*, Type::NEXT*/}) {
-      for(auto super : {TETS_SQUARE, TETS_LINE, TETS_T, TETS_L, TETS_J, TETS_S, TETS_Z}) {
-        for(uint8_t orientation = 0, oend = num_types(super); orientation != oend; ++orientation) {
-          const auto type = super_to_type(super, orientation);
-          auto feature = new Type(axis, type);
-          auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), join_last);
-          make_standard_fringe(predicate, next_rule_name("tetris*rl-action*f"), false, root_action_data, feature);
-        }
-      }
-    }
-
-//    for(auto value : {true, false}) {
-//      auto node_fringe = std::make_shared<Node_Fringe>(*this, 2);
-//      auto feature = new X_Odd(value);
-//      node_fringe->feature = feature;
-//      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(X_Odd::AXIS, 2), feature->symbol_constant(), join_last);
-//      make_standard_fringe(predicate, next_rule_name("tetris*rl-action*f"), false, root_action_data, feature);
-//    }
-
-    generate_rete_continuous<Size, Size::Axis>(root_action_data, Size::WIDTH, 0.0f, 4.0f);
-    generate_rete_continuous<Size, Size::Axis>(root_action_data, Size::HEIGHT, 0.0f, 4.0f);
-    generate_rete_continuous<Position, Position::Axis>(root_action_data, Position::X, 0.0f, 10.0f);
-    generate_rete_continuous<Position, Position::Axis>(root_action_data, Position::Y, 0.0f, 20.0f);
-    generate_rete_continuous<Gaps, Gaps::Axis>(root_action_data, Gaps::BENEATH, 0.0f, 75.0f);
-    generate_rete_continuous<Gaps, Gaps::Axis>(root_action_data, Gaps::CREATED, 0.0f, 75.0f);
-//    generate_rete_continuous<Gaps, Gaps::Axis>(root_action_data, Gaps::DEPTH, 0.0f, 20.0f);
-    generate_rete_continuous<Clears, Clears::Axis>(root_action_data, Clears::CLEARS, 0.0f, 5.0f);
-    generate_rete_continuous<Clears, Clears::Axis>(root_action_data, Clears::ENABLES, 0.0f, 5.0f);
-    generate_rete_continuous<Clears, Clears::Axis>(root_action_data, Clears::PROHIBITS, 0.0f, 5.0f);
+    rete_parse_file(*this, "rules/tetris-ycc.carli");
   }
 
   void Agent::generate_features() {

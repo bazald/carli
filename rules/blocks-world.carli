@@ -50,7 +50,7 @@ sp {blocks-world*rl-fringe*block-not-clear
 #-->
 #  = 0.0
 #}
-
+#
 #sp {blocks-world*rl-fringe*dest-not-clear
 #  :feature 2 fringe blocks-world*rl-action*general
 #  (<s> ^action <action>)
@@ -74,7 +74,7 @@ sp {blocks-world*rl-fringe*block-not-clear
 #-->
 #  = 0.0
 #}
-
+#
 #sp {blocks-world*rl-fringe*block-not-in-place
 #  :feature 2 fringe blocks-world*rl-action*general
 #  (<s> ^action <action>)
