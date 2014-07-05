@@ -520,15 +520,14 @@ namespace Tetris {
     std::list<Rete::WME_Ptr_C> wmes_current;
     std::ostringstream oss;
 
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_input_attr, m_input_id));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_input_id, m_type_next_attr, std::make_shared<Rete::Symbol_Constant_Int>(env->get_next())));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_type_next_attr, std::make_shared<Rete::Symbol_Constant_Int>(env->get_next())));
 
     size_t index = 0;
     for(const auto &placement : env->get_placements()) {
       oss << "place-" << ++index;
       Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
       oss.str("");
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_input_id, m_action_attr, action_id));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, action_id));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.type)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_width_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.first)));
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(placement.size.second)));

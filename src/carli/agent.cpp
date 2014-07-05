@@ -1019,9 +1019,10 @@ namespace Carli {
           continue;
         ++matches;
 
-        if(fringe->q_value->pseudoepisode_count > m_split_pseudoepisodes &&
+        if(general.q_value->depth < m_split_min ||
+          (fringe->q_value->pseudoepisode_count > m_split_pseudoepisodes &&
           (fringe->q_value->update_count > m_split_update_count &&
-          (m_mean_catde_queue_size ? m_mean_catde_queue.mean() : m_mean_catde).outlier_above(fringe->q_value->catde, m_split_catde + m_split_catde_qmult * q_value_count)))
+          (m_mean_catde_queue_size ? m_mean_catde_queue.mean() : m_mean_catde).outlier_above(fringe->q_value->catde, m_split_catde + m_split_catde_qmult * q_value_count))))
         {
 //#ifndef NDEBUG
 //          std::cerr << " matches: " << *fringe->q_value->feature << std::endl;
@@ -1094,8 +1095,9 @@ namespace Carli {
           continue;
         ++matches;
 
-        if(fringe->q_value->pseudoepisode_count <= m_split_pseudoepisodes ||
-           fringe->q_value->update_count <= m_split_update_count)
+        if(general.q_value->depth >= m_split_min &&
+          (fringe->q_value->pseudoepisode_count <= m_split_pseudoepisodes ||
+           fringe->q_value->update_count <= m_split_update_count))
         {
           return general.fringe_values.end(); ///< Wait to gather more data
         }
