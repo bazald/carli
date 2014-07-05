@@ -137,7 +137,7 @@ namespace Carli {
         Rete::WME_Bindings bindings;
         for(const auto &variable : *variables) { ///< NOTE: Assume all are potentially multivalued
           const auto found = old_variables->find(variable.first);
-          if(found == variables->end()) {
+          if(found == old_variables->end()) {
             if(!new_variables)
               new_variables = std::make_shared<Rete::Variable_Indices>(*old_variables);
             (*new_variables)[variable.first] = Rete::WME_Token_Index(variable.second.first + ancestor_left->get_token_size(), variable.second.second);
