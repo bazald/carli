@@ -191,8 +191,10 @@ namespace Puddle_World {
         generate_cmac(x_y);
       }
     }
-    else
-      rete_parse_file(*this, "rules/puddle-world.carli");
+    else {
+      if(rete_parse_file(*this, "rules/puddle-world.carli"))
+        abort();
+    }
     
     m_x_wme = std::make_shared<Rete::WME>(m_s_id, x_attr, m_x_value);
     m_y_wme = std::make_shared<Rete::WME>(m_s_id, y_attr, m_y_value);

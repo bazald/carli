@@ -511,7 +511,8 @@ namespace Tetris {
   }
 
   void Agent::generate_rete() {
-    rete_parse_file(*this, "rules/tetris-ycc.carli");
+    if(rete_parse_file(*this, "rules/tetris-ycc.carli"))
+      abort();
   }
 
   void Agent::generate_features() {

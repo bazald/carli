@@ -91,7 +91,8 @@ namespace Blocks_World {
   }
 
   void Agent::generate_rete() {
-    rete_parse_file(*this, "rules/blocks-world.carli");
+    if(rete_parse_file(*this, "rules/blocks-world.carli"))
+      abort();
   }
 
   void Agent::generate_features() {

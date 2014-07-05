@@ -1,0 +1,418 @@
+sp {infinite-mario*rl-action*general
+  :feature 1 unsplit nil
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*dpad-released
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<dpad> == -1)
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*dpad-left
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<dpad> == 0)
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*dpad-right
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<dpad> == 1)
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*dpad-down
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<dpad> == 2)
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*jump-false
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<jump> == 0)
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*jump-true
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<jump> == 1)
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*speed-false
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<speed> == 0)
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*speed-true
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<speed> == 1)
+-->
+  = 0.0
+}
+
+#sp {infinite-mario*rl-fringe*on-ground-false
+#  :feature 2 fringe infinite-mario*rl-action*general
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  +(<s> ^on-ground 0)
+#-->
+#  = 0.0
+#}
+#
+#sp {infinite-mario*rl-fringe*on-ground-true
+#  :feature 2 fringe infinite-mario*rl-action*general
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  +(<s> ^on-ground 1)
+#-->
+#  = 0.0
+#}
+
+#sp {infinite-mario*rl-fringe*may-jump-false
+#  :feature 2 fringe infinite-mario*rl-action*general
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  +(<s> ^may-jump 0)
+#-->
+#  = 0.0
+#}
+#
+#sp {infinite-mario*rl-fringe*may-jump-true
+#  :feature 2 fringe infinite-mario*rl-action*general
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  +(<s> ^may-jump 1)
+#-->
+#  = 0.0
+#}
+
+#sp {infinite-mario*rl-fringe*is-carrying-false
+#  :feature 2 fringe infinite-mario*rl-action*general
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  +(<s> ^is-carrying 0)
+#-->
+#  = 0.0
+#}
+#
+#sp {infinite-mario*rl-fringe*is-carrying-true
+#  :feature 2 fringe infinite-mario*rl-action*general
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  +(<s> ^is-carrying 1)
+#-->
+#  = 0.0
+#}
+
+#sp {infinite-mario*rl-fringe*is-high-jumping-false
+#  :feature 2 fringe infinite-mario*rl-action*general
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  +(<s> ^is-high-jumping 0)
+#-->
+#  = 0.0
+#}
+#
+#sp {infinite-mario*rl-fringe*is-high-jumping-true
+#  :feature 2 fringe infinite-mario*rl-action*general
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  +(<s> ^is-high-jumping 1)
+#-->
+#  = 0.0
+#}
+
+sp {infinite-mario*rl-fringe*is-above-pit-false
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +(<s> ^is-above-pit 0)
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*is-above-pit-true
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +(<s> ^is-above-pit 1)
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*is-in-pit-false
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +(<s> ^is-in-pit 0)
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*is-in-pit-true
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +(<s> ^is-in-pit 1)
+-->
+  = 0.0
+}
+
+#sp {infinite-mario*rl-fringe*pit-right-false
+#  :feature 2 fringe infinite-mario*rl-action*general
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  +(<s> ^pit-right 0)
+#-->
+#  = 0.0
+#}
+#
+#sp {infinite-mario*rl-fringe*pit-right-true
+#  :feature 2 fringe infinite-mario*rl-action*general
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  +(<s> ^pit-right 1)
+#-->
+#  = 0.0
+#}
+
+sp {infinite-mario*rl-fringe*obstacle-right-false
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +(<s> ^obstacle-right 0)
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*obstacle-right-true
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +(<s> ^obstacle-right 1)
+-->
+  = 0.0
+}
+
+#sp {infinite-mario*rl-fringe*x-lower
+#  :feature 2 fringe infinite-mario*rl-action*general 1 0.0 2000.0
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  {(<s> ^x <x>)
+#   (<x> < 2000.0)}
+#-->
+#  = 0.0
+#}
+#
+#sp {infinite-mario*rl-fringe*x-upper
+#  :feature 2 fringe infinite-mario*rl-action*general 1 2000.0 4000.0
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  {(<s> ^x <x>)
+#   (<x> >= 2000.0)}
+#-->
+#  = 0.0
+#}
+
+#sp {infinite-mario*rl-fringe*y-lower
+#  :feature 2 fringe infinite-mario*rl-action*general 1 0.0 176.0
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  {(<s> ^y <y>)
+#   (<y> < 176.0)}
+#-->
+#  = 0.0
+#}
+#
+#sp {infinite-mario*rl-fringe*y-upper
+#  :feature 2 fringe infinite-mario*rl-action*general 1 176.0 352.0
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  {(<s> ^y <y>)
+#   (<y> >= 176.0)}
+#-->
+#  = 0.0
+#}
+
+sp {infinite-mario*rl-fringe*right-pit-dist-lower
+  :feature 2 fringe infinite-mario*rl-action*general 1 0 6
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  {(<s> ^right-pit-dist <right-pit-dist>)
+   (<right-pit-dist> < 6)}
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*right-pit-dist-upper
+  :feature 2 fringe infinite-mario*rl-action*general 1 6 12
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  {(<s> ^right-pit-dist <right-pit-dist>)
+   (<right-pit-dist> >= 6)}
+-->
+  = 0.0
+}
+
+#sp {infinite-mario*rl-fringe*right-pit-width-lower
+#  :feature 2 fringe infinite-mario*rl-action*general 1 0 6
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  {(<s> ^right-pit-width <right-pit-width>)
+#   (<right-pit-width> < 6)}
+#-->
+#  = 0.0
+#}
+#
+#sp {infinite-mario*rl-fringe*right-pit-width-upper
+#  :feature 2 fringe infinite-mario*rl-action*general 1 6 12
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  {(<s> ^right-pit-width <right-pit-width>)
+#   (<right-pit-width> >= 6)}
+#-->
+#  = 0.0
+#}
+
+#sp {infinite-mario*rl-fringe*right-jump-dist-lower
+#  :feature 2 fringe infinite-mario*rl-action*general 1 0 6
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  {(<s> ^right-jump-dist <right-jump-dist>)
+#   (<right-jump-dist> < 6)}
+#-->
+#  = 0.0
+#}
+#
+#sp {infinite-mario*rl-fringe*right-jump-dist-upper
+#  :feature 2 fringe infinite-mario*rl-action*general 1 6 12
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  {(<s> ^right-jump-dist <right-jump-dist>)
+#   (<right-jump-dist> >= 6)}
+#-->
+#  = 0.0
+#}
+
+#sp {infinite-mario*rl-fringe*right-jump-height-lower
+#  :feature 2 fringe infinite-mario*rl-action*general 1 0 6
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  {(<s> ^right-jump-height <right-jump-height>)
+#   (<right-jump-height> < 6)}
+#-->
+#  = 0.0
+#}
+#
+#sp {infinite-mario*rl-fringe*right-jump-height-upper
+#  :feature 2 fringe infinite-mario*rl-action*general 1 6 12
+#  (<s> ^button-presses-out <button-presses-out>)
+#  (<button-presses-out> ^dpad <dpad>)
+#  (<button-presses-out> ^jump <jump>)
+#  (<button-presses-out> ^speed <speed>)
+#  {(<s> ^right-jump-height <right-jump-height>)
+#   (<right-jump-height> >= 6)}
+#-->
+#  = 0.0
+#}

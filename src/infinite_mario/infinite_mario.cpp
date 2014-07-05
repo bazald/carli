@@ -1,6 +1,7 @@
 #include "infinite_mario.h"
 
 #include "jni_layer.h"
+#include "carli/parser/rete_parser.h"
 
 namespace Mario {
 
@@ -311,136 +312,9 @@ namespace Mario {
     destroy();
   }
 
-  template<typename SUBFEATURE, typename AXIS>
-  void Agent::generate_rete_continuous(const Carli::Node_Unsplit_Ptr &node_unsplit,
-                                       const AXIS &axis,
-                                       const double &lower_bound,
-                                       const double &upper_bound)
-  {
-    const double midpt = floor((lower_bound + upper_bound) / 2.0);
-    const double values[][2] = {{lower_bound, midpt},
-                                {midpt, upper_bound}};
-    for(int i = 0; i != 2; ++i) {
-      auto feature = new SUBFEATURE(axis, values[i][0], values[i][1], 2, i != 0);
-      auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(axis, 2), feature->symbol_constant(), node_unsplit->rete_action.lock()->parent_left()->parent_left());
-      make_standard_fringe(predicate, next_rule_name("infinite-mario*rl-action*f"), false, node_unsplit, feature); //, Node_Ranged::Range(/*std::make_pair(0, 0), std::make_pair(5, 20)*/), lines);
-    }
-  }
-
   void Agent::generate_rete() {
-    Rete::WME_Bindings state_bindings;
-
-    auto filter_x = make_filter(Rete::WME(m_first_var, m_x_attr, m_third_var));
-    auto filter_y = make_filter(Rete::WME(m_first_var, m_y_attr, m_third_var));
-    auto filter_x_dot = make_filter(Rete::WME(m_first_var, m_x_dot_attr, m_third_var));
-    auto filter_y_dot = make_filter(Rete::WME(m_first_var, m_y_dot_attr, m_third_var));
-    auto filter_mode = make_filter(Rete::WME(m_first_var, m_mode_attr, m_third_var));
-    auto filter_on_ground = make_filter(Rete::WME(m_first_var, m_on_ground_attr, m_third_var));
-    auto filter_may_jump = make_filter(Rete::WME(m_first_var, m_may_jump_attr, m_third_var));
-    auto filter_is_carrying = make_filter(Rete::WME(m_first_var, m_is_carrying_attr, m_third_var));
-    auto filter_is_high_jumping = make_filter(Rete::WME(m_first_var, m_is_high_jumping_attr, m_third_var));
-    auto filter_is_above_pit = make_filter(Rete::WME(m_first_var, m_is_above_pit_attr, m_third_var));
-    auto filter_is_in_pit = make_filter(Rete::WME(m_first_var, m_is_in_pit_attr, m_third_var));
-    auto filter_pit_right = make_filter(Rete::WME(m_first_var, m_pit_right_attr, m_third_var));
-    auto filter_obstacle_right = make_filter(Rete::WME(m_first_var, m_obstacle_right_attr, m_third_var));
-    auto filter_dpad = make_filter(Rete::WME(m_first_var, m_dpad_attr, m_third_var));
-    auto filter_jump = make_filter(Rete::WME(m_first_var, m_jump_attr, m_third_var));
-    auto filter_speed = make_filter(Rete::WME(m_first_var, m_speed_attr, m_third_var));
-    auto filter_type = make_filter(Rete::WME(m_first_var, m_type_attr, m_third_var));
-    auto filter_right_pit_dist = make_filter(Rete::WME(m_first_var, m_right_pit_dist_attr, m_third_var));
-    auto filter_right_pit_width = make_filter(Rete::WME(m_first_var, m_right_pit_width_attr, m_third_var));
-    auto filter_right_jump_dist = make_filter(Rete::WME(m_first_var, m_right_jump_dist_attr, m_third_var));
-    auto filter_right_jump_height = make_filter(Rete::WME(m_first_var, m_right_jump_height_attr, m_third_var));
-
-    state_bindings.clear();
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 2), Rete::WME_Token_Index(0, 0)));
-
-    auto filter_button_presses_in = make_filter(Rete::WME(m_first_var, m_button_presses_in_attr, m_third_var));
-    auto join_button_presses_in_dpad = make_join(state_bindings, filter_button_presses_in, filter_dpad);
-    auto join_button_presses_in_jump = make_join(state_bindings, join_button_presses_in_dpad, filter_jump);
-    auto join_button_presses_in_speed = make_join(state_bindings, join_button_presses_in_jump, filter_speed);
-
-    auto filter_button_presses_out = make_filter(Rete::WME(m_first_var, m_button_presses_out_attr, m_third_var));
-    auto join_button_presses_out_dpad = make_join(state_bindings, filter_button_presses_out, filter_dpad);
-    auto join_button_presses_out_jump = make_join(state_bindings, join_button_presses_out_dpad, filter_jump);
-    auto join_button_presses_out_speed = make_join(state_bindings, join_button_presses_out_jump, filter_speed);
-
-    //auto filter_enemy = make_filter(Rete::WME(m_first_var, m_enemy_attr, m_third_var));
-    //auto join_enemy_type = make_join(state_bindings, filter_enemy, filter_type);
-    //auto join_enemy_x = make_join(state_bindings, join_enemy_type, filter_x);
-    //auto join_enemy_y = make_join(state_bindings, join_enemy_x, filter_y);
-
-    state_bindings.clear();
-    state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
-
-    auto join_state_x_y = make_join(state_bindings, filter_x, filter_y);
-    auto join_state_x_dot = make_join(state_bindings, join_state_x_y, filter_x_dot);
-    auto join_state_y_dot = make_join(state_bindings, join_state_x_dot, filter_y_dot);
-    auto join_state_mode = make_join(state_bindings, join_state_y_dot, filter_mode);
-    auto join_state_on_ground = make_join(state_bindings, join_state_mode, filter_on_ground);
-    auto join_state_may_jump = make_join(state_bindings, join_state_on_ground, filter_may_jump);
-    auto join_state_is_carrying = make_join(state_bindings, join_state_may_jump, filter_is_carrying);
-    auto join_state_is_high_jumping = make_join(state_bindings, join_state_is_carrying, filter_is_high_jumping);
-    auto join_state_is_above_pit = make_join(state_bindings, join_state_is_high_jumping, filter_is_above_pit);
-    auto join_state_is_in_pit = make_join(state_bindings, join_state_is_above_pit, filter_is_in_pit);
-    auto join_state_pit_right = make_join(state_bindings, join_state_is_in_pit, filter_pit_right);
-    auto join_state_obstacle_right = make_join(state_bindings, join_state_pit_right, filter_obstacle_right);
-    auto join_state_right_pit_dist = make_join(state_bindings, join_state_obstacle_right, filter_right_pit_dist);
-    auto join_state_right_pit_width = make_join(state_bindings, join_state_right_pit_dist, filter_right_pit_width);
-    auto join_state_right_jump_dist = make_join(state_bindings, join_state_right_pit_width, filter_right_jump_dist);
-    auto join_state_right_jump_height = make_join(state_bindings, join_state_right_jump_dist, filter_right_jump_height);
-
-    auto join_complete_state = make_join(state_bindings, join_state_right_jump_height, join_button_presses_in_speed);
-
-    auto join_last = make_join(state_bindings, join_complete_state, join_button_presses_out_speed);
-    //auto &join_enemy_last = join_enemy_y;
-
-    auto filter_blink = make_filter(*m_wme_blink);
-
-    Carli::Node_Unsplit_Ptr root_action_data;
-    {
-      auto join_blink = make_existential_join(Rete::WME_Bindings(), false, join_last, filter_blink);
-
-      auto root_action = make_standard_action(join_blink, next_rule_name("infinite-mario*rl-action*u"), false);
-      root_action_data = std::make_shared<Node_Unsplit>(*this, root_action, 1, nullptr);
-      root_action->data = root_action_data;
-    }
-
-    /*** State ***/
-
-    for(const auto flag : {/*Feature_Flag::ON_GROUND, Feature_Flag::MAY_JUMP, Feature_Flag::IS_CARRYING,*/
-                           /*Feature_Flag::IS_HIGH_JUMPING,*/ Feature_Flag::IS_ABOVE_PIT, Feature_Flag::IS_IN_PIT,
-                           /*Feature_Flag::PIT_RIGHT,*/ Feature_Flag::OBSTACLE_RIGHT}) {
-      for(const auto value : {false, true}) {
-        auto feature = new Feature_Flag(flag, value);
-        auto predicate = make_predicate_vc(feature->predicate(), feature->axis, feature->symbol_constant(), join_last);
-        make_standard_fringe(predicate, next_rule_name("infinite-mario*rl-action*f"), false, root_action_data, feature);
-      }
-    }
-
-    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(root_action_data, Feature_Position::X, 0.0f, 4000.0f);
-    //generate_rete_continuous<Feature_Position, Feature_Position::Axis>(root_action_data, Feature_Position::Y, 0.0f, 352.0f);
-
-    generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(root_action_data, Feature_Numeric::RIGHT_PIT_DIST, 0.0f, 12.0f);
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(root_action_data, Feature_Numeric::RIGHT_PIT_WIDTH, 0.0f, 12.0f);
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(root_action_data, Feature_Numeric::RIGHT_JUMP_DIST, 0.0f, 12.0f);
-    //generate_rete_continuous<Feature_Numeric, Feature_Numeric::Axis>(root_action_data, Feature_Numeric::RIGHT_JUMP_HEIGHT, 0.0f, 12.0f);
-
-    /*** Output Buttons ***/
-
-    for(const auto dpad : {BUTTON_NONE, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_DOWN}) {
-      auto feature = new Feature_Button(Feature_Button::OUT_DPAD, dpad);
-      auto predicate = make_predicate_vc(feature->predicate(), feature->axis, feature->symbol_constant(), join_last);
-      make_standard_fringe(predicate, next_rule_name("infinite-mario*rl-action*f"), false, root_action_data, feature);
-    }
-
-    for(const auto button : {Feature_Button::OUT_JUMP, Feature_Button::OUT_SPEED}) {
-      for(const auto down : {false, true}) {
-        auto feature = new Feature_Button(button, down);
-        auto predicate = make_predicate_vc(feature->predicate(), Rete::WME_Token_Index(button, 2), feature->symbol_constant(), join_last);
-        make_standard_fringe(predicate, next_rule_name("infinite-mario*rl-action*f"), false, root_action_data, feature);
-      }
-    }
+    if(rete_parse_file(*this, "../../rules/infinite-mario.carli"))
+      abort();
   }
 
   void Agent::generate_features() {

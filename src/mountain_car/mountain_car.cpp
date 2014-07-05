@@ -88,8 +88,10 @@ namespace Mountain_Car {
         generate_cmac(x_xdot);
       }
     }
-    else
-      rete_parse_file(*this, "rules/mountain-car.carli");
+    else {
+      if(rete_parse_file(*this, "rules/mountain-car.carli"))
+        abort();
+    }
 
     m_x_wme = std::make_shared<Rete::WME>(m_s_id, x_attr, m_x_value);
     m_x_dot_wme = std::make_shared<Rete::WME>(m_s_id, x_dot_attr, m_x_dot_value);

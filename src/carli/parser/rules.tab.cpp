@@ -2477,8 +2477,10 @@ int rete_parse_file(Carli::Agent &agent, const string &filename, const std::stri
   //cerr << "Sourcing '" << filename_part << "' from '" << source_path_full << '\'' << endl;
 
   FILE * file = fopen(filename_full.c_str(), "r");
-  if(!file)
+  if(!file) {
+    std::cerr << "Failed to open file '" << filename_full << "' for parsing." << std::endl;
     return -1;
+  }
 
   yyscan_t yyscanner;
   if(retelex_init(&yyscanner)) {

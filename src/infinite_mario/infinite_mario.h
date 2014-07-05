@@ -21,14 +21,6 @@ namespace Mario {
   using std::endl;
   using std::ostream;
 
-  class Feature;
-  class Feature_Position;
-  class Feature_Velocity;
-  class Feature_Mode;
-  class Feature_Flag;
-  class Feature_Numeric;
-  class Feature_Button;
-
   bool tile_can_jump_into(const Tile &tile);
   bool tile_can_jump_through(const Tile &tile);
   bool tile_can_land_on(const Tile &tile);
@@ -39,205 +31,6 @@ namespace Mario {
   bool object_powerup(const Object &object);
   bool object_killable_by_fireball(const Object &object);
   bool object_killable_by_jump(const Object &object);
-
-  class Feature : public Carli::Feature {
-  public:
-    Feature(const Rete::WME_Token_Index &axis_) : Carli::Feature(axis_) {}
-
-    virtual Feature * clone() const = 0;
-  };
-  
-  class Feature_Position : public Carli::Feature_Ranged<Feature> {
-  public:
-    enum Axis : size_t {X = 0,
-                        Y = X + 1};
-
-    Feature_Position(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
-    {
-    }
-
-    Feature_Position * clone() const {
-      return new Feature_Position(Axis(axis.first), bound_lower, bound_upper, depth, upper);
-    }
-
-    void print(ostream &os) const {
-      switch(axis.first) {
-        case X: os << "x"; break;
-        case Y: os << "y"; break;
-        default: abort();
-      }
-
-      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
-    }
-  };
-
-  class Feature_Velocity : public Carli::Feature_Ranged<Feature> {
-  public:
-    enum Axis : size_t {X_DOT = Feature_Position::Y + 1,
-                        Y_DOT = X_DOT + 1};
-
-    Feature_Velocity(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
-    {
-    }
-
-    Feature_Velocity * clone() const {
-      return new Feature_Velocity(Axis(axis.first), bound_lower, bound_upper, depth, upper);
-    }
-
-    void print(ostream &os) const {
-      switch(axis.first) {
-        case X_DOT: os << "x-dot"; break;
-        case Y_DOT: os << "y-dot"; break;
-        default: abort();
-      }
-
-      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
-    }
-  };
-
-  class Feature_Mode : public Carli::Feature_Enumerated<Feature> {
-  public:
-    enum Axis : size_t {MODE = Feature_Velocity::Y_DOT + 1};
-
-    Feature_Mode(const Mode &mode)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(MODE, 2), mode)
-    {
-    }
-
-    Feature_Mode * clone() const {
-      return new Feature_Mode(Mode(value));
-    }
-
-    void print(ostream &os) const {
-      os << "mode(" << value << ')';
-    }
-  };
-  
-  class Feature_Flag : public Carli::Feature_Enumerated<Feature> {
-  public:
-    enum Axis : size_t {
-      START = Feature_Mode::MODE + 1,
-      ON_GROUND = START + 0,
-      MAY_JUMP = START + 1,
-      IS_CARRYING = START + 2,
-      IS_HIGH_JUMPING = START + 3,
-      IS_ABOVE_PIT = START + 4,
-      IS_IN_PIT = START + 5,
-      PIT_RIGHT = START + 6,
-      OBSTACLE_RIGHT = START + 7,
-      END = OBSTACLE_RIGHT + 1
-    };
-
-    Feature_Flag(const Axis &axis_, const bool &flag)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), flag)
-    {
-    }
-
-    Feature_Flag * clone() const {
-      return new Feature_Flag(Axis(axis.first), value != 0);
-    }
-
-    void print(ostream &os) const {
-      switch(axis.first) {
-      case ON_GROUND       : os << "on-ground";       break;
-      case MAY_JUMP        : os << "may-jump";        break;
-      case IS_CARRYING     : os << "is-carrying";     break;
-      case IS_HIGH_JUMPING : os << "is-high-jumping"; break;
-      case IS_ABOVE_PIT    : os << "is-above-pit";    break;
-      case IS_IN_PIT       : os << "is-in-pit";       break;
-      case PIT_RIGHT       : os << "pit-right";       break;
-      case OBSTACLE_RIGHT  : os << "obstacle-right";  break;
-      default: abort();
-      }
-
-      os << '(' << value << ')';
-    }
-  };
-  
-  class Feature_Numeric : public Carli::Feature_Ranged<Feature> {
-  public:
-    enum Axis {
-      START = Feature_Flag::END,
-      RIGHT_PIT_DIST = START + 0,
-      RIGHT_PIT_WIDTH = START + 1,
-      RIGHT_JUMP_DIST = START + 2,
-      RIGHT_JUMP_HEIGHT = START + 3,
-      END = RIGHT_JUMP_HEIGHT + 1
-    };
-
-    Feature_Numeric(const Axis &axis_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_)
-     : Feature_Ranged(Rete::WME_Token_Index(axis_, 2), bound_lower_, bound_upper_, depth_, upper_, true)
-    {
-    }
-
-    Feature_Numeric * clone() const {
-      return new Feature_Numeric(Axis(axis.first), bound_lower, bound_upper, depth, upper);
-    }
-
-    void print(ostream &os) const {
-      switch(axis.first) {
-        case RIGHT_PIT_DIST: os << "right-pit-dist"; break;
-        case RIGHT_PIT_WIDTH: os << "right-pit-width"; break;
-        case RIGHT_JUMP_DIST: os << "right-jump-dist"; break;
-        case RIGHT_JUMP_HEIGHT: os << "right-jump-height"; break;
-        default: abort();
-      }
-
-      os << '(' << bound_lower << ',' << bound_upper << ':' << depth << ')';
-    }
-  };
-
-  class Feature_Button : public Carli::Feature_Enumerated<Feature> {
-  public:
-    enum Axis {
-      IN_JOIN = Feature_Numeric::END,
-      IN_START = IN_JOIN + 1,
-      IN_DPAD = IN_START + 0,
-      IN_JUMP = IN_START + 1,
-      IN_SPEED = IN_START + 2,
-      IN_END = IN_SPEED + 1,
-
-      OUT_JOIN = IN_END,
-      OUT_START = OUT_JOIN + 1,
-      OUT_DPAD = OUT_START + 0,
-      OUT_JUMP = OUT_START + 1,
-      OUT_SPEED = OUT_START + 2,
-      END = OUT_SPEED + 1
-    };
-
-    Feature_Button(const Axis &axis_, const int64_t &flag)
-     : Feature_Enumerated<Feature>(Rete::WME_Token_Index(axis_, 2), flag)
-    {
-    }
-
-    Feature_Button * clone() const {
-      return new Feature_Button(Axis(axis.first), value);
-    }
-
-    void print(ostream &os) const {
-      switch(axis.first) {
-      case IN_DPAD:
-      case OUT_DPAD:
-        os << "dpad-" << (axis.first == IN_DPAD ? "in" : "out") << '(' << (value == BUTTON_LEFT ? "left" : value == BUTTON_RIGHT ? "right" : value == BUTTON_DOWN ? "down" : "released") << ')';
-        break;
-
-      case IN_JUMP:
-      case OUT_JUMP:
-        os << "jump-" << (axis.first == IN_JUMP ? "in" : "out") << '(' << value << ')';
-        break;
-
-      case IN_SPEED:
-      case OUT_SPEED:
-        os << "speed-" << (axis.first == IN_SPEED ? "in" : "out") << '(' << value << ')';
-        break;
-
-      default:
-        abort();
-      }
-    }
-  };
 
   class Button_Presses : public Carli::Action {
   public:
@@ -295,11 +88,6 @@ namespace Mario {
     void act_part_2(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, const bool &terminal);
 
   private:
-    template<typename SUBFEATURE, typename AXIS>
-    void generate_rete_continuous(const Carli::Node_Unsplit_Ptr &node_unsplit,
-                                  const AXIS &axis,
-                                  const double &lower_bound,
-                                  const double &upper_bound);
     void generate_rete();
 
     void generate_features();
@@ -308,9 +96,6 @@ namespace Mario {
     
     const std::shared_ptr<State> &m_current_state;
     const std::shared_ptr<State> &m_prev_state;
-
-    const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
-    const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));
 
     const Rete::Symbol_Constant_String_Ptr_C m_button_presses_in_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("button-presses-in"));
     const Rete::Symbol_Constant_String_Ptr_C m_button_presses_out_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("button-presses-out"));
