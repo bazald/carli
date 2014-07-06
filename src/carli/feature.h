@@ -238,7 +238,12 @@ namespace Carli {
       os << '{';
       for(size_t i = 0; i != this->conditions.size(); ++i)
         os << (i ? "," : "") << this->conditions[i];
-      os << '}' << this->bindings << this->axis << (upper ? ">=" : "<") << bound_lower << ',' << bound_upper << ':' << depth;
+      os << '}' << this->bindings << this->axis << '=';
+      if(integer_locked && bound_lower + 1 == bound_upper)
+        os << bound_lower;
+      else
+        os << '[' << bound_lower << ',' << bound_upper << ')';
+      os << ':' << depth;
     }
   };
 
