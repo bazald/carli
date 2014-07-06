@@ -123,21 +123,29 @@ namespace Carli {
     }
     else {
       if(leaf.q_value->depth == 1) {
-        /// Trivial case -- use the original node
+        /// Case 1. Trivial -- use the original node
         new_test = ancestor_right;
       }
       else if(lra_lock->get_token_owner() == ra_lock->get_token_owner()) {
-        /// No new conditions to carry over
+        /// Case 2. No new conditions to carry over
         new_test = agent.make_existential_join(Rete::WME_Bindings(), true, ancestor_left, ancestor_right);
       }
       else {
-        /// Additional conditions required -- do joins naively for now
-        new_feature->axis.first += ancestor_left->get_token_size();
+        bool ancestor_found = false;
+        for(auto left = ancestor_left; !dynamic_cast<Rete::Rete_Filter *>(left.get()); left = left->parent_left()) {
+          if(left->parent_left()->get_token_owner() == ancestor_right->get_token_owner()) {
+            /// No new conditions to carry over, but explicit bindings are required
+            ancestor_found = true;
+            break;
+          }
+        }
 
+        /// Case 3. Additional conditions may be required -- do joins naively for now
         Rete::WME_Bindings bindings;
         for(const auto &variable : *variables) { ///< NOTE: Assume all are potentially multivalued
           const auto found = old_variables->find(variable.first);
           if(found == old_variables->end()) {
+            assert(!ancestor_found);
             if(!new_variables)
               new_variables = std::make_shared<Rete::Variable_Indices>(*old_variables);
             (*new_variables)[variable.first] = Rete::WME_Token_Index(variable.second.first + ancestor_left->get_token_size(), variable.second.second);
@@ -146,7 +154,12 @@ namespace Carli {
             bindings.insert(Rete::WME_Binding(found->second, variable.second));
         }
 
-        new_test = agent.make_join(bindings, ancestor_left, ancestor_right);
+        if(ancestor_found)
+          new_test = agent.make_existential_join(bindings, false, ancestor_left, ancestor_right);
+        else {
+          new_feature->axis.first += ancestor_left->get_token_size();
+          new_test = agent.make_join(bindings, ancestor_left, ancestor_right);
+        }
       }
     }
 
