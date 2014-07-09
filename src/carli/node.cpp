@@ -131,49 +131,45 @@ namespace Carli {
         new_test = agent.make_existential_join(Rete::WME_Bindings(), true, ancestor_left, ancestor_right);
       }
       else {
-        /// Case 3. New conditions may need to be carried over if they're not already part of the left token
         bool ancestor_found = false;
         for(auto left = ancestor_left; !dynamic_cast<Rete::Rete_Filter *>(left.get()); left = left->parent_left()) {
           if(left->parent_left()->get_token_owner() == ancestor_right->get_token_owner()) {
-            /// Case 3a. No new conditions to carry over, but explicit bindings are required
             ancestor_found = true;
             break;
           }
         }
 
-        int64_t offset = 0; ///< Essentially a ptrdiff to go from the the new conditions on the right token to left
-        if(!ancestor_found) {
-          /// Case 3b Step 1: Join in new conditions and calculate the offset
-          auto join = dynamic_cast<Rete::Rete_Join *>(ancestor_right.get());
-          if(!join)
-            join = dynamic_cast<Rete::Rete_Join *>(dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get())->parent_left().get());
+        if(ancestor_found) {
+          /// Case 3: No new conditions to carry over, but must do a more involved token comparison
+          Rete::WME_Bindings bindings;
+          for(const auto &variable : *variables) { ///< NOTE: Assume all are potentially multivalued
+            const auto found = old_variables->find(variable.first);
+            assert(found != old_variables->end());
+            bindings.insert(Rete::WME_Binding(found->second, variable.second));
+          }
+
+          new_test = agent.make_existential_join(bindings, false, ancestor_left, ancestor_right);
+        }
+        else {
+          /// Case 4: New conditions must be joined, new variables are assumed
+          const auto join = dynamic_cast<Rete::Rete_Join *>(ancestor_right.get());
           assert(join);
           new_test = agent.make_join(q_value->feature->bindings, ancestor_left, join->parent_right());
-          offset = new_test->get_token_size() - join->get_token_size();
-        }
-        
-        /// Case 3 Step 2: Add any new variable bindings
-        Rete::WME_Bindings bindings;
-        for(const auto &variable : *variables) { ///< NOTE: Assume all are potentially multivalued
-          const auto found = old_variables->find(variable.first);
-          if(found == old_variables->end()) {
-            assert(!ancestor_found);
-            if(!new_variables)
-              new_variables = std::make_shared<Rete::Variable_Indices>(*old_variables);
-            const auto new_index = Rete::WME_Token_Index(variable.second.first + offset, variable.second.second);
-            (*new_variables)[variable.first] = new_index;
-            bindings.insert(Rete::WME_Binding(new_index, variable.second));
+
+          /// Essentially a ptrdiff to go from the the new conditions on the right token to left
+          const int64_t offset = new_test->get_token_size() - join->get_token_size();
+
+          for(const auto &variable : *variables) {
+            const auto found = old_variables->find(variable.first);
+            if(found == old_variables->end()) {
+              if(!new_variables)
+                new_variables = std::make_shared<Rete::Variable_Indices>(*old_variables);
+              const auto new_index = Rete::WME_Token_Index(variable.second.first + offset, variable.second.second);
+              (*new_variables)[variable.first] = new_index;
+            }
           }
-          else
-            bindings.insert(Rete::WME_Binding(found->second, variable.second));
-        }
-        
-        /// Case 3 Step 3: Apply offsets and variable bindings
-        if(ancestor_found)
-          new_test = agent.make_existential_join(bindings, false, ancestor_left, ancestor_right);
-        else {
+
           new_feature->axis.first += offset;
-          new_test = agent.make_existential_join(bindings, false, new_test, ancestor_right);
         }
       }
     }
