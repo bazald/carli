@@ -62,6 +62,7 @@ namespace Carli {
     options.add('n', make_shared<Option_Ranged<int64_t>>("num-steps", 0, true, numeric_limits<int64_t>::max(), true, 50000), "Maximum number of steps; 0 disables.");
     options.add('o', make_shared<Option_Itemized>("output", set<string>({"null", "simple", "experiment"}), "simple"), "What kind of output should be generated.");
     options.add('p', make_shared<Option_Ranged<int64_t>>("print-every", 1, true, numeric_limits<int64_t>::max(), true, 100), "How many steps per line of output.");
+    options.add('r', make_shared<Option_String>("rules", "default"), "Which .carli rules should the agent load?");
     options.add(     make_shared<Option_Ranged<int64_t>>("scenario", 0, true, numeric_limits<int64_t>::max(), true, 0), "Which experimental scenario should be run, environment specific.");
     options.add('s', make_shared<Option_Ranged<int64_t>>("seed", numeric_limits<int64_t>::min(), true, numeric_limits<int64_t>::max(), true, std::random_device()()), "Random seed.");
     options.add(     make_shared<Option_Function>("stderr", 1, [this,&options](const Option::Arguments &args){
@@ -73,7 +74,6 @@ namespace Carli {
       cout.rdbuf(this->cout2file.rdbuf());
     }), "<file> Redirect stdout to <file>");
     options.add_line("\n  Environment Options:");
-    options.add(     make_shared<Option_Ranged<bool>>("enable-distractors", false, true, true, true, false), "Turn on extra distractor features in blocks-world.");
     options.add(     make_shared<Option_Ranged<bool>>("ignore-x", false, true, true, true, false), "Simplify cart-pole from 4D to 2D, eliminating x and x-dot.");
     options.add(     make_shared<Option_Ranged<bool>>("random-start", false, true, true, true, false), "Should starting positions be randomized in mountain-car and puddle-world.");
     options.add(     make_shared<Option_Ranged<bool>>("reward-negative", false, true, true, true, true), "Use negative rewards per step in mountain-car rather than positive terminal rewards.");

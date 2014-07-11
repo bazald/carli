@@ -313,7 +313,10 @@ namespace Mario {
   }
 
   void Agent::generate_rete() {
-    if(rete_parse_file(*this, "../../rules/infinite-mario.carli"))
+    std::string rules = dynamic_cast<const Option_String &>(Options::get_global()["rules"]).get_value();
+    if(rules == "default")
+      rules = "../../rules/infinite-mario.carli";
+    if(rete_parse_file(*this, rules))
       abort();
   }
 

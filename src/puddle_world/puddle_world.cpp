@@ -192,7 +192,10 @@ namespace Puddle_World {
       }
     }
     else {
-      if(rete_parse_file(*this, "rules/puddle-world.carli"))
+      std::string rules = dynamic_cast<const Option_String &>(Options::get_global()["rules"]).get_value();
+      if(rules == "default")
+        rules = "rules/puddle-world.carli";
+      if(rete_parse_file(*this, rules))
         abort();
     }
     

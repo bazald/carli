@@ -511,7 +511,10 @@ namespace Tetris {
   }
 
   void Agent::generate_rete() {
-    if(rete_parse_file(*this, "rules/tetris-ycc.carli"))
+    std::string rules = dynamic_cast<const Option_String &>(Options::get_global()["rules"]).get_value();
+    if(rules == "default")
+      rules = "rules/tetris-ycc.carli";
+    if(rete_parse_file(*this, rules))
       abort();
   }
 

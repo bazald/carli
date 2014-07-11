@@ -1,4 +1,4 @@
-# Blocks world -- Restricted to what I think matters
+# Blocks world -- Randomly shifting features added
 
 sp {blocks-world*rl-action*general
   :feature 1 unsplit nil
@@ -157,6 +157,122 @@ sp {blocks-world*rl-fringe*dest-name*3
   (<dest> ^name <dest-name>)
   (<block-name> <= 3)
   (<dest-name> == 3)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-brightness-lower
+  :feature 2 fringe blocks-world*rl-action*general 1 0.0 0.5
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block-name> <= 3)
+  (<dest-name> <= 3)
+  {(<block> ^brightness <block-brightness>)
+   (<block-brightness> < 0.5)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-brightness-upper
+  :feature 2 fringe blocks-world*rl-action*general 1 0.5 1.0
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block-name> <= 3)
+  (<dest-name> <= 3)
+  {(<block> ^brightness <block-brightness>)
+   (<block-brightness> >= 0.5)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-brightness-lower
+  :feature 2 fringe blocks-world*rl-action*general 1 0.0 0.5
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block-name> <= 3)
+  (<dest-name> <= 3)
+  {(<dest> ^brightness <dest-brightness>)
+   (<dest-brightness> < 0.5)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-brightness-upper
+  :feature 2 fringe blocks-world*rl-action*general 1 0.5 1.0
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block-name> <= 3)
+  (<dest-name> <= 3)
+  {(<dest> ^brightness <dest-brightness>)
+   (<dest-brightness> >= 0.5)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-glowing
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block-name> <= 3)
+  (<dest-name> <= 3)
+  +(<block> ^glowing true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-not-glowing
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block-name> <= 3)
+  (<dest-name> <= 3)
+  -(<block> ^glowing true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-glowing
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block-name> <= 3)
+  (<dest-name> <= 3)
+  +(<dest> ^glowing true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-not-glowing
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block-name> <= 3)
+  (<dest-name> <= 3)
+  -(<dest> ^glowing true)
 -->
   = 0.0
 }

@@ -43,6 +43,17 @@ namespace Blocks_World {
       stack.push_front(1);
       stack.push_front(3);
     }
+    {
+      m_blocks.push_front(Stack());
+      Stack &stack = *m_blocks.begin();
+      stack.push_front(4);
+    }
+    {
+      m_blocks.push_front(Stack());
+      Stack &stack = *m_blocks.begin();
+      stack.push_front(6);
+      stack.push_front(5);
+    }
   }
 
   Agent::reward_type Environment::transition_impl(const Carli::Action &action) {
@@ -91,7 +102,10 @@ namespace Blocks_World {
   }
 
   void Agent::generate_rete() {
-    if(rete_parse_file(*this, "rules/blocks-world.carli"))
+    std::string rules = dynamic_cast<const Option_String &>(Options::get_global()["rules"]).get_value();
+    if(rules == "default")
+      rules = "rules/blocks-world.carli";
+    if(rete_parse_file(*this, rules))
       abort();
   }
 
@@ -122,6 +136,11 @@ namespace Blocks_World {
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_block_attr, m_block_ids[size_t(*st)]));
         wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_name_attr, m_block_names[size_t(*st)]));
         wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
+        
+        const double brightness = m_random.frand_lte();
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
+        if(brightness > 0.5)
+          wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_glowing_attr, m_true_value));
       }
 
       wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*bt->begin())], m_clear_attr, m_true_value));
@@ -131,9 +150,10 @@ namespace Blocks_World {
 
       auto base = bt->rbegin();
       const auto stack = std::find_if(goal.begin(), goal.end(), [&base](const Environment::Stack &stack)->bool{return std::find(stack.begin(), stack.end(), *base) != stack.end();});
-      assert(stack != goal.end());
-      for(auto base_goal = stack->rbegin(); base != bt->rend() && base_goal != stack->rend() && *base == *base_goal; ++base, ++base_goal)
-        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*base)], m_in_place_attr, m_true_value));
+      if(stack != goal.end()) {
+        for(auto base_goal = stack->rbegin(); base != bt->rend() && base_goal != stack->rend() && *base == *base_goal; ++base, ++base_goal)
+          wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*base)], m_in_place_attr, m_true_value));
+      }
     }
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_block_attr, m_block_ids[0]));
@@ -169,8 +189,16 @@ namespace Blocks_World {
 
   void Agent::update() {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
+    
+    const auto &blocks = env->get_blocks();
+    const auto &goal = env->get_goal();
+    
+    for(const auto &gstack : goal) {
+      if(std::find(blocks.begin(), blocks.end(), gstack) == blocks.end())
+        return;
+    }
 
-    m_metastate = env->get_blocks() == env->get_goal() ? Metastate::SUCCESS : Metastate::NON_TERMINAL;
+    m_metastate = Metastate::SUCCESS;
   }
 
 }
