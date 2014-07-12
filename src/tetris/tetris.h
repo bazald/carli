@@ -7,6 +7,14 @@
 #include <array>
 #include <stdexcept>
 
+#if !defined(_WINDOWS)
+#define TETRIS_LINKAGE
+#elif !defined(TETRIS_INTERNAL)
+#define TETRIS_LINKAGE __declspec(dllimport)
+#else
+#define TETRIS_LINKAGE __declspec(dllexport)
+#endif
+
 namespace Tetris {
 
   enum Tetromino_Supertype {TETS_SQUARE = 1,
@@ -47,7 +55,7 @@ namespace Tetris {
   using std::endl;
   using std::ostream;
 
-  class Place : public Carli::Action {
+  class TETRIS_LINKAGE Place : public Carli::Action {
   public:
     Place()
      : type(TET_SQUARE)
@@ -89,7 +97,7 @@ namespace Tetris {
     Tetromino_Type type;
   };
 
-  class Environment : public Carli::Environment {
+  class TETRIS_LINKAGE Environment : public Carli::Environment {
   public:
     enum class Outcome {OUTCOME_NULL, OUTCOME_ACHIEVED, OUTCOME_ENABLED, OUTCOME_PROHIBITED};
 
@@ -174,7 +182,7 @@ namespace Tetris {
     bool m_lookahead = false;
   };
 
-  class Agent : public Carli::Agent {
+  class TETRIS_LINKAGE Agent : public Carli::Agent {
   public:
     Agent(const std::shared_ptr<Carli::Environment> &env);
     ~Agent();

@@ -11,6 +11,14 @@
 #include <stdexcept>
 #include <vector>
 
+#if !defined(_WINDOWS)
+#define PUDDLE_WORLD_LINKAGE
+#elif !defined(PUDDLE_WORLD_INTERNAL)
+#define PUDDLE_WORLD_LINKAGE __declspec(dllimport)
+#else
+#define PUDDLE_WORLD_LINKAGE __declspec(dllexport)
+#endif
+
 namespace Puddle_World {
   enum Direction : char {NORTH = 0, SOUTH = 1, EAST = 2, WEST = 3};
 }
@@ -28,7 +36,7 @@ namespace Puddle_World {
   using std::set;
   using std::shared_ptr;
 
-  class Move : public Carli::Action {
+  class PUDDLE_WORLD_LINKAGE Move : public Carli::Action {
   public:
     Move(const Direction &direction_ = NORTH)
      : direction(direction_)
@@ -59,7 +67,7 @@ namespace Puddle_World {
     Direction direction;
   };
 
-  class Environment : public Carli::Environment {
+  class PUDDLE_WORLD_LINKAGE Environment : public Carli::Environment {
     Environment(const Environment &) = delete;
     Environment & operator=(const Environment &) = delete;
 
@@ -122,7 +130,7 @@ namespace Puddle_World {
     double m_noise = 0.01;
   };
 
-  class Agent : public Carli::Agent {
+  class PUDDLE_WORLD_LINKAGE Agent : public Carli::Agent {
   public:
     Agent(const shared_ptr<Carli::Environment> &env);
     ~Agent();

@@ -10,6 +10,14 @@
 #include <list>
 #include <stdexcept>
 
+#if !defined(_WINDOWS)
+#define MOUNTAIN_CAR_LINKAGE
+#elif !defined(MOUNTAIN_CAR_INTERNAL)
+#define MOUNTAIN_CAR_LINKAGE __declspec(dllimport)
+#else
+#define MOUNTAIN_CAR_LINKAGE __declspec(dllexport)
+#endif
+
 namespace Mountain_Car {
   enum Direction : char {LEFT = 0, IDLE = 1, RIGHT = 2};
 }
@@ -27,7 +35,7 @@ namespace Mountain_Car {
   using std::set;
   using std::shared_ptr;
 
-  class Acceleration : public Carli::Action {
+  class MOUNTAIN_CAR_LINKAGE Acceleration : public Carli::Action {
   public:
     Acceleration(const Direction &direction_ = IDLE)
      : direction(direction_)
@@ -58,7 +66,7 @@ namespace Mountain_Car {
     Direction direction;
   };
 
-  class Environment : public Carli::Environment {
+  class MOUNTAIN_CAR_LINKAGE Environment : public Carli::Environment {
     Environment(const Environment &);
     Environment & operator=(const Environment &);
 
@@ -106,7 +114,7 @@ namespace Mountain_Car {
     const bool m_reward_negative = get_Option_Ranged<bool>(Options::get_global(), "reward-negative");
   };
 
-  class Agent : public Carli::Agent {
+  class MOUNTAIN_CAR_LINKAGE Agent : public Carli::Agent {
   public:
     Agent(const shared_ptr<Carli::Environment> &env);
     ~Agent();
