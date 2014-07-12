@@ -17,7 +17,7 @@ namespace Carli {
     Experiment();
     virtual ~Experiment();
 
-    void take_args(int argc, const char * const * argv);
+    int64_t take_args(int argc, const char * const * argv);
 
     void standard_run(const std::function<std::shared_ptr<Environment> ()> &make_env,
                       const std::function<std::shared_ptr<Agent> (const std::shared_ptr<Environment> &)> &make_agent,

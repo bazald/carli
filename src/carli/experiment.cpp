@@ -132,22 +132,10 @@ namespace Carli {
     cerr.rdbuf(cerr_bak);
   }
 
-  void Experiment::take_args(int argc, const char * const * argv) {
+  int64_t Experiment::take_args(int argc, const char * const * argv) {
     Options &options = Options::get_global();
 
     options.get(argc, argv);
-    if(options.optind < argc) {
-      options.print_help(cerr);
-      cerr << endl;
-
-      std::ostringstream oss;
-      oss << "Unknown trailing arguments:";
-      while(options.optind < argc)
-        oss << ' ' << argv[options.optind++];
-      oss << endl;
-
-      throw runtime_error(oss.str());
-    }
 
     const auto seed = uint32_t(dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value());
     Zeni::Random::get().seed(seed);
@@ -156,6 +144,8 @@ namespace Carli {
     std::ofstream seed_file("seed.txt");
     if(seed_file)
       seed_file << "SEED " << seed << endl;
+
+    return options.optind;
   }
 
   void Experiment::standard_run(const function<shared_ptr<Environment> ()> &make_env,

@@ -33,14 +33,15 @@ int main(int argc, char **argv) {
   signal(SIGTERM, signal_handler);
 
   Carli::Experiment experiment;
-  //experiment.take_args(argc, argv);
+  experiment.take_args(argc, argv);
+
   std::shared_ptr<Carli::Environment> env = std::make_shared<Blocks_World::Environment>();
   std::shared_ptr<Carli::Agent> agent = std::make_shared<Blocks_World::Agent>(env);
 
   std::string line;
   int line_number = 1;
 
-  for(int i = 1; !rete_get_exit() && i < argc; ++i) {
+  for(int64_t i = Options::get_global().optind; !rete_get_exit() && i < argc; ++i) {
     rete_parse_file(*agent, argv[i]);
     std::cout << std::endl;
   }

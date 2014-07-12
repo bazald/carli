@@ -4,11 +4,23 @@
 
 int main(int argc, char **argv) {
   try {
+    Options &options = Options::get_global();
     Carli::Experiment experiment;
 
-    experiment.take_args(argc, argv);
+    if(experiment.take_args(argc, argv) < argc) {
+      options.print_help(std::cerr);
+      std::cerr << std::endl;
 
-    const auto output = dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value();
+      std::ostringstream oss;
+      oss << "Unknown trailing arguments:";
+      while(options.optind < argc)
+        oss << ' ' << argv[options.optind++];
+      oss << std::endl;
+
+      throw std::runtime_error(oss.str());
+    }
+
+    const auto output = dynamic_cast<const Option_Itemized &>(options["output"]).get_value();
 
     experiment.standard_run([](){return std::make_shared<Blocks_World::Environment>();},
                             [](const std::shared_ptr<Carli::Environment> &env){return std::make_shared<Blocks_World::Agent>(env);},

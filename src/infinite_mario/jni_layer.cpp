@@ -290,7 +290,20 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM * /*vm*/, void * /*pvt*/) {
           for(const auto &arg : argvv)
             argv.push_back(arg.c_str());
 
-          experiment.take_args(argc, &argv[0]);
+          if(experiment.take_args(argc, &argv[0]) < argc) {
+            Options &options = Options::get_global();
+
+            options.print_help(std::cerr);
+            std::cerr << std::endl;
+
+            std::ostringstream oss;
+            oss << "Unknown trailing arguments:";
+            while(options.optind < argc)
+              oss << ' ' << argv[options.optind++];
+            oss << std::endl;
+
+            throw std::runtime_error(oss.str());
+          }
         }
       }
     }
