@@ -36,9 +36,9 @@ namespace Carli {
     typedef double reward_type;
     typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
 
-    bool respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token);
+    bool respecialize(Rete::Rete_Action &rete_action);
     bool specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token);
-    void expand_fringe(Rete::Rete_Action &rete_action, const Rete::WME_Token &token, const Fringe_Values::iterator &specialization);
+    void expand_fringe(Rete::Rete_Action &rete_action, const Fringe_Values::iterator &specialization);
     bool collapse_rete(Rete::Rete_Action &rete_action); ///< Collapses and returns true unless there exist no nodes to collapse into a new fringe
 
     Agent(const std::shared_ptr<Environment> &environment, const std::function<Carli::Action_Ptr_C (const Rete::Variable_Indices &variables, const Rete::WME_Token &token)> &get_action_);
@@ -111,8 +111,8 @@ namespace Carli {
     int64_t q_value_count = 0;
 
   protected:
-    Action_Ptr_C choose_epsilon_greedy(const double &epsilon);
-    Action_Ptr_C choose_greedy();
+    Action_Ptr_C choose_epsilon_greedy(const double &epsilon, const Feature * const &axis);
+    Action_Ptr_C choose_greedy(const Feature * const &axis);
     Action_Ptr_C choose_randomly();
 
     void td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next);
@@ -135,9 +135,10 @@ namespace Carli {
     void assign_credit_normalize(const Q_Value_List &value_list, const double &sum);
 
     Fringe_Values::iterator split_test_catde(const Rete::WME_Token &token, Node_Unsplit &general);
+    Fringe_Values::iterator split_test_policy(const Rete::WME_Token &token, Node_Unsplit &general);
     Fringe_Values::iterator split_test_value(const Rete::WME_Token &token, Node_Unsplit &general);
 
-    static double sum_value(const action_type * const &action, const Q_Value_List &value_list);
+    static double sum_value(const action_type * const &action, const Q_Value_List &value_list, const Feature * const &axis);
 
     void clean_features();
 

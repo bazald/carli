@@ -42,6 +42,34 @@ sp {blocks-world*rl-fringe*block-not-clear
   = 0.0
 }
 
+sp {blocks-world*rl-fringe*dest-clear
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block-name> <= 4)
+  (<dest-name> <= 4)
+  +(<dest> ^clear true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-not-clear
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<action> ^dest <dest>)
+  (<block> ^name <block-name>)
+  (<dest> ^name <dest-name>)
+  (<block-name> <= 4)
+  (<dest-name> <= 4)
+  -(<dest> ^clear true)
+-->
+  = 0.0
+}
+
 sp {blocks-world*rl-fringe*dest-in-place
   :feature 2 fringe blocks-world*rl-action*general
   (<s> ^action <action>)

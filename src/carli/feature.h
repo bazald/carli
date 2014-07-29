@@ -46,7 +46,7 @@ namespace Carli {
     }
 
     int64_t compare_axis(const Feature &rhs) const {
-      return conditions < rhs.conditions ? -1 : conditions > rhs.conditions ? 1 : 
+      return conditions < rhs.conditions ? -1 : conditions > rhs.conditions ? 1 :
              bindings < rhs.bindings ? -1 : bindings > rhs.bindings ? 1 :
              axis.first != rhs.axis.first ? axis.first - rhs.axis.first : axis.second - rhs.axis.second;
     }
@@ -59,6 +59,13 @@ namespace Carli {
     virtual std::vector<Feature *> refined() const {return std::vector<Feature *>();}
 
     virtual void print(std::ostream &os) const = 0;
+
+    void print_axis(std::ostream &os) const {
+      os << '{';
+      for(size_t i = 0; i != conditions.size(); ++i)
+        os << (i ? "," : "") << conditions[i];
+      os << '}' << bindings << axis;
+    }
 
     std::string to_string() const {
       std::ostringstream oss;
@@ -132,10 +139,8 @@ namespace Carli {
     }
 
     void print(std::ostream &os) const override {
-      os << '{';
-      for(size_t i = 0; i != this->conditions.size(); ++i)
-        os << (i ? "," : "") << this->conditions[i];
-      os << '}' << this->bindings << this->axis << '=' << value;
+      this->print_axis(os);
+      os << '=' << value;
     }
   };
 
@@ -235,10 +240,8 @@ namespace Carli {
     }
 
     void print(std::ostream &os) const {
-      os << '{';
-      for(size_t i = 0; i != this->conditions.size(); ++i)
-        os << (i ? "," : "") << this->conditions[i];
-      os << '}' << this->bindings << this->axis << '=';
+      this->print_axis(os);
+      os << '=';
       if(integer_locked && bound_lower + 1 == bound_upper)
         os << bound_lower;
       else

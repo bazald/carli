@@ -77,7 +77,7 @@ namespace Carli {
     Fringe_Values fringe_values;
   };
 
-  bool Agent::respecialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
+  bool Agent::respecialize(Rete::Rete_Action &rete_action) {
     return false;
 #ifndef NO_COLLAPSE_DETECTION_HACK
     if(m_experienced_n_positive_rewards_in_a_row)
@@ -104,7 +104,7 @@ namespace Carli {
     if(general.q_value->depth >= m_split_max)
       return false;
 #endif
-    
+
 //     if(general.fringe_values.empty()) {
 //       const auto grandparent = rete_action.parent_left()->parent_left();
 //       auto fringe_collector = grandparent->visit_preorder(Fringe_Collector_Immediate(grandparent), true);
@@ -132,7 +132,7 @@ namespace Carli {
       rete_print(fout);
     }
 
-    expand_fringe(rete_action, token, chosen);
+    expand_fringe(rete_action, chosen);
 
     auto new_node = general.create_split(*this, m_wme_blink, false);
 
@@ -150,11 +150,7 @@ namespace Carli {
     return true;
   }
 
-  void Agent::expand_fringe(Rete::Rete_Action &rete_action, const Rete::WME_Token &
-#ifdef DEBUG_OUTPUT
-                                                                                   token
-#endif
-                                                                                        , const Fringe_Values::iterator &specialization)
+  void Agent::expand_fringe(Rete::Rete_Action &rete_action, const Fringe_Values::iterator &specialization)
   {
     auto &general = debuggable_cast<Node_Unsplit &>(*rete_action.data);
     const std::string general_name = general.rete_action.lock()->get_name();
@@ -327,8 +323,8 @@ namespace Carli {
 
   Agent::Agent(const std::shared_ptr<Environment> &environment, const std::function<Carli::Action_Ptr_C (const Rete::Variable_Indices &variables, const Rete::WME_Token &token)> &get_action_)
     : get_action(get_action_),
-    m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy();}),
-    m_exploration_policy([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(m_epsilon);}),
+    m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy(nullptr);}),
+    m_exploration_policy([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(m_epsilon, nullptr);}),
     m_environment(environment),
     m_credit_assignment(
       m_credit_assignment_code == "all" ?
@@ -386,6 +382,11 @@ namespace Carli {
     if(m_split_test == "catde") {
       m_split_criterion = [this](const Rete::WME_Token &token, Node_Unsplit &general)->Fringe_Values::iterator{
         return this->split_test_catde(token, general);
+      };
+    }
+    else if(m_split_test == "policy") {
+      m_split_criterion = [this](const Rete::WME_Token &token, Node_Unsplit &general)->Fringe_Values::iterator{
+        return this->split_test_policy(token, general);
       };
     }
     else if(m_split_test == "value") {
@@ -487,7 +488,7 @@ namespace Carli {
         Action_Ptr_C next = m_exploration_policy();
 
         if(*m_next != *next) {
-          if(sum_value(nullptr, m_current_q_value) < sum_value(nullptr, m_next_q_values[next]))
+          if(sum_value(nullptr, m_current_q_value, nullptr) < sum_value(nullptr, m_next_q_values[next], nullptr))
             clear_eligibility_trace();
           m_next = next;
         }
@@ -631,23 +632,26 @@ namespace Carli {
     visit_preorder(visitor, true);
   }
 
-  Carli::Action_Ptr_C Agent::choose_epsilon_greedy(const double &epsilon) {
+  Carli::Action_Ptr_C Agent::choose_epsilon_greedy(const double &epsilon, const Feature * const &axis) {
     if(random.frand_lt() < epsilon)
       return choose_randomly();
     else
-      return choose_greedy();
+      return choose_greedy(axis);
   }
 
-  Carli::Action_Ptr_C Agent::choose_greedy() {
+  Carli::Action_Ptr_C Agent::choose_greedy(const Feature * const &axis) {
 #ifdef DEBUG_OUTPUT
-    std::cerr << "  choose_greedy" << std::endl;
+    std::cerr << "  choose_greedy(";
+    if(axis)
+      axis->print_axis(std::cerr);
+    std::cerr << ')' << std::endl;
 #endif
 
     int32_t count = 0;
     double value = double();
     Action_Ptr_C action;
     for(const auto &action_q : m_next_q_values) {
-      const double value_ = sum_value(action_q.first.get(), action_q.second);
+      const double value_ = sum_value(action_q.first.get(), action_q.second, axis);
 
       if(!action || value_ > value) {
         action = action_q.first;
@@ -685,7 +689,7 @@ namespace Carli {
   void Agent::td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next) {
     assert(!m_badness);
 
-    const double target_next = m_discount_rate * sum_value(nullptr, next);
+    const double target_next = m_discount_rate * sum_value(nullptr, next, nullptr);
     const double target_value = reward + target_next;
 
     double q_old = double();
@@ -1077,6 +1081,94 @@ namespace Carli {
     return chosen_axis;
   }
 
+  Fringe_Values::iterator Agent::split_test_policy(const Rete::WME_Token &token, Node_Unsplit &general) {
+    assert(general.q_value);
+    assert(general.q_value->type != Q_Value::Type::SPLIT);
+
+    /// Must obey the value function cap unless below the minimum split depth
+    if(general.q_value->depth >= m_split_min && m_value_function_cap && q_value_count >= m_value_function_cap)
+      return general.fringe_values.end();
+
+    const auto greedy_action = choose_greedy(nullptr);
+    for(const auto &axis : general.fringe_values) {
+      const auto greedy_axis = choose_greedy(axis.first);
+      if(*greedy_action != *greedy_axis) {
+        std::cerr << "Greedy mismatch for axis: ";
+        axis.first->print_axis(std::cerr);
+        std::cerr << std::endl;
+      }
+    }
+
+    assert(general.q_value->depth < m_split_max);
+    assert(!general.fringe_values.empty());
+    size_t matches = 0;
+    std::unordered_set<tracked_ptr<Feature>> touched;
+    for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+      for(auto &fringe : fringe_axis->second.values) {
+        if(!fringe->rete_action.lock()->is_active())
+          continue;
+        ++matches;
+
+        if(general.q_value->depth >= m_split_min &&
+          (fringe->q_value->pseudoepisode_count <= m_split_pseudoepisodes ||
+           fringe->q_value->update_count <= m_split_update_count))
+        {
+          return general.fringe_values.end(); ///< Wait to gather more data
+        }
+
+        touched.insert(fringe_axis->first);
+      }
+    }
+
+    Fringe_Values::iterator chosen_axis = general.fringe_values.end();
+    size_t count = 0;
+    int64_t depth_min = std::numeric_limits<int64_t>::max();
+    double delta_max = std::numeric_limits<double>::lowest();
+    for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+      const auto found = touched.find(fringe_axis->first);
+      if(found == touched.end())
+        continue;
+
+      double lowest = std::numeric_limits<double>::max();
+      double highest = std::numeric_limits<double>::lowest();
+      for(auto &fringe : fringe_axis->second.values) {
+        lowest = std::min(lowest, fringe->q_value->value);
+        highest = std::max(highest, fringe->q_value->value);
+      }
+      fringe_axis->second.value_delta_max = m_learning_rate * (highest - lowest) + (1 - m_learning_rate) * fringe_axis->second.value_delta_max;
+
+      //++fringe_axis->first->value_delta_update_count;
+      //if(fringe_axis->first->value_delta_update_count <= m_split_update_count)
+      //  continue;
+
+      int64_t depth_diff = fringe_axis->first->get_depth() - depth_min;
+      double delta_diff = delta_max - fringe_axis->second.value_delta_max;
+      if(chosen_axis == general.fringe_values.end() || depth_diff < 0 || (depth_diff == 0 && delta_diff < 0))
+        count = 1;
+      else if(depth_diff > 0 || delta_diff > 0 || random.frand_lt() >= 1.0 / ++count)
+        continue;
+
+      chosen_axis = fringe_axis;
+      depth_min = fringe_axis->first->get_depth();
+      delta_max = fringe_axis->second.value_delta_max;
+    }
+
+    if(chosen_axis == general.fringe_values.end()) {
+      if(!matches) {
+        std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
+#if !defined(NDEBUG) && defined(_WINDOWS)
+        __debugbreak();
+#elif !defined(NDEBUG)
+        assert(false);
+#endif
+      }
+
+      return general.fringe_values.end();
+    }
+
+    return chosen_axis;
+  }
+
   Fringe_Values::iterator Agent::split_test_value(const Rete::WME_Token &token, Node_Unsplit &general) {
     assert(general.q_value);
     assert(general.q_value->type != Q_Value::Type::SPLIT);
@@ -1159,7 +1251,7 @@ namespace Carli {
 #ifdef DEBUG_OUTPUT
                                                      action
 #endif
-                                                           , const Q_Value_List &value_list) {
+                                                           , const Q_Value_List &value_list, const Feature * const &axis) {
 #ifdef DEBUG_OUTPUT
     if(action) {
       std::cerr.unsetf(std::ios_base::floatfield);
@@ -1170,6 +1262,7 @@ namespace Carli {
   //    assert((&value_list - static_cast<Q_Value::List *>(nullptr)) > ptrdiff_t(sizeof(Q_Value)));
 
     double sum = double();
+    size_t touched = 0u;
     for(auto &q : value_list) {
 #ifdef DEBUG_OUTPUT
       if(action) {
@@ -1180,9 +1273,13 @@ namespace Carli {
           std::cerr << ':' << *q->feature;
       }
 #endif
-      if(q->type != Q_Value::Type::FRINGE)
+      if(axis ? (q->feature && q->feature->compare_axis(*axis) == 0) : q->type != Q_Value::Type::FRINGE) {
         sum += q->value /* * q->weight */;
+        ++touched;
+      }
     }
+
+    //assert(touched);
 
 #ifdef DEBUG_OUTPUT
     if(action) {

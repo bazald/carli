@@ -283,7 +283,7 @@ namespace Mario {
         Carli::Action_Ptr_C next = m_exploration_policy();
 
         if(*m_next != *next) {
-          if(sum_value(nullptr, m_current_q_value) < sum_value(nullptr, m_next_q_values[next]))
+          if(sum_value(nullptr, m_current_q_value, nullptr) < sum_value(nullptr, m_next_q_values[next], nullptr))
             clear_eligibility_trace();
           m_next = next;
         }

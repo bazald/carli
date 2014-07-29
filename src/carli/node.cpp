@@ -201,7 +201,7 @@ namespace Carli {
   }
 
   void Node_Split::action(Agent &agent, const Rete::WME_Token &token) {
-    if(!rete_action.lock()->is_excised() && (terminal || !agent.respecialize(*rete_action.lock(), token)))
+    if(!rete_action.lock()->is_excised() && (terminal || !agent.respecialize(*rete_action.lock())))
       agent.insert_q_value_next(agent.get_action(*variables, token), q_value);
   }
 

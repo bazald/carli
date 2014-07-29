@@ -98,7 +98,7 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<int64_t>>("split-max", 0, true, numeric_limits<int64_t>::max(), true, numeric_limits<int64_t>::max()), "Refinement is strictly prohibited from this depth.");
     options.add(     make_shared<Option_Ranged<int64_t>>("split-min", 0, true, numeric_limits<int64_t>::max(), true, 0), "Refinement is assured through this depth.");
     options.add(     make_shared<Option_Ranged<int64_t>>("split-pseudoepisodes", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more pseudoepisode than this to allow refinement.");
-    options.add(     make_shared<Option_Itemized>("split-test", set<string>({"catde", "value"}), "catde"), "'catde' splits based on TD error. 'value' splits on maximal value difference between fringe nodes.");
+    options.add(     make_shared<Option_Itemized>("split-test", set<string>({"catde", "policy", "value"}), "catde"), "'catde' splits based on TD error. 'policy' splits when there's a change to the greedy action. 'value' splits on maximal value difference between fringe nodes.");
     options.add(     make_shared<Option_Ranged<int64_t>>("split-update-count", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more update than this to allow refinement.");
     options.add_line("\n  Rete Representation Saving and Loading:");
     options.add(     make_shared<Option_Itemized>("value-function-map-mode", set<string>({"null", "in", "out"}), "null"), "'in' reads in a file written with 'out', resulting in a fixed hierarchical representation.");
