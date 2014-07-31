@@ -16,7 +16,20 @@ namespace Carli {
     return q_value->depth;
   }
 
+  void Node::action(Agent &agent, const Rete::WME_Token &token) {
+    agent.m_nodes_activating.push_back(shared_from_this());
+    agent.insert_q_value_next(agent.get_action(*variables, token), q_value);
+  }
+
   void Node::retraction(Agent &agent, const Rete::WME_Token &token) {
+    auto na = std::find(agent.m_nodes_active.begin(), agent.m_nodes_active.end(), shared_from_this());
+    if(na != agent.m_nodes_active.end())
+      agent.m_nodes_active.erase(na);
+
+    na = std::find(agent.m_nodes_activating.begin(), agent.m_nodes_activating.end(), shared_from_this());
+    if(na != agent.m_nodes_activating.end())
+      agent.m_nodes_activating.erase(na);
+
     agent.purge_q_value_next(agent.get_action(*variables, token), q_value);
   }
 
@@ -200,9 +213,9 @@ namespace Carli {
     return terminal ? rete_action.lock()->parent_left() : rete_action.lock()->parent_left()->parent_left();
   }
 
-  void Node_Split::action(Agent &agent, const Rete::WME_Token &token) {
-    if(!rete_action.lock()->is_excised() && (terminal || !agent.respecialize(*rete_action.lock())))
-      agent.insert_q_value_next(agent.get_action(*variables, token), q_value);
+  void Node_Split::decision(Agent &agent) {
+    if(!terminal && !rete_action.lock()->is_excised())
+      agent.respecialize(*rete_action.lock());
   }
 
   Node_Unsplit::Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
@@ -226,14 +239,9 @@ namespace Carli {
     return rete_action.lock()->parent_left()->parent_left();
   }
 
-  void Node_Unsplit::action(Agent &agent, const Rete::WME_Token &token) {
-    if(!rete_action.lock()->is_excised() && !agent.specialize(*rete_action.lock(), token))
-      agent.insert_q_value_next(agent.get_action(*variables, token), q_value);
-  }
-
-  void Node_Fringe::action(Agent &agent, const Rete::WME_Token &token) {
+  void Node_Unsplit::decision(Agent &agent) {
     if(!rete_action.lock()->is_excised())
-      agent.insert_q_value_next(agent.get_action(*variables, token), q_value);
+      agent.specialize(*rete_action.lock());
   }
 
   Rete::Rete_Node_Ptr Node_Fringe::cluster_root_ancestor() const {

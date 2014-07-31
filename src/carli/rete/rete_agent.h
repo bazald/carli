@@ -54,6 +54,8 @@ namespace Rete {
   protected:
     void destroy();
 
+    Agenda agenda;
+
   private:
     void source_rule(const Rete_Action_Ptr &action, const bool &user_command);
 
@@ -61,7 +63,6 @@ namespace Rete {
     std::unordered_map<std::string, Rete_Action_Ptr> rules;
     int64_t rule_name_index = 0;
     WME_Set working_memory;
-    Agenda agenda;
     intptr_t visitor_value = 0;
   };
 

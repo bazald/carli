@@ -95,7 +95,7 @@ namespace Carli {
     }
   }
 
-  bool Agent::specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token) {
+  bool Agent::specialize(Rete::Rete_Action &rete_action) {
     auto &general = debuggable_cast<Node_Unsplit &>(*rete_action.data);
 
     if(general.q_value->type == Q_Value::Type::SPLIT)
@@ -112,7 +112,7 @@ namespace Carli {
 //       assert(!general.fringe_values.empty());
 //     }
 
-    const Fringe_Values::iterator chosen = m_split_criterion(token, general);
+    const Fringe_Values::iterator chosen = m_split_criterion(general);
 
     if(chosen == general.fringe_values.end())
       return false;
@@ -380,18 +380,18 @@ namespace Carli {
       m_target_policy = m_exploration_policy;
 
     if(m_split_test == "catde") {
-      m_split_criterion = [this](const Rete::WME_Token &token, Node_Unsplit &general)->Fringe_Values::iterator{
-        return this->split_test_catde(token, general);
+      m_split_criterion = [this](Node_Unsplit &general)->Fringe_Values::iterator{
+        return this->split_test_catde(general);
       };
     }
     else if(m_split_test == "policy") {
-      m_split_criterion = [this](const Rete::WME_Token &token, Node_Unsplit &general)->Fringe_Values::iterator{
-        return this->split_test_policy(token, general);
+      m_split_criterion = [this](Node_Unsplit &general)->Fringe_Values::iterator{
+        return this->split_test_policy(general);
       };
     }
     else if(m_split_test == "value") {
-      m_split_criterion = [this](const Rete::WME_Token &token, Node_Unsplit &general)->Fringe_Values::iterator{
-        return this->split_test_value(token, general);
+      m_split_criterion = [this](Node_Unsplit &general)->Fringe_Values::iterator{
+        return this->split_test_value(general);
       };
     }
     else
@@ -436,8 +436,7 @@ namespace Carli {
 
     clear_eligibility_trace();
 
-    generate_features();
-    clean_features();
+    generate_all_features();
 
     if(m_metastate == Metastate::NON_TERMINAL)
       m_next = m_exploration_policy();
@@ -472,8 +471,7 @@ namespace Carli {
     update();
 
     if(m_metastate == Metastate::NON_TERMINAL) {
-      generate_features();
-      clean_features();
+      generate_all_features();
 
       m_next = m_target_policy();
 #ifdef DEBUG_OUTPUT
@@ -988,7 +986,7 @@ namespace Carli {
     }
   }
 
-  Fringe_Values::iterator Agent::split_test_catde(const Rete::WME_Token &token, Node_Unsplit &general) {
+  Fringe_Values::iterator Agent::split_test_catde(Node_Unsplit &general) {
     assert(general.q_value);
     assert(general.q_value->type != Q_Value::Type::SPLIT);
 
@@ -1081,7 +1079,7 @@ namespace Carli {
     return chosen_axis;
   }
 
-  Fringe_Values::iterator Agent::split_test_policy(const Rete::WME_Token &token, Node_Unsplit &general) {
+  Fringe_Values::iterator Agent::split_test_policy(Node_Unsplit &general) {
     assert(general.q_value);
     assert(general.q_value->type != Q_Value::Type::SPLIT);
 
@@ -1169,7 +1167,7 @@ namespace Carli {
     return chosen_axis;
   }
 
-  Fringe_Values::iterator Agent::split_test_value(const Rete::WME_Token &token, Node_Unsplit &general) {
+  Fringe_Values::iterator Agent::split_test_value(Node_Unsplit &general) {
     assert(general.q_value);
     assert(general.q_value->type != Q_Value::Type::SPLIT);
 
@@ -1279,7 +1277,7 @@ namespace Carli {
       }
     }
 
-    //assert(touched);
+    assert(touched);
 
 #ifdef DEBUG_OUTPUT
     if(action) {
@@ -1422,7 +1420,19 @@ namespace Carli {
   //    }
   //  }
 
-  void Agent::clean_features() {
+  void Agent::generate_all_features() {
+    m_nodes_active.swap(m_nodes_activating);
+
+    generate_features();
+
+    while(!m_nodes_activating.empty()) {
+      const auto node = m_nodes_activating.front();
+      m_nodes_active.push_back(node);
+      m_nodes_activating.pop_front();
+      Rete::Agenda::Locker lock(agenda);
+      node->decision(*this);
+    }
+
     for(auto it = m_next_q_values.begin(), iend = m_next_q_values.end(); it != iend; ) {
       if(it->second.empty())
         m_next_q_values.erase(it++);

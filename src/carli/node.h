@@ -51,12 +51,13 @@ namespace Carli {
     }
 
     virtual ~Node();
-    
+
     int64_t rank() const override;
 
-    virtual void action(Agent &agent, const Rete::WME_Token &token) = 0;
+    virtual void action(Agent &agent, const Rete::WME_Token &token);
+    virtual void decision(Agent &agent) = 0;
     virtual void retraction(Agent &agent, const Rete::WME_Token &token);
-    
+
     Node_Split_Ptr create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink, const bool &terminal);
     Node_Unsplit_Ptr create_unsplit(Agent &agent, const Rete::WME_Ptr_C &wme_blink);
     Node_Fringe_Ptr create_fringe(Agent &agent, Node_Unsplit &leaf, Feature * const &feature);
@@ -68,7 +69,7 @@ namespace Carli {
     tracked_ptr<Q_Value> q_value;
     bool delete_q_value = true;
   };
-  
+
   class CARLI_LINKAGE Node_Split : public Node {
     Node_Split(const Node_Split &) = delete;
     Node_Split & operator=(const Node_Split &) = delete;
@@ -80,15 +81,15 @@ namespace Carli {
     Node_Split * clone() const override {
       return new Node_Split(agent, parent_action.lock(), rete_action.lock(), q_value->clone(), terminal);
     }
-    
+
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
 
-    void action(Agent &agent, const Rete::WME_Token &token) override;
+    void decision(Agent &agent) override;
 
     bool terminal;
   };
-
   class CARLI_LINKAGE Node_Unsplit : public Node {
+
     Node_Unsplit(const Node_Unsplit &) = delete;
     Node_Unsplit & operator=(const Node_Unsplit &) = delete;
 
@@ -100,10 +101,10 @@ namespace Carli {
     Node_Unsplit * clone() const override {
       return new Node_Unsplit(agent, parent_action.lock(), rete_action.lock(), q_value->clone());
     }
-    
+
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
 
-    void action(Agent &agent, const Rete::WME_Token &token) override;
+    void decision(Agent &agent) override;
 
     Fringe_Values fringe_values; ///< Not cloned
   };
@@ -111,7 +112,7 @@ namespace Carli {
   class CARLI_LINKAGE Node_Fringe : public Node {
     Node_Fringe(const Node_Fringe &) = delete;
     Node_Fringe & operator=(const Node_Fringe &) = delete;
-    
+
   public:
     Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
      : Node(agent_, parent_action_, rete_action_, new Q_Value(0.0, Q_Value::Type::FRINGE, depth_, feature_))
@@ -127,10 +128,10 @@ namespace Carli {
     Node_Fringe * clone() const override {
       return new Node_Fringe(agent, parent_action.lock(), rete_action.lock(), q_value->clone());
     }
-    
+
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
 
-    void action(Agent &agent, const Rete::WME_Token &token) override;
+    void decision(Agent &) {}
   };
 
   inline void __node_size_check() {

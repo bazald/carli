@@ -37,7 +37,7 @@ namespace Carli {
     typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
 
     bool respecialize(Rete::Rete_Action &rete_action);
-    bool specialize(Rete::Rete_Action &rete_action, const Rete::WME_Token &token);
+    bool specialize(Rete::Rete_Action &rete_action);
     void expand_fringe(Rete::Rete_Action &rete_action, const Fringe_Values::iterator &specialization);
     bool collapse_rete(Rete::Rete_Action &rete_action); ///< Collapses and returns true unless there exist no nodes to collapse into a new fringe
 
@@ -110,6 +110,9 @@ namespace Carli {
     const std::function<Carli::Action_Ptr_C (const Rete::Variable_Indices &variables, const Rete::WME_Token &token)> get_action;
     int64_t q_value_count = 0;
 
+    std::list<Node_Ptr> m_nodes_active;
+    std::list<Node_Ptr> m_nodes_activating;
+
   protected:
     Action_Ptr_C choose_epsilon_greedy(const double &epsilon, const Feature * const &axis);
     Action_Ptr_C choose_greedy(const Feature * const &axis);
@@ -134,13 +137,13 @@ namespace Carli {
 
     void assign_credit_normalize(const Q_Value_List &value_list, const double &sum);
 
-    Fringe_Values::iterator split_test_catde(const Rete::WME_Token &token, Node_Unsplit &general);
-    Fringe_Values::iterator split_test_policy(const Rete::WME_Token &token, Node_Unsplit &general);
-    Fringe_Values::iterator split_test_value(const Rete::WME_Token &token, Node_Unsplit &general);
+    Fringe_Values::iterator split_test_catde(Node_Unsplit &general);
+    Fringe_Values::iterator split_test_policy(Node_Unsplit &general);
+    Fringe_Values::iterator split_test_value(Node_Unsplit &general);
 
     static double sum_value(const action_type * const &action, const Q_Value_List &value_list, const Feature * const &axis);
 
-    void clean_features();
+    void generate_all_features();
 
   #ifdef DEBUG_OUTPUT
     template <typename LIST>
@@ -165,7 +168,7 @@ namespace Carli {
     std::map<Action_Ptr_C, Q_Value_List, compare_deref_lt, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, Q_Value_List>>> m_next_q_values;
     std::function<Action_Ptr_C ()> m_target_policy; ///< Sarsa/Q-Learning selector
     std::function<Action_Ptr_C ()> m_exploration_policy; ///< Exploration policy
-    std::function<Fringe_Values::iterator (const Rete::WME_Token &, Node_Unsplit &)> m_split_criterion; ///< true if too general, false if sufficiently general
+    std::function<Fringe_Values::iterator (Node_Unsplit &)> m_split_criterion; ///< true if too general, false if sufficiently general
     //std::map<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<Action_Ptr_C>, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
     Rete::Symbol_Identifier_Ptr_C m_s_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("S1"));

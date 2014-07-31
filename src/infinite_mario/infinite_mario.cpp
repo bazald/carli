@@ -267,8 +267,7 @@ namespace Mario {
     if(terminal)
       td_update(m_current_q_value, reward, Q_Value_List());
     else {
-      generate_features();
-      clean_features();
+      generate_all_features();
 
       m_next = m_target_policy();
 #ifdef DEBUG_OUTPUT
