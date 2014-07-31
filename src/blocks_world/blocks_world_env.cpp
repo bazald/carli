@@ -92,7 +92,6 @@ namespace Blocks_World {
   Agent::Agent(const std::shared_ptr<Carli::Environment> &env)
    : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(variables, token);})
   {
-    insert_wme(m_wme_blink);
     generate_rete();
     generate_features();
   }
@@ -136,7 +135,7 @@ namespace Blocks_World {
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_block_attr, m_block_ids[size_t(*st)]));
         wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_name_attr, m_block_names[size_t(*st)]));
         wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
-        
+
         const double brightness = m_random.frand_lte();
         wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
         if(brightness > 0.5)
@@ -162,8 +161,6 @@ namespace Blocks_World {
     wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[0], m_in_place_attr, m_true_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[0], m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(0)));
 
-    remove_wme(m_wme_blink);
-
     for(auto wt = m_wmes_prev.begin(), wend = m_wmes_prev.end(); wt != wend; ) {
       const auto found = std::find_if(wmes_current.begin(), wmes_current.end(), [wt](const Rete::WME_Ptr_C &wme_)->bool{return *wme_ == **wt;});
       if(found == wmes_current.end()) {
@@ -183,16 +180,14 @@ namespace Blocks_World {
         insert_wme(wme);
       }
     }
-
-    insert_wme(m_wme_blink);
   }
 
   void Agent::update() {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
-    
+
     const auto &blocks = env->get_blocks();
     const auto &goal = env->get_goal();
-    
+
     for(const auto &gstack : goal) {
       if(std::find(blocks.begin(), blocks.end(), gstack) == blocks.end())
         return;

@@ -33,21 +33,14 @@ namespace Carli {
     agent.purge_q_value_next(agent.get_action(*variables, token), q_value);
   }
 
-  Node_Split_Ptr Node::create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink, const bool &terminal) {
+  Node_Split_Ptr Node::create_split(Agent &agent, const bool &terminal) {
     const auto ra_lock = rete_action.lock();
     const auto node_name = ra_lock->get_name();
     const auto new_name = agent.next_rule_name(node_name.substr(0, node_name.find_last_of('*') + 1) + "s");
-    auto parent = ra_lock->parent_left();
     tracked_ptr<Q_Value> new_q_value;
 
-    if(q_value->type == Q_Value::Type::FRINGE) {
-      if(!terminal) {
-        const auto filter_blink = agent.make_filter(*wme_blink);
-        parent = agent.make_existential_join(Rete::WME_Bindings(), false, parent, filter_blink);
-      }
-
+    if(q_value->type == Q_Value::Type::FRINGE)
       new_q_value = new Q_Value(0.0, Q_Value::Type::SPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr);
-    }
     else {
       assert(!terminal);
 
@@ -56,26 +49,18 @@ namespace Carli {
       new_q_value = q_value;
     }
 
-    auto new_leaf = agent.make_standard_action(parent, new_name, false, ra_lock->get_variables());
+    auto new_leaf = agent.make_standard_action(ra_lock->parent_left(), new_name, false, ra_lock->get_variables());
     auto new_leaf_data = std::make_shared<Node_Split>(agent, parent_action.lock(), new_leaf, new_q_value, terminal);
     new_leaf->data = new_leaf_data;
 
     return new_leaf_data;
   }
 
-  Node_Unsplit_Ptr Node::create_unsplit(Agent &agent, const Rete::WME_Ptr_C &wme_blink) {
+  Node_Unsplit_Ptr Node::create_unsplit(Agent &agent) {
     const auto ra_lock = rete_action.lock();
     const auto node_name = ra_lock->get_name();
     const auto new_name = agent.next_rule_name(node_name.substr(0, node_name.find_last_of('*') + 1) + "u");
-    auto parent = ra_lock->parent_left();
     tracked_ptr<Q_Value> new_q_value;
-
-    if(q_value->type == Q_Value::Type::FRINGE ||
-      (q_value->type == Q_Value::Type::SPLIT && debuggable_cast<Node_Split *>(this)->terminal))
-    {
-      auto filter_blink = agent.make_filter(*wme_blink);
-      parent = agent.make_existential_join(Rete::WME_Bindings(), false, parent, filter_blink);
-    }
 
     if(q_value->type == Q_Value::Type::FRINGE)
       new_q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr);
@@ -85,7 +70,7 @@ namespace Carli {
       new_q_value = q_value;
     }
 
-    auto new_leaf = agent.make_standard_action(parent, new_name, false, ra_lock->get_variables());
+    auto new_leaf = agent.make_standard_action(ra_lock->parent_left(), new_name, false, ra_lock->get_variables());
     auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, parent_action.lock(), new_leaf, new_q_value);
     new_leaf->data = new_leaf_data;
 
@@ -100,10 +85,8 @@ namespace Carli {
     const auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(new_feature);
 
     auto ancestor_left = lra_lock->parent_left();
-    if(leaf.q_value->type != Q_Value::Type::FRINGE) {
+    if(leaf.q_value->type != Q_Value::Type::FRINGE)
       assert(leaf.q_value->type == Q_Value::Type::UNSPLIT || !debuggable_cast<Node_Split &>(leaf).terminal);
-      ancestor_left = ancestor_left->parent_left(); ///< Skip blink node
-    }
     else
       assert(leaf.q_value->depth == q_value->depth);
 
@@ -112,12 +95,6 @@ namespace Carli {
 
     if(leaf.q_value->type != Q_Value::Type::FRINGE) {
       /// Collapsing rather the fringe rather than expanding it
-      if(q_value->type == Q_Value::Type::UNSPLIT ||
-        (q_value->type == Q_Value::Type::SPLIT && !debuggable_cast<Node_Split *>(this)->terminal))
-      {
-        ancestor_right = ancestor_right->parent_left(); ///< Skip blink node
-      }
-
       const int64_t dend = std::max(int64_t(2), leaf.q_value->depth);
       for(int64_t d = q_value->depth; d != dend; --d) {
         assert(dynamic_cast<Rete::Rete_Predicate *>(ancestor_right.get()) ||

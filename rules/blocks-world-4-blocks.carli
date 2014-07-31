@@ -9,7 +9,6 @@ sp {blocks-world*rl-action*general
   (<dest> ^name <dest-name>)
   (<block-name> <= 4)
   (<dest-name> <= 4)
-  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }

@@ -101,7 +101,6 @@ namespace Mountain_Car {
     insert_wme(m_x_dot_wme);
     for(const auto &acceleration_value : acceleration_values)
       insert_wme(std::make_shared<Rete::WME>(m_s_id, acceleration_attr, acceleration_value));
-    insert_wme(m_wme_blink);
   }
 
   Agent::~Agent() {
@@ -181,7 +180,6 @@ namespace Mountain_Car {
   void Agent::generate_features() {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
 
-    remove_wme(m_wme_blink);
     if(m_x_value->value != env->get_x()) {
       remove_wme(m_x_wme);
       m_x_wme->symbols[2] = m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(env->get_x());
@@ -192,7 +190,6 @@ namespace Mountain_Car {
       m_x_dot_wme->symbols[2] = m_x_dot_value = std::make_shared<Rete::Symbol_Constant_Float>(env->get_x_dot());
       insert_wme(m_x_dot_wme);
     }
-    insert_wme(m_wme_blink);
   }
 
   void Agent::update() {

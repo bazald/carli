@@ -134,7 +134,7 @@ namespace Carli {
 
     expand_fringe(rete_action, chosen);
 
-    auto new_node = general.create_split(*this, m_wme_blink, false);
+    auto new_node = general.create_split(*this, false);
 
     excise_rule(rete_action.get_name(), false);
 
@@ -197,9 +197,9 @@ namespace Carli {
 
         /** Step 2.1: Create a new split/unsplit node depending on the existence of a new fringe. */
         if(terminal)
-          leaf->create_split(*this, m_wme_blink, true);
+          leaf->create_split(*this, true);
         else {
-          const auto node_unsplit = leaf->create_unsplit(*this, m_wme_blink);
+          const auto node_unsplit = leaf->create_unsplit(*this);
 
           /** Step 2.2: Create new ranged fringe nodes if the new leaf is refineable. */
           for(auto &refined_feature : refined)
@@ -264,7 +264,7 @@ namespace Carli {
 #endif
 
     /// Make new unsplit node
-    const auto unsplit = split->create_unsplit(*this, m_wme_blink);
+    const auto unsplit = split->create_unsplit(*this);
 
     /// Preserve some learning
     unsplit->q_value->value = split->q_value->value;

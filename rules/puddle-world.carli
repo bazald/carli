@@ -2,7 +2,6 @@ sp {puddle-world*rl-action*north*general
   :feature 1 unsplit nil
   (<s> ^move <move>)
   (<move> == 0)
-  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }
@@ -51,7 +50,6 @@ sp {puddle-world*rl-action*south*general
   :feature 1 unsplit nil
   (<s> ^move <move>)
   (<move> == 1)
-  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }
@@ -100,7 +98,6 @@ sp {puddle-world*rl-action*east*general
   :feature 1 unsplit nil
   (<s> ^move <move>)
   (<move> == 2)
-  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }
@@ -149,7 +146,6 @@ sp {puddle-world*rl-action*west*general
   :feature 1 unsplit nil
   (<s> ^move <move>)
   (<move> == 3)
-  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }

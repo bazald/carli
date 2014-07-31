@@ -4,7 +4,6 @@ sp {tetris*rl-action*general
   (<action> ^type <type>)
   (<action> ^x <x>)
   (<action> ^y <y>)
-  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }

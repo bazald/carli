@@ -500,7 +500,6 @@ namespace Tetris {
   Agent::Agent(const std::shared_ptr<Carli::Environment> &env)
    : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Place>(variables, token);})
   {
-    insert_wme(m_wme_blink);
     generate_rete();
     generate_features();
   }
@@ -559,8 +558,6 @@ namespace Tetris {
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_prohibits_clearing_attr, std::make_shared<Rete::Symbol_Constant_Int>(prohibits)));
     }
 
-    remove_wme(m_wme_blink);
-
     for(auto wt = m_wmes_prev.begin(), wend = m_wmes_prev.end(); wt != wend; ) {
       const auto found = std::find_if(wmes_current.begin(), wmes_current.end(), [wt](const Rete::WME_Ptr_C &wme_)->bool{return *wme_ == **wt;});
       if(found == wmes_current.end()) {
@@ -580,8 +577,6 @@ namespace Tetris {
         insert_wme(wme);
       }
     }
-
-    insert_wme(m_wme_blink);
   }
 
   void Agent::update() {

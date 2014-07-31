@@ -4,7 +4,6 @@ sp {infinite-mario*rl-action*general
   (<button-presses-out> ^dpad <dpad>)
   (<button-presses-out> ^jump <jump>)
   (<button-presses-out> ^speed <speed>)
-  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }

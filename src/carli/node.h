@@ -58,8 +58,8 @@ namespace Carli {
     virtual void decision(Agent &agent) = 0;
     virtual void retraction(Agent &agent, const Rete::WME_Token &token);
 
-    Node_Split_Ptr create_split(Agent &agent, const Rete::WME_Ptr_C &wme_blink, const bool &terminal);
-    Node_Unsplit_Ptr create_unsplit(Agent &agent, const Rete::WME_Ptr_C &wme_blink);
+    Node_Split_Ptr create_split(Agent &agent, const bool &terminal);
+    Node_Unsplit_Ptr create_unsplit(Agent &agent);
     Node_Fringe_Ptr create_fringe(Agent &agent, Node_Unsplit &leaf, Feature * const &feature);
 
     Agent &agent;

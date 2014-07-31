@@ -197,14 +197,13 @@ namespace Puddle_World {
       if(rete_parse_file(*this, rules))
         abort();
     }
-    
+
     m_x_wme = std::make_shared<Rete::WME>(m_s_id, x_attr, m_x_value);
     m_y_wme = std::make_shared<Rete::WME>(m_s_id, y_attr, m_y_value);
     insert_wme(m_x_wme);
     insert_wme(m_y_wme);
     for(const auto &move_value : move_values)
       insert_wme(std::make_shared<Rete::WME>(m_s_id, move_attr, move_value));
-    insert_wme(m_wme_blink);
   }
 
   Agent::~Agent() {
@@ -281,7 +280,6 @@ namespace Puddle_World {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
     const auto pos = env->get_position();
 
-    remove_wme(m_wme_blink);
     if(m_x_value->value != pos.first) {
       remove_wme(m_x_wme);
       m_x_wme->symbols[2] = m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(pos.first);
@@ -292,7 +290,6 @@ namespace Puddle_World {
       m_y_wme->symbols[2] = m_y_value = std::make_shared<Rete::Symbol_Constant_Float>(pos.second);
       insert_wme(m_y_wme);
     }
-    insert_wme(m_wme_blink);
   }
 
   void Agent::update() {

@@ -2,7 +2,6 @@ sp {mountain-car*rl-action*left*general
   :feature 1 unsplit nil
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 0)
-  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }
@@ -51,7 +50,6 @@ sp {mountain-car*rl-action*idle*general
   :feature 1 unsplit nil
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 1)
-  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }
@@ -100,7 +98,6 @@ sp {mountain-car*rl-action*right*general
   :feature 1 unsplit nil
   (<s> ^acceleration <acceleration>)
   (<acceleration> == 2)
-  +(<s> ^<s> <s>)                  # Blink node currently required for non-fringe nodes
 -->
   = 0.0
 }

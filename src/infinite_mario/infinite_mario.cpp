@@ -302,7 +302,6 @@ namespace Mario {
    m_current_state(current_),
    m_prev_state(prev_)
   {
-    insert_wme(m_wme_blink);
     generate_rete();
     generate_features();
   }
@@ -420,8 +419,6 @@ namespace Mario {
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.second.second - m_current_state->getMarioFloatPos.second)));
     }
 
-    remove_wme(m_wme_blink);
-
     for(auto wt = m_wmes_prev.begin(), wend = m_wmes_prev.end(); wt != wend; ) {
       const auto found = std::find_if(wmes_current.begin(), wmes_current.end(), [wt](const Rete::WME_Ptr_C &wme_)->bool{return *wme_ == **wt;});
       if(found == wmes_current.end()) {
@@ -441,8 +438,6 @@ namespace Mario {
         insert_wme(wme);
       }
     }
-
-    insert_wme(m_wme_blink);
   }
 
   void Agent::update() {

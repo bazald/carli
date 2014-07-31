@@ -172,7 +172,6 @@ namespace Carli {
     //std::map<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<Action_Ptr_C>, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
     Rete::Symbol_Identifier_Ptr_C m_s_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("S1"));
-    Rete::WME_Ptr_C m_wme_blink = Rete::WME_Ptr_C(new Rete::WME(m_s_id, m_s_id, m_s_id));
 
   private:
     virtual void generate_features() = 0;
