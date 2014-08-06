@@ -323,7 +323,7 @@ namespace Carli {
 
   Agent::Agent(const std::shared_ptr<Environment> &environment, const std::function<Carli::Action_Ptr_C (const Rete::Variable_Indices &variables, const Rete::WME_Token &token)> &get_action_)
     : get_action(get_action_),
-    m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy(nullptr);}),
+    m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy(nullptr).first;}),
     m_exploration_policy([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(m_epsilon, nullptr);}),
     m_environment(environment),
     m_credit_assignment(
@@ -634,10 +634,10 @@ namespace Carli {
     if(random.frand_lt() < epsilon)
       return choose_randomly();
     else
-      return choose_greedy(axis);
+      return choose_greedy(axis).first;
   }
 
-  Carli::Action_Ptr_C Agent::choose_greedy(const Feature * const &axis) {
+  std::pair<Action_Ptr_C, double> Agent::choose_greedy(const Feature * const &axis) {
 #ifdef DEBUG_OUTPUT
     std::cerr << "  choose_greedy(";
     if(axis)
@@ -648,19 +648,24 @@ namespace Carli {
     int32_t count = 0;
     double value = double();
     Action_Ptr_C action;
+    double distance = double();
     for(const auto &action_q : m_next_q_values) {
       const double value_ = sum_value(action_q.first.get(), action_q.second, axis);
 
       if(!action || value_ > value) {
+        distance = value_ - value;
         action = action_q.first;
         value = value_;
         count = 1;
       }
-      else if(value_ == value && random.rand_lt(++count) == 0)
-        action = action_q.first;
+      else if(value_ == value) {
+        distance = 0;
+        if(random.rand_lt(++count) == 0)
+          action = action_q.first;
+      }
     }
 
-    return action;
+    return std::make_pair(action, distance);
   }
 
   Carli::Action_Ptr_C Agent::choose_randomly() {
@@ -1087,16 +1092,6 @@ namespace Carli {
     if(general.q_value->depth >= m_split_min && m_value_function_cap && q_value_count >= m_value_function_cap)
       return general.fringe_values.end();
 
-    const auto greedy_action = choose_greedy(nullptr);
-    for(const auto &axis : general.fringe_values) {
-      const auto greedy_axis = choose_greedy(axis.first);
-      if(*greedy_action != *greedy_axis) {
-        std::cerr << "Greedy mismatch for axis: ";
-        axis.first->print_axis(std::cerr);
-        std::cerr << std::endl;
-      }
-    }
-
     assert(general.q_value->depth < m_split_max);
     assert(!general.fringe_values.empty());
     size_t matches = 0;
@@ -1119,36 +1114,29 @@ namespace Carli {
     }
 
     Fringe_Values::iterator chosen_axis = general.fringe_values.end();
-    size_t count = 0;
-    int64_t depth_min = std::numeric_limits<int64_t>::max();
-    double delta_max = std::numeric_limits<double>::lowest();
+    auto greedy_action = choose_greedy(nullptr);
+    greedy_action.second = 0; ///< If there's anything new, we want to split, even if the difference is small.
+    size_t count = 1;
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
       const auto found = touched.find(fringe_axis->first);
       if(found == touched.end())
         continue;
 
-      double lowest = std::numeric_limits<double>::max();
-      double highest = std::numeric_limits<double>::lowest();
-      for(auto &fringe : fringe_axis->second.values) {
-        lowest = std::min(lowest, fringe->q_value->value);
-        highest = std::max(highest, fringe->q_value->value);
+      const auto greedy_axis = choose_greedy(fringe_axis->first);
+      if(*greedy_action.first != *greedy_axis.first) {
+//        std::cerr << "Greedy mismatch for axis: ";
+//        fringe_axis->first->print_axis(std::cerr);
+//        std::cerr << std::endl;
+
+        const int64_t depth_diff = chosen_axis != general.fringe_values.end() ? fringe_axis->first->get_depth() - chosen_axis->first->get_depth() : 0;
+        if(depth_diff < 0 || (depth_diff == 0 && greedy_axis.second > greedy_action.second))
+          count = 1;
+        else if(depth_diff > 0 || greedy_axis.second < greedy_action.second || random.frand_lt() >= 1.0 / ++count)
+          continue;
+
+        chosen_axis = fringe_axis;
+        greedy_action = greedy_axis;
       }
-      fringe_axis->second.value_delta_max = m_learning_rate * (highest - lowest) + (1 - m_learning_rate) * fringe_axis->second.value_delta_max;
-
-      //++fringe_axis->first->value_delta_update_count;
-      //if(fringe_axis->first->value_delta_update_count <= m_split_update_count)
-      //  continue;
-
-      int64_t depth_diff = fringe_axis->first->get_depth() - depth_min;
-      double delta_diff = delta_max - fringe_axis->second.value_delta_max;
-      if(chosen_axis == general.fringe_values.end() || depth_diff < 0 || (depth_diff == 0 && delta_diff < 0))
-        count = 1;
-      else if(depth_diff > 0 || delta_diff > 0 || random.frand_lt() >= 1.0 / ++count)
-        continue;
-
-      chosen_axis = fringe_axis;
-      depth_min = fringe_axis->first->get_depth();
-      delta_max = fringe_axis->second.value_delta_max;
     }
 
     if(chosen_axis == general.fringe_values.end()) {

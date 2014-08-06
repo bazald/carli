@@ -115,7 +115,7 @@ namespace Carli {
 
   protected:
     Action_Ptr_C choose_epsilon_greedy(const double &epsilon, const Feature * const &axis);
-    Action_Ptr_C choose_greedy(const Feature * const &axis);
+    std::pair<Action_Ptr_C, double> choose_greedy(const Feature * const &axis); ///< Greedy action, and distance to next most greedy
     Action_Ptr_C choose_randomly();
 
     void td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next);

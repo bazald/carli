@@ -13,4 +13,4 @@ on-policy
 --epsilon-greedy
 0.1
 --split-test
-value
+policy
