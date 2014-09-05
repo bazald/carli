@@ -54,6 +54,9 @@ namespace Carli {
 
     int64_t rank() const override;
 
+    void print_flags(std::ostream &os) const override;
+    void print_action(std::ostream &os) const override;
+
     virtual void action(Agent &agent, const Rete::WME_Token &token);
     virtual void decision(Agent &agent) = 0;
     virtual void retraction(Agent &agent, const Rete::WME_Token &token);

@@ -63,6 +63,7 @@ namespace Carli {
     options.add('o', make_shared<Option_Itemized>("output", set<string>({"null", "simple", "experiment"}), "simple"), "What kind of output should be generated.");
     options.add('p', make_shared<Option_Ranged<int64_t>>("print-every", 1, true, numeric_limits<int64_t>::max(), true, 100), "How many steps per line of output.");
     options.add('r', make_shared<Option_String>("rules", "default"), "Which .carli rules should the agent load?");
+    options.add(     make_shared<Option_String>("rules-out", ""), "Where should final .carli rules be saved?");
     options.add(     make_shared<Option_Ranged<int64_t>>("scenario", 0, true, numeric_limits<int64_t>::max(), true, 0), "Which experimental scenario should be run, environment specific.");
     options.add('s', make_shared<Option_Ranged<int64_t>>("seed", numeric_limits<int64_t>::min(), true, numeric_limits<int64_t>::max(), true, std::random_device()()), "Random seed.");
     options.add(     make_shared<Option_Function>("stderr", 1, [this,&options](const Option::Arguments &args){

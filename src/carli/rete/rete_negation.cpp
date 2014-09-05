@@ -74,6 +74,18 @@ namespace Rete {
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
   }
 
+  void Rete_Negation::print_rule(std::ostream &os) const {
+    os << '-';
+    const bool pb = get_token_size() > 1;
+    if(pb)
+      os << '}';
+
+    parent_right()->print_rule(os);
+
+    if(pb)
+      os << '}';
+  }
+
   void Rete_Negation::output_name(std::ostream &os, const int64_t &depth) const {
     os << "n(";
     if(input && depth)

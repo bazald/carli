@@ -34,6 +34,8 @@ namespace Rete {
 
     void print_details(std::ostream &os) const override; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
+    void print_rule(std::ostream &os) const override;
+
     void output_name(std::ostream &os, const int64_t &depth) const override;
 
     bool is_active() const override;
@@ -42,7 +44,7 @@ namespace Rete {
 
     static Rete_Predicate_Ptr find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out);
     static Rete_Predicate_Ptr find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out);
-    
+
     const WME_Token_Index & get_lhs_index() const {return m_lhs_index;}
     const Predicate & get_predicate() const {return m_predicate;}
     const WME_Token_Index & get_rhs_index() const {return m_rhs_index;}

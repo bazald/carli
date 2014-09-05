@@ -104,6 +104,24 @@ namespace Rete {
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
   }
 
+  void Rete_Action::print_rule(std::ostream &os) const {
+    os << "sp {" << name;
+    if(data) {
+      os << std::endl << "  ";
+      data->print_flags(os);
+    }
+    os << std::endl << "  ";
+
+    parent_left()->print_rule(os);
+
+    os << std::endl << "-->";
+    if(data) {
+      os << std::endl;
+      data->print_action(os);
+    }
+    os << std::endl << '}' << std::endl;
+  }
+
   void Rete_Action::output_name(std::ostream &os, const int64_t &depth) const {
     os << "a(";
     if(input && depth)

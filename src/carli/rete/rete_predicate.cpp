@@ -104,7 +104,7 @@ namespace Rete {
       case GT: os << '>'; break;
       case GTE: os << "&ge;"; break;
       case LT: os << '<'; break;
-      case LTE: os << "&le"; break;
+      case LTE: os << "&le;"; break;
       default: abort();
     }
     if(m_rhs)
@@ -114,6 +114,27 @@ namespace Rete {
     os << "\"];" << std::endl;
 
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
+  }
+
+  void Rete_Predicate::print_rule(std::ostream &os) const {
+    parent_left()->print_rule(os);
+
+    os << std::endl << "  (" << m_lhs_index << ' ';
+    switch(m_predicate) {
+      case EQ: os << "=="; break;
+      case NEQ: os << "!="; break;
+      case GT: os << '>'; break;
+      case GTE: os << ">="; break;
+      case LT: os << '<'; break;
+      case LTE: os << "<="; break;
+      default: abort();
+    }
+    os << ' ';
+    if(m_rhs)
+      os << *m_rhs;
+    else
+      os << m_rhs_index;
+    os << ')';
   }
 
   void Rete_Predicate::output_name(std::ostream &os, const int64_t &depth) const {

@@ -286,6 +286,21 @@ namespace Rete {
     os << "}" << std::endl;
   }
 
+  void Rete_Agent::rete_print_rules(std::ostream &os) const {
+    auto it = rules.begin();
+    const auto iend = rules.end();
+
+    if(it == iend)
+      return;
+    it->second->print_rule(os);
+    ++it;
+
+    for(; it != iend; ++it) {
+      os << std::endl;
+      it->second->print_rule(os);
+    }
+  }
+
   void Rete_Agent::source_rule(const Rete_Action_Ptr &action, const bool &user_command) {
     auto found = rules.find(action->get_name());
     if(found == rules.end()) {

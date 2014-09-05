@@ -1843,11 +1843,11 @@ yyreduce:
                                        wme.symbols[0] != wme.symbols[1] || wme.symbols[0] != wme.symbols[2];
                           }
 
-                          if(!terminal)
-                            test_node = test_node->parent_left();
+                          //if(!terminal)
+                          //  test_node = test_node->parent_left();
                         }
-                        else if(node_type == "unsplit")
-                          test_node = test_node->parent_left();
+                        //else if(node_type == "unsplit")
+                        //  test_node = test_node->parent_left();
 
                         if(feature) {
                           int64_t token_offset = 0;

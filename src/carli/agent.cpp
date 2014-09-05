@@ -412,6 +412,12 @@ namespace Carli {
   }
 
   void Agent::destroy() {
+    const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();
+    if(!rules_out_file.empty()) {
+      std::ofstream rules_out(rules_out_file.c_str());
+      rete_print_rules(rules_out);
+    }
+
     excise_all();
   //#ifdef DEBUG_OUTPUT
   //  std::cerr << *this << std::endl;

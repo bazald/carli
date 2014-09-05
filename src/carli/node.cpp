@@ -16,6 +16,14 @@ namespace Carli {
     return q_value->depth;
   }
 
+  void Node::print_flags(std::ostream &os) const {
+    os << "TODO";
+  }
+
+  void Node::print_action(std::ostream &os) const {
+    os << "  = " << q_value->value;
+  }
+
   void Node::action(Agent &agent, const Rete::WME_Token &token) {
     agent.m_nodes_activating.push_back(shared_from_this());
     agent.insert_q_value_next(agent.get_action(*variables, token), q_value);

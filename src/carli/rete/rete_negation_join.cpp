@@ -124,6 +124,21 @@ namespace Rete {
     os << "  " << intptr_t(input1) << " -> " << intptr_t(this) << " [color=blue];" << std::endl;
   }
 
+  void Rete_Negation_Join::print_rule(std::ostream &os) const {
+    parent_left()->print_rule(os);
+
+    os << std::endl << "  -";
+    const auto pr = parent_right();
+    const bool prb = pr->get_token_size() > 1;
+    if(prb)
+      os << '{';
+
+    parent_right()->print_rule(os);
+
+    if(prb)
+      os << '}';
+  }
+
   void Rete_Negation_Join::output_name(std::ostream &os, const int64_t &depth) const {
     os << "nj(" << bindings << ',';
     if(input0 && depth)
