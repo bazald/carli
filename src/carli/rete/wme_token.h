@@ -10,14 +10,8 @@ namespace Rete {
   class WME_Token;
   typedef std::shared_ptr<const WME_Token> WME_Token_Ptr_C;
   typedef std::shared_ptr<WME_Token> WME_Token_Ptr;
-  typedef std::pair<int64_t, int8_t> WME_Token_Index;
   typedef std::pair<WME_Token_Index, WME_Token_Index> WME_Binding;
   typedef std::set<WME_Binding> WME_Bindings;
-  typedef std::unordered_map<std::string, WME_Token_Index> Variable_Indices;
-
-  typedef std::shared_ptr<const Variable_Indices> Variable_Indices_Ptr_C;
-
-  typedef std::shared_ptr<Variable_Indices> Variable_Indices_Ptr;
 
   class RETE_LINKAGE WME_Token : public std::enable_shared_from_this<WME_Token>, public Zeni::Pool_Allocator<WME_Token> {
   public:
@@ -52,9 +46,10 @@ namespace Rete {
     WME_Ptr_C m_wme;
   };
 
+  Variable_Indices_Ptr_C bind_Variable_Indices(const WME_Bindings &bindings, const Variable_Indices_Ptr_C &indices, const int64_t &offset);
+
 }
 
-RETE_LINKAGE std::ostream & operator<<(std::ostream &os, const Rete::WME_Token_Index &index);
 RETE_LINKAGE std::ostream & operator<<(std::ostream &os, const Rete::WME_Binding &binding);
 RETE_LINKAGE std::ostream & operator<<(std::ostream &os, const Rete::WME_Bindings &bindings);
 RETE_LINKAGE std::ostream & operator<<(std::ostream &os, const Rete::WME_Token &wme_token);

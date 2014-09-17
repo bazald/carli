@@ -243,9 +243,9 @@ namespace Puddle_World {
     const double xy_size = 1.0 / cmac_resolution;
 
     const auto variables = std::make_shared<Rete::Variable_Indices>();
-    (*variables)["move"] = Rete::WME_Token_Index(0, 2);
-    (*variables)["x"] = Rete::WME_Token_Index(1, 2);
-    (*variables)["y"] = Rete::WME_Token_Index(2, 2);
+    variables->insert(std::make_pair("move", Rete::WME_Token_Index(0, 2)));
+    variables->insert(std::make_pair("x", Rete::WME_Token_Index(1, 2)));
+    variables->insert(std::make_pair("y", Rete::WME_Token_Index(2, 2)));
 
     for(int64_t tiling = -cmac_offset, tend = tiling + cmac_tilings; tiling != tend; ++tiling) {
       const double xy_offset = xy_size * tiling;

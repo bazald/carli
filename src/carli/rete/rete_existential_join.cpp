@@ -119,16 +119,21 @@ namespace Rete {
     os << "  " << intptr_t(input1) << " -> " << intptr_t(this) << " [color=blue];" << std::endl;
   }
 
-  void Rete_Existential_Join::print_rule(std::ostream &os) const {
-    parent_left()->print_rule(os);
-
-    os << std::endl << "  +";
+  void Rete_Existential_Join::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const {
+    const auto pl = parent_left();
+    const auto pls = pl->get_token_size();
     const auto pr = parent_right();
     const bool prb = pr->get_token_size() > 1;
+
+    const auto bound = bind_Variable_Indices(bindings, indices, pls);
+
+    pl->print_rule(os, bound, offset);
+
+    os << std::endl << "  +";
     if(prb)
       os << '{';
 
-    parent_right()->print_rule(os);
+    pr->print_rule(os, bound, offset + pls);
 
     if(prb)
       os << '}';

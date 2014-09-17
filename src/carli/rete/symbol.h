@@ -20,6 +20,10 @@ namespace Rete {
   class Symbol_Identifier;
   class Symbol_Variable;
 
+  typedef std::pair<int64_t, int8_t> WME_Token_Index;
+  typedef std::unordered_multimap<std::string, WME_Token_Index> Variable_Indices;
+  typedef std::shared_ptr<Variable_Indices> Variable_Indices_Ptr;
+
   typedef std::shared_ptr<const Symbol> Symbol_Ptr_C;
   typedef std::shared_ptr<const Symbol_Constant> Symbol_Constant_Ptr_C;
   typedef std::shared_ptr<const Symbol_Constant_Float> Symbol_Constant_Float_Ptr_C;
@@ -27,6 +31,7 @@ namespace Rete {
   typedef std::shared_ptr<const Symbol_Constant_String> Symbol_Constant_String_Ptr_C;
   typedef std::shared_ptr<const Symbol_Identifier> Symbol_Identifier_Ptr_C;
   typedef std::shared_ptr<const Symbol_Variable> Symbol_Variable_Ptr_C;
+  typedef std::shared_ptr<const Variable_Indices> Variable_Indices_Ptr_C;
 
   class RETE_LINKAGE Symbol : public Zeni::Pool_Allocator<char [48]>
   {
@@ -87,6 +92,7 @@ namespace Rete {
 
     virtual size_t hash() const = 0;
     virtual std::ostream & print(std::ostream &os) const = 0;
+    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const = 0;
   };
 
   class RETE_LINKAGE Symbol_Constant : public Symbol {
@@ -144,6 +150,10 @@ namespace Rete {
       return os << value;
     }
 
+    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &, const int64_t &) const override {
+      return os << value;
+    }
+
     const double value;
   };
 
@@ -191,6 +201,10 @@ namespace Rete {
     }
 
     virtual std::ostream & print(std::ostream &os) const override {
+      return os << value;
+    }
+
+    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &, const int64_t &) const override {
       return os << value;
     }
 
@@ -249,6 +263,10 @@ namespace Rete {
         return os << '|' << value << '|';
     }
 
+    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &, const int64_t &) const override {
+      return print(os);
+    }
+
     const std::string value;
   };
 
@@ -291,6 +309,10 @@ namespace Rete {
     }
 
     virtual std::ostream & print(std::ostream &os) const override {
+      return os << value;
+    }
+
+    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &, const int64_t &) const override {
       return os << value;
     }
 
@@ -342,6 +364,19 @@ namespace Rete {
       return os;
     }
 
+    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const override {
+      os.put('<');
+      const auto found = std::find_if(indices->begin(), indices->end(), [this,offset](const std::pair<std::string, WME_Token_Index> &ind)->bool {
+        return ind.second.first == offset && ind.second.second == this->value;
+      });
+      if(found != indices->end())
+        os << found->first;
+      else
+        os << value;
+      os.put('>');
+      return os;
+    }
+
     const Variable value;
   };
 
@@ -362,6 +397,19 @@ inline bool operator==(const std::string &lhs, const Rete::Symbol &rhs) {return 
 
 inline std::ostream & operator<<(std::ostream &os, const Rete::Symbol &symbol) {
   return symbol.print(os);
+}
+
+inline std::ostream & operator<<(std::ostream &os, const Rete::WME_Token_Index &index) {
+  return os << '(' << index.first << ',' << int(index.second) << ')';
+}
+
+inline std::ostream & operator<<(std::ostream &os, const Rete::Variable_Indices &indices) {
+  os << '{';
+  for(const auto &index : indices) {
+    os << '[' << index.first << ',' << index.second << ']';
+  }
+  os << '}';
+  return os;
 }
 
 namespace std {

@@ -30,7 +30,7 @@ namespace Rete {
 
     void print_details(std::ostream &os) const override; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
-    void print_rule(std::ostream &os) const override;
+    void print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const override;
 
     void output_name(std::ostream &os, const int64_t &depth) const override;
 

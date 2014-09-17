@@ -68,10 +68,44 @@ namespace Rete {
     }
   }
 
-}
+//  std::pair<Variable_Indices_Ptr_C, Variable_Indices_Ptr_C> split_Variable_Indices(const WME_Bindings &bindings, const Variable_Indices_Ptr_C &indices, const int64_t &offset) {
+////    std::pair<Variable_Indices_Ptr, Variable_Indices_Ptr> rv =
+////      std::make_pair(std::make_shared<Variable_Indices>(), std::make_shared<Variable_Indices>());
+//    std::pair<Variable_Indices_Ptr_C, Variable_Indices_Ptr> rv =
+//      std::make_pair(indices, std::make_shared<Variable_Indices>());
+//
+//    for(const auto &index : *indices) {
+//      if(index.second.first < offset)
+//        ;// (*rv.first)[index.first] = index.second;
+//      else
+//        rv.second->insert(std::make_pair(index.first, index.second));
+//    }
+//
+//    for(const auto &binding : bindings) {
+//      const auto found = find_if(rv.first->begin(), rv.first->end(), [&binding](const std::pair<std::string, WME_Token_Index> &index)->bool {
+//        return index.second == binding.second;
+//      });
+//      assert(found != rv.first->end());
+//      rv.second->insert(std::make_pair(found->first, binding.second));
+//    }
+//
+//    return rv;
+//  }
 
-std::ostream & operator<<(std::ostream &os, const Rete::WME_Token_Index &index) {
-  return os << '(' << index.first << ',' << int(index.second) << ')';
+  Variable_Indices_Ptr_C bind_Variable_Indices(const WME_Bindings &bindings, const Variable_Indices_Ptr_C &indices, const int64_t &offset) {
+    Variable_Indices_Ptr closure = std::make_shared<Variable_Indices>(*indices);
+
+    for(const auto &binding : bindings) {
+      const auto found = std::find_if(closure->begin(), closure->end(), [binding,offset](const std::pair<std::string, WME_Token_Index> &ind)->bool {
+        return ind.second == binding.first;
+      });
+      if(found != closure->end())
+        closure->insert(std::make_pair(found->first, WME_Token_Index(binding.second.first + offset, binding.second.second)));
+    }
+
+    return closure;
+  }
+
 }
 
 std::ostream & operator<<(std::ostream &os, const Rete::WME_Binding &binding) {

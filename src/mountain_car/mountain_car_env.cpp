@@ -143,9 +143,9 @@ namespace Mountain_Car {
     const double xdot_size = (m_max_x_dot - m_min_x_dot) / cmac_resolution;
 
     const auto variables = std::make_shared<Rete::Variable_Indices>();
-    (*variables)["acceleration"] = Rete::WME_Token_Index(0, 2);
-    (*variables)["x"] = Rete::WME_Token_Index(1, 2);
-    (*variables)["x-dot"] = Rete::WME_Token_Index(2, 2);
+    variables->insert(std::make_pair("acceleration", Rete::WME_Token_Index(0, 2)));
+    variables->insert(std::make_pair("x", Rete::WME_Token_Index(1, 2)));
+    variables->insert(std::make_pair("x-dot", Rete::WME_Token_Index(2, 2)));
 
     for(int64_t tiling = -cmac_offset, tend = tiling + cmac_tilings; tiling != tend; ++tiling) {
       const double x_offset = x_size * tiling;

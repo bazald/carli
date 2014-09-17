@@ -154,7 +154,7 @@ static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<array<stri
   for(size_t i = 0; i != variables.size(); ++i) {
     for(uint8_t ii = 0; ii != 3; ++ii) {
       if(!variables[i][ii].empty() && indices->find(variables[i][ii]) == indices->end())
-        (*indices)[variables[i][ii]] = Rete::WME_Token_Index(i, ii);
+        indices->insert(std::make_pair(variables[i][ii], Rete::WME_Token_Index(i, ii)));
     }
   }
   return indices;

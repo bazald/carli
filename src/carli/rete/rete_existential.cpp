@@ -78,13 +78,13 @@ namespace Rete {
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
   }
 
-  void Rete_Existential::print_rule(std::ostream &os) const {
+  void Rete_Existential::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const {
     os << '+';
     const bool pb = get_token_size() > 1;
     if(pb)
       os << '{';
 
-    parent_right()->print_rule(os);
+    parent_right()->print_rule(os, indices, offset);
 
     if(pb)
       os << '}';

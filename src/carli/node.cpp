@@ -163,7 +163,7 @@ namespace Carli {
               if(!new_variables)
                 new_variables = std::make_shared<Rete::Variable_Indices>(*old_variables);
               const auto new_index = Rete::WME_Token_Index(variable.second.first + offset, variable.second.second);
-              (*new_variables)[variable.first] = new_index;
+              new_variables->insert(std::make_pair(variable.first, new_index));
             }
           }
 

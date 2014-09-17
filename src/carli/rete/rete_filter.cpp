@@ -96,8 +96,8 @@ namespace Rete {
     os << "  " << intptr_t(this) << " [label=\"F" << m_wme << "\"];" << std::endl;
   }
 
-  void Rete_Filter::print_rule(std::ostream &os) const {
-    os << m_wme;
+  void Rete_Filter::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const {
+    m_wme.print(os, indices, offset);
   }
 
   void Rete_Filter::output_name(std::ostream &os, const int64_t &) const {
