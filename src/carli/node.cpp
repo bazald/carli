@@ -17,7 +17,25 @@ namespace Carli {
   }
 
   void Node::print_flags(std::ostream &os) const {
-    os << "TODO";
+    os << ":feature " << q_value->depth << ' ';
+
+    if(dynamic_cast<const Node_Fringe *>(this))
+      os << "fringe";
+    else if(dynamic_cast<const Node_Split *>(this))
+      os << "split";
+    else
+      os << "unsplit";
+
+    os << ' ' << rete_action.lock()->get_name();
+
+    if(const auto feature_ranged = dynamic_cast<const Feature_Ranged_Data *>(q_value->feature.get())) {
+      os << ' ' << feature_ranged->depth << ' ';
+
+      if(feature_ranged->integer_locked)
+        os << int64_t(feature_ranged->bound_lower) << ' ' << int64_t(feature_ranged->bound_upper);
+      else
+        os << feature_ranged->bound_lower << ' ' << feature_ranged->bound_upper;
+    }
   }
 
   void Node::print_action(std::ostream &os) const {
