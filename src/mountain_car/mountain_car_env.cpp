@@ -62,7 +62,10 @@ namespace Mountain_Car {
   }
 
   Agent::Agent(const shared_ptr<Carli::Environment> &env)
-   : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Acceleration>(variables, token);})
+   : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Acceleration>(variables, token);}),
+   m_action({{std::shared_ptr<const Carli::Action>(new Acceleration(LEFT)),
+              std::shared_ptr<const Carli::Action>(new Acceleration(IDLE)),
+              std::shared_ptr<const Carli::Action>(new Acceleration(RIGHT))}})
   {
     const Rete::Symbol_Variable_Ptr_C m_first_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::First));
     const Rete::Symbol_Variable_Ptr_C m_third_var = Rete::Symbol_Variable_Ptr_C(new Rete::Symbol_Variable(Rete::Symbol_Variable::Third));

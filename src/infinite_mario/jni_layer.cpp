@@ -15,6 +15,7 @@ namespace Mario {
   static std::shared_ptr<State> g_current_state;
 
   State::State()
+    : action({{false, false, false, false, false}})
   {
   }
 

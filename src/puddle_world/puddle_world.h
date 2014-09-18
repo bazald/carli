@@ -150,10 +150,8 @@ namespace Puddle_World {
     Rete::WME_Ptr m_x_wme;
     Rete::WME_Ptr m_y_wme;
 
-    std::array<std::shared_ptr<const Carli::Action>, 4> m_action = {{std::shared_ptr<const Carli::Action>(new Move(NORTH)),
-                                                                     std::shared_ptr<const Carli::Action>(new Move(SOUTH)),
-                                                                     std::shared_ptr<const Carli::Action>(new Move(EAST)),
-                                                                     std::shared_ptr<const Carli::Action>(new Move(WEST))}};
+    /// http://msdn.microsoft.com/en-us/library/dn793970.aspx
+    std::array<std::shared_ptr<const Carli::Action>, 4> m_action;
   };
 
 }

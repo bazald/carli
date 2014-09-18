@@ -131,9 +131,9 @@ namespace Tetris {
       std::array<Outcome, 5> outcome;
     };
     typedef std::list<Placement, Zeni::Pool_Allocator<Placement>> Placements;
-
-    const std::array<double, 5> score_line = {{0.0, 10.0, 20.0, 30.0, 40.0}}; ///< No risk-reward tradeoff
-//    const std::array<double, 5> score_line = {{0.0, 10.0, 20.0, 40.0, 80.0}}; ///< Risk-reward tradeoff
+    
+    /// http://msdn.microsoft.com/en-us/library/dn793970.aspx
+    /*const*/ std::array<double, 5> score_line;
     const double score_failure = 0.0;
 
     Environment();

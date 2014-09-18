@@ -117,8 +117,9 @@ namespace Mario {
     int getKillsByFire = 0;
     int getKillsByStomp = 0;
     int getKillsByShell = 0;
-
-    Action action = {{false, false, false, false, false}};
+    
+    /// http://msdn.microsoft.com/en-us/library/dn793970.aspx
+    Action action;
   };
 
 }

@@ -12,12 +12,16 @@ namespace Tetris {
   using Carli::Node_Unsplit;
   using Carli::Q_Value;
 
-  Environment::Environment() {
+  Environment::Environment()
+    : score_line({{0.0, 10.0, 20.0, 30.0, 40.0}}) ///< No risk-reward tradeoff
+    //: score_line({{0.0, 10.0, 20.0, 40.0, 80.0}}) ///< Risk-reward tradeoff
+  {
     init_impl();
   }
 
   Environment::Environment(const Environment &rhs)
    : Carli::Environment(rhs),
+   score_line(rhs.score_line),
    m_random_init(rhs.m_random_init),
    m_random_selection(rhs.m_random_selection),
    m_grid(rhs.m_grid),
@@ -31,6 +35,7 @@ namespace Tetris {
   Environment & Environment::operator=(const Environment &rhs) {
     Carli::Environment::operator=(rhs);
 
+    score_line = rhs.score_line;
     m_random_init = rhs.m_random_init;
     m_random_selection = rhs.m_random_selection;
     m_grid = rhs.m_grid;

@@ -90,7 +90,21 @@ namespace Blocks_World {
   }
 
   Agent::Agent(const std::shared_ptr<Carli::Environment> &env)
-   : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(variables, token);})
+   : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(variables, token);}),
+   m_block_ids({{Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("TABLE")),
+                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("A")),
+                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("B")),
+                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("C")),
+                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("D")),
+                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("E")),
+                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("F"))}}),
+   m_block_names({{Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(0)),
+                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1)),
+                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2)),
+                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3)),
+                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(4)),
+                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(5)),
+                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(6))}})
   {
     generate_rete();
     generate_features();

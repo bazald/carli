@@ -119,21 +119,9 @@ namespace Blocks_World {
 //    const Rete::Symbol_Constant_String_Ptr_C m_on_top_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("on-top"));
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
 
-    /// std::array mysteriously results in crashes when compiled with Visual Studio 12.0.21005.1 REL
-    const std::array<Rete::Symbol_Identifier_Ptr_C, 7> m_block_ids = {{Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("TABLE")),
-                                                                       Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("A")),
-                                                                       Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("B")),
-                                                                       Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("C")),
-                                                                       Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("D")),
-                                                                       Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("E")),
-                                                                       Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("F"))}};
-    const std::array<Rete::Symbol_Constant_Int_Ptr_C, 7> m_block_names = {{Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(0)),
-                                                                           Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1)),
-                                                                           Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2)),
-                                                                           Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3)),
-                                                                           Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(4)),
-                                                                           Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(5)),
-                                                                           Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(6))}};
+    /// http://msdn.microsoft.com/en-us/library/dn793970.aspx
+    const std::array<Rete::Symbol_Identifier_Ptr_C, 7> m_block_ids;
+    const std::array<Rete::Symbol_Constant_Int_Ptr_C, 7> m_block_names;
 
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
   };

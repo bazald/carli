@@ -140,10 +140,9 @@ namespace Mountain_Car {
 
     Rete::WME_Ptr m_x_wme;
     Rete::WME_Ptr m_x_dot_wme;
-
-    std::array<std::shared_ptr<const Carli::Action>, 3> m_action = {{std::shared_ptr<const Carli::Action>(new Acceleration(LEFT)),
-                                                                     std::shared_ptr<const Carli::Action>(new Acceleration(IDLE)),
-                                                                     std::shared_ptr<const Carli::Action>(new Acceleration(RIGHT))}};
+    
+    /// http://msdn.microsoft.com/en-us/library/dn793970.aspx
+    std::array<std::shared_ptr<const Carli::Action>, 3> m_action;
   };
 
 }
