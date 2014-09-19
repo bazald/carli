@@ -132,8 +132,9 @@ sp {blocks-world*rl-fringe*block-name*1
   (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
-  (<block-name> == 1)
+  (<block-name> <= 3)
   (<dest-name> <= 3)
+  (<block-name> == 1)
 -->
   = 0.0
 }
@@ -145,8 +146,9 @@ sp {blocks-world*rl-fringe*block-name*2
   (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
-  (<block-name> == 2)
+  (<block-name> <= 3)
   (<dest-name> <= 3)
+  (<block-name> == 2)
 -->
   = 0.0
 }
@@ -158,8 +160,9 @@ sp {blocks-world*rl-fringe*block-name*3
   (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
-  (<block-name> == 3)
+  (<block-name> <= 3)
   (<dest-name> <= 3)
+  (<block-name> == 3)
 -->
   = 0.0
 }
@@ -172,6 +175,7 @@ sp {blocks-world*rl-fringe*dest-name*0
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block-name> <= 3)
+  (<dest-name> <= 3)
   (<dest-name> == 0)
 -->
   = 0.0
@@ -185,6 +189,7 @@ sp {blocks-world*rl-fringe*dest-name*1
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block-name> <= 3)
+  (<dest-name> <= 3)
   (<dest-name> == 1)
 -->
   = 0.0
@@ -198,6 +203,7 @@ sp {blocks-world*rl-fringe*dest-name*2
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block-name> <= 3)
+  (<dest-name> <= 3)
   (<dest-name> == 2)
 -->
   = 0.0
@@ -211,6 +217,7 @@ sp {blocks-world*rl-fringe*dest-name*3
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
   (<block-name> <= 3)
+  (<dest-name> <= 3)
   (<dest-name> == 3)
 -->
   = 0.0

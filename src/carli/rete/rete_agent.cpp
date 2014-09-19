@@ -287,8 +287,12 @@ namespace Rete {
   }
 
   void Rete_Agent::rete_print_rules(std::ostream &os) const {
-    auto it = rules.begin();
-    const auto iend = rules.end();
+    std::multimap<int64_t, Rete_Action_Ptr_C> ordered_rules;
+    for(auto it = rules.begin(), iend = rules.end(); it != iend; ++it)
+      ordered_rules.insert(std::make_pair(it->second->data? it->second->data->rank() : 0, it->second));
+
+    auto it = ordered_rules.begin();
+    const auto iend = ordered_rules.end();
 
     if(it == iend)
       return;
