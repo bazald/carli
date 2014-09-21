@@ -40,7 +40,7 @@ namespace Rete {
 
     static Rete_Negation_Join_Ptr find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
-    const WME_Bindings & get_bindings() const {return bindings;}
+    virtual const WME_Bindings * get_bindings() const override {return &bindings;}
 
   private:
     void join_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs);

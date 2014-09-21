@@ -217,6 +217,18 @@ namespace Rete {
     return nullptr;
   }
 
+  std::string Rete_Predicate::get_predicate_str() const {
+    switch(m_predicate) {
+      case EQ: return "EQ";
+      case NEQ: return "NEQ";
+      case GT: return "GT";
+      case GTE: return "GTE";
+      case LT: return "LT";
+      case LTE: return "LTE";
+      default: abort();
+    }
+  }
+
   bool Rete_Predicate::test_predicate(const Symbol_Ptr_C &lhs, const Symbol_Ptr_C &rhs) const {
     switch(m_predicate) {
       case EQ: return *lhs == *rhs;

@@ -241,7 +241,7 @@ command:
 
                             /// Fill in conditions and bindings
                             feature->conditions = test_node->get_filter_wmes();
-                            feature->bindings = join->get_bindings();
+                            feature->bindings = *join->get_bindings();
                           }
 
                           /// Fill in Feature values / predicate tests
@@ -257,40 +257,43 @@ command:
                               feature_e->value = true;
                             else if(dynamic_cast<Rete::Rete_Negation_Join *>(test_node.get()))
                               feature_e->value = false;
-                            else
-                              abort();
+                            else {
+                              reteerror(&yylloc, yyscanner, agent, filename, source_path, "Error reading enumerated feature value / predicate test.");
+                              YYABORT;
+                            }
                           }
                           else if(const auto feature_r = dynamic_cast<Carli::Feature_Ranged<Carli::Feature> *>(feature)) {
                             const auto &predicate = dynamic_cast<Rete::Rete_Predicate &>(*test_node);
                             feature_r->upper = predicate.get_predicate() == Rete::Rete_Predicate::GTE;
                           }
-                          else
-                            abort();
+                          else {
+                            reteerror(&yylloc, yyscanner, agent, filename, source_path, "Error reading enumerated/ranged feature value / predicate test.");
+                            YYABORT;
+                          }
 
                           /// Determine Feature axes
-                          if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node.get()))
+                          if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node.get())) {
                             feature->axis = predicate->get_lhs_index();
+                            feature->axis_label = predicate->get_predicate_str();
+                          }
                           else {
-                            while(!dynamic_cast<const Rete::Rete_Filter *>(test_node->parent_right().get()))
+                            const Rete::Rete_Filter * filter_node = dynamic_cast<const Rete::Rete_Filter *>(test_node->parent_right().get());
+                            while(!filter_node) {
                               test_node = test_node->parent_right();
+                              filter_node = dynamic_cast<const Rete::Rete_Filter *>(test_node->parent_right().get());
+                            }
 
-                            if(const auto join = dynamic_cast<const Rete::Rete_Existential_Join *>(test_node.get())) {
-                              for(const auto binding : join->get_bindings()) {
+                            if(const auto bindings = test_node->get_bindings()) {
+                              for(const auto binding : *bindings) {
                                 if(binding.second == Rete::WME_Token_Index(0, 0)) {
                                   feature->axis = binding.first;
+                                  feature->axis_label = dynamic_cast<const Rete::Symbol_Constant_String *>(filter_node->get_wme().symbols[1].get())->value;
                                   goto AXIS_FOUND;
                                 }
                               }
                             }
-                            else if(const auto join = dynamic_cast<const Rete::Rete_Negation_Join *>(test_node.get())) {
-                              for(const auto binding : join->get_bindings()) {
-                                if(binding.second == Rete::WME_Token_Index(0, 0)) {
-                                  feature->axis = binding.first;
-                                  goto AXIS_FOUND;
-                                }
-                              }
-                            }
-                            abort();
+                            reteerror(&yylloc, yyscanner, agent, filename, source_path, "Error determining Feature axis.");
+                            YYABORT;
                             AXIS_FOUND:
                               ;
                           }
@@ -358,13 +361,13 @@ rule:
   ;
 flag:
   /* :feature q_value->depth [feature->depth feature->lower_bound feature->upper_bound] */
-  FLAG_FEATURE INT NODE_TYPE STRING INT FLOAT FLOAT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, false));
+  FLAG_FEATURE INT NODE_TYPE STRING INT FLOAT FLOAT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, "" /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, false));
                                                       delete $3;
                                                       delete $4; }
-  | FLAG_FEATURE INT NODE_TYPE STRING INT INT INT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, true));
+  | FLAG_FEATURE INT NODE_TYPE STRING INT INT INT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, "" /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, true));
                                                     delete $3;
                                                     delete $4; }
-  | FLAG_FEATURE INT NODE_TYPE STRING { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
+  | FLAG_FEATURE INT NODE_TYPE STRING { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, "" /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
                                         delete $3;
                                         delete $4; }
   ;

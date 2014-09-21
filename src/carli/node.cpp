@@ -108,6 +108,7 @@ namespace Carli {
     const auto leaf_node_name = lra_lock->get_name();
     const auto new_feature = feature ? feature : q_value->feature ? q_value->feature->clone() : nullptr;
     const auto new_name = agent.next_rule_name(leaf_node_name.substr(0, leaf_node_name.find_last_of('*') + 1) + "f");
+    const auto feature_enumerated_data = dynamic_cast<Feature_Enumerated_Data *>(new_feature);
     const auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(new_feature);
 
     auto ancestor_left = lra_lock->parent_left();
@@ -133,19 +134,31 @@ namespace Carli {
     auto old_variables = lra_lock->get_variables();
     Rete::Variable_Indices_Ptr new_variables;
 
-    if(feature_ranged_data && feature) {
-      /// Ranged feature -- refining of an existing variable
-      new_test = agent.make_predicate_vc(feature_ranged_data->predicate(), new_feature->axis, feature_ranged_data->symbol_constant(), ancestor_left);
+    if(dynamic_cast<const Rete::Rete_Predicate *>(ancestor_right.get())) {
+      assert(feature_enumerated_data || feature_ranged_data);
+      /// Refining of an existing variable
+      if(feature_enumerated_data) {
+        new_test = agent.make_predicate_vc(feature_enumerated_data->predicate(), new_feature->axis, feature_enumerated_data->symbol_constant(), ancestor_left);
+      }
+      else {
+        /// Ranged feature -- refining of an existing variable
+        new_test = agent.make_predicate_vc(feature_ranged_data->predicate(), new_feature->axis, feature_ranged_data->symbol_constant(), ancestor_left);
+      }
     }
     else {
+//      assert(dynamic_cast<const Rete::Rete_Join *>(ancestor_right.get()) ||
+//             dynamic_cast<const Rete::Rete_Existential_Join *>(ancestor_right.get()) ||
+//             dynamic_cast<const Rete::Rete_Negation_Join *>(ancestor_right.get()));
+//      assert(leaf.q_value->depth == 1 || ancestor_right->get_bindings());
+
       if(leaf.q_value->depth == 1) {
         /// Case 1. Trivial -- use the original node
         new_test = ancestor_right;
       }
-      else if(lra_lock->get_token_owner() == ra_lock->get_token_owner()) {
-        /// Case 2. No new conditions to carry over
-        new_test = agent.make_existential_join(Rete::WME_Bindings(), true, ancestor_left, ancestor_right);
-      }
+//      else if(lra_lock->get_token_owner() == ra_lock->get_token_owner()) {
+//        /// Case 2. No new conditions to carry over
+//        new_test = agent.make_existential_join(*ancestor_right->get_bindings(), false, ancestor_left, ancestor_right->parent_right());
+//      }
       else {
         bool ancestor_found = false;
         for(auto left = ancestor_left; !dynamic_cast<Rete::Rete_Filter *>(left.get()); left = left->parent_left()) {
@@ -157,20 +170,27 @@ namespace Carli {
 
         if(ancestor_found) {
           /// Case 3: No new conditions to carry over, but must do a more involved token comparison
-          Rete::WME_Bindings bindings;
-          for(const auto &variable : *variables) { ///< NOTE: Assume all are potentially multivalued
-            const auto found = old_variables->find(variable.first);
-            assert(found != old_variables->end());
-            bindings.insert(Rete::WME_Binding(found->second, variable.second));
-          }
+//          Rete::WME_Bindings bindings;
+//          for(const auto &variable : *variables) { ///< NOTE: Assume all are potentially multivalued
+//            const auto found = old_variables->find(variable.first);
+//            assert(found != old_variables->end());
+//            bindings.insert(Rete::WME_Binding(found->second, variable.second));
+//          }
+//
+//          new_test = agent.make_existential_join(bindings, false, ancestor_left, ancestor_right);
 
-          new_test = agent.make_existential_join(bindings, false, ancestor_left, ancestor_right);
+          if(dynamic_cast<const Rete::Rete_Existential_Join *>(ancestor_right.get()))
+            new_test = agent.make_existential_join(*ancestor_right->get_bindings(), false, ancestor_left, ancestor_right->parent_right());
+          else
+            new_test = agent.make_negation_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
         }
         else {
           /// Case 4: New conditions must be joined, new variables are assumed
           const auto join = dynamic_cast<Rete::Rete_Join *>(ancestor_right.get());
           assert(join);
-          new_test = agent.make_join(q_value->feature->bindings, ancestor_left, join->parent_right());
+//          new_test = agent.make_join(q_value->feature->bindings, ancestor_left, join->parent_right());
+
+          new_test = agent.make_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
 
           /// Essentially a ptrdiff to go from the the new conditions on the right token to left
           const int64_t offset = new_test->get_token_size() - join->get_token_size();
@@ -213,7 +233,7 @@ namespace Carli {
   }
 
   Rete::Rete_Node_Ptr Node_Split::cluster_root_ancestor() const {
-    return terminal ? rete_action.lock()->parent_left() : rete_action.lock()->parent_left()->parent_left();
+    return rete_action.lock()->parent_left();
   }
 
   void Node_Split::decision(Agent &agent) {
@@ -239,7 +259,7 @@ namespace Carli {
   }
 
   Rete::Rete_Node_Ptr Node_Unsplit::cluster_root_ancestor() const {
-    return rete_action.lock()->parent_left()->parent_left();
+    return rete_action.lock()->parent_left();
   }
 
   void Node_Unsplit::decision(Agent &agent) {

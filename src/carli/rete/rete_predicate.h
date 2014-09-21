@@ -47,6 +47,7 @@ namespace Rete {
 
     const WME_Token_Index & get_lhs_index() const {return m_lhs_index;}
     const Predicate & get_predicate() const {return m_predicate;}
+    std::string get_predicate_str() const;
     const WME_Token_Index & get_rhs_index() const {return m_rhs_index;}
     const Symbol_Ptr_C & get_rhs() const {return m_rhs;}
 

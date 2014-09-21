@@ -224,6 +224,8 @@ namespace Rete {
 
     virtual std::vector<WME> get_filter_wmes() const = 0;
 
+    virtual const WME_Bindings * get_bindings() const {return nullptr;}
+
     template <typename VISITOR>
     VISITOR visit_preorder(VISITOR visitor, const bool &strict) {
       return visit_preorder(visitor, strict, (intptr_t(this) & ~intptr_t(3)) | ((visitor_value & 3) != 1 ? 1 : 2));
