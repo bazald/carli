@@ -50,7 +50,7 @@ namespace Carli {
              bindings < rhs.bindings ? -1 : bindings > rhs.bindings ? 1 :
              axis.first != rhs.axis.first ? axis.first - rhs.axis.first :
              axis.second != rhs.axis.second ? axis.second - rhs.axis.second :
-             axis_label < rhs.axis_label ? -1 : 1;
+             strcmp(axis_label.c_str(), rhs.axis_label.c_str());
     }
 
     virtual int64_t get_depth() const = 0;

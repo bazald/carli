@@ -151,6 +151,7 @@ static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<array<stri
 %token <predicate> PREDICATE
 
 %type <flag_ptr> flag
+%type <fval> number
 %type <rete_node_ptr> final_conditions conditions condition_group condition_type condition
 %type <rule_ptr> rule
 %type <sval> string_or_literal literal literal_parts
@@ -324,19 +325,16 @@ command:
                           if(parent_action) {
                             auto &parent_data = dynamic_cast<Carli::Node_Unsplit &>(*parent_action->data);
                             parent_data.fringe_values[feature].values.push_back(new_action_data);
-                            for(auto it = parent, iend = parent_action->parent_left(); it != iend; it = it->parent_left()) {
-                              if(*it == *iend)
-                                break;
-                              else if(dynamic_cast<const Rete::Rete_Filter *>(it.get())) {
-                                reteerror(&yylloc, yyscanner, agent, filename, source_path, "Illegal ancestral relationship specified in :feature fringe.");
-                                YYABORT;
-                              }
-                            }
                           }
                           else {
                             reteerror(&yylloc, yyscanner, agent, filename, source_path, "Ancestral relationship specified in :feature fringe not found.");
                             YYABORT;
                           }
+                        }
+
+                        if(parent_action && parent->parent_left() != parent_action->parent_left()) {
+                          reteerror(&yylloc, yyscanner, agent, filename, source_path, "Illegal ancestral relationship specified in :feature.");
+                          YYABORT;
                         }
                       }
 
@@ -351,13 +349,13 @@ rule:
                                            delete $2;
                                            delete $3;
                                            delete $4; }
-  | '{' STRING final_conditions ARROW_RIGHT ASSIGNMENT FLOAT '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*$3, *$2, tuple<int64_t, string, string, Carli::Feature *>(), $6);
-                                                                   delete $2;
-                                                                   delete $3; }
-  | '{' STRING flag final_conditions ARROW_RIGHT ASSIGNMENT FLOAT '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*$4, *$2, *$3, $7);
-                                                                        delete $2;
-                                                                        delete $3;
-                                                                        delete $4; }
+  | '{' STRING final_conditions ARROW_RIGHT ASSIGNMENT number '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*$3, *$2, tuple<int64_t, string, string, Carli::Feature *>(), $6);
+                                                                    delete $2;
+                                                                    delete $3; }
+  | '{' STRING flag final_conditions ARROW_RIGHT ASSIGNMENT number '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*$4, *$2, *$3, $7);
+                                                                         delete $2;
+                                                                         delete $3;
+                                                                         delete $4; }
   ;
 flag:
   /* :feature q_value->depth [feature->depth feature->lower_bound feature->upper_bound] */
@@ -378,12 +376,6 @@ final_conditions:
   | final_conditions EXISTENTIAL_MATCH condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(Rete::WME_Bindings(), true, $1->first, $3->first)), $1->second);
                                                         delete $1;
                                                         delete $3; }
-  | final_conditions '+' condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings($1->second, $3->second), false, $1->first, $3->first)), $1->second);
-                                          delete $1;
-                                          delete $3; }
-  | final_conditions '-' condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(join_bindings($1->second, $3->second), $1->first, $3->first)), $1->second);
-                                          delete $1;
-                                          delete $3; }
   ;
 conditions:
   conditions condition_type { vector<array<string, 3>> variables($1->second);
@@ -391,6 +383,12 @@ conditions:
                               $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(join_bindings($1->second, $2->second), $1->first, $2->first)), variables);
                               delete $1;
                               delete $2; }
+  | conditions '+' condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings($1->second, $3->second), false, $1->first, $3->first)), $1->second);
+                                    delete $1;
+                                    delete $3; }
+  | conditions '-' condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(join_bindings($1->second, $3->second), $1->first, $3->first)), $1->second);
+                                    delete $1;
+                                    delete $3; }
   | conditions '(' VARIABLE PREDICATE symbol_constant ')' { const auto lhs_index = find_index($1->second, *$3);
                                                             if(lhs_index.second > 2) {
                                                               reteerror(&yylloc, yyscanner, agent, filename, source_path, "Unbound variable tested by predicate.");
@@ -436,6 +434,10 @@ symbol_constant:
   FLOAT { $$ = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Float>($1)); }
   | INT { $$ = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Int>($1)); }
   | string_or_literal { $$ = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_String>(*$1)); delete $1; }
+  ;
+number:
+  INT { $$ = double($1); }
+  | FLOAT { $$ = $1; }
   ;
 string_or_literal:
   STRING { $$ = $1; }

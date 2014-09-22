@@ -132,9 +132,9 @@ namespace Carli {
       rete_print(fout);
     }
 
-    expand_fringe(rete_action, chosen);
+    auto new_node = general.create_split(*this, general.parent_action.lock(), false);
 
-    auto new_node = general.create_split(*this, false);
+    expand_fringe(rete_action, new_node->rete_action.lock(), chosen);
 
     excise_rule(rete_action.get_name(), false);
 
@@ -150,7 +150,7 @@ namespace Carli {
     return true;
   }
 
-  void Agent::expand_fringe(Rete::Rete_Action &rete_action, const Fringe_Values::iterator &specialization)
+  void Agent::expand_fringe(Rete::Rete_Action &rete_action, const Rete::Rete_Action_Ptr &parent_action, const Fringe_Values::iterator &specialization)
   {
     auto &general = debuggable_cast<Node_Unsplit &>(*rete_action.data);
     const std::string general_name = general.rete_action.lock()->get_name();
@@ -197,9 +197,9 @@ namespace Carli {
 
         /** Step 2.1: Create a new split/unsplit node depending on the existence of a new fringe. */
         if(terminal)
-          leaf->create_split(*this, true);
+          leaf->create_split(*this, parent_action, true);
         else {
-          const auto node_unsplit = leaf->create_unsplit(*this);
+          const auto node_unsplit = leaf->create_unsplit(*this, parent_action);
 
           /** Step 2.2: Create new ranged fringe nodes if the new leaf is refineable. */
           for(auto &refined_feature : refined)
@@ -208,7 +208,7 @@ namespace Carli {
           /** Step 2.3 Create new fringe nodes. **/
           for(auto &fringe_axis : general.fringe_values) {
             for(auto &fringe : fringe_axis.second.values)
-              auto new_fringe = fringe->create_fringe(*this, *node_unsplit, nullptr);
+              fringe->create_fringe(*this, *node_unsplit, nullptr);
           }
         }
       }
@@ -264,7 +264,7 @@ namespace Carli {
 #endif
 
     /// Make new unsplit node
-    const auto unsplit = split->create_unsplit(*this);
+    const auto unsplit = split->create_unsplit(*this, nullptr); ///< TODO: MUSTFIX nullptr
 
     /// Preserve some learning
     unsplit->q_value->value = split->q_value->value;
@@ -1271,6 +1271,7 @@ namespace Carli {
       }
     }
 
+    /// TODO: MUSTFIX
     assert(touched);
 
 #ifdef DEBUG_OUTPUT

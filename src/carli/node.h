@@ -48,6 +48,7 @@ namespace Carli {
      variables(rete_action_->get_variables()),
      q_value(q_value_)
     {
+      assert(q_value->depth == 1 || parent_action.lock());
     }
 
     virtual ~Node();
@@ -61,9 +62,9 @@ namespace Carli {
     virtual void decision(Agent &agent) = 0;
     virtual void retraction(Agent &agent, const Rete::WME_Token &token);
 
-    Node_Split_Ptr create_split(Agent &agent, const bool &terminal);
-    Node_Unsplit_Ptr create_unsplit(Agent &agent);
-    Node_Fringe_Ptr create_fringe(Agent &agent, Node_Unsplit &leaf, Feature * const &feature);
+    Node_Split_Ptr create_split(Agent &agent, const Rete::Rete_Action_Ptr &parent_action_, const bool &terminal_);
+    Node_Unsplit_Ptr create_unsplit(Agent &agent, const Rete::Rete_Action_Ptr &parent_action_);
+    Node_Fringe_Ptr create_fringe(Agent &agent, Node_Unsplit &leaf, Feature * const &feature_);
 
     Agent &agent;
     std::weak_ptr<Rete::Rete_Action> parent_action;
