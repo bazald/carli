@@ -153,8 +153,6 @@ namespace Carli {
   void Agent::expand_fringe(Rete::Rete_Action &rete_action, const Rete::Rete_Action_Ptr &parent_action, const Fringe_Values::iterator &specialization)
   {
     auto &general = debuggable_cast<Node_Unsplit &>(*rete_action.data);
-    const std::string general_name = general.rete_action.lock()->get_name();
-    const std::string general_name_prefix = general_name.substr(0, general_name.find_last_of('*'));
 
     /** Step 1: Collect new leaves from the fringe
      *          They'll have to be modified / replaced, but it's good to separate them from the remainder of the fringe

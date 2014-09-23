@@ -130,13 +130,13 @@ namespace Rete {
     const auto pr = parent_right();
     const bool prb = pr->get_token_size() > 1;
 
-    const auto bound = bind_Variable_Indices(bindings, indices, pls);
-
-    pl->print_rule(os, bound, offset);
+    pl->print_rule(os, indices, offset);
 
     os << std::endl << "  -";
     if(prb)
       os << '{';
+
+    const auto bound = bind_Variable_Indices(bindings, indices, pls);
 
     pr->print_rule(os, bound, offset + pls);
 

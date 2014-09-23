@@ -12,6 +12,18 @@
 
 namespace Rete {
 
+  typedef std::pair<int64_t, int8_t> WME_Token_Index;
+  typedef std::unordered_multimap<std::string, WME_Token_Index> Variable_Indices;
+  typedef std::shared_ptr<Variable_Indices> Variable_Indices_Ptr;
+
+}
+
+inline std::ostream & operator<<(std::ostream &os, const Rete::WME_Token_Index &index) {
+  return os << '(' << index.first << ',' << int(index.second) << ')';
+}
+
+namespace Rete {
+
   class Symbol;
   class Symbol_Constant;
   class Symbol_Constant_Float;
@@ -19,10 +31,6 @@ namespace Rete {
   class Symbol_Constant_String;
   class Symbol_Identifier;
   class Symbol_Variable;
-
-  typedef std::pair<int64_t, int8_t> WME_Token_Index;
-  typedef std::unordered_multimap<std::string, WME_Token_Index> Variable_Indices;
-  typedef std::shared_ptr<Variable_Indices> Variable_Indices_Ptr;
 
   typedef std::shared_ptr<const Symbol> Symbol_Ptr_C;
   typedef std::shared_ptr<const Symbol_Constant> Symbol_Constant_Ptr_C;
@@ -397,10 +405,6 @@ inline bool operator==(const std::string &lhs, const Rete::Symbol &rhs) {return 
 
 inline std::ostream & operator<<(std::ostream &os, const Rete::Symbol &symbol) {
   return symbol.print(os);
-}
-
-inline std::ostream & operator<<(std::ostream &os, const Rete::WME_Token_Index &index) {
-  return os << '(' << index.first << ',' << int(index.second) << ')';
 }
 
 inline std::ostream & operator<<(std::ostream &os, const Rete::Variable_Indices &indices) {
