@@ -48,8 +48,6 @@ namespace Carli {
     int64_t compare_axis(const Feature &rhs) const {
       return conditions < rhs.conditions ? -1 : conditions > rhs.conditions ? 1 :
              bindings < rhs.bindings ? -1 : bindings > rhs.bindings ? 1 :
-             axis.first != rhs.axis.first ? axis.first - rhs.axis.first :
-             axis.second != rhs.axis.second ? axis.second - rhs.axis.second :
              strcmp(axis_label.c_str(), rhs.axis_label.c_str());
     }
 

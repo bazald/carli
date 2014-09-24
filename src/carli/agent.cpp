@@ -1269,6 +1269,14 @@ namespace Carli {
       }
     }
 
+//#ifdef DEBUG_OUTPUT
+//    std::cerr << std::endl << "Touched ";
+//    if(axis)
+//      std::cerr << *axis;
+//    else
+//      std::cerr << 0;
+//    std::cerr << '?' << std::endl;
+//#endif
     assert(touched || value_list.empty());
 
 #ifdef DEBUG_OUTPUT
