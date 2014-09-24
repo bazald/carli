@@ -3,58 +3,74 @@
 
 #include <array>
 #include <functional>
+#include <iomanip>
 #include <set>
+#include <sstream>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include "../linkage.h"
 
-class RETE_LINKAGE compare_deref_eq {
-public:
-  template <typename Ptr1, typename Ptr2>
-  bool operator()(const Ptr1 &lhs, const Ptr2 &rhs) const {
-    return *lhs == *rhs;
-  }
-};
+namespace Rete {
 
-class RETE_LINKAGE compare_deref_lt {
-public:
-  template <typename Ptr1, typename Ptr2>
-  bool operator()(const Ptr1 &lhs, const Ptr2 &rhs) const {
-    return *lhs < *rhs;
-  }
-};
+  class RETE_LINKAGE compare_deref_eq {
+  public:
+    template <typename Ptr1, typename Ptr2>
+    bool operator()(const Ptr1 &lhs, const Ptr2 &rhs) const {
+      return *lhs == *rhs;
+    }
+  };
 
-template <typename Type1, typename Type2, int64_t (Type1::*MemFun)(const Type2 &) const>
-class compare_deref_memfun_lt {
-public:
-  template <typename Ptr1, typename Ptr2>
-  bool operator()(const Ptr1 &lhs, const Ptr2 &rhs) const {
-    return std::bind(MemFun, &*lhs, std::cref(*rhs))() < 0;
-  }
-};
+  class RETE_LINKAGE compare_deref_lt {
+  public:
+    template <typename Ptr1, typename Ptr2>
+    bool operator()(const Ptr1 &lhs, const Ptr2 &rhs) const {
+      return *lhs < *rhs;
+    }
+  };
 
-inline size_t hash_combine(const size_t &prev_h, const size_t &new_val) {
-  return prev_h * 31 + new_val;
+  template <typename Type1, typename Type2, int64_t (Type1::*MemFun)(const Type2 &) const>
+  class compare_deref_memfun_lt {
+  public:
+    template <typename Ptr1, typename Ptr2>
+    bool operator()(const Ptr1 &lhs, const Ptr2 &rhs) const {
+      return std::bind(MemFun, &*lhs, std::cref(*rhs))() < 0;
+    }
+  };
+
+  inline size_t hash_combine(const size_t &prev_h, const size_t &new_val) {
+    return prev_h * 31 + new_val;
+  }
+
+  template <typename CONTAINER, typename HASHER>
+  size_t hash_container(const CONTAINER &container, HASHER &hasher) {
+    size_t h = 0;
+    for(const auto &entry : container)
+      h = hash_combine(h, hasher(entry));
+    return h;
+  }
+
+  template <typename T>
+  class hash_deref {
+  public:
+    template <typename Ptr>
+    size_t operator()(const Ptr &ptr) const {
+      return std::hash<T>()(*ptr);
+    }
+  };
+
+  inline std::string to_string(const double &number) {
+    std::ostringstream oss;
+    oss << std::setprecision(20) << std::fixed << number;
+    std::string str = oss.str();
+    size_t len = str.length();
+    while(str[len - 1] == '0' && str[len - 2] != '.')
+      --len;
+    return str.substr(0, len);
+  }
+
 }
-
-template <typename CONTAINER, typename HASHER>
-size_t hash_container(const CONTAINER &container, HASHER &hasher) {
-  size_t h = 0;
-  for(const auto &entry : container)
-    h = hash_combine(h, hasher(entry));
-  return h;
-}
-
-template <typename T>
-class hash_deref {
-public:
-  template <typename Ptr>
-  size_t operator()(const Ptr &ptr) const {
-    return std::hash<T>()(*ptr);
-  }
-};
 
 namespace std {
   template <typename T, size_t N>

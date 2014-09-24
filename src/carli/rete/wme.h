@@ -35,7 +35,7 @@ RETE_LINKAGE std::ostream & operator<<(std::ostream &os, const Rete::WME &wme);
 namespace std {
   template <> struct hash<Rete::WME> {
     size_t operator()(const Rete::WME &wme) const {
-      return hash_combine(hash_combine(wme.symbols[0]->hash(), wme.symbols[1]->hash()), wme.symbols[2]->hash());
+      return Rete::hash_combine(Rete::hash_combine(wme.symbols[0]->hash(), wme.symbols[1]->hash()), wme.symbols[2]->hash());
     }
   };
 }

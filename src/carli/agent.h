@@ -165,7 +165,7 @@ namespace Carli {
     Action_Ptr_C m_current;
     Q_Value_List m_current_q_value;
     Action_Ptr_C m_next;
-    std::map<Action_Ptr_C, Q_Value_List, compare_deref_lt, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, Q_Value_List>>> m_next_q_values;
+    std::map<Action_Ptr_C, Q_Value_List, Rete::compare_deref_lt, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, Q_Value_List>>> m_next_q_values;
     std::function<Action_Ptr_C ()> m_target_policy; ///< Sarsa/Q-Learning selector
     std::function<Action_Ptr_C ()> m_exploration_policy; ///< Exploration policy
     std::function<Fringe_Values::iterator (Node_Unsplit &)> m_split_criterion; ///< true if too general, false if sufficiently general

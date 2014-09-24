@@ -273,10 +273,8 @@ command:
                           }
 
                           /// Determine Feature axes
-                          if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node.get())) {
+                          if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node.get()))
                             feature->axis = predicate->get_lhs_index();
-                            feature->axis_label = predicate->get_predicate_str();
-                          }
                           else {
                             const Rete::Rete_Filter * filter_node = dynamic_cast<const Rete::Rete_Filter *>(test_node->parent_right().get());
                             while(!filter_node) {

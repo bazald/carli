@@ -19,8 +19,8 @@ namespace Carli {
   struct Fringe_Collector_All {
     std::unordered_set<Rete::Rete_Action_Ptr> excise;
     std::map<tracked_ptr<Feature>,
-      std::map<tracked_ptr<Feature>, Rete::Rete_Node_Ptr, compare_deref_lt>,
-      compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> features;
+      std::map<tracked_ptr<Feature>, Rete::Rete_Node_Ptr, Rete::compare_deref_lt>,
+      Rete::compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> features;
 
     Fringe_Collector_All(const Node_Split_Ptr &split)
       : root(split)
@@ -1269,8 +1269,7 @@ namespace Carli {
       }
     }
 
-    /// TODO: MUSTFIX
-    assert(touched);
+    assert(touched || value_list.empty());
 
 #ifdef DEBUG_OUTPUT
     if(action) {

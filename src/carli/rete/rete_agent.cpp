@@ -1,7 +1,7 @@
 #include "rete_agent.h"
 
+#include <iostream>
 #include <map>
-#include <sstream>
 
 namespace Rete {
 

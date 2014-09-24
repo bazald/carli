@@ -40,12 +40,12 @@ namespace Carli {
       if(feature_ranged->integer_locked)
         os << int64_t(feature_ranged->bound_lower) << ' ' << int64_t(feature_ranged->bound_upper);
       else
-        os << feature_ranged->bound_lower << ' ' << feature_ranged->bound_upper;
+        os << Rete::to_string(feature_ranged->bound_lower) << ' ' << Rete::to_string(feature_ranged->bound_upper);
     }
   }
 
   void Node::print_action(std::ostream &os) const {
-    os << "  = " << q_value->value;
+    os << "  = " << Rete::to_string(q_value->value);
   }
 
   void Node::action(Agent &agent, const Rete::WME_Token &token) {
@@ -140,16 +140,20 @@ namespace Carli {
     auto old_variables = lra_lock->get_variables();
     Rete::Variable_Indices_Ptr new_variables;
 
-    if(dynamic_cast<const Rete::Rete_Predicate *>(ancestor_right.get())) {
+    Rete::Rete_Node_Ptr_C ancestor_rightmost = ancestor_right;
+    while(!dynamic_cast<const Rete::Rete_Filter *>(ancestor_rightmost.get()) &&
+          !dynamic_cast<const Rete::Rete_Predicate *>(ancestor_rightmost.get()))
+    {
+      ancestor_rightmost = ancestor_rightmost->parent_right();
+    }
+
+    if(dynamic_cast<const Rete::Rete_Predicate *>(ancestor_rightmost.get())) {
       assert(feature_enumerated_data || feature_ranged_data);
       /// Refining of an existing variable
-      if(feature_enumerated_data) {
+      if(feature_enumerated_data)
         new_test = agent.make_predicate_vc(feature_enumerated_data->predicate(), new_feature->axis, feature_enumerated_data->symbol_constant(), ancestor_left);
-      }
-      else {
-        /// Ranged feature -- refining of an existing variable
+      else
         new_test = agent.make_predicate_vc(feature_ranged_data->predicate(), new_feature->axis, feature_ranged_data->symbol_constant(), ancestor_left);
-      }
     }
     else {
 //      assert(dynamic_cast<const Rete::Rete_Join *>(ancestor_right.get()) ||

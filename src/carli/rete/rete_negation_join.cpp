@@ -128,7 +128,7 @@ namespace Rete {
     const auto pl = parent_left();
     const auto pls = pl->get_token_size();
     const auto pr = parent_right();
-    const bool prb = pr->get_token_size() > 1;
+    const bool prb = !dynamic_cast<const Rete_Filter *>(pr.get());
 
     pl->print_rule(os, indices, offset);
 

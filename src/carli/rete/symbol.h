@@ -3,10 +3,10 @@
 
 #include "../utility/memory_pool.h"
 
+#include "utility.h"
+
 #include <array>
-#include <iostream>
 #include <memory>
-#include <string>
 
 #include "../linkage.h"
 
@@ -155,11 +155,11 @@ namespace Rete {
     }
 
     virtual std::ostream & print(std::ostream &os) const override {
-      return os << value;
+      return os << Rete::to_string(value);
     }
 
     virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &, const int64_t &) const override {
-      return os << value;
+      return os << Rete::to_string(value);
     }
 
     const double value;

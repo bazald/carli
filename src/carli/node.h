@@ -34,7 +34,7 @@ namespace Carli {
     double value_delta_max = 0.0;
     int64_t value_delta_update_count = 0;
   };
-  typedef std::map<Feature *, Fringe_Value_Data, compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> Fringe_Values;
+  typedef std::map<Feature *, Fringe_Value_Data, Rete::compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> Fringe_Values;
 
   class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Unsplit>, public Rete::Rete_Data {
     Node(const Node &) = delete;
