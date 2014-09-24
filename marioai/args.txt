@@ -14,3 +14,5 @@ on-policy
 0.1
 --split-test
 policy
+--rules-out
+../../rules-out.txt
