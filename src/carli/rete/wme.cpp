@@ -21,13 +21,13 @@ namespace Rete {
     return os << '(' << *symbols[0] << " ^" << *symbols[1] << ' ' << *symbols[2] << ')';
   }
 
-  std::ostream & WME::print(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const {
+  std::ostream & WME::print(std::ostream &os, const Variable_Indices_Ptr_C &indices) const {
     os << '(';
-    symbols[0]->print(os, indices, offset);
+    symbols[0]->print(os, indices);
     os << " ^";
-    symbols[1]->print(os, indices, offset);
+    symbols[1]->print(os, indices);
     os << ' ';
-    symbols[2]->print(os, indices, offset);
+    symbols[2]->print(os, indices);
     os << ')';
     return os;
   }

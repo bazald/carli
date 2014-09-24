@@ -23,7 +23,7 @@ namespace Rete {
     bool operator<(const WME &rhs) const;
 
     std::ostream & print(std::ostream &os) const;
-    std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const;
+    std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &indices) const;
 
     WME_Symbols symbols;
   };

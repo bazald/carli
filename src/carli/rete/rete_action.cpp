@@ -104,7 +104,7 @@ namespace Rete {
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
   }
 
-  void Rete_Action::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &, const int64_t &) const {
+  void Rete_Action::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &) const {
     os << "sp {" << name;
     if(data) {
       os << std::endl << "  ";
@@ -112,7 +112,7 @@ namespace Rete {
     }
     os << std::endl << "  ";
 
-    parent_left()->print_rule(os, variables, 0);
+    parent_left()->print_rule(os, variables);
 
     os << std::endl << "-->";
     if(data) {

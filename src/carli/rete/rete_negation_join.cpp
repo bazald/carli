@@ -124,21 +124,20 @@ namespace Rete {
     os << "  " << intptr_t(input1) << " -> " << intptr_t(this) << " [color=blue];" << std::endl;
   }
 
-  void Rete_Negation_Join::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const {
+  void Rete_Negation_Join::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices) const {
     const auto pl = parent_left();
-    const auto pls = pl->get_token_size();
     const auto pr = parent_right();
     const bool prb = !dynamic_cast<const Rete_Filter *>(pr.get());
 
-    pl->print_rule(os, indices, offset);
+    pl->print_rule(os, indices);
 
     os << std::endl << "  -";
     if(prb)
       os << '{';
 
-    const auto bound = bind_Variable_Indices(bindings, indices, pls);
+    const auto bound = bind_Variable_Indices(bindings, indices, pl->get_token_size());
 
-    pr->print_rule(os, bound, offset + pls);
+    pr->print_rule(os, bound);
 
     if(prb)
       os << '}';

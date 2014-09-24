@@ -100,7 +100,7 @@ namespace Rete {
 
     virtual size_t hash() const = 0;
     virtual std::ostream & print(std::ostream &os) const = 0;
-    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const = 0;
+    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &indices) const = 0;
   };
 
   class RETE_LINKAGE Symbol_Constant : public Symbol {
@@ -158,7 +158,7 @@ namespace Rete {
       return os << Rete::to_string(value);
     }
 
-    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &, const int64_t &) const override {
+    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &) const override {
       return os << Rete::to_string(value);
     }
 
@@ -212,7 +212,7 @@ namespace Rete {
       return os << value;
     }
 
-    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &, const int64_t &) const override {
+    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &) const override {
       return os << value;
     }
 
@@ -271,7 +271,7 @@ namespace Rete {
         return os << '|' << value << '|';
     }
 
-    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &, const int64_t &) const override {
+    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &) const override {
       return print(os);
     }
 
@@ -320,7 +320,7 @@ namespace Rete {
       return os << value;
     }
 
-    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &, const int64_t &) const override {
+    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &) const override {
       return os << value;
     }
 
@@ -372,10 +372,10 @@ namespace Rete {
       return os;
     }
 
-    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const override {
+    virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &indices) const override {
       os.put('<');
-      const auto found = std::find_if(indices->begin(), indices->end(), [this,offset](const std::pair<std::string, WME_Token_Index> &ind)->bool {
-        return ind.second.first == offset && ind.second.second == this->value;
+      const auto found = std::find_if(indices->begin(), indices->end(), [this](const std::pair<std::string, WME_Token_Index> &ind)->bool {
+        return ind.second.first == 0 && ind.second.second == this->value;
       });
       if(found != indices->end())
         os << found->first;

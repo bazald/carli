@@ -116,13 +116,13 @@ namespace Rete {
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
   }
 
-  void Rete_Predicate::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const {
-    parent_left()->print_rule(os, indices, offset);
+  void Rete_Predicate::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices) const {
+    parent_left()->print_rule(os, indices);
 
     os << std::endl << "  (";
 
     {
-      const auto found = std::find_if(indices->begin(), indices->end(), [this,offset](const std::pair<std::string, WME_Token_Index> &ind)->bool {
+      const auto found = std::find_if(indices->begin(), indices->end(), [this](const std::pair<std::string, WME_Token_Index> &ind)->bool {
         return ind.second.first == this->m_lhs_index.first && ind.second.second == this->m_lhs_index.second;
       });
       if(found != indices->end())
@@ -146,7 +146,7 @@ namespace Rete {
     if(m_rhs)
       os << *m_rhs;
     else {
-      const auto found = std::find_if(indices->begin(), indices->end(), [this,offset](const std::pair<std::string, WME_Token_Index> &ind)->bool {
+      const auto found = std::find_if(indices->begin(), indices->end(), [this](const std::pair<std::string, WME_Token_Index> &ind)->bool {
         return ind.second == this->m_rhs_index;
       });
       if(found != indices->end())

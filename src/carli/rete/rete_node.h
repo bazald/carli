@@ -216,7 +216,7 @@ namespace Rete {
 
     virtual void print_details(std::ostream &os) const = 0; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
-    virtual void print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const int64_t &offset) const = 0;
+    virtual void print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices) const = 0;
 
     virtual void output_name(std::ostream &os, const int64_t &depth) const = 0;
 

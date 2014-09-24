@@ -93,14 +93,27 @@ namespace Rete {
 //  }
 
   Variable_Indices_Ptr_C bind_Variable_Indices(const WME_Bindings &bindings, const Variable_Indices_Ptr_C &indices, const int64_t &offset) {
-    Variable_Indices_Ptr closure = std::make_shared<Variable_Indices>(*indices);
+    Variable_Indices_Ptr closure = std::make_shared<Variable_Indices>();
+
+    for(const auto &index : *indices) {
+      if(index.second.first >= offset)
+        closure->insert(std::make_pair(index.first, WME_Token_Index(index.second.first - offset, index.second.second)));
+    }
 
     for(const auto &binding : bindings) {
-      const auto found = std::find_if(closure->begin(), closure->end(), [binding,offset](const std::pair<std::string, WME_Token_Index> &ind)->bool {
+      auto found = std::find_if(indices->begin(), indices->end(), [binding,offset](const std::pair<std::string, WME_Token_Index> &ind)->bool {
+        return ind.second == binding.first;
+      });
+      if(found != indices->end()) {
+        closure->insert(std::make_pair(found->first, WME_Token_Index(binding.second.first, binding.second.second)));
+        continue;
+      }
+
+      found = std::find_if(closure->begin(), closure->end(), [binding,offset](const std::pair<std::string, WME_Token_Index> &ind)->bool {
         return ind.second == binding.first;
       });
       if(found != closure->end())
-        closure->insert(std::make_pair(found->first, WME_Token_Index(binding.second.first + offset, binding.second.second)));
+        closure->insert(std::make_pair(found->first, WME_Token_Index(binding.second.first, binding.second.second)));
     }
 
     return closure;
