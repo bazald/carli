@@ -43,6 +43,9 @@ namespace Carli {
 
         const auto found_axis = features.find(feature);
         if(found_axis != features.end()) {
+#ifdef DEBUG_OUTPUT
+          std::cerr << *found_axis->first << " =axis= " << *feature << std::endl;
+#endif
           const int64_t depth_diff = feature->get_depth() - found_axis->second.begin()->first->get_depth();
           if(depth_diff > 0)
             return;
@@ -79,18 +82,18 @@ namespace Carli {
 
   bool Agent::respecialize(Rete::Rete_Action &rete_action) {
     return false;
-#ifndef NO_COLLAPSE_DETECTION_HACK
-    if(m_experienced_n_positive_rewards_in_a_row)
-      return false;
-#endif
+//#ifndef NO_COLLAPSE_DETECTION_HACK
+//    if(m_experienced_n_positive_rewards_in_a_row)
+//      return false;
+//#endif
     //if(debuggable_cast<Node *>(rete_action.data.get())->q_value->depth < 3)
     //  return false;
     if(random.rand_lt(1000) || !collapse_rete(rete_action))
       return false;
     else {
-#ifndef NO_COLLAPSE_DETECTION_HACK
-      m_positive_rewards_in_a_row = 0;
-#endif
+//#ifndef NO_COLLAPSE_DETECTION_HACK
+//      m_positive_rewards_in_a_row = 0;
+//#endif
       return true;
     }
   }
@@ -132,7 +135,7 @@ namespace Carli {
       rete_print(fout);
     }
 
-    auto new_node = general.create_split(*this, general.parent_action.lock(), false);
+    auto new_node = general.create_split(*this, general.parent_action.lock());
 
     expand_fringe(rete_action, new_node->rete_action.lock(), chosen);
 
@@ -195,7 +198,7 @@ namespace Carli {
 
         /** Step 2.1: Create a new split/unsplit node depending on the existence of a new fringe. */
         if(terminal)
-          leaf->create_split(*this, parent_action, true);
+          leaf->create_split(*this, parent_action);
         else {
           const auto node_unsplit = leaf->create_unsplit(*this, parent_action);
 
@@ -262,7 +265,10 @@ namespace Carli {
 #endif
 
     /// Make new unsplit node
-    const auto unsplit = split->create_unsplit(*this, nullptr); ///< TODO: MUSTFIX nullptr
+    const auto unsplit = split->create_unsplit(*this, split->parent_action.lock());
+#ifdef DEBUG_OUTPUT
+    std::cerr << "Collapsing " << split << " to " << unsplit << std::endl;
+#endif
 
     /// Preserve some learning
     unsplit->q_value->value = split->q_value->value;
@@ -275,25 +281,25 @@ namespace Carli {
 
         auto new_fringe = node.create_fringe(*this, *unsplit, nullptr);
 
-        //std::cerr << "Collapsing: ";
-        //node.rete_action.output_name(std::cerr);
-        //std::cerr << std::endl;
-
-        //std::cerr << "Creating  : ";
-        //new_fringe->rete_action.output_name(std::cerr);
-        //std::cerr << std::endl;
+//        std::cerr << "Collapsing: ";
+//        node.rete_action.lock()->output_name(std::cerr, 3);
+//        std::cerr << std::endl;
+//
+//        std::cerr << "Creating  : ";
+//        new_fringe->rete_action.lock()->output_name(std::cerr, 3);
+//        std::cerr << std::endl;
       }
     }
 
     fringe_collector.features.clear();
 
-    //std::cerr << "Collapsing: ";
-    //rete_action.output_name(std::cerr);
-    //std::cerr << std::endl;
-
-    //std::cerr << "Creating  : ";
-    //unsplit->rete_action.output_name(std::cerr);
-    //std::cerr << std::endl;
+//    std::cerr << "Collapsing: ";
+//    rete_action.output_name(std::cerr, 3);
+//    std::cerr << std::endl;
+//
+//    std::cerr << "Creating  : ";
+//    unsplit->rete_action.lock()->output_name(std::cerr, 3);
+//    std::cerr << std::endl;
 
 #ifdef DEBUG_OUTPUT
     std::cerr << "Excising " << fringe_collector.excise.size() << " actions." << std::endl;

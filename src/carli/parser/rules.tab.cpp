@@ -634,10 +634,10 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint16 yyrline[] =
 {
        0,   161,   161,   162,   165,   167,   168,   170,   175,   180,
-     192,   343,   346,   350,   353,   360,   363,   366,   371,   372,
-     373,   374,   379,   384,   387,   390,   399,   409,   412,   415,
-     416,   419,   420,   421,   422,   425,   426,   429,   432,   433,
-     434,   437,   438,   441,   442,   445,   448,   449,   450,   451
+     192,   335,   338,   342,   345,   352,   355,   358,   363,   364,
+     365,   366,   371,   376,   379,   382,   391,   401,   404,   407,
+     408,   411,   412,   413,   414,   417,   418,   421,   424,   425,
+     426,   429,   430,   433,   434,   437,   440,   441,   442,   443
 };
 #endif
 
@@ -1829,34 +1829,25 @@ yyreduce:
                                                                  }, parent, make_shared<Rete::Variable_Indices>());
                       }
                       else {
-                        /// Pass through blink nodes
                         Rete::Rete_Node_Ptr test_node = parent;
-                        bool terminal = true;
-                        if(node_type == "split") {
-                          const auto filter = dynamic_cast<Rete::Rete_Filter *>(parent->parent_right().get());
-                          bool terminal = true;
-                          if(filter) {
-                            const auto &wme = filter->get_wme();
-                            terminal = !dynamic_cast<const Rete::Symbol_Variable *>(wme.symbols[0].get()) ||
-                                       wme.symbols[0] != wme.symbols[1] || wme.symbols[0] != wme.symbols[2];
-                          }
-
-                          //if(!terminal)
-                          //  test_node = test_node->parent_left();
-                        }
-                        //else if(node_type == "unsplit")
-                        //  test_node = test_node->parent_left();
 
                         if(feature) {
                           int64_t token_offset = 0;
-                          if(const auto join = dynamic_cast<Rete::Rete_Join *>(test_node.get())) {
-                            token_offset += test_node->parent_left()->get_token_size();
-                            test_node = test_node->parent_right(); ///< Assume more than one new WME is required for the new test
 
+                          if(test_node->get_bindings()) {
                             /// Fill in conditions and bindings
-                            feature->conditions = test_node->get_filter_wmes();
-                            feature->bindings = *join->get_bindings();
+                            feature->conditions = test_node->parent_right()->get_filter_wmes();
+                            feature->bindings = *test_node->get_bindings();
+
+                            if(test_node->get_token_size() > test_node->parent_left()->get_token_size())
+                              token_offset += test_node->parent_left()->get_token_size();
                           }
+                          else
+                            assert(test_node->get_token_size() == test_node->parent_left()->get_token_size());
+
+                          auto test_node_rightmost = test_node;
+                          while(test_node_rightmost->get_bindings())
+                            test_node_rightmost = test_node_rightmost->parent_right();
 
                           /// Fill in Feature values / predicate tests
                           if(const auto feature_e = dynamic_cast<Carli::Feature_Enumerated<Carli::Feature> *>(feature)) {
@@ -1877,7 +1868,7 @@ yyreduce:
                             }
                           }
                           else if(const auto feature_r = dynamic_cast<Carli::Feature_Ranged<Carli::Feature> *>(feature)) {
-                            const auto &predicate = dynamic_cast<Rete::Rete_Predicate &>(*test_node);
+                            const auto &predicate = dynamic_cast<Rete::Rete_Predicate &>(*test_node_rightmost);
                             feature_r->upper = predicate.get_predicate() == Rete::Rete_Predicate::GTE;
                           }
                           else {
@@ -1886,7 +1877,7 @@ yyreduce:
                           }
 
                           /// Determine Feature axes
-                          if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node.get()))
+                          if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node_rightmost.get()))
                             feature->axis = predicate->get_lhs_index();
                           else {
                             const Rete::Rete_Filter * filter_node = dynamic_cast<const Rete::Rete_Filter *>(test_node->parent_right().get());
@@ -1899,7 +1890,6 @@ yyreduce:
                               for(const auto binding : *bindings) {
                                 if(binding.second == Rete::WME_Token_Index(0, 0)) {
                                   feature->axis = binding.first;
-                                  feature->axis_label = dynamic_cast<const Rete::Symbol_Constant_String *>(filter_node->get_wme().symbols[1].get())->value;
                                   goto AXIS_FOUND;
                                 }
                               }
@@ -1911,6 +1901,8 @@ yyreduce:
                           }
 
                           feature->axis.first += token_offset;
+
+                          //std::cerr << "LHS" << feature->axis << ' ' << *variable_indices << std::endl;
                         }
 
                         /// Make the new action
@@ -1918,7 +1910,7 @@ yyreduce:
                         if(node_type == "split") {
                           const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::SPLIT, q_value_depth, feature);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Split>(agent, parent_action, new_action, new_q_value, terminal);
+                          auto new_action_data = std::make_shared<Carli::Node_Split>(agent, parent_action, new_action, new_q_value);
                           new_action->data = new_action_data;
                         }
                         else if(node_type == "unsplit") {
@@ -1955,7 +1947,7 @@ yyreduce:
 
   case 11:
 /* Line 1787 of yacc.c  */
-#line 343 "rules.yyy"
+#line 335 "rules.yyy"
     { (yyval.rule_ptr) = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*(yyvsp[(3) - (4)].rete_node_ptr), *(yyvsp[(2) - (4)].sval), tuple<int64_t, string, string, Carli::Feature *>(), 0.0);
                                     delete (yyvsp[(2) - (4)].sval);
                                     delete (yyvsp[(3) - (4)].rete_node_ptr); }
@@ -1963,7 +1955,7 @@ yyreduce:
 
   case 12:
 /* Line 1787 of yacc.c  */
-#line 346 "rules.yyy"
+#line 338 "rules.yyy"
     { (yyval.rule_ptr) = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*(yyvsp[(4) - (5)].rete_node_ptr), *(yyvsp[(2) - (5)].sval), *(yyvsp[(3) - (5)].flag_ptr), 0.0);
                                            delete (yyvsp[(2) - (5)].sval);
                                            delete (yyvsp[(3) - (5)].flag_ptr);
@@ -1972,7 +1964,7 @@ yyreduce:
 
   case 13:
 /* Line 1787 of yacc.c  */
-#line 350 "rules.yyy"
+#line 342 "rules.yyy"
     { (yyval.rule_ptr) = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*(yyvsp[(3) - (7)].rete_node_ptr), *(yyvsp[(2) - (7)].sval), tuple<int64_t, string, string, Carli::Feature *>(), (yyvsp[(6) - (7)].fval));
                                                                     delete (yyvsp[(2) - (7)].sval);
                                                                     delete (yyvsp[(3) - (7)].rete_node_ptr); }
@@ -1980,7 +1972,7 @@ yyreduce:
 
   case 14:
 /* Line 1787 of yacc.c  */
-#line 353 "rules.yyy"
+#line 345 "rules.yyy"
     { (yyval.rule_ptr) = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*(yyvsp[(4) - (8)].rete_node_ptr), *(yyvsp[(2) - (8)].sval), *(yyvsp[(3) - (8)].flag_ptr), (yyvsp[(7) - (8)].fval));
                                                                          delete (yyvsp[(2) - (8)].sval);
                                                                          delete (yyvsp[(3) - (8)].flag_ptr);
@@ -1989,49 +1981,49 @@ yyreduce:
 
   case 15:
 /* Line 1787 of yacc.c  */
-#line 360 "rules.yyy"
-    { (yyval.flag_ptr) = new tuple<int64_t, string, string, Carli::Feature *>((yyvsp[(2) - (7)].ival), *(yyvsp[(3) - (7)].sval), *(yyvsp[(4) - (7)].sval), new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, "" /*FIXUP later*/, (yyvsp[(6) - (7)].fval), (yyvsp[(7) - (7)].fval), (yyvsp[(5) - (7)].ival), false /*FIXUP later*/, false));
+#line 352 "rules.yyy"
+    { (yyval.flag_ptr) = new tuple<int64_t, string, string, Carli::Feature *>((yyvsp[(2) - (7)].ival), *(yyvsp[(3) - (7)].sval), *(yyvsp[(4) - (7)].sval), new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, (yyvsp[(6) - (7)].fval), (yyvsp[(7) - (7)].fval), (yyvsp[(5) - (7)].ival), false /*FIXUP later*/, false));
                                                       delete (yyvsp[(3) - (7)].sval);
                                                       delete (yyvsp[(4) - (7)].sval); }
     break;
 
   case 16:
 /* Line 1787 of yacc.c  */
-#line 363 "rules.yyy"
-    { (yyval.flag_ptr) = new tuple<int64_t, string, string, Carli::Feature *>((yyvsp[(2) - (7)].ival), *(yyvsp[(3) - (7)].sval), *(yyvsp[(4) - (7)].sval), new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, "" /*FIXUP later*/, (yyvsp[(6) - (7)].ival), (yyvsp[(7) - (7)].ival), (yyvsp[(5) - (7)].ival), false /*FIXUP later*/, true));
+#line 355 "rules.yyy"
+    { (yyval.flag_ptr) = new tuple<int64_t, string, string, Carli::Feature *>((yyvsp[(2) - (7)].ival), *(yyvsp[(3) - (7)].sval), *(yyvsp[(4) - (7)].sval), new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, (yyvsp[(6) - (7)].ival), (yyvsp[(7) - (7)].ival), (yyvsp[(5) - (7)].ival), false /*FIXUP later*/, true));
                                                     delete (yyvsp[(3) - (7)].sval);
                                                     delete (yyvsp[(4) - (7)].sval); }
     break;
 
   case 17:
 /* Line 1787 of yacc.c  */
-#line 366 "rules.yyy"
-    { (yyval.flag_ptr) = new tuple<int64_t, string, string, Carli::Feature *>((yyvsp[(2) - (4)].ival), *(yyvsp[(3) - (4)].sval), *(yyvsp[(4) - (4)].sval), (yyvsp[(2) - (4)].ival) > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, "" /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
+#line 358 "rules.yyy"
+    { (yyval.flag_ptr) = new tuple<int64_t, string, string, Carli::Feature *>((yyvsp[(2) - (4)].ival), *(yyvsp[(3) - (4)].sval), *(yyvsp[(4) - (4)].sval), (yyvsp[(2) - (4)].ival) > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
                                         delete (yyvsp[(3) - (4)].sval);
                                         delete (yyvsp[(4) - (4)].sval); }
     break;
 
   case 18:
 /* Line 1787 of yacc.c  */
-#line 371 "rules.yyy"
+#line 363 "rules.yyy"
     { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
     break;
 
   case 19:
 /* Line 1787 of yacc.c  */
-#line 372 "rules.yyy"
+#line 364 "rules.yyy"
     { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential((yyvsp[(2) - (2)].rete_node_ptr)->first)), Variables()); delete (yyvsp[(2) - (2)].rete_node_ptr); }
     break;
 
   case 20:
 /* Line 1787 of yacc.c  */
-#line 373 "rules.yyy"
+#line 365 "rules.yyy"
     { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation((yyvsp[(2) - (2)].rete_node_ptr)->first)), Variables()); delete (yyvsp[(2) - (2)].rete_node_ptr); }
     break;
 
   case 21:
 /* Line 1787 of yacc.c  */
-#line 374 "rules.yyy"
+#line 366 "rules.yyy"
     { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(Rete::WME_Bindings(), true, (yyvsp[(1) - (3)].rete_node_ptr)->first, (yyvsp[(3) - (3)].rete_node_ptr)->first)), (yyvsp[(1) - (3)].rete_node_ptr)->second);
                                                         delete (yyvsp[(1) - (3)].rete_node_ptr);
                                                         delete (yyvsp[(3) - (3)].rete_node_ptr); }
@@ -2039,7 +2031,7 @@ yyreduce:
 
   case 22:
 /* Line 1787 of yacc.c  */
-#line 379 "rules.yyy"
+#line 371 "rules.yyy"
     { vector<array<string, 3>> variables((yyvsp[(1) - (2)].rete_node_ptr)->second);
                               variables.insert(variables.end(), (yyvsp[(2) - (2)].rete_node_ptr)->second.begin(), (yyvsp[(2) - (2)].rete_node_ptr)->second.end());
                               (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(join_bindings((yyvsp[(1) - (2)].rete_node_ptr)->second, (yyvsp[(2) - (2)].rete_node_ptr)->second), (yyvsp[(1) - (2)].rete_node_ptr)->first, (yyvsp[(2) - (2)].rete_node_ptr)->first)), variables);
@@ -2049,7 +2041,7 @@ yyreduce:
 
   case 23:
 /* Line 1787 of yacc.c  */
-#line 384 "rules.yyy"
+#line 376 "rules.yyy"
     { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings((yyvsp[(1) - (3)].rete_node_ptr)->second, (yyvsp[(3) - (3)].rete_node_ptr)->second), false, (yyvsp[(1) - (3)].rete_node_ptr)->first, (yyvsp[(3) - (3)].rete_node_ptr)->first)), (yyvsp[(1) - (3)].rete_node_ptr)->second);
                                     delete (yyvsp[(1) - (3)].rete_node_ptr);
                                     delete (yyvsp[(3) - (3)].rete_node_ptr); }
@@ -2057,7 +2049,7 @@ yyreduce:
 
   case 24:
 /* Line 1787 of yacc.c  */
-#line 387 "rules.yyy"
+#line 379 "rules.yyy"
     { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(join_bindings((yyvsp[(1) - (3)].rete_node_ptr)->second, (yyvsp[(3) - (3)].rete_node_ptr)->second), (yyvsp[(1) - (3)].rete_node_ptr)->first, (yyvsp[(3) - (3)].rete_node_ptr)->first)), (yyvsp[(1) - (3)].rete_node_ptr)->second);
                                     delete (yyvsp[(1) - (3)].rete_node_ptr);
                                     delete (yyvsp[(3) - (3)].rete_node_ptr); }
@@ -2065,7 +2057,7 @@ yyreduce:
 
   case 25:
 /* Line 1787 of yacc.c  */
-#line 390 "rules.yyy"
+#line 382 "rules.yyy"
     { const auto lhs_index = find_index((yyvsp[(1) - (6)].rete_node_ptr)->second, *(yyvsp[(3) - (6)].sval));
                                                             if(lhs_index.second > 2) {
                                                               reteerror(&yylloc, yyscanner, agent, filename, source_path, "Unbound variable tested by predicate.");
@@ -2079,7 +2071,7 @@ yyreduce:
 
   case 26:
 /* Line 1787 of yacc.c  */
-#line 399 "rules.yyy"
+#line 391 "rules.yyy"
     { const auto lhs_index = find_index((yyvsp[(1) - (6)].rete_node_ptr)->second, *(yyvsp[(3) - (6)].sval));
                                                      const auto rhs_index = find_index((yyvsp[(1) - (6)].rete_node_ptr)->second, *(yyvsp[(5) - (6)].sval));
                                                      if(lhs_index.second > 2 || rhs_index.second > 2) {
@@ -2094,145 +2086,145 @@ yyreduce:
 
   case 27:
 /* Line 1787 of yacc.c  */
-#line 409 "rules.yyy"
+#line 401 "rules.yyy"
     { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
     break;
 
   case 28:
 /* Line 1787 of yacc.c  */
-#line 412 "rules.yyy"
+#line 404 "rules.yyy"
     { (yyval.rete_node_ptr) = (yyvsp[(2) - (3)].rete_node_ptr); }
     break;
 
   case 29:
 /* Line 1787 of yacc.c  */
-#line 415 "rules.yyy"
+#line 407 "rules.yyy"
     { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
     break;
 
   case 30:
 /* Line 1787 of yacc.c  */
-#line 416 "rules.yyy"
+#line 408 "rules.yyy"
     { (yyval.rete_node_ptr) = (yyvsp[(1) - (1)].rete_node_ptr); }
     break;
 
   case 31:
 /* Line 1787 of yacc.c  */
-#line 419 "rules.yyy"
+#line 411 "rules.yyy"
     { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *(yyvsp[(4) - (6)].symbol_ptr), *(yyvsp[(5) - (6)].symbol_ptr)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), "", ""))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].symbol_ptr); delete (yyvsp[(5) - (6)].symbol_ptr); }
     break;
 
   case 32:
 /* Line 1787 of yacc.c  */
-#line 420 "rules.yyy"
+#line 412 "rules.yyy"
     { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *(yyvsp[(4) - (6)].symbol_ptr), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Third)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), "", *(yyvsp[(5) - (6)].sval)))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].symbol_ptr); delete (yyvsp[(5) - (6)].sval); }
     break;
 
   case 33:
 /* Line 1787 of yacc.c  */
-#line 421 "rules.yyy"
+#line 413 "rules.yyy"
     { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(4) - (6)].sval) ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), *(yyvsp[(5) - (6)].symbol_ptr)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), *(yyvsp[(4) - (6)].sval), ""))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].sval); delete (yyvsp[(5) - (6)].symbol_ptr); }
     break;
 
   case 34:
 /* Line 1787 of yacc.c  */
-#line 422 "rules.yyy"
+#line 414 "rules.yyy"
     { (yyval.rete_node_ptr) = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(4) - (6)].sval) ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), make_shared<Rete::Symbol_Variable>(*(yyvsp[(2) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Rete::Symbol_Variable::First : *(yyvsp[(4) - (6)].sval) == *(yyvsp[(5) - (6)].sval) ? Rete::Symbol_Variable::Second : Rete::Symbol_Variable::Third)))), Variables(Variable(*(yyvsp[(2) - (6)].sval), *(yyvsp[(4) - (6)].sval), *(yyvsp[(5) - (6)].sval)))); delete (yyvsp[(2) - (6)].sval); delete (yyvsp[(4) - (6)].sval); delete (yyvsp[(5) - (6)].sval); }
     break;
 
   case 35:
 /* Line 1787 of yacc.c  */
-#line 425 "rules.yyy"
+#line 417 "rules.yyy"
     { (yyval.symbol_ptr) = (yyvsp[(1) - (1)].symbol_ptr); }
     break;
 
   case 36:
 /* Line 1787 of yacc.c  */
-#line 426 "rules.yyy"
+#line 418 "rules.yyy"
     { (yyval.symbol_ptr) = (yyvsp[(1) - (1)].symbol_ptr); }
     break;
 
   case 37:
 /* Line 1787 of yacc.c  */
-#line 429 "rules.yyy"
+#line 421 "rules.yyy"
     { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Identifier>(*(yyvsp[(2) - (2)].sval))); delete (yyvsp[(2) - (2)].sval); }
     break;
 
   case 38:
 /* Line 1787 of yacc.c  */
-#line 432 "rules.yyy"
+#line 424 "rules.yyy"
     { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Float>((yyvsp[(1) - (1)].fval))); }
     break;
 
   case 39:
 /* Line 1787 of yacc.c  */
-#line 433 "rules.yyy"
+#line 425 "rules.yyy"
     { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_Int>((yyvsp[(1) - (1)].ival))); }
     break;
 
   case 40:
 /* Line 1787 of yacc.c  */
-#line 434 "rules.yyy"
+#line 426 "rules.yyy"
     { (yyval.symbol_ptr) = new Rete::Symbol_Ptr_C(make_shared<Rete::Symbol_Constant_String>(*(yyvsp[(1) - (1)].sval))); delete (yyvsp[(1) - (1)].sval); }
     break;
 
   case 41:
 /* Line 1787 of yacc.c  */
-#line 437 "rules.yyy"
+#line 429 "rules.yyy"
     { (yyval.fval) = double((yyvsp[(1) - (1)].ival)); }
     break;
 
   case 42:
 /* Line 1787 of yacc.c  */
-#line 438 "rules.yyy"
+#line 430 "rules.yyy"
     { (yyval.fval) = (yyvsp[(1) - (1)].fval); }
     break;
 
   case 43:
 /* Line 1787 of yacc.c  */
-#line 441 "rules.yyy"
+#line 433 "rules.yyy"
     { (yyval.sval) = (yyvsp[(1) - (1)].sval); }
     break;
 
   case 44:
 /* Line 1787 of yacc.c  */
-#line 442 "rules.yyy"
+#line 434 "rules.yyy"
     { (yyval.sval) = (yyvsp[(1) - (1)].sval); }
     break;
 
   case 45:
 /* Line 1787 of yacc.c  */
-#line 445 "rules.yyy"
+#line 437 "rules.yyy"
     { (yyval.sval) = (yyvsp[(2) - (3)].sval); }
     break;
 
   case 46:
 /* Line 1787 of yacc.c  */
-#line 448 "rules.yyy"
+#line 440 "rules.yyy"
     { (yyval.sval) = (yyvsp[(1) - (2)].sval); *(yyval.sval) += (yyvsp[(2) - (2)].cval); }
     break;
 
   case 47:
 /* Line 1787 of yacc.c  */
-#line 449 "rules.yyy"
+#line 441 "rules.yyy"
     { (yyval.sval) = (yyvsp[(1) - (2)].sval); *(yyval.sval) += *(yyvsp[(2) - (2)].sval); delete (yyvsp[(2) - (2)].sval); }
     break;
 
   case 48:
 /* Line 1787 of yacc.c  */
-#line 450 "rules.yyy"
+#line 442 "rules.yyy"
     { (yyval.sval) = new string; *(yyval.sval) += (yyvsp[(1) - (1)].cval); }
     break;
 
   case 49:
 /* Line 1787 of yacc.c  */
-#line 451 "rules.yyy"
+#line 443 "rules.yyy"
     { (yyval.sval) = (yyvsp[(1) - (1)].sval); }
     break;
 
 
 /* Line 1787 of yacc.c  */
-#line 2231 "rules.tab.cpp"
+#line 2223 "rules.tab.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2471,7 +2463,7 @@ yyreturn:
 
 
 /* Line 2050 of yacc.c  */
-#line 454 "rules.yyy"
+#line 446 "rules.yyy"
 
 
 bool rete_get_exit() {

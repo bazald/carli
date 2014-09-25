@@ -216,34 +216,25 @@ command:
                                                                  }, parent, make_shared<Rete::Variable_Indices>());
                       }
                       else {
-                        /// Pass through blink nodes
                         Rete::Rete_Node_Ptr test_node = parent;
-                        bool terminal = true;
-                        if(node_type == "split") {
-                          const auto filter = dynamic_cast<Rete::Rete_Filter *>(parent->parent_right().get());
-                          bool terminal = true;
-                          if(filter) {
-                            const auto &wme = filter->get_wme();
-                            terminal = !dynamic_cast<const Rete::Symbol_Variable *>(wme.symbols[0].get()) ||
-                                       wme.symbols[0] != wme.symbols[1] || wme.symbols[0] != wme.symbols[2];
-                          }
-
-                          //if(!terminal)
-                          //  test_node = test_node->parent_left();
-                        }
-                        //else if(node_type == "unsplit")
-                        //  test_node = test_node->parent_left();
 
                         if(feature) {
                           int64_t token_offset = 0;
-                          if(const auto join = dynamic_cast<Rete::Rete_Join *>(test_node.get())) {
-                            token_offset += test_node->parent_left()->get_token_size();
-                            test_node = test_node->parent_right(); ///< Assume more than one new WME is required for the new test
 
+                          if(test_node->get_bindings()) {
                             /// Fill in conditions and bindings
-                            feature->conditions = test_node->get_filter_wmes();
-                            feature->bindings = *join->get_bindings();
+                            feature->conditions = test_node->parent_right()->get_filter_wmes();
+                            feature->bindings = *test_node->get_bindings();
+
+                            if(test_node->get_token_size() > test_node->parent_left()->get_token_size())
+                              token_offset += test_node->parent_left()->get_token_size();
                           }
+                          else
+                            assert(test_node->get_token_size() == test_node->parent_left()->get_token_size());
+
+                          auto test_node_rightmost = test_node;
+                          while(test_node_rightmost->get_bindings())
+                            test_node_rightmost = test_node_rightmost->parent_right();
 
                           /// Fill in Feature values / predicate tests
                           if(const auto feature_e = dynamic_cast<Carli::Feature_Enumerated<Carli::Feature> *>(feature)) {
@@ -264,7 +255,7 @@ command:
                             }
                           }
                           else if(const auto feature_r = dynamic_cast<Carli::Feature_Ranged<Carli::Feature> *>(feature)) {
-                            const auto &predicate = dynamic_cast<Rete::Rete_Predicate &>(*test_node);
+                            const auto &predicate = dynamic_cast<Rete::Rete_Predicate &>(*test_node_rightmost);
                             feature_r->upper = predicate.get_predicate() == Rete::Rete_Predicate::GTE;
                           }
                           else {
@@ -273,7 +264,7 @@ command:
                           }
 
                           /// Determine Feature axes
-                          if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node.get()))
+                          if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node_rightmost.get()))
                             feature->axis = predicate->get_lhs_index();
                           else {
                             const Rete::Rete_Filter * filter_node = dynamic_cast<const Rete::Rete_Filter *>(test_node->parent_right().get());
@@ -286,7 +277,6 @@ command:
                               for(const auto binding : *bindings) {
                                 if(binding.second == Rete::WME_Token_Index(0, 0)) {
                                   feature->axis = binding.first;
-                                  feature->axis_label = dynamic_cast<const Rete::Symbol_Constant_String *>(filter_node->get_wme().symbols[1].get())->value;
                                   goto AXIS_FOUND;
                                 }
                               }
@@ -298,6 +288,8 @@ command:
                           }
 
                           feature->axis.first += token_offset;
+
+                          //std::cerr << "LHS" << feature->axis << ' ' << *variable_indices << std::endl;
                         }
 
                         /// Make the new action
@@ -305,7 +297,7 @@ command:
                         if(node_type == "split") {
                           const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::SPLIT, q_value_depth, feature);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Split>(agent, parent_action, new_action, new_q_value, terminal);
+                          auto new_action_data = std::make_shared<Carli::Node_Split>(agent, parent_action, new_action, new_q_value);
                           new_action->data = new_action_data;
                         }
                         else if(node_type == "unsplit") {
@@ -357,13 +349,13 @@ rule:
   ;
 flag:
   /* :feature q_value->depth [feature->depth feature->lower_bound feature->upper_bound] */
-  FLAG_FEATURE INT NODE_TYPE STRING INT FLOAT FLOAT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, "" /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, false));
+  FLAG_FEATURE INT NODE_TYPE STRING INT FLOAT FLOAT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, false));
                                                       delete $3;
                                                       delete $4; }
-  | FLAG_FEATURE INT NODE_TYPE STRING INT INT INT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, "" /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, true));
+  | FLAG_FEATURE INT NODE_TYPE STRING INT INT INT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, true));
                                                     delete $3;
                                                     delete $4; }
-  | FLAG_FEATURE INT NODE_TYPE STRING { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, "" /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
+  | FLAG_FEATURE INT NODE_TYPE STRING { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
                                         delete $3;
                                         delete $4; }
   ;

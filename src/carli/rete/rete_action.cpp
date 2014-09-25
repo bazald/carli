@@ -105,6 +105,9 @@ namespace Rete {
   }
 
   void Rete_Action::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &) const {
+#ifdef DEBUG_OUTPUT
+    os << "# Variables: " << *variables << std::endl;
+#endif
     os << "sp {" << name;
     if(data) {
       os << std::endl << "  ";
