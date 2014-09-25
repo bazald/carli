@@ -119,6 +119,19 @@ namespace Rete {
     return closure;
   }
 
+  std::string get_Variable_name(const Variable_Indices_Ptr_C &indices, const WME_Token_Index &index) {
+    const auto found = std::find_if(indices->begin(), indices->end(), [index](const std::pair<std::string, WME_Token_Index> &ind)->bool {
+      return ind.second.first == index.first && ind.second.second == index.second;
+    });
+    assert(found != indices->end());
+    if(found != indices->end())
+      return found->first;
+
+    std::ostringstream oss;
+    oss << index;
+    return oss.str();
+  }
+
 }
 
 std::ostream & operator<<(std::ostream &os, const Rete::WME_Binding &binding) {

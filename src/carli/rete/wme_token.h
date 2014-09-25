@@ -47,6 +47,7 @@ namespace Rete {
   };
 
   Variable_Indices_Ptr_C bind_Variable_Indices(const WME_Bindings &bindings, const Variable_Indices_Ptr_C &indices, const int64_t &offset);
+  std::string get_Variable_name(const Variable_Indices_Ptr_C &indices, const WME_Token_Index &index);
 
 }
 

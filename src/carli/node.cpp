@@ -214,12 +214,13 @@ namespace Carli {
       }
     }
 
-    /// Fix feature index
+    /// Fix feature
     if(new_feature->axis.first >= lra_lock->parent_left()->get_token_size())
       new_feature->axis.first += ancestor_left->get_token_size() - lra_lock->parent_left()->get_token_size();
+    new_feature->indices = new_variables ? new_variables : old_variables;
 
     /// Create the actual action for the new fringe node
-    auto new_action = agent.make_standard_action(new_test, new_name, false, new_variables ? new_variables : old_variables);
+    auto new_action = agent.make_standard_action(new_test, new_name, false, new_feature->indices);
     auto new_action_data = std::make_shared<Node_Fringe>(agent, lra_lock, new_action, leaf.q_value->depth + 1, new_feature);
     new_action->data = new_action_data;
 
