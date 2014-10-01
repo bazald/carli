@@ -119,7 +119,7 @@ namespace Rete {
   void Rete_Predicate::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices) const {
     parent_left()->print_rule(os, indices);
 
-    os << std::endl << "  (" << get_Variable_name(indices, m_lhs_index) << ' ';
+    os << std::endl << "  (<" << get_Variable_name(indices, m_lhs_index) << "> ";
 
     switch(m_predicate) {
       case EQ: os << "=="; break;
@@ -135,7 +135,7 @@ namespace Rete {
     if(m_rhs)
       os << *m_rhs;
     else
-      os << get_Variable_name(indices, m_rhs_index);
+      os << '<' << get_Variable_name(indices, m_rhs_index) << '>';
 
     os << ')';
   }

@@ -88,7 +88,7 @@ namespace Carli {
 //#endif
     //if(debuggable_cast<Node *>(rete_action.data.get())->q_value->depth < 3)
     //  return false;
-    if(random.rand_lt(1000) || !collapse_rete(rete_action))
+    if(random.rand_lt(10) || !collapse_rete(rete_action))
       return false;
     else {
 //#ifndef NO_COLLAPSE_DETECTION_HACK

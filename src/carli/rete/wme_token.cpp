@@ -1,5 +1,7 @@
 #include "wme_token.h"
 
+#include <iostream>
+
 namespace Rete {
 
   WME_Token::WME_Token()
@@ -120,6 +122,10 @@ namespace Rete {
   }
 
   std::string get_Variable_name(const Variable_Indices_Ptr_C &indices, const WME_Token_Index &index) {
+//#ifdef DEBUG_OUTPUT
+//    std::cerr << std::endl << "Name " << index << " from " << *indices << std::endl;
+//#endif
+
     const auto found = std::find_if(indices->begin(), indices->end(), [index](const std::pair<std::string, WME_Token_Index> &ind)->bool {
       return ind.second.first == index.first && ind.second.second == index.second;
     });

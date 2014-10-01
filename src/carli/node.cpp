@@ -210,7 +210,7 @@ namespace Carli {
           }
         }
 
-        new_feature->axis.first += offset;
+        new_feature->axis.first = new_feature->axis.first + offset;
       }
     }
 

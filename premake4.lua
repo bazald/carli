@@ -45,10 +45,12 @@ solution "carli"
     configuration "x32"
       flags { "EnableSSE2" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
   else
-    flags { "EnableSSE" }
-    buildoptions { "-mfpmath=sse -mmmx -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
-    buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
-    linkoptions { "-Wl,-rpath,'$$ORIGIN'" }
+    configuration "Profiling or Release"
+      flags { "EnableSSE" }
+      buildoptions { "-mfpmath=sse -mmmx -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
+    configuration "*"
+      buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
+      linkoptions { "-Wl,-rpath,'$$ORIGIN'" }
   end
   if _OPTIONS["clang"] == "true" then
     buildoptions { "-Wno-undefined-bool-conversion" }
