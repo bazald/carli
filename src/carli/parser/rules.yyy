@@ -274,15 +274,44 @@ command:
                               ;
                           }
 
+                          if(feature->get_depth() > 1) {
+                            const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(parent.get());
+                            assert(predicate);
+                            if(predicate) {
+                              auto ancestor = parent_action;
+                              auto ancestor_prev = ancestor;
+                              assert(ancestor && dynamic_cast<const Carli::Node *>(ancestor->data.get())->q_value->feature);
+                              while(ancestor && dynamic_cast<const Carli::Node *>(ancestor->data.get())->q_value->feature &&
+                                    ancestor->get_token_size() > predicate->get_lhs_index().first)
+                              {
+                                ancestor_prev = ancestor;
+                                ancestor = dynamic_cast<const Carli::Node *>(ancestor->data.get())->parent_action.lock();
+                              }
+
+                              assert(ancestor);
+                              if(ancestor) {
+                                const auto ancestor_node = dynamic_cast<const Carli::Node *>(ancestor_prev->data.get());
+                                assert(ancestor_node);
+                                assert(ancestor_node->q_value);
+                                assert(ancestor_node->q_value->feature);
+                                feature->bindings = ancestor_node->q_value->feature->bindings;
+                                feature->conditions = ancestor_node->q_value->feature->conditions;
+                              }
+                              else
+                                feature->bindings.insert(std::make_pair(predicate->get_lhs_index(), Rete::WME_Token_Index(-1, -1)));
+                            }
+                          }
+                          else {
+                            if(parent->get_bindings()) {
+                              feature->bindings = *parent->get_bindings();
+                              feature->conditions = parent->parent_right()->get_filter_wmes();
+                            }
+                            if(auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(parent.get()))
+                              feature->bindings.insert(std::make_pair(predicate->get_lhs_index(), Rete::WME_Token_Index(-1, -1)));
+                          }
+
                           if(parent->get_token_size() > parent->parent_left()->get_token_size())
                             feature->axis.first += parent->parent_left()->get_token_size();
-                          if(parent->get_bindings()) {
-                            feature->bindings = *parent->get_bindings();
-                            feature->conditions = parent->parent_right()->get_filter_wmes();
-                          }
-                          if(auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(parent.get()))
-                            feature->bindings.insert(std::make_pair(predicate->get_lhs_index(), Rete::WME_Token_Index(-1, -1)));
-
                           feature->indices = variable_indices;
 
                           //std::cerr << "LHS" << feature->axis << ' ' << *variable_indices << std::endl;
