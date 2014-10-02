@@ -88,7 +88,7 @@ namespace Carli {
 //#endif
     //if(debuggable_cast<Node *>(rete_action.data.get())->q_value->depth < 3)
     //  return false;
-    if(random.rand_lt(10) || !collapse_rete(rete_action))
+    if(random.rand_lt(1000) || !collapse_rete(rete_action))
       return false;
     else {
 //#ifndef NO_COLLAPSE_DETECTION_HACK
@@ -240,7 +240,7 @@ namespace Carli {
 //    rete_action.visit_preorder(Expiration_Detector(), false);
 //#endif
 
-    auto fringe_collector = rete_action.parent_left()->parent_left()->visit_preorder(Fringe_Collector_All(split), true);
+    auto fringe_collector = rete_action.parent_left()->visit_preorder(Fringe_Collector_All(split), true);
 
     if(fringe_collector.features.empty())
       return false;
@@ -715,7 +715,7 @@ namespace Carli {
       if(q->type != Q_Value::Type::FRINGE) {
         q_old += q->value /* * q.weight */;
 #ifdef DEBUG_OUTPUT
-        std::cerr << ' ' << q;
+        std::cerr << ' ' << q->value;
 #endif
       }
     }
@@ -724,13 +724,13 @@ namespace Carli {
     std::cerr << " fringe  :";
     for(const auto &q : current) {
       if(q->type == Q_Value::Type::FRINGE)
-        std::cerr << ' ' << q;
+        std::cerr << ' ' << q->value;
     }
     std::cerr << std::endl;
     std::cerr << " next    :";
     for(const auto &q : next) {
       if(q->type != Q_Value::Type::FRINGE)
-        std::cerr << ' ' << q;
+        std::cerr << ' ' << q->value;
     }
     std::cerr << std::endl;
 #endif

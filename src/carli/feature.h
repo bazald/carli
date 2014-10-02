@@ -60,10 +60,12 @@ namespace Carli {
     virtual void print(std::ostream &os) const = 0;
 
     void print_axis(std::ostream &os) const {
-      os << '{';
-      for(size_t i = 0; i != conditions.size(); ++i)
-        os << (i ? "," : "") << conditions[i];
-      os << '}' << bindings << Rete::get_Variable_name(indices, axis);
+//      os << '{';
+//      for(size_t i = 0; i != conditions.size(); ++i)
+//        os << (i ? "," : "") << conditions[i];
+//      os << '}' << bindings;
+
+      os << Rete::get_Variable_name(indices, axis);
     }
 
     std::string to_string() const {

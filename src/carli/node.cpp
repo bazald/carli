@@ -115,7 +115,7 @@ namespace Carli {
     const auto feature_enumerated_data = dynamic_cast<Feature_Enumerated_Data *>(new_feature);
     const auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(new_feature);
 
-    auto ancestor_left = lra_lock->parent_left();
+    const auto ancestor_left = lra_lock->parent_left();
     if(leaf.q_value->type != Q_Value::Type::FRINGE)
       assert(leaf.q_value->type == Q_Value::Type::UNSPLIT);
     else
@@ -197,20 +197,49 @@ namespace Carli {
 
         new_test = agent.make_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
 
-        /// Essentially a ptrdiff to go from the the new conditions on the right token to left
-        const int64_t offset = new_test->get_token_size() - join->get_token_size();
+        const int64_t leaf_token_size = ancestor_left->get_token_size();
+        const int64_t old_token_size = ra_lock->parent_left()->get_token_size();
+        const int64_t new_token_size = new_test->get_token_size();
 
         for(const auto &variable : *variables) {
           const auto found = old_variables->find(variable.first);
           if(found == old_variables->end()) {
             if(!new_variables)
               new_variables = std::make_shared<Rete::Variable_Indices>(*old_variables);
-            const auto new_index = Rete::WME_Token_Index(variable.second.first + offset, variable.second.second);
+            auto new_index = variable.second;
+
+            if(new_token_size > old_token_size) {
+              /// Offset forward
+              new_index.first += new_token_size - leaf_token_size;
+            }
+            else if(new_index.first >= leaf_token_size) {
+              /// Offset backward
+              new_index.first -= old_token_size - new_token_size;
+              if(new_index.first < leaf_token_size) {
+                /// Discard intermediate fringe variables which no longer exist post-collapse
+                continue;
+              }
+            }
+
+            assert(new_index.first > -1);
+            assert(new_index.first < new_token_size);
+            assert(std::find_if(new_variables->begin(), new_variables->end(), [new_index](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == new_index;}) == new_variables->end());
             new_variables->insert(std::make_pair(variable.first, new_index));
           }
         }
 
-        new_feature->axis.first = new_feature->axis.first + offset;
+//        if(ra_lock->parent_left()->get_token_size() > ra_lock->parent_left()->parent_left()->get_token_size()) {
+//          offset -= ra_lock->parent_left()->get_token_size() - ra_lock->parent_left()->parent_left()->get_token_size();
+//          offset += ra_lock->parent_left()->parent_right()->get_token_size();
+//        }
+
+        assert(new_feature->axis.first > -1);
+        assert(new_feature->axis.first < old_token_size);
+        const int64_t index_offset = new_token_size > old_token_size ? new_token_size - leaf_token_size : new_token_size - old_token_size;
+        new_feature->axis.first = new_feature->axis.first + index_offset;
+        assert(new_feature->axis.first > -1);
+        assert(new_feature->axis.first < new_token_size);
+        assert(std::find_if(new_variables->begin(), new_variables->end(), [new_feature](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == new_feature->axis;}) != new_variables->end());
       }
     }
 
