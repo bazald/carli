@@ -252,6 +252,11 @@ command:
                           /// Determine Feature axes
                           if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node_rightmost.get()))
                             feature->axis = predicate->get_lhs_index();
+                          else if(dynamic_cast<Rete::Rete_Existential_Join *>(parent.get()) ||
+                                  dynamic_cast<Rete::Rete_Negation_Join *>(parent.get()))
+                          {
+                            feature->axis = Rete::WME_Token_Index(-1, -1);
+                          }
                           else {
                             Rete::Rete_Node_Ptr test_node = parent;
                             const Rete::Rete_Filter * filter_node = dynamic_cast<const Rete::Rete_Filter *>(test_node->parent_right().get());

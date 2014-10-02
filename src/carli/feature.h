@@ -63,9 +63,19 @@ namespace Carli {
 //      os << '{';
 //      for(size_t i = 0; i != conditions.size(); ++i)
 //        os << (i ? "," : "") << conditions[i];
-//      os << '}' << bindings;
+//      os << '}';
 
-      os << Rete::get_Variable_name(indices, axis);
+//      os << bindings;
+
+      if(axis.first == -1) {
+        for(const auto &binding : bindings) {
+          if(binding.second.first != -1)
+            os << Rete::get_Variable_name(indices, binding.first) << '.';
+        }
+        os << *conditions.rbegin()->symbols[1];
+      }
+      else
+        os << Rete::get_Variable_name(indices, axis);
     }
 
     std::string to_string() const {
