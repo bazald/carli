@@ -90,16 +90,10 @@ namespace Rete {
           auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
           if(found_output != output_tokens.end()) {
             for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
-#ifdef RETE_LR_UNLINKING
               if((*ot)->remove_wme_token(agent, *found_output, this))
                 (*ot++)->disconnect(agent, this);
-              else {
-#else
-              {
-                (*ot)->remove_wme_token(agent, *found_output, this);
-#endif
+              else
                 ++ot;
-              }
             }
             output_tokens.erase(found_output);
           }
@@ -117,16 +111,10 @@ namespace Rete {
           auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
           if(found_output != output_tokens.end()) {
             for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
-#ifdef RETE_LR_UNLINKING
               if((*ot)->remove_wme_token(agent, *found_output, this))
                 (*ot++)->disconnect(agent, this);
-              else {
-#else
-              {
-                (*ot)->remove_wme_token(agent, *found_output, this);
-#endif
+              else
                 ++ot;
-              }
             }
             output_tokens.erase(found_output);
           }

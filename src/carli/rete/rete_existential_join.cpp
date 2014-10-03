@@ -109,7 +109,11 @@ namespace Rete {
     return false;
   }
 
-  bool Rete_Existential_Join::disabled_input(const Rete_Node_Ptr &input) {
+  bool Rete_Existential_Join::disabled_input(const Rete_Node_Ptr &
+#ifdef RETE_LR_UNLINKING
+                                                                  input
+#endif
+                                                                       ) {
 #ifdef RETE_LR_UNLINKING
     if(input.get() == input0)
       return !data.connected0;
@@ -226,16 +230,10 @@ namespace Rete {
 
     if(--lhs.second == 0) {
       for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
-#ifdef RETE_LR_UNLINKING
         if((*ot)->remove_wme_token(agent, lhs.first, this))
           (*ot++)->disconnect(agent, this);
-        else {
-#else
-        {
-          (*ot)->remove_wme_token(agent, lhs.first, this);
-#endif
+        else
           ++ot;
-        }
       }
     }
   }

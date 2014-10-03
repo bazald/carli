@@ -82,16 +82,10 @@ namespace Rete {
       if(found != input0_tokens.end()) {
         if(found->second == 0u) {
           for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
-#ifdef RETE_LR_UNLINKING
             if((*ot)->remove_wme_token(agent, wme_token, this))
               (*ot++)->disconnect(agent, this);
-            else {
-#else
-            {
-              (*ot)->remove_wme_token(agent, wme_token, this);
-#endif
+            else
               ++ot;
-            }
           }
         }
         input0_tokens.erase(found);
@@ -217,16 +211,10 @@ namespace Rete {
 
     if(++lhs.second == 1) {
       for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
-#ifdef RETE_LR_UNLINKING
         if((*ot)->remove_wme_token(agent, lhs.first, this))
           (*ot++)->disconnect(agent, this);
-        else {
-#else
-        {
-          (*ot)->remove_wme_token(agent, lhs.first, this);
-#endif
+        else
           ++ot;
-        }
       }
     }
   }
