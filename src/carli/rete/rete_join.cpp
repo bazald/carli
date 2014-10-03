@@ -23,6 +23,10 @@ namespace Rete {
     }
   }
 
+  std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Rete_Join::get_output_tokens() const {
+    return output_tokens;
+  }
+
   void Rete_Join::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
     assert(from == input0 || from == input1);
 

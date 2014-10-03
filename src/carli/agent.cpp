@@ -4,6 +4,18 @@
 
 namespace Carli {
 
+#ifdef NDEBUG
+  inline dump_rules(const Agent &) {}
+#else
+  static void dump_rules(const Agent &agent) {
+    const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();
+    if(!rules_out_file.empty()) {
+      std::ofstream rules_out((rules_out_file + ".bak").c_str());
+      agent.rete_print_rules(rules_out);
+    }
+  }
+#endif
+
   //struct Expiration_Detector {
   //  void operator()(Rete::Rete_Node &rete_node) {
   //    if(!rete_node.data)
@@ -700,6 +712,7 @@ namespace Carli {
   }
 
   void Agent::td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next) {
+    dump_rules(*this);
     assert(!m_badness);
 
     const double target_next = m_discount_rate * sum_value(nullptr, next, nullptr);
@@ -1076,6 +1089,7 @@ namespace Carli {
     if(!chosen) {
       if(!matches) {
         std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
+        dump_rules(*this);
 #if !defined(NDEBUG) && defined(_WINDOWS)
         __debugbreak();
 #elif !defined(NDEBUG)
@@ -1152,6 +1166,7 @@ namespace Carli {
     if(chosen_axis == general.fringe_values.end()) {
       if(!matches) {
         std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
+        dump_rules(*this);
 #if !defined(NDEBUG) && defined(_WINDOWS)
         __debugbreak();
 #elif !defined(NDEBUG)
@@ -1230,6 +1245,7 @@ namespace Carli {
     if(chosen_axis == general.fringe_values.end()) {
       if(!matches) {
         std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
+        dump_rules(*this);
 #if !defined(NDEBUG) && defined(_WINDOWS)
         __debugbreak();
 #elif !defined(NDEBUG)
@@ -1247,7 +1263,7 @@ namespace Carli {
 #ifdef DEBUG_OUTPUT
                                                      action
 #endif
-                                                           , const Q_Value_List &value_list, const Feature * const &axis) {
+                                                           , const Q_Value_List &value_list, const Feature * const &axis) const {
 #ifdef DEBUG_OUTPUT
     if(action) {
       std::cerr.unsetf(std::ios_base::floatfield);
@@ -1283,11 +1299,15 @@ namespace Carli {
 //      std::cerr << 0;
 //    std::cerr << '?' << std::endl;
 //#endif
+#ifdef DEBUG_OUTPUT
+    if(action)
+      std::cerr << " } = ";
+
+    dump_rules(*this);
     assert(touched || value_list.empty());
 
-#ifdef DEBUG_OUTPUT
     if(action) {
-      std::cerr << " } = " << sum << std::endl;
+      std::cerr << sum << std::endl;
       std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
     }
 #endif

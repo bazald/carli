@@ -15,6 +15,13 @@ namespace Rete {
     }
   }
 
+  std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Rete_Existential::get_output_tokens() const {
+    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> tokens;
+    if(!input_tokens.empty())
+      tokens.push_back(output_token);
+    return tokens;
+  }
+
   void Rete_Existential::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                     from

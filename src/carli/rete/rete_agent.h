@@ -42,6 +42,8 @@ namespace Rete {
     size_t rete_size() const;
     void rete_print(std::ostream &os) const; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
     void rete_print_rules(std::ostream &os) const;
+    void rete_print_firing_counts(std::ostream &os) const;
+    void rete_print_matches(std::ostream &os) const;
 
     template <typename VISITOR>
     VISITOR visit_preorder(VISITOR visitor, const bool &strict) {

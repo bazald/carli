@@ -305,6 +305,20 @@ namespace Rete {
     }
   }
 
+  void Rete_Agent::rete_print_firing_counts(std::ostream &os) const {
+    for(auto it = rules.begin(), iend = rules.end(); it != iend; ++it)
+      os << it->first << ':' << it->second->parent_left()->get_output_tokens().size() << std::endl;
+  }
+
+  void Rete_Agent::rete_print_matches(std::ostream &os) const {
+    for(auto it = rules.begin(), iend = rules.end(); it != iend; ++it) {
+      os << it->first << " matches:" << std::endl;
+      const auto tokens = it->second->parent_left()->get_output_tokens();
+      for(const auto &token : tokens)
+        os << "  " << *token << std::endl;
+    }
+  }
+
   void Rete_Agent::source_rule(const Rete_Action_Ptr &action, const bool &user_command) {
     auto found = rules.find(action->get_name());
     if(found == rules.end()) {

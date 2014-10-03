@@ -141,7 +141,7 @@ namespace Carli {
     Fringe_Values::iterator split_test_policy(Node_Unsplit &general);
     Fringe_Values::iterator split_test_value(Node_Unsplit &general);
 
-    static double sum_value(const action_type * const &action, const Q_Value_List &value_list, const Feature * const &axis);
+    double sum_value(const action_type * const &action, const Q_Value_List &value_list, const Feature * const &axis) const;
 
     void generate_all_features();
 

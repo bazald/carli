@@ -23,6 +23,15 @@ namespace Rete {
     }
   }
 
+  std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Rete_Negation_Join::get_output_tokens() const {
+    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> tokens;
+    for(auto &wme_token : input0_tokens) {
+      if(!wme_token.second)
+        tokens.push_back(wme_token.first);
+    }
+    return tokens;
+  }
+
   void Rete_Negation_Join::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
     assert(from == input0 || from == input1);
 

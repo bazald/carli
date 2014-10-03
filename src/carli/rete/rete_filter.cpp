@@ -21,6 +21,10 @@ namespace Rete {
       agent.excise_filter(std::static_pointer_cast<Rete_Filter>(shared()));
   }
 
+  std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Rete_Filter::get_output_tokens() const {
+    return tokens;
+  }
+
   void Rete_Filter::insert_wme(Rete_Agent &agent, const WME_Ptr_C &wme) {
     for(int i = 0; i != 3; ++i)
       if(!m_variable[i] && *m_wme.symbols[i] != *wme->symbols[i])

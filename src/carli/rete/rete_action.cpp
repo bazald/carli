@@ -43,6 +43,10 @@ namespace Rete {
     }
   }
 
+  std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Rete_Action::get_output_tokens() const {
+    abort();
+  }
+
   void Rete_Action::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                               from
@@ -106,8 +110,19 @@ namespace Rete {
 
   void Rete_Action::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &) const {
 #ifdef DEBUG_OUTPUT
-    os << "# Variables: " << *variables << std::endl;
+    {
+      const auto tokens = parent_left()->get_output_tokens();
+
+      os << "# Firing Count: " << tokens.size() << std::endl;
+
+      size_t matches = 0;
+      for(const auto &token : tokens)
+        os << "# Match " << ++matches << ": " << *token << std::endl;
+
+      os << "# Variables: " << *variables << std::endl;
+    }
 #endif
+
     os << "sp {" << name;
     if(data) {
       os << std::endl << "  ";
