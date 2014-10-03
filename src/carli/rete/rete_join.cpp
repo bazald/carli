@@ -3,6 +3,8 @@
 #include "rete_existential.h"
 #include "rete_negation.h"
 
+#define RETE_LR_UNLINKING
+
 namespace Rete {
 
   Rete_Join::Rete_Join(WME_Bindings bindings_) : bindings(bindings_) {}
@@ -34,6 +36,7 @@ namespace Rete {
 //#ifdef DEBUG_OUTPUT
 //      std::cerr << this << " Joining left: " << *wme_token << std::endl;
 //#endif
+#ifdef RETE_LR_UNLINKING
       if(!data.connected1) {
 //#ifdef DEBUG_OUTPUT
 //        std::cerr << this << " Connecting right" << std::endl;
@@ -42,6 +45,7 @@ namespace Rete {
         input1->enable_output(agent, this);
         data.connected1 = true;
       }
+#endif
 
 //      assert(find(input0_tokens, wme_token) == input0_tokens.end());
       input0_tokens.push_back(wme_token);
@@ -53,6 +57,7 @@ namespace Rete {
 //#ifdef DEBUG_OUTPUT
 //      std::cerr << this << " Joining right: " << *wme_token << std::endl;
 //#endif
+#ifdef RETE_LR_UNLINKING
       if(!data.connected0) {
 //#ifdef DEBUG_OUTPUT
 //        std::cerr << this << " Connecting left" << std::endl;
@@ -61,6 +66,7 @@ namespace Rete {
         input0->enable_output(agent, this);
         data.connected0 = true;
       }
+#endif
 
 //      assert(find(input1_tokens, wme_token) == input1_tokens.end());
       input1_tokens.push_back(wme_token);
@@ -84,10 +90,16 @@ namespace Rete {
           auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
           if(found_output != output_tokens.end()) {
             for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
+#ifdef RETE_LR_UNLINKING
               if((*ot)->remove_wme_token(agent, *found_output, this))
                 (*ot++)->disconnect(agent, this);
-              else
+              else {
+#else
+              {
+                (*ot)->remove_wme_token(agent, *found_output, this);
+#endif
                 ++ot;
+              }
             }
             output_tokens.erase(found_output);
           }
@@ -105,10 +117,16 @@ namespace Rete {
           auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
           if(found_output != output_tokens.end()) {
             for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
+#ifdef RETE_LR_UNLINKING
               if((*ot)->remove_wme_token(agent, *found_output, this))
                 (*ot++)->disconnect(agent, this);
-              else
+              else {
+#else
+              {
+                (*ot)->remove_wme_token(agent, *found_output, this);
+#endif
                 ++ot;
+              }
             }
             output_tokens.erase(found_output);
           }
@@ -127,14 +145,21 @@ namespace Rete {
     return false;
   }
 
-  bool Rete_Join::disabled_input(const Rete_Node_Ptr &input) {
-//    if(input.get() == input0)
-//      return !data.connected0;
-//    else {
-//      assert(input.get() == input1);
-//      return !data.connected1;
-//    }
+  bool Rete_Join::disabled_input(const Rete_Node_Ptr &
+#ifdef RETE_LR_UNLINKING
+                                                      input
+#endif
+                                                           ) {
+#ifdef RETE_LR_UNLINKING
+    if(input.get() == input0)
+      return !data.connected0;
+    else {
+      assert(input.get() == input1);
+      return !data.connected1;
+    }
+#else
     return false;
+#endif
   }
 
   void Rete_Join::print_details(std::ostream &os) const {
@@ -230,25 +255,35 @@ namespace Rete {
       return lhs;
   }
 
-  void Rete_Join::disconnect(Rete_Agent &agent, const Rete_Node * const &from) {
-//    assert(input0 != input1);
-//    if(from == input0) {
-////#ifdef DEBUG_OUTPUT
-////      std::cerr << this << " Disconnecting right" << std::endl;
-////#endif
-//      assert(data.connected1);
-//      input1->disable_output(agent, this);
-//      data.connected1 = false;
-//    }
-//    else {
-////#ifdef DEBUG_OUTPUT
-////      std::cerr << this << " Disconnecting left" << std::endl;
-////#endif
-//      assert(data.connected0);
-//      input0->disable_output(agent, this);
-//      data.connected0 = false;
-//    }
-//    assert(data.connected0 || data.connected1);
+  void Rete_Join::disconnect(Rete_Agent &
+#ifdef RETE_LR_UNLINKING
+                                         agent
+#endif
+                                              , const Rete_Node * const &
+#ifdef RETE_LR_UNLINKING
+                                                                         from
+#endif
+                                                                             ) {
+#ifdef RETE_LR_UNLINKING
+    assert(input0 != input1);
+    if(from == input0) {
+//#ifdef DEBUG_OUTPUT
+//      std::cerr << this << " Disconnecting right" << std::endl;
+//#endif
+      assert(data.connected1);
+      input1->disable_output(agent, this);
+      data.connected1 = false;
+    }
+    else {
+//#ifdef DEBUG_OUTPUT
+//      std::cerr << this << " Disconnecting left" << std::endl;
+//#endif
+      assert(data.connected0);
+      input0->disable_output(agent, this);
+      data.connected0 = false;
+    }
+    assert(data.connected0 || data.connected1);
+#endif
   }
 
   void Rete_Join::pass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
@@ -273,12 +308,18 @@ namespace Rete {
 
     out0->insert_output_enabled(join);
     if(out0 != out1)
+#ifdef RETE_LR_UNLINKING
+      out1->insert_output_disabled(join);
+#else
       out1->insert_output_enabled(join);
     join->data.connected1 = true;
+#endif
 
     out0->pass_tokens(agent, join.get());
+#ifndef RETE_LR_UNLINKING
     if(out0 != out1)
       out1->pass_tokens(agent, join.get());
+#endif
   }
 
 }
