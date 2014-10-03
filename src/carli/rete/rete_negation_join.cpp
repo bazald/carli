@@ -36,10 +36,10 @@ namespace Rete {
     assert(from == input0 || from == input1);
 
     if(from == input0 && find_key(input0_tokens, wme_token) == input0_tokens.end()) {
-      if(!data.connected1) {
+//      if(!data.connected1) {
 //        input1->enable_output(agent, this);
-        data.connected1 = true;
-      }
+//        data.connected1 = true;
+//      }
 
 //      assert(find_key(input0_tokens, wme_token) == input0_tokens.end());
       input0_tokens.emplace_back(wme_token, 0u);
@@ -53,10 +53,10 @@ namespace Rete {
       }
     }
     if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
-      if(!data.connected0) {
+//      if(!data.connected0) {
 //        input0->enable_output(agent, this);
-        data.connected0 = true;
-      }
+//        data.connected0 = true;
+//      }
 
 //      assert(find(input1_tokens, wme_token) == input1_tokens.end());
       input1_tokens.push_back(wme_token);
@@ -261,10 +261,11 @@ namespace Rete {
     out0->insert_output_enabled(join);
     if(out0 != out1)
       out1->insert_output_enabled(join);
-    else
-      join->data.connected1 = true;
+    join->data.connected1 = true;
 
     out0->pass_tokens(agent, join.get());
+    if(out0 != out1)
+      out1->pass_tokens(agent, join.get());
   }
 
 }

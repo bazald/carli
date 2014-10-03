@@ -1303,8 +1303,10 @@ namespace Carli {
     if(action)
       std::cerr << " } = ";
 
-    dump_rules(*this);
-    assert(touched || value_list.empty());
+    if(!(touched || value_list.empty())) {
+      dump_rules(*this);
+      assert(touched || value_list.empty());
+    }
 
     if(action) {
       std::cerr << sum << std::endl;

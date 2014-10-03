@@ -191,8 +191,8 @@ namespace Carli {
       }
       else {
         /// Case 3: New conditions must be joined, new variables are assumed
-        const auto join = dynamic_cast<Rete::Rete_Join *>(ancestor_right.get());
-        assert(join);
+//        const auto join = dynamic_cast<Rete::Rete_Join *>(ancestor_right.get());
+//        assert(join);
 //          new_test = agent.make_join(q_value->feature->bindings, ancestor_left, join->parent_right());
 
         new_test = agent.make_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());

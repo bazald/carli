@@ -128,12 +128,13 @@ namespace Rete {
   }
 
   bool Rete_Join::disabled_input(const Rete_Node_Ptr &input) {
-    if(input.get() == input0)
-      return !data.connected0;
-    else {
-      assert(input.get() == input1);
-      return !data.connected1;
-    }
+//    if(input.get() == input0)
+//      return !data.connected0;
+//    else {
+//      assert(input.get() == input1);
+//      return !data.connected1;
+//    }
+    return false;
   }
 
   void Rete_Join::print_details(std::ostream &os) const {
@@ -230,24 +231,24 @@ namespace Rete {
   }
 
   void Rete_Join::disconnect(Rete_Agent &agent, const Rete_Node * const &from) {
-    assert(input0 != input1);
-    if(from == input0) {
-//#ifdef DEBUG_OUTPUT
-//      std::cerr << this << " Disconnecting right" << std::endl;
-//#endif
-      assert(data.connected1);
-      input1->disable_output(agent, this);
-      data.connected1 = false;
-    }
-    else {
-//#ifdef DEBUG_OUTPUT
-//      std::cerr << this << " Disconnecting left" << std::endl;
-//#endif
-      assert(data.connected0);
-      input0->disable_output(agent, this);
-      data.connected0 = false;
-    }
-    assert(data.connected0 || data.connected1);
+//    assert(input0 != input1);
+//    if(from == input0) {
+////#ifdef DEBUG_OUTPUT
+////      std::cerr << this << " Disconnecting right" << std::endl;
+////#endif
+//      assert(data.connected1);
+//      input1->disable_output(agent, this);
+//      data.connected1 = false;
+//    }
+//    else {
+////#ifdef DEBUG_OUTPUT
+////      std::cerr << this << " Disconnecting left" << std::endl;
+////#endif
+//      assert(data.connected0);
+//      input0->disable_output(agent, this);
+//      data.connected0 = false;
+//    }
+//    assert(data.connected0 || data.connected1);
   }
 
   void Rete_Join::pass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
@@ -272,11 +273,12 @@ namespace Rete {
 
     out0->insert_output_enabled(join);
     if(out0 != out1)
-      out1->insert_output_disabled(join);
-    else
-      join->data.connected1 = true;
+      out1->insert_output_enabled(join);
+    join->data.connected1 = true;
 
     out0->pass_tokens(agent, join.get());
+    if(out0 != out1)
+      out1->pass_tokens(agent, join.get());
   }
 
 }
