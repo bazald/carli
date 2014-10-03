@@ -5,7 +5,7 @@
 namespace Carli {
 
 #ifdef NDEBUG
-  inline dump_rules(const Agent &) {}
+  inline void dump_rules(const Agent &) {}
 #else
   static void dump_rules(const Agent &agent) {
     const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();

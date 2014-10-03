@@ -37,7 +37,7 @@ namespace Rete {
 
     if(from == input0 && find_key(input0_tokens, wme_token) == input0_tokens.end()) {
       if(!data.connected1) {
-        input1->enable_output(agent, this);
+//        input1->enable_output(agent, this);
         data.connected1 = true;
       }
 
@@ -54,7 +54,7 @@ namespace Rete {
     }
     if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
       if(!data.connected0) {
-        input0->enable_output(agent, this);
+//        input0->enable_output(agent, this);
         data.connected0 = true;
       }
 
@@ -109,12 +109,13 @@ namespace Rete {
   }
 
   bool Rete_Negation_Join::disabled_input(const Rete_Node_Ptr &input) {
-    if(input.get() == input0)
-      return !data.connected0;
-    else {
-      assert(input.get() == input1);
-      return !data.connected1;
-    }
+//    if(input.get() == input0)
+//      return !data.connected0;
+//    else {
+//      assert(input.get() == input1);
+//      return !data.connected1;
+//    }
+    return false;
   }
 
   void Rete_Negation_Join::print_details(std::ostream &os) const {
@@ -218,19 +219,19 @@ namespace Rete {
   }
 
   void Rete_Negation_Join::disconnect(Rete_Agent &agent, const Rete_Node * const &from) {
-    if(input0 != input1) {
-      if(from == input0) {
-        assert(data.connected1);
-        input1->disable_output(agent, this);
-        data.connected1 = false;
-      }
-      else {
-        assert(data.connected0);
-        input0->disable_output(agent, this);
-        data.connected0 = false;
-      }
-    }
-    assert(data.connected0 || data.connected1);
+//    if(input0 != input1) {
+//      if(from == input0) {
+//        assert(data.connected1);
+//        input1->disable_output(agent, this);
+//        data.connected1 = false;
+//      }
+//      else {
+//        assert(data.connected0);
+//        input0->disable_output(agent, this);
+//        data.connected0 = false;
+//      }
+//    }
+//    assert(data.connected0 || data.connected1);
   }
 
   void Rete_Negation_Join::pass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
@@ -259,7 +260,7 @@ namespace Rete {
 
     out0->insert_output_enabled(join);
     if(out0 != out1)
-      out1->insert_output_disabled(join);
+      out1->insert_output_enabled(join);
     else
       join->data.connected1 = true;
 
