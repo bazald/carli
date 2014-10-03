@@ -191,11 +191,14 @@ namespace Carli {
       }
       else {
         /// Case 3: New conditions must be joined, new variables are assumed
-//        const auto join = dynamic_cast<Rete::Rete_Join *>(ancestor_right.get());
-//        assert(join);
-//          new_test = agent.make_join(q_value->feature->bindings, ancestor_left, join->parent_right());
-
-        new_test = agent.make_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
+        if(dynamic_cast<Rete::Rete_Join *>(ancestor_right.get()))
+          new_test = agent.make_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
+        else if(const auto existential_join = dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get()))
+          new_test = agent.make_existential_join(*ancestor_right->get_bindings(), existential_join->is_matching_tokens(), ancestor_left, ancestor_right->parent_right());
+        else if(dynamic_cast<Rete::Rete_Negation_Join *>(ancestor_right.get()))
+          new_test = agent.make_negation_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
+        else
+          abort();
 
         const int64_t leaf_token_size = ancestor_left->get_token_size();
         const int64_t old_token_size = ra_lock->parent_left()->get_token_size();
@@ -233,13 +236,20 @@ namespace Carli {
 //          offset += ra_lock->parent_left()->parent_right()->get_token_size();
 //        }
 
-        assert(new_feature->axis.first > -1);
+        assert(new_feature->axis.first > -2);
         assert(new_feature->axis.first < old_token_size);
-        const int64_t index_offset = new_token_size > old_token_size ? new_token_size - leaf_token_size : new_token_size - old_token_size;
-        new_feature->axis.first = new_feature->axis.first + index_offset;
-        assert(new_feature->axis.first > -1);
+        if(new_feature->axis.first != -1) {
+          const int64_t index_offset = new_token_size > old_token_size ? new_token_size - leaf_token_size : new_token_size - old_token_size;
+          new_feature->axis.first = new_feature->axis.first + index_offset;
+          assert(new_feature->axis.first > -1);
+#ifndef NDEBUG
+          if(new_variables)
+            assert(std::find_if(new_variables->begin(), new_variables->end(), [new_feature](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == new_feature->axis;}) != new_variables->end());
+          else
+            assert(std::find_if(old_variables->begin(), old_variables->end(), [new_feature](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == new_feature->axis;}) != old_variables->end());
+#endif
+        }
         assert(new_feature->axis.first < new_token_size);
-        assert(std::find_if(new_variables->begin(), new_variables->end(), [new_feature](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == new_feature->axis;}) != new_variables->end());
       }
     }
 

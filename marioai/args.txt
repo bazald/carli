@@ -16,5 +16,3 @@ on-policy
 policy
 --rules-out
 ../../rules-out.txt
---output-dot
-true

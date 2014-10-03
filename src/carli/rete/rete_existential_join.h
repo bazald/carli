@@ -29,6 +29,7 @@ namespace Rete {
     bool operator==(const Rete_Node &rhs) const override;
 
     bool disabled_input(const Rete_Node_Ptr &input) override;
+    bool is_matching_tokens() const {return data.match_tokens;}
 
     void print_details(std::ostream &os) const override; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
