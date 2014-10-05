@@ -28,8 +28,6 @@ namespace Rete {
 
     bool operator==(const Rete_Node &rhs) const override;
 
-    bool disabled_input(const Rete_Node_Ptr &input) override;
-
     void print_details(std::ostream &os) const override; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
     void print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices) const;
@@ -48,8 +46,6 @@ namespace Rete {
     void join_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs);
     void unjoin_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs);
 
-    void disconnect(Rete_Agent &agent, const Rete_Node * const &from);
-
     void pass_tokens(Rete_Agent &agent, Rete_Node * const &output) override;
     void unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) override;
 
@@ -58,13 +54,6 @@ namespace Rete {
     Rete_Node * input1 = nullptr;
     std::list<std::pair<WME_Token_Ptr_C, size_t>, Zeni::Pool_Allocator<std::pair<WME_Token_Ptr_C, size_t>>> input0_tokens;
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input1_tokens;
-
-    struct Connected {
-      Connected() : connected0(true), connected1(false) {}
-
-      bool connected0 : 1;
-      bool connected1 : 1;
-    } data;
   };
 
   RETE_LINKAGE void bind_to_negation_join(Rete_Agent &agent, const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);

@@ -3,8 +3,6 @@
 #include "rete_existential.h"
 #include "rete_negation.h"
 
-//#define RETE_LR_UNLINKING
-
 namespace Rete {
 
   Rete_Negation_Join::Rete_Negation_Join(WME_Bindings bindings_) : bindings(bindings_) {}
@@ -38,13 +36,6 @@ namespace Rete {
     assert(from == input0 || from == input1);
 
     if(from == input0 && find_key(input0_tokens, wme_token) == input0_tokens.end()) {
-#ifdef RETE_LR_UNLINKING
-      if(!data.connected1) {
-        input1->enable_output(agent, this);
-        data.connected1 = true;
-      }
-#endif
-
 //      assert(find_key(input0_tokens, wme_token) == input0_tokens.end());
       input0_tokens.emplace_back(wme_token, 0u);
 
@@ -57,13 +48,6 @@ namespace Rete {
       }
     }
     if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
-#ifdef RETE_LR_UNLINKING
-      if(!data.connected0) {
-        input0->enable_output(agent, this);
-        data.connected0 = true;
-      }
-#endif
-
 //      assert(find(input1_tokens, wme_token) == input1_tokens.end());
       input1_tokens.push_back(wme_token);
 
@@ -112,23 +96,6 @@ namespace Rete {
     if(auto join = dynamic_cast<const Rete_Negation_Join *>(&rhs))
       return bindings == join->bindings && input0 == join->input0 && input1 == join->input1;
     return false;
-  }
-
-  bool Rete_Negation_Join::disabled_input(const Rete_Node_Ptr &
-#ifdef RETE_LR_UNLINKING
-                                                               input
-#endif
-                                                                    ) {
-#ifdef RETE_LR_UNLINKING
-    if(input.get() == input0)
-      return !data.connected0;
-    else {
-      assert(input.get() == input1);
-      return !data.connected1;
-    }
-#else
-    return false;
-#endif
   }
 
   void Rete_Negation_Join::print_details(std::ostream &os) const {
@@ -231,32 +198,6 @@ namespace Rete {
     }
   }
 
-  void Rete_Negation_Join::disconnect(Rete_Agent &
-#ifdef RETE_LR_UNLINKING
-                                                  agent
-#endif
-                                                       , const Rete_Node * const &
-#ifdef RETE_LR_UNLINKING
-                                                                                  from
-#endif
-                                                                                      ) {
-#ifdef RETE_LR_UNLINKING
-    if(input0 != input1) {
-      if(from == input0) {
-        assert(data.connected1);
-        input1->disable_output(agent, this);
-        data.connected1 = false;
-      }
-      else {
-        assert(data.connected0);
-        input0->disable_output(agent, this);
-        data.connected0 = false;
-      }
-    }
-    assert(data.connected0 || data.connected1);
-#endif
-  }
-
   void Rete_Negation_Join::pass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
     for(auto &wme_token : input0_tokens) {
       if(!wme_token.second)
@@ -282,19 +223,11 @@ namespace Rete {
     join->token_size = out0->get_token_size();
 
     out0->insert_output_enabled(join);
-    if(out0 != out1)
-#ifdef RETE_LR_UNLINKING
-      out1->insert_output_disabled(join);
-#else
-      out1->insert_output_enabled(join);
-    join->data.connected1 = true;
-#endif
-
     out0->pass_tokens(agent, join.get());
-#ifndef RETE_LR_UNLINKING
-    if(out0 != out1)
+    if(out0 != out1) {
+      out1->insert_output_enabled(join);
       out1->pass_tokens(agent, join.get());
-#endif
+    }
   }
 
 }
