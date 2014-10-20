@@ -77,12 +77,15 @@ namespace Carli {
     const std::shared_ptr<Environment> & get_env() {return m_environment;}
     Metastate get_metastate() const {return m_metastate;}
     int64_t get_episode_number() const {return m_episode_number;}
+    int64_t get_total_step_count() const {return m_total_step_count;}
     int64_t get_step_count() const {return m_step_count;}
     reward_type get_total_reward() const {return m_total_reward;}
   //  Mean get_mean_catde() const {return m_mean_catde;}
   //#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   //  Mean get_mean_matde() const {return m_mean_matde;}
   //#endif
+
+    void set_total_step_count(const int64_t &total_step_count_) {m_total_step_count = total_step_count_;}
 
     void reset_statistics();
 
@@ -195,6 +198,7 @@ namespace Carli {
 
     int64_t m_episode_number = 1;
     int64_t m_step_count = 0;
+    int64_t m_total_step_count = 0;
     reward_type m_total_reward = 0.0;
 
     const bool m_null_q_values = get_Option_Ranged<bool>(Options::get_global(), "null-q-values"); ///< insert nullptr instead of new Q_Values until reaching the leaf

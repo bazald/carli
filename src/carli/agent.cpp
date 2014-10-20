@@ -11,6 +11,7 @@ namespace Carli {
     const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();
     if(!rules_out_file.empty()) {
       std::ofstream rules_out((rules_out_file + ".bak").c_str());
+      rules_out << "set-total-step-count " << agent.get_total_step_count() << std::endl << std::endl;
       agent.rete_print_rules(rules_out);
     }
   }
@@ -431,6 +432,7 @@ namespace Carli {
     const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();
     if(!rules_out_file.empty()) {
       std::ofstream rules_out(rules_out_file.c_str());
+      rules_out << "set-total-step-count " << m_total_step_count << std::endl << std::endl;
       rete_print_rules(rules_out);
     }
 
@@ -524,6 +526,7 @@ namespace Carli {
 
     m_total_reward += reward;
     ++m_step_count;
+    ++m_total_step_count;
 
     return reward;
   }

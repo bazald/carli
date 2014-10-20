@@ -17,7 +17,10 @@ namespace Carli {
   }
 
   void Node::print_flags(std::ostream &os) const {
-    os << ":feature " << q_value->depth << ' ';
+    os << std::endl << "  :creation-time " << q_value->creation_time;
+
+
+    os << std::endl << "  :feature " << q_value->depth << ' ';
 
     if(dynamic_cast<const Node_Fringe *>(this))
       os << "fringe";
@@ -72,7 +75,7 @@ namespace Carli {
     tracked_ptr<Q_Value> new_q_value;
 
     if(q_value->type == Q_Value::Type::FRINGE)
-      new_q_value = new Q_Value(0.0, Q_Value::Type::SPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr);
+      new_q_value = new Q_Value(0.0, Q_Value::Type::SPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr, agent.get_total_step_count());
     else {
       delete_q_value = false;
       q_value->type = Q_Value::Type::SPLIT;
@@ -93,7 +96,7 @@ namespace Carli {
     tracked_ptr<Q_Value> new_q_value;
 
     if(q_value->type == Q_Value::Type::FRINGE)
-      new_q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr);
+      new_q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr, agent.get_total_step_count());
     else {
       delete_q_value = false;
       q_value->type = Q_Value::Type::UNSPLIT;
@@ -290,7 +293,7 @@ namespace Carli {
   }
 
   Node_Unsplit::Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
-    : Node(agent_, parent_action_, rete_action_, new Q_Value(0.0, Q_Value::Type::UNSPLIT, depth_, feature_))
+    : Node(agent_, parent_action_, rete_action_, new Q_Value(0.0, Q_Value::Type::UNSPLIT, depth_, feature_, agent_.get_total_step_count()))
   {
     ++agent.q_value_count;
   }
@@ -313,6 +316,11 @@ namespace Carli {
   void Node_Unsplit::decision(Agent &agent) {
     if(!rete_action.lock()->is_excised())
       agent.specialize(*rete_action.lock());
+  }
+
+  Node_Fringe::Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
+   : Node(agent_, parent_action_, rete_action_, new Q_Value(0.0, Q_Value::Type::FRINGE, depth_, feature_, agent_.get_total_step_count()))
+  {
   }
 
   Rete::Rete_Node_Ptr Node_Fringe::cluster_root_ancestor() const {

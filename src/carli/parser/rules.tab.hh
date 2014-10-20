@@ -65,18 +65,20 @@ typedef void *yyscan_t;
      COMMAND_EXIT = 262,
      COMMAND_INSERT_WME = 263,
      COMMAND_REMOVE_WME = 264,
-     COMMAND_SOURCE = 265,
-     COMMAND_SP = 266,
-     EXISTENTIAL_MATCH = 267,
-     FLAG_FEATURE = 268,
-     FLOAT = 269,
-     INT = 270,
-     NODE_TYPE = 271,
-     STRING = 272,
-     STRING_PART_C = 273,
-     STRING_PART_S = 274,
-     VARIABLE = 275,
-     PREDICATE = 276
+     COMMAND_SET_TOTAL_STEP_COUNT = 265,
+     COMMAND_SOURCE = 266,
+     COMMAND_SP = 267,
+     EXISTENTIAL_MATCH = 268,
+     FLAG_CREATION_TIME = 269,
+     FLAG_FEATURE = 270,
+     FLOAT = 271,
+     INT = 272,
+     NODE_TYPE = 273,
+     STRING = 274,
+     STRING_PART_C = 275,
+     STRING_PART_S = 276,
+     VARIABLE = 277,
+     PREDICATE = 278
    };
 #endif
 
@@ -89,19 +91,19 @@ typedef union YYSTYPE
 
   char cval;
   const char *csval;
-  std::tuple<int64_t, std::string, std::string, Carli::Feature *> *flag_ptr;
+  std::tuple<std::shared_ptr<int64_t>, std::shared_ptr<std::tuple<int64_t, std::string, std::string, Carli::Feature *>>> *flag_ptr;
   double fval;
   int64_t ival;
   std::list<std::string> *slist;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, std::string, Carli::Feature *>, double> *rule_ptr;
+  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<std::shared_ptr<int64_t>, std::shared_ptr<std::tuple<int64_t, std::string, std::string, Carli::Feature *>>>, double> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 
 
 /* Line 2053 of yacc.c  */
-#line 105 "rules.tab.hh"
+#line 107 "rules.tab.hh"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

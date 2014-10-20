@@ -124,10 +124,8 @@ namespace Rete {
 #endif
 
     os << "sp {" << name;
-    if(data) {
-      os << std::endl << "  ";
+    if(data)
       data->print_flags(os);
-    }
     os << std::endl << "  ";
 
     parent_left()->print_rule(os, variables);

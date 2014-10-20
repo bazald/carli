@@ -32,12 +32,14 @@ using namespace std;
 =                                                     { yylval->csval = "="; return ASSIGNMENT; }
 excise                                                { yylval->csval = "excise"; return COMMAND_EXCISE; }
 excise-all                                            { yylval->csval = "excise-all"; return COMMAND_EXCISE_ALL; }
-exit                                                  { yylval->csval = "exit"; return COMMAND_EXIT; }
-quit                                                  { yylval->csval = "quit"; return COMMAND_EXIT; }
 insert-wme                                            { yylval->csval = "insert-wme"; return COMMAND_INSERT_WME; }
+exit                                                  { yylval->csval = "exit"; return COMMAND_EXIT; }
 remove-wme                                            { yylval->csval = "remove-wme"; return COMMAND_REMOVE_WME; }
+quit                                                  { yylval->csval = "quit"; return COMMAND_EXIT; }
+set-total-step-count                                  { yylval->csval = "set-total-step-count"; return COMMAND_SET_TOTAL_STEP_COUNT; }
 source                                                { yylval->csval = "source"; return COMMAND_SOURCE; }
 sp                                                    { yylval->csval = "sp"; return COMMAND_SP; }
+:creation-time                                        { yylval->csval = "creation-time"; return FLAG_CREATION_TIME; }
 :feature                                              { yylval->csval = "feature"; return FLAG_FEATURE; }
 split                                                 { yylval->sval = new string(yytext); return NODE_TYPE; }
 unsplit                                               { yylval->sval = new string(yytext); return NODE_TYPE; }

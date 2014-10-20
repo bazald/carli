@@ -119,13 +119,13 @@ static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<array<stri
 %union {
   char cval;
   const char *csval;
-  std::tuple<int64_t, std::string, std::string, Carli::Feature *> *flag_ptr;
+  std::tuple<std::shared_ptr<int64_t>, std::shared_ptr<std::tuple<int64_t, std::string, std::string, Carli::Feature *>>> *flag_ptr;
   double fval;
   int64_t ival;
   std::list<std::string> *slist;
   std::string *sval;
   std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<int64_t, std::string, std::string, Carli::Feature *>, double> *rule_ptr;
+  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<std::shared_ptr<int64_t>, std::shared_ptr<std::tuple<int64_t, std::string, std::string, Carli::Feature *>>>, double> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 }
@@ -137,9 +137,11 @@ static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<array<stri
 %token <csval> COMMAND_EXIT
 %token <csval> COMMAND_INSERT_WME
 %token <csval> COMMAND_REMOVE_WME
+%token <csval> COMMAND_SET_TOTAL_STEP_COUNT
 %token <csval> COMMAND_SOURCE
 %token <csval> COMMAND_SP
 %token <csval> EXISTENTIAL_MATCH
+%token <csval> FLAG_CREATION_TIME
 %token <csval> FLAG_FEATURE
 %token <fval> FLOAT
 %token <ival> INT
@@ -150,7 +152,7 @@ static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<array<stri
 %token <sval> VARIABLE
 %token <predicate> PREDICATE
 
-%type <flag_ptr> flag
+%type <flag_ptr> flags
 %type <fval> number
 %type <rete_node_ptr> final_conditions conditions condition_group condition_type condition
 %type <rule_ptr> rule
@@ -177,6 +179,7 @@ command:
                                                           delete $3;
                                                           delete $5;
                                                           delete $6; }
+  | COMMAND_SET_TOTAL_STEP_COUNT INT { agent.set_total_step_count($2); }
   | COMMAND_SOURCE string_or_literal { const int rv = rete_parse_file(agent, *$2, source_path);
                                        if(rv) {
                                          ostringstream oss;
@@ -189,14 +192,15 @@ command:
                                        if(g_rete_exit) {
                                          YYACCEPT;
                                        } }
-  | COMMAND_SP rule { const auto &parent = get<0>(*$2).first;
-                      const auto &variable_names = get<0>(*$2).second;
-                      const string &name = get<1>(*$2);
-                      const int64_t &q_value_depth = get<0>(get<2>(*$2));
-                      const string &node_type = get<1>(get<2>(*$2));
-                      const string &parent_node_name = get<2>(get<2>(*$2));
-                      const auto &feature = get<3>(get<2>(*$2));
-                      const auto &q_value_value = get<3>(*$2);
+  | COMMAND_SP rule { const auto &parent =                            get<0>(*$2).first;
+                      const auto &variable_names =                    get<0>(*$2).second;
+                      const string &name =                            get<1>(*$2);
+                      const int64_t &timestamp =              *get<0>(get<2>(*$2));
+                      const int64_t &q_value_depth =   get<0>(*get<1>(get<2>(*$2)));
+                      const string &node_type =        get<1>(*get<1>(get<2>(*$2)));
+                      const string &parent_node_name = get<2>(*get<1>(get<2>(*$2)));
+                      const auto &feature =            get<3>(*get<1>(get<2>(*$2)));
+                      const auto &q_value_value =                     get<3>(*$2);
                       const auto variable_indices = variables_to_indices(variable_names);
                       const auto parent_action = agent.get_rule(parent_node_name);
 
@@ -324,20 +328,20 @@ command:
 
                         /// Make the new action
                         if(node_type == "split") {
-                          const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::SPLIT, q_value_depth, feature);
+                          const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::SPLIT, q_value_depth, feature, timestamp);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
                           auto new_action_data = std::make_shared<Carli::Node_Split>(agent, parent_action, new_action, new_q_value);
                           new_action->data = new_action_data;
                         }
                         else if(node_type == "unsplit") {
-                          const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::UNSPLIT, q_value_depth, feature);
+                          const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::UNSPLIT, q_value_depth, feature, timestamp);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
                           auto new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, parent_action, new_action, new_q_value);
                           new_action->data = new_action_data;
                         }
                         else {
                           assert(node_type == "fringe");
-                          const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::FRINGE, q_value_depth, feature);
+                          const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::FRINGE, q_value_depth, feature, timestamp);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
                           auto new_action_data = std::make_shared<Carli::Node_Fringe>(agent, parent_action, new_action, new_q_value);
                           new_action->data = new_action_data;
@@ -361,32 +365,59 @@ command:
                       delete $2; }
   ;
 rule:
-  '{' STRING final_conditions '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*$3, *$2, tuple<int64_t, string, string, Carli::Feature *>(), 0.0);
-                                    delete $2;
-                                    delete $3; }
-  | '{' STRING flag final_conditions '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*$4, *$2, *$3, 0.0);
-                                           delete $2;
-                                           delete $3;
-                                           delete $4; }
-  | '{' STRING final_conditions ARROW_RIGHT ASSIGNMENT number '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*$3, *$2, tuple<int64_t, string, string, Carli::Feature *>(), $6);
-                                                                    delete $2;
-                                                                    delete $3; }
-  | '{' STRING flag final_conditions ARROW_RIGHT ASSIGNMENT number '}' { $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<int64_t, string, string, Carli::Feature *>, double>(*$4, *$2, *$3, $7);
-                                                                         delete $2;
-                                                                         delete $3;
-                                                                         delete $4; }
+  '{' STRING flags final_conditions '}' { if(!get<0>(*$3))
+                                            get<0>(*$3) = make_shared<int64_t>(agent.get_total_step_count());
+                                          if(!get<1>(*$3))
+                                            get<1>(*$3) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>();
+                                          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, double>(*$4, *$2, *$3, 0.0);
+                                          delete $2;
+                                          delete $3;
+                                          delete $4; }
+  | '{' STRING flags final_conditions ARROW_RIGHT ASSIGNMENT number '}' { if(!get<0>(*$3))
+                                                                            get<0>(*$3) = make_shared<int64_t>(agent.get_total_step_count());
+                                                                          if(!get<1>(*$3))
+                                                                            get<1>(*$3) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>();
+                                                                          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, double>(*$4, *$2, *$3, $7);
+                                                                          delete $2;
+                                                                          delete $3;
+                                                                          delete $4; }
   ;
-flag:
+flags:
   /* :feature q_value->depth [feature->depth feature->lower_bound feature->upper_bound] */
-  FLAG_FEATURE INT NODE_TYPE STRING INT FLOAT FLOAT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, false));
-                                                      delete $3;
-                                                      delete $4; }
-  | FLAG_FEATURE INT NODE_TYPE STRING INT INT INT { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, new Carli::Feature_Ranged<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $6, $7, $5, false /*FIXUP later*/, true));
-                                                    delete $3;
-                                                    delete $4; }
-  | FLAG_FEATURE INT NODE_TYPE STRING { $$ = new tuple<int64_t, string, string, Carli::Feature *>($2, *$3, *$4, $2 > 1 ? new Carli::Feature_Enumerated<Carli::Feature>(std::vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, 0 /*FIXUP later*/) : nullptr);
-                                        delete $3;
-                                        delete $4; }
+  { $$ = new tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>; }
+  | flags FLAG_CREATION_TIME INT { if(get<0>(*$1)) {
+                                     reteerror(&yylloc, yyscanner, agent, filename, source_path, "Flag :creation-time set more than once.");
+                                     YYABORT;
+                                   }
+                                   $$ = $1;
+                                   get<0>(*$$) = make_shared<int64_t>($3); }
+  | flags FLAG_FEATURE INT NODE_TYPE STRING INT FLOAT FLOAT { if(get<1>(*$1)) {
+                                                                reteerror(&yylloc, yyscanner, agent, filename, source_path, "Flag :feature set more than once.");
+                                                                YYABORT;
+                                                              }
+                                                              $$ = $1;
+                                                              get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $7, $8, $6, false /*FIXUP later*/, false));
+                                                              delete $4;
+                                                              delete $5; }
+  | flags FLAG_FEATURE INT NODE_TYPE STRING INT INT INT { if(get<1>(*$1)) {
+                                                            reteerror(&yylloc, yyscanner, agent, filename, source_path, "Flag :feature set more than once.");
+                                                            YYABORT;
+                                                          }
+                                                          $$ = $1;
+                                                          get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $7, $8, $6, false /*FIXUP later*/, true));
+                                                          delete $4;
+                                                          delete $5; }
+  | flags FLAG_FEATURE INT NODE_TYPE STRING { if(get<1>(*$1)) {
+                                                reteerror(&yylloc, yyscanner, agent, filename, source_path, "Flag :feature set more than once.");
+                                                YYABORT;
+                                              }
+                                              $$ = $1;
+                                              if($3 > 1)
+                                                get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Enumerated<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, 0 /*FIXUP later*/));
+                                              else
+                                                get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, nullptr);
+                                              delete $4;
+                                              delete $5; }
   ;
 final_conditions:
   conditions { $$ = $1; }

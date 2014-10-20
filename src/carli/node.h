@@ -116,10 +116,7 @@ namespace Carli {
     Node_Fringe & operator=(const Node_Fringe &) = delete;
 
   public:
-    Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
-     : Node(agent_, parent_action_, rete_action_, new Q_Value(0.0, Q_Value::Type::FRINGE, depth_, feature_))
-    {
-    }
+    Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_);
 
     Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_)
       : Node(agent_, parent_action_, rete_action_, q_value_)

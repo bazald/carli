@@ -24,8 +24,9 @@ namespace Carli {
     typedef List::iterator iterator;
     enum class Type : char {SPLIT, UNSPLIT, FRINGE};
 
-    Q_Value(const double &q_value_, const Type &type_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
-     : depth(depth_),
+    Q_Value(const double &q_value_, const Type &type_, const int64_t &depth_, const tracked_ptr<Feature> &feature_, const int64_t &creation_time_)
+     : creation_time(creation_time_),
+     depth(depth_),
      type(type_),
      value(q_value_),
      eligible(this),
@@ -34,7 +35,7 @@ namespace Carli {
     }
 
     Q_Value * clone() const {
-      Q_Value * const lhs = new Q_Value(value, type, depth, feature->clone());
+      Q_Value * const lhs = new Q_Value(value, type, depth, feature->clone(), creation_time);
 
       lhs->last_episode_fired = last_episode_fired;
       lhs->last_step_fired = last_step_fired;
@@ -45,7 +46,7 @@ namespace Carli {
 
       lhs->catde = catde;
       lhs->matde = matde;
-      
+
 #ifdef WHITESON_ADAPTIVE_TILE
       lhs->minbe = minbe;
 #endif
@@ -61,6 +62,8 @@ namespace Carli {
       value = q_value_;
       return *this;
     }
+
+    int64_t creation_time = 0;
 
     int64_t last_episode_fired = std::numeric_limits<int64_t>::max();
     int64_t last_step_fired = std::numeric_limits<int64_t>::max();
