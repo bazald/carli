@@ -251,7 +251,7 @@ namespace Carli {
       return refined_features;
     }
 
-    void print(std::ostream &os) const {
+    void print(std::ostream &os) const override {
       this->print_axis(os);
       os << '=';
       if(integer_locked && bound_lower + 1 == bound_upper)

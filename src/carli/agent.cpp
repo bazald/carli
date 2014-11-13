@@ -29,6 +29,48 @@ namespace Carli {
   //  }
   //};
 
+  struct Feature_Dependency_Collector {
+    std::map<tracked_ptr<Feature>,
+      std::map<tracked_ptr<Feature>, double, Rete::compare_deref_lt>,
+      Rete::compare_deref_lt> dependencies;
+
+    void operator()(Rete::Rete_Node &rete_node) {
+      if(!rete_node.data) {
+        assert(!dynamic_cast<Rete::Rete_Action *>(&rete_node));
+        return;
+      }
+
+      auto &node = debuggable_cast<Carli::Node &>(*rete_node.data);
+      auto &feature = node.q_value->feature;
+      if(!feature || node.q_value->type == Q_Value::Type::FRINGE)
+        return;
+      const auto weight = pow(0.5, node.q_value->depth - 2);
+      auto &depends = dependencies[feature];
+
+      auto ancestor = node.parent_action.lock();
+      while(ancestor) {
+        auto &ancestor_node = debuggable_cast<Carli::Node &>(*ancestor->data);
+        auto &ancestor_feature = ancestor_node.q_value->feature;
+        if(!ancestor_feature)
+          continue;
+
+        dependencies[ancestor_feature];
+        depends[ancestor_feature] += weight;
+
+        ancestor = ancestor_node.parent_action.lock();
+      }
+    }
+
+    void print(std::ostream &os) {
+      for(const auto &depender : dependencies) {
+        os << *depender.first << " precedes:";
+        for(const auto &dependee : dependencies)
+          os << ' ' << *dependee.first << '(' << dependencies[dependee.first][depender.first] << ')';
+        os << std::endl;
+      }
+    }
+  };
+
   struct Fringe_Collector_All {
     std::unordered_set<Rete::Rete_Action_Ptr> excise;
     std::map<tracked_ptr<Feature>,

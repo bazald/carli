@@ -42,7 +42,7 @@ namespace Rete {
 
     bool is_active() const override;
 
-    std::vector<WME> get_filter_wmes() const;
+    std::vector<WME> get_filter_wmes() const override;
 
   private:
     WME m_wme;

@@ -30,13 +30,13 @@ namespace Rete {
 
     void print_details(std::ostream &os) const override; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
-    void print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices) const;
+    void print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices) const override;
 
     void output_name(std::ostream &os, const int64_t &depth) const override;
 
     bool is_active() const override;
 
-    std::vector<WME> get_filter_wmes() const;
+    std::vector<WME> get_filter_wmes() const override;
 
     static Rete_Negation_Join_Ptr find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 

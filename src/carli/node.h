@@ -130,7 +130,7 @@ namespace Carli {
 
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
 
-    void decision(Agent &) {}
+    void decision(Agent &) override {}
   };
 
   inline void __node_size_check() {

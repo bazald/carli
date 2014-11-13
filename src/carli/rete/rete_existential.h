@@ -39,7 +39,7 @@ namespace Rete {
 
     bool is_active() const override;
 
-    std::vector<WME> get_filter_wmes() const;
+    std::vector<WME> get_filter_wmes() const override;
 
     static Rete_Existential_Ptr find_existing(const Rete_Node_Ptr &out);
 

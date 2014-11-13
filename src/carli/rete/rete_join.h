@@ -38,7 +38,7 @@ namespace Rete {
 
     bool is_active() const override;
 
-    std::vector<WME> get_filter_wmes() const;
+    std::vector<WME> get_filter_wmes() const override;
 
     static Rete_Join_Ptr find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
@@ -49,7 +49,7 @@ namespace Rete {
 
     WME_Token_Ptr_C join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs);
 
-    void disconnect(Rete_Agent &agent, const Rete_Node * const &from);
+    void disconnect(Rete_Agent &agent, const Rete_Node * const &from) override;
 
     void pass_tokens(Rete_Agent &agent, Rete_Node * const &output) override;
     void unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) override;
