@@ -51,21 +51,25 @@ namespace Carli {
       while(ancestor) {
         auto &ancestor_node = debuggable_cast<Carli::Node &>(*ancestor->data);
         auto &ancestor_feature = ancestor_node.q_value->feature;
-        if(!ancestor_feature)
-          continue;
 
-        dependencies[ancestor_feature];
-        depends[ancestor_feature] += weight;
+        if(ancestor_feature) {
+          dependencies[ancestor_feature];
+          depends[ancestor_feature] += weight;
+        }
 
         ancestor = ancestor_node.parent_action.lock();
       }
     }
 
     void print(std::ostream &os) {
+      for(const auto &dependee : dependencies)
+        os << ',' << *dependee.first;
+      os << std::endl;
+
       for(const auto &depender : dependencies) {
-        os << *depender.first << " precedes:";
+        os << *depender.first;
         for(const auto &dependee : dependencies)
-          os << ' ' << *dependee.first << '(' << dependencies[dependee.first][depender.first] << ')';
+          os << ',' << dependencies[dependee.first][depender.first];
         os << std::endl;
       }
     }
@@ -476,6 +480,13 @@ namespace Carli {
       std::ofstream rules_out(rules_out_file.c_str());
       rules_out << "set-total-step-count " << m_total_step_count << std::endl << std::endl;
       rete_print_rules(rules_out);
+    }
+
+    const std::string dependencies_out_file = dynamic_cast<const Option_String &>(Options::get_global()["dependencies-out"]).get_value();
+    if(!dependencies_out_file.empty()) {
+      auto dependency_collector = visit_preorder(Feature_Dependency_Collector(), true);
+      std::ofstream dependencies_out(dependencies_out_file);
+      dependency_collector.print(dependencies_out);
     }
 
     excise_all();
