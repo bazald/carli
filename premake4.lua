@@ -118,6 +118,7 @@ solution "carli"
                   "C:\\Program Files\\Java\\jdk1.8.0_05\\include\\win32" }
 
   include "src/blocks_world"
+  include "src/blocks_world_2"
   include "src/carli"
   include "src/console"
   include "src/infinite_mario"
