@@ -91,10 +91,10 @@ namespace Mountain_Car {
       }
     }
     else {
-      std::string rules = dynamic_cast<const Option_String &>(Options::get_global()["rules"]).get_value();
-      if(rules == "default")
-        rules = "rules/mountain-car.carli";
-      if(rete_parse_file(*this, rules))
+      std::string rules_in = dynamic_cast<const Option_String &>(Options::get_global()["rules"]).get_value();
+      if(rules_in == "default")
+		  rules_in = "rules/mountain-car.carli";
+      if(rete_parse_file(*this, rules_in))
         abort();
     }
 

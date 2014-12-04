@@ -100,13 +100,13 @@ namespace Zeni {
       }
       if(dd == dend)
         return;
-      *dd = reinterpret_cast<const unsigned char *>(pattern)[3];
+	  *dd = pattern >> 24;
       if(++dd == dend)
         return;
-      *dd = reinterpret_cast<const unsigned char *>(pattern)[2];
+	  *dd = (pattern >> 16) & 0xFF;
       if(++dd == dend)
         return;
-      *dd = reinterpret_cast<const unsigned char *>(pattern)[1];
+	  *dd = (pattern >> 8) & 0xFF;
     }
 #endif
 

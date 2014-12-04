@@ -51,12 +51,12 @@ namespace Carli {
     os << "  = " << Rete::to_string(q_value->value);
   }
 
-  void Node::action(Agent &agent, const Rete::WME_Token &token) {
+  void Node::action(const Rete::WME_Token &token) {
     agent.m_nodes_activating.push_back(shared_from_this());
     agent.insert_q_value_next(agent.get_action(*variables, token), q_value);
   }
 
-  void Node::retraction(Agent &agent, const Rete::WME_Token &token) {
+  void Node::retraction(const Rete::WME_Token &token) {
     auto na = std::find(agent.m_nodes_active.begin(), agent.m_nodes_active.end(), shared_from_this());
     if(na != agent.m_nodes_active.end())
       agent.m_nodes_active.erase(na);
@@ -68,7 +68,7 @@ namespace Carli {
     agent.purge_q_value_next(agent.get_action(*variables, token), q_value);
   }
 
-  Node_Split_Ptr Node::create_split(Agent &agent, const Rete::Rete_Action_Ptr &parent_action_) {
+  Node_Split_Ptr Node::create_split(const Rete::Rete_Action_Ptr &parent_action_) {
     const auto ra_lock = rete_action.lock();
     const auto node_name = ra_lock->get_name();
     const auto new_name = agent.next_rule_name(node_name.substr(0, node_name.find_last_of('*') + 1) + "s");
@@ -89,7 +89,7 @@ namespace Carli {
     return new_leaf_data;
   }
 
-  Node_Unsplit_Ptr Node::create_unsplit(Agent &agent, const Rete::Rete_Action_Ptr &parent_action_) {
+  Node_Unsplit_Ptr Node::create_unsplit(const Rete::Rete_Action_Ptr &parent_action_) {
     const auto ra_lock = rete_action.lock();
     const auto node_name = ra_lock->get_name();
     const auto new_name = agent.next_rule_name(node_name.substr(0, node_name.find_last_of('*') + 1) + "u");
@@ -110,7 +110,7 @@ namespace Carli {
     return new_leaf_data;
   }
 
-  Node_Fringe_Ptr Node::create_fringe(Agent &agent, Node_Unsplit &leaf, Feature * const &feature_) {
+  Node_Fringe_Ptr Node::create_fringe(Node_Unsplit &leaf, Feature * const &feature_) {
     const auto lra_lock = leaf.rete_action.lock();
     const auto leaf_node_name = lra_lock->get_name();
     const auto new_feature = feature_ ? feature_ : q_value->feature ? q_value->feature->clone() : nullptr;
@@ -287,7 +287,7 @@ namespace Carli {
     return rete_action.lock()->parent_left();
   }
 
-  void Node_Split::decision(Agent &agent) {
+  void Node_Split::decision() {
     if(!rete_action.lock()->is_excised())
       agent.respecialize(*rete_action.lock());
   }
@@ -313,7 +313,7 @@ namespace Carli {
     return rete_action.lock()->parent_left();
   }
 
-  void Node_Unsplit::decision(Agent &agent) {
+  void Node_Unsplit::decision() {
     if(!rete_action.lock()->is_excised())
       agent.specialize(*rete_action.lock());
   }

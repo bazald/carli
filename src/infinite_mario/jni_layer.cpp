@@ -164,13 +164,13 @@ namespace Mario {
     jbooleanArray j_action = env->NewBooleanArray(5);
     assert(j_action);
 
-    jboolean *action = env->GetBooleanArrayElements(j_action, 0);
-    assert(action);
+    jboolean *c_action = env->GetBooleanArrayElements(j_action, 0);
+    assert(c_action);
 
     for(int i = 0; i != BUTTON_END; ++i)
-      action[i] = g_current_state->action[i];
+		c_action[i] = g_current_state->action[i];
 
-    env->ReleaseBooleanArrayElements(j_action, action, 0);
+    env->ReleaseBooleanArrayElements(j_action, c_action, 0);
 
     return j_action;
   }
@@ -279,11 +279,13 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM * /*vm*/, void * /*pvt*/) {
         std::vector<std::string> argvv;
         std::vector<const char *> argv(1, "carli");
 
-        std::string arg;
-        while(std::getline(fin, arg) && !arg.empty()) {
-          ++argc;
-          argvv.push_back(arg);
-        }
+	      {
+		      std::string arg;
+		      while(std::getline(fin, arg) && !arg.empty()) {
+			      ++argc;
+			      argvv.push_back(arg);
+		      }
+	      }
 
         if(argc) {
           ++argc;
@@ -300,7 +302,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM * /*vm*/, void * /*pvt*/) {
             std::ostringstream oss;
             oss << "Unknown trailing arguments:";
             while(options.optind < argc)
-              oss << ' ' << argv[options.optind++];
+              oss << ' ' << argv[static_cast<unsigned int>(options.optind++)];
             oss << std::endl;
 
             throw std::runtime_error(oss.str());

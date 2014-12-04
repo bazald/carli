@@ -114,8 +114,8 @@ solution "carli"
   configuration "linux"
     includedirs { "/usr/lib/jvm/java-7-openjdk-amd64/include" }
   configuration "windows"
-    includedirs { "C:\\Program Files\\Java\\jdk1.8.0_05\\include",
-                  "C:\\Program Files\\Java\\jdk1.8.0_05\\include\\win32" }
+    includedirs { "C:\\Program Files\\Java\\jdk1.8.0_25\\include",
+                  "C:\\Program Files\\Java\\jdk1.8.0_25\\include\\win32" }
 
   include "src/blocks_world"
   include "src/blocks_world_2"

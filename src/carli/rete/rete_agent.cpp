@@ -56,8 +56,8 @@ namespace Rete {
     bind_to_filter(*this, filter);
 
     this->filters.push_back(filter);
-    for(auto &wme : this->working_memory.wmes)
-      filter->insert_wme(*this, wme);
+    for(auto &w : this->working_memory.wmes)
+      filter->insert_wme(*this, w);
     return filter;
   }
 

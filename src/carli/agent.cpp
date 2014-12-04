@@ -194,7 +194,7 @@ namespace Carli {
       rete_print(fout);
     }
 
-    auto new_node = general.create_split(*this, general.parent_action.lock());
+    auto new_node = general.create_split(general.parent_action.lock());
 
     expand_fringe(rete_action, new_node->rete_action.lock(), chosen);
 
@@ -257,18 +257,18 @@ namespace Carli {
 
         /** Step 2.1: Create a new split/unsplit node depending on the existence of a new fringe. */
         if(terminal)
-          leaf->create_split(*this, parent_action);
+          leaf->create_split(parent_action);
         else {
-          const auto node_unsplit = leaf->create_unsplit(*this, parent_action);
+          const auto node_unsplit = leaf->create_unsplit(parent_action);
 
           /** Step 2.2: Create new ranged fringe nodes if the new leaf is refineable. */
           for(auto &refined_feature : refined)
-            node_unsplit->create_fringe(*this, *node_unsplit, refined_feature);
+            node_unsplit->create_fringe(*node_unsplit, refined_feature);
 
           /** Step 2.3 Create new fringe nodes. **/
           for(auto &fringe_axis : general.fringe_values) {
             for(auto &fringe : fringe_axis.second.values)
-              fringe->create_fringe(*this, *node_unsplit, nullptr);
+              fringe->create_fringe(*node_unsplit, nullptr);
           }
         }
       }
@@ -324,7 +324,7 @@ namespace Carli {
 #endif
 
     /// Make new unsplit node
-    const auto unsplit = split->create_unsplit(*this, split->parent_action.lock());
+    const auto unsplit = split->create_unsplit(split->parent_action.lock());
 #ifdef DEBUG_OUTPUT
     std::cerr << "Collapsing " << split << " to " << unsplit << std::endl;
 #endif
@@ -338,7 +338,7 @@ namespace Carli {
       for(const auto &feature_node : feature_axis.second) {
         auto &node = debuggable_cast<Node &>(*feature_node.second->data.get());
 
-        auto new_fringe = node.create_fringe(*this, *unsplit, nullptr);
+        auto new_fringe = node.create_fringe(*unsplit, nullptr);
 
 //        std::cerr << "Collapsing: ";
 //        node.rete_action.lock()->output_name(std::cerr, 3);
@@ -587,9 +587,9 @@ namespace Carli {
   Rete::Rete_Action_Ptr Agent::make_standard_action(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command, const Rete::Variable_Indices_Ptr_C &variables) {
     return make_action_retraction(name, user_command,
       [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Node *>(action.data.get())->action(*this, token);
+        debuggable_cast<Node *>(action.data.get())->action(token);
       }, [this](const Rete::Rete_Action &action, const Rete::WME_Token &token) {
-        debuggable_cast<Node *>(action.data.get())->retraction(*this, token);
+        debuggable_cast<Node *>(action.data.get())->retraction(token);
       }, parent, variables);
   }
 
@@ -830,7 +830,7 @@ namespace Carli {
 #endif
     for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; ) {
       Q_Value &q = **q_ptr;
-      const auto next = q_ptr->next();
+      const auto q_next = q_ptr->next();
 
       const double ldelta = weight_assignment_all && q.type != Q_Value::Type::FRINGE ? delta : target_value - q.value;
       const double edelta = q.eligibility * ldelta;
@@ -892,7 +892,7 @@ namespace Carli {
         q.eligibility = -1.0;
       }
 
-      q_ptr = next;
+      q_ptr = q_next;
     }
 
 #ifdef DEBUG_OUTPUT
@@ -1514,7 +1514,7 @@ namespace Carli {
       m_nodes_active.push_back(node);
       m_nodes_activating.pop_front();
       Rete::Agenda::Locker lock(agenda);
-      node->decision(*this);
+      node->decision();
     }
 
     for(auto it = m_next_q_values.begin(), iend = m_next_q_values.end(); it != iend; ) {

@@ -66,7 +66,7 @@ namespace Rete {
     virtual void print_action(std::ostream &os) const = 0;
   };
 
-  class RETE_LINKAGE Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<char [320]>
+  class RETE_LINKAGE Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<char [384]>
   {
     Rete_Node(const Rete_Node &);
     Rete_Node & operator=(const Rete_Node &);

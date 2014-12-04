@@ -58,13 +58,13 @@ namespace Carli {
     void print_flags(std::ostream &os) const override;
     void print_action(std::ostream &os) const override;
 
-    virtual void action(Agent &agent, const Rete::WME_Token &token);
-    virtual void decision(Agent &agent) = 0;
-    virtual void retraction(Agent &agent, const Rete::WME_Token &token);
+    virtual void action(const Rete::WME_Token &token);
+    virtual void decision() = 0;
+    virtual void retraction(const Rete::WME_Token &token);
 
-    Node_Split_Ptr create_split(Agent &agent, const Rete::Rete_Action_Ptr &parent_action_);
-    Node_Unsplit_Ptr create_unsplit(Agent &agent, const Rete::Rete_Action_Ptr &parent_action_);
-    Node_Fringe_Ptr create_fringe(Agent &agent, Node_Unsplit &leaf, Feature * const &feature_);
+    Node_Split_Ptr create_split(const Rete::Rete_Action_Ptr &parent_action_);
+    Node_Unsplit_Ptr create_unsplit(const Rete::Rete_Action_Ptr &parent_action_);
+    Node_Fringe_Ptr create_fringe(Node_Unsplit &leaf, Feature * const &feature_);
 
     Agent &agent;
     std::weak_ptr<Rete::Rete_Action> parent_action;
@@ -88,7 +88,7 @@ namespace Carli {
 
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
 
-    void decision(Agent &agent) override;
+    void decision() override;
   };
   class CARLI_LINKAGE Node_Unsplit : public Node {
 
@@ -106,7 +106,7 @@ namespace Carli {
 
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
 
-    void decision(Agent &agent) override;
+    void decision() override;
 
     Fringe_Values fringe_values; ///< Not cloned
   };
@@ -130,7 +130,7 @@ namespace Carli {
 
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
 
-    void decision(Agent &) override {}
+    void decision() override {}
   };
 
   inline void __node_size_check() {
