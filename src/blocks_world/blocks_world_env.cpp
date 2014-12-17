@@ -83,8 +83,8 @@ namespace Blocks_World {
   void Environment::print_impl(ostream &os) const {
     os << "Blocks World (Table is Left):" << endl;
     for(const Stack &stack : m_blocks) {
-      for(const block_id &id : stack)
-        os << ' ' << id;
+      for(auto it = stack.rbegin(), iend = stack.rend(); it != iend; ++it)
+        os << ' ' << *it;
       os << endl;
     }
   }

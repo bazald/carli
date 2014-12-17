@@ -1,4 +1,4 @@
-#include "blocks_world.h"
+#include "blocks_world_2.h"
 
 #include "carli/experiment.h"
 
@@ -22,8 +22,8 @@ int main(int argc, char **argv) {
 
     const auto output = dynamic_cast<const Option_Itemized &>(options["output"]).get_value();
 
-    experiment.standard_run([](){return std::make_shared<Blocks_World::Environment>();},
-                            [](const std::shared_ptr<Carli::Environment> &env){return std::make_shared<Blocks_World::Agent>(env);},
+    experiment.standard_run([](){return std::make_shared<Blocks_World_2::Environment>();},
+                            [](const std::shared_ptr<Carli::Environment> &env){return std::make_shared<Blocks_World_2::Agent>(env);},
                             [&output](const std::shared_ptr<Carli::Agent> &){}
                            );
 

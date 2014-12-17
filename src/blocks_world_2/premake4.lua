@@ -4,9 +4,9 @@ project "env_blocks_world_2"
 
   targetdir "../.."
 
-  defines { "BLOCKS_WORLD_INTERNAL" }
+  defines { "BLOCKS_WORLD_2_INTERNAL" }
 
-  files { "*.h", "blocks_world_env.cpp" }
+  files { "*.h", "blocks_world_2_env.cpp" }
 
   links { "carli" }
 
@@ -16,6 +16,6 @@ project "blocks_world_2"
 
   targetdir "../.."
 
-  files { "*.h", "blocks_world.cpp" }
+  files { "*.h", "blocks_world_2.cpp" }
 
   links { "env_blocks_world_2", "carli" }
