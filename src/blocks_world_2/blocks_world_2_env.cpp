@@ -137,12 +137,12 @@ namespace Blocks_World_2 {
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_blocks_attr, m_blocks_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_goal_attr, m_goal_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_table_id, m_name_attr, m_table_name));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_blocks_id, m_stack_attr, m_table_id));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_goal_id, m_stack_attr, m_table_id));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_table_id, m_top_attr, m_table_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_blocks_id, m_stack_attr, m_table_stack_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_goal_id, m_stack_attr, m_table_stack_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_top_attr, m_table_id));
 
     for(const auto &stack : blocks) {
-      std::string stack_str;
+      std::string stack_str = "|";
       for(const auto &block : stack)
         stack_str += char('@' + block);
 
@@ -164,7 +164,7 @@ namespace Blocks_World_2 {
         const auto match = std::mismatch(stack.begin(), stack.end(), goal_stack.begin());
 
         if(match.first == stack.end()) {
-          std::string goal_str;
+          std::string goal_str = "|";
           for(const auto &block : goal_stack)
             goal_str += char('@' + block);
 
