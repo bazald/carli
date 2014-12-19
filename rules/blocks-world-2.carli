@@ -142,7 +142,7 @@ sp {blocks-world*rl-fringe*dest-is-table
   (<blocks> ^stack <dest-stack>)
   (<dest-stack> ^top <dest>)
   (<s> ^goal <goal>)
-  +{(<dest> ^name table)}
+  +{(<dest> ^name 0)}
 -->
   = 0.0
 }
@@ -160,7 +160,7 @@ sp {blocks-world*rl-fringe*dest-is-not-table
   (<blocks> ^stack <dest-stack>)
   (<dest-stack> ^top <dest>)
   (<s> ^goal <goal>)
-  -{(<dest> ^name table)}
+  -{(<dest> ^name 0)}
 -->
   = 0.0
 }
