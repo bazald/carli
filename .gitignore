@@ -60,6 +60,7 @@
 /obj
 /puddle_world
 /tetris
+.~lock.*
 callgrind.out.*
 carli.workspace
 core
