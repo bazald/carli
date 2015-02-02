@@ -164,3 +164,41 @@ sp {blocks-world*rl-fringe*dest-is-not-table
 -->
   = 0.0
 }
+
+#sp {blocks-world*rl-fringe*discrepancy-lower
+#  :feature 2 fringe blocks-world*rl-action*general 1 0 14
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  {(<s> ^discrepancy <discrepancy>)
+#   (<discrepancy> < 14)}
+#-->
+#  = 0.0
+#}
+#
+#sp {blocks-world*rl-fringe*discrepancy-upper
+#  :feature 2 fringe blocks-world*rl-action*general 1 14 27
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  {(<s> ^discrepancy <discrepancy>)
+#   (<discrepancy> >= 14)}
+#-->
+#  = 0.0
+#}

@@ -181,7 +181,10 @@ namespace Carli {
     }
 
     Rete::Symbol_Ptr_C symbol_constant() const {
-      return std::make_shared<Rete::Symbol_Constant_Float>(upper ? bound_lower : bound_upper);
+      if(integer_locked)
+        return std::make_shared<Rete::Symbol_Constant_Int>(int64_t(upper ? bound_lower : bound_upper));
+      else
+        return std::make_shared<Rete::Symbol_Constant_Float>(upper ? bound_lower : bound_upper);
     }
 
     double bound_lower; ///< inclusive

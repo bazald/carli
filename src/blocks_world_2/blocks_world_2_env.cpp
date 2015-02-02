@@ -188,6 +188,19 @@ namespace Blocks_World_2 {
       }
     }
 
+    int64_t discrepancy = 0;
+    for(const auto &goal_stack : goal) {
+      discrepancy += goal_stack.size();
+      for(const auto &stack : blocks) {
+        const auto match = std::mismatch(goal_stack.begin(), goal_stack.end(), stack.begin());
+        if(match.first != goal_stack.begin()) {
+          discrepancy -= match.first - goal_stack.begin();
+          break;
+        }
+      }
+    }
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_discrepancy_attr, Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(discrepancy))));
+
     for(const auto &goal_stack : goal) {
       std::string goal_stack_str = "|";
       for(const auto &block : goal_stack)

@@ -127,6 +127,7 @@ namespace Blocks_World_2 {
     const Rete::Symbol_Constant_String_Ptr_C m_dest_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("dest"));
     const Rete::Symbol_Constant_String_Ptr_C m_name_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("name"));
     const Rete::Symbol_Constant_String_Ptr_C m_blocks_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("blocks"));
+    const Rete::Symbol_Constant_String_Ptr_C m_discrepancy_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("discrepancy"));
     const Rete::Symbol_Constant_String_Ptr_C m_goal_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("goal"));
     const Rete::Symbol_Constant_String_Ptr_C m_stack_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("stack"));
     const Rete::Symbol_Constant_String_Ptr_C m_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("matches"));
