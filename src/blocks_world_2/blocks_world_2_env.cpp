@@ -160,6 +160,8 @@ namespace Blocks_World_2 {
         wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_name_attr, Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(block))));
       }
 
+      wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *stack.rbegin())))), m_clear_attr, m_true_value));
+
       wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_top_attr, Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *stack.rbegin()))))));
       ///wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_matches_attr, m_table_stack_id));
 
@@ -183,8 +185,6 @@ namespace Blocks_World_2 {
 
           break;
         }
-
-        wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *goal_stack.begin())))), m_matches_top_attr, m_table_stack_id));
       }
     }
 
@@ -195,9 +195,12 @@ namespace Blocks_World_2 {
         const auto match = std::mismatch(goal_stack.begin(), goal_stack.end(), stack.begin());
         if(match.first != goal_stack.begin()) {
           discrepancy -= match.first - goal_stack.begin();
+          for(auto bt = goal_stack.begin(); bt != match.first; ++bt)
+            wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *bt)))), m_in_place_attr, m_true_value));
           break;
         }
       }
+      wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *goal_stack.begin())))), m_matches_top_attr, m_table_stack_id));
     }
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_discrepancy_attr, Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(discrepancy))));
 
