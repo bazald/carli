@@ -54,7 +54,10 @@ class CommaFormatter(ScalarFormatter):
       c = '-' + self.recurse(s[0][1:])
     else:
       c = self.recurse(s[0])
-    return c
+    if c is '0':
+      return arg
+    else:
+      return c
   
   def recurse(self, arg):
     if len(arg) < 4:
@@ -93,14 +96,12 @@ def main():
   #reward_label = 'Reward Within an Episode'
   #val0 = 4
   
-  # 1: ./puddleworld.py experiment-pw/*_0/*.out
-  # 2: ./puddleworld.py experiment-pw/*_0/*.out
-  # 3: ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out experiment-pw/cmac_*/*.out
-  # 4: ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/even_*_3/*.out experiment-pw/even_*_4/*.out
-  # 5: ./puddleworld.py experiment-pw/*_3/*.out
+  # 1: ./blocksworld2.py experiment-bw2/c*4/*.out
+  # 2: ./blocksworld2.py experiment-bw2/v*4/*.out
+  # 3: ./blocksworld2.py experiment-bw2/p*4/*.out
   scenario = 0
 
-  two_sided_plot = scenario == 4
+  two_sided_plot = scenario is not 0
 
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')
@@ -144,6 +145,7 @@ def main():
       files[group].smith['min'] = []
       files[group].smith['max'] = []
       files[group].smith['mem'] = []
+      files[group].smith['cpu'] = []
       done = False
       while not done:
         first_handle = True
@@ -163,24 +165,27 @@ def main():
               y_avg = float(split[val0 + 1])
               y_max = float(split[val0 + 2])
               y_mem = float(split[7])
+              y_cpu = float(split[9])
               y_count = 1
             else:
               y_min = min(y_min, float(split[val0 + 0]))
               y_avg = y_avg * (y_count / (y_count + 1.0)) + float(split[val0 + 1]) / (y_count + 1.0)
               y_max = max(y_max, float(split[val0 + 2]))
               y_mem = y_mem * (y_count / (y_count + 1.0)) + float(split[7]) / (y_count + 1.0)
+              y_cpu = y_cpu * (y_count / (y_count + 1.0)) + float(split[9]) / (y_count + 1.0)
               y_count = y_count + 1
         if not done:
           files[group].smith['min'].append(y_min)
           files[group].smith['avg'].append(y_avg)
           files[group].smith['max'].append(y_max)
           files[group].smith['mem'].append(y_mem)
+          files[group].smith['cpu'].append(y_cpu)
       
       for handle in files[group].handles:
         handle.f.close()
       
       first_group = False
-    
+  
     if len(files) == 1:
       title='Blocks World (' + group.rsplit('/',1)[1].replace('_', '\_') + ')'
       smith = files[group].smith
@@ -190,12 +195,14 @@ def main():
       
       smith = {}
       memory = {}
+      cpu = {}
       for group in files:
         smith[group.rsplit('/',1)[1].replace('_', '\_')] = files[group].smith['avg']
         memory[group.rsplit('/',1)[1].replace('_', '\_')] = files[group].smith['mem']
+        cpu[group.rsplit('/',1)[1].replace('_', '\_')] = files[group].smith['cpu']
       
       mode = 'multiple experiment evaluation'
-  
+
   fig = plt.figure()
   fig.canvas.set_window_title('Blocks World')
   
@@ -244,123 +251,34 @@ def main():
           labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
       
       remap_names = {}
-      remap_names['specific\\_4x4\\_4x4\\_0'] = '4x4'
-      remap_names['specific\\_8x8\\_8x8\\_0'] = '8x8'
-      remap_names['specific\\_16x16\\_16x16\\_0'] = '16x16'
-      remap_names['specific\\_32x32\\_32x32\\_0'] = '32x32'
-      remap_names['specific\\_64x64\\_64x64\\_0'] = '64x64'
-      remap_names['random\\_4x4\\_4x4\\_2'] = '1-4 static random'
-      remap_names['random\\_8x8\\_8x8\\_2'] = '1-8 static random'
-      remap_names['random\\_16x16\\_16x16\\_2'] = '1-16 static random'
-      remap_names['random\\_32x32\\_32x32\\_2'] = '1-32 static random'
-      remap_names['random\\_64x64\\_64x64\\_2'] = '1-64 static random'
-      remap_names['even\\_64x64\\_64x64\\_1'] = '1-64 static even'
-      remap_names['inv-log-update-count\\_64x64\\_64x64\\_1'] = '1-64 static $1/\ln$'
-      remap_names['inv-root-update-count\\_64x64\\_64x64\\_1'] = '1-64 static $1/\sqrt{~~~}$'
-      remap_names['even\\_2x2\\_64x64\\_3'] = '1-64 incremental even'
-      remap_names['even\\_2x2\\_64x64\\_4'] = '1-64 incremental in'
-      remap_names['inv-log-update-count\\_2x2\\_64x64\\_3'] = r'1-64 incremental $1/\ln$'
-      remap_names['inv-root-update-count\\_2x2\\_64x64\\_3'] = r'1-64 incremental $1/\sqrt{~~~}$'
-      remap_names['specific\\_2x2\\_64x64\\_3'] = '1-64 incremental specific'
-      remap_names['cmac\\_0\\_8\\_16'] = '8x8 CMAC, 16 tilings'
-      remap_names['cmac\\_0\\_16\\_16'] = '16x16 CMAC, 16 tilings'
+      remap_names['cof4'] = 'Non-Rel CATDE'
+      remap_names['vof4'] = 'Non-Rel Value'
+      remap_names['pof4'] = 'Non-Rel Policy'
+      remap_names['cnf4'] = 'Rel CATDE'
+      remap_names['vnf4'] = 'Rel Value'
+      remap_names['pnf4'] = 'Rel Policy'
+      remap_names['conf4'] = 'Mixed CATDE'
+      remap_names['vonf4'] = 'Mixed Value'
+      remap_names['ponf4'] = 'Mixed Policy'
       
       if scenario == 1:
-        agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0', 'specific\\_32x32\\_32x32\\_0', 'specific\\_64x64\\_64x64\\_0']
+        agent_list = ['cof4', 'cnf4', 'conf4']
       elif scenario == 2:
-        agent_list = ['specific\\_4x4\\_4x4\\_0', 'specific\\_8x8\\_8x8\\_0', 'specific\\_16x16\\_16x16\\_0']
+        agent_list = ['vof4', 'vnf4', 'vonf4']
       elif scenario == 3:
-        agent_list = ['even\\_64x64\\_64x64\\_1',
-                      'cmac\\_0\\_8\\_16',
-                      'specific\\_8x8\\_8x8\\_0',
-                      'cmac\\_0\\_16\\_16',
-                      'specific\\_16x16\\_16x16\\_0',
-                      'specific\\_4x4\\_4x4\\_0']
+        agent_list = ['pof4', 'pnf4', 'ponf4']
       if scenario > 0 and scenario < 4:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
           yss.append(smith[agent])
           
-          if agent is 'specific\\_4x4\\_4x4\\_0':
-            color = 'grey'
+          color = 'blue'
+          if agent is 'cof4' or agent is 'vof4' or agent is 'pof4':
             linestyle = ':'
-          elif agent is 'specific\\_8x8\\_8x8\\_0':
-            color = 'blue'
-            linestyle = ':'
-          elif agent is 'specific\\_16x16\\_16x16\\_0':
-            color = 'red'
-            linestyle = ':'
-          elif agent is 'specific\\_32x32\\_32x32\\_0':
-            color = 'teal'
-            linestyle = '-'
-          elif agent is 'specific\\_64x64\\_64x64\\_0':
-            color = 'green'
-            linestyle = '-'
-          elif agent is 'random\\_4x4\\_4x4\\_2':
-            color = 'grey'
-            linestyle = ':'
-          elif agent is 'random\\_8x8\\_8x8\\_2':
-            color = 'red'
-            linestyle = ':'
-          elif agent is 'random\\_16x16\\_16x16\\_2':
-            color = 'blue'
-            linestyle = ':'
-          elif agent is 'random\\_32x32\\_32x32\\_2':
-            color = 'black'
-            linestyle = ':'
-          elif agent is 'random\\_64x64\\_64x64\\_2':
-            color = 'green'
-            linestyle = ':'
-          elif agent is 'even\\_64x64\\_64x64\\_1':
-            color = 'black'
-            linestyle = '-'
-          elif agent is 'cmac\\_0\\_8\\_16':
-            color = 'blue'
+          elif agent is 'cnf4' or agent is 'vnf4' or agent is 'pnf4':
             linestyle = '--'
-          elif agent is 'cmac\\_0\\_16\\_16':
-            color = 'red'
-            linestyle = '--'
-          
-          labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
-      
-      if scenario == 4:
-        agent_list = ['even\\_2x2\\_64x64\\_4', 'even\\_64x64\\_64x64\\_1', 'even\\_2x2\\_64x64\\_3']
-        for agent in agent_list:
-          y_labels.append('Reward: ' + remap_names[agent])
-          yss.append(smith[agent])
-          
-          if agent is 'even\\_64x64\\_64x64\\_1':
-            color = 'blue'
-            linestyle = '-'
-          elif agent is 'even\\_2x2\\_64x64\\_3':
-            color = 'blue'
-            linestyle = '--'
-          elif agent is 'even\\_2x2\\_64x64\\_4':
-            color = 'blue'
+          elif agent is 'conf4' or agent is 'vonf4' or agent is 'ponf4':
             linestyle = '-.'
-          
-          labels += pylab.plot(x, smith[agent], label='Reward: ' + remap_names[agent], color=color, linestyle=linestyle)
-      elif scenario == 5:
-        agent_list = ['even\\_2x2\\_64x64\\_3',
-                      #'inv-log-update-count\\_2x2\\_64x64\\_3',
-                      #'inv-root-update-count\\_2x2\\_64x64\\_3',
-                      'specific\\_2x2\\_64x64\\_3']
-        for agent in agent_list:
-          y_labels.append(remap_names[agent])
-          yss.append(smith[agent])
-          
-          if agent is 'even\\_2x2\\_64x64\\_3':
-            color = 'blue'
-            linestyle = '-'
-          elif agent is 'inv-log-update-count\\_2x2\\_64x64\\_3':
-            color = 'blue'
-            linestyle = ':'
-          elif agent is 'inv-root-update-count\\_2x2\\_64x64\\_3':
-            color = 'blue'
-            linestyle = '-.'
-          elif agent is 'specific\\_2x2\\_64x64\\_3':
-            color = 'red'
-            linestyle = '-'
           
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
   
@@ -369,26 +287,8 @@ def main():
   pylab.xlabel('Step Number', fontsize=8)
   pylab.ylabel(reward_label, fontsize=8)
   
-  if scenario == 0:
-    #pylab.title(title, fontsize=10)
-    if len(sys.argv) > 1:
-      pylab.ylim(ymin=-250, ymax=0)
-  elif scenario == 1:
-    #pylab.title('Blocks World: Single Level Tilings', fontsize=10)
-    pylab.ylim(ymin=-100000, ymax=0)
-  elif scenario == 2:
-    #pylab.title('Blocks World: Single Level Tilings Expanded', fontsize=10)
-    pylab.xlim(xmax=50000)
-    pylab.ylim(ymin=-7000, ymax=0)
-  elif scenario == 3:
-    override = {'x': '0.45', 'fontsize': 'medium', 'verticalalignment': 'baseline', 'horizontalalignment': 'center'}
-    #pylab.title('Blocks World: Includes Static Hierarchical Tiling 1-64', fontsize=10, fontdict=override)
-    pylab.xlim(xmax=50000)
-    pylab.ylim(ymin=-7000, ymax=0)
-  elif scenario == 4:
-    #pylab.title('Blocks World: Static and Incremental Hierarchical Tiling', fontsize=10)
-    pylab.xlim(xmax=20000)
-    pylab.ylim(ymin=-4000, ymax=0)
+  if len(sys.argv) > 1:
+    pylab.ylim(ymin=-500, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
@@ -409,26 +309,29 @@ def main():
     ax2.yaxis.set_major_formatter(CommaFormatter())
 
     for agent in agent_list:
-      y_labels.append('Memory: ' + remap_names[agent])
-      yss.append(memory[agent])
+      y_labels.append('CPU: ' + remap_names[agent])
+      yss.append(cpu[agent])
+      #y_labels.append('Mem: ' + remap_names[agent])
+      #yss.append(memory[agent])
       
-      if agent is 'even\\_64x64\\_64x64\\_1':
-        color = 'red'
-        linestyle = '-'
-      elif agent is 'even\\_2x2\\_64x64\\_3':
-        color = 'red'
+      color = 'red'
+      if agent is 'cof4' or agent is 'vof4' or agent is 'pof4':
+        linestyle = ':'
+      elif agent is 'cnf4' or agent is 'vnf4' or agent is 'pnf4':
         linestyle = '--'
-      elif agent is 'even\\_2x2\\_64x64\\_4':
-        color = 'red'
+      elif agent is 'conf4' or agent is 'vonf4' or agent is 'ponf4':
         linestyle = '-.'
-      
-      labels += pylab.plot(x, memory[agent], label='Memory: ' + remap_names[agent], color=color, linestyle=linestyle)
-    ax2.set_xlim(0, 20000)
-    ax2.set_ylim(0, 55000)
+        
+      labels += pylab.plot(x, cpu[agent], label='CPU: ' + remap_names[agent], color=color, linestyle=linestyle)
+      #labels += pylab.plot(x, memory[agent], label='Mem: ' + remap_names[agent], color=color, linestyle=linestyle)
+    #ax2.set_xlim(0, 20000)
+    ax2.set_ylim(0, 0.002)
+    #ax2.set_ylim(0, 100)
     
     #ax2.set_ylabel(r"Temperature ($^\circ$C)")
-    ax2.set_ylabel('Number of Tiles / Weights')
-    fig.axes[0].spines['left'].set_color('red')
+    ax2.set_ylabel('CPU Time / Step (Seconds)')
+    #ax2.set_ylabel('Number of Tiles / Weights')
+    #fig.axes[0].spines['left'].set_color('red')
     fig.axes[0].tick_params(axis='y', colors='blue')
     #fig.axes[0].yaxis.label.set_color('blue')
     ax2.spines['right'].set_color('red')
@@ -436,7 +339,7 @@ def main():
     #ax2.yaxis.label.set_color('red')
     
     # lower right
-    pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.06,1,1))
+    #pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.06,1,1))
   else:
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)

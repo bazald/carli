@@ -1,6 +1,7 @@
 #ifndef CARLI_EXPERIMENTAL_OUTPUT
 #define CARLI_EXPERIMENTAL_OUTPUT
 
+#include <chrono>
 #include <cstddef>
 #include <functional>
 #include <inttypes.h>
@@ -32,6 +33,9 @@ namespace Carli {
     double m_simple_min;
     double m_simple_mean;
     double m_simple_max;
+
+    std::chrono::high_resolution_clock::time_point m_start;
+    std::chrono::high_resolution_clock::time_point m_current;
   };
 
 }

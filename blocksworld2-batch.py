@@ -11,16 +11,26 @@ g_base_command = "./blocks_world_2 --output experiment --discount-rate 0.9 --eli
 
 g_ep_tuples = []
 
-### Experiment 0
-g_ep_tuples.append(("cof4",  "--num-blocks 4 --split-test catde --rules rules/rules/blocks-world-4-blocks.carli"))
+g_ep_tuples.append(("cof4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-4-blocks.carli"))
 g_ep_tuples.append(("cnf4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2.carli"))
 g_ep_tuples.append(("conf4", "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-included.carli"))
-g_ep_tuples.append(("vof4",  "--num-blocks 4 --split-test value --rules rules/rules/blocks-world-4-blocks.carli"))
+#g_ep_tuples.append(("cnf4i",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-i.carli"))
+#g_ep_tuples.append(("cnf4r",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-r.carli"))
+#g_ep_tuples.append(("cnf4ir",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-ir.carli"))
+
+g_ep_tuples.append(("vof4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-4-blocks.carli"))
 g_ep_tuples.append(("vnf4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2.carli"))
 g_ep_tuples.append(("vonf4", "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-included.carli"))
-g_ep_tuples.append(("pof4",  "--num-blocks 4 --split-test policy --rules rules/rules/blocks-world-4-blocks.carli"))
+#g_ep_tuples.append(("vnf4i",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-i.carli"))
+#g_ep_tuples.append(("vnf4r",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-r.carli"))
+#g_ep_tuples.append(("vnf4ir",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-ir.carli"))
+
+g_ep_tuples.append(("pof4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-4-blocks.carli"))
 g_ep_tuples.append(("pnf4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2.carli"))
 g_ep_tuples.append(("ponf4", "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-legacy-included.carli"))
+#g_ep_tuples.append(("pnf4i",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-i.carli"))
+#g_ep_tuples.append(("pnf4r",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-r.carli"))
+#g_ep_tuples.append(("pnf4ir",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-ir.carli"))
 
 parser = argparse.ArgumentParser(description='Run Blocks World 2 experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,
@@ -30,7 +40,7 @@ parser.add_argument('-r', '--runs', metavar='N', type=int,
                    action='store', default=1,
                    help='number of runs per experiment')
 parser.add_argument('-n', '--num-steps', metavar='N', type=int,
-                   action='store', default=5000,
+                   action='store', default=10000,
                    help='number of steps per run')
 
 args = parser.parse_args()

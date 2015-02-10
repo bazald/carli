@@ -117,6 +117,18 @@ namespace Blocks_World_2 {
 
     std::ostringstream oss;
     for(const auto &stack : blocks) {
+      int64_t height = 0;
+      for(const auto &block : stack) {
+        const auto block_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + block))));
+
+        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
+
+        const double brightness = m_random.frand_lte();
+        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
+        if(brightness > 0.5)
+          wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_glowing_attr, m_true_value));
+      }
+
       for(const auto &dest_stack : blocks) {
         if(stack == dest_stack)
           continue;
