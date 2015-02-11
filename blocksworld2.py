@@ -287,6 +287,7 @@ def main():
   pylab.xlabel('Step Number', fontsize=8)
   pylab.ylabel(reward_label, fontsize=8)
   
+  pylab.xlim(xmax=5000)
   if len(sys.argv) > 1:
     pylab.ylim(ymin=-500, ymax=0)
   
@@ -324,7 +325,9 @@ def main():
         
       labels += pylab.plot(x, cpu[agent], label='CPU: ' + remap_names[agent], color=color, linestyle=linestyle)
       #labels += pylab.plot(x, memory[agent], label='Mem: ' + remap_names[agent], color=color, linestyle=linestyle)
-    #ax2.set_xlim(0, 20000)
+
+      print 'Memory Average for ' + agent + ': ' + str(memory[agent][-1])
+    ax2.set_xlim(0, 5000)
     ax2.set_ylim(0, 0.002)
     #ax2.set_ylim(0, 100)
     
