@@ -54,8 +54,8 @@ class CommaFormatter(ScalarFormatter):
       c = '-' + self.recurse(s[0][1:])
     else:
       c = self.recurse(s[0])
-    if c is '0':
-      return arg
+    if len(s) > 1 and s[1] is not '0':
+      return c + '.' + s[1]
     else:
       return c
   
@@ -96,9 +96,11 @@ def main():
   #reward_label = 'Reward Within an Episode'
   #val0 = 4
   
-  # 1: ./blocksworld2.py experiment-bw2/c*4/*.out
-  # 2: ./blocksworld2.py experiment-bw2/v*4/*.out
-  # 3: ./blocksworld2.py experiment-bw2/p*4/*.out
+  # 1: ./blocksworld2.py experiment-bw2/s*4/*.out
+  # 2: ./blocksworld2.py experiment-bw2/f*4/*.out
+  # 3: ./blocksworld2.py experiment-bw2/c*4/*.out
+  # 4: ./blocksworld2.py experiment-bw2/v*4/*.out
+  # 5: ./blocksworld2.py experiment-bw2/p*4/*.out
   scenario = 0
 
   two_sided_plot = scenario is not 0
@@ -165,14 +167,14 @@ def main():
               y_avg = float(split[val0 + 1])
               y_max = float(split[val0 + 2])
               y_mem = float(split[7])
-              y_cpu = float(split[9])
+              y_cpu = float(split[9]) * 1000.0
               y_count = 1
             else:
               y_min = min(y_min, float(split[val0 + 0]))
               y_avg = y_avg * (y_count / (y_count + 1.0)) + float(split[val0 + 1]) / (y_count + 1.0)
               y_max = max(y_max, float(split[val0 + 2]))
               y_mem = y_mem * (y_count / (y_count + 1.0)) + float(split[7]) / (y_count + 1.0)
-              y_cpu = y_cpu * (y_count / (y_count + 1.0)) + float(split[9]) / (y_count + 1.0)
+              y_cpu = y_cpu * (y_count / (y_count + 1.0)) + float(split[9]) * 1000.0 / (y_count + 1.0)
               y_count = y_count + 1
         if not done:
           files[group].smith['min'].append(y_min)
@@ -207,9 +209,9 @@ def main():
   fig.canvas.set_window_title('Blocks World')
   
   if two_sided_plot:
-    rect = [0.19,0.15,0.6525,0.82]
+    rect = [0.15,0.17,0.75,0.80]
   else:
-    rect = [0.19,0.15,0.7725,0.82]
+    rect = [0.15,0.15,0.7725,0.82]
   pylab.axes(rect)
   
   labels = []
@@ -251,33 +253,43 @@ def main():
           labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
       
       remap_names = {}
-      remap_names['cof4'] = 'Non-Rel CATDE'
-      remap_names['vof4'] = 'Non-Rel Value'
-      remap_names['pof4'] = 'Non-Rel Policy'
+      remap_names['sof4'] = 'Prop Flat'
+      remap_names['snf4'] = 'Rel Flat'
+      remap_names['sonf4'] = 'Mixed Flat'
+      remap_names['fof4'] = 'Prop Full'
+      remap_names['fnf4'] = 'Rel Full'
+      remap_names['fonf4'] = 'Mixed Full'
+      remap_names['cof4'] = 'Prop CATDE'
       remap_names['cnf4'] = 'Rel CATDE'
-      remap_names['vnf4'] = 'Rel Value'
-      remap_names['pnf4'] = 'Rel Policy'
       remap_names['conf4'] = 'Mixed CATDE'
+      remap_names['vof4'] = 'Prop Value'
+      remap_names['vnf4'] = 'Rel Value'
       remap_names['vonf4'] = 'Mixed Value'
+      remap_names['pof4'] = 'Prop Policy'
+      remap_names['pnf4'] = 'Rel Policy'
       remap_names['ponf4'] = 'Mixed Policy'
       
       if scenario == 1:
-        agent_list = ['cof4', 'cnf4', 'conf4']
+        agent_list = ['sof4', 'snf4', 'sonf4']
       elif scenario == 2:
-        agent_list = ['vof4', 'vnf4', 'vonf4']
+        agent_list = ['fof4', 'fnf4', 'fonf4']
       elif scenario == 3:
+        agent_list = ['cof4', 'cnf4', 'conf4']
+      elif scenario == 4:
+        agent_list = ['vof4', 'vnf4', 'vonf4']
+      elif scenario == 5:
         agent_list = ['pof4', 'pnf4', 'ponf4']
-      if scenario > 0 and scenario < 4:
+      if scenario > 0 and scenario < 6:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
           yss.append(smith[agent])
           
           color = 'blue'
-          if agent is 'cof4' or agent is 'vof4' or agent is 'pof4':
+          if agent is 'sof4' or agent is 'fof4' or agent is 'cof4' or agent is 'vof4' or agent is 'pof4':
             linestyle = ':'
-          elif agent is 'cnf4' or agent is 'vnf4' or agent is 'pnf4':
+          elif agent is 'snf4' or agent is 'fnf4' or agent is 'cnf4' or agent is 'vnf4' or agent is 'pnf4':
             linestyle = '--'
-          elif agent is 'conf4' or agent is 'vonf4' or agent is 'ponf4':
+          elif agent is 'sonf4' or agent is 'fonf4' or agent is 'conf4' or agent is 'vonf4' or agent is 'ponf4':
             linestyle = '-.'
           
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
@@ -316,11 +328,11 @@ def main():
       #yss.append(memory[agent])
       
       color = 'red'
-      if agent is 'cof4' or agent is 'vof4' or agent is 'pof4':
+      if agent is 'sof4' or agent is 'fof4' or agent is 'cof4' or agent is 'vof4' or agent is 'pof4':
         linestyle = ':'
-      elif agent is 'cnf4' or agent is 'vnf4' or agent is 'pnf4':
+      elif agent is 'snf4' or agent is 'fnf4' or agent is 'cnf4' or agent is 'vnf4' or agent is 'pnf4':
         linestyle = '--'
-      elif agent is 'conf4' or agent is 'vonf4' or agent is 'ponf4':
+      elif agent is 'sonf4' or agent is 'fonf4' or agent is 'conf4' or agent is 'vonf4' or agent is 'ponf4':
         linestyle = '-.'
         
       labels += pylab.plot(x, cpu[agent], label='CPU: ' + remap_names[agent], color=color, linestyle=linestyle)
@@ -328,11 +340,11 @@ def main():
 
       print 'Memory Average for ' + agent + ': ' + str(memory[agent][-1])
     ax2.set_xlim(0, 5000)
-    ax2.set_ylim(0, 0.002)
+    ax2.set_ylim(0, 2)
     #ax2.set_ylim(0, 100)
     
     #ax2.set_ylabel(r"Temperature ($^\circ$C)")
-    ax2.set_ylabel('CPU Time / Step (Seconds)')
+    ax2.set_ylabel('CPU Time / Step (Milliseconds)')
     #ax2.set_ylabel('Number of Tiles / Weights')
     #fig.axes[0].spines['left'].set_color('red')
     fig.axes[0].tick_params(axis='y', colors='blue')
@@ -341,8 +353,8 @@ def main():
     ax2.tick_params(axis='y', colors='red')
     #ax2.yaxis.label.set_color('red')
     
-    # lower right
-    #pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.06,1,1))
+    if scenario is 5:
+      pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(-0.05,0.3,1,1))
   else:
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)

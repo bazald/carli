@@ -47,7 +47,6 @@ namespace Carli {
 
     void destroy();
 
-    bool is_null_q_values() const {return m_null_q_values;}
     double get_learning_rate() const {return m_learning_rate;}
     double get_discount_rate() const {return m_discount_rate;}
     double get_eligibility_trace_decay_rate() const {return m_eligibility_trace_decay_rate;}
@@ -201,7 +200,6 @@ namespace Carli {
     int64_t m_total_step_count = 0;
     reward_type m_total_reward = 0.0;
 
-    const bool m_null_q_values = get_Option_Ranged<bool>(Options::get_global(), "null-q-values"); ///< insert nullptr instead of new Q_Values until reaching the leaf
     const int64_t m_value_function_cap = get_Option_Ranged<int64_t>(Options::get_global(), "value-function-cap"); ///< at this threshold, no more entries will be added to the value functions through refinement
 
     const double m_learning_rate = get_Option_Ranged<double>(Options::get_global(), "learning-rate"); ///< alpha

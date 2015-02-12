@@ -11,23 +11,31 @@ g_base_command = "./blocks_world_2 --output experiment --discount-rate 0.9 --eli
 
 g_ep_tuples = []
 
-g_ep_tuples.append(("cof4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("cnf4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("conf4", "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-included.carli"))
+g_ep_tuples.append(("sof4",  "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2-legacy-only.carli"))
+g_ep_tuples.append(("snf4",  "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2.carli"))
+g_ep_tuples.append(("sonf4", "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2-legacy-included.carli"))
+
+g_ep_tuples.append(("fof4",  "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2-legacy-only.carli"))
+g_ep_tuples.append(("fnf4",  "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2.carli"))
+g_ep_tuples.append(("fonf4", "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2-legacy-included.carli"))
+
+#g_ep_tuples.append(("cof4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("cnf4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("conf4", "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-included.carli"))
 #g_ep_tuples.append(("cnf4i",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-i.carli"))
 #g_ep_tuples.append(("cnf4r",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-r.carli"))
 #g_ep_tuples.append(("cnf4ir",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-ir.carli"))
 
-g_ep_tuples.append(("vof4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("vnf4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("vonf4", "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-included.carli"))
+#g_ep_tuples.append(("vof4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("vnf4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("vonf4", "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-included.carli"))
 #g_ep_tuples.append(("vnf4i",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-i.carli"))
 #g_ep_tuples.append(("vnf4r",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-r.carli"))
 #g_ep_tuples.append(("vnf4ir",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-ir.carli"))
 
-g_ep_tuples.append(("pof4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("pnf4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("ponf4", "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-legacy-included.carli"))
+#g_ep_tuples.append(("pof4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("pnf4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("ponf4", "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-legacy-included.carli"))
 #g_ep_tuples.append(("pnf4i",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-i.carli"))
 #g_ep_tuples.append(("pnf4r",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-r.carli"))
 #g_ep_tuples.append(("pnf4ir",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-ir.carli"))
@@ -73,11 +81,12 @@ print str(seeds) + '\n'
 
 
 class Experiment:
-  def __init__(self, num_steps, seed, stderr, stdout, experiment, vfm):
+  def __init__(self, num_steps, seed, stderr, stdout, rules, experiment, vfm):
     self.num_steps = num_steps
     self.seed = seed
     self.stderr = stderr
     self.stdout = stdout
+    self.rules = rules
     self.experiment = experiment
     self.vfm = vfm
     
@@ -86,7 +95,8 @@ class Experiment:
     args.extend(['--num-steps', str(self.num_steps),
                  '--seed', str(self.seed),
                  '--stderr', self.stderr,
-                 '--stdout', self.stdout])
+                 '--stdout', self.stdout,
+                 '--rules-out', self.rules])
     if self.vfm:
       args.extend(['--value-function-map-filename', self.vfm])
     return args
@@ -119,8 +129,9 @@ for ep_tuple in g_ep_tuples:
   for seed in seeds:
     stderr = dir + '/blocksworld-' + str(seed) + '.err'
     stdout = dir + '/blocksworld-' + str(seed) + '.out'
+    rules = dir + '/blocksworld-' + str(seed) + '.carli'
     vfm = dir + '/blocksworld-' + str(seed) + '.vfm'
-    experiment = Experiment(args.num_steps, seed, stderr, stdout, g_base_command + ' ' + ep_tuple[1], vfm=vfm)
+    experiment = Experiment(args.num_steps, seed, stderr, stdout, rules, g_base_command + ' ' + ep_tuple[1], vfm=vfm)
     g_experiments.append(experiment)
     experiment.print_args()
 
