@@ -116,9 +116,9 @@ namespace Carli {
     std::list<Node_Ptr> m_nodes_activating;
 
   protected:
-    Action_Ptr_C choose_epsilon_greedy(const double &epsilon, const Feature * const &axis);
-    std::pair<Action_Ptr_C, double> choose_greedy(const Feature * const &axis); ///< Greedy action, and distance to next most greedy
-    Action_Ptr_C choose_randomly();
+    std::pair<Action_Ptr_C, double> choose_epsilon_greedy(const double &epsilon, const Feature * const &axis);
+    std::pair<Action_Ptr_C, double> choose_greedy(const Feature * const &axis);
+    std::pair<Action_Ptr_C, double> choose_randomly(const Feature * const &axis);
 
     void td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next);
 
@@ -164,12 +164,12 @@ namespace Carli {
     //void merge_value_function_grid_sets(std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &combination, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &additions) const;
 
     Metastate m_metastate = Metastate::NON_TERMINAL;
-    Action_Ptr_C m_current;
+    std::pair<Action_Ptr_C, double> m_current;
     Q_Value_List m_current_q_value;
-    Action_Ptr_C m_next;
+    std::pair<Action_Ptr_C, double> m_next;
     std::map<Action_Ptr_C, Q_Value_List, Rete::compare_deref_lt, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, Q_Value_List>>> m_next_q_values;
-    std::function<Action_Ptr_C ()> m_target_policy; ///< Sarsa/Q-Learning selector
-    std::function<Action_Ptr_C ()> m_exploration_policy; ///< Exploration policy
+    std::function<std::pair<Action_Ptr_C, double> ()> m_target_policy; ///< Sarsa/Q-Learning selector
+    std::function<std::pair<Action_Ptr_C, double> ()> m_exploration_policy; ///< Exploration policy
     std::function<Fringe_Values::iterator (Node_Unsplit &)> m_split_criterion; ///< true if too general, false if sufficiently general
     //std::map<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<Action_Ptr_C>, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
@@ -203,6 +203,7 @@ namespace Carli {
     const int64_t m_value_function_cap = get_Option_Ranged<int64_t>(Options::get_global(), "value-function-cap"); ///< at this threshold, no more entries will be added to the value functions through refinement
 
     const double m_learning_rate = get_Option_Ranged<double>(Options::get_global(), "learning-rate"); ///< alpha
+    const double m_secondary_learning_rate = get_Option_Ranged<double>(Options::get_global(), "secondary-learning-rate"); ///< eta
     const double m_discount_rate = get_Option_Ranged<double>(Options::get_global(), "discount-rate"); ///< gamma
     const double m_eligibility_trace_decay_rate = get_Option_Ranged<double>(Options::get_global(), "eligibility-trace-decay-rate"); ///< lambda
     const double m_eligibility_trace_decay_threshold = get_Option_Ranged<double>(Options::get_global(), "eligibility-trace-decay-threshold");

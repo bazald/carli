@@ -76,7 +76,7 @@ namespace Carli {
     }), "<file> Redirect stdout to <file>");
     options.add_line("\n  Environment Options:");
     options.add(     make_shared<Option_Ranged<bool>>("ignore-x", false, true, true, true, false), "Simplify cart-pole from 4D to 2D, eliminating x and x-dot.");
-    options.add(make_shared<Option_Ranged<int64_t>>("num-blocks", 2, true, 26, true, 3), "Number of blocks to generate in Blocks World 2.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("num-blocks", 2, true, 26, true, 3), "Number of blocks to generate in Blocks World 2.");
     options.add(     make_shared<Option_Ranged<bool>>("random-start", false, true, true, true, false), "Should starting positions be randomized in mountain-car and puddle-world.");
     options.add(     make_shared<Option_Ranged<bool>>("reward-negative", false, true, true, true, true), "Use negative rewards per step in mountain-car rather than positive terminal rewards.");
     //options.add(     make_shared<Option_Ranged<bool>>("set-goal", false, true, true, true, false), "Convert Cart Pole from an equilibrium task to a \"minimum time manoever to a small goal region\" task.");
@@ -86,6 +86,7 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<double>>("eligibility-trace-decay-threshold", 0.0, true, 1.0, true, 0.0001), "Weights with credit below this threshold cease to receive updates.");
     options.add('g', make_shared<Option_Ranged<double>>("epsilon-greedy", 0.0, true, 1.0, true, 0.1), "Simple exploration rate.");
     options.add('l', make_shared<Option_Ranged<double>>("learning-rate", 0.0, true, 1.0, true, 1.0), "");
+    options.add(     make_shared<Option_Ranged<double>>("secondary-learning-rate", 0.0, true, 1.0, true, 1.0), "");
     options.add(     make_shared<Option_Itemized>("policy", set<string>({"on-policy", "off-policy"}), "on-policy"), "Learn about greedy or optimal policy.");
     options.add_line("\n  Credit Assignment:");
     options.add('c', make_shared<Option_Itemized>("credit-assignment", set<string>({"all", "random", "specific", "even", "inv-update-count", "inv-log-update-count", "inv-root-update-count", "inv-depth", "epsilon-even-specific", "epsilon-even-depth"}), "even"), "How to split credit between weights.");

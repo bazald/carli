@@ -193,12 +193,12 @@ namespace Mario {
 
   void Agent::act_part_1(Action &action) {
     m_current = m_next;
-    m_current_q_value = m_next_q_values[m_next];
+    m_current_q_value = m_next_q_values[m_next.first];
     m_current_q_value.sort([](const tracked_ptr<Q_Value> &lhs, const tracked_ptr<Q_Value> &rhs)->bool{return lhs->depth < rhs->depth;});
 
-    assert(m_current);
+    assert(m_current.first);
 
-    action = debuggable_cast<const Button_Presses &>(*m_next).action;
+    action = debuggable_cast<const Button_Presses &>(*m_next.first).action;
 
 #if defined(_WINDOWS) && defined(NDEBUG)
     //system("cls");
@@ -273,22 +273,22 @@ namespace Mario {
 #ifdef DEBUG_OUTPUT
   //      for(auto &next_q : m_next_q_values)
   //        std::cerr << "   " << *next_q.first << " is an option." << std::endl;
-      std::cerr << "   " << *m_next << " is next." << std::endl;
+      std::cerr << "   " << *m_next.first << " (" << m_next.second << ") is next." << std::endl;
 #endif
-      auto &value_best = m_next_q_values[m_next];
+      auto &value_best = m_next_q_values[m_next.first];
       td_update(m_current_q_value, reward, value_best);
 
       if(!is_on_policy()) {
-        Carli::Action_Ptr_C next = m_exploration_policy();
+        const auto next = m_exploration_policy();
 
-        if(*m_next != *next) {
-          if(sum_value(nullptr, m_current_q_value, nullptr) < sum_value(nullptr, m_next_q_values[next], nullptr))
+        if(*m_next.first != *next.first) {
+          if(sum_value(nullptr, m_current_q_value, nullptr) < sum_value(nullptr, m_next_q_values[next.first], nullptr))
             clear_eligibility_trace();
           m_next = next;
         }
 
 #ifdef DEBUG_OUTPUT
-        std::cerr << "   " << *m_next << " is next." << std::endl;
+        std::cerr << "   " << *m_next.first << " (" << m_next.second << ") is next." << std::endl;
 #endif
       }
     }
