@@ -93,7 +93,7 @@ namespace Mario {
     void generate_features();
 
     void update();
-    
+
     const std::shared_ptr<State> &m_current_state;
     const std::shared_ptr<State> &m_prev_state;
 
@@ -127,6 +127,7 @@ namespace Mario {
     const Rete::Symbol_Identifier_Ptr_C m_button_presses_in_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("I1"));
 
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
+    double m_rho = double();
   };
 
 }

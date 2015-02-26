@@ -116,11 +116,15 @@ namespace Carli {
     std::list<Node_Ptr> m_nodes_activating;
 
   protected:
-    std::pair<Action_Ptr_C, double> choose_epsilon_greedy(const double &epsilon, const Feature * const &axis);
-    std::pair<Action_Ptr_C, double> choose_greedy(const Feature * const &axis);
-    std::pair<Action_Ptr_C, double> choose_randomly(const Feature * const &axis);
+    Action_Ptr_C choose_epsilon_greedy(const double &epsilon, const Feature * const &axis);
+    std::pair<Action_Ptr_C, double> choose_greedy(const Feature * const &axis); ///< Greedy action, and distance to next most greedy
+    Action_Ptr_C choose_randomly();
 
-    void td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next);
+    double probability_epsilon_greedy(const Action_Ptr_C &action, const double &epsilon, const Feature * const &axis);
+    double probability_greedy(const Action_Ptr_C &action, const Feature * const &axis);
+    double probability_random();
+
+    void td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next, const double &rho, const double &I);
 
     void clear_eligibility_trace();
 
@@ -164,12 +168,12 @@ namespace Carli {
     //void merge_value_function_grid_sets(std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &combination, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &additions) const;
 
     Metastate m_metastate = Metastate::NON_TERMINAL;
-    std::pair<Action_Ptr_C, double> m_current;
+    Action_Ptr_C m_current;
     Q_Value_List m_current_q_value;
-    std::pair<Action_Ptr_C, double> m_next;
+    Action_Ptr_C m_next;
     std::map<Action_Ptr_C, Q_Value_List, Rete::compare_deref_lt, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, Q_Value_List>>> m_next_q_values;
-    std::function<std::pair<Action_Ptr_C, double> ()> m_target_policy; ///< Sarsa/Q-Learning selector
-    std::function<std::pair<Action_Ptr_C, double> ()> m_exploration_policy; ///< Exploration policy
+    std::function<Action_Ptr_C ()> m_target_policy; ///< Sarsa/Q-Learning selector
+    std::function<Action_Ptr_C ()> m_exploration_policy; ///< Exploration policy
     std::function<Fringe_Values::iterator (Node_Unsplit &)> m_split_criterion; ///< true if too general, false if sufficiently general
     //std::map<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<Action_Ptr_C>, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 

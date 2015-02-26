@@ -386,8 +386,8 @@ namespace Carli {
 
   Agent::Agent(const std::shared_ptr<Environment> &environment, const std::function<Carli::Action_Ptr_C (const Rete::Variable_Indices &variables, const Rete::WME_Token &token)> &get_action_)
     : get_action(get_action_),
-    m_target_policy([this]()->std::pair<Action_Ptr_C, double>{return this->choose_greedy(nullptr);}),
-    m_exploration_policy([this]()->std::pair<Action_Ptr_C, double>{return this->choose_epsilon_greedy(m_epsilon, nullptr);}),
+    m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy(nullptr).first;}),
+    m_exploration_policy([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(m_epsilon, nullptr);}),
     m_environment(environment),
     m_credit_assignment(
       m_credit_assignment_code == "all" ?
@@ -523,18 +523,21 @@ namespace Carli {
   }
 
   Agent::reward_type Agent::act() {
-  //    generate_features();
+    /// Calculate \rho
+    double rho = probability_epsilon_greedy(m_next, m_epsilon, nullptr);
+    if(!m_on_policy)
+      rho = probability_greedy(m_next, nullptr) / rho;
 
     m_current = m_next;
-    m_current_q_value = m_next_q_values[m_next.first];
+    m_current_q_value = m_next_q_values[m_next];
     m_current_q_value.sort([](const tracked_ptr<Q_Value> &lhs, const tracked_ptr<Q_Value> &rhs)->bool{return lhs->depth < rhs->depth;});
 
-    if(!m_current.first) {
+    if(!m_current) {
       std::cerr << "No action selected. Terminating." << std::endl;
       abort();
     }
 
-    const reward_type reward = m_environment->transition(*m_current.first);
+    const reward_type reward = m_environment->transition(*m_current);
 
 #ifndef NO_COLLAPSE_DETECTION_HACK
     if(reward > 0.0) {
@@ -554,27 +557,27 @@ namespace Carli {
 #ifdef DEBUG_OUTPUT
   //      for(auto &next_q : m_next_q_values)
   //        std::cerr << "   " << *next_q.first << " is an option." << std::endl;
-      std::cerr << "   " << *m_next.first << " (" << m_next.second << ") is next." << std::endl;
+      std::cerr << "   " << *m_next << " is next." << std::endl;
 #endif
-      auto &value_best = m_next_q_values[m_next.first];
-      td_update(m_current_q_value, reward, value_best);
+      auto &value_best = m_next_q_values[m_next];
+      td_update(m_current_q_value, reward, value_best, rho, 1.0);
 
       if(!m_on_policy) {
         const auto next = m_exploration_policy();
 
-        if(*m_next.first != *next.first) {
-          if(sum_value(nullptr, m_current_q_value, nullptr) < sum_value(nullptr, m_next_q_values[next.first], nullptr))
+        if(*m_next != *next) {
+          if(sum_value(nullptr, m_current_q_value, nullptr) < sum_value(nullptr, m_next_q_values[next], nullptr))
             clear_eligibility_trace();
           m_next = next;
         }
 
 #ifdef DEBUG_OUTPUT
-        std::cerr << "   " << *m_next.first << " (" << m_next.second << ") is next." << std::endl;
+        std::cerr << "   " << *m_next << " is next." << std::endl;
 #endif
       }
     }
     else {
-      td_update(m_current_q_value, reward, Q_Value_List());
+      td_update(m_current_q_value, reward, Q_Value_List(), rho, 1.0);
     }
 
     m_total_reward += reward;
@@ -708,11 +711,11 @@ namespace Carli {
     visit_preorder(visitor, true);
   }
 
-  std::pair<Action_Ptr_C, double> Agent::choose_epsilon_greedy(const double &epsilon, const Feature * const &axis) {
+  Action_Ptr_C Agent::choose_epsilon_greedy(const double &epsilon, const Feature * const &axis) {
     if(random.frand_lt() < epsilon)
-      return choose_randomly(axis);
+      return choose_randomly();
     else
-      return choose_greedy(axis);
+      return choose_greedy(axis).first;
   }
 
   std::pair<Action_Ptr_C, double> Agent::choose_greedy(const Feature * const &axis) {
@@ -726,59 +729,68 @@ namespace Carli {
     int32_t count = 0;
     double value = double();
     Action_Ptr_C action;
+    double distance = double();
     for(const auto &action_q : m_next_q_values) {
       const double value_ = sum_value(action_q.first.get(), action_q.second, axis);
 
       if(!action || value_ > value) {
+        distance = value_ - value;
         action = action_q.first;
         value = value_;
         count = 1;
       }
       else if(value_ == value) {
+        distance = 0;
         if(random.rand_lt(++count) == 0)
           action = action_q.first;
       }
     }
 
-    return std::make_pair(action, (1.0 - m_epsilon) / count + m_epsilon / m_next_q_values.size());
+    return std::make_pair(action, distance);
   }
 
-  std::pair<Action_Ptr_C, double> Agent::choose_randomly(const Feature * const &axis) {
+  Action_Ptr_C Agent::choose_randomly() {
 #ifdef DEBUG_OUTPUT
     std::cerr << "  choose_randomly" << std::endl;
 #endif
 
     int32_t counter = int32_t(m_next_q_values.size());
-  //    for(const auto &action_q : m_next_q_values) {
-  //      ++counter;
-  //      this->get_value(action_, Q_Value::next_offset()); ///< Trigger additional feature generation, as needed
-  //    }
 
     counter = random.rand_lt(counter) + 1;
     Action_Ptr_C action;
-    int32_t count = 0;
-    double value = double();
-    double max_value = std::numeric_limits<double>::lowest();
+    for(const auto &action_q : m_next_q_values) {
+      if(!--counter)
+        action = action_q.first;
+    }
+
+    return action;
+  }
+
+  double Agent::probability_epsilon_greedy(const Action_Ptr_C &action, const double &epsilon, const Feature * const &axis) {
+    return (1 - epsilon) * probability_greedy(action, axis) + epsilon * probability_random();
+  }
+
+  double Agent::probability_greedy(const Action_Ptr_C &action, const Feature * const &axis) {
+    double count = double();
+    const double value = sum_value(action.get(), m_next_q_values[action], axis);
+
     for(const auto &action_q : m_next_q_values) {
       const double value_ = sum_value(action_q.first.get(), action_q.second, axis);
 
-      if(!--counter) {
-        action = action_q.first;
-        value = value_;
-      }
-
-      if(max_value < value_) {
-        count = 1;
-        max_value = value_;
-      }
-      else if(max_value == value_ || !count)
+      if(value_ > value)
+        return 0.0;
+      else if(value_ == value)
         ++count;
     }
 
-    return std::make_pair(action, (1.0 - m_epsilon) / count + m_epsilon / m_next_q_values.size());
+    return 1.0 / count;
   }
 
-  void Agent::td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next) {
+  double Agent::probability_random() {
+    return 1.0 / m_next_q_values.size();
+  }
+
+  void Agent::td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next, const double &rho, const double &I) {
     dump_rules(*this);
     assert(!m_badness);
 

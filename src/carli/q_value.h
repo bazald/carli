@@ -81,6 +81,7 @@ namespace Carli {
   //  double weight = 1.0;
 
     double value;
+    double secondary = 0.0;
     Value catde; ///< Cumulative Absolute Bellman Error
     Value matde; ///< Mean Absolute Bellman Error (catde / update_count)
 

@@ -192,13 +192,18 @@ namespace Mario {
   }
 
   void Agent::act_part_1(Action &action) {
+    /// Calculate \rho
+    m_rho = probability_epsilon_greedy(m_next, get_epsilon(), nullptr);
+    if(!is_on_policy())
+      m_rho = probability_greedy(m_next, nullptr) / m_rho;
+
     m_current = m_next;
-    m_current_q_value = m_next_q_values[m_next.first];
+    m_current_q_value = m_next_q_values[m_next];
     m_current_q_value.sort([](const tracked_ptr<Q_Value> &lhs, const tracked_ptr<Q_Value> &rhs)->bool{return lhs->depth < rhs->depth;});
 
-    assert(m_current.first);
+    assert(m_current);
 
-    action = debuggable_cast<const Button_Presses &>(*m_next.first).action;
+    action = debuggable_cast<const Button_Presses &>(*m_next).action;
 
 #if defined(_WINDOWS) && defined(NDEBUG)
     //system("cls");
@@ -265,7 +270,7 @@ namespace Mario {
     update();
 
     if(terminal)
-      td_update(m_current_q_value, reward, Q_Value_List());
+      td_update(m_current_q_value, reward, Q_Value_List(), m_rho, 1.0);
     else {
       generate_all_features();
 
@@ -273,22 +278,22 @@ namespace Mario {
 #ifdef DEBUG_OUTPUT
   //      for(auto &next_q : m_next_q_values)
   //        std::cerr << "   " << *next_q.first << " is an option." << std::endl;
-      std::cerr << "   " << *m_next.first << " (" << m_next.second << ") is next." << std::endl;
+      std::cerr << "   " << *m_next << " is next." << std::endl;
 #endif
-      auto &value_best = m_next_q_values[m_next.first];
-      td_update(m_current_q_value, reward, value_best);
+      auto &value_best = m_next_q_values[m_next];
+      td_update(m_current_q_value, reward, value_best, m_rho, 1.0);
 
       if(!is_on_policy()) {
-        const auto next = m_exploration_policy();
+        Carli::Action_Ptr_C next = m_exploration_policy();
 
-        if(*m_next.first != *next.first) {
-          if(sum_value(nullptr, m_current_q_value, nullptr) < sum_value(nullptr, m_next_q_values[next.first], nullptr))
+        if(*m_next != *next) {
+          if(sum_value(nullptr, m_current_q_value, nullptr) < sum_value(nullptr, m_next_q_values[next], nullptr))
             clear_eligibility_trace();
           m_next = next;
         }
 
 #ifdef DEBUG_OUTPUT
-        std::cerr << "   " << *m_next.first << " (" << m_next.second << ") is next." << std::endl;
+        std::cerr << "   " << *m_next << " is next." << std::endl;
 #endif
       }
     }
