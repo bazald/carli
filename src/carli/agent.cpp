@@ -829,17 +829,24 @@ namespace Carli {
 
     m_credit_assignment(current);
 
+    double dot_w_phi = 0.0;
+    for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; q_ptr = q_ptr->next())
+      (*q_ptr)->eligibility *= rho;
     for(const auto &q : current) {
-      const double credit = this->m_learning_rate * q->credit;
+      const double credit = I * q->credit;
   //       const double credit_accum = credit + (q.eligibility < 0.0 ? 0.0 : q.eligibility);
 
-      if(credit >= q->eligibility) {
-        if(q->eligibility < 0.0)
+      /*if(credit >= q->eligibility)*/ {
+        if(q->eligibility < 0.0) {
+          q->eligibility = 0.0;
           q->eligible.insert_before(m_eligible);
+        }
 
         q->eligibility_init = true;
-        q->eligibility = credit;
+        q->eligibility += credit;
       }
+
+      dot_w_phi += q->secondary;
     }
 
 #ifdef DEBUG_OUTPUT
@@ -851,14 +858,17 @@ namespace Carli {
 #else
     const bool weight_assignment_all = true;
 #endif
-    for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; ) {
+    double dot_w_e = 0.0;
+    for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; q_ptr = q_ptr->next()) {
       Q_Value &q = **q_ptr;
-      const auto q_next = q_ptr->next();
 
       const double ldelta = weight_assignment_all && q.type != Q_Value::Type::FRINGE ? delta : target_value - q.value;
       const double edelta = q.eligibility * ldelta;
+      q.t0 = edelta;
 
-      q.value += edelta;
+      dot_w_e += q.secondary * q.eligibility;
+
+      q.value += m_learning_rate * edelta;
 #ifdef DEBUG_OUTPUT
       q_new += q.value /* * q.weight */;
 #endif
@@ -906,10 +916,27 @@ namespace Carli {
 #endif
         }
       }
+    }
+
+    for(auto &q : next)
+      q->value -= m_learning_rate * m_discount_rate * (1 - m_eligibility_trace_decay_rate) * dot_w_e;
+
+    for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; q_ptr = q_ptr->next()) {
+      Q_Value &q = **q_ptr;
+
+      q.secondary += m_learning_rate * m_secondary_learning_rate * q.t0;
+    }
+
+    for(auto &q : current)
+      q->secondary -= m_learning_rate * m_secondary_learning_rate * dot_w_phi;
+
+    for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; ) {
+      Q_Value &q = **q_ptr;
+      const auto q_next = q_ptr->next();
 
       assert(q.eligibility >= 0.0);
       q.eligibility_init = false;
-      q.eligibility *= m_eligibility_trace_decay_rate;
+      q.eligibility *= m_discount_rate * m_eligibility_trace_decay_rate;
       if(q.eligibility < m_eligibility_trace_decay_threshold) {
         q.eligible.erase_from(m_eligible);
         q.eligibility = -1.0;
