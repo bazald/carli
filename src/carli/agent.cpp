@@ -864,11 +864,11 @@ namespace Carli {
 
       const double ldelta = weight_assignment_all && q.type != Q_Value::Type::FRINGE ? delta : target_value - q.value;
       const double edelta = q.eligibility * ldelta;
-      q.t0 = edelta;
 
       dot_w_e += q.secondary * q.eligibility;
 
       q.value += m_learning_rate * edelta;
+      q.secondary += m_learning_rate * m_secondary_learning_rate * edelta;
 #ifdef DEBUG_OUTPUT
       q_new += q.value /* * q.weight */;
 #endif
@@ -920,12 +920,6 @@ namespace Carli {
 
     for(auto &q : next)
       q->value -= m_learning_rate * m_discount_rate * (1 - m_eligibility_trace_decay_rate) * dot_w_e;
-
-    for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; q_ptr = q_ptr->next()) {
-      Q_Value &q = **q_ptr;
-
-      q.secondary += m_learning_rate * m_secondary_learning_rate * q.t0;
-    }
 
     for(auto &q : current)
       q->secondary -= m_learning_rate * m_secondary_learning_rate * dot_w_phi;

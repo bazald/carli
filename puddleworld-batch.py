@@ -9,7 +9,7 @@ g_plotters = ['./puddleworld.py', './memory.py']
 g_plotter_grid = []#['./puddleworld-grid.py', './puddleworld-heat.py']
 g_plotter_grid_filters = ['move(north)', 'move(south)', 'move(east)', 'move(west)', 'all']
 
-g_base_command = "./puddle_world --output experiment --random-start true --learning-rate 0.1 --discount-rate 0.999 --epsilon-greedy 0.1 --policy off-policy --pseudoepisode-threshold 20"
+g_base_command = "./puddle_world --output experiment --random-start true --eligibility-trace-decay-rate 0.3 --discount-rate 0.999 --learning-rate 0.1 --secondary-learning-rate 0.1 --epsilon-greedy 0.1 --policy off-policy --pseudoepisode-threshold 20"
 
 g_ep_tuples = []
 
