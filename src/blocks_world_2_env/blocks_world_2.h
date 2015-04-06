@@ -71,6 +71,9 @@ namespace Blocks_World_2 {
   };
 
   class BLOCKS_WORLD_2_LINKAGE Environment : public Carli::Environment {
+    Environment(const Environment &);
+    Environment & operator=(const Environment &);
+
   public:
     Environment();
 
@@ -98,6 +101,9 @@ namespace Blocks_World_2 {
   };
 
   class BLOCKS_WORLD_2_LINKAGE Agent : public Carli::Agent {
+    Agent(const Agent &);
+    Agent & operator=(const Agent &);
+
   public:
     Agent(const std::shared_ptr<Carli::Environment> &env);
     ~Agent();

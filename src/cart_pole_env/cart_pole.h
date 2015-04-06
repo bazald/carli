@@ -11,11 +11,11 @@
 #include <stdexcept>
 
 #if !defined(_WINDOWS)
-#define PUDDLE_WORLD_LINKAGE
-#elif !defined(PUDDLE_WORLD_INTERNAL)
-#define PUDDLE_WORLD_LINKAGE __declspec(dllimport)
+#define CART_POLE_LINKAGE
+#elif !defined(CART_POLE_INTERNAL)
+#define CART_POLE_LINKAGE __declspec(dllimport)
 #else
-#define PUDDLE_WORLD_LINKAGE __declspec(dllexport)
+#define CART_POLE_LINKAGE __declspec(dllexport)
 #endif
 
 namespace Cart_Pole {
@@ -35,7 +35,7 @@ namespace Cart_Pole {
   using std::set;
   using std::shared_ptr;
 
-  class PUDDLE_WORLD_LINKAGE Move: public Carli::Action {
+  class CART_POLE_LINKAGE Move: public Carli::Action {
   public:
     Move(const Direction &direction_ = LEFT)
      : direction(direction_)
@@ -74,7 +74,10 @@ namespace Cart_Pole {
     Direction direction;
   };
 
-  class PUDDLE_WORLD_LINKAGE Environment : public Carli::Environment {
+  class CART_POLE_LINKAGE Environment : public Carli::Environment {
+    Environment(const Environment &);
+    Environment & operator=(const Environment &);
+
   public:
     typedef pair<double, double> double_pair;
 
@@ -134,7 +137,10 @@ namespace Cart_Pole {
     const double m_max_x_dot = m_has_goal ? 4.0 : 10.0;
   };
 
-  class PUDDLE_WORLD_LINKAGE Agent : public Carli::Agent {
+  class CART_POLE_LINKAGE Agent : public Carli::Agent {
+    Agent(const Agent &);
+    Agent & operator=(const Agent &);
+
   public:
     Agent(const std::shared_ptr<Carli::Environment> &env);
     ~Agent();

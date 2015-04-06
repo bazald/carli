@@ -51,7 +51,7 @@ namespace Cart_Pole {
   Agent::reward_type Environment::transition_impl(const Carli::Action &action) {
     const bool move_right = static_cast<const Move &>(action).direction == RIGHT;
 
-    const double force = move_right > 0 ? FORCE_MAG : -FORCE_MAG;
+    const double force = move_right ? FORCE_MAG : -FORCE_MAG;
     const double costheta = cos(m_theta);
     const double sintheta = sin(m_theta);
 
