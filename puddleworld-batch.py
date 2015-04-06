@@ -14,9 +14,9 @@ g_base_command = "./puddle_world --output experiment --random-start true --eligi
 g_ep_tuples = []
 
 ### Experiment 0, non-hierarchical agents comparison
-g_ep_tuples.append(("specific_4x4_4x4_0", "--scenario 0 --credit-assignment specific --split-min 5 --split-max 5"))
-g_ep_tuples.append(("specific_8x8_8x8_0", "--scenario 0 --credit-assignment specific --split-min 7 --split-max 7"))
-g_ep_tuples.append(("specific_16x16_16x16_0", "--scenario 0 --credit-assignment specific --split-min 9 --split-max 9"))
+g_ep_tuples.append(("specific_4x4_4x4_0", "--scenario 0 --credit-assignment specific --secondary-learning-rate 0.0 --split-min 5 --split-max 5"))
+g_ep_tuples.append(("specific_8x8_8x8_0", "--scenario 0 --credit-assignment specific --secondary-learning-rate 0.0 --split-min 7 --split-max 7"))
+g_ep_tuples.append(("specific_16x16_16x16_0", "--scenario 0 --credit-assignment specific --secondary-learning-rate 0.0 --split-min 9 --split-max 9"))
 #g_ep_tuples.append(("specific_32x32_32x32_0", "--scenario 0 --credit-assignment specific --split-min 11 --split-max 11"))
 #g_ep_tuples.append(("specific_64x64_64x64_0", "--scenario 0 --credit-assignment specific --split-min 13 --split-max 13"))
 

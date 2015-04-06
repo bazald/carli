@@ -5,7 +5,7 @@ project "infinite_mario"
   targetdir "../.."
   targetsuffix ""
 
-  files { "*.h", "*.cpp" }
+  files { "**.h", "**.cpp" }
 
   if _ACTION ~= "clean" then
     print(os.outputof("cd ../../marioai && ant"))

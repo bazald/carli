@@ -79,7 +79,7 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<int64_t>>("num-blocks", 2, true, 26, true, 3), "Number of blocks to generate in Blocks World 2.");
     options.add(     make_shared<Option_Ranged<bool>>("random-start", false, true, true, true, false), "Should starting positions be randomized in mountain-car and puddle-world.");
     options.add(     make_shared<Option_Ranged<bool>>("reward-negative", false, true, true, true, true), "Use negative rewards per step in mountain-car rather than positive terminal rewards.");
-    //options.add(     make_shared<Option_Ranged<bool>>("set-goal", false, true, true, true, false), "Convert Cart Pole from an equilibrium task to a \"minimum time manoever to a small goal region\" task.");
+    options.add(     make_shared<Option_Ranged<bool>>("set-goal", false, true, true, true, false), "Convert Cart Pole from an equilibrium task to a \"minimum time maneuver to a small goal region\" task.");
     options.add_line("\n  Standard TD Options:");
     options.add('d', make_shared<Option_Ranged<double>>("discount-rate", 0.0, true, 1.0, true, 1.0), "");
     options.add(     make_shared<Option_Ranged<double>>("eligibility-trace-decay-rate", 0.0, true, 1.0, true, 0.0), "Rate at which weights should lose credit.");

@@ -833,18 +833,11 @@ namespace Carli {
     for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; q_ptr = q_ptr->next())
       (*q_ptr)->eligibility *= rho;
     for(const auto &q : current) {
-      const double credit = I * q->credit;
-  //       const double credit_accum = credit + (q.eligibility < 0.0 ? 0.0 : q.eligibility);
+      if(q->eligibility < 0.0)
+        q->eligible.insert_before(m_eligible);
 
-      /*if(credit >= q->eligibility)*/ {
-        if(q->eligibility < 0.0) {
-          q->eligibility = 0.0;
-          q->eligible.insert_before(m_eligible);
-        }
-
-        q->eligibility_init = true;
-        q->eligibility += credit;
-      }
+      q->eligibility = (q->eligibility == -1.0 ? 0.0 : q->eligibility) + I * q->credit;
+      q->eligibility_init = true;
 
       dot_w_phi += q->secondary;
     }

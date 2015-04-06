@@ -1,0 +1,175 @@
+sp {cart-pole*rl-action*left*general
+  :feature 1 unsplit nil
+  (<s> ^move <move>)
+  (<move> == 0)
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*left*x-lower
+  :feature 2 fringe cart-pole*rl-action*left*general 1 -2.4 0.0
+  (<s> ^move <move>)
+  (<move> == 0)
+  {(<s> ^x <x>)
+   (<x> < 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*left*x-upper
+  :feature 2 fringe cart-pole*rl-action*left*general 1 0.0 2.4
+  (<s> ^move <move>)
+  (<move> == 0)
+  {(<s> ^x <x>)
+   (<x> >= 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*left*x-dot-lower
+  :feature 2 fringe cart-pole*rl-action*left*general 1 -10.0 0.0
+  (<s> ^move <move>)
+  (<move> == 0)
+  {(<s> ^x-dot <x-dot>)
+   (<x-dot> < 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*left*x-dot-upper
+  :feature 2 fringe cart-pole*rl-action*left*general 1 0.0 10.0
+  (<s> ^move <move>)
+  (<move> == 0)
+  {(<s> ^x-dot <x-dot>)
+   (<x-dot> >= 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*left*theta-lower
+  :feature 2 fringe cart-pole*rl-action*left*general 1 -0.2094384 0.0
+  (<s> ^move <move>)
+  (<move> == 0)
+  {(<s> ^theta <theta>)
+   (<theta> < 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*left*theta-upper
+  :feature 2 fringe cart-pole*rl-action*left*general 1 0.0 0.2094384
+  (<s> ^move <move>)
+  (<move> == 0)
+  {(<s> ^theta <theta>)
+   (<theta> >= 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*left*theta-dot-lower
+  :feature 2 fringe cart-pole*rl-action*left*general 1 -10.0 0.0
+  (<s> ^move <move>)
+  (<move> == 0)
+  {(<s> ^theta-dot <theta-dot>)
+   (<theta-dot> < 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*left*theta-dot-upper
+  :feature 2 fringe cart-pole*rl-action*left*general 1 0.0 10.0
+  (<s> ^move <move>)
+  (<move> == 0)
+  {(<s> ^theta-dot <theta-dot>)
+   (<theta-dot> >= 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-action*right*general
+  :feature 1 unsplit nil
+  (<s> ^move <move>)
+  (<move> == 1)
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*right*x-lower
+  :feature 2 fringe cart-pole*rl-action*right*general 1 -2.4 0.0
+  (<s> ^move <move>)
+  (<move> == 1)
+  {(<s> ^x <x>)
+   (<x> < 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*right*x-upper
+  :feature 2 fringe cart-pole*rl-action*right*general 1 0.0 2.4
+  (<s> ^move <move>)
+  (<move> == 1)
+  {(<s> ^x <x>)
+   (<x> >= 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*right*x-dot-lower
+  :feature 2 fringe cart-pole*rl-action*right*general 1 -10.0 0.0
+  (<s> ^move <move>)
+  (<move> == 1)
+  {(<s> ^x-dot <x-dot>)
+   (<x-dot> < 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*right*x-dot-upper
+  :feature 2 fringe cart-pole*rl-action*right*general 1 0.0 10.0
+  (<s> ^move <move>)
+  (<move> == 1)
+  {(<s> ^x-dot <x-dot>)
+   (<x-dot> >= 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*right*theta-lower
+  :feature 2 fringe cart-pole*rl-action*right*general 1 -0.2094384 0.0
+  (<s> ^move <move>)
+  (<move> == 1)
+  {(<s> ^theta <theta>)
+   (<theta> < 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*right*theta-upper
+  :feature 2 fringe cart-pole*rl-action*right*general 1 0.0 0.2094384
+  (<s> ^move <move>)
+  (<move> == 1)
+  {(<s> ^theta <theta>)
+   (<theta> >= 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*right*theta-dot-lower
+  :feature 2 fringe cart-pole*rl-action*right*general 1 -10.0 0.0
+  (<s> ^move <move>)
+  (<move> == 1)
+  {(<s> ^theta-dot <theta-dot>)
+   (<theta-dot> < 0.0)}
+-->
+  = 0.0
+}
+
+sp {cart-pole*rl-fringe*right*theta-dot-upper
+  :feature 2 fringe cart-pole*rl-action*right*general 1 0.0 10.0
+  (<s> ^move <move>)
+  (<move> == 1)
+  {(<s> ^theta-dot <theta-dot>)
+   (<theta-dot> >= 0.0)}
+-->
+  = 0.0
+}
