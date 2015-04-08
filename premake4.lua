@@ -83,9 +83,8 @@ solution "carli"
       linkoptions { "-static-libgcc ", "-static-libstdc++" }
     end
   configuration "macosx"
-    buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
+    buildoptions { "-Qunused-arguments" }
     buildoptions { "-Wno-deprecated-register", "-Wno-null-conversion", "-Wno-parentheses-equality", "-Wno-unneeded-internal-declaration" }
-    linkoptions { "-stdlib=libc++" }
   configuration "linux"
     linkoptions { "-Wl,--hash-style=both" }
   configuration "*"
@@ -104,9 +103,8 @@ solution "carli"
 --       links { "tcmalloc_and_profiler" }
     if _OPTIONS["clang"] == "true" then
       configuration "linux"
-        buildoptions { "-stdlib=libc++", "-Qunused-arguments" }
+        buildoptions { "-Qunused-arguments" }
         buildoptions { "-Wno-deprecated-register", "-Wno-null-conversion", "-Wno-parentheses-equality", "-Wno-unneeded-internal-declaration" }
-        linkoptions { "-stdlib=libc++", "-nodefaultlibs" }
         links { "c++", "c++abi", "m", "c", "gcc_s", "gcc" }
     end
   end
