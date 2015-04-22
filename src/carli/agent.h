@@ -1,7 +1,6 @@
 #ifndef CARLI_AGENT_H
 #define CARLI_AGENT_H
 
-#include "utility/getopt.h"
 #include "utility/tracked_ptr.h"
 #include "utility/random.h"
 

@@ -5,11 +5,32 @@
 
 namespace Rete {
 
+  Rete_Agent::CPU_Accumulator::CPU_Accumulator(Rete_Agent &agent_)
+   : agent(agent_)
+  {
+    if(++agent.m_rete_depth == 1)
+      agent.m_start = std::chrono::high_resolution_clock::now();
+  }
+
+  Rete_Agent::CPU_Accumulator::~CPU_Accumulator() {
+    if(!--agent.m_rete_depth) {
+      using dseconds = std::chrono::duration<double, std::ratio<1,1>>;
+      const auto current = std::chrono::high_resolution_clock::now();
+      agent.m_cpu_time += std::chrono::duration_cast<dseconds>(current - agent.m_start).count();
+    }
+  }
+
   Rete_Agent::Rete_Agent()
   {
   }
 
+  Rete_Agent::~Rete_Agent()
+  {
+  }
+
   Rete_Action_Ptr Rete_Agent::make_action(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Node_Ptr &out, const Variable_Indices_Ptr_C &variables) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     if(auto existing = Rete_Action::find_existing(action, [](const Rete_Action &, const WME_Token &){}, out))
       return existing;
 //      std::cerr << "DEBUG: make_action" << std::endl;
@@ -17,10 +38,13 @@ namespace Rete {
     bind_to_action(*this, action_fun, out, variables);
 //      std::cerr << "END: make_action" << std::endl;
     source_rule(action_fun, user_action);
+
     return action_fun;
   }
 
   Rete_Action_Ptr Rete_Agent::make_action_retraction(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out, const Variable_Indices_Ptr_C &variables) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     if(auto existing = Rete_Action::find_existing(action, retraction, out))
       return existing;
     auto action_fun = std::make_shared<Rete_Action>(name, action, retraction);
@@ -30,6 +54,8 @@ namespace Rete {
   }
 
   Rete_Existential_Ptr Rete_Agent::make_existential(const Rete_Node_Ptr &out) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     if(auto existing = Rete_Existential::find_existing(out))
       return existing;
     auto existential = std::make_shared<Rete_Existential>();
@@ -38,6 +64,8 @@ namespace Rete {
   }
 
   Rete_Existential_Join_Ptr Rete_Agent::make_existential_join(const WME_Bindings &bindings, const bool &match_tokens, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     if(auto existing = Rete_Existential_Join::find_existing(bindings, match_tokens, out0, out1))
       return existing;
     auto existential_join = std::make_shared<Rete_Existential_Join>(bindings, match_tokens);
@@ -46,6 +74,8 @@ namespace Rete {
   }
 
   Rete_Filter_Ptr Rete_Agent::make_filter(const WME &wme) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     auto filter = std::make_shared<Rete_Filter>(wme);
 
     for(auto &existing_filter : filters) {
@@ -62,6 +92,8 @@ namespace Rete {
   }
 
   Rete_Join_Ptr Rete_Agent::make_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     if(auto existing = Rete_Join::find_existing(bindings, out0, out1))
       return existing;
     auto join = std::make_shared<Rete_Join>(bindings);
@@ -70,6 +102,8 @@ namespace Rete {
   }
 
   Rete_Negation_Ptr Rete_Agent::make_negation(const Rete_Node_Ptr &out) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     if(auto existing = Rete_Negation::find_existing(out))
       return existing;
     auto negation = std::make_shared<Rete_Negation>();
@@ -78,6 +112,8 @@ namespace Rete {
   }
 
   Rete_Negation_Join_Ptr Rete_Agent::make_negation_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     if(auto existing = Rete_Negation_Join::find_existing(bindings, out0, out1))
       return existing;
     auto negation_join = std::make_shared<Rete_Negation_Join>(bindings);
@@ -86,6 +122,8 @@ namespace Rete {
   }
 
   Rete_Predicate_Ptr Rete_Agent::make_predicate_vc(const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     if(auto existing = Rete_Predicate::find_existing(pred, lhs_index, rhs, out))
       return existing;
     auto predicate = std::make_shared<Rete_Predicate>(pred, lhs_index, rhs);
@@ -94,6 +132,8 @@ namespace Rete {
   }
 
   Rete_Predicate_Ptr Rete_Agent::make_predicate_vv(const Rete_Predicate::Predicate &pred, const WME_Token_Index &lhs_index, const WME_Token_Index &rhs_index, const Rete_Node_Ptr &out) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     if(auto existing = Rete_Predicate::find_existing(pred, lhs_index, rhs_index, out))
       return existing;
     auto predicate = std::make_shared<Rete_Predicate>(pred, lhs_index, rhs_index);
@@ -109,18 +149,24 @@ namespace Rete {
   }
 
   void Rete_Agent::excise_all() {
+    CPU_Accumulator cpu_accumulator(*this);
+
     Agenda::Locker locker(agenda);
     filters.clear();
     rules.clear();
   }
 
   void Rete_Agent::excise_filter(const Rete_Filter_Ptr &filter) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     const auto found = std::find(filters.begin(), filters.end(), filter);
     if(found != filters.end())
       filters.erase(found);
   }
 
   void Rete_Agent::excise_rule(const std::string &name, const bool &user_command) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     auto found = rules.find(name);
     if(found == rules.end()) {
 //        std::cerr << "Rule '" << name << "' not found." << std::endl;
@@ -145,6 +191,8 @@ namespace Rete {
   }
 
   Rete_Action_Ptr Rete_Agent::unname_rule(const std::string &name, const bool &user_command) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     Rete_Action_Ptr ptr;
     auto found = rules.find(name);
     if(found != rules.end()) {
@@ -157,6 +205,9 @@ namespace Rete {
   }
 
   void Rete_Agent::insert_wme(const WME_Ptr_C &wme) {
+    ///< Too slow!
+//    CPU_Accumulator cpu_accumulator(*this);
+
     if(working_memory.wmes.find(wme) != working_memory.wmes.end()) {
 #ifdef DEBUG_OUTPUT
       std::cerr << "rete.already_inserted" << *wme << std::endl;
@@ -176,6 +227,9 @@ namespace Rete {
   }
 
   void Rete_Agent::remove_wme(const WME_Ptr_C &wme) {
+    ///< Too slow!
+//    CPU_Accumulator cpu_accumulator(*this);
+
     auto found = working_memory.wmes.find(wme);
 
     if(found == working_memory.wmes.end()) {
@@ -195,6 +249,8 @@ namespace Rete {
   }
 
   void Rete_Agent::clear_wmes() {
+    CPU_Accumulator cpu_accumulator(*this);
+
     Agenda::Locker locker(agenda);
     for(auto &wme : working_memory.wmes) {
       for(auto &filter : filters)
@@ -320,6 +376,8 @@ namespace Rete {
   }
 
   void Rete_Agent::source_rule(const Rete_Action_Ptr &action, const bool &user_command) {
+    CPU_Accumulator cpu_accumulator(*this);
+
     auto found = rules.find(action->get_name());
     if(found == rules.end()) {
 //        std::cerr << "Rule '" << name << "' sourced." << std::endl;

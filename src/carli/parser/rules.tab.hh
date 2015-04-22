@@ -1,19 +1,19 @@
-/* A Bison parser, made by GNU Bison 2.7.12-4996.  */
+/* A Bison parser, made by GNU Bison 3.0.2.  */
 
 /* Bison interface for Yacc-like parsers in C
-   
-      Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
-   
+
+   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -26,13 +26,13 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
 #ifndef YY_RETE_RULES_TAB_HH_INCLUDED
 # define YY_RETE_RULES_TAB_HH_INCLUDED
-/* Enabling traces.  */
+/* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
@@ -40,54 +40,50 @@
 extern int retedebug;
 #endif
 /* "%code requires" blocks.  */
-/* Line 2053 of yacc.c  */
-#line 14 "rules.yyy"
+#line 14 "rules.yyy" /* yacc.c:1909  */
 
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
 typedef void *yyscan_t;
 #endif
 
+#line 51 "rules.tab.hh" /* yacc.c:1909  */
 
-/* Line 2053 of yacc.c  */
-#line 54 "rules.tab.hh"
-
-/* Tokens.  */
+/* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     ARROW_RIGHT = 258,
-     ASSIGNMENT = 259,
-     COMMAND_EXCISE = 260,
-     COMMAND_EXCISE_ALL = 261,
-     COMMAND_EXIT = 262,
-     COMMAND_INSERT_WME = 263,
-     COMMAND_REMOVE_WME = 264,
-     COMMAND_SET_TOTAL_STEP_COUNT = 265,
-     COMMAND_SOURCE = 266,
-     COMMAND_SP = 267,
-     EXISTENTIAL_MATCH = 268,
-     FLAG_CREATION_TIME = 269,
-     FLAG_FEATURE = 270,
-     FLOAT = 271,
-     INT = 272,
-     NODE_TYPE = 273,
-     STRING = 274,
-     STRING_PART_C = 275,
-     STRING_PART_S = 276,
-     VARIABLE = 277,
-     PREDICATE = 278
-   };
+  enum yytokentype
+  {
+    ARROW_RIGHT = 258,
+    ASSIGNMENT = 259,
+    COMMAND_EXCISE = 260,
+    COMMAND_EXCISE_ALL = 261,
+    COMMAND_EXIT = 262,
+    COMMAND_INSERT_WME = 263,
+    COMMAND_REMOVE_WME = 264,
+    COMMAND_SET_TOTAL_STEP_COUNT = 265,
+    COMMAND_SOURCE = 266,
+    COMMAND_SP = 267,
+    EXISTENTIAL_MATCH = 268,
+    FLAG_CREATION_TIME = 269,
+    FLAG_FEATURE = 270,
+    FLOAT = 271,
+    INT = 272,
+    NODE_TYPE = 273,
+    STRING = 274,
+    STRING_PART_C = 275,
+    STRING_PART_S = 276,
+    VARIABLE = 277,
+    PREDICATE = 278
+  };
 #endif
 
-
+/* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
+typedef union YYSTYPE YYSTYPE;
+union YYSTYPE
 {
-/* Line 2053 of yacc.c  */
-#line 119 "rules.yyy"
+#line 119 "rules.yyy" /* yacc.c:1909  */
 
   char cval;
   const char *csval;
@@ -101,41 +97,28 @@ typedef union YYSTYPE
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 
-
-/* Line 2053 of yacc.c  */
-#line 107 "rules.tab.hh"
-} YYSTYPE;
+#line 101 "rules.tab.hh" /* yacc.c:1909  */
+};
 # define YYSTYPE_IS_TRIVIAL 1
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
+/* Location type.  */
 #if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
-typedef struct YYLTYPE
+typedef struct YYLTYPE YYLTYPE;
+struct YYLTYPE
 {
   int first_line;
   int first_column;
   int last_line;
   int last_column;
-} YYLTYPE;
-# define yyltype YYLTYPE /* obsolescent; will be withdrawn */
+};
 # define YYLTYPE_IS_DECLARED 1
 # define YYLTYPE_IS_TRIVIAL 1
 #endif
 
 
-#ifdef YYPARSE_PARAM
-#if defined __STDC__ || defined __cplusplus
-int reteparse (void *YYPARSE_PARAM);
-#else
-int reteparse ();
-#endif
-#else /* ! YYPARSE_PARAM */
-#if defined __STDC__ || defined __cplusplus
+
 int reteparse (yyscan_t yyscanner, Carli::Agent &agent, const std::string &filename, const std::string &source_path);
-#else
-int reteparse ();
-#endif
-#endif /* ! YYPARSE_PARAM */
 
 #endif /* !YY_RETE_RULES_TAB_HH_INCLUDED  */

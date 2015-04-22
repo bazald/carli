@@ -114,6 +114,8 @@ namespace Carli {
     options.add_line("\n  Unusual Options:");
     options.add(     make_shared<Option_Ranged<int64_t>>("contribute-update-count", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more update than this to count toward means and variances.");
     options.add(     make_shared<Option_String>("dependencies-out", ""), "Where to output feature dependencies depender\\dependee .csv?");
+    options.add(     make_shared<Option_Ranged<bool>>("rete-flush-wmes", false, true, true, true, false), "Flush all WMEs from step to step for purposes of performance comparison.");
+    options.add(     make_shared<Option_Ranged<bool>>("rete-node-sharing", false, true, true, true, true), "Enable sharing of rete nodes. Disable for purposes of performance comparison.");
     options.add(     make_shared<Option_Ranged<bool>>("dynamic-midpoint", false, true, true, true, false), "Dynamically modify midpoint values for features to better balance refinements.");
     options.add(     make_shared<Option_Ranged<double>>("fringe-learning-scale", 0.0, false, 1.0, true, 0.3), "How quickly should the fringe learn relative to rest of the value function? (1.0 == same)");
     options.add(     make_shared<Option_Ranged<int64_t>>("mean-catde-queue-size", 0, true, numeric_limits<int64_t>::max(), true, 0), "How large of a working set to use for means and variances; 0 disables.");

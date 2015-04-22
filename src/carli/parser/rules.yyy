@@ -356,8 +356,10 @@ command:
                         }
 
                         if(parent_action && parent->parent_left() != parent_action->parent_left()) {
-                          reteerror(&yylloc, yyscanner, agent, filename, source_path, "Illegal ancestral relationship specified in :feature.");
-                          YYABORT;
+                          if(get_Option_Ranged<bool>(Options::get_global(), "rete-node-sharing")) {
+                            reteerror(&yylloc, yyscanner, agent, filename, source_path, "Illegal ancestral relationship specified in :feature.");
+                            YYABORT;
+                          }
                         }
                       }
 

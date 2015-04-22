@@ -284,12 +284,16 @@ namespace Puddle_World {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
     const auto pos = env->get_position();
 
-    if(m_x_value->value != pos.first) {
+    CPU_Accumulator cpu_accumulator(*this);
+
+    const bool flush_wmes = get_Option_Ranged<bool>(Options::get_global(), "rete-flush-wmes");
+
+    if(flush_wmes || m_x_value->value != pos.first) {
       remove_wme(m_x_wme);
       m_x_wme->symbols[2] = m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(pos.first);
       insert_wme(m_x_wme);
     }
-    if(m_y_value->value != pos.second) {
+    if(flush_wmes || m_y_value->value != pos.second) {
       remove_wme(m_y_wme);
       m_y_wme->symbols[2] = m_y_value = std::make_shared<Rete::Symbol_Constant_Float>(pos.second);
       insert_wme(m_y_wme);

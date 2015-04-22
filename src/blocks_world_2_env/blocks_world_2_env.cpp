@@ -229,15 +229,24 @@ namespace Blocks_World_2 {
       wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *goal_stack.begin())))), m_matches_top_attr, m_table_stack_id));
     }
 
-    for(auto wt = m_wmes_prev.begin(), wend = m_wmes_prev.end(); wt != wend; ) {
-      const auto found = std::find_if(wmes_current.begin(), wmes_current.end(), [wt](const Rete::WME_Ptr_C &wme_)->bool{return *wme_ == **wt;});
-      if(found == wmes_current.end()) {
+    CPU_Accumulator cpu_accumulator(*this);
+
+    if(get_Option_Ranged<bool>(Options::get_global(), "rete-flush-wmes")) {
+      for(auto wt = m_wmes_prev.begin(), wend = m_wmes_prev.end(); wt != wend; ++wt)
         remove_wme(*wt);
-        m_wmes_prev.erase(wt++);
-      }
-      else {
-        wmes_current.erase(found);
-        ++wt;
+      m_wmes_prev.clear();
+    }
+    else {
+      for(auto wt = m_wmes_prev.begin(), wend = m_wmes_prev.end(); wt != wend; ) {
+        const auto found = std::find_if(wmes_current.begin(), wmes_current.end(), [wt](const Rete::WME_Ptr_C &wme_)->bool{return *wme_ == **wt;});
+        if(found == wmes_current.end()) {
+          remove_wme(*wt);
+          m_wmes_prev.erase(wt++);
+        }
+        else {
+          wmes_current.erase(found);
+          ++wt;
+        }
       }
     }
 

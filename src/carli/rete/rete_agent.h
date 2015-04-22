@@ -4,6 +4,7 @@
 #include "agenda.h"
 #include "rete.h"
 #include "wme_set.h"
+#include <chrono>
 #include <unordered_map>
 
 namespace Rete {
@@ -13,7 +14,17 @@ namespace Rete {
     Rete_Agent & operator=(Rete_Agent &);
 
   public:
+    class CPU_Accumulator {
+    public:
+      CPU_Accumulator(Rete_Agent &agent_);
+      ~CPU_Accumulator();
+
+    private:
+      Rete_Agent &agent;
+    };
+
     Rete_Agent();
+    ~Rete_Agent();
 
     Rete_Action_Ptr make_action(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Node_Ptr &out, const Variable_Indices_Ptr_C &variables);
     Rete_Action_Ptr make_action_retraction(const std::string &name, const bool &user_action, const Rete_Action::Action &action, const Rete_Action::Action &retraction, const Rete_Node_Ptr &out, const Variable_Indices_Ptr_C &variables);
@@ -39,6 +50,7 @@ namespace Rete {
     void remove_wme(const WME_Ptr_C &wme);
     void clear_wmes();
 
+    double rete_cpu_time() const {return m_cpu_time;}
     size_t rete_size() const;
     void rete_print(std::ostream &os) const; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
     void rete_print_rules(std::ostream &os) const;
@@ -67,6 +79,10 @@ namespace Rete {
     int64_t rule_name_index = 0;
     WME_Set working_memory;
     intptr_t visitor_value = 0;
+
+    double m_cpu_time = 0.0;
+    size_t m_rete_depth = 0;
+    std::chrono::high_resolution_clock::time_point m_start;
   };
 
 }

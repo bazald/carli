@@ -207,6 +207,9 @@ namespace Rete {
   }
 
   Rete_Join_Ptr Rete_Join::find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
+    if(!get_Option_Ranged<bool>(Options::get_global(), "rete-node-sharing"))
+      return nullptr;
+
     for(auto &o0 : out0->get_outputs_all()) {
       if(auto existing_join = std::dynamic_pointer_cast<Rete_Join>(o0)) {
         if(std::find(out1->get_outputs_all().begin(), out1->get_outputs_all().end(), existing_join) != out1->get_outputs_all().end()) {

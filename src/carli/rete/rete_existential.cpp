@@ -113,6 +113,9 @@ namespace Rete {
   }
 
   Rete_Existential_Ptr Rete_Existential::find_existing(const Rete_Node_Ptr &out) {
+    if(!get_Option_Ranged<bool>(Options::get_global(), "rete-node-sharing"))
+      return nullptr;
+
     for(auto &o : out->get_outputs_all()) {
       if(auto existing_existential = std::dynamic_pointer_cast<Rete_Existential>(o))
         return existing_existential;

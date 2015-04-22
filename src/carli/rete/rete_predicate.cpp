@@ -189,6 +189,9 @@ namespace Rete {
   }
 
   Rete_Predicate_Ptr Rete_Predicate::find_existing(const Predicate &predicate, const WME_Token_Index &lhs_index, const Symbol_Ptr_C &rhs, const Rete_Node_Ptr &out) {
+    if(!get_Option_Ranged<bool>(Options::get_global(), "rete-node-sharing"))
+      return nullptr;
+
     for(auto &o : out->get_outputs_all()) {
       if(auto existing_predicate = std::dynamic_pointer_cast<Rete_Predicate>(o)) {
         if(predicate == existing_predicate->m_predicate &&

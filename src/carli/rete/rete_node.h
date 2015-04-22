@@ -2,6 +2,7 @@
 #define RETE_NODE_H
 
 #include "../utility/linked_list.h"
+#include "../utility/getopt.h"
 #include "wme_token.h"
 
 #include <algorithm>

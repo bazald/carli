@@ -183,12 +183,16 @@ namespace Mountain_Car {
   void Agent::generate_features() {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
 
-    if(m_x_value->value != env->get_x()) {
+    CPU_Accumulator cpu_accumulator(*this);
+
+    const bool flush_wmes = get_Option_Ranged<bool>(Options::get_global(), "rete-flush-wmes");
+
+    if(flush_wmes || m_x_value->value != env->get_x()) {
       remove_wme(m_x_wme);
       m_x_wme->symbols[2] = m_x_value = std::make_shared<Rete::Symbol_Constant_Float>(env->get_x());
       insert_wme(m_x_wme);
     }
-    if(m_x_dot_value->value != env->get_x_dot()) {
+    if(flush_wmes || m_x_dot_value->value != env->get_x_dot()) {
       remove_wme(m_x_dot_wme);
       m_x_dot_wme->symbols[2] = m_x_dot_value = std::make_shared<Rete::Symbol_Constant_Float>(env->get_x_dot());
       insert_wme(m_x_dot_wme);
