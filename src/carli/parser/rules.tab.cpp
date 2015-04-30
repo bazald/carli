@@ -1777,7 +1777,7 @@ yyreduce:
                         }
 
                         if(parent_action && parent->parent_left() != parent_action->parent_left()) {
-                          if(get_Option_Ranged<bool>(Options::get_global(), "rete-node-sharing")) {
+                          if(!get_Option_Ranged<bool>(Options::get_global(), "rete-disable-node-sharing")) {
                             reteerror(&yylloc, yyscanner, agent, filename, source_path, "Illegal ancestral relationship specified in :feature.");
                             YYABORT;
                           }

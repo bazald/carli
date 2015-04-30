@@ -207,7 +207,7 @@ namespace Rete {
   }
 
   Rete_Join_Ptr Rete_Join::find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
-    if(!get_Option_Ranged<bool>(Options::get_global(), "rete-node-sharing"))
+    if(get_Option_Ranged<bool>(Options::get_global(), "rete-disable-node-sharing"))
       return nullptr;
 
     for(auto &o0 : out0->get_outputs_all()) {

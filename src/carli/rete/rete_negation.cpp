@@ -109,7 +109,7 @@ namespace Rete {
   }
 
   Rete_Negation_Ptr Rete_Negation::find_existing(const Rete_Node_Ptr &out) {
-    if(!get_Option_Ranged<bool>(Options::get_global(), "rete-node-sharing"))
+    if(get_Option_Ranged<bool>(Options::get_global(), "rete-disable-node-sharing"))
       return nullptr;
 
     for(auto &o : out->get_outputs_all()) {

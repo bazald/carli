@@ -11,13 +11,13 @@ project "carli"
     os.mkdir("../../obj")
     local f = assert(io.open("../../obj/scu.cpp", "w"))
     for i, filename in ipairs(matches) do
-      if filename ~= "git.cpp" and filename ~= "obj/scu.cpp" then
+      if filename ~= "git.cpp" and filename ~= "parser/lex.rete.cpp" and filename ~= "parser/rules.tab.cpp" and filename ~= "obj/scu.cpp" then
         f:write("#include \"carli/"..filename.."\"\n")
       end
     end
     f:close()
 
-    files { "git.cpp", "../../obj/scu.cpp" }
+    files { "git.cpp", "parser/lex.rete.cpp", "parser/rules.tab.cpp", "../../obj/scu.cpp" }
   else
     files { "**.h", "**.hh", "**.cpp", "**.lll", "**.yyy" }
     excludes { "obj/scu.cpp" }
