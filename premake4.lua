@@ -70,7 +70,7 @@ solution "carli"
     targetsuffix(TARGETSUFFIX)
   configuration "Release"
     defines { "NDEBUG", "debuggable_cast=static_cast", "debuggable_pointer_cast=std::static_pointer_cast" }
-    flags { "Optimize" }
+    flags { "Optimize", "Symbols" } -- Errors compiling without Symbols on Mac OS X
     targetsuffix "_r"
 --    buildoptions { "-flto" }
 --    linkoptions { "-flto" }
@@ -111,6 +111,9 @@ solution "carli"
 
   configuration "linux"
     includedirs { "/usr/lib/jvm/java-7-openjdk-amd64/include" }
+  configuration "macosx"
+    includedirs { "/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/include",
+                  "/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/include/darwin" }
   configuration "windows"
     includedirs { "C:\\Program Files\\Java\\jdk1.8.0_25\\include",
                   "C:\\Program Files\\Java\\jdk1.8.0_25\\include\\win32" }
