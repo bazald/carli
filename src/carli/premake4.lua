@@ -39,3 +39,8 @@ project "carli"
     configuration "Release"
       postbuildcommands { [[cp carli.dll marioai\classes\]] }
   end
+
+  configuration { "macosx", "Debug*" }
+    linkoptions { "-install_name @rpath/libcarli_d.dylib" }
+  configuration { "macosx", "Release*" }
+    linkoptions { "-install_name @rpath/libcarli.dylib" }

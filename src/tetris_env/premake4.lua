@@ -9,3 +9,8 @@ project "env_tetris"
   files { "**.h", "**.cpp" }
 
   links { "carli" }
+
+  configuration { "macosx", "Debug*" }
+    linkoptions { "-install_name @rpath/libenv_tetris_d.dylib" }
+  configuration { "macosx", "Release*" }
+    linkoptions { "-install_name @rpath/libenv_tetris.dylib" }

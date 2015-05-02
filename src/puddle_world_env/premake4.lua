@@ -9,3 +9,8 @@ project "env_puddle_world"
   files { "**.h", "**.cpp" }
 
   links { "carli" }
+
+  configuration { "macosx", "Debug*" }
+    linkoptions { "-install_name @rpath/libenv_puddle_world_d.dylib" }
+  configuration { "macosx", "Release*" }
+    linkoptions { "-install_name @rpath/libenv_puddle_world.dylib" }

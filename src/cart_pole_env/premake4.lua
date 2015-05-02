@@ -9,3 +9,8 @@ project "env_cart_pole"
   files { "**.h", "**.cpp" }
 
   links { "carli" }
+
+  configuration { "macosx", "Debug*" }
+    linkoptions { "-install_name @rpath/libenv_cart_pole_d.dylib" }
+  configuration { "macosx", "Release*" }
+    linkoptions { "-install_name @rpath/libenv_cart_pole.dylib" }

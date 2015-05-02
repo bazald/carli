@@ -50,6 +50,9 @@ solution "carli"
       buildoptions { "-mfpmath=sse -mmmx -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
     configuration "*"
       buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
+    configuration "macosx"
+      linkoptions { "-Wl,-rpath,'@loader_path/'" }
+    configuration "linux"
       linkoptions { "-Wl,-rpath,'$$ORIGIN'" }
   end
   if _OPTIONS["clang"] == "true" then
