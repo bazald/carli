@@ -83,7 +83,7 @@ namespace Zeni {
     }
 
     /// Get the maximum size of a random integer returned from rand()
-    int32_t rand_max() const {
+    static int32_t rand_max() {
       return std::numeric_limits<int32_t>::max();
     }
 
@@ -167,6 +167,20 @@ namespace Zeni {
 
     bool m_have_next_gaussian = false;
     double m_next_gaussian;
+  };
+
+  class UniformRandomNumberGenerator {
+  public:
+    typedef int32_t result_type;
+    static result_type min() {return 0;}
+    result_type max() const {return m_max;}
+    result_type operator()() {return m_random.rand_lte(m_max);}
+
+    UniformRandomNumberGenerator(const Random &random_, const int32_t &max_) : m_random(random_), m_max(max_) {}
+
+  private:
+    Random m_random;
+    int32_t m_max;
   };
 
 }

@@ -15,21 +15,21 @@ namespace Blocks_World_2 {
   }
 
   void Environment::init_impl() {
-    m_blocks = random_Stacks(m_num_blocks);
+    assert(m_num_blocks > 0);
+
+    std::vector<Block> blocks;
+    blocks.reserve(m_num_blocks);
+    for(int i = 1; i <= m_num_blocks; ++i)
+      blocks.push_back(Block(i, Color(m_random.rand_lt(COLOR_END))));
+    std::shuffle(blocks.begin(), blocks.end(), Zeni::UniformRandomNumberGenerator(m_random, m_num_blocks - 1));
+
+    m_blocks = random_Stacks(blocks);
     do {
-      m_goal = random_Stacks(m_num_blocks);
+      m_goal = random_Stacks(blocks);
     } while(m_blocks == m_goal);
   }
 
-  Environment::Stacks Environment::random_Stacks(const int64_t &num_blocks) {
-    assert(num_blocks > 0);
-
-    std::vector<int> blocks;
-    blocks.reserve(num_blocks);
-    for(int i = 1; i <= num_blocks; ++i)
-      blocks.push_back(i);
-    std::random_shuffle(blocks.begin(), blocks.end());
-
+  Environment::Stacks Environment::random_Stacks(const std::vector<Block> &blocks) {
     Stacks stacks;
     for(const auto &block : blocks) {
       const size_t stack_index = m_random.rand_lte(int32_t(stacks.size()));
@@ -47,26 +47,28 @@ namespace Blocks_World_2 {
     const Move &move = debuggable_cast<const Move &>(action);
 
     Stacks::iterator src = std::find_if(m_blocks.begin(), m_blocks.end(), [&move](Stack &stack)->bool {
-      return !stack.empty() && *stack.rbegin() == move.block;
+      return !stack.empty() && stack.rbegin()->id == move.block;
     });
     Stacks::iterator dest = std::find_if(m_blocks.begin(), m_blocks.end(), [&move](Stack &stack)->bool {
-      return !stack.empty() && *stack.rbegin() == move.dest;
+      return !stack.empty() && stack.rbegin()->id == move.dest;
     });
 
     if(src == m_blocks.end())
       return -10.0; ///< throw std::runtime_error("Attempt to move Block from under another Block.");
 
+    const Block block = *src->rbegin();
+
     src->pop_back();
 
     if(dest != m_blocks.end()) {
-      dest->push_back(move.block);
+      dest->push_back(block);
       if(src->empty())
         m_blocks.erase(src);
     }
     else {
       assert(move.dest == 0);
       assert(src->size() != 0);
-      m_blocks.push_back(Stack(1, move.block));
+      m_blocks.push_back(Stack(1, block));
     }
 
     std::sort(m_blocks.begin(), m_blocks.end());
@@ -77,14 +79,14 @@ namespace Blocks_World_2 {
   void Environment::print_impl(ostream &os) const {
     os << "Blocks World (Table is Left):" << endl;
     for(const Stack &stack : m_blocks) {
-      for(const block_id &id : stack)
-        os << ' ' << char('@' + id);
+      for(const Block &block : stack)
+        os << ' ' << (block.color == COLOR_RED ? 'r' : block.color == COLOR_GREEN ? 'g' : 'b') << char('@' + block.id);
       os << endl;
     }
     os << "Goal:" << endl;
     for(const Stack &stack : m_goal) {
-      for(const block_id &id : stack)
-        os << ' ' << char('@' + id);
+      for(const Block &block : stack)
+        os << ' ' << (block.color == COLOR_RED ? 'r' : block.color == COLOR_GREEN ? 'g' : 'b') << char('@' + block.id);
       os << endl;
     }
   }
@@ -119,9 +121,11 @@ namespace Blocks_World_2 {
     for(const auto &stack : blocks) {
       int64_t height = 0;
       for(const auto &block : stack) {
-        const auto block_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + block))));
+        const auto block_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + block.id))));
 
         wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
+
+        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_color_attr, block.color == COLOR_RED ? m_red_value : block.color == COLOR_GREEN ? m_green_value : m_blue_value));
 
         const double brightness = m_random.frand_lte();
         wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
@@ -132,20 +136,20 @@ namespace Blocks_World_2 {
       for(const auto &dest_stack : blocks) {
         if(stack == dest_stack)
           continue;
-        oss << "move-" << char('@' + *stack.rbegin()) << '-' << char('@' + *dest_stack.rbegin());
+        oss << "move-" << char('@' + stack.rbegin()->id) << '-' << char('@' + dest_stack.rbegin()->id);
         Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
         oss.str("");
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, action_id));
-        wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_block_attr, Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *stack.rbegin()))))));
-        wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_dest_attr, Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *dest_stack.rbegin()))))));
+        wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_block_attr, Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + stack.rbegin()->id))))));
+        wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_dest_attr, Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + dest_stack.rbegin()->id))))));
       }
 
       if(stack.size() > 1) {
-        oss << "move-" << char('@' + *stack.rbegin()) << "-TABLE";
+        oss << "move-" << char('@' + stack.rbegin()->id) << "-TABLE";
         Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
         oss.str("");
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, action_id));
-        wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_block_attr, Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *stack.rbegin()))))));
+        wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_block_attr, Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + stack.rbegin()->id))))));
         wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_dest_attr, m_table_id));
       }
     }
@@ -161,20 +165,20 @@ namespace Blocks_World_2 {
     for(const auto &stack : blocks) {
       std::string stack_str = "|";
       for(const auto &block : stack)
-        stack_str += char('@' + block);
+        stack_str += char('@' + block.id);
 
       Rete::Symbol_Identifier_Ptr_C stack_id(new Rete::Symbol_Identifier(stack_str));
 
       wmes_current.push_back(std::make_shared<Rete::WME>(m_blocks_id, m_stack_attr, stack_id));
       for(const auto &block : stack) {
-        const Rete::Symbol_Identifier_Ptr_C block_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + block))));
+        const Rete::Symbol_Identifier_Ptr_C block_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + block.id))));
         wmes_current.push_back(std::make_shared<Rete::WME>(m_blocks_id, m_block_attr, block_id));
-        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_name_attr, Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(block))));
+        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_name_attr, Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(block.id))));
       }
 
-      wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *stack.rbegin())))), m_clear_attr, m_true_value));
+      wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + stack.rbegin()->id)))), m_clear_attr, m_true_value));
 
-      wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_top_attr, Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *stack.rbegin()))))));
+      wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_top_attr, Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + stack.rbegin()->id))))));
       ///wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_matches_attr, m_table_stack_id));
 
       for(const auto &goal_stack : goal) {
@@ -186,14 +190,14 @@ namespace Blocks_World_2 {
         if(match.first == stack.end()) {
           std::string goal_str = "|";
           for(const auto &block : goal_stack)
-            goal_str += char('@' + block);
+            goal_str += char('@' + block.id);
 
           Rete::Symbol_Identifier_Ptr_C goal_id(new Rete::Symbol_Identifier(goal_str));
 
           wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_matches_attr, goal_id));
 
           if(match.second != goal_stack.end())
-            wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *match.second)))), m_matches_top_attr, stack_id));
+            wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + match.second->id)))), m_matches_top_attr, stack_id));
 
           break;
         }
@@ -208,25 +212,25 @@ namespace Blocks_World_2 {
         if(match.first != goal_stack.begin()) {
           discrepancy -= match.first - goal_stack.begin();
           for(auto bt = goal_stack.begin(); bt != match.first; ++bt)
-            wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *bt)))), m_in_place_attr, m_true_value));
+            wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + bt->id)))), m_in_place_attr, m_true_value));
           break;
         }
       }
-      wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *goal_stack.begin())))), m_matches_top_attr, m_table_stack_id));
+      wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + goal_stack.begin()->id)))), m_matches_top_attr, m_table_stack_id));
     }
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_discrepancy_attr, Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(discrepancy))));
 
     for(const auto &goal_stack : goal) {
       std::string goal_stack_str = "|";
       for(const auto &block : goal_stack)
-        goal_stack_str += char('@' + block);
+        goal_stack_str += char('@' + block.id);
 
       Rete::Symbol_Identifier_Ptr_C goal_stack_id(new Rete::Symbol_Identifier(goal_stack_str));
 
       wmes_current.push_back(std::make_shared<Rete::WME>(m_goal_id, m_stack_attr, goal_stack_id));
       if(std::find(blocks.begin(), blocks.end(), goal_stack) == blocks.end())
-        wmes_current.push_back(std::make_shared<Rete::WME>(goal_stack_id, m_top_attr, Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *goal_stack.rbegin()))))));
-      wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + *goal_stack.begin())))), m_matches_top_attr, m_table_stack_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(goal_stack_id, m_top_attr, Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + goal_stack.rbegin()->id))))));
+      wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + goal_stack.begin()->id)))), m_matches_top_attr, m_table_stack_id));
     }
 
     CPU_Accumulator cpu_accumulator(*this);
