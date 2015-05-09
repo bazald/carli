@@ -23,7 +23,7 @@ namespace Blocks_World_2 {
     blocks.reserve(m_num_blocks);
     for(int i = 1; i <= m_num_blocks; ++i)
       blocks.push_back(Block(i, m_random.rand_lt(g_num_colors)));
-    std::shuffle(blocks.begin(), blocks.end(), Zeni::UniformRandomNumberGenerator(m_random, m_num_blocks - 1));
+    std::shuffle(blocks.begin(), blocks.end(), m_random);
 
     m_blocks = random_Stacks(blocks);
     do {

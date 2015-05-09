@@ -14,7 +14,10 @@ namespace Rete {
     Rete_Agent & operator=(Rete_Agent &);
 
   public:
-    class CPU_Accumulator {
+    class RETE_LINKAGE CPU_Accumulator {
+      CPU_Accumulator(const CPU_Accumulator &);
+      CPU_Accumulator operator=(const CPU_Accumulator &);
+
     public:
       CPU_Accumulator(Rete_Agent &agent_);
       ~CPU_Accumulator();

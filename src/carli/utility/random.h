@@ -71,6 +71,12 @@ namespace Zeni {
 #endif
 
   public:
+    /// Implement Concept: UniformRandomNumberGenerator
+    typedef int32_t result_type;
+    static result_type min() {return 0;}
+    static result_type max() {return rand_max();}
+    result_type operator()() {return rand();}
+
     Random(const uint32_t &seed = Random::get().rand())
      : m_random(seed)
     {
@@ -167,20 +173,6 @@ namespace Zeni {
 
     bool m_have_next_gaussian = false;
     double m_next_gaussian;
-  };
-
-  class UniformRandomNumberGenerator {
-  public:
-    typedef int32_t result_type;
-    static result_type min() {return 0;}
-    result_type max() const {return m_max;}
-    result_type operator()() {return m_random.rand_lte(m_max);}
-
-    UniformRandomNumberGenerator(const Random &random_, const int32_t &max_) : m_random(random_), m_max(max_) {}
-
-  private:
-    Random m_random;
-    int32_t m_max;
   };
 
 }
