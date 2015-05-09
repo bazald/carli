@@ -47,68 +47,67 @@ static unordered_map<string, shared_ptr<tuple<double, double, bool>>> * Flags(co
   return flags;
 }
 
-static array<string, 3> Variable(const string &s0, const string &s1, const string &s2) {
-  array<string, 3> variable;
-  variable[0] = s0;
-  variable[1] = s1;
-  variable[2] = s2;
-  return variable;
-}
-static vector<array<string, 3>> Variables() {
-  vector<array<string, 3>> rv;
+static vector<Variable> Variables() {
+  vector<Variable> rv;
   return rv;
 }
-static vector<array<string, 3>> Variables(const array<string, 3> &variable) {
-  vector<array<string, 3>> rv;
+static vector<Variable> Variables(const Variable &variable) {
+  vector<Variable> rv;
   rv.push_back(variable);
   return rv;
 }
-static pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>> *
-Rete_Node_Ptr_and_Variables(const Rete::Rete_Node_Ptr &rete_node, const vector<array<string, 3>> &variables) {
-  return new pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>(rete_node, variables);
+static pair<Rete::Rete_Node_Ptr, vector<Variable>> *
+Rete_Node_Ptr_and_Variables(const Rete::Rete_Node_Ptr &rete_node, const vector<Variable> &variables) {
+  return new pair<Rete::Rete_Node_Ptr, vector<Variable>>(rete_node, variables);
 }
 
-static Rete::WME_Token_Index find_index(const std::vector<std::array<std::string, 3>> &variables, const std::string &variable) {
+static Rete::WME_Token_Index find_index(const std::vector<Variable> &variables, const std::string &name) {
   for(size_t i = 0; i != variables.size(); ++i) {
-    for(uint8_t ii = 0; ii != 3; ++ii) {
-      if(variables[i][ii] == variable)
-        return Rete::WME_Token_Index(i, ii);
+    if(!variables[i].existential) {
+      for(uint8_t ii = 0; ii != 3; ++ii) {
+        if(variables[i].names[ii] == name)
+          return Rete::WME_Token_Index(i, ii);
+      }
     }
   }
   return Rete::WME_Token_Index(size_t(-1), uint8_t(-1));
 }
 
-static Rete::WME_Bindings join_bindings(const std::vector<std::array<std::string, 3>> &lhs,
-                                        const std::vector<std::array<std::string, 3>> &rhs)
+static Rete::WME_Bindings join_bindings(const std::vector<Variable> &lhs,
+                                        const std::vector<Variable> &rhs)
 {
   Rete::WME_Bindings bindings;
   unordered_set<string> joined;
   for(size_t i = 0; i != lhs.size(); ++i) {
-    for(uint8_t ii = 0; ii != 3; ++ii) {
-      if(!lhs[i][ii].empty() && joined.find(lhs[i][ii]) == joined.end()) {
-        for(size_t j = 0; j != rhs.size(); ++j) {
-          for(uint8_t jj = 0; jj != 3; ++jj) {
-            if(lhs[i][ii] == rhs[j][jj]) {
-              bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
-              joined.insert(lhs[i][ii]);
-              goto DONE_JOINING;
+    if(!lhs[i].existential) {
+      for(uint8_t ii = 0; ii != 3; ++ii) {
+        if(!lhs[i].names[ii].empty() && joined.find(lhs[i].names[ii]) == joined.end()) {
+          for(size_t j = 0; j != rhs.size(); ++j) {
+            if(!rhs[j].existential) {
+              for(uint8_t jj = 0; jj != 3; ++jj) {
+                if(lhs[i].names[ii] == rhs[j].names[jj]) {
+                  bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
+                  joined.insert(lhs[i].names[ii]);
+                  goto DONE_JOINING;
+                }
+              }
             }
           }
         }
+        DONE_JOINING:
+          ;
       }
-      DONE_JOINING:
-        ;
     }
   }
   return bindings;
 }
 
-static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<array<string, 3>> &variables) {
+static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<Variable> &variables) {
   const auto indices = std::make_shared<Rete::Variable_Indices>();
   for(size_t i = 0; i != variables.size(); ++i) {
     for(uint8_t ii = 0; ii != 3; ++ii) {
-      if(!variables[i][ii].empty() && indices->find(variables[i][ii]) == indices->end())
-        indices->insert(std::make_pair(variables[i][ii], Rete::WME_Token_Index(i, ii)));
+      if(!variables[i].names[ii].empty() && indices->find(variables[i].names[ii]) == indices->end())
+        indices->insert(std::make_pair(variables[i].names[ii], Rete::WME_Token_Index(i, ii)));
     }
   }
   return indices;
@@ -124,8 +123,8 @@ static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<array<stri
   int64_t ival;
   std::list<std::string> *slist;
   std::string *sval;
-  std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>> *rete_node_ptr;
-  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<std::array<std::string, 3>>>, std::string, std::tuple<std::shared_ptr<int64_t>, std::shared_ptr<std::tuple<int64_t, std::string, std::string, Carli::Feature *>>>, double> *rule_ptr;
+  std::pair<Rete::Rete_Node_Ptr, std::vector<Variable>> *rete_node_ptr;
+  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<Variable>>, std::string, std::tuple<std::shared_ptr<int64_t>, std::shared_ptr<std::tuple<int64_t, std::string, std::string, Carli::Feature *>>>, double> *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 }
@@ -371,7 +370,7 @@ rule:
                                             get<0>(*$3) = make_shared<int64_t>(agent.get_total_step_count());
                                           if(!get<1>(*$3))
                                             get<1>(*$3) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>();
-                                          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, double>(*$4, *$2, *$3, 0.0);
+                                          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<Variable>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, double>(*$4, *$2, *$3, 0.0);
                                           delete $2;
                                           delete $3;
                                           delete $4; }
@@ -379,7 +378,7 @@ rule:
                                                                             get<0>(*$3) = make_shared<int64_t>(agent.get_total_step_count());
                                                                           if(!get<1>(*$3))
                                                                             get<1>(*$3) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>();
-                                                                          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<array<string, 3>>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, double>(*$4, *$2, *$3, $7);
+                                                                          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<Variable>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, double>(*$4, *$2, *$3, $7);
                                                                           delete $2;
                                                                           delete $3;
                                                                           delete $4; }
@@ -430,15 +429,29 @@ final_conditions:
                                                         delete $3; }
   ;
 conditions:
-  conditions condition_type { vector<array<string, 3>> variables($1->second);
+  conditions condition_type { vector<Variable> variables($1->second);
                               variables.insert(variables.end(), $2->second.begin(), $2->second.end());
                               $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(join_bindings($1->second, $2->second), $1->first, $2->first)), variables);
                               delete $1;
                               delete $2; }
-  | conditions '+' condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings($1->second, $3->second), false, $1->first, $3->first)), $1->second);
+  | conditions '+' condition_type { vector<Variable> variables($1->second);
+                                    variables.reserve(variables.size() + $3->second.size());
+                                    for(const Variable &var_ : $3->second) {
+                                      Variable var(var_);
+                                      var.existential = true;
+                                      variables.push_back(var);
+                                    }
+                                    $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings($1->second, $3->second), false, $1->first, $3->first)), variables);
                                     delete $1;
                                     delete $3; }
-  | conditions '-' condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(join_bindings($1->second, $3->second), $1->first, $3->first)), $1->second);
+  | conditions '-' condition_type { vector<Variable> variables($1->second);
+                                    variables.reserve(variables.size() + $3->second.size());
+                                    for(const Variable &var_ : $3->second) {
+                                      Variable var(var_);
+                                      var.existential = true;
+                                      variables.push_back(var);
+                                    }
+                                    $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(join_bindings($1->second, $3->second), $1->first, $3->first)), variables);
                                     delete $1;
                                     delete $3; }
   | conditions '(' VARIABLE PREDICATE symbol_constant ')' { const auto lhs_index = find_index($1->second, *$3);

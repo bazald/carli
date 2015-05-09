@@ -24,11 +24,6 @@ namespace Blocks_World_2 {
 
   typedef int64_t block_id;
 
-  enum Color {COLOR_RED   = 0,
-              COLOR_GREEN = 1,
-              COLOR_BLUE  = 2,
-              COLOR_END   = 3};
-
   /** Stupid features:
     * BLOCK ^column C
     * BLOCK ^height H
@@ -83,7 +78,7 @@ namespace Blocks_World_2 {
     Environment();
 
     struct Block {
-      Block(const block_id &id_, const Color &color_) : id(id_), color(color_) {}
+      Block(const block_id &id_, const int32_t &color_) : id(id_), color(color_) {}
 
       bool operator==(const Block &rhs) const {
         return id == rhs.id && color == rhs.color;
@@ -94,7 +89,7 @@ namespace Blocks_World_2 {
       }
 
       block_id id;
-      Color color;
+      int32_t color;
     };
 
     typedef std::vector<Block> Stack;
@@ -137,6 +132,8 @@ namespace Blocks_World_2 {
 
     Zeni::Random m_random;
 
+    std::function<bool (const Environment::Block &lhs, const Environment::Block &rhs)> m_match_test;
+
     /*
      * Objects: workspace/goal
      *          stack
@@ -167,9 +164,6 @@ namespace Blocks_World_2 {
     const Rete::Symbol_Constant_String_Ptr_C m_matches_top_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("matches-top"));
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
     const Rete::Symbol_Constant_String_Ptr_C m_false_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("false"));
-    const Rete::Symbol_Constant_String_Ptr_C m_red_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("red"));
-    const Rete::Symbol_Constant_String_Ptr_C m_green_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("green"));
-    const Rete::Symbol_Constant_String_Ptr_C m_blue_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("blue"));
     const Rete::Symbol_Identifier_Ptr_C m_blocks_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("BLOCKS"));
     const Rete::Symbol_Identifier_Ptr_C m_goal_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("GOAL"));
     const Rete::Symbol_Identifier_Ptr_C m_table_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("TABLE"));

@@ -10,6 +10,8 @@ namespace Blocks_World_2 {
   using Carli::Node_Unsplit;
   using Carli::Q_Value;
 
+  static const int32_t g_num_colors = 3;
+
   Environment::Environment() {
     init_impl();
   }
@@ -20,7 +22,7 @@ namespace Blocks_World_2 {
     std::vector<Block> blocks;
     blocks.reserve(m_num_blocks);
     for(int i = 1; i <= m_num_blocks; ++i)
-      blocks.push_back(Block(i, Color(m_random.rand_lt(COLOR_END))));
+      blocks.push_back(Block(i, m_random.rand_lt(g_num_colors)));
     std::shuffle(blocks.begin(), blocks.end(), Zeni::UniformRandomNumberGenerator(m_random, m_num_blocks - 1));
 
     m_blocks = random_Stacks(blocks);
@@ -80,13 +82,13 @@ namespace Blocks_World_2 {
     os << "Blocks World (Table is Left):" << endl;
     for(const Stack &stack : m_blocks) {
       for(const Block &block : stack)
-        os << ' ' << (block.color == COLOR_RED ? 'r' : block.color == COLOR_GREEN ? 'g' : 'b') << char('@' + block.id);
+        os << ' ' << (block.color == 0 ? 'r' : block.color == 1 ? 'g' : 'b') << char('@' + block.id);
       os << endl;
     }
     os << "Goal:" << endl;
     for(const Stack &stack : m_goal) {
       for(const Block &block : stack)
-        os << ' ' << (block.color == COLOR_RED ? 'r' : block.color == COLOR_GREEN ? 'g' : 'b') << char('@' + block.id);
+        os << ' ' << (block.color == 0 ? 'r' : block.color == 1 ? 'g' : 'b') << char('@' + block.id);
       os << endl;
     }
   }
@@ -94,6 +96,21 @@ namespace Blocks_World_2 {
   Agent::Agent(const std::shared_ptr<Carli::Environment> &env)
    : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(variables, token);})
   {
+    const std::string goal = dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value();
+
+    if(goal == "exact") {
+      m_match_test = [](const Environment::Block &lhs, const Environment::Block &rhs)->bool{
+        return lhs.id == rhs.id;
+      };
+    }
+    else if(goal == "color") {
+      m_match_test = [](const Environment::Block &lhs, const Environment::Block &rhs)->bool{
+        return lhs.color == rhs.color;
+      };
+    }
+    else
+      abort();
+
     generate_rete();
     generate_features();
   }
@@ -125,7 +142,7 @@ namespace Blocks_World_2 {
 
         wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
 
-        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_color_attr, block.color == COLOR_RED ? m_red_value : block.color == COLOR_GREEN ? m_green_value : m_blue_value));
+        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_color_attr, std::make_shared<Rete::Symbol_Constant_Int>(block.color)));
 
         const double brightness = m_random.frand_lte();
         wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
@@ -185,7 +202,7 @@ namespace Blocks_World_2 {
         if(goal_stack.size() < stack.size())
           continue;
 
-        const auto match = std::mismatch(stack.begin(), stack.end(), goal_stack.begin());
+        const auto match = std::mismatch(stack.begin(), stack.end(), goal_stack.begin(), m_match_test);
 
         if(match.first == stack.end()) {
           std::string goal_str = "|";
@@ -208,7 +225,7 @@ namespace Blocks_World_2 {
     for(const auto &goal_stack : goal) {
       discrepancy += goal_stack.size();
       for(const auto &stack : blocks) {
-        const auto match = std::mismatch(goal_stack.begin(), goal_stack.end(), stack.begin());
+        const auto match = std::mismatch(goal_stack.begin(), goal_stack.end(), stack.begin(), m_match_test);
         if(match.first != goal_stack.begin()) {
           discrepancy -= match.first - goal_stack.begin();
           for(auto bt = goal_stack.begin(); bt != match.first; ++bt)
