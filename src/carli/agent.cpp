@@ -622,6 +622,21 @@ namespace Carli {
   //  std::cerr << "Inserting next value " << q_value << " for action " << *action << std::endl;
   //#endif
     auto &q_values = m_next_q_values[action];
+
+//#ifdef DEBUG_OUTPUT
+//    std::cerr << "insert_q_value_next(" << *action << ',' << q_value.get() << ") into {";
+//    for(auto &q : q_values) {
+//      if(action) {
+//        std::cerr << ' ' << q->value /* * q.weight */ << ':' << q->depth;
+//        if(q->type == Q_Value::Type::FRINGE)
+//          std::cerr << 'f';
+//        if(q->feature)
+//          std::cerr << ':' << *q->feature;
+//      }
+//    }
+//    std::cerr << " }." << std::endl;
+//#endif
+
 #ifndef NDEBUG
     if(std::find(q_values.begin(), q_values.end(), q_value) != q_values.end())
       increment_badness();
@@ -636,6 +651,7 @@ namespace Carli {
     assert(q_value);
     auto &q_values = m_next_q_values[action];
     auto found = std::find(q_values.begin(), q_values.end(), q_value);
+    assert(found != q_values.end());
     if(found != q_values.end()) {
       q_values.erase(found);
 #ifndef NDEBUG
@@ -643,6 +659,22 @@ namespace Carli {
         decrement_badness();
 #endif
     }
+
+//#ifdef DEBUG_OUTPUT
+//    std::cerr << "purge_q_value_next(" << *action << ',' << q_value.get() << ") ";
+//    std::cerr << (found != q_values.end() ? "succeeded" : "failed");
+//    std::cerr << " from {";
+//    for(auto &q : q_values) {
+//      if(action) {
+//        std::cerr << ' ' << q->value /* * q.weight */ << ':' << q->depth;
+//        if(q->type == Q_Value::Type::FRINGE)
+//          std::cerr << 'f';
+//        if(q->feature)
+//          std::cerr << ':' << *q->feature;
+//      }
+//    }
+//    std::cerr << " }." << std::endl;
+//#endif
   }
 
   void Agent::purge_q_value_eligible(const tracked_ptr<Q_Value> &q_value) {
@@ -1361,7 +1393,7 @@ namespace Carli {
 #ifdef DEBUG_OUTPUT
     if(action) {
       std::cerr.unsetf(std::ios_base::floatfield);
-      std::cerr << "   sum_value(" << *action << ") = {";
+      std::cerr << "   sum_value(" << *action << ") = " << value_list.size() << " {";
     }
 #endif
 
