@@ -154,6 +154,7 @@ namespace Rete {
 
     int64_t get_height() const {return height;}
     Rete_Node_Ptr_C get_token_owner() const {return token_owner.lock();}
+    int64_t get_size() const {return size;}
     int64_t get_token_size() const {return token_size;}
 
     virtual std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> get_output_tokens() const = 0;
@@ -283,6 +284,7 @@ namespace Rete {
 
     int64_t height = 0;
     std::weak_ptr<const Rete_Node> token_owner;
+    int64_t size = -1;
     int64_t token_size = -1;
 
   private:

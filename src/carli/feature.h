@@ -67,9 +67,9 @@ namespace Carli {
 
 //      os << bindings;
 
-      if(axis.first == -1) {
+      if(axis.rete_row == -1) {
         for(const auto &binding : bindings) {
-          if(binding.second.first != -1)
+          if(binding.second.rete_row != -1)
             os << Rete::get_Variable_name(indices, binding.first) << '.';
         }
         os << *conditions.rbegin()->symbols[1];

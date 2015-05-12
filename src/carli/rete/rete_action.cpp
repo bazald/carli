@@ -109,7 +109,7 @@ namespace Rete {
   }
 
   void Rete_Action::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &) const {
-#ifdef DEBUG_OUTPUT
+//#ifdef DEBUG_OUTPUT
     {
       const auto tokens = parent_left()->get_output_tokens();
 
@@ -121,7 +121,7 @@ namespace Rete {
 
       os << "# Variables: " << *variables << std::endl;
     }
-#endif
+//#endif
 
     os << "sp {" << name;
     if(data)
@@ -170,6 +170,7 @@ namespace Rete {
     action->variables = variables;
     action->height = out->get_height() + 1;
     action->token_owner = out->get_token_owner();
+    action->size = out->get_size();
     action->token_size = out->get_token_size();
     out->insert_output_enabled(action);
     out->pass_tokens(agent, action.get());

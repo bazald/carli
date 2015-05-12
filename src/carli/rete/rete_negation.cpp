@@ -125,6 +125,7 @@ namespace Rete {
     negation->input = out.get();
     negation->height = out->get_height() + 1;
     negation->token_owner = out->get_token_owner();
+    negation->size = out->get_size();
     negation->token_size = out->get_token_size();
     out->insert_output_enabled(negation);
     out->pass_tokens(agent, negation.get());

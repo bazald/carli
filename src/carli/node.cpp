@@ -193,7 +193,7 @@ namespace Carli {
           new_test = agent.make_negation_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
       }
       else {
-        /// Case 3: New conditions must be joined, new variables are assumed
+        /// Case 3: New conditions must be joined
         if(dynamic_cast<Rete::Rete_Join *>(ancestor_right.get()))
           new_test = agent.make_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
         else if(const auto existential_join = dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get()))
@@ -202,33 +202,54 @@ namespace Carli {
           new_test = agent.make_negation_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
         else
           abort();
+      }
 
+      /// New conditions are possible for cases 2 and 3
+      {
+        const int64_t leaf_size = ancestor_left->get_size();
         const int64_t leaf_token_size = ancestor_left->get_token_size();
+        const int64_t old_size = ra_lock->parent_left()->get_size();
         const int64_t old_token_size = ra_lock->parent_left()->get_token_size();
+        const int64_t new_size = new_test->get_size();
         const int64_t new_token_size = new_test->get_token_size();
 
         for(const auto &variable : *variables) {
-          const auto found = old_variables->find(variable.first);
-          if(found == old_variables->end()) {
+          const auto found = old_variables->equal_range(variable.first);
+          bool found_non_existential = false;
+          std::find_if(found.first, found.second, [&found_non_existential,&old_token_size](const std::pair<std::string, Rete::WME_Token_Index> &variable)->bool {
+            return found_non_existential = !variable.second.existential;
+          });
+          if(!found_non_existential) {
             if(!new_variables)
               new_variables = std::make_shared<Rete::Variable_Indices>(*old_variables);
             auto new_index = variable.second;
 
+            if(new_size > old_size) {
+              /// Offset forward
+              new_index.rete_row += new_size - leaf_size;
+            }
+            else if(new_index.rete_row >= leaf_size) {
+              /// Offset backward
+              new_index.rete_row -= old_size - new_size;
+            }
+
             if(new_token_size > old_token_size) {
               /// Offset forward
-              new_index.first += new_token_size - leaf_token_size;
+              new_index.token_row += new_token_size - leaf_token_size;
             }
-            else if(new_index.first >= leaf_token_size) {
+            else if(new_index.token_row >= leaf_token_size) {
               /// Offset backward
-              new_index.first -= old_token_size - new_token_size;
-              if(new_index.first < leaf_token_size) {
+              new_index.token_row -= old_token_size - new_token_size;
+              if(new_index.token_row < leaf_token_size) {
                 /// Discard intermediate fringe variables which no longer exist post-collapse
                 continue;
               }
             }
 
-            assert(new_index.first > -1);
-            assert(new_index.first < new_token_size);
+            assert(new_index.rete_row > -1);
+            assert(new_index.token_row > -1);
+            assert(new_index.rete_row < new_size);
+            assert(new_index.existential || new_index.token_row < new_token_size);
             assert(std::find_if(new_variables->begin(), new_variables->end(), [new_index](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == new_index;}) == new_variables->end());
             new_variables->insert(std::make_pair(variable.first, new_index));
           }
@@ -239,12 +260,12 @@ namespace Carli {
 //          offset += ra_lock->parent_left()->parent_right()->get_token_size();
 //        }
 
-        assert(new_feature->axis.first > -2);
-        assert(new_feature->axis.first < old_token_size);
-        if(new_feature->axis.first != -1) {
-          const int64_t index_offset = new_token_size > old_token_size ? new_token_size - leaf_token_size : new_token_size - old_token_size;
-          new_feature->axis.first = new_feature->axis.first + index_offset;
-          assert(new_feature->axis.first > -1);
+        assert(new_feature->axis.rete_row > -2);
+        assert(new_feature->axis.rete_row < old_size);
+        if(new_feature->axis.rete_row != -1) {
+          const int64_t index_offset = new_size > old_size ? new_size - leaf_size : new_size - old_size;
+          new_feature->axis.rete_row = new_feature->axis.rete_row + index_offset;
+          assert(new_feature->axis.rete_row > -1);
 #ifndef NDEBUG
           if(new_variables)
             assert(std::find_if(new_variables->begin(), new_variables->end(), [new_feature](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == new_feature->axis;}) != new_variables->end());
@@ -252,13 +273,30 @@ namespace Carli {
             assert(std::find_if(old_variables->begin(), old_variables->end(), [new_feature](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == new_feature->axis;}) != old_variables->end());
 #endif
         }
-        assert(new_feature->axis.first < new_token_size);
+        assert(new_feature->axis.rete_row < new_size);
+
+        assert(new_feature->axis.token_row > -2);
+        assert(new_feature->axis.token_row < old_token_size);
+        if(new_feature->axis.token_row != -1) {
+          const int64_t index_offset = new_token_size > old_token_size ? new_token_size - leaf_token_size : new_token_size - old_token_size;
+          new_feature->axis.token_row = new_feature->axis.token_row + index_offset;
+          assert(new_feature->axis.token_row > -1);
+#ifndef NDEBUG
+          if(new_variables)
+            assert(std::find_if(new_variables->begin(), new_variables->end(), [new_feature](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == new_feature->axis;}) != new_variables->end());
+          else
+            assert(std::find_if(old_variables->begin(), old_variables->end(), [new_feature](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == new_feature->axis;}) != old_variables->end());
+#endif
+        }
+        assert(new_feature->axis.token_row < new_token_size);
       }
     }
 
     /// Fix feature
-    if(new_feature->axis.first >= lra_lock->parent_left()->get_token_size())
-      new_feature->axis.first += ancestor_left->get_token_size() - lra_lock->parent_left()->get_token_size();
+    if(new_feature->axis.rete_row >= lra_lock->parent_left()->get_size())
+      new_feature->axis.rete_row += ancestor_left->get_size() - lra_lock->parent_left()->get_size();
+    if(new_feature->axis.token_row >= lra_lock->parent_left()->get_token_size())
+      new_feature->axis.token_row += ancestor_left->get_token_size() - lra_lock->parent_left()->get_token_size();
     new_feature->indices = new_variables ? new_variables : old_variables;
 
     /// Create the actual action for the new fringe node

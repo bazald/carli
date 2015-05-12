@@ -237,6 +237,7 @@ namespace Rete {
     predicate->input = out.get();
     predicate->height = out->get_height() + 1;
     predicate->token_owner = out->get_token_owner();
+    predicate->size = out->get_size() + 1;
     predicate->token_size = out->get_token_size();
 
     out->insert_output_enabled(predicate);

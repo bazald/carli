@@ -12,14 +12,39 @@
 
 namespace Rete {
 
-  typedef std::pair<int64_t, int8_t> WME_Token_Index;
+  struct WME_Token_Index {
+    WME_Token_Index() : rete_row(0), token_row(0), column(0) {}
+
+    WME_Token_Index(const int64_t &rete_row_, const int64_t &token_row_, const int8_t &column_)
+     : rete_row(rete_row_), token_row(token_row_), column(column_)
+    {
+    }
+
+    bool operator==(const WME_Token_Index &rhs) const {
+      return rete_row == rhs.rete_row && token_row == rhs.token_row && column == rhs.column && existential == rhs.existential;
+    }
+
+    bool operator<(const WME_Token_Index &rhs) const {
+      return rete_row < rhs.rete_row ||
+             (rete_row == rhs.rete_row &&
+              (token_row < rhs.token_row ||
+               (token_row == rhs.token_row &&
+                (column < rhs.column ||
+                 (column == rhs.column && !existential && rhs.existential)))));
+    }
+
+    int64_t rete_row;
+    int64_t token_row;
+    int8_t column;
+    bool existential = false;
+  };
   typedef std::unordered_multimap<std::string, WME_Token_Index> Variable_Indices;
   typedef std::shared_ptr<Variable_Indices> Variable_Indices_Ptr;
 
 }
 
 inline std::ostream & operator<<(std::ostream &os, const Rete::WME_Token_Index &index) {
-  return os << '(' << index.first << ',' << int(index.second) << ')';
+  return os << '(' << index.rete_row << ',' << index.token_row << ',' << int(index.column) << ',' << index.existential << ')';
 }
 
 namespace Rete {
@@ -375,7 +400,7 @@ namespace Rete {
     virtual std::ostream & print(std::ostream &os, const Variable_Indices_Ptr_C &indices) const override {
       os.put('<');
       const auto found = std::find_if(indices->begin(), indices->end(), [this](const std::pair<std::string, WME_Token_Index> &ind)->bool {
-        return ind.second.first == 0 && ind.second.second == this->value;
+        return ind.second.token_row == 0 && ind.second.column == this->value;
       });
       if(found != indices->end())
         os << found->first;

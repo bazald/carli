@@ -79,12 +79,12 @@ namespace Mountain_Car {
 
     if(dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value()) {
       Rete::WME_Bindings state_bindings;
-      state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
+      state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0, 0), Rete::WME_Token_Index(0, 0, 0)));
       auto acceleration = make_filter(Rete::WME(m_first_var, acceleration_attr, m_third_var));
       auto x = make_filter(Rete::WME(m_first_var, x_attr, m_third_var));
       auto x_dot = make_filter(Rete::WME(m_first_var, x_dot_attr, m_third_var));
       for(const auto &acceleration_value : acceleration_values) {
-        auto acceleration_pred = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(0, 2), acceleration_value, acceleration);
+        auto acceleration_pred = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(0, 0, 2), acceleration_value, acceleration);
         auto acceleration_x = make_join(state_bindings, acceleration_pred, x);
         auto x_xdot = make_join(state_bindings, acceleration_x, x_dot);
         generate_cmac(x_xdot);
@@ -146,9 +146,9 @@ namespace Mountain_Car {
     const double xdot_size = (m_max_x_dot - m_min_x_dot) / cmac_resolution;
 
     const auto variables = std::make_shared<Rete::Variable_Indices>();
-    variables->insert(std::make_pair("acceleration", Rete::WME_Token_Index(0, 2)));
-    variables->insert(std::make_pair("x", Rete::WME_Token_Index(1, 2)));
-    variables->insert(std::make_pair("x-dot", Rete::WME_Token_Index(2, 2)));
+    variables->insert(std::make_pair("acceleration", Rete::WME_Token_Index(0, 0, 2)));
+    variables->insert(std::make_pair("x", Rete::WME_Token_Index(1, 1, 2)));
+    variables->insert(std::make_pair("x-dot", Rete::WME_Token_Index(2, 2, 2)));
 
     for(int64_t tiling = -cmac_offset, tend = tiling + cmac_tilings; tiling != tend; ++tiling) {
       const double x_offset = x_size * tiling;
@@ -157,13 +157,13 @@ namespace Mountain_Car {
       for(int64_t i = 0; i != cmac_resolution; ++i) {
         const double left = m_min_x + (i - x_offset) * x_size;
         const double right = m_min_x + (i + 1 - x_offset) * x_size;
-        auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(1, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
-        auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(1, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
+        auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(1, 1, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
+        auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(1, 1, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
         for(int64_t j = 0; j != cmac_resolution; ++j) {
           const double top = m_min_x_dot + (j - xdot_offset) * xdot_size;
           const double bottom = m_min_x_dot + (j + 1 - xdot_offset) * xdot_size;
-          auto xdotgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(2, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
-          auto xdotlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(2, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), xdotgte);
+          auto xdotgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(2, 2, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
+          auto xdotlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(2, 2, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), xdotgte);
 
           ///// This does redundant work for actions after the first.
           //for(const auto &action : m_action) {

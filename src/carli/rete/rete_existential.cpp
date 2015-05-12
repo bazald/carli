@@ -129,6 +129,7 @@ namespace Rete {
     existential->input = out.get();
     existential->height = out->get_height() + 1;
     existential->token_owner = out->get_token_owner();
+    existential->size = out->get_size();
     existential->token_size = out->get_token_size();
     out->insert_output_enabled(existential);
     out->pass_tokens(agent, existential.get());

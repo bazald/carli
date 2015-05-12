@@ -62,15 +62,13 @@ Rete_Node_Ptr_and_Variables(const Rete::Rete_Node_Ptr &rete_node, const vector<V
 }
 
 static Rete::WME_Token_Index find_index(const std::vector<Variable> &variables, const std::string &name) {
-  for(size_t i = 0; i != variables.size(); ++i) {
-    if(!variables[i].existential) {
-      for(uint8_t ii = 0; ii != 3; ++ii) {
-        if(variables[i].names[ii] == name)
-          return Rete::WME_Token_Index(i, ii);
-      }
+  for(const auto &variable : variables) {
+    for(const auto &ni : variable.name_index) {
+      if(!ni.second.existential && ni.first == name)
+        return ni.second;
     }
   }
-  return Rete::WME_Token_Index(size_t(-1), uint8_t(-1));
+  return Rete::WME_Token_Index(-1, -1, -1);
 }
 
 static Rete::WME_Bindings join_bindings(const std::vector<Variable> &lhs,
@@ -78,25 +76,21 @@ static Rete::WME_Bindings join_bindings(const std::vector<Variable> &lhs,
 {
   Rete::WME_Bindings bindings;
   unordered_set<string> joined;
-  for(size_t i = 0; i != lhs.size(); ++i) {
-    if(!lhs[i].existential) {
-      for(uint8_t ii = 0; ii != 3; ++ii) {
-        if(!lhs[i].names[ii].empty() && joined.find(lhs[i].names[ii]) == joined.end()) {
-          for(size_t j = 0; j != rhs.size(); ++j) {
-            if(!rhs[j].existential) {
-              for(uint8_t jj = 0; jj != 3; ++jj) {
-                if(lhs[i].names[ii] == rhs[j].names[jj]) {
-                  bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(i, ii), Rete::WME_Token_Index(j, jj)));
-                  joined.insert(lhs[i].names[ii]);
-                  goto DONE_JOINING;
-                }
-              }
+  for(const Variable &lvar : lhs) {
+    for(const auto &lni : lvar.name_index) {
+      if(!lni.second.existential && !lni.first.empty() && joined.find(lni.first) == joined.end()) {
+        for(const Variable &rvar : rhs) {
+          for(const auto &rni : rvar.name_index) {
+            if(!rni.second.existential && lni.first == rni.first) {
+              bindings.insert(Rete::WME_Binding(lni.second, rni.second));
+              joined.insert(lni.first);
+              goto DONE_JOINING;
             }
           }
         }
-        DONE_JOINING:
-          ;
       }
+      DONE_JOINING:
+        ;
     }
   }
   return bindings;
@@ -104,13 +98,49 @@ static Rete::WME_Bindings join_bindings(const std::vector<Variable> &lhs,
 
 static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<Variable> &variables) {
   const auto indices = std::make_shared<Rete::Variable_Indices>();
-  for(size_t i = 0; i != variables.size(); ++i) {
-    for(uint8_t ii = 0; ii != 3; ++ii) {
-      if(!variables[i].names[ii].empty() && indices->find(variables[i].names[ii]) == indices->end())
-        indices->insert(std::make_pair(variables[i].names[ii], Rete::WME_Token_Index(i, ii)));
+  for(const auto &variable : variables) {
+    for(const auto &ni : variable.name_index) {
+      if(ni.first.empty())
+        continue;
+      indices->insert(ni);
     }
   }
   return indices;
+}
+
+static vector<Variable> merge_variables(const vector<Variable> &lhs, const vector<Variable> &rhs, const bool &existential) {
+  vector<Variable> variables(lhs);
+  int64_t rete_offset = 0;
+  int64_t token_offset = 0;
+  for(const Variable &variable : variables) {
+    for(const auto &ni : variable.name_index) {
+      if(ni.second.rete_row >= rete_offset)
+        rete_offset = ni.second.rete_row + 1;
+      if(!ni.second.existential && ni.second.token_row >= token_offset)
+        token_offset = ni.second.token_row + 1;
+    }
+  }
+  variables.reserve(variables.size() + rhs.size());
+  for(const Variable &var_ : rhs) {
+    Variable var(var_);
+    for(auto &ni : var.name_index) {
+      for(const Variable &existing_var : variables) {
+        for(const auto &existing_ni : existing_var.name_index) {
+          if(!existing_ni.second.existential && existing_ni.first == ni.first) {
+            ni.first.clear();
+            goto VAR_FOUND;
+          }
+        }
+      }
+      VAR_FOUND:
+      ni.second.rete_row += rete_offset;
+      ni.second.token_row += token_offset;
+      ni.second.existential |= existential;
+        ;
+    }
+    variables.push_back(var);
+  }
+  return variables;
 }
 
 %}
@@ -258,7 +288,7 @@ command:
                           else if(dynamic_cast<Rete::Rete_Existential_Join *>(parent.get()) ||
                                   dynamic_cast<Rete::Rete_Negation_Join *>(parent.get()))
                           {
-                            feature->axis = Rete::WME_Token_Index(-1, -1);
+                            feature->axis = Rete::WME_Token_Index(-1, -1, -1);
                           }
                           else {
                             Rete::Rete_Node_Ptr test_node = parent;
@@ -270,7 +300,7 @@ command:
 
                             if(const auto bindings = test_node->get_bindings()) {
                               for(const auto binding : *bindings) {
-                                if(binding.second == Rete::WME_Token_Index(0, 0)) {
+                                if(binding.second == Rete::WME_Token_Index(0, 0, 0)) {
                                   feature->axis = binding.first;
                                   goto AXIS_FOUND;
                                 }
@@ -290,7 +320,7 @@ command:
                               auto ancestor_prev = ancestor;
                               assert(ancestor && dynamic_cast<const Carli::Node *>(ancestor->data.get())->q_value->feature);
                               while(ancestor && dynamic_cast<const Carli::Node *>(ancestor->data.get())->q_value->feature &&
-                                    ancestor->get_token_size() > predicate->get_lhs_index().first)
+                                    ancestor->get_token_size() > predicate->get_lhs_index().token_row)
                               {
                                 ancestor_prev = ancestor;
                                 ancestor = dynamic_cast<const Carli::Node *>(ancestor->data.get())->parent_action.lock();
@@ -306,7 +336,7 @@ command:
                                 feature->conditions = ancestor_node->q_value->feature->conditions;
                               }
                               else
-                                feature->bindings.insert(std::make_pair(predicate->get_lhs_index(), Rete::WME_Token_Index(-1, -1)));
+                                feature->bindings.insert(std::make_pair(predicate->get_lhs_index(), Rete::WME_Token_Index(-1, -1, -1)));
                             }
                           }
                           else {
@@ -315,11 +345,11 @@ command:
                               feature->conditions = parent->parent_right()->get_filter_wmes();
                             }
                             if(auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(parent.get()))
-                              feature->bindings.insert(std::make_pair(predicate->get_lhs_index(), Rete::WME_Token_Index(-1, -1)));
+                              feature->bindings.insert(std::make_pair(predicate->get_lhs_index(), Rete::WME_Token_Index(-1, -1, -1)));
                           }
 
                           if(parent->get_token_size() > parent->parent_left()->get_token_size())
-                            feature->axis.first += parent->parent_left()->get_token_size();
+                            feature->axis.token_row += parent->parent_left()->get_token_size();
                           feature->indices = variable_indices;
 
                           //std::cerr << "LHS" << feature->axis << ' ' << *variable_indices << std::endl;
@@ -429,33 +459,20 @@ final_conditions:
                                                         delete $3; }
   ;
 conditions:
-  conditions condition_type { vector<Variable> variables($1->second);
-                              variables.insert(variables.end(), $2->second.begin(), $2->second.end());
+  conditions condition_type { const vector<Variable> variables(merge_variables($1->second, $2->second, false));
                               $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(join_bindings($1->second, $2->second), $1->first, $2->first)), variables);
                               delete $1;
                               delete $2; }
-  | conditions '+' condition_type { vector<Variable> variables($1->second);
-                                    variables.reserve(variables.size() + $3->second.size());
-                                    for(const Variable &var_ : $3->second) {
-                                      Variable var(var_);
-                                      var.existential = true;
-                                      variables.push_back(var);
-                                    }
+  | conditions '+' condition_type { const vector<Variable> variables(merge_variables($1->second, $3->second, true));
                                     $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings($1->second, $3->second), false, $1->first, $3->first)), variables);
                                     delete $1;
                                     delete $3; }
-  | conditions '-' condition_type { vector<Variable> variables($1->second);
-                                    variables.reserve(variables.size() + $3->second.size());
-                                    for(const Variable &var_ : $3->second) {
-                                      Variable var(var_);
-                                      var.existential = true;
-                                      variables.push_back(var);
-                                    }
+  | conditions '-' condition_type { const vector<Variable> variables(merge_variables($1->second, $3->second, true));
                                     $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(join_bindings($1->second, $3->second), $1->first, $3->first)), variables);
                                     delete $1;
                                     delete $3; }
   | conditions '(' VARIABLE PREDICATE symbol_constant ')' { const auto lhs_index = find_index($1->second, *$3);
-                                                            if(lhs_index.second > 2) {
+                                                            if(lhs_index.column > 2) {
                                                               reteerror(&yylloc, yyscanner, agent, filename, source_path, "Unbound variable tested by predicate.");
                                                               YYABORT;
                                                             }
@@ -465,7 +482,7 @@ conditions:
                                                             delete $5; }
   | conditions '(' VARIABLE PREDICATE VARIABLE ')' { const auto lhs_index = find_index($1->second, *$3);
                                                      const auto rhs_index = find_index($1->second, *$5);
-                                                     if(lhs_index.second > 2 || rhs_index.second > 2) {
+                                                     if(lhs_index.column > 2 || rhs_index.column > 2) {
                                                        reteerror(&yylloc, yyscanner, agent, filename, source_path, "Unbound variable tested by predicate.");
                                                        YYABORT;
                                                      }

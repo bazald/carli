@@ -120,6 +120,7 @@ namespace Rete {
     assert(filter);
     filter->height = 1;
     filter->token_owner = filter;
+    filter->size = 1;
     filter->token_size = 1;
   }
 

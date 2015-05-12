@@ -183,12 +183,12 @@ namespace Puddle_World {
 
     if(dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["cmac"]).get_value()) {
       Rete::WME_Bindings state_bindings;
-      state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0), Rete::WME_Token_Index(0, 0)));
+      state_bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0, 0), Rete::WME_Token_Index(0, 0, 0)));
       const auto move = make_filter(Rete::WME(m_first_var, move_attr, m_third_var));
       const auto x = make_filter(Rete::WME(m_first_var, x_attr, m_third_var));
       const auto y = make_filter(Rete::WME(m_first_var, y_attr, m_third_var));
       for(const auto &move_value : move_values) {
-        const auto move_pred = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(0, 2), move_value, move);
+        const auto move_pred = make_predicate_vc(Rete::Rete_Predicate::EQ, Rete::WME_Token_Index(0, 0, 2), move_value, move);
         const auto move_x = make_join(state_bindings, move_pred, x);
         const auto x_y = make_join(state_bindings, move_x, y);
         generate_cmac(x_y);
@@ -247,9 +247,9 @@ namespace Puddle_World {
     const double xy_size = 1.0 / cmac_resolution;
 
     const auto variables = std::make_shared<Rete::Variable_Indices>();
-    variables->insert(std::make_pair("move", Rete::WME_Token_Index(0, 2)));
-    variables->insert(std::make_pair("x", Rete::WME_Token_Index(1, 2)));
-    variables->insert(std::make_pair("y", Rete::WME_Token_Index(2, 2)));
+    variables->insert(std::make_pair("move", Rete::WME_Token_Index(0, 0, 2)));
+    variables->insert(std::make_pair("x", Rete::WME_Token_Index(1, 1, 2)));
+    variables->insert(std::make_pair("y", Rete::WME_Token_Index(2, 2, 2)));
 
     for(int64_t tiling = -cmac_offset, tend = tiling + cmac_tilings; tiling != tend; ++tiling) {
       const double xy_offset = xy_size * tiling;
@@ -257,13 +257,13 @@ namespace Puddle_World {
       for(int64_t i = 0; i != cmac_resolution; ++i) {
         const double left = (i - xy_offset) * xy_size;
         const double right = (i + 1 - xy_offset) * xy_size;
-        auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(1, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
-        auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(1, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
+        auto xgte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(1, 1, 2), std::make_shared<Rete::Symbol_Constant_Float>(left), parent);
+        auto xlt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(1, 1, 2), std::make_shared<Rete::Symbol_Constant_Float>(right), xgte);
         for(int64_t j = 0; j != cmac_resolution; ++j) {
           const double top = (j - xy_offset) * xy_size;
           const double bottom = (j + 1 - xy_offset) * xy_size;
-          auto ygte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(2, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
-          auto ylt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(2, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), ygte);
+          auto ygte = make_predicate_vc(Rete::Rete_Predicate::GTE, Rete::WME_Token_Index(2, 2, 2), std::make_shared<Rete::Symbol_Constant_Float>(top), xlt);
+          auto ylt = make_predicate_vc(Rete::Rete_Predicate::LT, Rete::WME_Token_Index(2, 2, 2), std::make_shared<Rete::Symbol_Constant_Float>(bottom), ygte);
 
           ///// This does redundant work for actions after the first.
           //for(const auto &action : m_action) {

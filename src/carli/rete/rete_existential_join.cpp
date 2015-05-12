@@ -153,7 +153,7 @@ namespace Rete {
     if(prb)
       os << '{';
 
-    const auto bound = bind_Variable_Indices(bindings, indices, pl->get_token_size());
+    const auto bound = bind_Variable_Indices(bindings, indices, *pl);
 
     pr->print_rule(os, bound);
 
@@ -289,6 +289,7 @@ namespace Rete {
     join->input1 = out1.get();
     join->height = std::max(out0->get_height(), out1->get_height()) + 1;
     join->token_owner = out0->get_token_owner();
+    join->size = out0->get_size() + out1->get_size();
     join->token_size = out0->get_token_size();
 
     out0->insert_output_enabled(join);

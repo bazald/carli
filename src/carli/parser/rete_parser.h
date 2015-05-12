@@ -10,12 +10,13 @@ PARSER_LINKAGE void rete_set_exit();
 
 struct PARSER_LINKAGE Variable {
   Variable(const std::string &s0, const std::string &s1, const std::string &s2)
-   : names({{s0, s1, s2}})
+   : name_index({{std::make_pair(s0, Rete::WME_Token_Index(0u, 0u, 0)),
+                  std::make_pair(s1, Rete::WME_Token_Index(0u, 0u, 1)),
+                  std::make_pair(s2, Rete::WME_Token_Index(0u, 0u, 2))}})
   {
   }
 
-  std::array<std::string, 3> names;
-  bool existential = false;
+  std::array<std::pair<std::string, Rete::WME_Token_Index>, 3> name_index;
 };
 
 inline int rete_parse_string(Carli::Agent &agent, const std::string &str) {

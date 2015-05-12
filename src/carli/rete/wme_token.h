@@ -7,6 +7,7 @@
 
 namespace Rete {
 
+  class Rete_Node;
   class WME_Token;
   typedef std::shared_ptr<const WME_Token> WME_Token_Ptr_C;
   typedef std::shared_ptr<WME_Token> WME_Token_Ptr;
@@ -46,7 +47,7 @@ namespace Rete {
     WME_Ptr_C m_wme;
   };
 
-  Variable_Indices_Ptr_C bind_Variable_Indices(const WME_Bindings &bindings, const Variable_Indices_Ptr_C &indices, const int64_t &offset);
+  Variable_Indices_Ptr_C bind_Variable_Indices(const WME_Bindings &bindings, const Variable_Indices_Ptr_C &indices, const Rete_Node &left);
   std::string get_Variable_name(const Variable_Indices_Ptr_C &indices, const WME_Token_Index &index);
 
 }

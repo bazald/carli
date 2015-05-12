@@ -1,5 +1,7 @@
 #include "wme_token.h"
 
+#include "rete_node.h"
+
 #include <iostream>
 
 namespace Rete {
@@ -54,19 +56,19 @@ namespace Rete {
 
   const Symbol_Ptr_C & WME_Token::operator[](const WME_Token_Index &index) const {
     if(m_wme) {
-      assert(index.first == 0);
-      assert(index.second < 3);
+      assert(index.token_row == 0);
+      assert(index.column < 3);
 
-      return m_wme->symbols[index.second];
+      return m_wme->symbols[index.column];
     }
     else {
-      assert(index.first < m_size);
+      assert(index.token_row < m_size);
 
       const auto first_size = m_wme_token.first->m_size;
-      if(index.first < first_size)
+      if(index.token_row < first_size)
         return (*m_wme_token.first)[index];
       else
-        return (*m_wme_token.second)[WME_Token_Index(index.first - first_size, index.second)];
+        return (*m_wme_token.second)[WME_Token_Index(index.rete_row, index.token_row - first_size, index.column)];
     }
   }
 
@@ -94,28 +96,31 @@ namespace Rete {
 //    return rv;
 //  }
 
-  Variable_Indices_Ptr_C bind_Variable_Indices(const WME_Bindings &bindings, const Variable_Indices_Ptr_C &indices, const int64_t &offset) {
+  Variable_Indices_Ptr_C bind_Variable_Indices(const WME_Bindings &bindings, const Variable_Indices_Ptr_C &indices, const Rete_Node &left) {
+    const int64_t left_size = left.get_size();
+    const int64_t left_token_size = left.get_token_size();
+
     Variable_Indices_Ptr closure = std::make_shared<Variable_Indices>();
 
     for(const auto &index : *indices) {
-      if(index.second.first >= offset)
-        closure->insert(std::make_pair(index.first, WME_Token_Index(index.second.first - offset, index.second.second)));
+      if(index.second.rete_row >= left_size)
+        closure->insert(std::make_pair(index.first, WME_Token_Index(index.second.rete_row - left_size, index.second.token_row - left_token_size, index.second.column)));
     }
 
     for(const auto &binding : bindings) {
-      auto found = std::find_if(indices->begin(), indices->end(), [binding,offset](const std::pair<std::string, WME_Token_Index> &ind)->bool {
-        return ind.second == binding.first;
+      auto found = std::find_if(indices->begin(), indices->end(), [binding](const std::pair<std::string, WME_Token_Index> &ind)->bool {
+        return ind.second.token_row == binding.first.token_row && ind.second.column == binding.first.column;
       });
       if(found != indices->end()) {
-        closure->insert(std::make_pair(found->first, WME_Token_Index(binding.second.first, binding.second.second)));
+        closure->insert(std::make_pair(found->first, binding.second));
         continue;
       }
 
-      found = std::find_if(closure->begin(), closure->end(), [binding,offset](const std::pair<std::string, WME_Token_Index> &ind)->bool {
-        return ind.second == binding.first;
+      found = std::find_if(closure->begin(), closure->end(), [binding](const std::pair<std::string, WME_Token_Index> &ind)->bool {
+        return ind.second.token_row == binding.first.token_row && ind.second.column == binding.first.column;
       });
       if(found != closure->end())
-        closure->insert(std::make_pair(found->first, WME_Token_Index(binding.second.first, binding.second.second)));
+        closure->insert(std::make_pair(found->first, binding.second));
     }
 
     return closure;
@@ -127,7 +132,7 @@ namespace Rete {
 //#endif
 
     const auto found = std::find_if(indices->begin(), indices->end(), [index](const std::pair<std::string, WME_Token_Index> &ind)->bool {
-      return ind.second.first == index.first && ind.second.second == index.second;
+      return ind.second.rete_row == index.rete_row && ind.second.column == index.column;
     });
     assert(found != indices->end());
     if(found != indices->end())
