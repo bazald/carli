@@ -197,27 +197,58 @@ namespace Blocks_World_2 {
 
       wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_top_attr, Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + stack.rbegin()->id))))));
       ///wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_matches_attr, m_table_stack_id));
+    }
 
-      for(const auto &goal_stack : goal) {
+    std::unordered_set<const Environment::Stack *> matched_stacks;
+    for(const auto &goal_stack : goal) {
+      const Environment::Stack * best_match = nullptr;
+      size_t best_match_size = 0u;
+
+      for(const auto &stack : blocks) {
+        if(matched_stacks.find(&stack) != matched_stacks.end())
+          continue;
         if(goal_stack.size() < stack.size())
           continue;
 
         const auto match = std::mismatch(stack.begin(), stack.end(), goal_stack.begin(), m_match_test);
 
         if(match.first == stack.end()) {
-          std::string goal_str = "|";
-          for(const auto &block : goal_stack)
-            goal_str += char('@' + block.id);
-
-          Rete::Symbol_Identifier_Ptr_C goal_id(new Rete::Symbol_Identifier(goal_str));
-
-          wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_matches_attr, goal_id));
-
-          if(match.second != goal_stack.end())
-            wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + match.second->id)))), m_matches_top_attr, stack_id));
-
-          break;
+          if(match.second == goal_stack.end()) {
+            best_match = &stack;
+            best_match_size = stack.size();
+            break;
+          }
+          else if(stack.size() > best_match_size) {
+            best_match = &stack;
+            best_match_size = stack.size();
+          }
         }
+      }
+
+      if(best_match) {
+        std::string goal_str = "|";
+        for(const auto &block : goal_stack)
+          goal_str += char('@' + block.id);
+        std::string stack_str = "|";
+        for(const auto &block : *best_match)
+          stack_str += char('@' + block.id);
+
+        const Rete::Symbol_Identifier_Ptr_C goal_id(new Rete::Symbol_Identifier(goal_str));
+        const Rete::Symbol_Identifier_Ptr_C stack_id(new Rete::Symbol_Identifier(stack_str));
+        const auto match = std::mismatch(best_match->begin(), best_match->end(), goal_stack.begin(), m_match_test);
+
+        wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_matches_attr, goal_id));
+
+        if(match.second != goal_stack.end()) {
+          for(const auto &stack : blocks) {
+            for(const auto &block : stack) {
+              if(m_match_test(block, *match.second))
+                wmes_current.push_back(std::make_shared<Rete::WME>(Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + block.id)))), m_matches_top_attr, stack_id));
+            }
+          }
+        }
+
+        matched_stacks.insert(best_match);
       }
     }
 
@@ -286,9 +317,26 @@ namespace Blocks_World_2 {
     const auto &blocks = env->get_blocks();
     const auto &goal = env->get_goal();
 
-    for(const auto &gstack : goal) {
-      if(std::find(blocks.begin(), blocks.end(), gstack) == blocks.end())
-        return;
+    std::unordered_set<const Environment::Stack *> matched_stacks;
+    for(const auto &goal_stack : goal) {
+      for(const auto &stack : blocks) {
+        if(matched_stacks.find(&stack) != matched_stacks.end())
+          continue;
+        if(goal_stack.size() < stack.size())
+          continue;
+
+        const auto match = std::mismatch(stack.begin(), stack.end(), goal_stack.begin(), m_match_test);
+
+        if(match.first == stack.end() && match.second == goal_stack.end()) {
+          matched_stacks.insert(&stack);
+          goto MATCHED_GOAL;
+        }
+      }
+
+      return;
+
+      MATCHED_GOAL:
+        ;
     }
 
     m_metastate = Metastate::SUCCESS;

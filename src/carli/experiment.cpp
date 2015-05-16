@@ -143,9 +143,11 @@ namespace Carli {
 
     options.get(argc, argv);
 
-    const auto seed = uint32_t(dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["seed"]).get_value());
+    const auto seed = uint32_t(dynamic_cast<const Option_Ranged<int64_t> &>(options["seed"]).get_value());
+    const auto output = dynamic_cast<const Option_Itemized &>(options["output"]).get_value();
     Zeni::Random::get().seed(seed);
-    cout << "SEED " << seed << endl;
+    if(output != "null")
+      cout << "SEED " << seed << endl;
 
     std::ofstream seed_file("seed.txt");
     if(seed_file)

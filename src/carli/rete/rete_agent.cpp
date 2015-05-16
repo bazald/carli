@@ -378,6 +378,8 @@ namespace Rete {
   void Rete_Agent::source_rule(const Rete_Action_Ptr &action, const bool &user_command) {
     CPU_Accumulator cpu_accumulator(*this);
 
+    const auto output = dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value();
+
     auto found = rules.find(action->get_name());
     if(found == rules.end()) {
 //        std::cerr << "Rule '" << name << "' sourced." << std::endl;
@@ -387,11 +389,11 @@ namespace Rete {
 //        std::cerr << "Rule '" << name << "' replaced." << std::endl;
       assert(found->second != action);
       found->second->destroy(*this);
-        if(user_command)
-      std::cerr << '#';
+      if(user_command && output != "null")
+        std::cerr << '#';
       found->second = action;
     }
-    if(user_command)
+    if(user_command && output != "null")
       std::cerr << '*';
   }
 
