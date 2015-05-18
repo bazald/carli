@@ -175,6 +175,7 @@ namespace Blocks_World {
     wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[0], m_in_place_attr, m_true_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[0], m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(0)));
 
+    Rete::Agenda::Locker locker(agenda);
     CPU_Accumulator cpu_accumulator(*this);
 
     if(get_Option_Ranged<bool>(Options::get_global(), "rete-flush-wmes")) {

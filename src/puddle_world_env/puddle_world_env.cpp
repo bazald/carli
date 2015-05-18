@@ -284,6 +284,7 @@ namespace Puddle_World {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
     const auto pos = env->get_position();
 
+    Rete::Agenda::Locker locker(agenda);
     CPU_Accumulator cpu_accumulator(*this);
 
     const bool flush_wmes = get_Option_Ranged<bool>(Options::get_global(), "rete-flush-wmes");

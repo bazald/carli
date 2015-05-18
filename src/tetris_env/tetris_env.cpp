@@ -563,6 +563,7 @@ namespace Tetris {
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_prohibits_clearing_attr, std::make_shared<Rete::Symbol_Constant_Int>(prohibits)));
     }
 
+    Rete::Agenda::Locker locker(agenda);
     CPU_Accumulator cpu_accumulator(*this);
 
     if(get_Option_Ranged<bool>(Options::get_global(), "rete-flush-wmes")) {

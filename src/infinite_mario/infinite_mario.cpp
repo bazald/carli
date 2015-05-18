@@ -424,7 +424,8 @@ namespace Mario {
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.second.second - m_current_state->getMarioFloatPos.second)));
     }
 
-   CPU_Accumulator cpu_accumulator(*this);
+    Rete::Agenda::Locker locker(agenda);
+    CPU_Accumulator cpu_accumulator(*this);
 
     if(get_Option_Ranged<bool>(Options::get_global(), "rete-flush-wmes")) {
       for(auto wt = m_wmes_prev.begin(), wend = m_wmes_prev.end(); wt != wend; ++wt)

@@ -178,7 +178,7 @@ static vector<Variable> merge_variables(const vector<Variable> &lhs, const vecto
       VAR_FOUND:
       ni.second.rete_row += rete_offset;
       ni.second.token_row += token_offset;
-      ni.second.existential |= existential;
+      ni.second.existential = ni.second.existential | existential;
         ;
     }
     variables.push_back(var);

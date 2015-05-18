@@ -149,9 +149,10 @@ namespace Rete {
   }
 
   void Rete_Agent::excise_all() {
+    Agenda::Locker locker(agenda);
+
     CPU_Accumulator cpu_accumulator(*this);
 
-    Agenda::Locker locker(agenda);
     filters.clear();
     rules.clear();
   }
@@ -249,9 +250,10 @@ namespace Rete {
   }
 
   void Rete_Agent::clear_wmes() {
+    Agenda::Locker locker(agenda);
+
     CPU_Accumulator cpu_accumulator(*this);
 
-    Agenda::Locker locker(agenda);
     for(auto &wme : working_memory.wmes) {
       for(auto &filter : filters)
         filter->remove_wme(*this, wme);

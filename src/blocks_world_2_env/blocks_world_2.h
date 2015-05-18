@@ -95,10 +95,11 @@ namespace Blocks_World_2 {
     typedef std::vector<Block> Stack;
     typedef std::vector<Stack> Stacks;
 
+    const std::function<bool (const Environment::Block &lhs, const Environment::Block &rhs)> & get_match_test() const {return m_match_test;}
     const Stacks & get_blocks() const {return m_blocks;}
     const Stacks & get_goal() const {return m_goal;}
 
-    int64_t num_blocks() const {return m_num_blocks;}
+    bool success() const;
 
   private:
     void init_impl();
@@ -109,6 +110,9 @@ namespace Blocks_World_2 {
     void print_impl(ostream &os) const;
 
     const int64_t m_num_blocks = get_Option_Ranged<int64_t>(Options::get_global(), "num-blocks");
+    const int64_t m_num_goal_blocks = get_Option_Ranged<int64_t>(Options::get_global(), "num-goal-blocks");
+
+    std::function<bool (const Environment::Block &lhs, const Environment::Block &rhs)> m_match_test;
 
     Zeni::Random m_random;
     Stacks m_blocks;
@@ -131,8 +135,6 @@ namespace Blocks_World_2 {
     void update();
 
     Zeni::Random m_random;
-
-    std::function<bool (const Environment::Block &lhs, const Environment::Block &rhs)> m_match_test;
 
     /*
      * Objects: workspace/goal

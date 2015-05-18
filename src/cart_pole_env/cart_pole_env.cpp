@@ -124,6 +124,7 @@ namespace Cart_Pole {
   void Agent::generate_features() {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
 
+    Rete::Agenda::Locker locker(agenda);
     CPU_Accumulator cpu_accumulator(*this);
 
     const bool flush_wmes = get_Option_Ranged<bool>(Options::get_global(), "rete-flush-wmes");
