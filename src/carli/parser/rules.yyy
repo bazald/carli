@@ -252,8 +252,11 @@ command:
                       else {
                         if(feature) {
                           auto test_node_rightmost = parent;
-                          while(test_node_rightmost->get_bindings())
+                          int64_t test_node_rightmost_offset = 0;
+                          while(test_node_rightmost->get_bindings()) {
+                            test_node_rightmost_offset += test_node_rightmost->parent_left()->get_size();
                             test_node_rightmost = test_node_rightmost->parent_right();
+                          }
 
                           /// Fill in Feature values / predicate tests
                           if(const auto feature_e = dynamic_cast<Carli::Feature_Enumerated<Carli::Feature> *>(feature)) {
@@ -283,8 +286,10 @@ command:
                           }
 
                           /// Determine Feature axes
-                          if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node_rightmost.get()))
+                          if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node_rightmost.get())) {
                             feature->axis = predicate->get_lhs_index();
+                            feature->axis.rete_row += test_node_rightmost_offset;
+                          }
                           else if(dynamic_cast<Rete::Rete_Existential_Join *>(parent.get()) ||
                                   dynamic_cast<Rete::Rete_Negation_Join *>(parent.get()))
                           {

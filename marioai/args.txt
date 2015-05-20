@@ -5,9 +5,9 @@
 --discount-rate
 0.9
 --learning-rate
-0.3
+0.01
 --eligibility-trace-decay-rate
-0.5
+0.1
 --policy
 on-policy
 --epsilon-greedy
