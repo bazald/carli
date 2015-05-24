@@ -20,7 +20,8 @@ namespace Mario {
   }
 
   State::State(const State &prev, JNIEnv *env, jobject observation)
-   : action(prev.action)
+   : enemiesSeen(prev.enemiesSeen),
+   action(prev.action)
   {
     jclass cls = env->FindClass("ch/idsia/mario/environments/Environment");
     assert(cls);
@@ -102,8 +103,8 @@ namespace Mario {
       assert(pos);
       float *pos_data = env->GetFloatArrayElements(pos, 0);
       assert(pos_data);
-      for(int i = 0, iend = env->GetArrayLength(pos); i + 2 < iend; i += 3)
-        getEnemiesFloatPos.push_back(std::make_pair(Object(int(pos_data[i])), std::make_pair(pos_data[i + 1], pos_data[i + 2])));
+      for(int64_t i = 0, iend = env->GetArrayLength(pos); i + 2 < iend; i += 3)
+        getEnemiesFloatPos.push_back(Enemy_Info(Object(int(pos_data[i])), std::make_pair(pos_data[i + 1], pos_data[i + 2])));
       env->ReleaseFloatArrayElements(pos, pos_data, JNI_ABORT);
 
       getter = env->GetMethodID(cls, "getMarioMode", "()I");
@@ -153,6 +154,45 @@ namespace Mario {
       assert(getter);
       getKillsByShell = env->CallIntMethod(observation, getter);
     }
+
+    /// Higher order variable calculations
+
+    {
+      std::set<int64_t> unmatchedJs;
+      const auto jend = unmatchedJs.end();
+      for(int64_t i = 0, iend = getEnemiesFloatPos.size(); i != iend; ++i)
+        unmatchedJs.insert(i);
+
+      for(int64_t i = 0, iend = prev.getEnemiesFloatPos.size(); i != iend; ++i) {
+        const auto &old = prev.getEnemiesFloatPos[i];
+
+        for(auto jt = unmatchedJs.begin(); jt != jend; ++jt) {
+          auto &cur = getEnemiesFloatPos[*jt];
+
+          if(cur.which)
+            continue;
+          if(old.object != cur.object)
+            continue;
+
+          const double dx = cur.position.first - old.position.first;
+          const double dy = cur.position.second - old.position.second;
+
+          if(dx * dx + dy * dy > 25.0)
+            continue;
+
+          cur.which = old.which ? old.which : ++enemiesSeen;
+          cur.velocity = std::make_pair(dx, dy);
+
+          unmatchedJs.erase(jt);
+          break;
+        }
+      }
+
+      for(auto &enemy : getEnemiesFloatPos)
+        enemy.which = enemy.which ? enemy.which : ++enemiesSeen;
+    }
+
+    getMarioFloatVel = std::make_pair(getMarioFloatPos.first - prev.getMarioFloatPos.first, getMarioFloatPos.second - prev.getMarioFloatPos.second);
 
     if((prev.mayMarioJump || prev.isMarioHighJumping) && prev.action[BUTTON_JUMP])
       isMarioHighJumping = true;

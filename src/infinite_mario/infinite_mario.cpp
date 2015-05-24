@@ -327,13 +327,10 @@ namespace Mario {
     std::list<Rete::WME_Ptr_C> wmes_current;
     std::ostringstream oss;
 
-    const std::pair<double, double> velocity(m_current_state->getMarioFloatPos.first - m_prev_state->getMarioFloatPos.first,
-                                             m_current_state->getMarioFloatPos.second - m_prev_state->getMarioFloatPos.second);
-
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(m_current_state->getMarioFloatPos.first)));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(m_current_state->getMarioFloatPos.second)));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_x_dot_attr, std::make_shared<Rete::Symbol_Constant_Float>(velocity.first)));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_y_dot_attr, std::make_shared<Rete::Symbol_Constant_Float>(velocity.second)));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_x_dot_attr, std::make_shared<Rete::Symbol_Constant_Float>(m_current_state->getMarioFloatVel.first)));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_y_dot_attr, std::make_shared<Rete::Symbol_Constant_Float>(m_current_state->getMarioFloatVel.second)));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_mode_attr, std::make_shared<Rete::Symbol_Constant_Int>(m_current_state->getMarioMode)));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_on_ground_attr, m_current_state->isMarioOnGround ? m_true_value : m_false_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_may_jump_attr, m_current_state->mayMarioJump ? m_true_value : m_false_value));
@@ -413,16 +410,51 @@ namespace Mario {
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_speed_attr, i & 0x1 ? m_true_value : m_false_value));
     }
 
-    int i = 0;
+    Rete::Symbol_Identifier_Ptr_C closest_enemy_id;
+    double closest_enemy_distance = std::numeric_limits<double>::max();
     for(const auto &enemy : m_current_state->getEnemiesFloatPos) {
-      oss << "E" << ++i;
-      Rete::Symbol_Identifier_Ptr_C enemy_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
+      oss << "E" << enemy.which;
+      const Rete::Symbol_Identifier_Ptr_C enemy_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
       oss.str("");
+
+      const double x_rel = enemy.position.first - m_current_state->getMarioFloatPos.first;
+      const double y_rel = enemy.position.second - m_current_state->getMarioFloatPos.second;
+      const double distance = std::sqrt(x_rel*x_rel + y_rel*y_rel);
+
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_enemy_attr, enemy_id));
-      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(enemy.first)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.second.first - m_current_state->getMarioFloatPos.first)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.second.second - m_current_state->getMarioFloatPos.second)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(enemy.object)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(x_rel)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(y_rel)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_dot_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.velocity.first)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_dot_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.velocity.second)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_flies_attr, object_flies(enemy.object) ? m_true_value : m_false_value));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_fireball_kills_attr, object_killable_by_fireball(enemy.object) ? m_true_value : m_false_value));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_jump_kills_attr, object_killable_by_jump(enemy.object) ? m_true_value : m_false_value));
+
+      if(distance < closest_enemy_distance) {
+        closest_enemy_id = enemy_id;
+        closest_enemy_distance = distance;
+      }
     }
+
+    if(!closest_enemy_id) {
+      const Rete::Symbol_Identifier_Ptr_C enemy_id = std::make_shared<Rete::Symbol_Identifier>("E0");
+      const Rete::Symbol_Constant_Float_Ptr_C zero = std::make_shared<Rete::Symbol_Constant_Float>(0.0);
+
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_enemy_attr, enemy_id));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(OBJECT_IRRELEVANT)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_attr, zero));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(-100.0)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_dot_attr, zero));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_dot_attr, zero));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_flies_attr, m_false_value));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_fireball_kills_attr, m_true_value));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_jump_kills_attr, m_true_value));
+
+      closest_enemy_id = enemy_id;
+    }
+
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_closest_enemy_attr, closest_enemy_id));
 
     Rete::Agenda::Locker locker(agenda);
     CPU_Accumulator cpu_accumulator(*this);

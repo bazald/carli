@@ -66,7 +66,7 @@ namespace Mario {
     State(const State &prev, JNIEnv *env, jobject observation);
 
     jbooleanArray to_jbooleanArray(JNIEnv *env) const;
-    
+
     void init_impl() {}
 
     reward_type transition_impl(const Carli::Action &) {
@@ -99,25 +99,37 @@ namespace Mario {
         unsigned int above_pit : 1;
       } detail;
     };
-    
+
+    struct Enemy_Info {
+      Enemy_Info() {}
+      Enemy_Info(const Object &object_, const std::pair<float, float> &position_) : object(object_), position(position_) {}
+
+      int64_t which = 0;
+      Object object = OBJECT_IRRELEVANT;
+      std::pair<float, float> position;
+      std::pair<float, float> velocity;
+    };
+
     std::array<std::array<Tile_Info, OBSERVATION_WIDTH>, OBSERVATION_HEIGHT> getLevelSceneObservation;
     std::array<std::array<Object, OBSERVATION_WIDTH>, OBSERVATION_HEIGHT> getEnemiesObservation;
 
-    std::vector<std::pair<Object, std::pair<float, float>>> getEnemiesFloatPos;
+    std::vector<Enemy_Info> getEnemiesFloatPos;
+    int64_t enemiesSeen = 0;
 
     std::pair<float, float> getMarioFloatPos;
+    std::pair<float, float> getMarioFloatVel;
     int64_t getMarioMode = MODE_SMALL;
 
     bool isMarioOnGround = false;
     bool mayMarioJump = false;
     bool isMarioCarrying = false;
     bool isMarioHighJumping = false;
-    
+
     int getKillsTotal = 0;
     int getKillsByFire = 0;
     int getKillsByStomp = 0;
     int getKillsByShell = 0;
-    
+
     /// http://msdn.microsoft.com/en-us/library/dn793970.aspx
     Action action;
   };
