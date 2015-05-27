@@ -191,6 +191,24 @@ namespace Mario {
     }
   }
 
+  Object object_simplified(const Object &object) {
+    switch(object) {
+    case OBJECT_GOOMBA:
+    case OBJECT_GOOMBA_WINGED:
+    case OBJECT_SPIKY:
+    case OBJECT_SPIKY_WINGED:
+      return OBJECT_GOOMBA;
+    case OBJECT_GREEN_KOOPA:
+    case OBJECT_GREEN_KOOPA_WINGED:
+      return OBJECT_GREEN_KOOPA;
+    case OBJECT_RED_KOOPA:
+    case OBJECT_RED_KOOPA_WINGED:
+      return OBJECT_RED_KOOPA;
+    default:
+      return object;
+    }
+  }
+
   void Agent::act_part_1(Action &action) {
     /// Calculate \rho
     m_rho = probability_epsilon_greedy(m_next, get_epsilon(), nullptr);
@@ -422,7 +440,7 @@ namespace Mario {
       const double distance = std::sqrt(x_rel*x_rel + y_rel*y_rel);
 
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_enemy_attr, enemy_id));
-      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(enemy.object)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(object_simplified(enemy.object))));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(x_rel)));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(y_rel)));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_dot_attr, std::make_shared<Rete::Symbol_Constant_Float>(enemy.velocity.first)));
@@ -442,7 +460,7 @@ namespace Mario {
       const Rete::Symbol_Constant_Float_Ptr_C zero = std::make_shared<Rete::Symbol_Constant_Float>(0.0);
 
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_enemy_attr, enemy_id));
-      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(OBJECT_IRRELEVANT)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(object_simplified(OBJECT_IRRELEVANT))));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_attr, zero));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(-100.0)));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_dot_attr, zero));

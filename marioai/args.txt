@@ -16,3 +16,5 @@ on-policy
 policy
 --rules-out
 ../../rules-out.txt
+--seed
+582140543

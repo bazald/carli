@@ -660,6 +660,9 @@ namespace Carli {
 #endif
     }
 
+    if(q_values.empty())
+      m_next_q_values.erase(action);
+
 //#ifdef DEBUG_OUTPUT
 //    std::cerr << "purge_q_value_next(" << *action << ',' << q_value.get() << ") ";
 //    std::cerr << (found != q_values.end() ? "succeeded" : "failed");

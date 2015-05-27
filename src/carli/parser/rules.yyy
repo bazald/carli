@@ -252,16 +252,16 @@ command:
                       else {
                         if(feature) {
                           auto test_node_rightmost = parent;
-                          int64_t test_node_rightmost_offset = 0;
+                          bool test_node_rightmost_existential = false;
                           while(test_node_rightmost->get_bindings()) {
-                            test_node_rightmost_offset += test_node_rightmost->parent_left()->get_size();
+                            test_node_rightmost_existential |= dynamic_cast<Rete::Rete_Existential_Join *>(test_node_rightmost.get()) || dynamic_cast<Rete::Rete_Negation_Join *>(test_node_rightmost.get());
                             test_node_rightmost = test_node_rightmost->parent_right();
                           }
 
                           /// Fill in Feature values / predicate tests
                           if(const auto feature_e = dynamic_cast<Carli::Feature_Enumerated<Carli::Feature> *>(feature)) {
                             /// TODO: Handle variable-to-variable relations
-                            if(const auto predicate = dynamic_cast<Rete::Rete_Predicate *>(parent.get())) {
+                            if(const auto predicate = dynamic_cast<Rete::Rete_Predicate *>(test_node_rightmost.get())) {
                               const auto rhs = predicate->get_rhs().get();
                               const auto symbol_i = dynamic_cast<const Rete::Symbol_Constant_Int *>(rhs);
                               assert(symbol_i);
@@ -288,7 +288,7 @@ command:
                           /// Determine Feature axes
                           if(const auto predicate = dynamic_cast<const Rete::Rete_Predicate *>(test_node_rightmost.get())) {
                             feature->axis = predicate->get_lhs_index();
-                            feature->axis.rete_row += test_node_rightmost_offset;
+                            feature->axis.existential = test_node_rightmost_existential;
                           }
                           else if(dynamic_cast<Rete::Rete_Existential_Join *>(parent.get()) ||
                                   dynamic_cast<Rete::Rete_Negation_Join *>(parent.get()))
@@ -353,8 +353,11 @@ command:
                               feature->bindings.insert(std::make_pair(predicate->get_lhs_index(), Rete::WME_Token_Index(-1, -1, -1)));
                           }
 
-                          if(parent->get_token_size() > parent->parent_left()->get_token_size())
-                            feature->axis.token_row += parent->parent_left()->get_token_size();
+                          if(feature->axis.rete_row != -1 && parent->get_bindings()) {
+                            feature->axis.rete_row += parent->parent_left()->get_size();
+                            if(feature->axis.existential)
+                              feature->axis.token_row += parent->parent_left()->get_token_size();
+                          }
                           feature->indices = variable_indices;
 
                           //std::cerr << "LHS" << feature->axis << ' ' << *variable_indices << std::endl;

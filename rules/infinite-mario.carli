@@ -415,3 +415,120 @@ sp {infinite-mario*rl-fringe*right-pit-dist-upper
 #-->
 #  = 0.0
 #}
+
+sp {infinite-mario*rl-fringe*closest-enemy-type-none
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +{(<s> ^closest-enemy <enemy>)
+  (<enemy> ^type <type>)
+  (<type> == 0)}                                       # None
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*closest-enemy-type-goomba
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +{(<s> ^closest-enemy <enemy>)
+  (<enemy> ^type <type>)
+  (<type> == 2)}                                       # Goomba
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*closest-enemy-type-red-koopa
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +{(<s> ^closest-enemy <enemy>)
+  (<enemy> ^type <type>)
+  (<type> == 4)}                                       # Red Koopa
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*closest-enemy-type-green-koopa
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +{(<s> ^closest-enemy <enemy>)
+  (<enemy> ^type <type>)
+  (<type> == 6)}                                       # Green Koopa
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*closest-enemy-type-bullet-bill
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +{(<s> ^closest-enemy <enemy>)
+  (<enemy> ^type <type>)
+  (<type> == 8)}                                       # Bullet Bill
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*closest-enemy-type-enemy-flower
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +{(<s> ^closest-enemy <enemy>)
+  (<enemy> ^type <type>)
+  (<type> == 12)}                                       # Enemy Flower
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*closest-enemy-type-shell
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +{(<s> ^closest-enemy <enemy>)
+  (<enemy> ^type <type>)
+  (<type> == 13)}                                       # Shell
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*closest-enemy-x-lower
+  :feature 2 fringe infinite-mario*rl-action*general 1 -400.0 0.0
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +{(<s> ^closest-enemy <enemy>)
+  (<enemy> ^x <x>)
+  (<x> < 0.0)}                                       # Shell
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*closest-enemy-x-upper
+  :feature 2 fringe infinite-mario*rl-action*general 1 0.0 400.0
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  +{(<s> ^closest-enemy <enemy>)
+  (<enemy> ^x <x>)
+  (<x> < 0.0)}                                       # Shell
+-->
+  = 0.0
+}

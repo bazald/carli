@@ -12,6 +12,8 @@ namespace Rete {
    m_lhs_index(lhs_index_),
    m_rhs_index(rhs_index_)
   {
+    assert(m_lhs_index.rete_row >= m_lhs_index.token_row);
+    assert(m_rhs_index.rete_row >= m_rhs_index.token_row);
   }
 
   Rete_Predicate::Rete_Predicate(const Predicate &predicate_, const WME_Token_Index lhs_index_, const Symbol_Ptr_C &rhs_)
@@ -19,6 +21,7 @@ namespace Rete {
    m_lhs_index(lhs_index_),
    m_rhs(rhs_)
   {
+    assert(m_lhs_index.rete_row >= m_lhs_index.token_row);
   }
 
   void Rete_Predicate::destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) {
