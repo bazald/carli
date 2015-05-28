@@ -108,18 +108,8 @@ static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<Variable> 
   return indices;
 }
 
-static vector<Variable> merge_variables(const vector<Variable> &lhs, const vector<Variable> &rhs, const bool &existential) {
+static vector<Variable> merge_variables(const vector<Variable> &lhs, const int64_t &lhs_size, const int64_t &lhs_token_size, const vector<Variable> &rhs, const bool &existential) {
   vector<Variable> variables(lhs);
-  int64_t rete_offset = 0;
-  int64_t token_offset = 0;
-  for(const Variable &variable : variables) {
-    for(const auto &ni : variable.name_index) {
-      if(ni.second.rete_row >= rete_offset)
-        rete_offset = ni.second.rete_row + 1;
-      if(!ni.second.existential && ni.second.token_row >= token_offset)
-        token_offset = ni.second.token_row + 1;
-    }
-  }
   variables.reserve(variables.size() + rhs.size());
   for(const Variable &var_ : rhs) {
     Variable var(var_);
@@ -133,8 +123,8 @@ static vector<Variable> merge_variables(const vector<Variable> &lhs, const vecto
         }
       }
       VAR_FOUND:
-      ni.second.rete_row += rete_offset;
-      ni.second.token_row += token_offset;
+      ni.second.rete_row += lhs_size;
+      ni.second.token_row += lhs_token_size;
       ni.second.existential = ni.second.existential | existential;
         ;
     }
@@ -470,15 +460,15 @@ final_conditions:
                                                         delete $3; }
   ;
 conditions:
-  conditions condition_type { const vector<Variable> variables(merge_variables($1->second, $2->second, false));
+  conditions condition_type { const vector<Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $2->second, false));
                               $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(join_bindings($1->second, $2->second), $1->first, $2->first)), variables);
                               delete $1;
                               delete $2; }
-  | conditions '+' condition_type { const vector<Variable> variables(merge_variables($1->second, $3->second, true));
+  | conditions '+' condition_type { const vector<Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $3->second, true));
                                     $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings($1->second, $3->second), false, $1->first, $3->first)), variables);
                                     delete $1;
                                     delete $3; }
-  | conditions '-' condition_type { const vector<Variable> variables(merge_variables($1->second, $3->second, true));
+  | conditions '-' condition_type { const vector<Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $3->second, true));
                                     $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(join_bindings($1->second, $3->second), $1->first, $3->first)), variables);
                                     delete $1;
                                     delete $3; }
