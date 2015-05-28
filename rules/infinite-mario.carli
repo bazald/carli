@@ -565,7 +565,7 @@ sp {infinite-mario*rl-fringe*closest-enemy-x-upper
   (<button-presses-out> ^speed <speed>)
   (<s> ^closest-enemy <enemy>)
   {(<enemy> ^x <x>)
-   (<x> < 0.0)}
+   (<x> >= 0.0)}
 -->
   = 0.0
 }
