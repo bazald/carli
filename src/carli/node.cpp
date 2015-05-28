@@ -18,8 +18,6 @@ namespace Carli {
 
   void Node::print_flags(std::ostream &os) const {
     os << std::endl << "  :creation-time " << q_value->creation_time;
-
-
     os << std::endl << "  :feature " << q_value->depth << ' ';
 
     if(dynamic_cast<const Node_Fringe *>(this))
@@ -218,7 +216,16 @@ namespace Carli {
         const int64_t new_size = new_test->get_size();
         const int64_t new_token_size = new_test->get_token_size();
 
+#ifndef NDEBUG
+        std::cerr << "Values: " << leaf_size << ' ' << leaf_token_size << ' ' << old_size << ' ' << old_token_size << ' ' << new_size << ' ' << new_token_size << std::endl;
+#endif
+
         for(const auto &variable : *variables) {
+#ifndef NDEBUG
+          std::cerr << "Considering Variable '" << variable.first << "' at " << variable.second << std::endl;
+#endif
+          if(variable.second.rete_row < ra_lock->parent_left()->parent_left()->get_size())
+            continue;
           const auto found = old_variables->equal_range(variable.first);
           bool found_non_existential = false;
           std::find_if(found.first, found.second, [&found_non_existential,&old_token_size](const std::pair<std::string, Rete::WME_Token_Index> &variable)->bool {
@@ -230,7 +237,7 @@ namespace Carli {
             auto new_index = variable.second;
 
 #ifndef NDEBUG
-            std::cerr << "new_index was " << new_index << std::endl;
+            std::cerr << "new_index(" << variable.first << ") was " << new_index << std::endl;
 #endif
 
             if(new_size >= old_size) {
@@ -276,9 +283,19 @@ namespace Carli {
             assert(new_index.token_row <= new_index.rete_row);
             assert(new_index.existential || new_index.token_row < new_token_size);
             assert(std::find_if(new_variables->begin(), new_variables->end(), [new_index](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == new_index;}) == new_variables->end());
+            if(!new_index.existential) {
+              const auto found = new_variables->equal_range(variable.first);
+              for(auto ft = found.first; ft != found.second; ++ft) {
+                assert(ft->second.existential);
+                if(!ft->second.existential) {
+                  std::cerr << "New variable conflicts with existing variable." << std::endl;
+                  abort();
+                }
+              }
+            }
             new_variables->insert(std::make_pair(variable.first, new_index));
 #ifndef NDEBUG
-            std::cerr << "new_index = " << new_index << std::endl;
+            std::cerr << "new_index(" << variable.first << ") = " << new_index << std::endl;
 #endif
           }
         }

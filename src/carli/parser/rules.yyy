@@ -354,9 +354,12 @@ command:
                           }
 
                           if(feature->axis.rete_row != -1 && parent->get_bindings()) {
+                            if(feature->axis.existential && dynamic_cast<const Carli::Feature_Ranged_Data *>(feature)) {
+                              reteerror(&yylloc, yyscanner, agent, filename, source_path, "Refineable feature illegally declared existential.");
+                              YYABORT;
+                            }
                             feature->axis.rete_row += parent->parent_left()->get_size();
-                            if(feature->axis.existential)
-                              feature->axis.token_row += parent->parent_left()->get_token_size();
+                            feature->axis.token_row += parent->parent_left()->get_token_size();
                           }
                           feature->indices = variable_indices;
 

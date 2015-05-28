@@ -461,8 +461,8 @@ namespace Mario {
 
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_enemy_attr, enemy_id));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(object_simplified(OBJECT_IRRELEVANT))));
-      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_attr, zero));
-      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(-100.0)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(-300.0)));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, zero));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_dot_attr, zero));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_dot_attr, zero));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_flies_attr, m_false_value));
