@@ -5,9 +5,9 @@
 --discount-rate
 0.9
 --learning-rate
-0.01
---eligibility-trace-decay-rate
 0.1
+--eligibility-trace-decay-rate
+0.3
 --policy
 on-policy
 --epsilon-greedy
@@ -16,5 +16,3 @@ on-policy
 policy
 --rules-out
 ../../rules-out.txt
---seed
-582140543

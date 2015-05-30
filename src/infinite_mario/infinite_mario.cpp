@@ -256,23 +256,12 @@ namespace Mario {
   }
 
   void Agent::act_part_2(const std::shared_ptr<State> &prev, const std::shared_ptr<State> &current, const bool &terminal) {
-    double delta_x = current->getMarioFloatPos.first - prev->getMarioFloatPos.first;
-    if(prev->action[BUTTON_RIGHT])
-      delta_x = std::max(delta_x, 0.0);
-    else if(prev->action[BUTTON_LEFT])
-      delta_x = std::min(delta_x, 0.0);
-
-    //const bool continued_high_jump = prev->isMarioHighJumping && prev->action[BUTTON_JUMP];
-    //const bool stopped_high_jump = prev->isMarioHighJumping && !prev->action[BUTTON_JUMP];
-    //const bool legal_jump = prev->mayMarioJump && prev->action[BUTTON_JUMP];
-    //const bool illegal_jump = !prev->mayMarioJump && prev->action[BUTTON_JUMP];
-    //const reward_type reward = (delta_x > 0 ? 1 : 2) * delta_x;
-
-    //const reward_type reward_jumping = 0; // legal_jump ? 30 : continued_high_jump ? 30 : stopped_high_jump ? -50 : 0;
-    const reward_type reward =
+    const reward_type reward_situation =
       m_current_state->getLevelSceneObservation[OBSERVATION_HEIGHT / 2][OBSERVATION_WIDTH / 2 - 1].detail.pit
-        ? (m_current_state->getMarioFloatPos.second < m_prev_state->getMarioFloatPos.second ? 10.0 : -10000.0)
-        : 100.0 * delta_x - 110.0;
+        ? (m_current_state->getMarioFloatPos.second < m_prev_state->getMarioFloatPos.second ? 10.0 : -10000.0) : 0.0;
+    const reward_type reward_mode = 1000.0 * (current->getMarioMode - prev->getMarioMode);
+    const reward_type reward_progress = 100.0 * current->getMarioFloatVel.first - 110.0;
+    const reward_type reward = reward_situation + reward_mode + reward_progress;
 
     std::cerr << "Reward = " << reward << std::endl;
 

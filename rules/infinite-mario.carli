@@ -453,6 +453,71 @@ sp {infinite-mario*rl-fringe*right-pit-dist-upper
 #  = 0.0
 #}
 
+sp {infinite-mario*rl-fringe*mario-mode-small
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<s> ^closest-enemy <enemy>)
+  +{(<s> ^mode <mode>)
+    (<mode> == 0)}
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*mario-mode-big
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<s> ^closest-enemy <enemy>)
+  +{(<s> ^mode <mode>)
+    (<mode> == 1)}
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*mario-mode-fiery
+  :feature 2 fringe infinite-mario*rl-action*general
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<s> ^closest-enemy <enemy>)
+  +{(<s> ^mode <mode>)
+    (<mode> == 2)}
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*x-dot-lower
+  :feature 2 fringe infinite-mario*rl-action*general 1 -100.0 0.0
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<s> ^closest-enemy <enemy>)
+  {(<s> ^x-dot <x-dot>)
+   (<x-dot> < 0.0)}
+-->
+  = 0.0
+}
+
+sp {infinite-mario*rl-fringe*x-dot-upper
+  :feature 2 fringe infinite-mario*rl-action*general 1 0.0 100.0
+  (<s> ^button-presses-out <button-presses-out>)
+  (<button-presses-out> ^dpad <dpad>)
+  (<button-presses-out> ^jump <jump>)
+  (<button-presses-out> ^speed <speed>)
+  (<s> ^closest-enemy <enemy>)
+  {(<s> ^x-dot <x-dot>)
+   (<x-dot> >= 0.0)}
+-->
+  = 0.0
+}
+
 sp {infinite-mario*rl-fringe*closest-enemy-type-none
   :feature 2 fringe infinite-mario*rl-action*general
   (<s> ^button-presses-out <button-presses-out>)
