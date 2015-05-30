@@ -234,11 +234,13 @@ namespace Carli {
 #endif
           if(variable.second.rete_row < ra_lock->parent_left()->parent_left()->get_size())
             continue;
-          const auto found = old_variables->equal_range(variable.first);
           bool found_non_existential = false;
-          std::find_if(found.first, found.second, [&found_non_existential,&old_token_size](const std::pair<std::string, Rete::WME_Token_Index> &variable)->bool {
-            return found_non_existential = !variable.second.existential;
-          });
+          {
+            const auto found = old_variables->equal_range(variable.first);
+            std::find_if(found.first, found.second, [&found_non_existential,&old_token_size](const std::pair<std::string, Rete::WME_Token_Index> &variable)->bool {
+              return found_non_existential = !variable.second.existential;
+            });
+          }
           if(!found_non_existential) {
             if(!new_variables)
               new_variables = std::make_shared<Rete::Variable_Indices>(*old_variables);
