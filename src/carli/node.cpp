@@ -16,6 +16,14 @@ namespace Carli {
     return q_value->depth;
   }
 
+  double Node::sum_value(const double value_accumulator) const {
+    const auto pa_lock = parent_action.lock();
+    const double value = value_accumulator + (q_value->type == Q_Value::Type::FRINGE ? 0.0 : q_value->value);
+    if(pa_lock)
+      return dynamic_cast<Node *>(pa_lock->data.get())->sum_value(value);
+    return value;
+  }
+
   void Node::print_flags(std::ostream &os) const {
     os << std::endl << "  :creation-time " << q_value->creation_time;
     os << std::endl << "  :feature " << q_value->depth << ' ';
@@ -73,7 +81,7 @@ namespace Carli {
     tracked_ptr<Q_Value> new_q_value;
 
     if(q_value->type == Q_Value::Type::FRINGE)
-      new_q_value = new Q_Value(0.0, Q_Value::Type::SPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr, agent.get_total_step_count());
+      new_q_value = new Q_Value(q_value->value - sum_value(), Q_Value::Type::SPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr, agent.get_total_step_count());
     else {
       delete_q_value = false;
       q_value->type = Q_Value::Type::SPLIT;
@@ -94,7 +102,7 @@ namespace Carli {
     tracked_ptr<Q_Value> new_q_value;
 
     if(q_value->type == Q_Value::Type::FRINGE)
-      new_q_value = new Q_Value(0.0, Q_Value::Type::UNSPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr, agent.get_total_step_count());
+      new_q_value = new Q_Value(q_value->value - sum_value(), Q_Value::Type::UNSPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr, agent.get_total_step_count());
     else {
       delete_q_value = false;
       q_value->type = Q_Value::Type::UNSPLIT;
@@ -401,6 +409,7 @@ namespace Carli {
   Node_Fringe::Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
    : Node(agent_, parent_action_, rete_action_, new Q_Value(0.0, Q_Value::Type::FRINGE, depth_, feature_, agent_.get_total_step_count()))
   {
+    q_value->value = sum_value();
   }
 
   Rete::Rete_Node_Ptr Node_Fringe::cluster_root_ancestor() const {

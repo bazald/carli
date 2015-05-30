@@ -115,12 +115,12 @@ namespace Carli {
     std::list<Node_Ptr> m_nodes_activating;
 
   protected:
-    Action_Ptr_C choose_epsilon_greedy(const double &epsilon, const Feature * const &axis);
-    std::pair<Action_Ptr_C, double> choose_greedy(const Feature * const &axis); ///< Greedy action, and distance to next most greedy
+    Action_Ptr_C choose_epsilon_greedy(const double &epsilon, const Node_Fringe * const &fringe);
+    std::pair<Action_Ptr_C, double> choose_greedy(const Node_Fringe * const &fringe, const bool &non_random = false); ///< Greedy action, and distance to next most greedy
     Action_Ptr_C choose_randomly();
 
-    double probability_epsilon_greedy(const Action_Ptr_C &action, const double &epsilon, const Feature * const &axis);
-    double probability_greedy(const Action_Ptr_C &action, const Feature * const &axis);
+    double probability_epsilon_greedy(const Action_Ptr_C &action, const double &epsilon, const Node_Fringe * const &fringe);
+    double probability_greedy(const Action_Ptr_C &action, const Node_Fringe * const &fringe);
     double probability_random();
 
     void td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next, const double &rho, const double &I);

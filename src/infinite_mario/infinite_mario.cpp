@@ -316,8 +316,9 @@ namespace Mario {
       }
     }
 
-    //m_total_reward += reward;
-    //++m_step_count;
+//    m_total_reward += reward;
+//    ++m_step_count;
+    set_total_step_count(get_total_step_count() + 1);
   }
 
   Agent::Agent(const std::shared_ptr<State> &prev_, const std::shared_ptr<State> &current_)

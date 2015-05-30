@@ -54,6 +54,7 @@ namespace Carli {
     virtual ~Node();
 
     int64_t rank() const override;
+    double sum_value(const double value_accumulator = 0.0) const;
 
     void print_flags(std::ostream &os) const override;
     void print_action(std::ostream &os) const override;

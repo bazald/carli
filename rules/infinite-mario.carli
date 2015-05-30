@@ -460,8 +460,8 @@ sp {infinite-mario*rl-fringe*closest-enemy-type-none
   (<button-presses-out> ^jump <jump>)
   (<button-presses-out> ^speed <speed>)
   (<s> ^closest-enemy <enemy>)
-  +{(<enemy> ^type <type>)
-    (<type> == 0)}                                       # None
+  +{(<enemy> ^type <enemy-type>)
+    (<enemy-type> == 0)}                                       # None
 -->
   = 0.0
 }
@@ -473,8 +473,8 @@ sp {infinite-mario*rl-fringe*closest-enemy-type-goomba
   (<button-presses-out> ^jump <jump>)
   (<button-presses-out> ^speed <speed>)
   (<s> ^closest-enemy <enemy>)
-  +{(<enemy> ^type <type>)
-    (<type> == 2)}                                       # Goomba
+  +{(<enemy> ^type <enemy-type>)
+    (<enemy-type> == 2)}                                       # Goomba
 -->
   = 0.0
 }
@@ -486,8 +486,8 @@ sp {infinite-mario*rl-fringe*closest-enemy-type-red-koopa
   (<button-presses-out> ^jump <jump>)
   (<button-presses-out> ^speed <speed>)
   (<s> ^closest-enemy <enemy>)
-  +{(<enemy> ^type <type>)
-    (<type> == 4)}                                       # Red Koopa
+  +{(<enemy> ^type <enemy-type>)
+    (<enemy-type> == 4)}                                       # Red Koopa
 -->
   = 0.0
 }
@@ -499,8 +499,8 @@ sp {infinite-mario*rl-fringe*closest-enemy-type-green-koopa
   (<button-presses-out> ^jump <jump>)
   (<button-presses-out> ^speed <speed>)
   (<s> ^closest-enemy <enemy>)
-  +{(<enemy> ^type <type>)
-    (<type> == 6)}                                       # Green Koopa
+  +{(<enemy> ^type <enemy-type>)
+    (<enemy-type> == 6)}                                       # Green Koopa
 -->
   = 0.0
 }
@@ -512,8 +512,8 @@ sp {infinite-mario*rl-fringe*closest-enemy-type-bullet-bill
   (<button-presses-out> ^jump <jump>)
   (<button-presses-out> ^speed <speed>)
   (<s> ^closest-enemy <enemy>)
-  +{(<enemy> ^type <type>)
-    (<type> == 8)}                                       # Bullet Bill
+  +{(<enemy> ^type <enemy-type>)
+    (<enemy-type> == 8)}                                       # Bullet Bill
 -->
   = 0.0
 }
@@ -525,8 +525,8 @@ sp {infinite-mario*rl-fringe*closest-enemy-type-enemy-flower
   (<button-presses-out> ^jump <jump>)
   (<button-presses-out> ^speed <speed>)
   (<s> ^closest-enemy <enemy>)
-  +{(<enemy> ^type <type>)
-    (<type> == 12)}                                       # Enemy Flower
+  +{(<enemy> ^type <enemy-type>)
+    (<enemy-type> == 12)}                                       # Enemy Flower
 -->
   = 0.0
 }
@@ -538,8 +538,8 @@ sp {infinite-mario*rl-fringe*closest-enemy-type-shell
   (<button-presses-out> ^jump <jump>)
   (<button-presses-out> ^speed <speed>)
   (<s> ^closest-enemy <enemy>)
-  +{(<enemy> ^type <type>)
-    (<type> == 13)}                                       # Shell
+  +{(<enemy> ^type <enemy-type>)
+    (<enemy-type> == 13)}                                       # Shell
 -->
   = 0.0
 }
@@ -551,8 +551,8 @@ sp {infinite-mario*rl-fringe*closest-enemy-x-lower
   (<button-presses-out> ^jump <jump>)
   (<button-presses-out> ^speed <speed>)
   (<s> ^closest-enemy <enemy>)
-  {(<enemy> ^x <x>)
-   (<x> < 0.0)}
+  {(<enemy> ^x <enemy-x>)
+   (<enemy-x> < 0.0)}
 -->
   = 0.0
 }
@@ -564,8 +564,8 @@ sp {infinite-mario*rl-fringe*closest-enemy-x-upper
   (<button-presses-out> ^jump <jump>)
   (<button-presses-out> ^speed <speed>)
   (<s> ^closest-enemy <enemy>)
-  {(<enemy> ^x <x>)
-   (<x> >= 0.0)}
+  {(<enemy> ^x <enemy-x>)
+   (<enemy-x> >= 0.0)}
 -->
   = 0.0
 }
