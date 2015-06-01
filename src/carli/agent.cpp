@@ -386,7 +386,7 @@ namespace Carli {
 
   Agent::Agent(const std::shared_ptr<Environment> &environment, const std::function<Carli::Action_Ptr_C (const Rete::Variable_Indices &variables, const Rete::WME_Token &token)> &get_action_)
     : get_action(get_action_),
-    m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy(nullptr).first;}),
+    m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy(nullptr);}),
     m_exploration_policy([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(m_epsilon, nullptr);}),
     m_environment(environment),
     m_credit_assignment(
@@ -751,10 +751,18 @@ namespace Carli {
     if(random.frand_lt() < epsilon)
       return choose_randomly();
     else
-      return choose_greedy(fringe).first;
+      return choose_greedy(fringe);
   }
 
-  std::pair<Action_Ptr_C, double> Agent::choose_greedy(const Node_Fringe * const &fringe, const bool &non_random) {
+  Action_Ptr_C Agent::choose_greedy(const Node_Fringe * const &fringe) {
+    auto greedies = choose_greedies(fringe);
+    int32_t count = random.rand_lt(greedies.size());
+    while(count--)
+      greedies.pop_front();
+    return greedies.front();
+  }
+
+  std::list<Action_Ptr_C, Zeni::Pool_Allocator<Action_Ptr_C>> Agent::choose_greedies(const Node_Fringe * const &fringe) {
 #ifdef DEBUG_OUTPUT
     std::cerr << "  choose_greedy(";
     if(fringe)
@@ -762,32 +770,23 @@ namespace Carli {
     std::cerr << ')' << std::endl;
 #endif
 
-    int32_t count = 0;
+    std::list<Action_Ptr_C, Zeni::Pool_Allocator<Action_Ptr_C>> greedies;
     double value = double();
-    Action_Ptr_C action;
-    double distance = double();
     const Q_Value * const parent_q = fringe ? dynamic_cast<Node *>(fringe->parent_action.lock()->data.get())->q_value.get() : nullptr;
     for(const auto &action_q : m_next_q_values) {
+      double value_;
       if(parent_q && std::find(action_q.second.begin(), action_q.second.end(), parent_q) == action_q.second.end())
-        continue;
-      const double value_ = sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value->feature.get() : nullptr);
+        value_ = sum_value(action_q.first.get(), action_q.second, nullptr);
+      else
+        value_ = sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value->feature.get() : nullptr);
 
-      if(!action || value_ > value) {
-        distance = action ? value_ - value : 0.0;
-        action = action_q.first;
+      if(greedies.empty() || value_ > value) {
+        greedies.push_back(action_q.first);
         value = value_;
-        count = 1;
-      }
-      else if(value_ < value)
-        distance = std::min(distance, value - value_);
-      else {
-//        distance = 0;
-        if(!non_random && random.rand_lt(++count) == 0)
-          action = action_q.first;
       }
     }
 
-    return std::make_pair(action, distance);
+    return greedies;
   }
 
   Action_Ptr_C Agent::choose_randomly() {
@@ -1280,35 +1279,47 @@ namespace Carli {
         }
 
         touched.insert(fringe_axis->first);
+        break;
       }
     }
 
+    const auto greedies = choose_greedies(nullptr);
     Fringe_Values::iterator chosen_axis = general.fringe_values.end();
-    auto greedy_action = choose_greedy(nullptr, true);
-    greedy_action.second = 0.001; ///< If there's anything new, we want to split, even if the difference is small.
-    size_t count = 1;
+    double chosen_score = 0.0;
+    int32_t count = 0;
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
-      const auto found = touched.find(fringe_axis->first);
-      if(found == touched.end())
+      if(touched.find(fringe_axis->first) == touched.end())
         continue;
 
-      const auto greedy_axis = choose_greedy(fringe_axis->second.values.begin()->get(), true);
-      if(*greedy_action.first != *greedy_axis.first) {
-        const int64_t depth_diff = chosen_axis != general.fringe_values.end() ? fringe_axis->first->get_depth() - chosen_axis->first->get_depth() : 0;
-        if(depth_diff < 0 || (depth_diff == 0 && greedy_axis.second > greedy_action.second))
-          count = 1;
-        else if(depth_diff > 0 || greedy_axis.second < greedy_action.second || random.frand_lt() >= 1.0 / ++count)
-          continue;
+      auto new_greedies = choose_greedies(fringe_axis->second.values.begin()->get());
+      int32_t removed = 0, unchanged = 0;
+      for(auto greedy : greedies) {
+        const auto found = std::find(new_greedies.begin(), new_greedies.end(), greedy);
+        if(found == new_greedies.end())
+          ++removed;
+        else {
+          ++unchanged;
+          new_greedies.erase(found);
+        }
+      }
+      const int32_t added = new_greedies.size();
+      const double new_score = (added + removed) / (unchanged + 0.5 * (added + removed));
+
+      if(new_score > chosen_score)
+        count = 1;
+      else if(new_score < chosen_score || random.frand_lt() >= 1.0 / ++count)
+        continue;
 
 #ifndef NDEBUG
-        std::cerr << "Greedy mismatch for axis: ";
-        fringe_axis->first->print_axis(std::cerr);
-        std::cerr << " by " << greedy_axis.second << std::endl;
+      std::cerr << "Greedy mismatch for axis: ";
+      fringe_axis->first->print_axis(std::cerr);
+      std::cerr << " by ";
+      chosen_axis->first->print_axis(std::cerr);
+      std::cerr << std::endl;
 #endif
 
-        chosen_axis = fringe_axis;
-        greedy_action = greedy_axis;
-      }
+      chosen_axis = fringe_axis;
+      chosen_score = new_score;
     }
 
     if(chosen_axis == general.fringe_values.end()) {

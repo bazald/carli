@@ -7,38 +7,38 @@ import pp
 g_dir = 'experiment-bw2'
 g_plotters = ['./blocksworld2.py']
 
-g_base_command = "./blocks_world_2 --output experiment --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.3 --secondary-learning-rate 0.1 --policy on-policy --split-update-count 1"
+g_base_command = "./blocks_world_2 --output experiment --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.3 --secondary-learning-rate 0.1 --policy off-policy --split-update-count 1"
 
 g_ep_tuples = []
 
-g_ep_tuples.append(("sof4",  "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("snf4",  "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("sonf4", "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2-legacy-included.carli"))
+#g_ep_tuples.append(("sof4",  "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("snf4",  "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("sonf4", "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2-legacy-included.carli"))
 
-g_ep_tuples.append(("fof4",  "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("fnf4",  "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("fonf4", "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2-legacy-included.carli"))
+#g_ep_tuples.append(("fof4",  "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("fnf4",  "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("fonf4", "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2-legacy-included.carli"))
 
-g_ep_tuples.append(("cof4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("cnf4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("conf4", "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-included.carli"))
-#g_ep_tuples.append(("cnf4i",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-i.carli"))
-#g_ep_tuples.append(("cnf4r",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-r.carli"))
-#g_ep_tuples.append(("cnf4ir",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-ir.carli"))
+#g_ep_tuples.append(("cof4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("cnf4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("conf4", "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-included.carli"))
+##g_ep_tuples.append(("cnf4i",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-i.carli"))
+##g_ep_tuples.append(("cnf4r",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-r.carli"))
+##g_ep_tuples.append(("cnf4ir",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-ir.carli"))
 
-g_ep_tuples.append(("vof4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("vnf4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("vonf4", "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-included.carli"))
-#g_ep_tuples.append(("vnf4i",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-i.carli"))
-#g_ep_tuples.append(("vnf4r",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-r.carli"))
-#g_ep_tuples.append(("vnf4ir",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-ir.carli"))
+#g_ep_tuples.append(("vof4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("vnf4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("vonf4", "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-included.carli"))
+##g_ep_tuples.append(("vnf4i",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-i.carli"))
+##g_ep_tuples.append(("vnf4r",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-r.carli"))
+##g_ep_tuples.append(("vnf4ir",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-ir.carli"))
 
-g_ep_tuples.append(("pof4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("pnf4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("pof4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("pnf4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2.carli"))
 g_ep_tuples.append(("ponf4", "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-legacy-included.carli"))
-#g_ep_tuples.append(("pnf4i",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-i.carli"))
-#g_ep_tuples.append(("pnf4r",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-r.carli"))
-#g_ep_tuples.append(("pnf4ir",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-ir.carli"))
+##g_ep_tuples.append(("pnf4i",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-i.carli"))
+##g_ep_tuples.append(("pnf4r",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-r.carli"))
+##g_ep_tuples.append(("pnf4ir",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-ir.carli"))
 
 parser = argparse.ArgumentParser(description='Run Blocks World 2 experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,

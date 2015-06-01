@@ -116,7 +116,8 @@ namespace Carli {
 
   protected:
     Action_Ptr_C choose_epsilon_greedy(const double &epsilon, const Node_Fringe * const &fringe);
-    std::pair<Action_Ptr_C, double> choose_greedy(const Node_Fringe * const &fringe, const bool &non_random = false); ///< Greedy action, and distance to next most greedy
+    Action_Ptr_C choose_greedy(const Node_Fringe * const &fringe);
+    std::list<Action_Ptr_C, Zeni::Pool_Allocator<Action_Ptr_C>> choose_greedies(const Node_Fringe * const &fringe);
     Action_Ptr_C choose_randomly();
 
     double probability_epsilon_greedy(const Action_Ptr_C &action, const double &epsilon, const Node_Fringe * const &fringe);

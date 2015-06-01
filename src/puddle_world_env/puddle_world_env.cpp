@@ -222,7 +222,7 @@ namespace Puddle_World {
       for(size_t x = 0lu; x != granularity; ++x) {
         env->set_position(Environment::double_pair((x + 0.5) / granularity, (y - 0.5) / granularity));
         generate_features();
-        auto action = choose_greedy(nullptr).first;
+        auto action = choose_greedy(nullptr);
         switch(static_cast<const Move &>(*action).direction) {
           case NORTH: os << 'N'; break;
           case SOUTH: os << 'S'; break;
