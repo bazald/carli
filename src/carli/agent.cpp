@@ -566,7 +566,7 @@ namespace Carli {
       if(!m_on_policy) {
         const auto next = m_exploration_policy();
 
-        if(*m_next != *next) {
+        if(m_secondary_learning_rate && *m_next != *next) {
           if(sum_value(nullptr, m_current_q_value, nullptr) < sum_value(nullptr, m_next_q_values[next], nullptr))
             clear_eligibility_trace();
           m_next = next;
@@ -878,8 +878,10 @@ namespace Carli {
     m_credit_assignment(current);
 
     double dot_w_phi = 0.0;
-    for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; q_ptr = q_ptr->next())
-      (*q_ptr)->eligibility *= rho;
+    if(m_secondary_learning_rate) {
+      for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; q_ptr = q_ptr->next())
+        (*q_ptr)->eligibility *= rho;
+    }
     for(const auto &q : current) {
       if(q->eligibility < 0.0)
         q->eligible.insert_before(m_eligible);
@@ -909,7 +911,8 @@ namespace Carli {
       dot_w_e += q.secondary * q.eligibility;
 
       q.value += m_learning_rate * edelta;
-      q.secondary += m_learning_rate * m_secondary_learning_rate * edelta;
+      if(m_secondary_learning_rate)
+        q.secondary += m_learning_rate * m_secondary_learning_rate * edelta;
 #ifdef DEBUG_OUTPUT
       q_new += q.value /* * q.weight */;
 #endif
@@ -959,11 +962,13 @@ namespace Carli {
       }
     }
 
-    for(auto &q : next)
-      q->value -= m_learning_rate * m_discount_rate * (1 - m_eligibility_trace_decay_rate) * dot_w_e;
+    if(m_secondary_learning_rate) {
+      for(auto &q : next)
+        q->value -= m_learning_rate * m_discount_rate * (1 - m_eligibility_trace_decay_rate) * dot_w_e;
 
-    for(auto &q : current)
-      q->secondary -= m_learning_rate * m_secondary_learning_rate * dot_w_phi;
+      for(auto &q : current)
+        q->secondary -= m_learning_rate * m_secondary_learning_rate * dot_w_phi;
+    }
 
     for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; ) {
       Q_Value &q = **q_ptr;
@@ -1191,8 +1196,8 @@ namespace Carli {
         ++matches;
 
         if(general.q_value->depth < m_split_min ||
-          (fringe->q_value->pseudoepisode_count > m_split_pseudoepisodes &&
-          (fringe->q_value->update_count > m_split_update_count &&
+          (fringe->q_value->pseudoepisode_count >= m_split_pseudoepisodes &&
+          (fringe->q_value->update_count >= m_split_update_count &&
           (m_mean_catde_queue_size ? m_mean_catde_queue.mean() : m_mean_catde).outlier_above(fringe->q_value->catde, m_split_catde + m_split_catde_qmult * q_value_count))))
         {
 //#ifndef NDEBUG
@@ -1268,8 +1273,8 @@ namespace Carli {
         ++matches;
 
         if(general.q_value->depth >= m_split_min &&
-          (fringe->q_value->pseudoepisode_count <= m_split_pseudoepisodes ||
-           fringe->q_value->update_count <= m_split_update_count))
+          (fringe->q_value->pseudoepisode_count < m_split_pseudoepisodes ||
+           fringe->q_value->update_count < m_split_update_count))
         {
           return general.fringe_values.end(); ///< Wait to gather more data
         }
@@ -1342,8 +1347,8 @@ namespace Carli {
         ++matches;
 
         if(general.q_value->depth >= m_split_min &&
-          (fringe->q_value->pseudoepisode_count <= m_split_pseudoepisodes ||
-           fringe->q_value->update_count <= m_split_update_count))
+          (fringe->q_value->pseudoepisode_count < m_split_pseudoepisodes ||
+           fringe->q_value->update_count < m_split_update_count))
         {
           return general.fringe_values.end(); ///< Wait to gather more data
         }
