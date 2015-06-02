@@ -525,9 +525,9 @@ namespace Carli {
 
   Agent::reward_type Agent::act() {
     /// Calculate \rho
-    double rho = probability_epsilon_greedy(m_next, m_epsilon, nullptr);
+    double rho = 1.0;
     if(!m_on_policy)
-      rho = probability_greedy(m_next, nullptr) / rho;
+      rho = probability_greedy(m_next, nullptr) / probability_epsilon_greedy(m_next, m_epsilon, nullptr);
 
     m_current = m_next;
     m_current_q_value = m_next_q_values[m_next];
@@ -891,7 +891,7 @@ namespace Carli {
       if(q->eligibility < 0.0)
         q->eligible.insert_before(m_eligible);
 
-      q->eligibility = (q->eligibility == -1.0 ? 0.0 : q->eligibility) + I * q->credit;
+      q->eligibility = (q->eligibility == -1.0 ? 0.0 : q->eligibility) + (q->credit ? I : 0.0);
       q->eligibility_init = true;
 
       dot_w_phi += q->secondary;

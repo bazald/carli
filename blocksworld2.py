@@ -13,7 +13,7 @@ if os.name is 'posix':
   fig_size =  [fig_width,fig_height]
   params = {'backend': 'ps',
             'axes.labelsize': 8,
-            'text.fontsize': 8,
+            'font.size': 8,
             'legend.fontsize': 6,
             'xtick.labelsize': 6,
             'ytick.labelsize': 6,
@@ -299,7 +299,7 @@ def main():
   pylab.xlabel('Step Number', fontsize=8)
   pylab.ylabel(reward_label, fontsize=8)
   
-  pylab.xlim(xmax=5000)
+  pylab.xlim(xmax=10000)
   if len(sys.argv) > 1:
     pylab.ylim(ymin=-500, ymax=0)
   
