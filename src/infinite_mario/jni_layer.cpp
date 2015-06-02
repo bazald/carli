@@ -174,10 +174,10 @@ namespace Mario {
           if(old.object != cur.object)
             continue;
 
-          const double dx = cur.position.first - old.position.first;
-          const double dy = cur.position.second - old.position.second;
+          const float dx = cur.position.first - old.position.first;
+          const float dy = cur.position.second - old.position.second;
 
-          if(dx * dx + dy * dy > 25.0)
+          if(dx * dx + dy * dy > 25.0f)
             continue;
 
           cur.which = old.which ? old.which : ++enemiesSeen;

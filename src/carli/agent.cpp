@@ -758,7 +758,7 @@ namespace Carli {
 
   Action_Ptr_C Agent::choose_greedy(const Node_Fringe * const &fringe) {
     auto greedies = choose_greedies(fringe);
-    int32_t count = random.rand_lt(greedies.size());
+    int32_t count = random.rand_lt(int32_t(greedies.size()));
     while(count--)
       greedies.pop_front();
     return greedies.front();
@@ -1312,8 +1312,8 @@ namespace Carli {
           new_greedies.erase(found);
         }
       }
-      const int32_t added = new_greedies.size();
-      const double new_score = (added + removed) / (unchanged + 0.5 * (added + removed));
+      const int32_t added = int32_t(new_greedies.size());
+      const double new_score = (added + removed) / (2 * unchanged + added + removed);
 
       if(new_score > chosen_score)
         count = 1;
