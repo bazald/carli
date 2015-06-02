@@ -299,9 +299,9 @@ def main():
   pylab.xlabel('Step Number', fontsize=8)
   pylab.ylabel(reward_label, fontsize=8)
   
-  pylab.xlim(xmax=10000)
+  pylab.xlim(xmax=5000)
   if len(sys.argv) > 1:
-    pylab.ylim(ymin=-750, ymax=0)
+    pylab.ylim(ymin=-500, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())

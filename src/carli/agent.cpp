@@ -882,6 +882,9 @@ namespace Carli {
         (*q_ptr)->eligibility *= rho;
     }
     for(const auto &q : current) {
+      if(!q->credit)
+        continue;
+
       if(q->eligibility < 0.0)
         q->eligible.insert_before(m_eligible);
 
@@ -962,11 +965,15 @@ namespace Carli {
     }
 
     if(m_secondary_learning_rate) {
-      for(auto &q : next)
-        q->value -= m_learning_rate * m_discount_rate * (1 - m_eligibility_trace_decay_rate) * dot_w_e;
+      for(auto &q : next) {
+        if(q->credit)
+          q->value -= m_learning_rate * m_discount_rate * (1 - m_eligibility_trace_decay_rate) * dot_w_e;
+      }
 
-      for(auto &q : current)
-        q->secondary -= m_learning_rate * m_secondary_learning_rate * dot_w_phi;
+      for(auto &q : current) {
+        if(q->credit)
+          q->secondary -= m_learning_rate * m_secondary_learning_rate * dot_w_phi;
+      }
     }
 
     for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; ) {
@@ -1365,6 +1372,7 @@ namespace Carli {
         }
 
         touched.insert(fringe_axis->first);
+        break;
       }
     }
 
@@ -1373,8 +1381,7 @@ namespace Carli {
     int64_t depth_min = std::numeric_limits<int64_t>::max();
     double delta_max = std::numeric_limits<double>::lowest();
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
-      const auto found = touched.find(fringe_axis->first);
-      if(found == touched.end())
+      if(touched.find(fringe_axis->first) == touched.end())
         continue;
 
       double lowest = std::numeric_limits<double>::max();
