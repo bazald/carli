@@ -566,11 +566,13 @@ namespace Carli {
       if(!m_on_policy) {
         const auto next = m_exploration_policy();
 
-        if(m_secondary_learning_rate && *m_next != *next) {
-          if(sum_value(nullptr, m_current_q_value, nullptr) < sum_value(nullptr, m_next_q_values[next], nullptr))
-            clear_eligibility_trace();
-          m_next = next;
+        if(!m_secondary_learning_rate && *m_next != *next &&
+           sum_value(nullptr, m_next_q_values[next], nullptr) < sum_value(nullptr, m_next_q_values[m_next], nullptr))
+        {
+          clear_eligibility_trace();
         }
+
+        m_next = next;
 
 #ifdef DEBUG_OUTPUT
         std::cerr << "   " << *m_next << " is next." << std::endl;
@@ -781,9 +783,11 @@ namespace Carli {
         value_ = sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value->feature.get() : nullptr);
 
       if(greedies.empty() || value_ > value) {
-        greedies.push_back(action_q.first);
+        greedies = {{action_q.first}};
         value = value_;
       }
+      else if(value_ == value)
+        greedies.push_back(action_q.first);
     }
 
     return greedies;
@@ -795,7 +799,6 @@ namespace Carli {
 #endif
 
     int32_t counter = int32_t(m_next_q_values.size());
-
     counter = random.rand_lt(counter) + 1;
     Action_Ptr_C action;
     for(const auto &action_q : m_next_q_values) {
@@ -894,9 +897,6 @@ namespace Carli {
       dot_w_phi += q->secondary;
     }
 
-#ifdef DEBUG_OUTPUT
-    double q_new = 0.0;
-#endif
     const double delta = target_value - q_old;
 #ifdef ENABLE_WEIGHT
     const bool weight_assignment_all = m_weight_assignment_code == "all";
@@ -913,11 +913,8 @@ namespace Carli {
       dot_w_e += q.secondary * q.eligibility;
 
       q.value += m_learning_rate * edelta;
-      if(m_secondary_learning_rate)
+      if(m_secondary_learning_rate && q.credit)
         q.secondary += m_learning_rate * m_secondary_learning_rate * edelta;
-#ifdef DEBUG_OUTPUT
-      q_new += q.value /* * q.weight */;
-#endif
 
       if(q.type == Q_Value::Type::FRINGE) {
         const double abs_edelta = std::abs(edelta);
@@ -992,6 +989,12 @@ namespace Carli {
     }
 
 #ifdef DEBUG_OUTPUT
+    double q_new = double();
+    for(const auto &q : current) {
+      if(q->type != Q_Value::Type::FRINGE)
+        q_new += q->value /* * q.weight */;
+    }
+
     std::cerr.unsetf(std::ios_base::floatfield);
     std::cerr << " td_update: " << q_old << " <" << m_learning_rate << "= " << reward << " + " << m_discount_rate << " * " << target_next << std::endl;
     std::cerr << "            " << delta << " = " << target_value << " - " << q_old << std::endl;
@@ -1321,7 +1324,10 @@ namespace Carli {
       std::cerr << "Greedy mismatch for axis: ";
       fringe_axis->first->print_axis(std::cerr);
       std::cerr << " by ";
-      chosen_axis->first->print_axis(std::cerr);
+      if(chosen_axis != general.fringe_values.end())
+        chosen_axis->first->print_axis(std::cerr);
+      else
+        std::cerr << "nullptr";
       std::cerr << std::endl;
 #endif
 
