@@ -141,6 +141,8 @@ namespace Carli {
 
   bool Agent::respecialize(Rete::Rete_Action &rete_action) {
     return false;
+    if(!m_learning_rate)
+      return false;
 //#ifndef NO_COLLAPSE_DETECTION_HACK
 //    if(m_experienced_n_positive_rewards_in_a_row)
 //      return false;
@@ -162,10 +164,8 @@ namespace Carli {
 
     if(general.q_value->type == Q_Value::Type::SPLIT)
       return true;
-#ifndef NDEBUG
-    if(general.q_value->depth >= m_split_max)
+    if(general.q_value->depth >= m_split_max || !m_learning_rate)
       return false;
-#endif
 
 //     if(general.fringe_values.empty()) {
 //       const auto grandparent = rete_action.parent_left()->parent_left();
@@ -841,6 +841,9 @@ namespace Carli {
   }
 
   void Agent::td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next, const double &rho, const double &I) {
+    if(!m_learning_rate)
+      return;
+
     dump_rules(*this);
     assert(!m_badness);
 

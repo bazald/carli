@@ -435,6 +435,13 @@ def main():
     ax2.tick_params(axis='y', colors='red')
     #ax2.yaxis.label.set_color('red')
     
+    # Fix right axis tick labels
+    al=ax2.get_yticks().tolist()
+    al2=[]
+    for a in al:
+      al2.append(str(a))
+    ax2.set_yticklabels(al2)
+
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(0,0.06,1,1))
   else:

@@ -209,7 +209,7 @@ def main():
   fig.canvas.set_window_title('Blocks World')
   
   if two_sided_plot:
-    rect = [0.15,0.17,0.75,0.80]
+    rect = [0.15,0.17,0.73,0.80]
   else:
     rect = [0.15,0.15,0.7725,0.82]
   pylab.axes(rect)
@@ -270,15 +270,15 @@ def main():
       remap_names['ponf4'] = 'Mixed Policy'
       
       if scenario == 1:
-        agent_list = ['sof4', 'snf4', 'sonf4']
+        agent_list = ['snf4', 'sonf4', 'sof4']
       elif scenario == 2:
-        agent_list = ['fof4', 'fnf4', 'fonf4']
+        agent_list = ['fnf4', 'fonf4', 'fof4']
       elif scenario == 3:
-        agent_list = ['cof4', 'cnf4', 'conf4']
+        agent_list = ['cnf4', 'conf4', 'cof4']
       elif scenario == 4:
-        agent_list = ['vof4', 'vnf4', 'vonf4']
+        agent_list = ['vnf4', 'vonf4', 'vof4']
       elif scenario == 5:
-        agent_list = ['pof4', 'pnf4', 'ponf4']
+        agent_list = ['pnf4', 'ponf4', 'pof4']
       if scenario > 0 and scenario < 6:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
@@ -352,18 +352,25 @@ def main():
     ax2.spines['right'].set_color('red')
     ax2.tick_params(axis='y', colors='red')
     #ax2.yaxis.label.set_color('red')
-    
+
+    # Fix right axis tick labels
+    al=ax2.get_yticks().tolist()
+    al2=[]
+    for a in al:
+      al2.append(str(a))
+    ax2.set_yticklabels(al2)
+
     if scenario is 5:
-      pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(-0.05,0.3,1,1))
+      pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(-0.05,0.25,1,1))
   else:
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
   
   if len(sys.argv) == 1:
-    write_to_csv('puddleworld.csv', 'Step Number', xs, y_labels, yss)
-    pylab.savefig('puddleworld.eps')
-    pylab.savefig('puddleworld.png', dpi=1200)
-    pylab.savefig('puddleworld.svg')
+    write_to_csv('blocksworld2.csv', 'Step Number', xs, y_labels, yss)
+    pylab.savefig('blocksworld2.eps')
+    pylab.savefig('blocksworld2.png', dpi=1200)
+    pylab.savefig('blocksworld2.svg')
     plt.show()
   else:
     splitd = directory.rsplit('/', 1)
