@@ -40,97 +40,101 @@ static void reteerror(const YYLTYPE * const /*yylloc*/, yyscan_t const yyscanner
 
 using namespace std;
 
-static unordered_map<string, shared_ptr<tuple<double, double, bool>>> * Flags(const string &flag, const shared_ptr<tuple<double, double, bool>> &value, std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>> * flags = nullptr) {
-  if(!flags)
-    flags = new std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>;
-  (*flags)[flag] = value;
-  return flags;
-}
+namespace Rete {
 
-static vector<Variable> Variables() {
-  vector<Variable> rv;
-  return rv;
-}
-static vector<Variable> Variables(const Variable &variable) {
-  vector<Variable> rv;
-  rv.push_back(variable);
-  return rv;
-}
-static pair<Rete::Rete_Node_Ptr, vector<Variable>> *
-Rete_Node_Ptr_and_Variables(const Rete::Rete_Node_Ptr &rete_node, const vector<Variable> &variables) {
-  return new pair<Rete::Rete_Node_Ptr, vector<Variable>>(rete_node, variables);
-}
-
-static Rete::WME_Token_Index find_index(const std::vector<Variable> &variables, const std::string &name) {
-  for(const auto &variable : variables) {
-    for(const auto &ni : variable.name_index) {
-      if(!ni.second.existential && ni.first == name)
-        return ni.second;
-    }
+  static unordered_map<string, shared_ptr<tuple<double, double, bool>>> * Flags(const string &flag, const shared_ptr<tuple<double, double, bool>> &value, std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>> * flags = nullptr) {
+    if(!flags)
+      flags = new std::unordered_map<std::string, std::shared_ptr<std::tuple<double, double, bool>>>;
+    (*flags)[flag] = value;
+    return flags;
   }
-  return Rete::WME_Token_Index(-1, -1, -1);
-}
 
-static Rete::WME_Bindings join_bindings(const std::vector<Variable> &lhs,
-                                        const std::vector<Variable> &rhs)
-{
-  Rete::WME_Bindings bindings;
-  unordered_set<string> joined;
-  for(const Variable &lvar : lhs) {
-    for(const auto &lni : lvar.name_index) {
-      if(!lni.second.existential && !lni.first.empty() && joined.find(lni.first) == joined.end()) {
-        for(const Variable &rvar : rhs) {
-          for(const auto &rni : rvar.name_index) {
-            if(!rni.second.existential && lni.first == rni.first) {
-              bindings.insert(Rete::WME_Binding(lni.second, rni.second));
-              joined.insert(lni.first);
-              goto DONE_JOINING;
+  static vector<Parser_Variable> Variables() {
+    vector<Parser_Variable> rv;
+    return rv;
+  }
+  static vector<Parser_Variable> Variables(const Parser_Variable &variable) {
+    vector<Parser_Variable> rv;
+    rv.push_back(variable);
+    return rv;
+  }
+  static pair<Rete::Rete_Node_Ptr, vector<Parser_Variable>> *
+  Rete_Node_Ptr_and_Variables(const Rete::Rete_Node_Ptr &rete_node, const vector<Parser_Variable> &variables) {
+    return new pair<Rete::Rete_Node_Ptr, vector<Parser_Variable>>(rete_node, variables);
+  }
+
+  static Rete::WME_Token_Index find_index(const std::vector<Parser_Variable> &variables, const std::string &name) {
+    for(const auto &variable : variables) {
+      for(const auto &ni : variable.name_index) {
+        if(!ni.second.existential && ni.first == name)
+          return ni.second;
+      }
+    }
+    return Rete::WME_Token_Index(-1, -1, -1);
+  }
+
+  static Rete::WME_Bindings join_bindings(const std::vector<Parser_Variable> &lhs,
+                                          const std::vector<Parser_Variable> &rhs)
+  {
+    Rete::WME_Bindings bindings;
+    unordered_set<string> joined;
+    for(const Parser_Variable &lvar : lhs) {
+      for(const auto &lni : lvar.name_index) {
+        if(!lni.second.existential && !lni.first.empty() && joined.find(lni.first) == joined.end()) {
+          for(const Parser_Variable &rvar : rhs) {
+            for(const auto &rni : rvar.name_index) {
+              if(!rni.second.existential && lni.first == rni.first) {
+                bindings.insert(Rete::WME_Binding(lni.second, rni.second));
+                joined.insert(lni.first);
+                goto DONE_JOINING;
+              }
             }
           }
         }
+        DONE_JOINING:
+          ;
       }
-      DONE_JOINING:
-        ;
     }
+    return bindings;
   }
-  return bindings;
-}
 
-static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<Variable> &variables) {
-  const auto indices = std::make_shared<Rete::Variable_Indices>();
-  for(const auto &variable : variables) {
-    for(const auto &ni : variable.name_index) {
-      if(ni.first.empty())
-        continue;
-      indices->insert(ni);
+  static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<Parser_Variable> &variables) {
+    const auto indices = std::make_shared<Rete::Variable_Indices>();
+    for(const auto &variable : variables) {
+      for(const auto &ni : variable.name_index) {
+        if(ni.first.empty())
+          continue;
+        indices->insert(ni);
+      }
     }
+    return indices;
   }
-  return indices;
-}
 
-static vector<Variable> merge_variables(const vector<Variable> &lhs, const int64_t &lhs_size, const int64_t &lhs_token_size, const vector<Variable> &rhs, const bool &existential) {
-  vector<Variable> variables(lhs);
-  variables.reserve(variables.size() + rhs.size());
-  for(const Variable &var_ : rhs) {
-    Variable var(var_);
-    for(auto &ni : var.name_index) {
-      for(const Variable &existing_var : variables) {
-        for(const auto &existing_ni : existing_var.name_index) {
-          if(!existing_ni.second.existential && existing_ni.first == ni.first) {
-            ni.first.clear();
-            goto VAR_FOUND;
+  static vector<Parser_Variable> merge_variables(const vector<Parser_Variable> &lhs, const int64_t &lhs_size, const int64_t &lhs_token_size, const vector<Parser_Variable> &rhs, const bool &existential) {
+    vector<Parser_Variable> variables(lhs);
+    variables.reserve(variables.size() + rhs.size());
+    for(const Parser_Variable &var_ : rhs) {
+      Parser_Variable var(var_);
+      for(auto &ni : var.name_index) {
+        for(const Parser_Variable &existing_var : variables) {
+          for(const auto &existing_ni : existing_var.name_index) {
+            if(!existing_ni.second.existential && existing_ni.first == ni.first) {
+              ni.first.clear();
+              goto VAR_FOUND;
+            }
           }
         }
+        VAR_FOUND:
+        ni.second.rete_row += lhs_size;
+        ni.second.token_row += lhs_token_size;
+        ni.second.existential = ni.second.existential | existential;
+          ;
       }
-      VAR_FOUND:
-      ni.second.rete_row += lhs_size;
-      ni.second.token_row += lhs_token_size;
-      ni.second.existential = ni.second.existential | existential;
-        ;
+      variables.push_back(var);
     }
-    variables.push_back(var);
+    return variables;
   }
-  return variables;
+
 }
 
 %}
@@ -138,13 +142,13 @@ static vector<Variable> merge_variables(const vector<Variable> &lhs, const int64
 %union {
   char cval;
   const char *csval;
-  std::tuple<std::shared_ptr<int64_t>, std::shared_ptr<std::tuple<int64_t, std::string, std::string, Carli::Feature *>>> *flag_ptr;
+  Rete::Parser_Flag *flag_ptr;
   double fval;
   int64_t ival;
   std::list<std::string> *slist;
   std::string *sval;
-  std::pair<Rete::Rete_Node_Ptr, std::vector<Variable>> *rete_node_ptr;
-  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<Variable>>, std::string, std::tuple<std::shared_ptr<int64_t>, std::shared_ptr<std::tuple<int64_t, std::string, std::string, Carli::Feature *>>>, double> *rule_ptr;
+  Rete::Parser_Rete_Node *rete_node_ptr;
+  Rete::Parser_Rule *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 }
@@ -401,7 +405,7 @@ rule:
                                             get<0>(*$3) = make_shared<int64_t>(agent.get_total_step_count());
                                           if(!get<1>(*$3))
                                             get<1>(*$3) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>();
-                                          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<Variable>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, double>(*$4, *$2, *$3, 0.0);
+                                          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<Rete::Parser_Variable>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, double>(*$4, *$2, *$3, 0.0);
                                           delete $2;
                                           delete $3;
                                           delete $4; }
@@ -409,7 +413,7 @@ rule:
                                                                             get<0>(*$3) = make_shared<int64_t>(agent.get_total_step_count());
                                                                           if(!get<1>(*$3))
                                                                             get<1>(*$3) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>();
-                                                                          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<Variable>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, double>(*$4, *$2, *$3, $7);
+                                                                          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<Rete::Parser_Variable>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, double>(*$4, *$2, *$3, $7);
                                                                           delete $2;
                                                                           delete $3;
                                                                           delete $4; }
@@ -453,22 +457,22 @@ flags:
   ;
 final_conditions:
   conditions { $$ = $1; }
-  | '+' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential($2->first)), Variables()); delete $2; }
-  | '-' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation($2->first)), Variables()); delete $2; }
+  | '+' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential($2->first)), Rete::Variables()); delete $2; }
+  | '-' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation($2->first)), Rete::Variables()); delete $2; }
   | final_conditions EXISTENTIAL_MATCH condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(Rete::WME_Bindings(), true, $1->first, $3->first)), $1->second);
                                                         delete $1;
                                                         delete $3; }
   ;
 conditions:
-  conditions condition_type { const vector<Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $2->second, false));
+  conditions condition_type { const vector<Rete::Parser_Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $2->second, false));
                               $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(join_bindings($1->second, $2->second), $1->first, $2->first)), variables);
                               delete $1;
                               delete $2; }
-  | conditions '+' condition_type { const vector<Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $3->second, true));
+  | conditions '+' condition_type { const vector<Rete::Parser_Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $3->second, true));
                                     $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings($1->second, $3->second), false, $1->first, $3->first)), variables);
                                     delete $1;
                                     delete $3; }
-  | conditions '-' condition_type { const vector<Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $3->second, true));
+  | conditions '-' condition_type { const vector<Rete::Parser_Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $3->second, true));
                                     $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(join_bindings($1->second, $3->second), $1->first, $3->first)), variables);
                                     delete $1;
                                     delete $3; }
@@ -501,10 +505,10 @@ condition_type:
   | condition_group { $$ = $1; }
   ;
 condition:
-  '(' VARIABLE '^' symbol_constant symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *$4, *$5))), Variables(Variable(*$2, "", ""))); delete $2; delete $4; delete $5; }
-  | '(' VARIABLE '^' symbol_constant VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *$4, make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Third)))), Variables(Variable(*$2, "", *$5))); delete $2; delete $4; delete $5; }
-  | '(' VARIABLE '^' VARIABLE symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), *$5))), Variables(Variable(*$2, *$4, ""))); delete $2; delete $4; delete $5; }
-  | '(' VARIABLE '^' VARIABLE VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : *$4 == *$5 ? Rete::Symbol_Variable::Second : Rete::Symbol_Variable::Third)))), Variables(Variable(*$2, *$4, *$5))); delete $2; delete $4; delete $5; }
+  '(' VARIABLE '^' symbol_constant symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *$4, *$5))), Variables(Rete::Parser_Variable(*$2, "", ""))); delete $2; delete $4; delete $5; }
+  | '(' VARIABLE '^' symbol_constant VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *$4, make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Third)))), Variables(Rete::Parser_Variable(*$2, "", *$5))); delete $2; delete $4; delete $5; }
+  | '(' VARIABLE '^' VARIABLE symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), *$5))), Variables(Rete::Parser_Variable(*$2, *$4, ""))); delete $2; delete $4; delete $5; }
+  | '(' VARIABLE '^' VARIABLE VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : *$4 == *$5 ? Rete::Symbol_Variable::Second : Rete::Symbol_Variable::Third)))), Variables(Rete::Parser_Variable(*$2, *$4, *$5))); delete $2; delete $4; delete $5; }
   ;
 symbol:
   symbol_constant { $$ = $1; }
@@ -538,83 +542,4 @@ literal_parts:
 
 %%
 
-bool rete_get_exit() {
-  return g_rete_exit;
-}
-
-int rete_parse_file(Carli::Agent &agent, const string &filename, const std::string &source_path) {
-  if(filename.empty())
-    return -1;
-
-  string source_path_full = source_path;
-  string filename_part = filename;
-  string filename_full;
-  const size_t filename_slash_pos = filename.find_last_of("/\\");
-  if(filename_slash_pos != string::npos) {
-    if(filename[0] == '/' || filename[0] == '\\')
-      source_path_full.clear();
-    source_path_full += filename.substr(0, filename_slash_pos + 1);
-    filename_part = filename.substr(filename_slash_pos + 1);
-  }
-  filename_full = source_path_full + filename_part;
-
-  //cerr << "Sourcing '" << filename_part << "' from '" << source_path_full << '\'' << endl;
-
-  FILE * file = fopen(filename_full.c_str(), "r");
-  if(!file) {
-    std::cerr << "Failed to open file '" << filename_full << "' for parsing." << std::endl;
-    return -1;
-  }
-
-  yyscan_t yyscanner;
-  if(retelex_init(&yyscanner)) {
-    fclose(file);
-    return -1;
-  }
-
-  int rv = 0;
-
-  reterestart(file, yyscanner);
-  reteset_lineno(1, yyscanner);
-
-  Rete::Agenda::Locker locker(agent.get_agenda());
-
-  // retelex();
-  do {
-    rv = reteparse(yyscanner, agent, filename_full, source_path_full);
-    if(rv)
-      break;
-  } while (!feof(reteget_in(yyscanner)));
-
-  retelex_destroy(yyscanner);
-  fclose(file);
-
-  return rv;
-}
-
-int rete_parse_string(Carli::Agent &agent, const string &str, int &line_number) {
-  int rv = 0;
-
-  yyscan_t yyscanner;
-  if(retelex_init(&yyscanner))
-    return -1;
-
-  YY_BUFFER_STATE buf = rete_scan_string(str.c_str(), yyscanner);
-  reteset_lineno(line_number, yyscanner);
-
-  // retelex();
-  rv = reteparse(yyscanner, agent, "", "");
-
-  line_number = reteget_lineno(yyscanner) + 1;
-
-  rete_delete_buffer(buf, yyscanner);
-  retelex_destroy(yyscanner);
-
-  Rete::Agenda::Locker locker(agent.get_agenda());
-
-  return rv;
-}
-
-void rete_set_exit() {
-  g_rete_exit = true;
-}
+#include "rete_parser.cxx"

@@ -83,17 +83,17 @@ typedef void *yyscan_t;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 138 "rules.yyy" /* yacc.c:1909  */
+#line 142 "rules.yyy" /* yacc.c:1909  */
 
   char cval;
   const char *csval;
-  std::tuple<std::shared_ptr<int64_t>, std::shared_ptr<std::tuple<int64_t, std::string, std::string, Carli::Feature *>>> *flag_ptr;
+  Rete::Parser_Flag *flag_ptr;
   double fval;
   int64_t ival;
   std::list<std::string> *slist;
   std::string *sval;
-  std::pair<Rete::Rete_Node_Ptr, std::vector<Variable>> *rete_node_ptr;
-  std::tuple<std::pair<Rete::Rete_Node_Ptr, std::vector<Variable>>, std::string, std::tuple<std::shared_ptr<int64_t>, std::shared_ptr<std::tuple<int64_t, std::string, std::string, Carli::Feature *>>>, double> *rule_ptr;
+  Rete::Parser_Rete_Node *rete_node_ptr;
+  Rete::Parser_Rule *rule_ptr;
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 

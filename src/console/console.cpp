@@ -17,10 +17,10 @@ inline bool redirected_cin() {return !isatty(STDIN_FILENO);}
 #endif
 
 void signal_handler(int sig) {
-  if(!rete_get_exit())
+  if(!Rete::rete_get_exit())
     signal(sig, signal_handler);
   if(sig == SIGTERM)
-    rete_set_exit();
+    Rete::rete_set_exit();
   else
     std::cerr << std::endl << "Ctrl+" << (sig == SIGINT ? "C" : "Break") <<" captured. Call 'exit' to quit." << std::endl;
 }
@@ -41,20 +41,20 @@ int main(int argc, char **argv) {
   std::string line;
   int line_number = 1;
 
-  for(int64_t i = Options::get_global().optind; !rete_get_exit() && i < argc; ++i) {
-    rete_parse_file(*agent, argv[i]);
+  for(int64_t i = Options::get_global().optind; !Rete::rete_get_exit() && i < argc; ++i) {
+    Rete::rete_parse_file(*agent, argv[i]);
     std::cout << std::endl;
   }
 
-  while(!rete_get_exit()) {
+  while(!Rete::rete_get_exit()) {
     std::cout << "carli % ";
     getline(std::cin, line);
     if(std::cin) {
-      rete_parse_string(*agent, line, line_number);
+      Rete::rete_parse_string(*agent, line, line_number);
       std::cout << std::endl;
     }
     else if(redirected_cin())
-      rete_set_exit();
+      Rete::rete_set_exit();
     else
       std::cin.clear();
   }
