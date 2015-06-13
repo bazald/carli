@@ -107,6 +107,7 @@ namespace Blocks_World_2 {
   }
 
   Agent::reward_type Environment::transition_impl(const Carli::Action &action) {
+    const int64_t best_match_total_before = matching_blocks();
     const Move &move = debuggable_cast<const Move &>(action);
 
     Stacks::iterator src = std::find_if(m_blocks.begin(), m_blocks.end(), [&move](Stack &stack)->bool {
@@ -136,7 +137,47 @@ namespace Blocks_World_2 {
 
     std::sort(m_blocks.begin(), m_blocks.end());
 
-    return -1.0;
+    const int64_t best_match_total_after = matching_blocks();
+    return best_match_total_after - best_match_total_before;
+
+//    return -1.0;
+  }
+
+  int64_t Environment::matching_blocks() const {
+    int64_t best_match_total = 0u;
+    std::unordered_set<const Environment::Stack *> matched_stacks;
+    for(const auto &goal_stack : m_goal) {
+      const Environment::Stack * best_match = nullptr;
+      size_t best_match_size = 0u;
+
+      for(const auto &stack : m_blocks) {
+        if(matched_stacks.find(&stack) != matched_stacks.end())
+          continue;
+        if(goal_stack.size() < stack.size())
+          continue;
+
+        const auto match = std::mismatch(stack.begin(), stack.end(), goal_stack.begin(), m_match_test);
+
+        if(match.first == stack.end()) {
+          if(match.second == goal_stack.end()) {
+            best_match = &stack;
+            best_match_size = stack.size();
+            break;
+          }
+          else if(stack.size() > best_match_size) {
+            best_match = &stack;
+            best_match_size = stack.size();
+          }
+        }
+      }
+
+      if(best_match) {
+        matched_stacks.insert(best_match);
+        best_match_total += best_match_size;
+      }
+    }
+
+    return best_match_total;
   }
 
   void Environment::print_impl(ostream &os) const {

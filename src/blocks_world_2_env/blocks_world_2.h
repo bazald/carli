@@ -106,6 +106,7 @@ namespace Blocks_World_2 {
     Stacks random_Stacks(const std::vector<Block> &blocks);
 
     reward_type transition_impl(const Carli::Action &action);
+    int64_t matching_blocks() const;
 
     void print_impl(ostream &os) const;
 
