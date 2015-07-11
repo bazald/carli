@@ -115,7 +115,8 @@ namespace Carli {
     std::list<Node_Ptr> m_nodes_activating;
 
   protected:
-    Action_Ptr_C choose_epsilon_greedy(const double &epsilon, const Node_Fringe * const &fringe);
+    Action_Ptr_C choose_epsilon_greedy(const Node_Fringe * const &fringe);
+    Action_Ptr_C choose_t_test(const Node_Fringe * const &fringe);
     Action_Ptr_C choose_greedy(const Node_Fringe * const &fringe);
     std::list<Action_Ptr_C, Zeni::Pool_Allocator<Action_Ptr_C>> choose_greedies(const Node_Fringe * const &fringe);
     Action_Ptr_C choose_randomly();
@@ -147,7 +148,8 @@ namespace Carli {
     Fringe_Values::iterator split_test_policy(Node_Unsplit &general);
     Fringe_Values::iterator split_test_value(Node_Unsplit &general);
 
-    double sum_value(const action_type * const &action, const Q_Value_List &value_list, const Feature * const &axis) const;
+    /// Get the sample mean and standard deviation
+    std::tuple<double, double, int64_t> sum_value(const action_type * const &action, const Q_Value_List &value_list, const Feature * const &axis) const;
 
     void generate_all_features();
 
@@ -228,6 +230,7 @@ namespace Carli {
 
     const bool m_on_policy = dynamic_cast<const Option_Itemized &>(Options::get_global()["policy"]).get_value() == "on-policy"; ///< for Sarsa/Q-learning selection
     const double m_epsilon = get_Option_Ranged<double>(Options::get_global(), "epsilon-greedy"); ///< for epsilon-greedy decision-making
+    const double m_t_test = get_Option_Ranged<double>(Options::get_global(), "t-test"); ///< for t-test decision-making
 
     const int64_t m_pseudoepisode_threshold = get_Option_Ranged<int64_t>(Options::get_global(), "pseudoepisode-threshold"); ///< For deciding how many steps indicates a pseudoepisode
     const double m_split_catde = get_Option_Ranged<double>(Options::get_global(), "split-catde");

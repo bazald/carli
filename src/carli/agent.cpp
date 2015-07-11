@@ -2,6 +2,8 @@
 
 //#include "../infinite_mario/infinite_mario.h"
 
+#include "t_test.h"
+
 namespace Carli {
 
 #ifdef NDEBUG
@@ -387,7 +389,9 @@ namespace Carli {
   Agent::Agent(const std::shared_ptr<Environment> &environment, const std::function<Carli::Action_Ptr_C (const Rete::Variable_Indices &variables, const Rete::WME_Token &token)> &get_action_)
     : get_action(get_action_),
     m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy(nullptr);}),
-    m_exploration_policy([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(m_epsilon, nullptr);}),
+    m_exploration_policy(dynamic_cast<const Option_Itemized &>(Options::get_global()["exploration"]).get_value() == "epsilon-greedy"
+                         ? std::function<Action_Ptr_C ()>([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(nullptr);})
+                         : std::function<Action_Ptr_C ()>([this]()->Action_Ptr_C{return this->choose_t_test(nullptr);})),
     m_environment(environment),
     m_credit_assignment(
       m_credit_assignment_code == "all" ?
@@ -567,7 +571,7 @@ namespace Carli {
         const auto next = m_exploration_policy();
 
         if(!m_secondary_learning_rate && *m_next != *next &&
-           sum_value(nullptr, m_next_q_values[next], nullptr) < sum_value(nullptr, m_next_q_values[m_next], nullptr))
+           std::get<0>(sum_value(nullptr, m_next_q_values[next], nullptr)) < std::get<0>(sum_value(nullptr, m_next_q_values[m_next], nullptr)))
         {
           clear_eligibility_trace();
         }
@@ -749,11 +753,38 @@ namespace Carli {
     visit_preorder(visitor, true);
   }
 
-  Action_Ptr_C Agent::choose_epsilon_greedy(const double &epsilon, const Node_Fringe * const &fringe) {
-    if(random.frand_lt() < epsilon)
+  Action_Ptr_C Agent::choose_epsilon_greedy(const Node_Fringe * const &fringe) {
+    if(random.frand_lt() < m_epsilon)
       return choose_randomly();
     else
       return choose_greedy(fringe);
+  }
+
+  Action_Ptr_C Agent::choose_t_test(const Node_Fringe * const &fringe) {
+    const Q_Value * const parent_q = fringe ? dynamic_cast<Node *>(fringe->parent_action.lock()->data.get())->q_value.get() : nullptr;
+    const auto greedy = choose_greedy(fringe);
+    const auto greedy_weights = m_next_q_values[greedy];
+    const auto greedy_value = parent_q && std::find(greedy_weights.begin(), greedy_weights.end(), parent_q) == greedy_weights.end()
+                            ? sum_value(greedy.get(), greedy_weights, nullptr)
+                            : sum_value(greedy.get(), greedy_weights, fringe ? fringe->q_value->feature.get() : nullptr);
+
+    Action_Ptr_C gtewp;
+    int32_t gtewp_count = 0;
+    for(const auto &action_q : m_next_q_values) {
+      const auto value = parent_q && std::find(action_q.second.begin(), action_q.second.end(), parent_q) == action_q.second.end()
+                       ? sum_value(action_q.first.get(), action_q.second, nullptr)
+                       : sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value->feature.get() : nullptr);
+
+      if(probability_gte(std::get<2>(value), std::get<0>(value), std::get<1>(value),
+                         std::get<2>(greedy_value), std::get<0>(greedy_value), std::get<1>(greedy_value)))
+      {
+        ++gtewp_count;
+        if(gtewp_count == 1 || random.rand_lt(gtewp_count) == 0)
+          gtewp = action_q.first;
+      }
+    }
+
+    return gtewp;
   }
 
   Action_Ptr_C Agent::choose_greedy(const Node_Fringe * const &fringe) {
@@ -778,9 +809,9 @@ namespace Carli {
     for(const auto &action_q : m_next_q_values) {
       double value_;
       if(parent_q && std::find(action_q.second.begin(), action_q.second.end(), parent_q) == action_q.second.end())
-        value_ = sum_value(action_q.first.get(), action_q.second, nullptr);
+        value_ = std::get<0>(sum_value(action_q.first.get(), action_q.second, nullptr));
       else
-        value_ = sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value->feature.get() : nullptr);
+        value_ = std::get<0>(sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value->feature.get() : nullptr));
 
       if(greedies.empty() || value_ > value) {
         greedies = {{action_q.first}};
@@ -820,12 +851,12 @@ namespace Carli {
       return 0.0;
 
     double count = double();
-    const double value = sum_value(action.get(), next_q_values_action, fringe ? fringe->q_value->feature.get() : nullptr);
+    const double value = std::get<0>(sum_value(action.get(), next_q_values_action, fringe ? fringe->q_value->feature.get() : nullptr));
 
     for(const auto &action_q : m_next_q_values) {
       if(parent_q && std::find(action_q.second.begin(), action_q.second.end(), parent_q) == action_q.second.end())
         continue;
-      const double value_ = sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value->feature.get() : nullptr);
+      const double value_ = std::get<0>(sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value->feature.get() : nullptr));
 
       if(value_ > value)
         return 0.0;
@@ -847,7 +878,7 @@ namespace Carli {
     dump_rules(*this);
     assert(!m_badness);
 
-    const double target_next = m_discount_rate * sum_value(nullptr, next, nullptr);
+    const double target_next = m_discount_rate * std::get<0>(sum_value(nullptr, next, nullptr));
     const double target_value = reward + target_next;
 
     double q_old = double();
@@ -898,6 +929,15 @@ namespace Carli {
       q->eligibility_init = true;
 
       dot_w_phi += q->secondary;
+
+      if(q->update_count > 1) {
+        const double delta = (target_value - q_old) * m_learning_rate;
+        const double q_new = q_old + delta; ///< Could calculate like q_old post-update -- might be different
+        const double mdelta = (target_value - q_old) * (target_value - q_new);
+
+        q->mean2 += mdelta * q->credit;
+        q->variance = q->mean2 / (q->update_count - 1);
+      }
     }
 
     const double delta = target_value - q_old;
@@ -918,6 +958,7 @@ namespace Carli {
       q.value += m_learning_rate * edelta;
       if(m_secondary_learning_rate && q.credit)
         q.secondary += m_learning_rate * m_secondary_learning_rate * edelta;
+      q.normalize();
 
       if(q.type == Q_Value::Type::FRINGE) {
         const double abs_edelta = std::abs(edelta);
@@ -966,13 +1007,17 @@ namespace Carli {
 
     if(m_secondary_learning_rate) {
       for(auto &q : next) {
-        if(q->credit)
+        if(q->credit) {
           q->value -= m_learning_rate * m_discount_rate * (1 - m_eligibility_trace_decay_rate) * dot_w_e;
+          q->normalize();
+        }
       }
 
       for(auto &q : current) {
-        if(q->credit)
+        if(q->credit) {
           q->secondary -= m_learning_rate * m_secondary_learning_rate * dot_w_phi;
+          q->normalize();
+        }
       }
     }
 
@@ -1434,7 +1479,7 @@ namespace Carli {
     return chosen_axis;
   }
 
-  double Agent::sum_value(const action_type * const &
+  std::tuple<double, double, int64_t> Agent::sum_value(const action_type * const &
 #ifdef DEBUG_OUTPUT
                                                      action
 #endif
@@ -1449,11 +1494,14 @@ namespace Carli {
   //    assert((&value_list - static_cast<Q_Value::List *>(nullptr)) > ptrdiff_t(sizeof(Q_Value)));
 
     double sum = double();
+    double sum_variance = double();
+//    int64_t avg_update_count = std::numeric_limits<int64_t>::max();
+    int64_t min_update_count = std::numeric_limits<int64_t>::max();
     size_t touched = 0u;
     for(auto &q : value_list) {
 #ifdef DEBUG_OUTPUT
       if(action && (!axis || (q->feature && q->feature->compare_axis(*axis) == 0))) {
-        std::cerr << ' ' << q->value /* * q.weight */ << ':' << q->depth;
+        std::cerr << ' ' << q->value << ';' << q->variance << ':' << q->depth;
         if(q->type == Q_Value::Type::FRINGE)
           std::cerr << 'f';
         if(q->feature)
@@ -1462,9 +1510,15 @@ namespace Carli {
 #endif
       if(axis ? (q->feature && q->feature->compare_axis(*axis) == 0) : q->type != Q_Value::Type::FRINGE) {
         sum += q->value /* * q->weight */;
+        sum_variance += q->variance;
+//        avg_update_count *= touched / (touched + 1.0);
+        min_update_count = std::min(min_update_count, q->update_count);
         ++touched;
+//        avg_update_count += q->update_count / double(touched);
       }
     }
+
+    const double stddev = sqrt(sum_variance);
 
 //#ifdef DEBUG_OUTPUT
 //    std::cerr << std::endl << "Touched ";
@@ -1481,15 +1535,17 @@ namespace Carli {
     if(!(touched || value_list.empty())) {
       dump_rules(*this);
       assert(touched || value_list.empty());
+//      avg_update_count = 0;
+      min_update_count = 0;
     }
 
     if(action) {
-      std::cerr << sum << std::endl;
+      std::cerr << sum << " + " << stddev << " = " << sum + stddev << std::endl;
       std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
     }
 #endif
 
-    return sum;
+    return std::make_tuple(sum, stddev, min_update_count);
   }
 
   //void Agent::print_value_function_grid_set(std::ostream &os, const std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>> &line_segments) const {

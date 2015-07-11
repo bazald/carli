@@ -32,6 +32,7 @@ namespace Carli {
      eligible(this),
      feature(feature_)
     {
+      normalize();
     }
 
     Q_Value * clone() const {
@@ -51,6 +52,9 @@ namespace Carli {
       lhs->minbe = minbe;
 #endif
 
+      lhs->mean2 = mean2;
+      lhs->variance = variance;
+
       return lhs;
     }
 
@@ -61,6 +65,11 @@ namespace Carli {
     Q_Value & operator=(const double &q_value_) {
       value = q_value_;
       return *this;
+    }
+
+    void normalize() {
+      value = normalize(value);
+      secondary = normalize(secondary);
     }
 
     int64_t creation_time = 0;
@@ -85,6 +94,9 @@ namespace Carli {
     Value catde; ///< Cumulative Absolute Bellman Error
     Value matde; ///< Mean Absolute Bellman Error (catde / update_count)
 
+    double mean2 = 0.0;
+    double variance = 0.0;
+
 #ifdef WHITESON_ADAPTIVE_TILE
     double minbe = DBL_MAX; ///< Minimum Bellman Error experienced
 #endif
@@ -94,6 +106,15 @@ namespace Carli {
     List eligible;
 
     tracked_ptr<Feature> feature;
+
+  private:
+    static double normalize(const double &input) {
+      switch(std::fpclassify(input)) {
+        case FP_NORMAL:   return input;
+        case FP_INFINITE: return input > 0.0 ? std::numeric_limits<double>::max() : std::numeric_limits<double>::lowest();
+        default:          return 0.0;
+      }
+    }
   };
 
 }

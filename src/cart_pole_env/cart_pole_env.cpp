@@ -57,8 +57,8 @@ namespace Cart_Pole {
 
     const double temp = (force + POLEMASS_LENGTH * m_theta_dot * m_theta_dot * sintheta) / TOTAL_MASS;
 
-    const double thetaacc = (GRAVITY * sintheta - costheta* temp) /
-                             (LENGTH * (FOURTHIRDS - MASSPOLE * costheta * costheta / TOTAL_MASS));
+    const double thetaacc = (GRAVITY * sintheta - costheta * temp) /
+                            (LENGTH * (FOURTHIRDS - MASSPOLE * costheta * costheta / TOTAL_MASS));
 
     if(!m_ignore_x) {
       const double xacc  = temp - POLEMASS_LENGTH * thetaacc* costheta / TOTAL_MASS;
@@ -69,6 +69,40 @@ namespace Cart_Pole {
 
     m_theta += TAU * m_theta_dot;
     m_theta_dot = std::max(-m_max_theta_dot, std::min(m_max_theta_dot, m_theta_dot + TAU * thetaacc));
+
+    double reward = 0.0;
+
+    reward += fabs(m_theta) / m_max_theta < 0.1 ? 10.0 : fabs(m_theta) / m_max_theta < 0.2 ? 5.0 : 0.0;
+    if(m_theta < 0.0) {
+      if(m_theta_dot < 0.0)
+        reward += -m_theta_dot / m_max_theta_dot < 0.1 ? 0.0 : -m_theta_dot / m_max_theta_dot < 0.2 ? -1.0 : -10.0;
+      else
+        reward += 1.0;
+    }
+    else {
+      if(m_theta_dot < 0.0)
+        reward += 1.0;
+      else
+        reward += m_theta_dot / m_max_theta_dot < 0.1 ? 0.0 : m_theta_dot / m_max_theta_dot < 0.2 ? -1.0 : -10.0;
+    }
+
+    if(!m_ignore_x) {
+      reward += fabs(m_x) / m_max_x < 0.1 ? 10.0 : fabs(m_x) / m_max_x < 0.2 ? 5.0 : 0.0;
+      if(m_x < 0.0) {
+        if(m_x_dot < 0.0)
+          reward += -m_x_dot / m_max_x_dot < 0.1 ? 0.0 : -m_x_dot / m_max_x_dot < 0.2 ? -1.0 : -10.0;
+        else
+          reward += 1.0;
+      }
+      else {
+        if(m_x_dot < 0.0)
+          reward += 1.0;
+        else
+          reward += m_x_dot / m_max_x_dot < 0.1 ? 0.0 : m_x_dot / m_max_x_dot < 0.2 ? -1.0 : -10.0;
+      }
+    }
+
+    return reward;
 
     return success() ? 1.0 : failed() ? -1.0 : 0.0;
   }

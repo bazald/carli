@@ -412,6 +412,7 @@ namespace Carli {
    : Node(agent_, parent_action_, rete_action_, new Q_Value(0.0, Q_Value::Type::FRINGE, depth_, feature_, agent_.get_total_step_count()))
   {
     q_value->value = sum_value();
+    q_value->normalize();
   }
 
   Rete::Rete_Node_Ptr Node_Fringe::cluster_root_ancestor() const {
