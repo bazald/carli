@@ -23,20 +23,17 @@ namespace Carli {
     typedef Zeni::Linked_List<Q_Value> List;
     typedef List::iterator iterator;
     enum class Type : char {SPLIT, UNSPLIT, FRINGE};
-    typedef std::tuple<double, double, double, double, double, double, double, int64_t> Token;
+    typedef std::tuple<double, double, double, double, int64_t> Token;
 
     Q_Value(const Token value, const Type &type_, const int64_t &depth_, const tracked_ptr<Feature> &feature_, const int64_t &creation_time_)
      : creation_time(creation_time_),
      depth(depth_),
-     update_count(std::get<7>(value)),
+     update_count(std::get<4>(value)),
      type(type_),
-     primary_0(std::get<0>(value)),
-     primary_0_mean2(std::get<1>(value)),
-     primary_0_variance(std::get<2>(value)),
-     primary_rest(std::get<3>(value)),
-     primary_rest_mean2(std::get<4>(value)),
-     primary_rest_variance(std::get<5>(value)),
-     secondary_rest(std::get<6>(value)),
+     primary(std::get<0>(value)),
+     primary_mean2(std::get<1>(value)),
+     primary_variance(std::get<2>(value)),
+     secondary(std::get<3>(value)),
      eligible(this),
      feature(feature_)
     {
@@ -44,9 +41,7 @@ namespace Carli {
     }
 
     Q_Value * clone() const {
-      Q_Value * const lhs = new Q_Value(Token(primary_0, primary_0_mean2, primary_0_variance,
-                                              primary_rest, primary_rest_mean2, primary_rest_variance,
-                                              secondary_rest, update_count),
+      Q_Value * const lhs = new Q_Value(Token(primary, primary_mean2, primary_variance, secondary, update_count),
                                         type, depth, feature->clone(), creation_time);
 
       lhs->last_episode_fired = last_episode_fired;
@@ -70,9 +65,9 @@ namespace Carli {
     }
 
     void update_totals() {
-      primary_total = normalize(primary_0 + primary_rest);
-      primary_variance_total = normalize(primary_0_variance + primary_rest_variance);
-      secondary_rest = normalize(secondary_rest);
+      primary = normalize(primary);
+      primary_variance = normalize(primary_variance);
+      secondary = normalize(secondary);
     }
 
     int64_t creation_time = 0;
@@ -92,18 +87,11 @@ namespace Carli {
     double credit = 1.0;
   //  double weight = 1.0;
 
-    double primary_0 = 0.0;
-    double primary_0_mean2 = 0.0;
-    double primary_0_variance = 0.0;
+    double primary = 0.0;
+    double primary_mean2 = 0.0;
+    double primary_variance = 0.0;
 
-    double primary_rest = 0.0;
-    double primary_rest_mean2 = 0.0;
-    double primary_rest_variance = 0.0;
-
-    double primary_total;
-    double primary_variance_total;
-
-    double secondary_rest = 0.0;
+    double secondary = 0.0;
 
     Value catde; ///< Cumulative Absolute Bellman Error
     Value matde; ///< Mean Absolute Bellman Error (catde / update_count)

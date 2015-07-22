@@ -21,14 +21,11 @@ namespace Carli {
     const auto pa_lock = parent_action.lock();
 
     if(q_value->type != Q_Value::Type::FRINGE) {
-      value_accumulator = Q_Value::Token(std::get<0>(value_accumulator) + q_value->primary_0,
-                                         std::get<1>(value_accumulator) + q_value->primary_0_mean2,
-                                         std::get<2>(value_accumulator) + q_value->primary_0_variance,
-                                         std::get<3>(value_accumulator) + q_value->primary_rest,
-                                         std::get<4>(value_accumulator) + q_value->primary_rest_mean2,
-                                         std::get<5>(value_accumulator) + q_value->primary_rest_variance,
-                                         std::get<6>(value_accumulator) + q_value->secondary_rest,
-                                         std::min(std::get<7>(value_accumulator), q_value->update_count));
+      value_accumulator = Q_Value::Token(std::get<0>(value_accumulator) + q_value->primary,
+                                         std::get<1>(value_accumulator) + q_value->primary_mean2,
+                                         std::get<2>(value_accumulator) + q_value->primary_variance,
+                                         std::get<3>(value_accumulator) + q_value->secondary,
+                                         std::min(std::get<4>(value_accumulator), q_value->update_count));
     }
 
     if(pa_lock)
@@ -66,9 +63,8 @@ namespace Carli {
   }
 
   void Node::print_action(std::ostream &os) const {
-    os << "  = " << Rete::to_string(q_value->primary_0) << ' ' << Rete::to_string(q_value->primary_0_mean2) << ' ' << Rete::to_string(q_value->primary_0_variance)
-       << ' ' << Rete::to_string(q_value->primary_rest) << ' ' << Rete::to_string(q_value->primary_rest_mean2) << ' ' << Rete::to_string(q_value->primary_rest_variance)
-       << ' ' << Rete::to_string(q_value->secondary_rest) << ' ' << q_value->update_count;
+    os << "  = " << Rete::to_string(q_value->primary) << ' ' << Rete::to_string(q_value->primary_mean2) << ' ' << Rete::to_string(q_value->primary_variance)
+       << ' ' << Rete::to_string(q_value->secondary) << ' ' << q_value->update_count;
   }
 
   void Node::action(const Rete::WME_Token &token) {
@@ -96,9 +92,8 @@ namespace Carli {
 
     if(q_value->type == Q_Value::Type::FRINGE) {
       const auto summed = sum_value();
-      new_q_value = new Q_Value(Q_Value::Token(q_value->primary_0 - std::get<0>(summed), q_value->primary_0_mean2 - std::get<1>(summed), q_value->primary_0_variance - std::get<2>(summed),
-                                               q_value->primary_rest - std::get<3>(summed), q_value->primary_rest_mean2 - std::get<4>(summed), q_value->primary_rest_variance - std::get<5>(summed),
-                                               q_value->secondary_rest - std::get<6>(summed), std::min(q_value->update_count, std::get<7>(summed))),
+      new_q_value = new Q_Value(Q_Value::Token(q_value->primary - std::get<0>(summed), q_value->primary_mean2 - std::get<1>(summed), q_value->primary_variance - std::get<2>(summed),
+                                               q_value->secondary - std::get<3>(summed), std::min(q_value->update_count, std::get<4>(summed))),
                                 Q_Value::Type::SPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr, agent.get_total_step_count());
     }
     else {
@@ -122,9 +117,8 @@ namespace Carli {
 
     if(q_value->type == Q_Value::Type::FRINGE) {
       const auto summed = sum_value();
-      new_q_value = new Q_Value(Q_Value::Token(q_value->primary_0 - std::get<0>(summed), q_value->primary_0_mean2 - std::get<1>(summed), q_value->primary_0_variance - std::get<2>(summed),
-                                               q_value->primary_rest - std::get<3>(summed), q_value->primary_rest_mean2 - std::get<4>(summed), q_value->primary_rest_variance - std::get<5>(summed),
-                                               q_value->secondary_rest - std::get<6>(summed), std::min(q_value->update_count, std::get<7>(summed))),
+      new_q_value = new Q_Value(Q_Value::Token(q_value->primary - std::get<0>(summed), q_value->primary_mean2 - std::get<1>(summed), q_value->primary_variance - std::get<2>(summed),
+                                               q_value->secondary - std::get<3>(summed), std::min(q_value->update_count, std::get<4>(summed))),
                                 Q_Value::Type::UNSPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr, agent.get_total_step_count());
     }
     else {
