@@ -332,7 +332,8 @@ namespace Carli {
 #endif
 
     /// Preserve some learning
-    unsplit->q_value->value = split->q_value->value;
+    /// Already being done in node.cpp, but should attempt to do better
+//    unsplit->q_value->value = split->q_value->value;
 
     /// Make new fringe
     Fringe_Values node_unsplit_fringe;
@@ -881,7 +882,10 @@ namespace Carli {
     const double target_next = m_discount_rate * std::get<0>(sum_value(nullptr, next, nullptr));
     const double target_value = reward + target_next;
 
-    double q_old = double();
+    double q_0_old = 0.0;
+    double q_rest_old = 0.0;
+    double q_old = 0.0;
+    int64_t min_update_count = std::numeric_limits<int64_t>::max();
 #ifdef DEBUG_OUTPUT
     std::cerr << " current :";
 #endif
@@ -889,9 +893,12 @@ namespace Carli {
       ++q->update_count;
 
       if(q->type != Q_Value::Type::FRINGE) {
-        q_old += q->value /* * q.weight */;
+        q_0_old += q->primary_0;
+        q_rest_old += q->primary_rest;
+        q_old += q->primary_total /* * q.weight */;
+        min_update_count = std::min(min_update_count, q->update_count);
 #ifdef DEBUG_OUTPUT
-        std::cerr << ' ' << q->value;
+        std::cerr << ' ' << q->primary_total;
 #endif
       }
     }
@@ -900,18 +907,22 @@ namespace Carli {
     std::cerr << " fringe  :";
     for(const auto &q : current) {
       if(q->type == Q_Value::Type::FRINGE)
-        std::cerr << ' ' << q->value;
+        std::cerr << ' ' << q->primary_total;
     }
     std::cerr << std::endl;
     std::cerr << " next    :";
     for(const auto &q : next) {
       if(q->type != Q_Value::Type::FRINGE)
-        std::cerr << ' ' << q->value;
+        std::cerr << ' ' << q->primary_total;
     }
     std::cerr << std::endl;
 #endif
 
     m_credit_assignment(current);
+
+    /// Seems bad, and I'm not sure why
+//    const double learning_rate_0 = std::min(1.0 / min_update_count, m_learning_rate);
+    const double learning_rate_0 = m_learning_rate;
 
     double dot_w_phi = 0.0;
     if(m_secondary_learning_rate) {
@@ -928,19 +939,29 @@ namespace Carli {
       q->eligibility = (q->eligibility == -1.0 ? 0.0 : q->eligibility) + (q->credit ? I : 0.0);
       q->eligibility_init = true;
 
-      dot_w_phi += q->secondary;
+      dot_w_phi += q->secondary_rest;
 
       if(q->update_count > 1) {
-        const double delta = (target_value - q_old) * m_learning_rate;
-        const double q_new = q_old + delta; ///< Could calculate like q_old post-update -- might be different
-        const double mdelta = (target_value - q_old) * (target_value - q_new);
+        const double delta_0 = (reward - q_0_old) * learning_rate_0;
+        const double delta_rest = (target_next - q_rest_old) * m_learning_rate;
 
-        q->mean2 += mdelta * q->credit;
-        q->variance = q->mean2 / (q->update_count - 1);
+        /// Could calculate like q_old post-update -- might be different
+        const double q_0_new = q_0_old + delta_0;
+        const double q_rest_new = q_rest_old + delta_rest;
+
+        const double mdelta_0 = (reward - q_0_old) * (reward - q_0_new);
+        const double mdelta_rest = (target_next - q_rest_old) * (target_next - q_rest_new);
+
+        q->primary_0_mean2 += mdelta_0 * q->credit;
+        q->primary_rest_mean2 += mdelta_rest * q->credit;
+
+        q->primary_0_variance = q->primary_0_mean2 / (q->update_count - 1);
+        q->primary_rest_variance = q->primary_rest_mean2 / (q->update_count - 1);
       }
     }
 
-    const double delta = target_value - q_old;
+    const double delta_0 = reward - q_0_old;
+    const double delta_rest = target_next - q_rest_old;
 #ifdef ENABLE_WEIGHT
     const bool weight_assignment_all = m_weight_assignment_code == "all";
 #else
@@ -950,18 +971,22 @@ namespace Carli {
     for(Q_Value::List::list_pointer_type q_ptr = m_eligible; q_ptr; q_ptr = q_ptr->next()) {
       Q_Value &q = **q_ptr;
 
-      const double ldelta = weight_assignment_all && q.type != Q_Value::Type::FRINGE ? delta : target_value - q.value;
-      const double edelta = q.eligibility * ldelta;
+      const double ldelta_0 = weight_assignment_all && q.type != Q_Value::Type::FRINGE ? delta_0 : reward - q.primary_0;
+      const double ldelta_rest = weight_assignment_all && q.type != Q_Value::Type::FRINGE ? delta_rest : target_next - q.primary_rest;
 
-      dot_w_e += q.secondary * q.eligibility;
+      const double edelta_0 = q.eligibility * ldelta_0;
+      const double edelta_rest = q.eligibility * ldelta_rest;
 
-      q.value += m_learning_rate * edelta;
+      dot_w_e += q.secondary_rest * q.eligibility;
+
+      q.primary_0 += learning_rate_0 * edelta_0;
+      q.primary_rest += m_learning_rate * edelta_rest;
       if(m_secondary_learning_rate && q.credit)
-        q.secondary += m_learning_rate * m_secondary_learning_rate * edelta;
-      q.normalize();
+        q.secondary_rest += m_learning_rate * m_secondary_learning_rate * edelta_rest;
+      q.update_totals();
 
       if(q.type == Q_Value::Type::FRINGE) {
-        const double abs_edelta = std::abs(edelta);
+        const double abs_edelta = std::abs(edelta_0 + edelta_rest);
 
         if(q.eligibility_init) {
           if(q.last_episode_fired != this->m_episode_number) {
@@ -1008,15 +1033,15 @@ namespace Carli {
     if(m_secondary_learning_rate) {
       for(auto &q : next) {
         if(q->credit) {
-          q->value -= m_learning_rate * m_discount_rate * (1 - m_eligibility_trace_decay_rate) * dot_w_e;
-          q->normalize();
+          q->primary_rest -= m_learning_rate * m_discount_rate * (1 - m_eligibility_trace_decay_rate) * dot_w_e;
+          q->update_totals();
         }
       }
 
       for(auto &q : current) {
         if(q->credit) {
-          q->secondary -= m_learning_rate * m_secondary_learning_rate * dot_w_phi;
-          q->normalize();
+          q->secondary_rest -= m_learning_rate * m_secondary_learning_rate * dot_w_phi;
+          q->update_totals();
         }
       }
     }
@@ -1040,12 +1065,12 @@ namespace Carli {
     double q_new = double();
     for(const auto &q : current) {
       if(q->type != Q_Value::Type::FRINGE)
-        q_new += q->value /* * q.weight */;
+        q_new += q->primary_total /* * q.weight */;
     }
 
     std::cerr.unsetf(std::ios_base::floatfield);
     std::cerr << " td_update: " << q_old << " <" << m_learning_rate << "= " << reward << " + " << m_discount_rate << " * " << target_next << std::endl;
-    std::cerr << "            " << delta << " = " << target_value << " - " << q_old << std::endl;
+    std::cerr << "            " << delta_0 + delta_rest << " = " << target_value << " - " << q_old << std::endl;
     std::cerr << "            " << q_new << std::endl;
     std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
 
@@ -1441,8 +1466,8 @@ namespace Carli {
       double lowest = std::numeric_limits<double>::max();
       double highest = std::numeric_limits<double>::lowest();
       for(auto &fringe : fringe_axis->second.values) {
-        lowest = std::min(lowest, fringe->q_value->value);
-        highest = std::max(highest, fringe->q_value->value);
+        lowest = std::min(lowest, fringe->q_value->primary_total);
+        highest = std::max(highest, fringe->q_value->primary_total);
       }
       fringe_axis->second.value_delta_max = m_learning_rate * (highest - lowest) + (1 - m_learning_rate) * fringe_axis->second.value_delta_max;
 
@@ -1501,7 +1526,7 @@ namespace Carli {
     for(auto &q : value_list) {
 #ifdef DEBUG_OUTPUT
       if(action && (!axis || (q->feature && q->feature->compare_axis(*axis) == 0))) {
-        std::cerr << ' ' << q->value << ';' << q->variance << ':' << q->depth;
+        std::cerr << ' ' << q->primary_total << ';' << q->primary_variance_total << ':' << q->depth;
         if(q->type == Q_Value::Type::FRINGE)
           std::cerr << 'f';
         if(q->feature)
@@ -1509,8 +1534,8 @@ namespace Carli {
       }
 #endif
       if(axis ? (q->feature && q->feature->compare_axis(*axis) == 0) : q->type != Q_Value::Type::FRINGE) {
-        sum += q->value /* * q->weight */;
-        sum_variance += q->variance;
+        sum += q->primary_total /* * q->weight */;
+        sum_variance += q->primary_variance_total;
 //        avg_update_count *= touched / (touched + 1.0);
         min_update_count = std::min(min_update_count, q->update_count);
         ++touched;

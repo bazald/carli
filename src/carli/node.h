@@ -54,7 +54,11 @@ namespace Carli {
     virtual ~Node();
 
     int64_t rank() const override;
-    double sum_value(const double value_accumulator = 0.0) const;
+
+    Q_Value::Token sum_value(Q_Value::Token value_accumulator = Q_Value::Token()) const;
+
+//    template <typename TYPE>
+//    double min_int64(const ptrdiff_t offset, const int64_t value_accumulator = std::numeric_limits<int64_t>) const;
 
     void print_flags(std::ostream &os) const override;
     void print_action(std::ostream &os) const override;

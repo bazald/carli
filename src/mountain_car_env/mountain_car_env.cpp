@@ -174,7 +174,7 @@ namespace Mountain_Car {
           //}
 
           auto action = make_standard_action(xdotlt, next_rule_name("mountain-car*rl-action*cmac-"), false, variables);
-          action->data = std::make_shared<Node_Split>(*this, Rete::Rete_Action_Ptr(), action, new Q_Value(0.0, Q_Value::Type::SPLIT, 1, nullptr, 0));
+          action->data = std::make_shared<Node_Split>(*this, Rete::Rete_Action_Ptr(), action, new Q_Value(Q_Value::Token(), Q_Value::Type::SPLIT, 1, nullptr, 0));
         }
       }
     }

@@ -23,7 +23,7 @@ namespace Rete {
 
   typedef std::tuple<std::shared_ptr<int64_t>, std::shared_ptr<std::tuple<int64_t, std::string, std::string, Carli::Feature *>>> Parser_Flag;
   typedef std::pair<Rete::Rete_Node_Ptr, std::vector<Rete::Parser_Variable>> Parser_Rete_Node;
-  typedef std::tuple<Rete::Parser_Rete_Node, std::string, Rete::Parser_Flag, double> Parser_Rule;
+  typedef std::tuple<Rete::Parser_Rete_Node, std::string, Rete::Parser_Flag, Carli::Q_Value::Token> Parser_Rule;
 
   inline int rete_parse_string(Carli::Agent &agent, const std::string &str) {
     int line_number = 1;
