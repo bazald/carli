@@ -143,7 +143,13 @@ namespace Carli {
     const auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(new_feature);
 
 #ifndef NDEBUG
-    std::cerr << "Parent feature " << *leaf.q_value->feature << ", depth " << leaf.q_value->depth << std::endl;
+    std::cerr << "Parent feature ";
+    if(leaf.q_value->feature)
+      std::cerr << *leaf.q_value->feature;
+    else
+      std::cerr << 0;
+    std::cerr << ", depth " << leaf.q_value->depth << std::endl;
+
     std::cerr << "Creating fringe node for " << *new_feature << std::endl;
 #endif
 
@@ -182,6 +188,9 @@ namespace Carli {
     if(dynamic_cast<const Rete::Rete_Predicate *>(ancestor_rightmost.get())) {
       assert(feature_enumerated_data || feature_ranged_data);
       /// Case 1. Refining of an existing variable
+#ifndef NDEBUG
+      std::cerr << "Fringe Case 1" << std::endl;
+#endif
       if(feature_enumerated_data)
         new_test = agent.make_predicate_vc(feature_enumerated_data->predicate(), new_feature->axis, feature_enumerated_data->symbol_constant(), ancestor_left);
       else
@@ -207,6 +216,9 @@ namespace Carli {
 
       if(ancestor_found) {
         /// Case 2: No new conditions to carry over, but must do a more involved token comparison
+#ifndef NDEBUG
+        std::cerr << "Fringe Case 2" << std::endl;
+#endif
 //          Rete::WME_Bindings bindings;
 //          for(const auto &variable : *variables) { ///< NOTE: Assume all are potentially multivalued
 //            const auto found = old_variables->find(variable.first);
@@ -223,12 +235,27 @@ namespace Carli {
       }
       else {
         /// Case 3: New conditions must be joined
-        if(dynamic_cast<Rete::Rete_Join *>(ancestor_right.get()))
+#ifndef NDEBUG
+        std::cerr << "Fringe Case 3" << std::endl;
+#endif
+        if(dynamic_cast<Rete::Rete_Join *>(ancestor_right.get())) {
+#ifndef NDEBUG
+          std::cerr << "  Join" << std::endl;
+#endif
           new_test = agent.make_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
-        else if(const auto existential_join = dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get()))
+        }
+        else if(const auto existential_join = dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get())) {
+#ifndef NDEBUG
+          std::cerr << "  Existential Join" << std::endl;
+#endif
           new_test = agent.make_existential_join(*ancestor_right->get_bindings(), existential_join->is_matching_tokens(), ancestor_left, ancestor_right->parent_right());
-        else if(dynamic_cast<Rete::Rete_Negation_Join *>(ancestor_right.get()))
+        }
+        else if(dynamic_cast<Rete::Rete_Negation_Join *>(ancestor_right.get())) {
+#ifndef NDEBUG
+          std::cerr << "  Negation Join" << std::endl;
+#endif
           new_test = agent.make_negation_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
+        }
         else
           abort();
       }
@@ -279,7 +306,7 @@ namespace Carli {
               /// Offset backward
               new_index.rete_row -= old_size - new_size;
 #ifndef NDEBUG
-              std::cerr << "new_index.rete_row offset backward " << leaf_size << '-' << new_size << " = " << new_index << std::endl;
+              std::cerr << "new_index.rete_row offset backward " << old_size << '-' << new_size << " = " << new_index << std::endl;
 #endif
             }
 
@@ -292,9 +319,9 @@ namespace Carli {
             }
             else if(new_index.token_row >= leaf_token_size) {
               /// Offset backward
-              new_index.token_row -= leaf_token_size - new_token_size;
+              new_index.token_row -= new_token_size - leaf_token_size;
 #ifndef NDEBUG
-              std::cerr << "new_index.token_row offset backward " << leaf_token_size << '-' << new_token_size << " = " << new_index << std::endl;
+              std::cerr << "new_index.token_row offset backward " << new_token_size << '-' << leaf_token_size << " = " << new_index << std::endl;
 #endif
               if(new_index.token_row < leaf_token_size) {
 #ifndef NDEBUG
@@ -337,7 +364,7 @@ namespace Carli {
         assert(new_feature->axis.token_row > -2);
         assert(new_feature->axis.token_row <= new_feature->axis.rete_row);
         assert(new_feature->axis.existential || new_feature->axis.rete_row < old_size);
-        assert(new_feature->axis.existential || new_feature->axis.token_row < new_token_size);
+//        assert(new_feature->axis.existential || new_feature->axis.token_row < new_token_size);
         if(new_feature->axis.rete_row != -1) {
 #ifndef NDEBUG
           std::cerr << "old_feature->axis = " << new_feature->axis << std::endl;
