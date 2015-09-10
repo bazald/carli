@@ -317,8 +317,8 @@ command:
                             if(predicate) {
                               auto ancestor = parent_action;
                               auto ancestor_prev = ancestor;
-                              assert(ancestor && dynamic_cast<const Carli::Node *>(ancestor->data.get())->q_value->feature);
-                              while(ancestor && dynamic_cast<const Carli::Node *>(ancestor->data.get())->q_value->feature &&
+                              assert(ancestor && dynamic_cast<const Carli::Node *>(ancestor->data.get())->q_value_fringe->feature);
+                              while(ancestor && dynamic_cast<const Carli::Node *>(ancestor->data.get())->q_value_fringe->feature &&
                                     ancestor->get_token_size() > predicate->get_lhs_index().token_row)
                               {
                                 ancestor_prev = ancestor;
@@ -329,10 +329,10 @@ command:
                               if(ancestor) {
                                 const auto ancestor_node = dynamic_cast<const Carli::Node *>(ancestor_prev->data.get());
                                 assert(ancestor_node);
-                                assert(ancestor_node->q_value);
-                                assert(ancestor_node->q_value->feature);
-                                feature->bindings = ancestor_node->q_value->feature->bindings;
-                                feature->conditions = ancestor_node->q_value->feature->conditions;
+                                assert(ancestor_node->q_value_fringe);
+                                assert(ancestor_node->q_value_fringe->feature);
+                                feature->bindings = ancestor_node->q_value_fringe->feature->bindings;
+                                feature->conditions = ancestor_node->q_value_fringe->feature->conditions;
                               }
                               else
                                 feature->bindings.insert(std::make_pair(predicate->get_lhs_index(), Rete::WME_Token_Index(-1, -1, -1)));
@@ -362,22 +362,24 @@ command:
 
                         /// Make the new action
                         if(node_type == "split") {
-                          const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::SPLIT, q_value_depth, feature, timestamp);
+                          const auto new_q_value_weight = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::SPLIT, q_value_depth, feature, timestamp);
+                          const auto new_q_value_fringe = new Carli::Q_Value(Carli::Q_Value::Token() /** HACK: Not stored in written rules. */, Carli::Q_Value::Type::FRINGE, q_value_depth, feature, timestamp);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Split>(agent, parent_action, new_action, new_q_value);
+                          auto new_action_data = std::make_shared<Carli::Node_Split>(agent, parent_action, new_action, new_q_value_weight, new_q_value_fringe);
                           new_action->data = new_action_data;
                         }
                         else if(node_type == "unsplit") {
-                          const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::UNSPLIT, q_value_depth, feature, timestamp);
+                          const auto new_q_value_weight = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::UNSPLIT, q_value_depth, feature, timestamp);
+                          const auto new_q_value_fringe = new Carli::Q_Value(Carli::Q_Value::Token() /** HACK: Not stored in written rules. */, Carli::Q_Value::Type::FRINGE, q_value_depth, feature, timestamp);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, parent_action, new_action, new_q_value);
+                          auto new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, parent_action, new_action, new_q_value_weight, new_q_value_fringe);
                           new_action->data = new_action_data;
                         }
                         else {
                           assert(node_type == "fringe");
-                          const auto new_q_value = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::FRINGE, q_value_depth, feature, timestamp);
+                          const auto new_q_value_fringe = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::FRINGE, q_value_depth, feature, timestamp);
                           new_action = agent.make_standard_action(parent, name, true, variable_indices);
-                          auto new_action_data = std::make_shared<Carli::Node_Fringe>(agent, parent_action, new_action, new_q_value);
+                          auto new_action_data = std::make_shared<Carli::Node_Fringe>(agent, parent_action, new_action, nullptr, new_q_value_fringe);
                           new_action->data = new_action_data;
                           if(parent_action) {
                             auto &parent_data = dynamic_cast<Carli::Node_Unsplit &>(*parent_action->data);

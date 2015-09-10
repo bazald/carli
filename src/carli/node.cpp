@@ -5,27 +5,32 @@
 namespace Carli {
 
   Node::~Node() {
-    if(delete_q_value) {
-      agent.purge_q_value(q_value);
-      agent.purge_q_value_eligible(q_value);
-      q_value.delete_and_zero();
+    if(delete_q_value_weight && q_value_weight) {
+      agent.purge_q_value(q_value_weight);
+      agent.purge_q_value_eligible(q_value_weight);
+      q_value_weight.delete_and_zero();
+    }
+    if(delete_q_value_fringe) {
+      agent.purge_q_value(q_value_fringe);
+      agent.purge_q_value_eligible(q_value_fringe);
+      q_value_fringe.delete_and_zero();
     }
   }
 
   int64_t Node::rank() const {
-    return q_value->depth;
+    return q_value_weight ? q_value_weight->depth : q_value_fringe;
   }
 
   Q_Value::Token Node::sum_value(Q_Value::Token value_accumulator) const
   {
     const auto pa_lock = parent_action.lock();
 
-    if(q_value->type != Q_Value::Type::FRINGE) {
-      value_accumulator = Q_Value::Token(std::get<0>(value_accumulator) + q_value->primary,
-                                         std::get<1>(value_accumulator) + q_value->primary_mean2,
-                                         std::get<2>(value_accumulator) + q_value->primary_variance,
-                                         std::get<3>(value_accumulator) + q_value->secondary,
-                                         std::min(std::get<4>(value_accumulator), q_value->update_count));
+    if(q_value_weight) {
+      value_accumulator = Q_Value::Token(std::get<0>(value_accumulator) + q_value_weight->primary,
+                                         std::get<1>(value_accumulator) + q_value_weight->primary_mean2,
+                                         std::get<2>(value_accumulator) + q_value_weight->primary_variance,
+                                         std::get<3>(value_accumulator) + q_value_weight->secondary,
+                                         std::min(std::get<4>(value_accumulator), q_value_weight->update_count));
     }
 
     if(pa_lock)
@@ -34,6 +39,8 @@ namespace Carli {
   }
 
   void Node::print_flags(std::ostream &os) const {
+    const auto &q_value = q_value_weight ? q_value_weight : q_value_fringe;
+
     os << std::endl << "  :creation-time " << q_value->creation_time;
     os << std::endl << "  :feature " << q_value->depth << ' ';
 
@@ -63,13 +70,18 @@ namespace Carli {
   }
 
   void Node::print_action(std::ostream &os) const {
+    const auto &q_value = q_value_weight ? q_value_weight : q_value_fringe;
+
     os << "  = " << Rete::to_string(q_value->primary) << ' ' << Rete::to_string(q_value->primary_mean2) << ' ' << Rete::to_string(q_value->primary_variance)
        << ' ' << Rete::to_string(q_value->secondary) << ' ' << q_value->update_count;
   }
 
   void Node::action(const Rete::WME_Token &token) {
     agent.m_nodes_activating.push_back(shared_from_this());
-    agent.insert_q_value_next(agent.get_action(*variables, token), q_value);
+    if(q_value_weight)
+      agent.insert_q_value_next(agent.get_action(*variables, token), q_value_weight);
+    if(q_value_fringe)
+      agent.insert_q_value_next(agent.get_action(*variables, token), q_value_fringe);
   }
 
   void Node::retraction(const Rete::WME_Token &token) {
@@ -81,29 +93,33 @@ namespace Carli {
     if(na != agent.m_nodes_activating.end())
       agent.m_nodes_activating.erase(na);
 
-    agent.purge_q_value_next(agent.get_action(*variables, token), q_value);
+    if(q_value_weight)
+      agent.purge_q_value_next(agent.get_action(*variables, token), q_value_weight);
+    if(q_value_fringe)
+      agent.purge_q_value_next(agent.get_action(*variables, token), q_value_fringe);
   }
 
   Node_Split_Ptr Node::create_split(const Rete::Rete_Action_Ptr &parent_action_) {
     const auto ra_lock = rete_action.lock();
     const auto node_name = ra_lock->get_name();
     const auto new_name = agent.next_rule_name(node_name.substr(0, node_name.find_last_of('*') + 1) + "s");
-    tracked_ptr<Q_Value> new_q_value;
+    tracked_ptr<Q_Value> new_q_value_weight;
 
-    if(q_value->type == Q_Value::Type::FRINGE) {
+    if(!q_value_weight) {
       const auto summed = sum_value();
-      new_q_value = new Q_Value(Q_Value::Token(q_value->primary - std::get<0>(summed), q_value->primary_mean2 - std::get<1>(summed), q_value->primary_variance - std::get<2>(summed),
-                                               q_value->secondary - std::get<3>(summed), std::min(q_value->update_count, std::get<4>(summed))),
-                                Q_Value::Type::SPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr, agent.get_total_step_count());
+      new_q_value_weight = new Q_Value(Q_Value::Token(q_value_fringe->primary - std::get<0>(summed), 0.0, 0.0, q_value_fringe->secondary - std::get<3>(summed), 0.0),
+                                Q_Value::Type::SPLIT, q_value_fringe->depth, q_value_fringe->feature ? q_value_fringe->feature->clone() : nullptr, agent.get_total_step_count());
+      assert(new_q_value_weight->primary_mean2 >= 0.0);
     }
     else {
-      delete_q_value = false;
-      q_value->type = Q_Value::Type::SPLIT;
-      new_q_value = q_value;
+      delete_q_value_weight = false;
+      q_value_weight->type = Q_Value::Type::SPLIT;
+      new_q_value_weight = q_value_weight;
     }
+    delete_q_value_fringe = false;
 
     auto new_leaf = agent.make_standard_action(ra_lock->parent_left(), new_name, false, ra_lock->get_variables());
-    auto new_leaf_data = std::make_shared<Node_Split>(agent, parent_action_, new_leaf, new_q_value);
+    auto new_leaf_data = std::make_shared<Node_Split>(agent, parent_action_, new_leaf, new_q_value_weight, q_value_fringe);
     new_leaf->data = new_leaf_data;
 
     return new_leaf_data;
@@ -113,22 +129,22 @@ namespace Carli {
     const auto ra_lock = rete_action.lock();
     const auto node_name = ra_lock->get_name();
     const auto new_name = agent.next_rule_name(node_name.substr(0, node_name.find_last_of('*') + 1) + "u");
-    tracked_ptr<Q_Value> new_q_value;
+    tracked_ptr<Q_Value> new_q_value_weight;
 
-    if(q_value->type == Q_Value::Type::FRINGE) {
+    if(!q_value_weight) {
       const auto summed = sum_value();
-      new_q_value = new Q_Value(Q_Value::Token(q_value->primary - std::get<0>(summed), q_value->primary_mean2 - std::get<1>(summed), q_value->primary_variance - std::get<2>(summed),
-                                               q_value->secondary - std::get<3>(summed), std::min(q_value->update_count, std::get<4>(summed))),
-                                Q_Value::Type::UNSPLIT, q_value->depth, q_value->feature ? q_value->feature->clone() : nullptr, agent.get_total_step_count());
+      new_q_value_weight = new Q_Value(Q_Value::Token(q_value_fringe->primary - std::get<0>(summed), 0.0, 0.0, q_value_fringe->secondary - std::get<3>(summed), 0),
+                                Q_Value::Type::UNSPLIT, q_value_fringe->depth, q_value_fringe->feature ? q_value_fringe->feature->clone() : nullptr, agent.get_total_step_count());
     }
     else {
-      delete_q_value = false;
-      q_value->type = Q_Value::Type::UNSPLIT;
-      new_q_value = q_value;
+      delete_q_value_weight = false;
+      q_value_weight->type = Q_Value::Type::UNSPLIT;
+      new_q_value_weight = q_value_weight;
     }
+    delete_q_value_fringe = false;
 
     auto new_leaf = agent.make_standard_action(ra_lock->parent_left(), new_name, false, ra_lock->get_variables());
-    auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, parent_action_, new_leaf, new_q_value);
+    auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, parent_action_, new_leaf, new_q_value_weight, q_value_fringe);
     new_leaf->data = new_leaf_data;
 
     return new_leaf_data;
@@ -137,27 +153,27 @@ namespace Carli {
   Node_Fringe_Ptr Node::create_fringe(Node_Unsplit &leaf, Feature * const &feature_) {
     const auto lra_lock = leaf.rete_action.lock();
     const auto leaf_node_name = lra_lock->get_name();
-    const auto new_feature = feature_ ? feature_ : q_value->feature ? q_value->feature->clone() : nullptr;
+    const auto new_feature = feature_ ? feature_ : q_value_fringe->feature ? q_value_fringe->feature->clone() : nullptr;
     const auto new_name = agent.next_rule_name(leaf_node_name.substr(0, leaf_node_name.find_last_of('*') + 1) + "f");
     const auto feature_enumerated_data = dynamic_cast<Feature_Enumerated_Data *>(new_feature);
     const auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(new_feature);
 
 #ifndef NDEBUG
     std::cerr << "Parent feature ";
-    if(leaf.q_value->feature)
-      std::cerr << *leaf.q_value->feature;
+    if(leaf.q_value_fringe->feature)
+      std::cerr << *leaf.q_value_fringe->feature;
     else
       std::cerr << 0;
-    std::cerr << ", depth " << leaf.q_value->depth << std::endl;
+    std::cerr << ", depth " << leaf.q_value_fringe->depth << std::endl;
 
     std::cerr << "Creating fringe node for " << *new_feature << std::endl;
 #endif
 
     const auto ancestor_left = lra_lock->parent_left();
-    if(leaf.q_value->type != Q_Value::Type::FRINGE)
-      assert(leaf.q_value->type == Q_Value::Type::UNSPLIT);
+    if(leaf.q_value_weight)
+      assert(leaf.q_value_weight->type == Q_Value::Type::UNSPLIT);
     else
-      assert(leaf.q_value->depth == q_value->depth);
+      assert(leaf.q_value_fringe->depth == q_value_fringe->depth);
 
     const auto ra_lock = rete_action.lock();
     Rete::Rete_Node_Ptr ancestor_right = ra_lock->parent_left();
@@ -398,19 +414,19 @@ namespace Carli {
 
     /// Create the actual action for the new fringe node
     auto new_action = agent.make_standard_action(new_test, new_name, false, new_feature->indices);
-    auto new_action_data = std::make_shared<Node_Fringe>(agent, lra_lock, new_action, leaf.q_value->depth + 1, new_feature);
+    auto new_action_data = std::make_shared<Node_Fringe>(agent, lra_lock, new_action, leaf.q_value_fringe->depth + 1, new_feature);
     new_action->data = new_action_data;
 
     /// Add to the appropriate parent list
-    leaf.fringe_values[new_action_data->q_value->feature.get()].values.push_back(new_action_data);
+    leaf.fringe_values[new_action_data->q_value_fringe->feature.get()].values.push_back(new_action_data);
 
     return new_action_data;
   }
 
-  Node_Split::Node_Split(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_)
-    : Node(agent_, parent_action_, rete_action_, q_value_)
+  Node_Split::Node_Split(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_weight_, const tracked_ptr<Q_Value> &q_value_fringe_)
+    : Node(agent_, parent_action_, rete_action_, q_value_weight_, q_value_fringe_)
   {
-    assert(q_value_->type == Q_Value::Type::SPLIT);
+    assert(q_value_weight_->type == Q_Value::Type::SPLIT);
     ++agent.q_value_count;
   }
 
@@ -428,15 +444,15 @@ namespace Carli {
   }
 
   Node_Unsplit::Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
-    : Node(agent_, parent_action_, rete_action_, new Q_Value(Q_Value::Token(), Q_Value::Type::UNSPLIT, depth_, feature_, agent_.get_total_step_count()))
+    : Node(agent_, parent_action_, rete_action_, new Q_Value(Q_Value::Token(), Q_Value::Type::UNSPLIT, depth_, feature_, agent_.get_total_step_count()), new Q_Value(Q_Value::Token(), Q_Value::Type::FRINGE, depth_, feature_->clone(), agent_.get_total_step_count()))
   {
     ++agent.q_value_count;
   }
 
-  Node_Unsplit::Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_)
-    : Node(agent_, parent_action_, rete_action_, q_value_)
+  Node_Unsplit::Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_weight_, const tracked_ptr<Q_Value> &q_value_fringe_)
+    : Node(agent_, parent_action_, rete_action_, q_value_weight_, q_value_fringe_)
   {
-    assert(q_value_->type == Q_Value::Type::UNSPLIT);
+    assert(q_value_weight_->type == Q_Value::Type::UNSPLIT);
     ++agent.q_value_count;
   }
 
@@ -454,9 +470,9 @@ namespace Carli {
   }
 
   Node_Fringe::Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_)
-   : Node(agent_, parent_action_, rete_action_, new Q_Value(dynamic_cast<Node *>(parent_action_->data.get())->sum_value(), Q_Value::Type::FRINGE, depth_, feature_, agent_.get_total_step_count()))
+   : Node(agent_, parent_action_, rete_action_, nullptr, new Q_Value(dynamic_cast<Node *>(parent_action_->data.get())->sum_value(), Q_Value::Type::FRINGE, depth_, feature_, agent_.get_total_step_count()))
   {
-    q_value->update_totals();
+    q_value_fringe->update_totals();
   }
 
   Rete::Rete_Node_Ptr Node_Fringe::cluster_root_ancestor() const {

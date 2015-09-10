@@ -41,14 +41,15 @@ namespace Carli {
     Node & operator=(const Node &) = delete;
 
   public:
-    Node(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_)
+    Node(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_weight_, const tracked_ptr<Q_Value> &q_value_fringe_)
      : agent(agent_),
      parent_action(parent_action_),
      rete_action(rete_action_),
      variables(rete_action_->get_variables()),
-     q_value(q_value_)
+     q_value_weight(q_value_weight_),
+     q_value_fringe(q_value_fringe_)
     {
-      assert(q_value->depth == 1 || parent_action.lock());
+      assert((q_value_weight && q_value_weight->depth == 1) || (q_value_fringe && q_value_fringe->depth == 1) || parent_action.lock());
     }
 
     virtual ~Node();
@@ -75,8 +76,10 @@ namespace Carli {
     std::weak_ptr<Rete::Rete_Action> parent_action;
     std::weak_ptr<Rete::Rete_Action> rete_action;
     Rete::Variable_Indices_Ptr_C variables;
-    tracked_ptr<Q_Value> q_value;
-    bool delete_q_value = true;
+    tracked_ptr<Q_Value> q_value_weight;
+    bool delete_q_value_weight = true;
+    tracked_ptr<Q_Value> q_value_fringe;
+    bool delete_q_value_fringe = true;
   };
 
   class CARLI_LINKAGE Node_Split : public Node {
@@ -84,11 +87,11 @@ namespace Carli {
     Node_Split & operator=(const Node_Split &) = delete;
 
   public:
-    Node_Split(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_);
+    Node_Split(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_weight_, const tracked_ptr<Q_Value> &q_value_fringe_);
     ~Node_Split();
 
     Node_Split * clone() const override {
-      return new Node_Split(agent, parent_action.lock(), rete_action.lock(), q_value->clone());
+      return new Node_Split(agent, parent_action.lock(), rete_action.lock(), q_value_weight ? q_value_weight->clone() : nullptr, q_value_fringe ? q_value_fringe->clone() : nullptr);
     }
 
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
@@ -102,11 +105,11 @@ namespace Carli {
 
   public:
     Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_);
-    Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_);
+    Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_weight_, const tracked_ptr<Q_Value> &q_value_fringe_);
     ~Node_Unsplit();
 
     Node_Unsplit * clone() const override {
-      return new Node_Unsplit(agent, parent_action.lock(), rete_action.lock(), q_value->clone());
+      return new Node_Unsplit(agent, parent_action.lock(), rete_action.lock(), q_value_weight ? q_value_weight->clone() : nullptr, q_value_fringe ? q_value_fringe->clone() : nullptr);
     }
 
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
@@ -123,14 +126,14 @@ namespace Carli {
   public:
     Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_);
 
-    Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_)
-      : Node(agent_, parent_action_, rete_action_, q_value_)
+    Node_Fringe(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_weight_, const tracked_ptr<Q_Value> &q_value_fringe_)
+      : Node(agent_, parent_action_, rete_action_, q_value_weight_, q_value_fringe_)
     {
-      assert(q_value_->type == Q_Value::Type::FRINGE);
+      assert((!q_value_weight_ || q_value_weight_->type == Q_Value::Type::FRINGE) && (!q_value_fringe_ || q_value_fringe_->type == Q_Value::Type::FRINGE));
     }
 
     Node_Fringe * clone() const override {
-      return new Node_Fringe(agent, parent_action.lock(), rete_action.lock(), q_value->clone());
+      return new Node_Fringe(agent, parent_action.lock(), rete_action.lock(), q_value_weight ? q_value_weight->clone() : nullptr, q_value_fringe ? q_value_fringe->clone() : nullptr);
     }
 
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
