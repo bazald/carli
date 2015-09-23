@@ -18,7 +18,7 @@ namespace Carli {
   }
 
   int64_t Node::rank() const {
-    return q_value_weight ? q_value_weight->depth : q_value_fringe;
+    return q_value_fringe->depth;
   }
 
   Q_Value::Token Node::sum_value(Q_Value::Token value_accumulator) const
