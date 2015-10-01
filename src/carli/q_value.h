@@ -50,6 +50,8 @@ namespace Carli {
 
       lhs->depth = depth;
 
+      lhs->type_internal = type_internal;
+
       lhs->catde = catde;
       lhs->matde = matde;
 
@@ -80,6 +82,7 @@ namespace Carli {
     int64_t update_count;
 
     Type type;
+    bool type_internal = false;
 
     /** Not cloned **/
     bool eligibility_init = false;

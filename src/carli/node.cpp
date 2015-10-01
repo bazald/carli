@@ -118,6 +118,8 @@ namespace Carli {
     }
     delete_q_value_fringe = false;
 
+    q_value_fringe->type_internal = true;
+
     auto new_leaf = agent.make_standard_action(ra_lock->parent_left(), new_name, false, ra_lock->get_variables());
     auto new_leaf_data = std::make_shared<Node_Split>(agent, parent_action_, new_leaf, new_q_value_weight, q_value_fringe);
     new_leaf->data = new_leaf_data;
@@ -142,6 +144,8 @@ namespace Carli {
       new_q_value_weight = q_value_weight;
     }
     delete_q_value_fringe = false;
+
+    q_value_fringe->type_internal = true;
 
     auto new_leaf = agent.make_standard_action(ra_lock->parent_left(), new_name, false, ra_lock->get_variables());
     auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, parent_action_, new_leaf, new_q_value_weight, q_value_fringe);

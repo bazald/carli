@@ -981,7 +981,7 @@ namespace Carli {
         q.secondary += m_learning_rate * m_secondary_learning_rate * edelta;
       q.update_totals();
 
-      if(q.type == Q_Value::Type::FRINGE) {
+      if(q.type == Q_Value::Type::FRINGE && !q.type_internal) {
         const double abs_edelta = std::abs(edelta);
 
         if(q.eligibility_init) {
