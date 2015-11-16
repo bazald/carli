@@ -944,7 +944,7 @@ namespace Carli {
       if(q->eligibility < 0.0)
         q->eligible.insert_before(m_eligible);
 
-      q->eligibility = (q->eligibility == -1.0 ? 0.0 : q->eligibility) + (q->credit ? I : 0.0);
+      q->eligibility = (q->eligibility == -1.0 ? 0.0 : q->eligibility) + (m_secondary_learning_rate ? (q->credit ? I : 0.0) : q->credit);
       q->eligibility_init = true;
 
       dot_w_phi += q->secondary;
