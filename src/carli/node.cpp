@@ -5,6 +5,22 @@
 namespace Carli {
 
   Node::~Node() {
+    const auto pa_lock = parent_action.lock();
+    if(pa_lock) {
+      if(const auto split = dynamic_cast<Node_Split *>(pa_lock->data.get())) {
+        const auto found = std::find_if(split->children.begin(), split->children.end(), [this](const Node_Ptr &node){return node.get() == this;});
+        assert(found != split->children.end());
+        split->children.erase(found);
+      }
+//      else if(const auto unsplit = dynamic_cast<Node_Unsplit *>(pa_lock->data.get())) {
+//        const auto found = unsplit->fringe_values.find(q_value_fringe->feature.get());
+//        assert(found != unsplit->fringe_values.end());
+//        const auto found2 = std::find_if(found->second.values.begin(), found->second.values.end(), [this](const Node_Fringe_Ptr &value){return value.get() == this;});
+//        assert(found2 != found->second.values.end());
+//        found->second.values.erase(found2);
+//      }
+    }
+
     if(delete_q_value_weight && q_value_weight) {
       agent.purge_q_value(q_value_weight);
       agent.purge_q_value_eligible(q_value_weight);
@@ -124,6 +140,10 @@ namespace Carli {
     auto new_leaf_data = std::make_shared<Node_Split>(agent, parent_action_, new_leaf, new_q_value_weight, q_value_fringe);
     new_leaf->data = new_leaf_data;
 
+    /// Add to the appropriate parent list
+    if(parent_action_)
+      debuggable_pointer_cast<Node_Split>(parent_action_->data)->children.push_back(new_leaf_data);
+
     return new_leaf_data;
   }
 
@@ -150,6 +170,10 @@ namespace Carli {
     auto new_leaf = agent.make_standard_action(ra_lock->parent_left(), new_name, false, ra_lock->get_variables());
     auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, parent_action_, new_leaf, new_q_value_weight, q_value_fringe);
     new_leaf->data = new_leaf_data;
+
+    /// Add to the appropriate parent list
+    if(parent_action_)
+      debuggable_pointer_cast<Node_Split>(parent_action_->data)->children.push_back(new_leaf_data);
 
     return new_leaf_data;
   }

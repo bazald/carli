@@ -97,7 +97,10 @@ namespace Carli {
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
 
     void decision() override;
+
+    std::list<Node_Ptr> children; ///< Not cloned
   };
+
   class CARLI_LINKAGE Node_Unsplit : public Node {
 
     Node_Unsplit(const Node_Unsplit &) = delete;
