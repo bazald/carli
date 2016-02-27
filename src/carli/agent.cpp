@@ -156,22 +156,31 @@ namespace Carli {
   };
 
   bool Agent::respecialize(Rete::Rete_Action &rete_action) {
-//    return false;
     if(!m_learning_rate)
       return false;
+
+    auto &general_node = debuggable_cast<Node &>(*rete_action.data);
+    if(general_node.q_value_weight->type != Q_Value::Type::SPLIT)
+      return true;
+
+    auto &general = debuggable_cast<Node_Split &>(general_node);
+
 //#ifndef NO_COLLAPSE_DETECTION_HACK
 //    if(m_experienced_n_positive_rewards_in_a_row)
 //      return false;
 //#endif
+
     //if(debuggable_cast<Node *>(rete_action.data.get())->q_value->depth < 3)
     //  return false;
-    if(random.rand_lt(100) || !collapse_rete(rete_action))
-      return false;
+
+    if(m_unsplit_criterion(general))
+      return collapse_rete(rete_action);
     else {
 //#ifndef NO_COLLAPSE_DETECTION_HACK
 //      m_positive_rewards_in_a_row = 0;
 //#endif
-      return true;
+
+      return false;
     }
   }
 
@@ -263,10 +272,13 @@ namespace Carli {
      *          ...create it, clone remaining fringe entries below the new leaf, and destroy the old fringe node
      */
     for(auto &leaf : leaves) {
-      if(leaf->q_value_fringe->depth <= m_split_max) {
-        bool terminal = leaf->q_value_fringe->depth == m_split_max;
+//      if(leaf->q_value_fringe->depth <= m_split_max)
+      {
+//        bool terminal = leaf->q_value_fringe->depth == m_split_max;
+        bool terminal = false;
         std::vector<Carli::Feature *> refined;
-        if(!terminal) {
+//        if(!terminal)
+        {
           refined = leaf->q_value_fringe->feature->refined();
           terminal = refined.empty() && general.fringe_values.empty();
         }
@@ -474,6 +486,29 @@ namespace Carli {
     else if(m_split_test == "value") {
       m_split_criterion = [this](Node_Unsplit &general)->Fringe_Values::iterator{
         return this->split_test_value(general);
+      };
+    }
+    else
+      abort();
+
+    if(m_unsplit_test == "none") {
+      m_unsplit_criterion = [this](Node_Split &)->bool{
+        return false;
+      };
+    }
+    else if(m_unsplit_test == "catde") {
+      m_unsplit_criterion = [this](Node_Split &general)->bool{
+        return this->unsplit_test_catde(general);
+      };
+    }
+    else if(m_unsplit_test == "policy") {
+      m_unsplit_criterion = [this](Node_Split &general)->bool{
+        return this->unsplit_test_policy(general);
+      };
+    }
+    else if(m_unsplit_test == "value") {
+      m_unsplit_criterion = [this](Node_Split &general)->bool{
+        return this->unsplit_test_value(general);
       };
     }
     else
@@ -1498,6 +1533,89 @@ namespace Carli {
     }
 
     return chosen_axis;
+  }
+
+  bool Agent::unsplit_test_catde(Node_Split &general) {
+    return random.rand_lt(100);
+  }
+
+  bool Agent::unsplit_test_policy(Node_Split &general) {
+    return random.rand_lt(100);
+  }
+
+  bool Agent::unsplit_test_value(Node_Split &general) {
+//    assert(general.q_value_weight);
+//    assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
+//
+//    assert(general.q_value_weight->depth < m_split_max);
+//    assert(!general.fringe_values.empty());
+//    size_t matches = 0;
+//    std::unordered_set<tracked_ptr<Feature>> touched;
+//    for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+//      for(auto &fringe : fringe_axis->second.values) {
+//        if(!fringe->rete_action.lock()->is_active())
+//          continue;
+//        ++matches;
+//
+//        if(general.q_value_weight->depth >= m_split_min &&
+//          (fringe->q_value_fringe->pseudoepisode_count < m_split_pseudoepisodes ||
+//           fringe->q_value_fringe->update_count < m_split_update_count))
+//        {
+//          return general.fringe_values.end(); ///< Wait to gather more data
+//        }
+//
+//        touched.insert(fringe_axis->first);
+//        break;
+//      }
+//    }
+//
+//    Fringe_Values::iterator chosen_axis = general.fringe_values.end();
+//    size_t count = 0;
+//    int64_t depth_min = std::numeric_limits<int64_t>::max();
+//    double delta_max = std::numeric_limits<double>::lowest();
+//    for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+//      if(touched.find(fringe_axis->first) == touched.end())
+//        continue;
+//
+//      double lowest = std::numeric_limits<double>::max();
+//      double highest = std::numeric_limits<double>::lowest();
+//      for(auto &fringe : fringe_axis->second.values) {
+//        lowest = std::min(lowest, fringe->q_value_fringe->primary);
+//        highest = std::max(highest, fringe->q_value_fringe->primary);
+//      }
+//      fringe_axis->second.value_delta_max = m_learning_rate * (highest - lowest) + (1 - m_learning_rate) * fringe_axis->second.value_delta_max;
+//
+//      //++fringe_axis->first->value_delta_update_count;
+//      //if(fringe_axis->first->value_delta_update_count <= m_split_update_count)
+//      //  continue;
+//
+//      int64_t depth_diff = fringe_axis->first->get_depth() - depth_min;
+//      double delta_diff = delta_max - fringe_axis->second.value_delta_max;
+//      if(chosen_axis == general.fringe_values.end() || depth_diff < 0 || (depth_diff == 0 && delta_diff < 0))
+//        count = 1;
+//      else if(depth_diff > 0 || delta_diff > 0 || random.frand_lt() >= 1.0 / ++count)
+//        continue;
+//
+//      chosen_axis = fringe_axis;
+//      depth_min = fringe_axis->first->get_depth();
+//      delta_max = fringe_axis->second.value_delta_max;
+//    }
+//
+//    if(chosen_axis == general.fringe_values.end()) {
+//      if(!matches) {
+//        std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
+//        dump_rules(*this);
+//#if !defined(NDEBUG) && defined(_WINDOWS)
+//        __debugbreak();
+//#elif !defined(NDEBUG)
+//        assert(false);
+//#endif
+//      }
+//
+//      return general.fringe_values.end();
+//    }
+
+    return random.rand_lt(100);
   }
 
   std::tuple<double, double, int64_t> Agent::sum_value(const action_type * const &

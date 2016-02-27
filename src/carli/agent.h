@@ -148,6 +148,10 @@ namespace Carli {
     Fringe_Values::iterator split_test_policy(Node_Unsplit &general);
     Fringe_Values::iterator split_test_value(Node_Unsplit &general);
 
+    bool unsplit_test_catde(Node_Split &general);
+    bool unsplit_test_policy(Node_Split &general);
+    bool unsplit_test_value(Node_Split &general);
+
     /// Get the sample mean and standard deviation
     std::tuple<double, double, int64_t> sum_value(const action_type * const &action, const Q_Value_List &value_list, const Feature * const &axis) const;
 
@@ -177,6 +181,7 @@ namespace Carli {
     std::function<Action_Ptr_C ()> m_target_policy; ///< Sarsa/Q-Learning selector
     std::function<Action_Ptr_C ()> m_exploration_policy; ///< Exploration policy
     std::function<Fringe_Values::iterator (Node_Unsplit &)> m_split_criterion; ///< true if too general, false if sufficiently general
+    std::function<bool (Node_Split &)> m_unsplit_criterion; ///< true if too general, false if sufficiently general
     //std::map<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>, std::less<Action_Ptr_C>, Zeni::Pool_Allocator<std::pair<Action_Ptr_C, std::set<typename Node_Ranged::Line, std::less<typename Node_Ranged::Line>, Zeni::Pool_Allocator<typename Node_Ranged::Line>>>>> m_lines;
 
     Rete::Symbol_Identifier_Ptr_C m_s_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("S1"));
@@ -239,6 +244,7 @@ namespace Carli {
     const int64_t m_split_min = get_Option_Ranged<int64_t>(Options::get_global(), "split-min");
     const int64_t m_split_pseudoepisodes = get_Option_Ranged<int64_t>(Options::get_global(), "split-pseudoepisodes");
     const std::string m_split_test = dynamic_cast<const Option_Itemized &>(Options::get_global()["split-test"]).get_value();
+    const std::string m_unsplit_test = dynamic_cast<const Option_Itemized &>(Options::get_global()["unsplit-test"]).get_value();
     const int64_t m_split_update_count = get_Option_Ranged<int64_t>(Options::get_global(), "split-update-count");
 
     const int64_t m_contribute_update_count = get_Option_Ranged<int64_t>(Options::get_global(), "contribute-update-count");
