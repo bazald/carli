@@ -979,10 +979,11 @@ namespace Carli {
       if(q->eligibility < 0.0)
         q->eligible.insert_before(m_eligible);
 
-      q->eligibility = (q->eligibility == -1.0 ? 0.0 : q->eligibility) + (m_secondary_learning_rate ? (q->credit ? I : 0.0) : q->credit);
+      q->eligibility = (q->eligibility == -1.0 ? 0.0 : q->eligibility) + (m_secondary_learning_rate ? I * q->credit : q->credit);
       q->eligibility_init = true;
 
-      dot_w_phi += q->secondary;
+      if(q->type != Q_Value::Type::FRINGE)
+        dot_w_phi += q->secondary;
 
       if(q->update_count > 1) {
         const double delta = (target_value - q_old) * m_learning_rate;
@@ -1009,7 +1010,8 @@ namespace Carli {
       const double ldelta = weight_assignment_all && q.type != Q_Value::Type::FRINGE ? delta : target_value - q.primary;
       const double edelta = q.eligibility * ldelta;
 
-      dot_w_e += q.secondary * q.eligibility;
+      if(q.type != Q_Value::Type::FRINGE)
+        dot_w_e += q.secondary * q.eligibility;
 
       q.primary += m_learning_rate * edelta;
       if(m_secondary_learning_rate && q.credit)
@@ -1639,15 +1641,15 @@ namespace Carli {
     size_t touched = 0u;
     for(auto &q : value_list) {
 #ifdef DEBUG_OUTPUT
-      if(action && (!axis || (q->feature && q->feature->compare_axis(*axis) == 0))) {
+      if(action && (!axis || (!q->type_internal && q->feature && q->feature->compare_axis(*axis) == 0))) {
         std::cerr << ' ' << q->primary << ';' << q->primary_variance << ':' << q->depth;
         if(q->type == Q_Value::Type::FRINGE)
-          std::cerr << 'f';
+          std::cerr << (q->type_internal ? 'i' : 'f');
         if(q->feature)
           std::cerr << ':' << *q->feature;
       }
 #endif
-      if(axis ? (q->feature && q->feature->compare_axis(*axis) == 0) : q->type != Q_Value::Type::FRINGE) {
+      if(axis ? (!q->type_internal && q->feature && q->feature->compare_axis(*axis) == 0) : q->type != Q_Value::Type::FRINGE) {
         sum += q->primary /* * q->weight */;
         sum_variance += q->primary_variance;
 //        avg_update_count *= touched / (touched + 1.0);

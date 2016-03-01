@@ -123,7 +123,7 @@ namespace Carli {
 
     if(!q_value_weight) {
       const auto summed = sum_value();
-      new_q_value_weight = new Q_Value(Q_Value::Token(q_value_fringe->primary - std::get<0>(summed), 0.0, 0.0, q_value_fringe->secondary - std::get<3>(summed), 0.0),
+      new_q_value_weight = new Q_Value(Q_Value::Token(),
                                 Q_Value::Type::SPLIT, q_value_fringe->depth, q_value_fringe->feature ? q_value_fringe->feature->clone() : nullptr, agent.get_total_step_count());
       assert(new_q_value_weight->primary_mean2 >= 0.0);
     }
@@ -133,8 +133,6 @@ namespace Carli {
       new_q_value_weight = q_value_weight;
     }
     delete_q_value_fringe = false;
-
-    q_value_fringe->type_internal = true;
 
     auto new_leaf = agent.make_standard_action(ra_lock->parent_left(), new_name, false, ra_lock->get_variables());
     auto new_leaf_data = std::make_shared<Node_Split>(agent, parent_action_, new_leaf, new_q_value_weight, q_value_fringe);
@@ -155,7 +153,7 @@ namespace Carli {
 
     if(!q_value_weight) {
       const auto summed = sum_value();
-      new_q_value_weight = new Q_Value(Q_Value::Token(q_value_fringe->primary - std::get<0>(summed), 0.0, 0.0, q_value_fringe->secondary - std::get<3>(summed), 0),
+      new_q_value_weight = new Q_Value(Q_Value::Token(),
                                 Q_Value::Type::UNSPLIT, q_value_fringe->depth, q_value_fringe->feature ? q_value_fringe->feature->clone() : nullptr, agent.get_total_step_count());
     }
     else {
@@ -164,8 +162,6 @@ namespace Carli {
       new_q_value_weight = q_value_weight;
     }
     delete_q_value_fringe = false;
-
-    q_value_fringe->type_internal = true;
 
     auto new_leaf = agent.make_standard_action(ra_lock->parent_left(), new_name, false, ra_lock->get_variables());
     auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, parent_action_, new_leaf, new_q_value_weight, q_value_fringe);
@@ -456,6 +452,7 @@ namespace Carli {
   {
     assert(q_value_weight_->type == Q_Value::Type::SPLIT);
     ++agent.q_value_count;
+    q_value_fringe->type_internal = true;
   }
 
   Node_Split::~Node_Split() {
@@ -475,6 +472,7 @@ namespace Carli {
     : Node(agent_, parent_action_, rete_action_, new Q_Value(Q_Value::Token(), Q_Value::Type::UNSPLIT, depth_, feature_, agent_.get_total_step_count()), new Q_Value(Q_Value::Token(), Q_Value::Type::FRINGE, depth_, feature_->clone(), agent_.get_total_step_count()))
   {
     ++agent.q_value_count;
+    q_value_fringe->type_internal = true;
   }
 
   Node_Unsplit::Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_weight_, const tracked_ptr<Q_Value> &q_value_fringe_)
@@ -482,6 +480,7 @@ namespace Carli {
   {
     assert(q_value_weight_->type == Q_Value::Type::UNSPLIT);
     ++agent.q_value_count;
+    q_value_fringe->type_internal = true;
   }
 
   Node_Unsplit::~Node_Unsplit() {
