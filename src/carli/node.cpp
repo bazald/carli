@@ -122,7 +122,7 @@ namespace Carli {
     tracked_ptr<Q_Value> new_q_value_weight;
 
     if(!q_value_weight) {
-      const auto summed = sum_value();
+//      const auto summed = sum_value();
       new_q_value_weight = new Q_Value(Q_Value::Token(),
                                 Q_Value::Type::SPLIT, q_value_fringe->depth, q_value_fringe->feature ? q_value_fringe->feature->clone() : nullptr, agent.get_total_step_count());
       assert(new_q_value_weight->primary_mean2 >= 0.0);
@@ -152,7 +152,7 @@ namespace Carli {
     tracked_ptr<Q_Value> new_q_value_weight;
 
     if(!q_value_weight) {
-      const auto summed = sum_value();
+//      const auto summed = sum_value();
       new_q_value_weight = new Q_Value(Q_Value::Token(),
                                 Q_Value::Type::UNSPLIT, q_value_fringe->depth, q_value_fringe->feature ? q_value_fringe->feature->clone() : nullptr, agent.get_total_step_count());
     }

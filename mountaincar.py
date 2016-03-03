@@ -50,11 +50,14 @@ class CommaFormatter(ScalarFormatter):
     s = arg.split('.')
     if len(s) is 2 and s[1][0] is not '0':
       return ""
-    if s[0][0] is '-':
+    if s[0][0] not in {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}:
       c = '-' + self.recurse(s[0][1:])
     else:
       c = self.recurse(s[0])
-    return c
+    if len(s) > 1 and s[1] is not '0':
+      return c + '.' + s[1]
+    else:
+      return c
   
   def recurse(self, arg):
     if len(arg) < 4:
