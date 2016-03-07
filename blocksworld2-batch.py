@@ -7,7 +7,7 @@ import pp
 g_dir = 'experiment-bw2'
 g_plotters = ['./blocksworld2.py']
 
-g_base_command = "./blocks_world_2 --output experiment --discount-rate 0.9 --eligibility-trace-decay-rate 0.1 --learning-rate 0.1 --secondary-learning-rate 0.2 --policy off-policy --split-update-count 30"
+g_base_command = "./blocks_world_2 --output experiment --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.01 --secondary-learning-rate 0.2 --policy on-policy --split-update-count 30"
 
 g_ep_tuples = []
 

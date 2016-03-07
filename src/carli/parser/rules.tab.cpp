@@ -1787,7 +1787,7 @@ yyreduce:
                         if(node_type != "fringe") {
                           Carli::Node_Ptr new_action_data;
                           if(node_type == "split") {
-                            const auto new_q_value_weight = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::SPLIT, q_value_depth, feature, timestamp);
+                            const auto new_q_value_weight = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::SPLIT, q_value_depth, feature ? feature->clone() : nullptr, timestamp);
                             const auto new_q_value_fringe = new Carli::Q_Value(Carli::Q_Value::Token() /** HACK: Not stored in written rules. */, Carli::Q_Value::Type::FRINGE, q_value_depth, feature, timestamp);
                             new_action = agent.make_standard_action(parent, name, true, variable_indices);
                             new_action_data = std::make_shared<Carli::Node_Split>(agent, parent_action, new_action, new_q_value_weight, new_q_value_fringe);
@@ -1795,7 +1795,7 @@ yyreduce:
                           }
                           else {
                             assert(node_type == "unsplit");
-                            const auto new_q_value_weight = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::UNSPLIT, q_value_depth, feature, timestamp);
+                            const auto new_q_value_weight = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::UNSPLIT, q_value_depth, feature ? feature->clone() : nullptr, timestamp);
                             const auto new_q_value_fringe = new Carli::Q_Value(Carli::Q_Value::Token() /** HACK: Not stored in written rules. */, Carli::Q_Value::Type::FRINGE, q_value_depth, feature, timestamp);
                             new_action = agent.make_standard_action(parent, name, true, variable_indices);
                             new_action_data = std::make_shared<Carli::Node_Unsplit>(agent, parent_action, new_action, new_q_value_weight, new_q_value_fringe);
