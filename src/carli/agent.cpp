@@ -1018,47 +1018,57 @@ namespace Carli {
         q.secondary += m_learning_rate * m_secondary_learning_rate * edelta;
       q.update_totals();
 
-      if(q.type == Q_Value::Type::FRINGE && !q.type_internal) {
-        const double abs_edelta = std::abs(edelta);
+      if(q.type == Q_Value::Type::FRINGE) {
+        if(q.type_internal) {
+          const double abs_delta = fabs(target_value - q.primary);
+#ifndef NDEBUG
+          std::cerr << "Absolute Delta = " << abs_delta << std::endl;
+#endif // NDEBUG
+          q.catde += abs_delta;
+          q.catde_post_split += abs_delta;
+        }
+        else {
+          const double abs_edelta = std::abs(edelta);
 
-        if(q.eligibility_init) {
-          if(q.last_episode_fired != this->m_episode_number) {
-            ++q.pseudoepisode_count;
-            q.last_episode_fired = this->m_episode_number;
+          if(q.eligibility_init) {
+            if(q.last_episode_fired != this->m_episode_number) {
+              ++q.pseudoepisode_count;
+              q.last_episode_fired = this->m_episode_number;
+            }
+            else if(this->m_step_count - q.last_step_fired > m_pseudoepisode_threshold)
+              ++q.pseudoepisode_count;
+            q.last_step_fired = this->m_step_count;
+
+  #ifdef WHITESON_ADAPTIVE_TILE
+            if(q.type == Q_Value::Type::UNSPLIT) {
+              if(abs_edelta < q.minbe) {
+                q.minbe = abs_edelta;
+                this->m_steps_since_minbe = 0;
+              }
+              else
+                ++this->m_steps_since_minbe;
+            }
+  #endif
           }
-          else if(this->m_step_count - q.last_step_fired > m_pseudoepisode_threshold)
-            ++q.pseudoepisode_count;
-          q.last_step_fired = this->m_step_count;
 
-#ifdef WHITESON_ADAPTIVE_TILE
-          if(q.type == Q_Value::Type::UNSPLIT) {
-            if(abs_edelta < q.minbe) {
-              q.minbe = abs_edelta;
-              this->m_steps_since_minbe = 0;
+          q.catde += abs_edelta;
+  #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+          q.matde.set_value(q.catde / q.update_count);
+  #endif
+
+          if(q.update_count > m_contribute_update_count) {
+            if(m_mean_catde_queue_size) {
+              if(this->m_mean_catde_queue.size() == uint64_t(m_mean_catde_queue_size))
+                this->m_mean_catde_queue.pop();
+              this->m_mean_catde_queue.push(q.catde);
             }
             else
-              ++this->m_steps_since_minbe;
+              this->m_mean_catde.contribute(q.catde);
+
+  #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
+            this->m_mean_matde.contribute(q.matde);
+  #endif
           }
-#endif
-        }
-
-        q.catde += abs_edelta;
-#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-        q.matde.set_value(q.catde / q.update_count);
-#endif
-
-        if(q.update_count > m_contribute_update_count) {
-          if(m_mean_catde_queue_size) {
-            if(this->m_mean_catde_queue.size() == uint64_t(m_mean_catde_queue_size))
-              this->m_mean_catde_queue.pop();
-            this->m_mean_catde_queue.push(q.catde);
-          }
-          else
-            this->m_mean_catde.contribute(q.catde);
-
-#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-          this->m_mean_matde.contribute(q.matde);
-#endif
         }
       }
     }
@@ -1538,7 +1548,24 @@ namespace Carli {
   }
 
   bool Agent::unsplit_test_catde(Node_Split &general) {
-    return random.rand_lt(100);
+    assert(general.q_value_weight);
+    assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
+
+    if(general.children.empty())
+      return false;
+
+    double sum_error = 0.0;
+    for(auto &child : general.children)
+      sum_error += child->q_value_fringe->catde;
+
+    const double improvement = general.q_value_fringe->catde_post_split - sum_error;
+    assert(improvement <= 0.0);
+
+#ifndef NDEBUG
+    std::cerr << "CATDE Improvement = " << general.q_value_fringe->catde_post_split << " - " << sum_error << " = " << improvement << std::endl;
+#endif
+
+    return false;
   }
 
   bool Agent::unsplit_test_policy(Node_Split &general) {
@@ -1546,78 +1573,25 @@ namespace Carli {
   }
 
   bool Agent::unsplit_test_value(Node_Split &general) {
-//    assert(general.q_value_weight);
-//    assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
-//
-//    assert(general.q_value_weight->depth < m_split_max);
-//    assert(!general.fringe_values.empty());
-//    size_t matches = 0;
-//    std::unordered_set<tracked_ptr<Feature>> touched;
-//    for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
-//      for(auto &fringe : fringe_axis->second.values) {
-//        if(!fringe->rete_action.lock()->is_active())
-//          continue;
-//        ++matches;
-//
-//        if(general.q_value_weight->depth >= m_split_min &&
-//          (fringe->q_value_fringe->pseudoepisode_count < m_split_pseudoepisodes ||
-//           fringe->q_value_fringe->update_count < m_split_update_count))
-//        {
-//          return general.fringe_values.end(); ///< Wait to gather more data
-//        }
-//
-//        touched.insert(fringe_axis->first);
-//        break;
-//      }
-//    }
-//
-//    Fringe_Values::iterator chosen_axis = general.fringe_values.end();
-//    size_t count = 0;
-//    int64_t depth_min = std::numeric_limits<int64_t>::max();
-//    double delta_max = std::numeric_limits<double>::lowest();
-//    for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
-//      if(touched.find(fringe_axis->first) == touched.end())
-//        continue;
-//
-//      double lowest = std::numeric_limits<double>::max();
-//      double highest = std::numeric_limits<double>::lowest();
-//      for(auto &fringe : fringe_axis->second.values) {
-//        lowest = std::min(lowest, fringe->q_value_fringe->primary);
-//        highest = std::max(highest, fringe->q_value_fringe->primary);
-//      }
-//      fringe_axis->second.value_delta_max = m_learning_rate * (highest - lowest) + (1 - m_learning_rate) * fringe_axis->second.value_delta_max;
-//
-//      //++fringe_axis->first->value_delta_update_count;
-//      //if(fringe_axis->first->value_delta_update_count <= m_split_update_count)
-//      //  continue;
-//
-//      int64_t depth_diff = fringe_axis->first->get_depth() - depth_min;
-//      double delta_diff = delta_max - fringe_axis->second.value_delta_max;
-//      if(chosen_axis == general.fringe_values.end() || depth_diff < 0 || (depth_diff == 0 && delta_diff < 0))
-//        count = 1;
-//      else if(depth_diff > 0 || delta_diff > 0 || random.frand_lt() >= 1.0 / ++count)
-//        continue;
-//
-//      chosen_axis = fringe_axis;
-//      depth_min = fringe_axis->first->get_depth();
-//      delta_max = fringe_axis->second.value_delta_max;
-//    }
-//
-//    if(chosen_axis == general.fringe_values.end()) {
-//      if(!matches) {
-//        std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
-//        dump_rules(*this);
-//#if !defined(NDEBUG) && defined(_WINDOWS)
-//        __debugbreak();
-//#elif !defined(NDEBUG)
-//        assert(false);
-//#endif
-//      }
-//
-//      return general.fringe_values.end();
-//    }
+    assert(general.q_value_weight);
+    assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
 
-    return random.rand_lt(100);
+    if(general.children.empty())
+      return false;
+
+    double sum_squared = 0.0;
+    for(auto &child : general.children) {
+      const double delta = child->q_value_fringe->primary - general.q_value_fringe->primary;
+      sum_squared += delta * delta;
+    }
+
+    const double rms = sqrt(sum_squared) / general.children.size();
+
+#ifndef NDEBUG
+    std::cerr << "RMS: " << rms << std::endl;
+#endif
+
+    return false;
   }
 
   std::tuple<double, double, int64_t> Agent::sum_value(const action_type * const &

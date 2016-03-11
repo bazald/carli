@@ -125,6 +125,7 @@ namespace Carli {
 //      const auto summed = sum_value();
       new_q_value_weight = new Q_Value(Q_Value::Token(),
                                 Q_Value::Type::SPLIT, q_value_fringe->depth, q_value_fringe->feature ? q_value_fringe->feature->clone() : nullptr, agent.get_total_step_count());
+      q_value_fringe->catde = 0.0;
       assert(new_q_value_weight->primary_mean2 >= 0.0);
     }
     else {
@@ -132,6 +133,8 @@ namespace Carli {
       q_value_weight->type = Q_Value::Type::SPLIT;
       new_q_value_weight = q_value_weight;
     }
+
+    q_value_fringe->catde_post_split = 0.0;
     delete_q_value_fringe = false;
 
     auto new_leaf = agent.make_standard_action(ra_lock->parent_left(), new_name, false, ra_lock->get_variables());
@@ -161,6 +164,9 @@ namespace Carli {
       q_value_weight->type = Q_Value::Type::UNSPLIT;
       new_q_value_weight = q_value_weight;
     }
+
+    q_value_fringe->catde = 0.0;
+    q_value_fringe->catde_post_split = 0.0;
     delete_q_value_fringe = false;
 
     auto new_leaf = agent.make_standard_action(ra_lock->parent_left(), new_name, false, ra_lock->get_variables());

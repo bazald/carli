@@ -53,7 +53,8 @@ namespace Carli {
       lhs->type_internal = type_internal;
 
       lhs->catde = catde;
-      lhs->matde = matde;
+//      lhs->matde = matde;
+      lhs->catde_post_split = catde_post_split;
 
 #ifdef WHITESON_ADAPTIVE_TILE
       lhs->minbe = minbe;
@@ -96,8 +97,9 @@ namespace Carli {
 
     double secondary = 0.0;
 
-    Value catde; ///< Cumulative Absolute Bellman Error
-    Value matde; ///< Mean Absolute Bellman Error (catde / update_count)
+    Value catde; ///< Cumulative Absolute Temporal Difference (Bellmanesque) Error
+//    Value matde; ///< Mean Absolute Bellman Error (catde / update_count)
+    Value catde_post_split; ///< CATDE after conversion to a Split Node
 
 #ifdef WHITESON_ADAPTIVE_TILE
     double minbe = DBL_MAX; ///< Minimum Bellman Error experienced
