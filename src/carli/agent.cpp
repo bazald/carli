@@ -988,7 +988,7 @@ namespace Carli {
       if(q->update_count > 1) {
         const double delta = (target_value - q_old) * m_learning_rate;
         const double q_new = q_old + delta; ///< Could calculate like q_old post-update -- might be different
-        const double mdelta = (target_value - q_old) * (target_value - q_new);
+        const double mdelta = std::max(0.0, (target_value - q_old) * (target_value - q_new));
 
         assert(q->primary_mean2 >= 0.0);
         q->primary_mean2 += mdelta * q->credit;
@@ -1559,13 +1559,13 @@ namespace Carli {
       sum_error += child->q_value_fringe->catde;
 
     const double improvement = general.q_value_fringe->catde_post_split - sum_error;
-    assert(improvement <= 0.0);
 
 #ifndef NDEBUG
     std::cerr << "CATDE Improvement = " << general.q_value_fringe->catde_post_split << " - " << sum_error << " = " << improvement << std::endl;
 #endif
 
-    return false;
+    return improvement > 0 && general.q_value_fringe->update_count > 99;
+    //fabs(improvement) > 10.0 * std::max(fabs(general.q_value_fringe->catde_post_split), fabs(sum_error));
   }
 
   bool Agent::unsplit_test_policy(Node_Split &general) {

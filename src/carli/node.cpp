@@ -125,6 +125,7 @@ namespace Carli {
 //      const auto summed = sum_value();
       new_q_value_weight = new Q_Value(Q_Value::Token(),
                                 Q_Value::Type::SPLIT, q_value_fringe->depth, q_value_fringe->feature ? q_value_fringe->feature->clone() : nullptr, agent.get_total_step_count());
+      q_value_fringe->update_count = 0;
       q_value_fringe->catde = 0.0;
       assert(new_q_value_weight->primary_mean2 >= 0.0);
     }
@@ -158,6 +159,7 @@ namespace Carli {
 //      const auto summed = sum_value();
       new_q_value_weight = new Q_Value(Q_Value::Token(),
                                 Q_Value::Type::UNSPLIT, q_value_fringe->depth, q_value_fringe->feature ? q_value_fringe->feature->clone() : nullptr, agent.get_total_step_count());
+      q_value_fringe->update_count = 0;
     }
     else {
       delete_q_value_weight = false;
