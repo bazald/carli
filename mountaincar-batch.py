@@ -167,7 +167,7 @@ class Experiment:
     self.vfm = vfm
 
   def get_args(self):
-    args = self.experiment.split(' ')
+    args = self.experiment.split()
     args.extend(['--num-steps', str(self.num_steps),
                  '--seed', str(self.seed),
                  '--stderr', self.stderr,

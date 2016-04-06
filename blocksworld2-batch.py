@@ -6,48 +6,52 @@ import pp
 
 g_dir = 'experiment-bw2'
 g_plotters = ['./blocksworld2.py']
+g_error = False
 
 g_base_command = "./blocks_world_2 --output experiment --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.01 --secondary-learning-rate 0.2 --policy on-policy --split-update-count 30"
 
 g_ep_tuples = []
 
-g_ep_tuples.append(("sof4",  "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("snf4",  "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("sonf4", "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2-legacy-included.carli"))
+#g_ep_tuples.append(("sof4",  "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("snf4",  "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("sonf4", "--num-blocks 4 --split-min 99 --credit-assignment specific --rules rules/blocks-world-2-legacy-included.carli"))
 
-###g_ep_tuples.append(("pnf4ir",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-ir.carli"))
-g_ep_tuples.append(("fof4",  "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("fnf4",  "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("fonf4", "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2-legacy-included.carli"))
+####g_ep_tuples.append(("pnf4ir",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-ir.carli"))
+#g_ep_tuples.append(("fof4",  "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("fnf4",  "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("fonf4", "--num-blocks 4 --split-min 99 --rules rules/blocks-world-2-legacy-included.carli"))
 
-#g_ep_tuples.append(("scof4",  "--num-blocks 4 --split-test catde --credit-assignment specific --rules rules/blocks-world-2-legacy-only.carli"))
-#g_ep_tuples.append(("scnf4",  "--num-blocks 4 --split-test catde --credit-assignment specific --rules rules/blocks-world-2.carli"))
-#g_ep_tuples.append(("sconf4", "--num-blocks 4 --split-test catde --credit-assignment specific --rules rules/blocks-world-2-legacy-included.carli"))
-g_ep_tuples.append(("cof4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("cnf4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("conf4", "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-included.carli"))
-#g_ep_tuples.append(("cnf4i",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-i.carli"))
-#g_ep_tuples.append(("cnf4r",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-r.carli"))
-#g_ep_tuples.append(("cnf4ir",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-ir.carli"))
+##g_ep_tuples.append(("scof4",  "--num-blocks 4 --split-test catde --credit-assignment specific --rules rules/blocks-world-2-legacy-only.carli"))
+##g_ep_tuples.append(("scnf4",  "--num-blocks 4 --split-test catde --credit-assignment specific --rules rules/blocks-world-2.carli"))
+##g_ep_tuples.append(("sconf4", "--num-blocks 4 --split-test catde --credit-assignment specific --rules rules/blocks-world-2-legacy-included.carli"))
+#g_ep_tuples.append(("cof4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("cnf4",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("conf4", "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-legacy-included.carli"))
+##g_ep_tuples.append(("cnf4i",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-i.carli"))
+##g_ep_tuples.append(("cnf4r",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-r.carli"))
+##g_ep_tuples.append(("cnf4ir",  "--num-blocks 4 --split-test catde --rules rules/blocks-world-2-ir.carli"))
 
-#g_ep_tuples.append(("svof4",  "--num-blocks 4 --split-test value --credit-assignment specific --rules rules/blocks-world-2-legacy-only.carli"))
-#g_ep_tuples.append(("svnf4",  "--num-blocks 4 --split-test value --credit-assignment specific --rules rules/blocks-world-2.carli"))
-#g_ep_tuples.append(("svonf4", "--num-blocks 4 --split-test value --credit-assignment specific --rules rules/blocks-world-2-legacy-included.carli"))
-g_ep_tuples.append(("vof4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("vnf4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("vonf4", "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-included.carli"))
-#g_ep_tuples.append(("vnf4i",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-i.carli"))
-#g_ep_tuples.append(("vnf4r",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-r.carli"))
-#g_ep_tuples.append(("vnf4ir",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-ir.carli"))
+##g_ep_tuples.append(("svof4",  "--num-blocks 4 --split-test value --credit-assignment specific --rules rules/blocks-world-2-legacy-only.carli"))
+##g_ep_tuples.append(("svnf4",  "--num-blocks 4 --split-test value --credit-assignment specific --rules rules/blocks-world-2.carli"))
+##g_ep_tuples.append(("svonf4", "--num-blocks 4 --split-test value --credit-assignment specific --rules rules/blocks-world-2-legacy-included.carli"))
+#g_ep_tuples.append(("vof4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("vnf4",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("vonf4", "--num-blocks 4 --split-test value --rules rules/blocks-world-2-legacy-included.carli"))
+##g_ep_tuples.append(("vnf4i",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-i.carli"))
+##g_ep_tuples.append(("vnf4r",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-r.carli"))
+##g_ep_tuples.append(("vnf4ir",  "--num-blocks 4 --split-test value --rules rules/blocks-world-2-ir.carli"))
 
-#g_ep_tuples.append(("spof4",  "--num-blocks 4 --split-test policy --credit-assignment specific --rules rules/blocks-world-2-legacy-only.carli"))
-#g_ep_tuples.append(("spnf4",  "--num-blocks 4 --split-test policy --credit-assignment specific --rules rules/blocks-world-2.carli"))
-#g_ep_tuples.append(("sponf4", "--num-blocks 4 --split-test policy --credit-assignment specific --rules rules/blocks-world-2-legacy-included.carli"))
-g_ep_tuples.append(("pof4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-legacy-only.carli"))
-g_ep_tuples.append(("pnf4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("ponf4", "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-legacy-included.carli"))
-##g_ep_tuples.append(("pnf4i",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-i.carli"))
-##g_ep_tuples.append(("pnf4r",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-r.carli"))
+##g_ep_tuples.append(("spof4",  "--num-blocks 4 --split-test policy --credit-assignment specific --rules rules/blocks-world-2-legacy-only.carli"))
+##g_ep_tuples.append(("spnf4",  "--num-blocks 4 --split-test policy --credit-assignment specific --rules rules/blocks-world-2.carli"))
+##g_ep_tuples.append(("sponf4", "--num-blocks 4 --split-test policy --credit-assignment specific --rules rules/blocks-world-2-legacy-included.carli"))
+#g_ep_tuples.append(("pof4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-legacy-only.carli"))
+#g_ep_tuples.append(("pnf4",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("ponf4", "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-legacy-included.carli"))
+###g_ep_tuples.append(("pnf4i",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-i.carli"))
+###g_ep_tuples.append(("pnf4r",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-r.carli"))
+
+g_ep_tuples.append(("unsplit-none",  "--num-blocks 4 --split-test catde --unsplit-test none  --rules rules/blocks-world-2.carli"))
+g_ep_tuples.append(("unsplit-catde", "--num-blocks 4 --split-test catde --unsplit-test catde --rules rules/blocks-world-2-legacy-included.carli"))
 
 parser = argparse.ArgumentParser(description='Run Blocks World 2 experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,
@@ -98,9 +102,10 @@ class Experiment:
     self.rules = rules
     self.experiment = experiment
     self.vfm = vfm
+    self.errorcode = 0
     
   def get_args(self):
-    args = self.experiment.split(' ')
+    args = self.experiment.split()
     args.extend(['--num-steps', str(self.num_steps),
                  '--seed', str(self.seed),
                  '--stderr', self.stderr,
@@ -115,11 +120,17 @@ class Experiment:
     cmd = args[0]
     for arg in args[1:]:
       cmd += ' ' + arg
-    print cmd
+    return cmd
   
   def run(self):
     args = self.get_args()
-    subprocess.call(args)
+    #print self.print_args()
+    try:
+      subprocess.check_call(args, stdin=None, stdout=None, stderr=None)
+    except subprocess.CalledProcessError, e:
+      g_error = True
+      print "Called Process Error:", e.cmd, "=", e.returncode, ":", e.output
+      self.errorcode = e.returncode
     return self
 
 def resolution(split):
@@ -142,7 +153,7 @@ for ep_tuple in g_ep_tuples:
     vfm = dir + '/blocksworld-' + str(seed) + '.vfm'
     experiment = Experiment(args.num_steps, seed, stderr, stdout, rules, g_base_command + ' ' + ep_tuple[1], vfm=vfm)
     g_experiments.append(experiment)
-    experiment.print_args()
+    print experiment.print_args()
 
 class Progress:
   def __init__(self, experiments):
@@ -153,13 +164,19 @@ class Progress:
     for experiment in experiments:
       try:
         self.count[experiment.experiment] += 1
+        #print "Updated count of " + experiment.experiment + " = " + str(self.count[experiment.experiment])
       except KeyError:
         self.count[experiment.experiment] = 1
+        #print "New count of " + experiment.experiment + " = " + str(self.count[experiment.experiment])
       self.finished[experiment.experiment] = 0
 
   def just_finished(self, experiment):
+    global g_error
     self.lock.acquire()
-    self.finished[experiment.experiment] += 1
+    if experiment.errorcode:
+      g_error = True
+    else:
+      self.finished[experiment.experiment] += 1
     self.lock.release()
 
   def just_finished_plot(self, args):
@@ -171,8 +188,9 @@ class Progress:
     self.lock.acquire()
     num = self.count[experiment]
     fin = self.finished[experiment]
+    #print 'Finished ' + str(fin) + ' of ' + str(num)
     self.lock.release()
-    return fin is num
+    return fin >= num
 
 class Plots:
   def __init__(self):
@@ -183,23 +201,25 @@ for i in range(len(g_ep_tuples) * len(g_plotters)):
   plots.append(Plots())
 
 def syscall(args):
-  subprocess.call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+  subprocess.check_call(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
 def take_fives(group):
-  while True:
+  while not g_error:
     job_server.print_stats()
+    #print "Group = " + group
     if progress.all_finished(group):
       break
     else:
       time.sleep(5)
-  job_server.wait(group)
+  if not g_error:
+    job_server.wait(group)
 
 job_server = pp.Server(args.jobs)
 progress = Progress(g_experiments + plots)
 start_time = time.time()
 #for experiment in g_experiments:
   #experiment.run()
-jobs = [(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread',), callback=progress.just_finished, group=experiment.experiment)) for experiment in g_experiments]
+jobs = [(job_server.submit(Experiment.run, (experiment,), (), ('subprocess', 'thread'), callback=progress.just_finished, group=experiment.experiment)) for experiment in g_experiments]
 
 for ep_tuple, dir in zip(g_ep_tuples, g_dirs):
   take_fives(g_base_command + ' ' + ep_tuple[1])

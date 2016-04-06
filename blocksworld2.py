@@ -301,7 +301,7 @@ def main():
   
   pylab.xlim(xmax=10000)
   if len(sys.argv) > 1:
-    pylab.ylim(ymin=-500, ymax=0)
+    pylab.ylim(ymin=0, ymax=5)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())

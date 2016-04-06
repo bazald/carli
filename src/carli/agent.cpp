@@ -488,11 +488,16 @@ namespace Carli {
         return this->split_test_value(general);
       };
     }
+    else if(m_split_test == "utile") {
+      m_split_criterion = [this](Node_Unsplit &general)->Fringe_Values::iterator{
+        return this->split_test_utile(general);
+      };
+    }
     else
       abort();
 
     if(m_unsplit_test == "none") {
-      m_unsplit_criterion = [this](Node_Split &)->bool{
+      m_unsplit_criterion = [](Node_Split &)->bool{
         return false;
       };
     }
@@ -509,6 +514,11 @@ namespace Carli {
     else if(m_unsplit_test == "value") {
       m_unsplit_criterion = [this](Node_Split &general)->bool{
         return this->unsplit_test_value(general);
+      };
+    }
+    else if(m_unsplit_test == "utile") {
+      m_unsplit_criterion = [this](Node_Split &general)->bool{
+        return this->unsplit_test_utile(general);
       };
     }
     else
@@ -1547,6 +1557,10 @@ namespace Carli {
     return chosen_axis;
   }
 
+  Fringe_Values::iterator Agent::split_test_utile(Node_Unsplit &general) {
+    return general.fringe_values.end();
+  }
+
   bool Agent::unsplit_test_catde(Node_Split &general) {
     assert(general.q_value_weight);
     assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
@@ -1564,7 +1578,8 @@ namespace Carli {
     std::cerr << "CATDE Improvement = " << general.q_value_fringe->catde_post_split << " - " << sum_error << " = " << improvement << std::endl;
 #endif
 
-    return improvement > 0 && general.q_value_fringe->update_count > 99;
+    /// Counterintuitive: actually unsplit if error is greater in the children?
+    return improvement > 0.0 && general.q_value_fringe->update_count > 99;
     //fabs(improvement) > 10.0 * std::max(fabs(general.q_value_fringe->catde_post_split), fabs(sum_error));
   }
 
@@ -1592,6 +1607,10 @@ namespace Carli {
 #endif
 
     return false;
+  }
+
+  bool Agent::unsplit_test_utile(Node_Split &general) {
+    return random.rand_lt(100);
   }
 
   std::tuple<double, double, int64_t> Agent::sum_value(const action_type * const &

@@ -147,10 +147,12 @@ namespace Carli {
     Fringe_Values::iterator split_test_catde(Node_Unsplit &general);
     Fringe_Values::iterator split_test_policy(Node_Unsplit &general);
     Fringe_Values::iterator split_test_value(Node_Unsplit &general);
+    Fringe_Values::iterator split_test_utile(Node_Unsplit &general);
 
     bool unsplit_test_catde(Node_Split &general);
     bool unsplit_test_policy(Node_Split &general);
     bool unsplit_test_value(Node_Split &general);
+    bool unsplit_test_utile(Node_Split &general);
 
     /// Get the sample mean and standard deviation
     std::tuple<double, double, int64_t> sum_value(const action_type * const &action, const Q_Value_List &value_list, const Feature * const &axis) const;
