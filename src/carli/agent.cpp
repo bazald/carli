@@ -221,6 +221,13 @@ namespace Carli {
 
     auto new_node = general.create_split(general.parent_action.lock());
 
+    if(new_node->blacklist.find(chosen->first) == new_node->blacklist.end()) {
+      new_node->blacklist.insert(chosen->first->clone());
+
+      if(new_node->blacklist.size() == general.fringe_values.size())
+        new_node->blacklist_full = true;
+    }
+
     expand_fringe(rete_action, new_node->rete_action.lock(), chosen);
 
     excise_rule(rete_action.get_name(), false);
@@ -1330,6 +1337,9 @@ namespace Carli {
           continue;
         ++matches;
 
+        if(general.blacklist.find(fringe->q_value_fringe->feature) != general.blacklist.end())
+          continue;
+
         if(general.q_value_weight->depth < m_split_min ||
           (fringe->q_value_fringe->pseudoepisode_count >= m_split_pseudoepisodes &&
           (fringe->q_value_fringe->update_count >= m_split_update_count &&
@@ -1413,6 +1423,9 @@ namespace Carli {
         {
           return general.fringe_values.end(); ///< Wait to gather more data
         }
+
+        if(general.blacklist.find(fringe->q_value_fringe->feature) != general.blacklist.end())
+          continue;
 
         touched.insert(fringe_axis->first);
         break;
@@ -1503,6 +1516,9 @@ namespace Carli {
           return general.fringe_values.end(); ///< Wait to gather more data
         }
 
+        if(general.blacklist.find(fringe->q_value_fringe->feature) != general.blacklist.end())
+          continue;
+
         touched.insert(fringe_axis->first);
         break;
       }
@@ -1565,7 +1581,7 @@ namespace Carli {
     assert(general.q_value_weight);
     assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
 
-    if(general.children.empty())
+    if(general.children.empty() || general.blacklist_full)
       return false;
 
     double sum_error = 0.0;
@@ -1584,6 +1600,12 @@ namespace Carli {
   }
 
   bool Agent::unsplit_test_policy(Node_Split &general) {
+    assert(general.q_value_weight);
+    assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
+
+    if(general.children.empty() || general.blacklist_full)
+      return false;
+
     return random.rand_lt(100);
   }
 
@@ -1591,7 +1613,7 @@ namespace Carli {
     assert(general.q_value_weight);
     assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
 
-    if(general.children.empty())
+    if(general.children.empty() || general.blacklist_full)
       return false;
 
     double sum_squared = 0.0;
@@ -1610,6 +1632,12 @@ namespace Carli {
   }
 
   bool Agent::unsplit_test_utile(Node_Split &general) {
+    assert(general.q_value_weight);
+    assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
+
+    if(general.children.empty() || general.blacklist_full)
+      return false;
+
     return random.rand_lt(100);
   }
 

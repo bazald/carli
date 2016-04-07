@@ -36,6 +36,11 @@ namespace Carli {
   };
   typedef std::map<Feature *, Fringe_Value_Data, Rete::compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> Fringe_Values;
 
+  class Fringe_Axis_Blacklist : public std::set<tracked_ptr<Feature>, Rete::compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> {
+  public:
+    ~Fringe_Axis_Blacklist();
+  };
+
   class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Unsplit>, public Rete::Rete_Data {
     Node(const Node &) = delete;
     Node & operator=(const Node &) = delete;
@@ -99,6 +104,8 @@ namespace Carli {
     void decision() override;
 
     std::list<Node_Ptr> children; ///< Not cloned
+    Fringe_Axis_Blacklist blacklist;
+    bool blacklist_full = false;
   };
 
   class CARLI_LINKAGE Node_Unsplit : public Node {
@@ -120,6 +127,7 @@ namespace Carli {
     void decision() override;
 
     Fringe_Values fringe_values; ///< Not cloned
+    Fringe_Axis_Blacklist blacklist;
   };
 
   class CARLI_LINKAGE Node_Fringe : public Node {

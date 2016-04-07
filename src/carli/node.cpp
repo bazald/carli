@@ -4,6 +4,15 @@
 
 namespace Carli {
 
+  Fringe_Axis_Blacklist::~Fringe_Axis_Blacklist() {
+    while(!empty()) {
+      auto bt = begin();
+      auto ptr = *bt;
+      erase(bt);
+      ptr.delete_and_zero();
+    }
+  }
+
   Node::~Node() {
     const auto pa_lock = parent_action.lock();
     if(pa_lock) {
@@ -142,6 +151,9 @@ namespace Carli {
     auto new_leaf_data = std::make_shared<Node_Split>(agent, parent_action_, new_leaf, new_q_value_weight, q_value_fringe);
     new_leaf->data = new_leaf_data;
 
+    if(q_value_weight)
+      new_leaf_data->blacklist.swap(debuggable_cast<Node_Unsplit *>(this)->blacklist);
+
     /// Add to the appropriate parent list
     if(parent_action_)
       debuggable_pointer_cast<Node_Split>(parent_action_->data)->children.push_back(new_leaf_data);
@@ -174,6 +186,9 @@ namespace Carli {
     auto new_leaf = agent.make_standard_action(ra_lock->parent_left(), new_name, false, ra_lock->get_variables());
     auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, parent_action_, new_leaf, new_q_value_weight, q_value_fringe);
     new_leaf->data = new_leaf_data;
+
+    if(q_value_weight)
+      new_leaf_data->blacklist.swap(debuggable_cast<Node_Split *>(this)->blacklist);
 
     /// Add to the appropriate parent list
     if(parent_action_)
