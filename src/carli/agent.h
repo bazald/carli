@@ -82,6 +82,7 @@ namespace Carli {
   //#ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
   //  Mean get_mean_matde() const {return m_mean_matde;}
   //#endif
+    const std::map<int64_t, int64_t> & get_unrefinements() const {return m_unrefinements;}
 
     void set_total_step_count(const int64_t &total_step_count_) {m_total_step_count = total_step_count_;}
 
@@ -275,6 +276,8 @@ namespace Carli {
     size_t m_positive_rewards_in_a_row = 0;
     bool m_experienced_n_positive_rewards_in_a_row = false;
 #endif
+
+    std::map<int64_t, int64_t> m_unrefinements;
   };
 
 }

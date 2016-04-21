@@ -213,7 +213,7 @@ namespace Carli {
         done = agent->get_metastate() != Metastate::NON_TERMINAL /*|| agent->get_step_count() >= 5000*/ || (num_steps && total_steps > 0 && total_steps >= num_steps);
 
         if(output == "experiment" && total_steps > -1)
-          experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, agent->q_value_count);
+          experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, agent->q_value_count, agent->get_unrefinements());
       } while(!done);
 
       if(agent->get_metastate() == Metastate::SUCCESS) {

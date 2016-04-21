@@ -417,6 +417,8 @@ namespace Carli {
 //    unsplit->rete_action.lock()->visit_preorder(Expiration_Detector(), false);
 //#endif
 
+    ++m_unrefinements[split->rank()];
+
     return true;
   }
 
@@ -539,6 +541,8 @@ namespace Carli {
     }
     else if(m_value_function_map_mode == "out")
       m_value_function_out.open(m_value_function_map_filename);
+
+    m_unrefinements[1] = 0;
   }
 
   Agent::~Agent() {
@@ -1594,9 +1598,8 @@ namespace Carli {
     std::cerr << "CATDE Improvement = " << general.q_value_fringe->catde_post_split << " - " << sum_error << " = " << improvement << std::endl;
 #endif
 
-    /// Counterintuitive: actually unsplit if error is greater in the children?
-    return improvement > 0.0 && general.q_value_fringe->update_count > 99;
-    //fabs(improvement) > 10.0 * std::max(fabs(general.q_value_fringe->catde_post_split), fabs(sum_error));
+    /// Counterintuitive: actually unsplit if error is reduced in the children?
+    return improvement > 5.0 && general.q_value_fringe->update_count > 99;
   }
 
   bool Agent::unsplit_test_policy(Node_Split &general) {

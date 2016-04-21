@@ -14,7 +14,7 @@ namespace Carli {
     reset_stats();
   }
 
-  void Experimental_Output::print(const int64_t &total_steps, const int64_t &episode_number, const int64_t &step_count, const double &reward, const bool &done, const int64_t &q_value_count) {
+  void Experimental_Output::print(const int64_t &total_steps, const int64_t &episode_number, const int64_t &step_count, const double &reward, const bool &done, const int64_t &q_value_count, const std::map<int64_t, int64_t> &unrefinements) {
     m_cumulative_reward += reward;
     m_simple_reward += reward;
 
@@ -46,7 +46,19 @@ namespace Carli {
           std::cout << steps << ' '
                     << m_cumulative_min << ' ' << m_cumulative_mean << ' ' << m_cumulative_max << ' '
                     << m_simple_min << ' ' << m_simple_mean << ' ' << m_simple_max << ' '
-                    << q_value_count << ' ' << time_passed << ' ' << time_step << std::endl;
+                    << q_value_count << ' ' << time_passed << ' ' << time_step << ' ';
+
+          for(int64_t i = 1, iend = unrefinements.rbegin()->first; i <= iend; ++i) {
+            const auto found = unrefinements.find(i);
+            if(i != 1)
+              std::cout << ':';
+            if(found == unrefinements.end())
+              std::cout << 0;
+            else
+              std::cout << found->second;
+          }
+
+          std::cout << std::endl;
 
           reset_stats();
         }
