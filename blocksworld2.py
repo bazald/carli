@@ -103,7 +103,9 @@ def main():
   # 5: ./blocksworld2.py experiment-bw2/p*4/*.out
   scenario = 0
 
-  two_sided_plot = scenario is not 0
+  memory_plot = scenario is not 0
+  unrefinement_plot = not memory_plot
+  two_sided_plot = memory_plot or unrefinement_plot
 
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')
@@ -112,6 +114,7 @@ def main():
     xs = []
     smith = []
     memory = []
+    unrefinements = []
     while True:
       line = f.readline()
       if not line or line == '':
@@ -122,6 +125,7 @@ def main():
         xs.append(int(split[0]))
         smith.append(float(split[val0 + 1]))
         memory.append(float(split[7]))
+        unrefinements.append(map(int, split[10].split(':')))
     f.close()
     
     directory=''
@@ -148,6 +152,7 @@ def main():
       files[group].smith['max'] = []
       files[group].smith['mem'] = []
       files[group].smith['cpu'] = []
+      files[group].smith['unr'] = []
       done = False
       while not done:
         first_handle = True
@@ -168,13 +173,25 @@ def main():
               y_max = float(split[val0 + 2])
               y_mem = float(split[7])
               y_cpu = float(split[9]) * 1000.0
+              y_unr = map(float, split[10].split(':'))
               y_count = 1
             else:
+              mul1 = 1.0 / (y_count + 1.0)
+              mul0 = y_count * mul1
               y_min = min(y_min, float(split[val0 + 0]))
-              y_avg = y_avg * (y_count / (y_count + 1.0)) + float(split[val0 + 1]) / (y_count + 1.0)
+              y_avg = y_avg * mul0 + float(split[val0 + 1]) * mul1
               y_max = max(y_max, float(split[val0 + 2]))
-              y_mem = y_mem * (y_count / (y_count + 1.0)) + float(split[7]) / (y_count + 1.0)
-              y_cpu = y_cpu * (y_count / (y_count + 1.0)) + float(split[9]) * 1000.0 / (y_count + 1.0)
+              y_mem = y_mem * mul0 + float(split[7]) * mul1
+              y_cpu = y_cpu * mul0 + float(split[9]) * 1000.0 * mul1
+              unr = map(float, split[10].split(':'))
+              for i in range(0, min(len(y_unr), len(unr))):
+                y_unr[i] = y_unr[i] * mul0 + unr[i] * mul1
+              if len(y_unr) > len(unr):
+                for i in range(len(unr), len(y_unr)):
+                  y_unr[i] = y_unr[i] * mul0
+              else:
+                for i in range(len(y_unr), len(unr)):
+                  y_unr.append(unr[i] * mul1)
               y_count = y_count + 1
         if not done:
           files[group].smith['min'].append(y_min)
@@ -182,6 +199,7 @@ def main():
           files[group].smith['max'].append(y_max)
           files[group].smith['mem'].append(y_mem)
           files[group].smith['cpu'].append(y_cpu)
+          files[group].smith['unr'].append(y_unr)
       
       for handle in files[group].handles:
         handle.f.close()
@@ -195,13 +213,20 @@ def main():
     else:
       title='Blocks World (' + group.rsplit('/',1)[0].replace('_', '\_') + ')'
       
+      agent_list = []
+      remap_names = {}
       smith = {}
       memory = {}
       cpu = {}
+      unrefinements = {}
       for group in files:
-        smith[group.rsplit('/',1)[1].replace('_', '\_')] = files[group].smith['avg']
-        memory[group.rsplit('/',1)[1].replace('_', '\_')] = files[group].smith['mem']
-        cpu[group.rsplit('/',1)[1].replace('_', '\_')] = files[group].smith['cpu']
+        agent = group.rsplit('/',1)[1].replace('_', '\_')
+        remap_names[agent] = agent
+        agent_list.append(agent)
+        smith[agent] = files[group].smith['avg']
+        memory[agent] = files[group].smith['mem']
+        cpu[agent] = files[group].smith['cpu']
+        unrefinements[agent] = files[group].smith['unr']
       
       mode = 'multiple experiment evaluation'
 
@@ -252,7 +277,7 @@ def main():
           
           labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
       
-      remap_names = {}
+      #remap_names = {}
       remap_names['sof4'] = 'Prop Flat'
       remap_names['snf4'] = 'Rel Flat'
       remap_names['sonf4'] = 'Mixed Flat'
@@ -316,7 +341,7 @@ def main():
   #print last_xlabel.get_text()
   #print last_xlabel
   
-  if two_sided_plot:
+  if memory_plot:
     ax2 = fig.axes[0].twinx()
     ax2.xaxis.set_major_formatter(CommaFormatter())
     ax2.yaxis.set_major_formatter(CommaFormatter())
@@ -362,6 +387,44 @@ def main():
 
     if scenario is 5:
       pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(-0.05,0.25,1,1))
+  elif unrefinement_plot:
+    ax2 = fig.axes[0].twinx()
+    ax2.xaxis.set_major_formatter(CommaFormatter())
+    ax2.yaxis.set_major_formatter(CommaFormatter())
+
+    for agent in agent_list:
+      y_labels.append('Unr: ' + remap_names[agent])
+      yss.append(unrefinements[agent])
+      
+      linestyle = ':'
+      
+      imax = len(unrefinements[agent][len(x) - 1])
+      for i in range(0, imax):
+        y = []
+        for unr in unrefinements[agent]:
+          if i < len(unr):
+            y.append(unr[i])
+          else:
+            y.append(0.0)
+        labels += pylab.plot(x, y, label='Unr('+str(i)+'): ' + remap_names[agent], color=str(float(i) / imax), linestyle=linestyle)
+
+      print 'Unrefinement Average for ' + agent + ': ' + str(sum(unrefinements[agent][len(x) - 1]))
+    ax2.set_xlim(0)
+    ax2.set_ylim(0)
+    
+    ax2.set_ylabel('Unrefinements')
+    fig.axes[0].tick_params(axis='y', colors='blue')
+    ax2.spines['right'].set_color('blue')
+    ax2.tick_params(axis='y', colors='blue')
+
+    # Fix right axis tick labels
+    al=ax2.get_yticks().tolist()
+    al2=[]
+    for a in al:
+      al2.append(str(a))
+    ax2.set_yticklabels(al2)
+    
+    legend = pylab.legend(labels, [l.get_label() for l in labels], loc=2, handlelength=4.2, numpoints=2, prop={'size':1})
   else:
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
