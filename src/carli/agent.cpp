@@ -221,7 +221,7 @@ namespace Carli {
 
     auto new_node = general.create_split(general.parent_action.lock());
 
-    if(new_node->blacklist.find(chosen->first) == new_node->blacklist.end()) {
+    if(m_split_blacklist && new_node->blacklist.find(chosen->first) == new_node->blacklist.end()) {
       new_node->blacklist.insert(chosen->first->clone());
 
       if(new_node->blacklist.size() == general.fringe_values.size())
@@ -1599,7 +1599,7 @@ namespace Carli {
 #endif
 
     /// Counterintuitive: actually unsplit if error is reduced in the children?
-    return improvement > 5.0 && general.q_value_fringe->update_count > 99;
+    return improvement > 0.0 && general.q_value_fringe->update_count > 99;
   }
 
   bool Agent::unsplit_test_policy(Node_Split &general) {

@@ -50,8 +50,9 @@ g_ep_tuples = []
 ###g_ep_tuples.append(("pnf4i",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-i.carli"))
 ###g_ep_tuples.append(("pnf4r",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-r.carli"))
 
-g_ep_tuples.append(("unsplit-none",  "--num-blocks 6 --split-test catde --unsplit-test none  --rules rules/blocks-world-2-distractors.carli"))
-g_ep_tuples.append(("unsplit-catde", "--num-blocks 6 --split-test catde --unsplit-test catde --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("unsplit-none",     "--num-blocks 6 --split-test catde --unsplit-test none  --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("unsplit-catde-nb", "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("unsplit-catde",    "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
 parser = argparse.ArgumentParser(description='Run Blocks World 2 experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,
@@ -61,7 +62,7 @@ parser.add_argument('-r', '--runs', metavar='N', type=int,
                    action='store', default=1,
                    help='number of runs per experiment')
 parser.add_argument('-n', '--num-steps', metavar='N', type=int,
-                   action='store', default=10000,
+                   action='store', default=20000,
                    help='number of steps per run')
 
 args = parser.parse_args()

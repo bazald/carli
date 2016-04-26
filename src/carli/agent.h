@@ -249,6 +249,7 @@ namespace Carli {
     const std::string m_split_test = dynamic_cast<const Option_Itemized &>(Options::get_global()["split-test"]).get_value();
     const std::string m_unsplit_test = dynamic_cast<const Option_Itemized &>(Options::get_global()["unsplit-test"]).get_value();
     const int64_t m_split_update_count = get_Option_Ranged<int64_t>(Options::get_global(), "split-update-count");
+    const bool m_split_blacklist = get_Option_Ranged<bool>(Options::get_global(), "unsplit-blacklist");
 
     const int64_t m_contribute_update_count = get_Option_Ranged<int64_t>(Options::get_global(), "contribute-update-count");
     const bool m_dynamic_midpoint = get_Option_Ranged<bool>(Options::get_global(), "dynamic-midpoint");
