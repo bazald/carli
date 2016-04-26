@@ -99,7 +99,7 @@ namespace Puddle_World {
     }
   }
 
-  Environment::reward_type Environment::transition_impl(const Carli::Action &action) {
+  std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action) {
     const double shift = m_random_motion.frand_gaussian() * 0.01;
     const double step_size = shift + 0.05;
 
@@ -129,7 +129,7 @@ namespace Puddle_World {
     for(const Puddle &puddle : m_vertical_puddles)
       reward -= 400.0 * vertical_puddle_reward(puddle[0], puddle[1], puddle[2], puddle[3]);
 
-    return reward;
+    return std::make_pair(reward, reward);
   }
 
   double Environment::horizontal_puddle_reward(const double &left, const double &right, const double &y, const double &radius) const {

@@ -156,7 +156,7 @@ namespace Tetris {
 
     void init_impl();
 
-    reward_type transition_impl(const Carli::Action &action);
+    std::pair<reward_type, reward_type> transition_impl(const Carli::Action &action);
     void place_Tetromino(const Tetromino &tet, const std::pair<int16_t, int16_t> &position);
 
     void print_impl(ostream &os) const;

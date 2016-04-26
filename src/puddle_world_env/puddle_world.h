@@ -91,7 +91,7 @@ namespace Puddle_World {
 
     void alter_impl();
 
-    reward_type transition_impl(const Carli::Action &action);
+    std::pair<reward_type, reward_type> transition_impl(const Carli::Action &action);
 
     double horizontal_puddle_reward(const double &left, const double &right, const double &y, const double &radius) const;
 

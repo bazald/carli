@@ -56,7 +56,7 @@ namespace Blocks_World {
     }
   }
 
-  Agent::reward_type Environment::transition_impl(const Carli::Action &action) {
+  std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action) {
     const Move &move = debuggable_cast<const Move &>(action);
 
     Stacks::iterator src = std::find_if(m_blocks.begin(), m_blocks.end(), [&move](Stack &stack)->bool {
@@ -67,7 +67,7 @@ namespace Blocks_World {
     });
 
     if(src == m_blocks.end())
-      return -10.0; ///< throw std::runtime_error("Attempt to move Block from under another Block.");
+      return std::make_pair(-10.0, -10.0); ///< throw std::runtime_error("Attempt to move Block from under another Block.");
     if(dest == m_blocks.end())
       dest = m_blocks.insert(m_blocks.begin(), Stack());
 
@@ -77,7 +77,7 @@ namespace Blocks_World {
     if(src->empty())
       m_blocks.erase(src);
 
-    return -1.0;
+    return std::make_pair(-1.0, -1.0);
   }
 
   void Environment::print_impl(ostream &os) const {

@@ -106,7 +106,7 @@ namespace Cart_Pole {
   private:
     void init_impl();
 
-    reward_type transition_impl(const Carli::Action &action);
+    std::pair<reward_type, reward_type> transition_impl(const Carli::Action &action);
 
     void print_impl(ostream &os) const;
 

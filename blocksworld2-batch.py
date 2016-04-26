@@ -50,8 +50,8 @@ g_ep_tuples = []
 ###g_ep_tuples.append(("pnf4i",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-i.carli"))
 ###g_ep_tuples.append(("pnf4r",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-r.carli"))
 
-g_ep_tuples.append(("unsplit-none",  "--num-blocks 4 --split-test catde --unsplit-test none  --rules rules/blocks-world-2-distractors.carli"))
-g_ep_tuples.append(("unsplit-catde", "--num-blocks 4 --split-test catde --unsplit-test catde --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("unsplit-none",  "--num-blocks 6 --split-test catde --unsplit-test none  --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("unsplit-catde", "--num-blocks 6 --split-test catde --unsplit-test catde --rules rules/blocks-world-2-distractors.carli"))
 
 parser = argparse.ArgumentParser(description='Run Blocks World 2 experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,

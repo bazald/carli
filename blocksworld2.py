@@ -206,19 +206,27 @@ def main():
       
       first_group = False
   
+    agent_list = []
+    remap_names = {}
+    memory = {}
+    cpu = {}
+    unrefinements = {}
+
     if len(files) == 1:
       title='Blocks World (' + group.rsplit('/',1)[1].replace('_', '\_') + ')'
       smith = files[group].smith
       mode = 'single experiment evaluation'
+      
+      agent = group.rsplit('/',1)[1].replace('_', '\_')
+      remap_names[agent] = agent
+      agent_list.append(agent)
+      memory[agent] = smith['mem']
+      cpu[agent] = smith['cpu']
+      unrefinements[agent] = smith['unr']
     else:
       title='Blocks World (' + group.rsplit('/',1)[0].replace('_', '\_') + ')'
       
-      agent_list = []
-      remap_names = {}
       smith = {}
-      memory = {}
-      cpu = {}
-      unrefinements = {}
       for group in files:
         agent = group.rsplit('/',1)[1].replace('_', '\_')
         remap_names[agent] = agent
@@ -326,7 +334,7 @@ def main():
   
   pylab.xlim(xmax=10000)
   if len(sys.argv) > 1:
-    pylab.ylim(ymin=0, ymax=5)
+    pylab.ylim(ymin=-1000, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
@@ -401,12 +409,13 @@ def main():
       imax = len(unrefinements[agent][len(x) - 1])
       for i in range(0, imax):
         y = []
-        for unr in unrefinements[agent]:
-          if i < len(unr):
-            y.append(unr[i])
-          else:
-            y.append(0.0)
-        labels += pylab.plot(x, y, label='Unr('+str(i)+'): ' + remap_names[agent], color=str(float(i) / imax), linestyle=linestyle)
+        if unrefinements[agent][len(x) - 1][i] > 0.0:
+          for unr in unrefinements[agent]:
+            if i < len(unr):
+              y.append(unr[i])
+            else:
+              y.append(0.0)
+          labels += pylab.plot(x, y, label='Unr('+str(i)+'): ' + remap_names[agent], color=str(float(i) / imax), linestyle=linestyle)
 
       print 'Unrefinement Average for ' + agent + ': ' + str(sum(unrefinements[agent][len(x) - 1]))
     ax2.set_xlim(0)
@@ -414,8 +423,8 @@ def main():
     
     ax2.set_ylabel('Unrefinements')
     fig.axes[0].tick_params(axis='y', colors='blue')
-    ax2.spines['right'].set_color('blue')
-    ax2.tick_params(axis='y', colors='blue')
+    ax2.spines['right'].set_color('red')
+    ax2.tick_params(axis='y', colors='red')
 
     # Fix right axis tick labels
     al=ax2.get_yticks().tolist()

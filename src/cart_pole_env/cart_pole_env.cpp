@@ -48,7 +48,7 @@ namespace Cart_Pole {
     m_random_motion = Zeni::Random(m_random_init.rand());
   }
 
-  Agent::reward_type Environment::transition_impl(const Carli::Action &action) {
+  std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action) {
     const bool move_right = static_cast<const Move &>(action).direction == RIGHT;
 
     const double force = move_right ? FORCE_MAG : -FORCE_MAG;
@@ -102,9 +102,9 @@ namespace Cart_Pole {
       }
     }
 
-    return reward;
+    return std::make_pair(reward, reward);
 
-    return success() ? 1.0 : failed() ? -1.0 : 0.0;
+    return std::make_pair(success() ? 1.0 : failed() ? -1.0 : 0.0, success() ? 1.0 : failed() ? -1.0 : 0.0);
   }
 
   void Environment::print_impl(ostream &os) const {

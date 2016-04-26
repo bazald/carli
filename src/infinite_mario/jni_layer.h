@@ -69,7 +69,7 @@ namespace Mario {
 
     void init_impl() {}
 
-    reward_type transition_impl(const Carli::Action &) {
+    std::pair<reward_type, reward_type> transition_impl(const Carli::Action &) {
       abort();
     }
 

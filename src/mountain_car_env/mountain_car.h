@@ -93,7 +93,7 @@ namespace Mountain_Car {
 
     void alter_impl();
 
-    reward_type transition_impl(const Carli::Action &action);
+    std::pair<reward_type, reward_type> transition_impl(const Carli::Action &action);
 
     void print_impl(ostream &os) const;
 

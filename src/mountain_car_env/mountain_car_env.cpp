@@ -39,7 +39,7 @@ namespace Mountain_Car {
     }
   }
 
-  Environment::reward_type Environment::transition_impl(const Carli::Action &action) {
+  std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action) {
     const int64_t a = int64_t(debuggable_cast<const Acceleration &>(action).direction);
 
     assert(0 <= a && a <= 2);
@@ -53,7 +53,7 @@ namespace Mountain_Car {
     if(m_x == m_min_position && m_x_dot < 0)
       m_x_dot = 0;
 
-    return m_reward_negative ? -1 : success() ? 1 : 0;
+    return std::make_pair(m_reward_negative ? -1.0 : success() ? 1.0 : 0.0, m_reward_negative ? -1.0 : success() ? 1.0 : 0.0);
   }
 
   void Environment::print_impl(ostream &os) const {

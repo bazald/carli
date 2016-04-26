@@ -35,7 +35,7 @@ namespace Carli {
       }
     }
 
-    reward_type transition(const Action &action) {
+    std::pair<reward_type, reward_type> transition(const Action &action) {
       return transition_impl(action);
     }
 
@@ -48,7 +48,7 @@ namespace Carli {
   private:
     virtual void init_impl() = 0;
     virtual void alter_impl() {}
-    virtual reward_type transition_impl(const Action &action) = 0;
+    virtual std::pair<reward_type, reward_type> transition_impl(const Action &action) = 0;
     virtual void print_impl(std::ostream &os) const = 0;
 
     const int64_t m_scenario = get_Option_Ranged<int64_t>(Options::get_global(), "scenario");

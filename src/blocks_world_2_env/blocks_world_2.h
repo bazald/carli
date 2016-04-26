@@ -105,7 +105,7 @@ namespace Blocks_World_2 {
     void init_impl();
     Stacks random_Stacks(const std::vector<Block> &blocks);
 
-    reward_type transition_impl(const Carli::Action &action);
+    std::pair<reward_type, reward_type> transition_impl(const Carli::Action &action);
     int64_t matching_blocks() const;
 
     void print_impl(ostream &os) const;
@@ -163,8 +163,12 @@ namespace Blocks_World_2 {
     const Rete::Symbol_Constant_String_Ptr_C m_goal_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("goal"));
     const Rete::Symbol_Constant_String_Ptr_C m_stack_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("stack"));
     const Rete::Symbol_Constant_String_Ptr_C m_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("matches"));
+    const Rete::Symbol_Constant_String_Ptr_C m_early_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("early-matches")); ///< Defective
+    const Rete::Symbol_Constant_String_Ptr_C m_late_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("late-matches")); ///< Defective
     const Rete::Symbol_Constant_String_Ptr_C m_top_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top"));
     const Rete::Symbol_Constant_String_Ptr_C m_matches_top_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("matches-top"));
+    const Rete::Symbol_Constant_String_Ptr_C m_early_matches_top_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("early-matches-top")); ///< Defective
+    const Rete::Symbol_Constant_String_Ptr_C m_late_matches_top_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("late-matches-top")); ///< Defective
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
     const Rete::Symbol_Constant_String_Ptr_C m_false_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("false"));
     const Rete::Symbol_Identifier_Ptr_C m_blocks_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("BLOCKS"));

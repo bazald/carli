@@ -69,7 +69,7 @@ namespace Tetris {
     generate_placements();
   }
 
-  Environment::reward_type Environment::transition_impl(const Carli::Action &action) {
+  std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action) {
     const Place &place = debuggable_cast<const Place &>(action);
 
     const auto tet = generate_Tetromino(place.type);
@@ -86,9 +86,9 @@ namespace Tetris {
     generate_placements();
 
     if(m_placements.empty())
-      return score_failure;
+      return std::make_pair(score_failure, score_failure);
     else
-      return score;
+      return std::make_pair(score, score);
   }
 
   void Environment::place_Tetromino(const Environment::Tetromino &tet, const std::pair<int16_t, int16_t> &position) {

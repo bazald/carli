@@ -613,10 +613,10 @@ namespace Carli {
       abort();
     }
 
-    const reward_type reward = m_environment->transition(*m_current);
+    const std::pair<reward_type, reward_type> reward = m_environment->transition(*m_current);
 
 #ifndef NO_COLLAPSE_DETECTION_HACK
-    if(reward > 0.0) {
+    if(reward.first > 0.0) {
       if(++m_positive_rewards_in_a_row > 30)
         m_experienced_n_positive_rewards_in_a_row = true;
     }
@@ -636,7 +636,7 @@ namespace Carli {
       std::cerr << "   " << *m_next << " is next." << std::endl;
 #endif
       auto &value_best = m_next_q_values[m_next];
-      td_update(m_current_q_value, reward, value_best, rho, 1.0);
+      td_update(m_current_q_value, reward.first, value_best, rho, 1.0);
 
       if(!m_on_policy) {
         const auto next = m_exploration_policy();
@@ -655,14 +655,14 @@ namespace Carli {
       }
     }
     else {
-      td_update(m_current_q_value, reward, Q_Value_List(), rho, 1.0);
+      td_update(m_current_q_value, reward.first, Q_Value_List(), rho, 1.0);
     }
 
-    m_total_reward += reward;
+    m_total_reward += reward.second;
     ++m_step_count;
     ++m_total_step_count;
 
-    return reward;
+    return reward.second;
   }
 
   Rete::Rete_Action_Ptr Agent::make_standard_action(const Rete::Rete_Node_Ptr &parent, const std::string &name, const bool &user_command, const Rete::Variable_Indices_Ptr_C &variables) {
