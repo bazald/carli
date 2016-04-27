@@ -15,8 +15,8 @@ ENVIRONMENT=blocks_world_2_p
 #HEAPCHECK=normal         $CMD -n 1000   "$@"
 #HEAPPROFILE=$ENVIRONMENT.heap $CMD -n 1000   "$@"
 # CPUPROFILE=$ENVIRONMENT.prof CPUPROFILE_FREQUENCY=100000 \
-valgrind --tool=callgrind -v --dump-every-bb=100000000 \
-  ./blocks_world_2_p -o null --seed $SEED --num-steps 1000 --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.1 --secondary-learning-rate 0.1 --policy on-policy --num-blocks 4
+valgrind --tool=callgrind -v --dump-every-bb=10000000 \
+  ./blocks_world_2_p -o null --seed $SEED --num-steps 1000 --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.01 --secondary-learning-rate 0.2 --policy on-policy --split-update-count 30 --num-blocks 4 --split-test catde --unsplit-test catde --rules rules/blocks-world-2-distractors.carli --unsplit-blacklist true
 #  ./$ENVIRONMENT -o null --seed $SEED --num-steps 10000 --split-min 2 "$@"
 #  ./$ENVIRONMENT -o null --seed $SEED --num-steps 10000 --random-start true --learning-rate 0.1 --discount-rate 0.999 --epsilon-greedy 0.1 --policy off-policy --pseudoepisode-threshold 20 --credit-assignment even --split-min 5 --split-max 11 "$@"
 #pprof --gv ./$ENVIRONMENT ./$ENVIRONMENT.prof

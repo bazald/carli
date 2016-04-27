@@ -126,11 +126,19 @@ namespace Carli {
             ++data.count;
             data.aggregate_value += node.q_value_fringe->primary;
           }
-          else
-            found_axis->second[feature] = {rete_node.shared(), 1, node.q_value_fringe->primary};
+          else {
+            Data &datum = found_axis->second[feature];
+            datum.node = rete_node.shared();
+            datum.count = 1;
+            datum.aggregate_value = node.q_value_fringe->primary;
+          }
         }
-        else
-          features[feature][feature] = {rete_node.shared(), 1, node.q_value_fringe->primary};
+        else {
+          Data &datum = features[feature][feature];
+          datum.node = rete_node.shared();
+          datum.count = 1;
+          datum.aggregate_value = node.q_value_fringe->primary;
+        }
       }
     }
 
