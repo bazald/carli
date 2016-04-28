@@ -107,6 +107,7 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<int64_t>>("split-pseudoepisodes", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more pseudoepisode than this to allow refinement.");
     options.add(     make_shared<Option_Itemized>("split-test", set<string>({"catde", "policy", "value", "utile"}), "catde"), "'catde' splits based on TD error. 'policy' splits when there's a change to the greedy action. 'value' splits on maximal value difference between fringe nodes. 'utile' splits on whether expected return is increased.");
     options.add(     make_shared<Option_Ranged<int64_t>>("split-update-count", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more update than this to allow refinement.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("unsplit-update-count", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more update than this to allow unrefinement.");
     options.add(     make_shared<Option_Itemized>("unsplit-test", set<string>({"none", "catde", "policy", "value", "utile"}), "none"), "'none' disables. catde' splits based on TD error. 'policy' splits when there's a change to the greedy action. 'value' splits on maximal value difference between fringe nodes. 'utile' splits on whether expected return is increased.");
     options.add(     make_shared<Option_Ranged<bool>>("unsplit-blacklist", false, true, true, true, false), "Blacklist previously attempted refinements.");
     options.add_line("\n  Rete Representation Saving and Loading:");
