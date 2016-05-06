@@ -465,7 +465,7 @@ namespace Carli {
     new_action->data = new_action_data;
 
     /// Add to the appropriate parent list
-    leaf.fringe_values[new_action_data->q_value_fringe->feature.get()].values.push_back(new_action_data);
+    leaf.fringe_values[new_action_data->q_value_fringe->feature.get()].push_back(new_action_data);
 
     return new_action_data;
   }

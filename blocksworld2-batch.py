@@ -50,10 +50,25 @@ g_ep_tuples = []
 ###g_ep_tuples.append(("pnf4i",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-i.carli"))
 ###g_ep_tuples.append(("pnf4r",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-r.carli"))
 
-g_ep_tuples.append(("unsplit-none",     "--num-blocks 6 --split-test catde --unsplit-test none                             --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
-g_ep_tuples.append(("unsplit-none-130", "--num-blocks 6 --split-test catde --unsplit-test none    --split-update-count 130 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
-g_ep_tuples.append(("unsplit-catde-nb", "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
-g_ep_tuples.append(("unsplit-catde",    "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("catde-none",     "--num-blocks 4 --split-test catde --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("catde-catde-nb", "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("catde-catde",    "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
+
+g_ep_tuples.append(("catde-catde-test",    "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
+
+#g_ep_tuples.append(("catde-none-6",     "--num-blocks 6 --split-test catde --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("catde-none-130-6", "--num-blocks 6 --split-test catde --unsplit-test none    --split-update-count 130                           --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("catde-catde-nb-6", "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("catde-catde-6",    "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("catde-anticatde-6", "--num-blocks 6 --split-test catde --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
+
+#g_ep_tuples.append(("policy-none",     "--num-blocks 4 --split-test policy --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("policy-catde-nb", "--num-blocks 4 --split-test policy --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("policy-catde",    "--num-blocks 4 --split-test policy --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
+
+#g_ep_tuples.append(("value-none",     "--num-blocks 4 --split-test value --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("value-catde-nb", "--num-blocks 4 --split-test value --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("value-catde",    "--num-blocks 4 --split-test value --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
 parser = argparse.ArgumentParser(description='Run Blocks World 2 experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,
@@ -105,7 +120,7 @@ class Experiment:
     self.experiment = experiment
     self.vfm = vfm
     self.errorcode = 0
-    
+
   def get_args(self):
     args = self.experiment.split()
     args.extend(['--num-steps', str(self.num_steps),
@@ -116,14 +131,14 @@ class Experiment:
     if self.vfm:
       args.extend(['--value-function-map-filename', self.vfm])
     return args
-  
+
   def print_args(self):
     args = self.get_args()
     cmd = args[0]
     for arg in args[1:]:
       cmd += ' ' + arg
     return cmd
-  
+
   def run(self):
     args = self.get_args()
     #print self.print_args()
@@ -147,7 +162,7 @@ for ep_tuple in g_ep_tuples:
   if not os.path.isdir(dir):
     os.mkdir(dir)
   g_dirs.append(dir)
-  
+
   for seed in seeds:
     stderr = dir + '/blocksworld-' + str(seed) + '.err'
     stdout = dir + '/blocksworld-' + str(seed) + '.out'
@@ -160,7 +175,7 @@ for ep_tuple in g_ep_tuples:
 class Progress:
   def __init__(self, experiments):
     self.lock = thread.allocate_lock()
-    
+
     self.count = {}
     self.finished = {}
     for experiment in experiments:

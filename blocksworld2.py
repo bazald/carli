@@ -91,11 +91,6 @@ def write_to_csv(filename, x_label, xs, y_labels, yss):
     f.write('\n')
 
 def main():
-  reward_label = 'Cumulative Reward / \# Episodes'
-  val0 = 1
-  #reward_label = 'Reward Within an Episode'
-  #val0 = 4
-  
   # 1: ./blocksworld2.py experiment-bw2/s*4/*.out
   # 2: ./blocksworld2.py experiment-bw2/f*4/*.out
   # 3: ./blocksworld2.py experiment-bw2/c*4/*.out
@@ -106,6 +101,14 @@ def main():
   memory_plot = scenario is not 0
   unrefinement_plot = not memory_plot
   two_sided_plot = memory_plot or unrefinement_plot
+  cumulative = True
+
+  if cumulative:
+    reward_label = 'Cumulative Reward / \# Episodes'
+    val0 = 1
+  else:
+    reward_label = 'Reward Within an Episode'
+    val0 = 4
 
   if len(sys.argv) == 1:
     f = open('stdout.txt', 'r')
@@ -249,19 +252,19 @@ def main():
   
   labels = []
   if len(sys.argv) == 1:
-    if val0 == 4:
-      for i in range(1, len(smith)):
-        smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
+    #if val0 == 4:
+      #for i in range(1, len(smith)):
+        #smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
     
     y_labels = ['Values']
     yss = [smith]
     
     labels += pylab.plot(x, smith, label="Values", color='blue', linestyle='solid')
   else:
-    if val0 == 4:
-      for a in smith:
-        for i in range(1, len(smith[a])):
-          smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
+    #if val0 == 4:
+      #for a in smith:
+        #for i in range(1, len(smith[a])):
+          #smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
     
     if mode == 'single experiment evaluation':
       y_labels = ['Maximum', 'Average', 'Minimum']

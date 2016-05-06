@@ -29,19 +29,14 @@ namespace Carli {
   typedef std::shared_ptr<Node_Unsplit> Node_Unsplit_Ptr;
   typedef std::shared_ptr<Node_Fringe> Node_Fringe_Ptr;
 
-  struct Fringe_Value_Data {
-    std::list<Node_Fringe_Ptr> values;
-    double value_delta_max = 0.0;
-    int64_t value_delta_update_count = 0;
-  };
-  typedef std::map<Feature *, Fringe_Value_Data, Rete::compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> Fringe_Values;
+  typedef std::map<Feature *, std::list<Node_Fringe_Ptr>, Rete::compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> Fringe_Values;
 
   class Fringe_Axis_Blacklist : public std::set<tracked_ptr<Feature>, Rete::compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> {
   public:
     ~Fringe_Axis_Blacklist();
   };
 
-  class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Unsplit>, public Rete::Rete_Data {
+  class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Split>, public Rete::Rete_Data {
     Node(const Node &) = delete;
     Node & operator=(const Node &) = delete;
 
@@ -106,6 +101,8 @@ namespace Carli {
     std::list<Node_Ptr> children; ///< Not cloned
     Fringe_Axis_Blacklist blacklist;
     bool blacklist_full = false;
+
+    Fringe_Values fringe_values; ///< Not cloned
   };
 
   class CARLI_LINKAGE Node_Unsplit : public Node {

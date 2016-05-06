@@ -394,7 +394,7 @@ command:
                           new_action->data = new_action_data;
                           if(parent_action) {
                             auto &parent_data = dynamic_cast<Carli::Node_Unsplit &>(*parent_action->data);
-                            parent_data.fringe_values[feature].values.push_back(new_action_data);
+                            parent_data.fringe_values[feature].push_back(new_action_data);
                           }
                           else {
                             reteerror(&yylloc, yyscanner, agent, filename, source_path, "Ancestral relationship specified in :feature fringe not found.");
