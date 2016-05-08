@@ -1622,7 +1622,7 @@ namespace Carli {
     assert(general.q_value_weight);
     assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
 
-    if(general.children.empty() || general.blacklist_full)
+    if(general.children.empty() || general.blacklist_full || general.q_value_fringe->update_count < m_unsplit_update_count)
       return false;
 
     double sum_error = 0.0;
@@ -1636,36 +1636,39 @@ namespace Carli {
 #endif
 
     /// Counterintuitive: actually unsplit if error is reduced in the children?
-    return improvement > 0.0 && general.q_value_fringe->update_count > m_unsplit_update_count;
+    return improvement > 0.0;
   }
 
   bool Agent::unsplit_test_value(Node_Split &general) {
     assert(general.q_value_weight);
     assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
 
-    if(general.children.empty() || general.blacklist_full)
+    if(general.children.empty() || general.blacklist_full || general.q_value_fringe->update_count < m_unsplit_update_count)
       return false;
 
-    double sum_squared = 0.0;
+    std::pair<double, double> child_range = std::make_pair(std::numeric_limits<double>::max(), std::numeric_limits<double>::lowest());
     for(auto &child : general.children) {
-      const double delta = child->q_value_fringe->primary - general.q_value_fringe->primary;
-      sum_squared += delta * delta;
+      const auto cr = child->value_range();
+      child_range.first = std::min(child_range.first, cr.first);
+      child_range.second = std::max(child_range.second, cr.second);
     }
 
-    const double rms = sqrt(sum_squared) / general.children.size();
+    std::pair<double, double> fringe_range = std::make_pair(std::numeric_limits<double>::max(), std::numeric_limits<double>::lowest());
+    for(auto &fringe_axis : general.fringe_values) {
+      for(auto &fringe : fringe_axis.second) {
+        fringe_range.first = std::min(fringe_range.first, fringe->q_value_fringe->primary);
+        fringe_range.second = std::max(fringe_range.second, fringe->q_value_fringe->primary);
+      }
+    }
 
-#ifndef NDEBUG
-    std::cerr << "RMS: " << rms << std::endl;
-#endif
-
-    return false;
+    return fringe_range.second - fringe_range.first > child_range.second - child_range.first;
   }
 
   bool Agent::unsplit_test_utile(Node_Split &general) {
     assert(general.q_value_weight);
     assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
 
-    if(general.children.empty() || general.blacklist_full)
+    if(general.children.empty() || general.blacklist_full || general.q_value_fringe->update_count < m_unsplit_update_count)
       return false;
 
     return random.rand_lt(100);

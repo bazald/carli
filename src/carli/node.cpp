@@ -63,6 +63,38 @@ namespace Carli {
     return value_accumulator;
   }
 
+  std::pair<double, double> Node::value_range(const bool &include_ancestors) const {
+    std::pair<double, double> child_values;
+
+    if(const auto split = dynamic_cast<const Node_Split *>(this)) {
+      child_values.first = std::numeric_limits<double>::max();
+      child_values.second = std::numeric_limits<double>::lowest();
+
+      for(auto &fringe_axis : split->fringe_values) {
+        for(auto &fringe : fringe_axis.second) {
+          const auto cv = fringe->value_range(false);
+          child_values.first = std::min(child_values.first, cv.first);
+          child_values.second = std::max(child_values.second, cv.second);
+        }
+      }
+    }
+
+    double ancestors = q_value_weight ? q_value_weight->primary : 0.0;
+
+    if(include_ancestors) {
+      for(auto pa_lock = parent_action.lock(); pa_lock; ) {
+        const auto pan = dynamic_cast<Node *>(pa_lock->data.get());
+        ancestors += pan->q_value_weight ? pan->q_value_weight->primary : 0.0;
+        pa_lock = pan->parent_action.lock();
+      }
+    }
+
+    child_values.first += ancestors;
+    child_values.second += ancestors;
+
+    return child_values;
+  }
+
   void Node::print_flags(std::ostream &os) const {
     const auto &q_value = q_value_weight ? q_value_weight : q_value_fringe;
 

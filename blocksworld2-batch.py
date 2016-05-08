@@ -54,8 +54,6 @@ g_ep_tuples = []
 #g_ep_tuples.append(("catde-catde-nb", "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("catde-catde",    "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
-g_ep_tuples.append(("catde-catde-test",    "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
-
 #g_ep_tuples.append(("catde-none-6",     "--num-blocks 6 --split-test catde --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("catde-none-130-6", "--num-blocks 6 --split-test catde --unsplit-test none    --split-update-count 130                           --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("catde-catde-nb-6", "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))

@@ -57,6 +57,7 @@ namespace Carli {
     int64_t rank() const override;
 
     Q_Value::Token sum_value(Q_Value::Token value_accumulator = Q_Value::Token()) const;
+    std::pair<double, double> value_range(const bool &include_ancestors = true) const;
 
 //    template <typename TYPE>
 //    double min_int64(const ptrdiff_t offset, const int64_t value_accumulator = std::numeric_limits<int64_t>) const;
