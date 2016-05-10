@@ -1647,11 +1647,17 @@ namespace Carli {
       return false;
 
     std::pair<double, double> child_range = std::make_pair(std::numeric_limits<double>::max(), std::numeric_limits<double>::lowest());
+    bool update_count_passed = false;
     for(auto &child : general.children) {
       const auto cr = child->value_range();
       child_range.first = std::min(child_range.first, cr.first);
       child_range.second = std::max(child_range.second, cr.second);
+      if(child->q_value_fringe->update_count >= m_unsplit_update_count)
+        update_count_passed = true;
     }
+
+    if(!update_count_passed)
+      return false;
 
     std::pair<double, double> fringe_range = std::make_pair(std::numeric_limits<double>::max(), std::numeric_limits<double>::lowest());
     for(auto &fringe_axis : general.fringe_values) {
@@ -1661,7 +1667,14 @@ namespace Carli {
       }
     }
 
-    return fringe_range.second - fringe_range.first > child_range.second - child_range.first;
+    const double improvement = (fringe_range.second - fringe_range.first) - (child_range.second - child_range.first);
+
+#ifndef NDEBUG
+    std::cerr << "Value Improvement = (" << fringe_range.second << " - " << fringe_range.first
+              << ") - (" << child_range.second << " - " << child_range.first << " = " << improvement << ')' << std::endl;
+#endif
+
+    return improvement > 0.0;
   }
 
   bool Agent::unsplit_test_utile(Node_Split &general) {

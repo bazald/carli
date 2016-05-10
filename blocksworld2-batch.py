@@ -67,6 +67,12 @@ g_ep_tuples = []
 #g_ep_tuples.append(("value-none",     "--num-blocks 4 --split-test value --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("value-catde-nb", "--num-blocks 4 --split-test value --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("value-catde",    "--num-blocks 4 --split-test value --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("value-value-nb", "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
+#g_ep_tuples.append(("value-value",    "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
+
+g_ep_tuples.append(("value-none-6",     "--num-blocks 6 --split-test value --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("value-value-nb-6", "--num-blocks 6 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("value-value-6",    "--num-blocks 6 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
 parser = argparse.ArgumentParser(description='Run Blocks World 2 experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,
