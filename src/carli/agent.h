@@ -116,14 +116,14 @@ namespace Carli {
     std::list<Node_Ptr> m_nodes_activating;
 
   protected:
-    Action_Ptr_C choose_epsilon_greedy(const Node_Fringe * const &fringe);
-    Action_Ptr_C choose_t_test(const Node_Fringe * const &fringe);
-    Action_Ptr_C choose_greedy(const Node_Fringe * const &fringe);
-    std::list<Action_Ptr_C, Zeni::Pool_Allocator<Action_Ptr_C>> choose_greedies(const Node_Fringe * const &fringe);
+    Action_Ptr_C choose_epsilon_greedy(const Node_Fringe * const &fringe, const int64_t &fringe_depth);
+    Action_Ptr_C choose_t_test(const Node_Fringe * const &fringe, const int64_t &fringe_depth);
+    Action_Ptr_C choose_greedy(const Node_Fringe * const &fringe, const int64_t &fringe_depth);
+    std::list<Action_Ptr_C, Zeni::Pool_Allocator<Action_Ptr_C>> choose_greedies(const Node_Fringe * const &fringe, const int64_t &fringe_depth);
     Action_Ptr_C choose_randomly();
 
-    double probability_epsilon_greedy(const Action_Ptr_C &action, const double &epsilon, const Node_Fringe * const &fringe);
-    double probability_greedy(const Action_Ptr_C &action, const Node_Fringe * const &fringe);
+    double probability_epsilon_greedy(const Action_Ptr_C &action, const double &epsilon, const Node_Fringe * const &fringe, const int64_t &fringe_depth);
+    double probability_greedy(const Action_Ptr_C &action, const Node_Fringe * const &fringe, const int64_t &fringe_depth);
     double probability_random();
 
     void td_update(const Q_Value_List &current, const reward_type &reward, const Q_Value_List &next, const double &rho, const double &I);
@@ -156,7 +156,7 @@ namespace Carli {
     bool unsplit_test_utile(Node_Split &general);
 
     /// Get the sample mean and standard deviation
-    std::tuple<double, double, int64_t> sum_value(const action_type * const &action, const Q_Value_List &value_list, const Feature * const &axis) const;
+    std::tuple<double, double, int64_t> sum_value(const action_type * const &action, const Q_Value_List &value_list, const Feature * const &axis, const int64_t &fringe_depth) const;
 
     void generate_all_features();
 

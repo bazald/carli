@@ -120,7 +120,7 @@ namespace Mountain_Car {
       for(size_t x = 0lu; x != granularity; ++x) {
         env->set_x(((x + 0.5) / granularity) * 1.8 - 1.2);
         generate_features();
-        auto action = choose_greedy(nullptr);
+        auto action = choose_greedy(nullptr, std::numeric_limits<int64_t>::max());
         switch(static_cast<const Acceleration &>(*action).direction) {
           case LEFT:  os << '-'; break;
           case IDLE:  os << '0'; break;

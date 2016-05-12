@@ -211,9 +211,9 @@ namespace Mario {
 
   void Agent::act_part_1(Action &action) {
     /// Calculate \rho
-    m_rho = probability_epsilon_greedy(m_next, get_epsilon(), nullptr);
+    m_rho = probability_epsilon_greedy(m_next, get_epsilon(), nullptr, std::numeric_limits<int64_t>::max());
     if(!is_on_policy())
-      m_rho = probability_greedy(m_next, nullptr) / m_rho;
+      m_rho = probability_greedy(m_next, nullptr, std::numeric_limits<int64_t>::max()) / m_rho;
 
     m_current = m_next;
     m_current_q_value = m_next_q_values[m_next];
@@ -294,7 +294,7 @@ namespace Mario {
         Carli::Action_Ptr_C next = m_exploration_policy();
 
         if(*m_next != *next) {
-          if(sum_value(nullptr, m_current_q_value, nullptr) < sum_value(nullptr, m_next_q_values[next], nullptr))
+          if(sum_value(nullptr, m_current_q_value, nullptr, std::numeric_limits<int64_t>::max()) < sum_value(nullptr, m_next_q_values[next], nullptr, std::numeric_limits<int64_t>::max()))
             clear_eligibility_trace();
           m_next = next;
         }
