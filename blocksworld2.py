@@ -101,7 +101,7 @@ def main():
   memory_plot = scenario is not 0
   unrefinement_plot = not memory_plot
   two_sided_plot = memory_plot or unrefinement_plot
-  cumulative = True
+  cumulative = False
 
   if cumulative:
     reward_label = 'Cumulative Reward / \# Episodes'

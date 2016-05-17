@@ -1459,13 +1459,13 @@ namespace Carli {
     const auto greedies = choose_greedies(nullptr, std::numeric_limits<int64_t>::max());
     Fringe_Values::iterator chosen_axis = general.fringe_values.end();
     double chosen_score = 0.0;
-    int32_t count = 0;
+    int64_t count = 0;
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
       if(touched.find(fringe_axis->first) == touched.end())
         continue;
 
       auto new_greedies = choose_greedies(fringe_axis->second.begin()->get(), std::numeric_limits<int64_t>::max());
-      int32_t removed = 0, unchanged = 0;
+      int64_t removed = 0, unchanged = 0;
       for(auto greedy : greedies) {
         const auto found = std::find(new_greedies.begin(), new_greedies.end(), greedy);
         if(found == new_greedies.end())
@@ -1475,8 +1475,8 @@ namespace Carli {
           new_greedies.erase(found);
         }
       }
-      const int32_t added = int32_t(new_greedies.size());
-      const double new_score = (added + removed) / (2 * unchanged + added + removed);
+      const int64_t added = int64_t(new_greedies.size());
+      const double new_score = (added + removed) / (2.0 * unchanged + added + removed);
 
       if(new_score > chosen_score)
         count = 1;
@@ -1626,23 +1626,60 @@ namespace Carli {
       return false;
 
     bool update_count_passed = false;
-    double sum_error = 0.0;
     for(auto &child : general.children) {
       if(child->q_value_fringe->update_count >= m_unsplit_update_count)
         update_count_passed = true;
-      sum_error += child->q_value_fringe->catde;
     }
 
     if(!update_count_passed)
       return false;
 
-    const double improvement = -(general.q_value_fringe->catde_post_split - sum_error);
+    const int64_t fringe_depth = general.fringe_values.begin()->second.begin()->get()->q_value_fringe->depth;
+    const auto greedies = choose_greedies(nullptr, fringe_depth);
+
+    double chosen_score = 0.0;
+    {
+      auto new_greedies = choose_greedies(nullptr, std::numeric_limits<int64_t>::max());
+      int64_t removed = 0, unchanged = 0;
+      for(auto greedy : greedies) {
+        const auto found = std::find(new_greedies.begin(), new_greedies.end(), greedy);
+        if(found == new_greedies.end())
+          ++removed;
+        else {
+          ++unchanged;
+          new_greedies.erase(found);
+        }
+      }
+      const int64_t added = int64_t(new_greedies.size());
+
+      chosen_score = (added + removed) / (2.0 * unchanged + added + removed);
+    }
+
+    double max_score = 0.0;
+    for(auto &fringe_axis : general.fringe_values) {
+      auto new_greedies = choose_greedies(fringe_axis.second.begin()->get(), fringe_depth);
+      int64_t removed = 0, unchanged = 0;
+      for(auto greedy : greedies) {
+        const auto found = std::find(new_greedies.begin(), new_greedies.end(), greedy);
+        if(found == new_greedies.end())
+          ++removed;
+        else {
+          ++unchanged;
+          new_greedies.erase(found);
+        }
+      }
+      const int64_t added = int64_t(new_greedies.size());
+      const double new_score = (added + removed) / (2.0 * unchanged + added + removed);
+
+      max_score = std::max(max_score, new_score);
+    }
+
+    const double improvement = max_score - chosen_score;
 
 #ifndef NDEBUG
-    std::cerr << "CATDE Improvement = " << general.q_value_fringe->catde_post_split << " - " << sum_error << " = " << improvement << std::endl;
+    std::cerr << "Policy Improvement = " << max_score << " - " << chosen_score << " = " << improvement << ')' << std::endl;
 #endif
 
-    /// Counterintuitive: actually unsplit if error is reduced in the children?
     return improvement > 0.0;
   }
 
@@ -1666,19 +1703,21 @@ namespace Carli {
     if(!update_count_passed)
       return false;
 
-    std::pair<double, double> fringe_range = std::make_pair(std::numeric_limits<double>::max(), std::numeric_limits<double>::lowest());
+    double fringe_spread = 0.0;
     for(auto &fringe_axis : general.fringe_values) {
+      std::pair<double, double> fringe_range = std::make_pair(std::numeric_limits<double>::max(), std::numeric_limits<double>::lowest());
       for(auto &fringe : fringe_axis.second) {
         fringe_range.first = std::min(fringe_range.first, fringe->q_value_fringe->primary);
         fringe_range.second = std::max(fringe_range.second, fringe->q_value_fringe->primary);
       }
+      fringe_spread = std::max(fringe_spread, fringe_range.second - fringe_range.first);
     }
 
-    const double improvement = (fringe_range.second - fringe_range.first) - (child_range.second - child_range.first);
+    const double improvement = fringe_spread - (child_range.second - child_range.first);
 
 #ifndef NDEBUG
-    std::cerr << "Value Improvement = (" << fringe_range.second << " - " << fringe_range.first
-              << ") - (" << child_range.second << " - " << child_range.first << " = " << improvement << ')' << std::endl;
+    std::cerr << "Value Improvement = " << fringe_spread
+              << " - (" << child_range.second << " - " << child_range.first << " = " << improvement << ')' << std::endl;
 #endif
 
     return improvement > 0.0;
