@@ -337,6 +337,7 @@ namespace Carli {
     split.fringe_values.swap(unsplit.fringe_values);
     for(auto &fringe_axis : split.fringe_values) {
       for(auto &fringe : fringe_axis.second) {
+        fringe->parent_action = split.rete_action;
         fringe->q_value_fringe->type_internal = true;
         fringe->q_value_fringe->update_count = 0;
         fringe->q_value_fringe->catde = 0.0;
