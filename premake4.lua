@@ -118,8 +118,8 @@ solution "carli"
     includedirs { "/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/include",
                   "/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/include/darwin" }
   configuration "windows"
-    includedirs { "C:\\Program Files\\Java\\jdk1.8.0_25\\include",
-                  "C:\\Program Files\\Java\\jdk1.8.0_25\\include\\win32" }
+    includedirs { "C:\\Program Files\\Java\\jdk1.8.0_77\\include",
+                  "C:\\Program Files\\Java\\jdk1.8.0_77\\include\\win32" }
 
   include "src/blocks_world"
   include "src/blocks_world_env"

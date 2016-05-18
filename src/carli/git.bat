@@ -11,13 +11,13 @@ echo #include ^<string^>>> git.h~ || exit 3
 echo #define GIT_MODIFIED \>>git.h~
 if ERRORLEVEL 1 exit /B 4
 
-"C:\Program Files (x86)\Git\bin\git.exe" status | grep -c modified>>git.h~
+git.exe status | grep -c modified>>git.h~
 REM if ERRORLEVEL 1 exit /B 5
 ver > nul
 
 echo #define GIT_REVISION \>>git.h~
 if ERRORLEVEL 1 exit /B 5
-"C:\Program Files (x86)\Git\bin\git.exe" log -n 1 | head -n 1 | sed "s/commit //">>git.h~
+git.exe log -n 1 | head -n 1 | sed "s/commit //">>git.h~
 if ERRORLEVEL 1 exit /B 6
 echo #define GIT_STR_STR(x) #x>>git.h~
 if ERRORLEVEL 1 exit /B 7
