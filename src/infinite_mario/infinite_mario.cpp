@@ -418,8 +418,8 @@ namespace Mario {
       wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_speed_attr, i & 0x1 ? m_true_value : m_false_value));
     }
 
-    Rete::Symbol_Identifier_Ptr_C closest_enemy_id;
-    double closest_enemy_distance = std::numeric_limits<double>::max();
+    Rete::Symbol_Identifier_Ptr_C nearest_enemy_id;
+    double nearest_enemy_distance = std::numeric_limits<double>::max();
     for(const auto &enemy : m_current_state->getEnemiesFloatPos) {
       oss << "E" << enemy.which;
       const Rete::Symbol_Identifier_Ptr_C enemy_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
@@ -439,30 +439,68 @@ namespace Mario {
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_fireball_kills_attr, object_killable_by_fireball(enemy.object) ? m_true_value : m_false_value));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_jump_kills_attr, object_killable_by_jump(enemy.object) ? m_true_value : m_false_value));
 
-      if(distance < closest_enemy_distance) {
-        closest_enemy_id = enemy_id;
-        closest_enemy_distance = distance;
+      if(distance < nearest_enemy_distance) {
+        nearest_enemy_id = enemy_id;
+        nearest_enemy_distance = distance;
       }
     }
 
-    if(!closest_enemy_id) {
+    if(!nearest_enemy_id) {
       const Rete::Symbol_Identifier_Ptr_C enemy_id = std::make_shared<Rete::Symbol_Identifier>("E0");
-      const Rete::Symbol_Constant_Float_Ptr_C zero = std::make_shared<Rete::Symbol_Constant_Float>(0.0);
 
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_enemy_attr, enemy_id));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(object_simplified(OBJECT_IRRELEVANT))));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(-300.0)));
-      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, zero));
-      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_dot_attr, zero));
-      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_dot_attr, zero));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_attr, m_zero));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_x_dot_attr, m_zero));
+      wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_y_dot_attr, m_zero));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_flies_attr, m_false_value));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_fireball_kills_attr, m_true_value));
       wmes_current.push_back(std::make_shared<Rete::WME>(enemy_id, m_jump_kills_attr, m_true_value));
 
-      closest_enemy_id = enemy_id;
+      nearest_enemy_id = enemy_id;
     }
 
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_closest_enemy_attr, closest_enemy_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_nearest_enemy_attr, nearest_enemy_id));
+
+    {
+      int dist2 = std::numeric_limits<int>::max();
+      int pos_x = 0;
+      int pos_y = 0;
+      int powerup = OBJECT_IRRELEVANT;
+
+      for(int x = 0; x != OBSERVATION_WIDTH; ++x) {
+        for(int y = 0; y != OBSERVATION_HEIGHT; ++y) {
+          if(object_powerup(m_current_state->getEnemiesObservation[y][x])) {
+            const int dx = x - OBSERVATION_WIDTH / 2;
+            const int dy = y - OBSERVATION_HEIGHT / 2;
+            const int d2 = dx * dx + dy * dy;
+
+            if(d2 < dist2) {
+              dist2 = d2;
+              pos_x = x;
+              pos_y = y;
+              powerup = object_simplified(m_current_state->getEnemiesObservation[y][x]);
+            }
+          }
+        }
+      }
+
+      const Rete::Symbol_Identifier_Ptr_C powerup_id = std::make_shared<Rete::Symbol_Identifier>("POW");
+
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_nearest_powerup_attr, powerup_id));
+
+      if(powerup != OBJECT_IRRELEVANT) {
+        wmes_current.push_back(std::make_shared<Rete::WME>(powerup_id, m_x_attr, std::make_shared<Rete::Symbol_Constant_Float>(pos_x - OBSERVATION_WIDTH / 2)));
+        wmes_current.push_back(std::make_shared<Rete::WME>(powerup_id, m_y_attr, std::make_shared<Rete::Symbol_Constant_Float>(pos_y - OBSERVATION_HEIGHT / 2)));
+        wmes_current.push_back(std::make_shared<Rete::WME>(powerup_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(powerup)));
+      }
+      else {
+        wmes_current.push_back(std::make_shared<Rete::WME>(powerup_id, m_x_attr, m_zero));
+        wmes_current.push_back(std::make_shared<Rete::WME>(powerup_id, m_y_attr, m_zero));
+        wmes_current.push_back(std::make_shared<Rete::WME>(powerup_id, m_type_attr, std::make_shared<Rete::Symbol_Constant_Int>(object_simplified(OBJECT_IRRELEVANT))));
+      }
+    }
 
     Rete::Agenda::Locker locker(agenda);
     CPU_Accumulator cpu_accumulator(*this);

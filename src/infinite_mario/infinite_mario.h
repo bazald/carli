@@ -122,11 +122,13 @@ namespace Mario {
     const Rete::Symbol_Constant_String_Ptr_C m_speed_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("speed"));
     const Rete::Symbol_Constant_String_Ptr_C m_type_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("type"));
     const Rete::Symbol_Constant_String_Ptr_C m_flies_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("flies"));
-    const Rete::Symbol_Constant_String_Ptr_C m_closest_enemy_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("closest-enemy"));
+    const Rete::Symbol_Constant_String_Ptr_C m_nearest_enemy_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("nearest-enemy"));
     const Rete::Symbol_Constant_String_Ptr_C m_fireball_kills_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("fireball-kills"));
     const Rete::Symbol_Constant_String_Ptr_C m_jump_kills_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("jump-kills"));
+    const Rete::Symbol_Constant_String_Ptr_C m_nearest_powerup_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("nearest-powerup"));
     const Rete::Symbol_Constant_Int_Ptr_C m_true_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
     const Rete::Symbol_Constant_Int_Ptr_C m_false_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(0));
+    const Rete::Symbol_Constant_Float_Ptr_C m_zero = std::make_shared<Rete::Symbol_Constant_Float>(0.0);
 
     const Rete::Symbol_Identifier_Ptr_C m_button_presses_in_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("I1"));
 

@@ -13,6 +13,8 @@ on-policy
 --epsilon-greedy
 0.1
 --split-test
-policy
+value
+--unsplit-test
+none
 --rules-out
 ../../rules-out.txt
