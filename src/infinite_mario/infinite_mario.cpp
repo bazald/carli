@@ -471,7 +471,7 @@ namespace Mario {
 
       for(int x = 0; x != OBSERVATION_WIDTH; ++x) {
         for(int y = 0; y != OBSERVATION_HEIGHT; ++y) {
-          if(object_powerup(m_current_state->getEnemiesObservation[y][x])) {
+          if(object_powerup(m_current_state->getCompleteObservation[y][x])) {
             const int dx = x - OBSERVATION_WIDTH / 2;
             const int dy = y - OBSERVATION_HEIGHT / 2;
             const int d2 = dx * dx + dy * dy;
@@ -480,7 +480,7 @@ namespace Mario {
               dist2 = d2;
               pos_x = x;
               pos_y = y;
-              powerup = object_simplified(m_current_state->getEnemiesObservation[y][x]);
+              powerup = object_simplified(m_current_state->getCompleteObservation[y][x]);
             }
           }
         }

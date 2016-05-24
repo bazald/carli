@@ -23,13 +23,15 @@ namespace Mario {
    : enemiesSeen(prev.enemiesSeen),
    action(prev.action)
   {
-    jclass cls = env->FindClass("ch/idsia/mario/environments/Environment");
-    assert(cls);
+    jclass envClass = env->FindClass("ch/idsia/mario/environments/Environment");
+    assert(envClass);
+    jclass marioClass = env->FindClass("ch/idsia/mario/engine/LevelScene");
+    assert(marioClass);
 
     jmethodID getter;
 
     {
-      getter = env->GetMethodID(cls, "getLevelSceneObservation", "()[[B");
+      getter = env->GetMethodID(envClass, "getLevelSceneObservation", "()[[B");
       assert(getter);
       jobjectArray levelSceneObservation = jobjectArray(env->CallObjectMethod(observation, getter));
       for(int j = 0; j != OBSERVATION_HEIGHT; ++j) {
@@ -69,7 +71,7 @@ namespace Mario {
 
       /** End pit detection **/
 
-      //getter = env->GetMethodID(cls, "getLevelSceneObservationZ", "(I)[[B");
+      //getter = env->GetMethodID(envClass, "getLevelSceneObservationZ", "(I)[[B");
       //assert(getter);
       //jobjectArray levelSceneObservation = jobjectArray(env->CallObjectMethod(observation, getter, 0));
       //for(int j = 0; j != OBSERVATION_HEIGHT; ++j) {
@@ -82,7 +84,7 @@ namespace Mario {
       //  env->ReleaseByteArrayElements(row, row_data, JNI_ABORT);
       //}
 
-      getter = env->GetMethodID(cls, "getEnemiesObservation", "()[[B");
+      getter = env->GetMethodID(envClass, "getEnemiesObservation", "()[[B");
       assert(getter);
       jobjectArray enemiesObservation = jobjectArray(env->CallObjectMethod(observation, getter));
       for(int j = 0; j != OBSERVATION_HEIGHT; ++j) {
@@ -96,8 +98,21 @@ namespace Mario {
       }
     }
 
+    getter = env->GetMethodID(envClass, "getCompleteObservation", "()[[B");
+    assert(getter);
+    jobjectArray completeSceneObservation = jobjectArray(env->CallObjectMethod(observation, getter));
+    for(int j = 0; j != OBSERVATION_HEIGHT; ++j) {
+      jbyteArray row = jbyteArray(env->GetObjectArrayElement(completeSceneObservation, j));
+      assert(row);
+      jbyte *row_data = env->GetByteArrayElements(row, 0);
+      assert(row_data);
+      for(int i = 0; i != OBSERVATION_WIDTH; ++i)
+        getCompleteObservation[j][i] = Object(row_data[i]);
+      env->ReleaseByteArrayElements(row, row_data, JNI_ABORT);
+    }
+
     {
-      getter = env->GetMethodID(cls, "getEnemiesFloatPos", "()[F");
+      getter = env->GetMethodID(envClass, "getEnemiesFloatPos", "()[F");
       assert(getter);
       jfloatArray pos = jfloatArray(env->CallObjectMethod(observation, getter));
       assert(pos);
@@ -107,13 +122,13 @@ namespace Mario {
         getEnemiesFloatPos.push_back(Enemy_Info(Object(int(pos_data[i])), std::make_pair(pos_data[i + 1], pos_data[i + 2])));
       env->ReleaseFloatArrayElements(pos, pos_data, JNI_ABORT);
 
-      getter = env->GetMethodID(cls, "getMarioMode", "()I");
+      getter = env->GetMethodID(envClass, "getMarioMode", "()I");
       assert(getter);
       getMarioMode = env->CallIntMethod(observation, getter);
     }
 
     {
-      getter = env->GetMethodID(cls, "getMarioFloatPos", "()[F");
+      getter = env->GetMethodID(envClass, "getMarioFloatPos", "()[F");
       assert(getter);
       jfloatArray pos = jfloatArray(env->CallObjectMethod(observation, getter));
       assert(pos);
@@ -123,34 +138,37 @@ namespace Mario {
       getMarioFloatPos.second = pos_data[1];
       env->ReleaseFloatArrayElements(pos, pos_data, JNI_ABORT);
 
-      getter = env->GetMethodID(cls, "getMarioMode", "()I");
+      getter = env->GetMethodID(envClass, "getMarioMode", "()I");
       assert(getter);
       getMarioMode = env->CallIntMethod(observation, getter);
     }
 
     {
-      getter = env->GetMethodID(cls, "isMarioOnGround", "()Z");
+      getter = env->GetMethodID(envClass, "isMarioOnGround", "()Z");
       assert(getter);
       isMarioOnGround = env->CallBooleanMethod(observation, getter) != 0;
-      getter = env->GetMethodID(cls, "mayMarioJump", "()Z");
+      getter = env->GetMethodID(envClass, "mayMarioJump", "()Z");
       assert(getter);
       mayMarioJump = env->CallBooleanMethod(observation, getter) != 0;
-      getter = env->GetMethodID(cls, "isMarioCarrying", "()Z");
+      getter = env->GetMethodID(envClass, "isMarioCarrying", "()Z");
       assert(getter);
       isMarioCarrying = env->CallBooleanMethod(observation, getter) != 0;
     }
 
     {
-      getter = env->GetMethodID(cls, "getKillsTotal", "()I");
+      jfieldID timeLeftField = env->GetFieldID(marioClass, "timeLeft", "I");
+      timeLeft = env->GetIntField(observation, timeLeftField);
+
+      getter = env->GetMethodID(envClass, "getKillsTotal", "()I");
       assert(getter);
       getKillsTotal = env->CallIntMethod(observation, getter);
-      getter = env->GetMethodID(cls, "getKillsByFire", "()I");
+      getter = env->GetMethodID(envClass, "getKillsByFire", "()I");
       assert(getter);
       getKillsByFire = env->CallIntMethod(observation, getter);
-      getter = env->GetMethodID(cls, "getKillsByStomp", "()I");
+      getter = env->GetMethodID(envClass, "getKillsByStomp", "()I");
       assert(getter);
       getKillsByStomp = env->CallIntMethod(observation, getter);
-      getter = env->GetMethodID(cls, "getKillsByShell", "()I");
+      getter = env->GetMethodID(envClass, "getKillsByShell", "()I");
       assert(getter);
       getKillsByShell = env->CallIntMethod(observation, getter);
     }

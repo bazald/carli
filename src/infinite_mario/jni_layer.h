@@ -111,6 +111,7 @@ namespace Mario {
     };
 
     std::array<std::array<Tile_Info, OBSERVATION_WIDTH>, OBSERVATION_HEIGHT> getLevelSceneObservation;
+    std::array<std::array<Object, OBSERVATION_WIDTH>, OBSERVATION_HEIGHT> getCompleteObservation;
     std::array<std::array<Object, OBSERVATION_WIDTH>, OBSERVATION_HEIGHT> getEnemiesObservation;
 
     std::vector<Enemy_Info> getEnemiesFloatPos;
@@ -124,6 +125,8 @@ namespace Mario {
     bool mayMarioJump = false;
     bool isMarioCarrying = false;
     bool isMarioHighJumping = false;
+
+    int timeLeft = 0;
 
     int getKillsTotal = 0;
     int getKillsByFire = 0;
