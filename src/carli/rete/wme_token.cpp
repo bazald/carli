@@ -96,14 +96,15 @@ namespace Rete {
 //    return rv;
 //  }
 
-  Variable_Indices_Ptr_C bind_Variable_Indices(const WME_Bindings &bindings, const Variable_Indices_Ptr_C &indices, const Rete_Node &left) {
+  Variable_Indices_Ptr_C bind_Variable_Indices(const WME_Bindings &bindings, const Variable_Indices_Ptr_C &indices, const Rete_Node &left, const Rete_Node &right) {
     const int64_t left_size = left.get_size();
     const int64_t left_token_size = left.get_token_size();
+    const int64_t right_size = right.get_size();
 
     Variable_Indices_Ptr closure = std::make_shared<Variable_Indices>();
 
     for(const auto &index : *indices) {
-      if(index.second.rete_row >= left_size)
+      if(index.second.rete_row >= left_size && index.second.rete_row < left_size + right_size)
         closure->insert(std::make_pair(index.first, WME_Token_Index(index.second.rete_row - left_size, index.second.token_row - left_token_size, index.second.column)));
     }
 

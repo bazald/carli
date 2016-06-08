@@ -335,7 +335,7 @@ def main():
   pylab.xlabel('Step Number', fontsize=8)
   pylab.ylabel(reward_label, fontsize=8)
   
-  pylab.xlim(xmax=10000)
+  #pylab.xlim(xmax=10000)
   if len(sys.argv) > 1:
     pylab.ylim(ymin=-1000, ymax=0)
   

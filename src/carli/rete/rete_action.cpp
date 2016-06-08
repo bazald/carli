@@ -47,6 +47,10 @@ namespace Rete {
     abort();
   }
 
+  bool Rete_Action::has_output_tokens() const {
+    abort();
+  }
+
   void Rete_Action::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                               from

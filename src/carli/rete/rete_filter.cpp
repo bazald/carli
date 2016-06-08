@@ -25,6 +25,10 @@ namespace Rete {
     return tokens;
   }
 
+  bool Rete_Filter::has_output_tokens() const {
+    return !tokens.empty();
+  }
+
   void Rete_Filter::insert_wme(Rete_Agent &agent, const WME_Ptr_C &wme) {
     for(int i = 0; i != 3; ++i)
       if(!m_variable[i] && *m_wme.symbols[i] != *wme->symbols[i])

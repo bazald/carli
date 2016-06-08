@@ -220,16 +220,17 @@ namespace Carli {
       std::cerr << "Rete size before expansion: " << rete_size() << std::endl;
 
       std::ostringstream fname;
-      g_output_dot_expcon_count = m_output_dot_expanding ? g_output_dot_expcon_count + 1 : 0;
-      m_output_dot_expanding = true;
-      fname << "pre-expansion-" << (g_output_dot_expcon_count % 4) << ".dot";
+      g_output_dot_exp_count = (g_output_dot_exp_count + 1) % 4;
+      fname << "pre-expansion-" << g_output_dot_exp_count << ".dot";
       std::ofstream fout(fname.str());
       rete_print(fout);
     }
 
     auto new_node = general.create_split(general.parent_action.lock());
 
-    if(m_unsplit_blacklist && new_node->blacklist.find(chosen->first) == new_node->blacklist.end()) {
+    if(m_unsplit_test == "none")
+      new_node->blacklist_full = true;
+    else if(m_unsplit_blacklist && new_node->blacklist.find(chosen->first) == new_node->blacklist.end()) {
       new_node->blacklist.insert(chosen->first->clone());
 
       if(new_node->blacklist.size() == general.fringe_values.size())
@@ -244,7 +245,7 @@ namespace Carli {
       std::cerr << "Rete size after expansion: " << rete_size() << std::endl;
 
       std::ostringstream fname;
-      fname << "post-expansion-" << (g_output_dot_expcon_count % 4) << ".dot";
+      fname << "post-expansion-" << g_output_dot_exp_count << ".dot";
       std::ofstream fout(fname.str());
       rete_print(fout);
     }
@@ -328,20 +329,23 @@ namespace Carli {
       excise_rule(leaf->rete_action.lock()->get_name(), false);
     }
 
-//    /** Step 3: Excise all old fringe rules from the system */
-//    for(auto &fringe_axis : unsplit.fringe_values)
-//      for(auto &fringe : fringe_axis.second)
-//        excise_rule(fringe->rete_action.lock()->get_name(), false);
-
-    /** Step 3: Convert fringe nodes to internal fringe values **/
-    split.fringe_values.swap(unsplit.fringe_values);
-    for(auto &fringe_axis : split.fringe_values) {
-      for(auto &fringe : fringe_axis.second) {
-        fringe->parent_action = split.rete_action;
-        fringe->q_value_fringe->type_internal = true;
-        fringe->q_value_fringe->update_count = 0;
-        fringe->q_value_fringe->catde = 0.0;
-        fringe->q_value_fringe->catde_post_split = 0.0;
+    if(split.blacklist_full) {
+      /** Step 3a: Excise all old fringe rules from the system */
+      for(auto &fringe_axis : unsplit.fringe_values)
+        for(auto &fringe : fringe_axis.second)
+          excise_rule(fringe->rete_action.lock()->get_name(), false);
+    }
+    else {
+      /** Step 3b: Convert fringe nodes to internal fringe values **/
+      split.fringe_values.swap(unsplit.fringe_values);
+      for(auto &fringe_axis : split.fringe_values) {
+        for(auto &fringe : fringe_axis.second) {
+          fringe->parent_action = split.rete_action;
+          fringe->q_value_fringe->type_internal = true;
+          fringe->q_value_fringe->update_count = 0;
+          fringe->q_value_fringe->catde = 0.0;
+          fringe->q_value_fringe->catde_post_split = 0.0;
+        }
       }
     }
   }
@@ -364,9 +368,8 @@ namespace Carli {
       std::cerr << "Rete size before collapse: " << rete_size() << std::endl;
 
       std::ostringstream fname;
-      g_output_dot_expcon_count = m_output_dot_expanding ? 0 : g_output_dot_expcon_count + 1;
-      m_output_dot_expanding = false;
-      fname << "pre-collapse-" << (g_output_dot_expcon_count % 4) << ".dot";
+      g_output_dot_col_count = (g_output_dot_col_count + 1) % 4;
+      fname << "pre-collapse-" << g_output_dot_col_count << ".dot";
       std::ofstream fout(fname.str());
       rete_print(fout);
     }
@@ -429,7 +432,7 @@ namespace Carli {
       std::cerr << "Rete size after collapse: " << rete_size() << std::endl;
 
       std::ostringstream fname;
-      fname << "post-collapse-" << (g_output_dot_expcon_count % 4) << ".dot";
+      fname << "post-collapse-" << g_output_dot_col_count << ".dot";
       std::ofstream fout(fname.str());
       rete_print(fout);
     }

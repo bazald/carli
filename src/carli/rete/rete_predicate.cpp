@@ -39,6 +39,10 @@ namespace Rete {
     return tokens;
   }
 
+  bool Rete_Predicate::has_output_tokens() const {
+    return !tokens.empty();
+  }
+
   void Rete_Predicate::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                                                       from
@@ -88,6 +92,9 @@ namespace Rete {
   }
 
   void Rete_Predicate::unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
+//#ifndef NDEBUG
+//    std::cerr << "Unpassing " << tokens.size() << " Rete_Predicate tokens." << std::endl;
+//#endif
     for(auto &wme_token : tokens)
       output->remove_wme_token(agent, wme_token, this);
   }

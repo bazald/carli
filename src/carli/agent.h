@@ -270,8 +270,8 @@ namespace Carli {
     mutable std::ofstream m_value_function_out;
 
     const bool m_output_dot = get_Option_Ranged<bool>(Options::get_global(), "output-dot");
-    bool m_output_dot_expanding = false;
-    size_t g_output_dot_expcon_count = 0u;
+    size_t g_output_dot_exp_count = 0u;
+    size_t g_output_dot_col_count = 0u;
 
 #ifndef NO_COLLAPSE_DETECTION_HACK
   protected:

@@ -3,6 +3,8 @@
 #include "rete_existential.h"
 #include "rete_negation.h"
 
+#include <typeinfo>
+
 #define RETE_LR_UNLINKING
 
 namespace Rete {
@@ -27,6 +29,10 @@ namespace Rete {
 
   std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Rete_Join::get_output_tokens() const {
     return output_tokens;
+  }
+
+  bool Rete_Join::has_output_tokens() const {
+    return !output_tokens.empty();
   }
 
   void Rete_Join::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
@@ -177,7 +183,7 @@ namespace Rete {
     if(prb)
       os << '{';
 
-    const auto bound = bind_Variable_Indices(bindings, indices, *pl);
+    const auto bound = bind_Variable_Indices(bindings, indices, *pl, *pr);
 
     pr->print_rule(os, bound);
 
@@ -261,8 +267,21 @@ namespace Rete {
 //#ifdef DEBUG_OUTPUT
 //      std::cerr << this << " Disconnecting right" << std::endl;
 //#endif
+      assert(data.connected0);
       assert(data.connected1);
+      assert(input0_tokens.empty());
+//#ifndef NDEBUG
+//      std::cerr << input1_tokens.size() << std::endl;
+//#endif
       input1->disable_output(agent, this);
+      input1_tokens.clear();
+//#ifndef NDEBUG
+//      std::cerr << typeid(*input1).name() << " failed to unpass" << input1_tokens.size() << std::endl;
+//      for(const auto &token : input1_tokens) {
+//        std::cerr << *token << std::endl;
+//      }
+//#endif
+      assert(input1_tokens.empty());
       data.connected1 = false;
     }
     else {
@@ -270,7 +289,20 @@ namespace Rete {
 //      std::cerr << this << " Disconnecting left" << std::endl;
 //#endif
       assert(data.connected0);
+      assert(data.connected1);
+      assert(input1_tokens.empty());
+//#ifndef NDEBUG
+//      std::cerr << input0_tokens.size() << std::endl;
+//#endif
       input0->disable_output(agent, this);
+      input0_tokens.clear();
+//#ifndef NDEBUG
+//      std::cerr << typeid(*input0).name() << " failed to unpass" << input0_tokens.size() << std::endl;
+//      for(const auto &token : input0_tokens) {
+//        std::cerr << *token << std::endl;
+//      }
+//#endif
+      assert(input0_tokens.empty());
       data.connected0 = false;
     }
     assert(data.connected0 || data.connected1);
@@ -298,17 +330,40 @@ namespace Rete {
     join->size = out0->get_size() + out1->get_size();
     join->token_size = out0->get_token_size() + out1->get_token_size();
 
+#ifdef RETE_LR_UNLINKING
+    if(!out1->has_output_tokens()) {
+      out0->insert_output_enabled(join);
+
+      if(out0 != out1) {
+        out1->insert_output_disabled(join);
+        join->data.connected1 = false;
+      }
+
+      out0->pass_tokens(agent, join.get());
+    }
+    else {
+      out1->insert_output_enabled(join);
+
+      if(out0->has_output_tokens()) {
+        if(out0 != out1) {
+          out0->insert_output_enabled(join);
+          out0->pass_tokens(agent, join.get());
+        }
+      }
+      else {
+        out0->insert_output_disabled(join);
+        join->data.connected0 = false;
+      }
+
+      out1->pass_tokens(agent, join.get());
+    }
+#else
     out0->insert_output_enabled(join);
     if(out0 != out1)
-#ifdef RETE_LR_UNLINKING
-      out1->insert_output_disabled(join);
-#else
       out1->insert_output_enabled(join);
     join->data.connected1 = true;
-#endif
 
     out0->pass_tokens(agent, join.get());
-#ifndef RETE_LR_UNLINKING
     if(out0 != out1)
       out1->pass_tokens(agent, join.get());
 #endif

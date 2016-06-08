@@ -22,6 +22,7 @@ namespace Rete {
     Rete_Node_Ptr parent_right() override {abort();}
 
     std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> get_output_tokens() const override;
+    bool has_output_tokens() const override;
 
     void insert_wme(Rete_Agent &agent, const WME_Ptr_C &wme);
     void remove_wme(Rete_Agent &agent, const WME_Ptr_C &wme);

@@ -44,6 +44,7 @@
 *.sln
 *.so
 *.suo
+*.sync-conflict-*
 *.synctex.gz
 *.tlog
 *.toc
@@ -71,10 +72,12 @@
 /puddle_world
 /tetris
 .~lock.*
+.syncthing*
 bw2.txt
 callgrind.out.*
 carli.workspace
 core
+codeblocks_dbgrpt-*
 dump.txt
 git.h
 Makefile

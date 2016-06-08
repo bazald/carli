@@ -1,0 +1,922 @@
+# Blocks world 2
+
+sp {blocks-world*rl-action*general
+  :feature 1 unsplit nil
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+-->
+  = 0.0
+}
+
+#sp {blocks-world*rl-fringe*dest-in-place
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  +(<dest> ^in-place true)
+#-->
+#  = 0.0
+#}
+#
+#sp {blocks-world*rl-fringe*dest-not-in-place
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  -(<dest> ^in-place true)
+#-->
+#  = 0.0
+#}
+
+sp {blocks-world*rl-fringe*block-name*1
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<block-name> == 1)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-name*2
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<block-name> == 2)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-name*3
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<block-name> == 3)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-name*4
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<block-name> == 4)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-name*5
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<block-name> == 5)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-name*6
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<block-name> == 6)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-name*0
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<dest-name> == 0)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-name*1
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<dest-name> == 1)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-name*2
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<dest-name> == 2)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-name*3
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<dest-name> == 3)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-name*4
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<dest-name> == 4)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-name*5
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<dest-name> == 5)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-name*6
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  (<dest-name> == 6)
+-->
+  = 0.0
+}
+
+#sp {blocks-world*rl-fringe*stack-matches-goal-stack
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  +{(<goal> ^stack <goal-stack>)
+#  (<stack> ^matches <goal-stack>)}
+#-->
+#  = 0.0
+#}
+#
+#sp {blocks-world*rl-fringe*stack-not-matches-goal-stack
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  -{(<goal> ^stack <goal-stack>)
+#  (<stack> ^matches <goal-stack>)}
+#-->
+#  = 0.0
+#}
+
+sp {blocks-world*rl-fringe*stack-early-matches-goal-stack
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  +{(<goal> ^stack <goal-stack>)
+  (<stack> ^early-matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*stack-not-early-matches-goal-stack
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  -{(<goal> ^stack <goal-stack>)
+  (<stack> ^early-matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*stack-late-matches-goal-stack
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  +{(<goal> ^stack <goal-stack>)
+  (<stack> ^late-matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*stack-not-late-matches-goal-stack
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  -{(<goal> ^stack <goal-stack>)
+  (<stack> ^late-matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-matches-goal-stack
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  +{(<goal> ^stack <goal-stack>)
+  (<dest-stack> ^matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-not-matches-goal-stack
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  -{(<goal> ^stack <goal-stack>)
+  (<dest-stack> ^matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+#sp {blocks-world*rl-fringe*dest-early-matches-goal-stack
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  +{(<goal> ^stack <goal-stack>)
+#  (<dest-stack> ^early-matches <goal-stack>)}
+#-->
+#  = 0.0
+#}
+#
+#sp {blocks-world*rl-fringe*dest-not-early-matches-goal-stack
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  -{(<goal> ^stack <goal-stack>)
+# (<dest-stack> ^early-matches <goal-stack>)}
+#-->
+#  = 0.0
+#}
+#
+#sp {blocks-world*rl-fringe*dest-late-matches-goal-stack
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  +{(<goal> ^stack <goal-stack>)
+#  (<dest-stack> ^late-matches <goal-stack>)}
+#-->
+#  = 0.0
+#}
+#
+#sp {blocks-world*rl-fringe*dest-not-late-matches-goal-stack
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  -{(<goal> ^stack <goal-stack>)
+#  (<dest-stack> ^late-matches <goal-stack>)}
+#-->
+#  = 0.0
+#}
+
+sp {blocks-world*rl-fringe*top-matches-dest-stack
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  +{(<block> ^matches-top <dest-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*top-not-matches-dest-stack
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  -{(<block> ^matches-top <dest-stack>)}
+-->
+  = 0.0
+}
+
+#sp {blocks-world*rl-fringe*top-early-matches-dest-stack
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  +{(<block> ^early-matches-top <dest-stack>)}
+#-->
+#  = 0.0
+#}
+#
+#sp {blocks-world*rl-fringe*top-not-early-matches-dest-stack
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  -{(<block> ^early-matches-top <dest-stack>)}
+#-->
+#  = 0.0
+#}
+#
+#sp {blocks-world*rl-fringe*top-late-matches-dest-stack
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  +{(<block> ^late-matches-top <dest-stack>)}
+#-->
+#  = 0.0
+#}
+#
+#sp {blocks-world*rl-fringe*top-not-late-matches-dest-stack
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+# (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  -{(<block> ^late-matches-top <dest-stack>)}
+#-->
+#  = 0.0
+#}
+
+sp {blocks-world*rl-fringe*dest-is-table
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  +{(<dest> ^name 0)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-is-not-table
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  -{(<dest> ^name 0)}
+-->
+  = 0.0
+}
+
+#sp {blocks-world*rl-fringe*discrepancy-lower
+#  :feature 2 fringe blocks-world*rl-action*general 1 0 14
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  {(<s> ^discrepancy <discrepancy>)
+#   (<discrepancy> < 14)}
+#-->
+#  = 0.0
+#}
+#
+#sp {blocks-world*rl-fringe*discrepancy-upper
+#  :feature 2 fringe blocks-world*rl-action*general 1 14 27
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<s> ^blocks <blocks>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  (<s> ^goal <goal>)
+#  {(<s> ^discrepancy <discrepancy>)
+#   (<discrepancy> >= 14)}
+#-->
+#  = 0.0
+#}
+
+sp {blocks-world*rl-fringe*block-height-lower
+  :feature 2 fringe blocks-world*rl-action*general 1 0 2
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  {(<block> ^height <block-height>)
+   (<block-height> < 2)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-height-upper
+  :feature 2 fringe blocks-world*rl-action*general 1 2 4
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  {(<block> ^height <block-height>)
+   (<block-height> >= 2)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-height-lower
+  :feature 2 fringe blocks-world*rl-action*general 1 0 2
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  {(<dest> ^height <dest-height>)
+   (<dest-height> < 2)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-height-upper
+  :feature 2 fringe blocks-world*rl-action*general 1 2 4
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  {(<dest> ^height <dest-height>)
+   (<dest-height> >= 2)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-brightness-lower
+  :feature 2 fringe blocks-world*rl-action*general 1 0.0 0.5
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  {(<block> ^brightness <block-brightness>)
+   (<block-brightness> < 0.5)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-brightness-upper
+  :feature 2 fringe blocks-world*rl-action*general 1 0.5 1.0
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  {(<block> ^brightness <block-brightness>)
+   (<block-brightness> >= 0.5)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-brightness-lower
+  :feature 2 fringe blocks-world*rl-action*general 1 0.0 0.5
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  {(<dest> ^brightness <dest-brightness>)
+   (<dest-brightness> < 0.5)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-brightness-upper
+  :feature 2 fringe blocks-world*rl-action*general 1 0.5 1.0
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  {(<dest> ^brightness <dest-brightness>)
+   (<dest-brightness> >= 0.5)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-glowing
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  +(<block> ^glowing true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*block-not-glowing
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  -(<block> ^glowing true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-glowing
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  +(<dest> ^glowing true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-not-glowing
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^action <action>)
+  (<action> ^block <block>)
+  (<block> ^name <block-name>)
+  (<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<s> ^goal <goal>)
+  -(<dest> ^glowing true)
+-->
+  = 0.0
+}

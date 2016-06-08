@@ -22,6 +22,10 @@ namespace Rete {
     return tokens;
   }
 
+  bool Rete_Existential::has_output_tokens() const {
+    return !input_tokens.empty();
+  }
+
   void Rete_Existential::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
 #ifndef NDEBUG
                                                                                     from

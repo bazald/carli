@@ -4,11 +4,11 @@
 import argparse, glob, os, random, shutil, subprocess, sys, thread, time
 import pp
 
-g_dir = 'experiment-bw2'
+g_dir = 'experiment-bw2-long'
 g_plotters = ['./blocksworld2.py']
 g_error = False
 
-g_base_command = "./blocks_world_2 --output experiment --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.01 --secondary-learning-rate 0.2 --policy on-policy --split-update-count 30"
+g_base_command = "./blocks_world_2 --output experiment --print-every 500 --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.01 --secondary-learning-rate 0.2 --policy on-policy --split-update-count 30"
 
 g_ep_tuples = []
 
@@ -54,11 +54,11 @@ g_ep_tuples = []
 #g_ep_tuples.append(("catde-catde-nb", "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("catde-catde",    "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
-#g_ep_tuples.append(("catde-none-6",     "--num-blocks 6 --split-test catde --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("catde-none-130-6", "--num-blocks 6 --split-test catde --unsplit-test none    --split-update-count 130                           --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("catde-catde-nb-6", "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("catde-catde-6",    "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("catde-anticatde-6", "--num-blocks 6 --split-test catde --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
+##g_ep_tuples.append(("catde-none-6",     "--num-blocks 6 --split-test catde --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
+##g_ep_tuples.append(("catde-none-130-6", "--num-blocks 6 --split-test catde --unsplit-test none    --split-update-count 130                           --rules rules/blocks-world-2-distractors.carli"))
+##g_ep_tuples.append(("catde-catde-nb-6", "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
+##g_ep_tuples.append(("catde-catde-6",    "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
+##g_ep_tuples.append(("catde-anticatde-6", "--num-blocks 6 --split-test catde --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
 #g_ep_tuples.append(("value-none",     "--num-blocks 4 --split-test value --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
 ##g_ep_tuples.append(("value-catde-nb", "--num-blocks 4 --split-test value --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
@@ -66,9 +66,9 @@ g_ep_tuples = []
 #g_ep_tuples.append(("value-value-nb", "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("value-value",    "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
-#g_ep_tuples.append(("value-none-6",     "--num-blocks 6 --split-test value --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("value-value-nb-6", "--num-blocks 6 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("value-value-6",    "--num-blocks 6 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
+##g_ep_tuples.append(("value-none-6",     "--num-blocks 6 --split-test value --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
+##g_ep_tuples.append(("value-value-nb-6", "--num-blocks 6 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
+##g_ep_tuples.append(("value-value-6",    "--num-blocks 6 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
 #g_ep_tuples.append(("policy-none",      "--num-blocks 4 --split-test policy --unsplit-test none                                                        --rules rules/blocks-world-2-distractors.carli"))
 ##g_ep_tuples.append(("policy-catde-nb", "--num-blocks 4 --split-test policy --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
@@ -76,9 +76,9 @@ g_ep_tuples = []
 #g_ep_tuples.append(("policy-policy-nb", "--num-blocks 4 --split-test policy --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("policy-policy",    "--num-blocks 4 --split-test policy --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
-#g_ep_tuples.append(("policy-none-6",      "--num-blocks 6 --split-test policy --unsplit-test none                                                        --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("policy-policy-nb-6", "--num-blocks 6 --split-test policy --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("policy-policy-6",    "--num-blocks 6 --split-test policy --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
+##g_ep_tuples.append(("policy-none-6",      "--num-blocks 6 --split-test policy --unsplit-test none                                                        --rules rules/blocks-world-2-distractors.carli"))
+##g_ep_tuples.append(("policy-policy-nb-6", "--num-blocks 6 --split-test policy --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
+##g_ep_tuples.append(("policy-policy-6",    "--num-blocks 6 --split-test policy --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
 g_ep_tuples.append(("catde-none-bnd",     "--num-blocks 4 --split-test catde --unsplit-test none                                                       --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
 g_ep_tuples.append(("catde-catde-nb-bnd", "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
@@ -100,7 +100,7 @@ parser.add_argument('-r', '--runs', metavar='N', type=int,
                    action='store', default=1,
                    help='number of runs per experiment')
 parser.add_argument('-n', '--num-steps', metavar='N', type=int,
-                   action='store', default=20000,
+                   action='store', default=200000,
                    help='number of steps per run')
 
 args = parser.parse_args()

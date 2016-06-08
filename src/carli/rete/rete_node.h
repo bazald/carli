@@ -158,6 +158,7 @@ namespace Rete {
     int64_t get_token_size() const {return token_size;}
 
     virtual std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> get_output_tokens() const = 0;
+    virtual bool has_output_tokens() const = 0;
 
     virtual void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0;
     virtual bool remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0; ///< Returns true if removed the last

@@ -263,7 +263,19 @@ namespace Rete {
 
   size_t Rete_Agent::rete_size() const {
     size_t size = 0;
-    std::function<void (const Rete_Node &)> visitor = [&size](const Rete_Node &){++size;};
+    std::function<void (const Rete_Node &)> visitor = [&size](const Rete_Node &
+#ifndef NDEBUG
+                                                              node
+#endif
+                                                              ){
+#ifndef NDEBUG
+      if(dynamic_cast<const Rete_Action *>(&node))
+        assert(node.get_outputs_all().empty());
+      else
+        assert(!node.get_outputs_all().empty());
+#endif
+      ++size;
+    };
     const_cast<Rete_Agent *>(this)->visit_preorder(visitor, true);
     return size;
   }

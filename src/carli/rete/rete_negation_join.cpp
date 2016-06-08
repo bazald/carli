@@ -32,6 +32,14 @@ namespace Rete {
     return tokens;
   }
 
+  bool Rete_Negation_Join::has_output_tokens() const {
+    for(auto &wme_token : input0_tokens) {
+      if(!wme_token.second)
+        return true;
+    }
+    return false;
+  }
+
   void Rete_Negation_Join::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
     assert(from == input0 || from == input1);
 
@@ -125,7 +133,7 @@ namespace Rete {
     if(prb)
       os << '{';
 
-    const auto bound = bind_Variable_Indices(bindings, indices, *pl);
+    const auto bound = bind_Variable_Indices(bindings, indices, *pl, *pr);
 
     pr->print_rule(os, bound);
 
