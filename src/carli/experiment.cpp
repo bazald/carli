@@ -109,7 +109,8 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<int64_t>>("split-update-count", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more update than this to allow refinement.");
     options.add(     make_shared<Option_Ranged<int64_t>>("unsplit-update-count", 0, true, numeric_limits<int64_t>::max(), true, 0), "Require 1 more update than this to allow unrefinement.");
     options.add(     make_shared<Option_Itemized>("unsplit-test", set<string>({"none", "catde", "policy", "value"/*, "utile"*/}), "none"), "'none' disables. catde' splits based on TD error. 'policy' splits when there's a change to the greedy action. 'value' splits on maximal value difference between fringe nodes. 'utile' splits on whether expected return is increased.");
-    options.add(     make_shared<Option_Ranged<bool>>("unsplit-blacklist", false, true, true, true, false), "Blacklist previously attempted refinements.");
+    options.add(     make_shared<Option_Itemized>("resplit-bias", set<string>({"none", "blacklist", "boost"}), "none"), "'none' is unbiased, 'blacklist' prevents reselection, and 'boost' biases in favor of past selections.");
+    options.add(     make_shared<Option_Ranged<double>>("resplit-boost-scale", 0.0, false, numeric_limits<double>::infinity(), false, 0.1), "How much of a boost to provide for resplit-bias boost.");
     options.add_line("\n  Rete Representation Saving and Loading:");
     options.add(     make_shared<Option_Itemized>("value-function-map-mode", set<string>({"null", "in", "out"}), "null"), "'in' reads in a file written with 'out', resulting in a fixed hierarchical representation.");
     options.add(     make_shared<Option_String>("value-function-map-filename", "value-function-map.txt"), "");

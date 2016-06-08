@@ -4,10 +4,10 @@
 
 namespace Carli {
 
-  Fringe_Axis_Blacklist::~Fringe_Axis_Blacklist() {
+  Fringe_Axis_Selections::~Fringe_Axis_Selections() {
     while(!empty()) {
       auto bt = begin();
-      auto ptr = *bt;
+      auto ptr = bt->first;
       erase(bt);
       ptr.delete_and_zero();
     }
@@ -183,8 +183,10 @@ namespace Carli {
     auto new_leaf_data = std::make_shared<Node_Split>(agent, parent_action_, new_leaf, new_q_value_weight, q_value_fringe);
     new_leaf->data = new_leaf_data;
 
-    if(q_value_weight)
-      new_leaf_data->blacklist.swap(debuggable_cast<Node_Unsplit *>(this)->blacklist);
+    if(q_value_weight) {
+      new_leaf_data->fringe_axis_selections.swap(debuggable_cast<Node_Unsplit *>(this)->fringe_axis_selections);
+      new_leaf_data->fringe_axis_counter = debuggable_cast<Node_Unsplit *>(this)->fringe_axis_counter;
+    }
 
     /// Add to the appropriate parent list
     if(parent_action_)
@@ -219,8 +221,10 @@ namespace Carli {
     auto new_leaf_data = std::make_shared<Node_Unsplit>(agent, parent_action_, new_leaf, new_q_value_weight, q_value_fringe);
     new_leaf->data = new_leaf_data;
 
-    if(q_value_weight)
-      new_leaf_data->blacklist.swap(debuggable_cast<Node_Split *>(this)->blacklist);
+    if(q_value_weight) {
+      new_leaf_data->fringe_axis_selections.swap(debuggable_cast<Node_Split *>(this)->fringe_axis_selections);
+      new_leaf_data->fringe_axis_counter = debuggable_cast<Node_Unsplit *>(this)->fringe_axis_counter;
+    }
 
     /// Add to the appropriate parent list
     if(parent_action_)

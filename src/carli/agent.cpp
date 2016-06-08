@@ -230,10 +230,10 @@ namespace Carli {
 
     if(m_unsplit_test == "none")
       new_node->blacklist_full = true;
-    else if(m_unsplit_blacklist && new_node->blacklist.find(chosen->first) == new_node->blacklist.end()) {
-      new_node->blacklist.insert(chosen->first->clone());
+    else if(m_resplit_bias != "none") {
+      new_node->fringe_axis_selections[chosen->first->clone()] += ++new_node->fringe_axis_counter;
 
-      if(new_node->blacklist.size() == general.fringe_values.size())
+      if(m_resplit_bias == "blacklist" && new_node->fringe_axis_selections.size() == general.fringe_values.size())
         new_node->blacklist_full = true;
     }
 
@@ -1365,13 +1365,21 @@ namespace Carli {
           continue;
         ++matches;
 
-        if(general.blacklist.find(fringe->q_value_fringe->feature) != general.blacklist.end())
-          continue;
+        double boost = 1.0;
+        if(m_resplit_bias == "blacklist") {
+          if(general.fringe_axis_selections.find(fringe->q_value_fringe->feature) != general.fringe_axis_selections.end())
+            continue;
+        }
+        else if(m_resplit_bias == "boost") {
+          const auto fast = general.fringe_axis_selections.find(fringe->q_value_fringe->feature);
+          if(fast != general.fringe_axis_selections.end())
+            boost += fast->second * m_resplit_boost_scale;
+        }
 
         if(general.q_value_weight->depth < m_split_min ||
           (fringe->q_value_fringe->pseudoepisode_count >= m_split_pseudoepisodes &&
           (fringe->q_value_fringe->update_count >= m_split_update_count &&
-          (m_mean_catde_queue_size ? m_mean_catde_queue.mean() : m_mean_catde).outlier_above(fringe->q_value_fringe->catde, m_split_catde + m_split_catde_qmult * q_value_count))))
+          (m_mean_catde_queue_size ? m_mean_catde_queue.mean() : m_mean_catde).outlier_above(fringe->q_value_fringe->catde * boost, m_split_catde + m_split_catde_qmult * q_value_count))))
         {
 //#ifndef NDEBUG
 //          std::cerr << " matches: " << *fringe->q_value->feature << std::endl;
@@ -1452,7 +1460,7 @@ namespace Carli {
           return general.fringe_values.end(); ///< Wait to gather more data
         }
 
-        if(general.blacklist.find(fringe->q_value_fringe->feature) != general.blacklist.end())
+        if(m_resplit_bias == "blacklist" && general.fringe_axis_selections.find(fringe->q_value_fringe->feature) != general.fringe_axis_selections.end())
           continue;
 
         touched.insert(fringe_axis->first);
@@ -1468,6 +1476,13 @@ namespace Carli {
       if(touched.find(fringe_axis->first) == touched.end())
         continue;
 
+      double boost = 0.0;
+      if(m_resplit_bias == "boost") {
+        const auto fast = general.fringe_axis_selections.find(fringe_axis->first);
+        if(fast != general.fringe_axis_selections.end())
+          boost += fast->second * m_resplit_boost_scale;
+      }
+
       auto new_greedies = choose_greedies(fringe_axis->second.begin()->get(), std::numeric_limits<int64_t>::max());
       int64_t removed = 0, unchanged = 0;
       for(auto greedy : greedies) {
@@ -1480,7 +1495,7 @@ namespace Carli {
         }
       }
       const int64_t added = int64_t(new_greedies.size());
-      const double new_score = (added + removed) / (2.0 * unchanged + added + removed);
+      const double new_score = (added + removed) / (2.0 * unchanged + added + removed) + boost;
 
       if(new_score > chosen_score)
         count = 1;
@@ -1544,7 +1559,7 @@ namespace Carli {
           return general.fringe_values.end(); ///< Wait to gather more data
         }
 
-        if(general.blacklist.find(fringe->q_value_fringe->feature) != general.blacklist.end())
+        if(m_resplit_bias == "blacklist" && general.fringe_axis_selections.find(fringe->q_value_fringe->feature) != general.fringe_axis_selections.end())
           continue;
 
         touched.insert(fringe_axis->first);
@@ -1560,13 +1575,20 @@ namespace Carli {
       if(touched.find(fringe_axis->first) == touched.end())
         continue;
 
+      double boost = 1.0;
+      if(m_resplit_bias == "boost") {
+        const auto fast = general.fringe_axis_selections.find(fringe_axis->first);
+        if(fast != general.fringe_axis_selections.end())
+          boost += fast->second * m_resplit_boost_scale;
+      }
+
       double lowest = std::numeric_limits<double>::max();
       double highest = std::numeric_limits<double>::lowest();
       for(auto &fringe : fringe_axis->second) {
         lowest = std::min(lowest, fringe->q_value_fringe->primary);
         highest = std::max(highest, fringe->q_value_fringe->primary);
       }
-      const double value_delta_max = highest - lowest;
+      const double value_delta_max = (highest - lowest) * boost;
 
       int64_t depth_diff = fringe_axis->first->get_depth() - depth_min;
       double delta_diff = delta_max - value_delta_max;
@@ -1608,11 +1630,22 @@ namespace Carli {
     if(general.children.empty() || general.blacklist_full)
       return false;
 
+    double boost_general = 1.0;
+    double boost_children = 1.0;
+    if(m_resplit_bias == "boost") {
+      auto fast = general.q_value_fringe->feature ? general.fringe_axis_selections.find(general.q_value_fringe->feature) : general.fringe_axis_selections.end();
+      if(fast != general.fringe_axis_selections.end())
+        boost_general += fast->second * m_resplit_boost_scale;
+      fast = general.fringe_axis_selections.find((*general.children.begin())->q_value_fringe->feature);
+      if(fast != general.fringe_axis_selections.end())
+        boost_children += fast->second * m_resplit_boost_scale;
+    }
+
     double sum_error = 0.0;
     for(auto &child : general.children)
       sum_error += child->q_value_fringe->catde;
 
-    const double improvement = general.q_value_fringe->catde_post_split - sum_error;
+    const double improvement = general.q_value_fringe->catde_post_split * boost_general - sum_error * boost_children;
 
 #ifndef NDEBUG
     std::cerr << "CATDE Improvement = " << general.q_value_fringe->catde_post_split << " - " << sum_error << " = " << improvement << std::endl;
@@ -1643,6 +1676,13 @@ namespace Carli {
 
     double chosen_score = 0.0;
     {
+      double boost = 0.0;
+      if(m_resplit_bias == "boost") {
+        const auto fast = general.fringe_axis_selections.find((*general.children.begin())->q_value_fringe->feature);
+        if(fast != general.fringe_axis_selections.end())
+          boost += fast->second * m_resplit_boost_scale;
+      }
+
       auto new_greedies = choose_greedies(nullptr, std::numeric_limits<int64_t>::max());
       int64_t removed = 0, unchanged = 0;
       for(auto greedy : greedies) {
@@ -1656,11 +1696,18 @@ namespace Carli {
       }
       const int64_t added = int64_t(new_greedies.size());
 
-      chosen_score = (added + removed) / (2.0 * unchanged + added + removed);
+      chosen_score = (added + removed) / (2.0 * unchanged + added + removed) + boost;
     }
 
     double max_score = 0.0;
     for(auto &fringe_axis : general.fringe_values) {
+      double boost = 0.0;
+      if(m_resplit_bias == "boost") {
+        const auto fast = general.fringe_axis_selections.find(fringe_axis.first);
+        if(fast != general.fringe_axis_selections.end())
+          boost += fast->second * m_resplit_boost_scale;
+      }
+
       auto new_greedies = choose_greedies(fringe_axis.second.begin()->get(), fringe_depth);
       int64_t removed = 0, unchanged = 0;
       for(auto greedy : greedies) {
@@ -1673,7 +1720,7 @@ namespace Carli {
         }
       }
       const int64_t added = int64_t(new_greedies.size());
-      const double new_score = (added + removed) / (2.0 * unchanged + added + removed);
+      const double new_score = (added + removed) / (2.0 * unchanged + added + removed) + boost;
 
       max_score = std::max(max_score, new_score);
     }
@@ -1694,6 +1741,13 @@ namespace Carli {
     if(general.children.empty() || general.blacklist_full || general.q_value_fringe->update_count < m_unsplit_update_count)
       return false;
 
+    double boost_general = 1.0;
+    if(m_resplit_bias == "boost") {
+      const auto fast = general.fringe_axis_selections.find((*general.children.begin())->q_value_fringe->feature);
+      if(fast != general.fringe_axis_selections.end())
+        boost_general += fast->second * m_resplit_boost_scale;
+    }
+
     bool update_count_passed = false;
     std::pair<double, double> child_range = std::make_pair(std::numeric_limits<double>::max(), std::numeric_limits<double>::lowest());
     for(auto &child : general.children) {
@@ -1709,15 +1763,22 @@ namespace Carli {
 
     double fringe_spread = 0.0;
     for(auto &fringe_axis : general.fringe_values) {
+      double boost_fringe = 1.0;
+      if(m_resplit_bias == "boost") {
+        const auto fast = general.fringe_axis_selections.find(fringe_axis.first);
+        if(fast != general.fringe_axis_selections.end())
+          boost_fringe += fast->second * m_resplit_boost_scale;
+      }
+
       std::pair<double, double> fringe_range = std::make_pair(std::numeric_limits<double>::max(), std::numeric_limits<double>::lowest());
       for(auto &fringe : fringe_axis.second) {
         fringe_range.first = std::min(fringe_range.first, fringe->q_value_fringe->primary);
         fringe_range.second = std::max(fringe_range.second, fringe->q_value_fringe->primary);
       }
-      fringe_spread = std::max(fringe_spread, fringe_range.second - fringe_range.first);
+      fringe_spread = std::max(fringe_spread, (fringe_range.second - fringe_range.first) * boost_fringe);
     }
 
-    const double improvement = fringe_spread - (child_range.second - child_range.first);
+    const double improvement = fringe_spread - (child_range.second - child_range.first) * boost_general;
 
 #ifndef NDEBUG
     std::cerr << "Value Improvement = " << fringe_spread
