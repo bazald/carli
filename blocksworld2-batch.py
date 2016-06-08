@@ -50,47 +50,49 @@ g_ep_tuples = []
 ###g_ep_tuples.append(("pnf4i",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-i.carli"))
 ###g_ep_tuples.append(("pnf4r",  "--num-blocks 4 --split-test policy --rules rules/blocks-world-2-r.carli"))
 
-#g_ep_tuples.append(("catde-none",     "--num-blocks 4 --split-test catde --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("catde-catde-nb", "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("catde-catde",    "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
-
 #g_ep_tuples.append(("catde-none-6",     "--num-blocks 6 --split-test catde --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("catde-none-130-6", "--num-blocks 6 --split-test catde --unsplit-test none    --split-update-count 130                           --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("catde-catde-nb-6", "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("catde-catde-6",    "--num-blocks 6 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("catde-anticatde-6", "--num-blocks 6 --split-test catde --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
-#g_ep_tuples.append(("value-none",     "--num-blocks 4 --split-test value --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
-##g_ep_tuples.append(("value-catde-nb", "--num-blocks 4 --split-test value --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
-##g_ep_tuples.append(("value-catde",    "--num-blocks 4 --split-test value --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("value-value-nb", "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("value-value",    "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
-
 #g_ep_tuples.append(("value-none-6",     "--num-blocks 6 --split-test value --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("value-value-nb-6", "--num-blocks 6 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("value-value-6",    "--num-blocks 6 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
-
-#g_ep_tuples.append(("policy-none",      "--num-blocks 4 --split-test policy --unsplit-test none                                                        --rules rules/blocks-world-2-distractors.carli"))
-##g_ep_tuples.append(("policy-catde-nb", "--num-blocks 4 --split-test policy --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
-##g_ep_tuples.append(("policy-catde",    "--num-blocks 4 --split-test policy --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("policy-policy-nb", "--num-blocks 4 --split-test policy --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
-#g_ep_tuples.append(("policy-policy",    "--num-blocks 4 --split-test policy --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
 #g_ep_tuples.append(("policy-none-6",      "--num-blocks 6 --split-test policy --unsplit-test none                                                        --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("policy-policy-nb-6", "--num-blocks 6 --split-test policy --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors.carli"))
 #g_ep_tuples.append(("policy-policy-6",    "--num-blocks 6 --split-test policy --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors.carli"))
 
-g_ep_tuples.append(("catde-none-bnd",     "--num-blocks 4 --split-test catde --unsplit-test none                                                       --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("catde-catde-nb-bnd", "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("catde-catde-bnd",    "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("catde-none",       "--num-blocks 4 --split-test catde --unsplit-test none                                                      --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("catde-catde-none", "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --resplit-bias none      --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("catde-catde-bkls", "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --resplit-bias blacklist --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("catde-catde-bst",  "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --resplit-bias boost     --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
 
-g_ep_tuples.append(("value-none-bnd",     "--num-blocks 4 --split-test value --unsplit-test none                                                       --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("value-value-nb-bnd", "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("value-value-bnd",    "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("value-none",       "--num-blocks 4 --split-test value --unsplit-test none                                                      --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("value-value-none", "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --resplit-bias none      --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("value-value-bkls", "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --resplit-bias blacklist --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("value-value-bst",  "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --resplit-bias boost     --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
 
-g_ep_tuples.append(("policy-none-bnd",      "--num-blocks 4 --split-test policy --unsplit-test none                                                        --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("policy-policy-nb-bnd", "--num-blocks 4 --split-test policy --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist false --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("policy-policy-bnd",    "--num-blocks 4 --split-test policy --unsplit-test policy --unsplit-update-count 100 --unsplit-blacklist true  --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("policy-none",        "--num-blocks 4 --split-test policy --unsplit-test none                                                       --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("policy-policy-none", "--num-blocks 4 --split-test policy --unsplit-test policy --unsplit-update-count 100 --resplit-bias none      --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("policy-policy-bkls", "--num-blocks 4 --split-test policy --unsplit-test policy --unsplit-update-count 100 --resplit-bias blacklist --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("policy-policy-bst",  "--num-blocks 4 --split-test policy --unsplit-test policy --unsplit-update-count 100 --resplit-bias boost     --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+
+g_ep_tuples.append(("catde-none-5k",       "--num-blocks 4 --split-test catde --unsplit-test none                                                      --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("catde-catde-none-5k", "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --resplit-bias none      --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("catde-catde-bkls-5k", "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --resplit-bias blacklist --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("catde-catde-bst-5k",  "--num-blocks 4 --split-test catde --unsplit-test catde --unsplit-update-count 100 --resplit-bias boost     --rules rules/blocks-world-2-distractors.carli"))
+
+g_ep_tuples.append(("value-none-5k",       "--num-blocks 4 --split-test value --unsplit-test none                                                      --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("value-value-none-5k", "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --resplit-bias none      --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("value-value-bkls-5k", "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --resplit-bias blacklist --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("value-value-bst-5k",  "--num-blocks 4 --split-test value --unsplit-test value --unsplit-update-count 100 --resplit-bias boost     --rules rules/blocks-world-2-distractors.carli"))
+
+g_ep_tuples.append(("policy-none-5k",        "--num-blocks 4 --split-test policy --unsplit-test none                                                       --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("policy-policy-none-5k", "--num-blocks 4 --split-test policy --unsplit-test policy --unsplit-update-count 100 --resplit-bias none      --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("policy-policy-bkls-5k", "--num-blocks 4 --split-test policy --unsplit-test policy --unsplit-update-count 100 --resplit-bias blacklist --rules rules/blocks-world-2-distractors.carli"))
+g_ep_tuples.append(("policy-policy-bst-5k",  "--num-blocks 4 --split-test policy --unsplit-test policy --unsplit-update-count 100 --resplit-bias boost     --rules rules/blocks-world-2-distractors.carli"))
 
 parser = argparse.ArgumentParser(description='Run Blocks World 2 experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,
