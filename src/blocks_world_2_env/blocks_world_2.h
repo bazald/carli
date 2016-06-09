@@ -174,8 +174,14 @@ namespace Blocks_World_2 {
     const Rete::Symbol_Identifier_Ptr_C m_blocks_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("BLOCKS"));
     const Rete::Symbol_Identifier_Ptr_C m_goal_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("GOAL"));
     const Rete::Symbol_Identifier_Ptr_C m_table_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("TABLE"));
-    const Rete::Symbol_Identifier_Ptr_C m_table_stack_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("|"));
+    const Rete::Symbol_Identifier_Ptr_C m_table_stack_id = m_table_id; //Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("|"));
     const Rete::Symbol_Constant_Int_Ptr_C m_table_name = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(0));
+
+    std::map<block_id, Rete::Symbol_Identifier_Ptr_C> m_block_ids;
+    std::map<block_id, Rete::Symbol_Constant_Int_Ptr_C> m_block_names;
+    std::map<block_id, Rete::Symbol_Identifier_Ptr_C> m_stack_ids;
+    std::map<block_id, Rete::Symbol_Identifier_Ptr_C> m_goal_stack_ids;
+
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
   };
 

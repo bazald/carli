@@ -171,6 +171,9 @@ namespace Carli {
     if(general_node.q_value_weight->type != Q_Value::Type::SPLIT)
       return true;
 
+    if(random.frand_lt() >= m_unsplit_probability)
+      return false;
+
     auto &general = debuggable_cast<Node_Split &>(general_node);
 
 //#ifndef NO_COLLAPSE_DETECTION_HACK
@@ -198,6 +201,9 @@ namespace Carli {
     if(general.q_value_weight->type == Q_Value::Type::SPLIT)
       return true;
     if(general.q_value_weight->depth >= m_split_max || !m_learning_rate)
+      return false;
+
+    if(random.frand_lt() >= m_split_probability)
       return false;
 
 //     if(general.fringe_values.empty()) {
@@ -231,7 +237,11 @@ namespace Carli {
     if(m_unsplit_test == "none")
       new_node->blacklist_full = true;
     else if(m_resplit_bias != "none") {
-      new_node->fringe_axis_selections[chosen->first->clone()] += ++new_node->fringe_axis_counter;
+      auto found = new_node->fringe_axis_selections.find(chosen->first);
+      if(found == new_node->fringe_axis_selections.end())
+        new_node->fringe_axis_selections[chosen->first->clone()] += ++new_node->fringe_axis_counter;
+      else
+        found->second += ++new_node->fringe_axis_counter;
 
       if(m_resplit_bias == "blacklist" && new_node->fringe_axis_selections.size() == general.fringe_values.size())
         new_node->blacklist_full = true;

@@ -252,6 +252,8 @@ namespace Carli {
     const int64_t m_unsplit_update_count = get_Option_Ranged<int64_t>(Options::get_global(), "unsplit-update-count");
     const std::string m_resplit_bias = dynamic_cast<const Option_Itemized &>(Options::get_global()["resplit-bias"]).get_value();
     const double m_resplit_boost_scale = get_Option_Ranged<double>(Options::get_global(), "resplit-boost-scale");
+    const double m_split_probability = get_Option_Ranged<double>(Options::get_global(), "split-probability");
+    const double m_unsplit_probability = get_Option_Ranged<double>(Options::get_global(), "unsplit-probability");
 
     const int64_t m_contribute_update_count = get_Option_Ranged<int64_t>(Options::get_global(), "contribute-update-count");
     const bool m_dynamic_midpoint = get_Option_Ranged<bool>(Options::get_global(), "dynamic-midpoint");
