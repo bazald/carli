@@ -171,10 +171,30 @@ namespace Carli {
     if(general_node.q_value_weight->type != Q_Value::Type::SPLIT)
       return true;
 
-    if(random.frand_lt() >= m_unsplit_probability)
+    auto &general = debuggable_cast<Node_Split &>(general_node);
+
+    if(general.blacklist_full)
       return false;
 
-    auto &general = debuggable_cast<Node_Split &>(general_node);
+    if(m_concrete_update_count && general.q_value_weight->update_count > m_concrete_update_count) {
+#ifdef DEBUG_OUTPUT
+      std::cerr << "Cementing " << general.rete_action.lock()->get_name() << std::endl;
+#endif
+
+      general.blacklist_full = true;
+
+      for(auto &fringe_axis : general.fringe_values) {
+        for(auto &fringe : fringe_axis.second)
+          excise_rule(fringe->rete_action.lock()->get_name(), false);
+      }
+
+      general.fringe_values.clear();
+
+      return false;
+    }
+
+    if(random.frand_lt() >= m_unsplit_probability)
+      return false;
 
 //#ifndef NO_COLLAPSE_DETECTION_HACK
 //    if(m_experienced_n_positive_rewards_in_a_row)
@@ -1076,9 +1096,9 @@ namespace Carli {
       if(q.type == Q_Value::Type::FRINGE) {
         if(q.type_internal) {
           const double abs_delta = fabs(target_value - q.primary);
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
           std::cerr << "Absolute Delta = " << abs_delta << std::endl;
-#endif // NDEBUG
+#endif
           q.catde += abs_delta;
           q.catde_post_split += abs_delta;
         }
@@ -1391,7 +1411,7 @@ namespace Carli {
           (fringe->q_value_fringe->update_count >= m_split_update_count &&
           (m_mean_catde_queue_size ? m_mean_catde_queue.mean() : m_mean_catde).outlier_above(fringe->q_value_fringe->catde * boost, m_split_catde + m_split_catde_qmult * q_value_count))))
         {
-//#ifndef NDEBUG
+//#ifdef DEBUG_OUTPUT
 //          std::cerr << " matches: " << *fringe->q_value->feature << std::endl;
 //#endif
           const int64_t depth_diff = chosen ? fringe->q_value_fringe->feature->get_depth() - chosen->q_value_fringe->feature->get_depth() : 0;
@@ -1404,7 +1424,7 @@ namespace Carli {
           chosen_axis = fringe_axis;
           chosen = fringe;
         }
-//#ifndef NDEBUG
+//#ifdef DEBUG_OUTPUT
 //        else
 //          std::cerr << "!matches: " << *fringe->q_value->feature << std::endl;
 //#endif
@@ -1512,7 +1532,7 @@ namespace Carli {
       else if(new_score < chosen_score || random.frand_lt() >= 1.0 / ++count)
         continue;
 
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
       std::cerr << "Greedy mismatch for axis: ";
       fringe_axis->first->print_axis(std::cerr);
       std::cerr << " by ";
@@ -1636,9 +1656,8 @@ namespace Carli {
   bool Agent::unsplit_test_catde(Node_Split &general) {
     assert(general.q_value_weight);
     assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
-
-    if(general.children.empty() || general.blacklist_full)
-      return false;
+    assert(!general.children.empty());
+    assert(!general.blacklist_full);
 
     double boost_general = 1.0;
     double boost_children = 1.0;
@@ -1657,7 +1676,7 @@ namespace Carli {
 
     const double improvement = general.q_value_fringe->catde_post_split * boost_general - sum_error * boost_children;
 
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
     std::cerr << "CATDE Improvement = " << general.q_value_fringe->catde_post_split << " - " << sum_error << " = " << improvement << std::endl;
 #endif
 
@@ -1668,8 +1687,10 @@ namespace Carli {
   bool Agent::unsplit_test_policy(Node_Split &general) {
     assert(general.q_value_weight);
     assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
+    assert(!general.children.empty());
+    assert(!general.blacklist_full);
 
-    if(general.children.empty() || general.blacklist_full || general.q_value_fringe->update_count < m_unsplit_update_count)
+    if(general.q_value_fringe->update_count < m_unsplit_update_count)
       return false;
 
     bool update_count_passed = false;
@@ -1737,7 +1758,7 @@ namespace Carli {
 
     const double improvement = max_score - chosen_score;
 
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
     std::cerr << "Policy Improvement = " << max_score << " - " << chosen_score << " = " << improvement << ')' << std::endl;
 #endif
 
@@ -1747,8 +1768,10 @@ namespace Carli {
   bool Agent::unsplit_test_value(Node_Split &general) {
     assert(general.q_value_weight);
     assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
+    assert(!general.children.empty());
+    assert(!general.blacklist_full);
 
-    if(general.children.empty() || general.blacklist_full || general.q_value_fringe->update_count < m_unsplit_update_count)
+    if(general.q_value_fringe->update_count < m_unsplit_update_count)
       return false;
 
     double boost_general = 1.0;
@@ -1790,7 +1813,7 @@ namespace Carli {
 
     const double improvement = fringe_spread - (child_range.second - child_range.first) * boost_general;
 
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
     std::cerr << "Value Improvement = " << fringe_spread
               << " - (" << child_range.second << " - " << child_range.first << " = " << improvement << ')' << std::endl;
 #endif
@@ -1805,7 +1828,7 @@ namespace Carli {
     if(general.children.empty() || general.blacklist_full || general.q_value_fringe->update_count < m_unsplit_update_count)
       return false;
 
-    return random.rand_lt(100);
+    return random.rand_lt(100) != 0;
   }
 
   std::tuple<double, double, int64_t> Agent::sum_value(const action_type * const &

@@ -145,7 +145,7 @@ namespace Blocks_World_2 {
     std::sort(m_blocks.begin(), m_blocks.end());
 
     const int64_t best_match_total_after = matching_blocks();
-    return std::make_pair(best_match_total_after - best_match_total_before, -1.0);
+    return std::make_pair(double(best_match_total_after - best_match_total_before), -1.0);
 
 //    return -1.0;
   }
@@ -338,7 +338,8 @@ namespace Blocks_World_2 {
         const Rete::Symbol_Identifier_Ptr_C goal_id = m_goal_stack_ids[goal_stack.begin()->id];
         const Rete::Symbol_Identifier_Ptr_C stack_id = m_stack_ids[(*best_match).begin()->id];
 
-        const auto match = std::mismatch(best_match->begin(), best_match->end(), goal_stack.begin(), env->get_match_test());
+        const auto bmend = goal_stack.size() < best_match->size() ? best_match->begin() + goal_stack.size() : best_match->end();
+        const auto match = std::mismatch(best_match->begin(), bmend, goal_stack.begin(), env->get_match_test());
 
         wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_matches_attr, goal_id));
         if(get_total_step_count() < 5000) {
@@ -381,7 +382,8 @@ namespace Blocks_World_2 {
     for(const auto &goal_stack : goal) {
       discrepancy += goal_stack.size();
       for(const auto &stack : blocks) {
-        const auto match = std::mismatch(goal_stack.begin(), goal_stack.end(), stack.begin(), env->get_match_test());
+        const auto gsend = stack.size() < goal_stack.size() ? goal_stack.begin() + stack.size() : goal_stack.end();
+        const auto match = std::mismatch(goal_stack.begin(), gsend, stack.begin(), env->get_match_test());
         if(match.first != goal_stack.begin()) {
           discrepancy -= match.first - goal_stack.begin();
           for(auto bt = goal_stack.begin(); bt != match.first; ++bt)

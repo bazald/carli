@@ -18,8 +18,8 @@ namespace Carli {
     if(pa_lock) {
       if(const auto split = dynamic_cast<Node_Split *>(pa_lock->data.get())) {
         const auto found = std::find_if(split->children.begin(), split->children.end(), [this](const Node_Ptr &node){return node.get() == this;});
-        assert(found != split->children.end());
-        split->children.erase(found);
+        if(found != split->children.end())
+          split->children.erase(found);
       }
 //      else if(const auto unsplit = dynamic_cast<Node_Unsplit *>(pa_lock->data.get())) {
 //        const auto found = unsplit->fringe_values.find(q_value_fringe->feature.get());
@@ -223,7 +223,7 @@ namespace Carli {
 
     if(q_value_weight) {
       new_leaf_data->fringe_axis_selections.swap(debuggable_cast<Node_Split *>(this)->fringe_axis_selections);
-      new_leaf_data->fringe_axis_counter = debuggable_cast<Node_Unsplit *>(this)->fringe_axis_counter;
+      new_leaf_data->fringe_axis_counter = debuggable_cast<Node_Split *>(this)->fringe_axis_counter;
     }
 
     /// Add to the appropriate parent list
@@ -241,7 +241,7 @@ namespace Carli {
     const auto feature_enumerated_data = dynamic_cast<Feature_Enumerated_Data *>(new_feature);
     const auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(new_feature);
 
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
     std::cerr << "Parent feature ";
     if(leaf.q_value_fringe->feature)
       std::cerr << *leaf.q_value_fringe->feature;
@@ -287,7 +287,7 @@ namespace Carli {
     if(dynamic_cast<const Rete::Rete_Predicate *>(ancestor_rightmost.get())) {
       assert(feature_enumerated_data || feature_ranged_data);
       /// Case 1. Refining of an existing variable
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
       std::cerr << "Fringe Case 1" << std::endl;
 #endif
       if(feature_enumerated_data)
@@ -315,7 +315,7 @@ namespace Carli {
 
       if(ancestor_found) {
         /// Case 2: No new conditions to carry over, but must do a more involved token comparison
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
         std::cerr << "Fringe Case 2" << std::endl;
 #endif
 //          Rete::WME_Bindings bindings;
@@ -334,23 +334,23 @@ namespace Carli {
       }
       else {
         /// Case 3: New conditions must be joined
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
         std::cerr << "Fringe Case 3" << std::endl;
 #endif
         if(dynamic_cast<Rete::Rete_Join *>(ancestor_right.get())) {
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
           std::cerr << "  Join" << std::endl;
 #endif
           new_test = agent.make_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
         }
         else if(const auto existential_join = dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get())) {
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
           std::cerr << "  Existential Join" << std::endl;
 #endif
           new_test = agent.make_existential_join(*ancestor_right->get_bindings(), existential_join->is_matching_tokens(), ancestor_left, ancestor_right->parent_right());
         }
         else if(dynamic_cast<Rete::Rete_Negation_Join *>(ancestor_right.get())) {
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
           std::cerr << "  Negation Join" << std::endl;
 #endif
           new_test = agent.make_negation_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
@@ -368,12 +368,12 @@ namespace Carli {
         const int64_t new_size = new_test->get_size();
         const int64_t new_token_size = new_test->get_token_size();
 
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
         std::cerr << "Values: " << leaf_size << ' ' << leaf_token_size << ' ' << old_size << ' ' << old_token_size << ' ' << new_size << ' ' << new_token_size << std::endl;
 #endif
 
         for(const auto &variable : *variables) {
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
           std::cerr << "Considering Variable '" << variable.first << "' at " << variable.second << std::endl;
 #endif
           if(variable.second.rete_row < ra_lock->parent_left()->parent_left()->get_size())
@@ -390,21 +390,21 @@ namespace Carli {
               new_variables = std::make_shared<Rete::Variable_Indices>(*old_variables);
             auto new_index = variable.second;
 
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
             std::cerr << "new_index(" << variable.first << ") was " << new_index << std::endl;
 #endif
 
             if(new_size >= old_size) {
               /// Offset forward
               new_index.rete_row += new_size - old_size;
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
               std::cerr << "new_index.rete_row offset forward " << new_size  << '-' << old_size << " = " << new_index << std::endl;
 #endif
             }
             else if(new_index.rete_row >= leaf_size) {
               /// Offset backward
               new_index.rete_row -= old_size - new_size;
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
               std::cerr << "new_index.rete_row offset backward " << old_size << '-' << new_size << " = " << new_index << std::endl;
 #endif
             }
@@ -412,18 +412,18 @@ namespace Carli {
             if(new_token_size >= old_token_size) {
               /// Offset forward
               new_index.token_row += new_token_size - old_token_size;
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
               std::cerr << "new_index.token_row offset forward " << new_token_size << '-' << old_token_size << " = " << new_index << std::endl;
 #endif
             }
             else if(new_index.token_row >= leaf_token_size) {
               /// Offset backward
               new_index.token_row -= new_token_size - leaf_token_size;
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
               std::cerr << "new_index.token_row offset backward " << new_token_size << '-' << leaf_token_size << " = " << new_index << std::endl;
 #endif
               if(new_index.token_row < leaf_token_size) {
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
                 std::cerr << "new_index discarded" << std::endl;
 #endif
                 /// Discard intermediate fringe variables which no longer exist post-collapse
@@ -448,7 +448,7 @@ namespace Carli {
               }
             }
             new_variables->insert(std::make_pair(variable.first, new_index));
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
             std::cerr << "new_index(" << variable.first << ") = " << new_index << std::endl;
 #endif
           }
@@ -465,7 +465,7 @@ namespace Carli {
         assert(new_feature->axis.existential || new_feature->axis.rete_row < old_size);
 //        assert(new_feature->axis.existential || new_feature->axis.token_row < new_token_size);
         if(new_feature->axis.rete_row != -1) {
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
           std::cerr << "old_feature->axis = " << new_feature->axis << std::endl;
 #endif
           const int64_t index_offset = new_size - old_size;
@@ -474,7 +474,7 @@ namespace Carli {
           new_feature->axis.token_row = new_feature->axis.token_row + token_index_offset;
           assert(new_feature->axis.rete_row > -1);
           assert(new_feature->axis.token_row > -1);
-#ifndef NDEBUG
+#ifdef DEBUG_OUTPUT
           std::cerr << "new_feature->axis = " << new_feature->axis << std::endl;
           if(new_variables)
             assert(std::find_if(new_variables->begin(), new_variables->end(), [new_feature](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == new_feature->axis;}) != new_variables->end());

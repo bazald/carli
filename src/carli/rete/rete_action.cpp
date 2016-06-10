@@ -60,7 +60,7 @@ namespace Rete {
 
     input_tokens.push_back(wme_token);
 
-//#ifndef NDEBUG
+//#ifdef DEBUG_OUTPUT
 //    std::cerr << "Firing action: ";
 //    output_name(std::cerr);
 //    std::cerr << std::endl;

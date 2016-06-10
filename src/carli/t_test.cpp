@@ -23,13 +23,13 @@ namespace Carli {
   double degrees_of_freedom_ws(const int64_t &lhs_update_count, const double &lhs_variance,
                                const int64_t &rhs_update_count, const double &rhs_variance) {
     if(lhs_update_count < 2 || rhs_update_count < 2)
-      return lhs_update_count + rhs_update_count - 2; ///< Assume equal variances
+      return lhs_update_count + rhs_update_count - 2.0; ///< Assume equal variances
 
     double t1 = lhs_variance / lhs_update_count;
     double t2 = rhs_variance / rhs_update_count;
 
     if(t1 + t2 <= 0.0)
-      return lhs_update_count + rhs_update_count - 2; ///< Avoid divide by zero error
+      return lhs_update_count + rhs_update_count - 2.0; ///< Avoid divide by zero error
 
     double v = t1 + t2;
 
