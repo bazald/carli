@@ -254,7 +254,7 @@ namespace Carli {
 
     auto new_node = general.create_split(general.parent_action.lock());
 
-    if(m_unsplit_test == "none")
+    if(m_unsplit_test == "none" || general.q_value_fringe->depth < m_split_min)
       new_node->blacklist_full = true;
     else if(m_resplit_bias != "none") {
       auto found = new_node->fringe_axis_selections.find(chosen->first);

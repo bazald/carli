@@ -20,14 +20,22 @@ namespace Carli {
         const auto found = std::find_if(split->children.begin(), split->children.end(), [this](const Node_Ptr &node){return node.get() == this;});
         if(found != split->children.end())
           split->children.erase(found);
+
+        //const auto found2 = split->fringe_values.find(q_value_fringe->feature.get());
+        //if(found2 != split->fringe_values.end()) {
+        //  const auto found3 = std::find_if(found2->second.begin(), found2->second.end(), [this](const Node_Fringe_Ptr &value) {return value.get() == this; });
+        //  if(found3 != found2->second.end())
+        //    found2->second.erase(found3);
+        //}
       }
-//      else if(const auto unsplit = dynamic_cast<Node_Unsplit *>(pa_lock->data.get())) {
-//        const auto found = unsplit->fringe_values.find(q_value_fringe->feature.get());
-//        assert(found != unsplit->fringe_values.end());
-//        const auto found2 = std::find_if(found->second.values.begin(), found->second.values.end(), [this](const Node_Fringe_Ptr &value){return value.get() == this;});
-//        assert(found2 != found->second.values.end());
-//        found->second.values.erase(found2);
-//      }
+      //else if(const auto unsplit = dynamic_cast<Node_Unsplit *>(pa_lock->data.get())) {
+      //  const auto found = unsplit->fringe_values.find(q_value_fringe->feature.get());
+      //  if(found != unsplit->fringe_values.end()) {
+      //    const auto found2 = std::find_if(found->second.begin(), found->second.end(), [this](const Node_Fringe_Ptr &value) {return value.get() == this; });
+      //    if(found2 != found->second.end())
+      //      found->second.erase(found2);
+      //  }
+      //}
     }
 
     if(delete_q_value_weight && q_value_weight) {
