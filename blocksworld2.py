@@ -245,7 +245,7 @@ def main():
   fig.canvas.set_window_title('Blocks World')
   
   if two_sided_plot:
-    rect = [0.15,0.17,0.73,0.80]
+    rect = [0.17,0.17,0.70,0.80]
   else:
     rect = [0.15,0.15,0.7725,0.82]
   pylab.axes(rect)
@@ -404,21 +404,25 @@ def main():
     ax2.yaxis.set_major_formatter(CommaFormatter())
 
     for agent in agent_list:
-      y_labels.append('Unr: ' + remap_names[agent])
-      yss.append(unrefinements[agent])
-      
-      linestyle = ':'
-      
-      imax = len(unrefinements[agent][len(x) - 1])
-      for i in range(0, imax):
-        y = []
-        if unrefinements[agent][len(x) - 1][i] > 0.0:
-          for unr in unrefinements[agent]:
-            if i < len(unr):
-              y.append(unr[i])
-            else:
-              y.append(0.0)
-          labels += pylab.plot(x, y, label='Unr('+str(i)+'): ' + remap_names[agent], color=str(float(i) / imax), linestyle=linestyle)
+      if agent.find("none") is not -1:
+        y_labels.append('Unr: ' + remap_names[agent])
+        yss.append(unrefinements[agent])
+        
+        linestyle = ':'
+        
+        imax = len(unrefinements[agent][len(x) - 1])
+        for i in range(0, imax):
+          y = []
+          if unrefinements[agent][len(x) - 1][i] > 0.0:
+            for unr in unrefinements[agent]:
+              if i < len(unr):
+                y.append(unr[i])
+              else:
+                y.append(0.0)
+
+            #labels += 
+            pylab.plot(x, y, label='Unr('+str(i)+'): ' + remap_names[agent], color=str(float(i) / imax), linestyle=linestyle)
+            plotted = True
 
       print 'Unrefinement Average for ' + agent + ': ' + str(sum(unrefinements[agent][len(x) - 1]))
     ax2.set_xlim(0)
@@ -436,7 +440,12 @@ def main():
       al2.append(str(a))
     ax2.set_yticklabels(al2)
     
-    legend = pylab.legend(labels, [l.get_label() for l in labels], loc=2, handlelength=4.2, numpoints=2, prop={'size':1})
+    ### upper left
+    #legend = pylab.legend(labels, [l.get_label() for l in labels], loc=2, handlelength=4.2, numpoints=2, prop={'size':4}, bbox_to_anchor=(0.03,-0.05,0,1))
+    ## lower center
+    #legend = pylab.legend(labels, [l.get_label() for l in labels], handlelength=4.2, numpoints=2, prop={'size':4}, bbox_to_anchor=(0.3,0.3,0.5,0))
+    # lower right
+    legend = pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, prop={'size':4}, bbox_to_anchor=(-0.03,0.05,1,1))
   else:
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)

@@ -3,7 +3,7 @@
 #include "rete_existential.h"
 #include "rete_negation.h"
 
-//#define RETE_LR_UNLINKING
+#undef RETE_LR_UNLINKING
 
 namespace Rete {
 
