@@ -49,7 +49,7 @@ solution "carli"
       flags { "EnableSSE" }
       buildoptions { "-mfpmath=sse -mmmx -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
     configuration "*"
-      buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++14", "-pedantic" }
+      buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++11", "-pedantic" }
     configuration "macosx"
       linkoptions { "-Wl,-rpath,'@loader_path/'" }
     configuration "linux"
@@ -129,7 +129,7 @@ solution "carli"
   include "src/cart_pole_env"
   include "src/carli"
   include "src/console"
-  include "src/infinite_mario"
+--  include "src/infinite_mario"
   include "src/mountain_car"
   include "src/mountain_car_env"
   include "src/puddle_world"
