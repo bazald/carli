@@ -82,12 +82,27 @@ public:
   bool operator<=(const tracked_ptr<T, Deleter, TPM> &rhs) const {return ptr <= rhs.ptr;}
   bool operator>(const tracked_ptr<T, Deleter, TPM> &rhs) const {return ptr > rhs.ptr;}
   bool operator>=(const tracked_ptr<T, Deleter, TPM> &rhs) const {return ptr >= rhs.ptr;}
+
   bool operator==(const T * const rhs) const {return ptr == rhs;}
   bool operator!=(const T * const rhs) const {return ptr != rhs;}
   bool operator<(const T * const rhs) const {return ptr < rhs;}
   bool operator<=(const T * const rhs) const {return ptr <= rhs;}
   bool operator>(const T * const rhs) const {return ptr > rhs;}
   bool operator>=(const T * const rhs) const {return ptr >= rhs;}
+
+  bool operator==(const intptr_t rhs) const {return intptr_t(ptr) == rhs;}
+  bool operator!=(const intptr_t rhs) const {return intptr_t(ptr) != rhs;}
+  bool operator<(const intptr_t rhs) const {return intptr_t(ptr) < rhs;}
+  bool operator<=(const intptr_t rhs) const {return intptr_t(ptr) <= rhs;}
+  bool operator>(const intptr_t rhs) const {return intptr_t(ptr) > rhs;}
+  bool operator>=(const intptr_t rhs) const {return intptr_t(ptr) >= rhs;}
+
+  bool operator==(const uintptr_t rhs) const {return uintptr_t(ptr) == rhs;}
+  bool operator!=(const uintptr_t rhs) const {return uintptr_t(ptr) != rhs;}
+  bool operator<(const uintptr_t rhs) const {return uintptr_t(ptr) < rhs;}
+  bool operator<=(const uintptr_t rhs) const {return uintptr_t(ptr) <= rhs;}
+  bool operator>(const uintptr_t rhs) const {return uintptr_t(ptr) > rhs;}
+  bool operator>=(const uintptr_t rhs) const {return uintptr_t(ptr) >= rhs;}
 
 private:
   pointer ptr;
@@ -105,6 +120,32 @@ template <typename T, typename Deleter, tracked_ptr_mode TPM>
 inline bool operator>(const T * const lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs > rhs.get();}
 template <typename T, typename Deleter, tracked_ptr_mode TPM>
 inline bool operator>=(const T * const lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs >= rhs.get();}
+
+template <typename T, typename Deleter, tracked_ptr_mode TPM>
+inline bool operator==(const intptr_t lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs == intptr_t(rhs.get());}
+template <typename T, typename Deleter, tracked_ptr_mode TPM>
+inline bool operator!=(const intptr_t lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs != intptr_t(rhs.get());}
+template <typename T, typename Deleter, tracked_ptr_mode TPM>
+inline bool operator<(const intptr_t lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs < intptr_t(rhs.get());}
+template <typename T, typename Deleter, tracked_ptr_mode TPM>
+inline bool operator<=(const intptr_t lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs <= intptr_t(rhs.get());}
+template <typename T, typename Deleter, tracked_ptr_mode TPM>
+inline bool operator>(const intptr_t lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs > intptr_t(rhs.get());}
+template <typename T, typename Deleter, tracked_ptr_mode TPM>
+inline bool operator>=(const intptr_t lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs >= intptr_t(rhs.get());}
+
+template <typename T, typename Deleter, tracked_ptr_mode TPM>
+inline bool operator==(const uintptr_t lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs == uintptr_t(rhs.get());}
+template <typename T, typename Deleter, tracked_ptr_mode TPM>
+inline bool operator!=(const uintptr_t lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs != uintptr_t(rhs.get());}
+template <typename T, typename Deleter, tracked_ptr_mode TPM>
+inline bool operator<(const uintptr_t lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs < uintptr_t(rhs.get());}
+template <typename T, typename Deleter, tracked_ptr_mode TPM>
+inline bool operator<=(const uintptr_t lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs <= uintptr_t(rhs.get());}
+template <typename T, typename Deleter, tracked_ptr_mode TPM>
+inline bool operator>(const uintptr_t lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs > uintptr_t(rhs.get());}
+template <typename T, typename Deleter, tracked_ptr_mode TPM>
+inline bool operator>=(const uintptr_t lhs, const tracked_ptr<T, Deleter, TPM> &rhs) {return lhs >= uintptr_t(rhs.get());}
 
 namespace std {
   template <typename T, typename Deleter, tracked_ptr_mode TPM>
