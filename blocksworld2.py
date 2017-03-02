@@ -91,15 +91,15 @@ def write_to_csv(filename, x_label, xs, y_labels, yss):
     f.write('\n')
 
 def main():
-  # 1: ./blocksworld2.py experiment-bw2/s*4/*.out
-  # 2: ./blocksworld2.py experiment-bw2/f*4/*.out
-  # 3: ./blocksworld2.py experiment-bw2/c*4/*.out
-  # 4: ./blocksworld2.py experiment-bw2/v*4/*.out
-  # 5: ./blocksworld2.py experiment-bw2/p*4/*.out
+  # 1: ./blocksworld2.py experiment-bw2-long/catde-none-5k/*.out experiment-bw2-long/policy-none-5k/*.out experiment-bw2-long/value-none-5k/*.out
+  # 2: ./blocksworld2.py experiment-bw2-long/catde-catde-none-5k/*.out experiment-bw2-long/policy-policy-none-5k/*.out experiment-bw2-long/value-value-none-5k/*.out
+  # 3: ./blocksworld2.py experiment-bw2-long/catde-catde-bkls-5k/*.out experiment-bw2-long/policy-policy-bkls-5k/*.out experiment-bw2-long/value-value-bkls-5k/*.out
+  # 4: ./blocksworld2.py experiment-bw2-long/catde-catde-bst-5k/*.out experiment-bw2-long/policy-policy-bst-5k/*.out experiment-bw2-long/value-value-bst-5k/*.out
+  # 5: ./blocksworld2.py experiment-bw2-long/catde-catde-c300-5k/*.out experiment-bw2-long/policy-policy-c300-5k/*.out experiment-bw2-long/value-value-c300-5k/*.out
   scenario = 0
 
-  memory_plot = scenario is not 0
-  unrefinement_plot = not memory_plot
+  memory_plot = False # scenario is not 0
+  unrefinement_plot = False # not memory_plot
   two_sided_plot = memory_plot or unrefinement_plot
   cumulative = False
 
@@ -247,7 +247,7 @@ def main():
   if two_sided_plot:
     rect = [0.17,0.17,0.70,0.80]
   else:
-    rect = [0.15,0.15,0.7725,0.82]
+    rect = [0.17,0.17,0.80,0.80]
   pylab.axes(rect)
   
   labels = []
@@ -289,44 +289,61 @@ def main():
           labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
       
       #remap_names = {}
-      remap_names['sof4'] = 'Prop Flat'
-      remap_names['snf4'] = 'Rel Flat'
-      remap_names['sonf4'] = 'Mixed Flat'
-      remap_names['fof4'] = 'Prop Full'
-      remap_names['fnf4'] = 'Rel Full'
-      remap_names['fonf4'] = 'Mixed Full'
-      remap_names['cof4'] = 'Prop CATDE'
-      remap_names['cnf4'] = 'Rel CATDE'
-      remap_names['conf4'] = 'Mixed CATDE'
-      remap_names['vof4'] = 'Prop Value'
-      remap_names['vnf4'] = 'Rel Value'
-      remap_names['vonf4'] = 'Mixed Value'
-      remap_names['pof4'] = 'Prop Policy'
-      remap_names['pnf4'] = 'Rel Policy'
-      remap_names['ponf4'] = 'Mixed Policy'
+      remap_names['catde-catde-bkls'] = 'CATDE SBN'
+      remap_names['catde-catde-bkls-5k'] = 'CATDE SBD'
+      remap_names['catde-catde-bst'] = 'CATDE SON'
+      remap_names['catde-catde-bst-5k'] = 'CATDE SOD'
+      remap_names['catde-catde-c300'] = 'CATDE SCN'
+      remap_names['catde-catde-c300-5k'] = 'CATDE SCD'
+      remap_names['catde-catde-none'] = 'CATDE SNN'
+      remap_names['catde-catde-none-5k'] = 'CATDE SND'
+      remap_names['catde-none'] = 'CATDE NNN'
+      remap_names['catde-none-5k'] = 'CATDE NND'
+      remap_names['policy-policy-bkls'] = 'Policy SBN'
+      remap_names['policy-policy-bkls-5k'] = 'Policy SBD'
+      remap_names['policy-policy-bst'] = 'Policy SON'
+      remap_names['policy-policy-bst-5k'] = 'Policy SOD'
+      remap_names['policy-policy-c300'] = 'Policy SCN'
+      remap_names['policy-policy-c300-5k'] = 'Policy SCD'
+      remap_names['policy-policy-none'] = 'Policy SNN'
+      remap_names['policy-policy-none-5k'] = 'Policy SND'
+      remap_names['policy-none'] = 'Policy NNN'
+      remap_names['policy-none-5k'] = 'Policy NND'
+      remap_names['value-value-bkls'] = 'Value SBN'
+      remap_names['value-value-bkls-5k'] = 'Value SBD'
+      remap_names['value-value-bst'] = 'Value SON'
+      remap_names['value-value-bst-5k'] = 'Value SOD'
+      remap_names['value-value-c300'] = 'Value SCN'
+      remap_names['value-value-c300-5k'] = 'Value SCD'
+      remap_names['value-value-none'] = 'Value SNN'
+      remap_names['value-value-none-5k'] = 'Value SND'
+      remap_names['value-none'] = 'Value NNN'
+      remap_names['value-none-5k'] = 'Value NND'
       
       if scenario == 1:
-        agent_list = ['snf4', 'sonf4', 'sof4']
+        agent_list = ['catde-none-5k', 'policy-none-5k', 'value-none-5k']
       elif scenario == 2:
-        agent_list = ['fnf4', 'fonf4', 'fof4']
+        agent_list = ['catde-catde-none-5k', 'policy-policy-none-5k', 'value-value-none-5k']
       elif scenario == 3:
-        agent_list = ['cnf4', 'conf4', 'cof4']
+        agent_list = ['catde-catde-bkls-5k', 'policy-policy-bkls-5k', 'value-value-bkls-5k']
       elif scenario == 4:
-        agent_list = ['vnf4', 'vonf4', 'vof4']
+        agent_list = ['catde-catde-bst-5k', 'policy-policy-bst-5k', 'value-value-bst-5k']
       elif scenario == 5:
-        agent_list = ['pnf4', 'ponf4', 'pof4']
+        agent_list = ['catde-catde-c300-5k', 'policy-policy-c300-5k', 'value-value-c300-5k']
       if scenario > 0 and scenario < 6:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
           yss.append(smith[agent])
           
-          color = 'blue'
-          if agent is 'sof4' or agent is 'fof4' or agent is 'cof4' or agent is 'vof4' or agent is 'pof4':
+          if agent is 'catde-none-5k' or agent is 'catde-catde-none-5k' or agent is 'catde-catde-bkls-5k' or agent is 'catde-catde-bst-5k' or agent is 'catde-catde-c300-5k':
+            color = 'red'
             linestyle = ':'
-          elif agent is 'snf4' or agent is 'fnf4' or agent is 'cnf4' or agent is 'vnf4' or agent is 'pnf4':
+          elif agent is 'policy-none-5k' or agent is 'policy-policy-none-5k' or agent is 'policy-policy-bkls-5k' or agent is 'policy-policy-bst-5k' or agent is 'policy-policy-c300-5k':
+            color = 'green'
             linestyle = '--'
-          elif agent is 'sonf4' or agent is 'fonf4' or agent is 'conf4' or agent is 'vonf4' or agent is 'ponf4':
-            linestyle = '-.'
+          elif agent is 'value-none-5k' or agent is 'value-value-none-5k' or agent is 'value-value-bkls-5k' or agent is 'value-value-bst-5k' or agent is 'value-value-c300-5k':
+            color = 'blue'
+            linestyle = '-'
           
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
   
@@ -337,7 +354,10 @@ def main():
   
   #pylab.xlim(xmax=10000)
   if len(sys.argv) > 1:
-    pylab.ylim(ymin=-1000, ymax=0)
+    if cumulative:
+      pylab.ylim(ymin=-400, ymax=0)
+    else:
+      pylab.ylim(ymin=-1000, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
@@ -374,6 +394,7 @@ def main():
       labels += pylab.plot(x, cpu[agent], label='CPU: ' + remap_names[agent], color=color, linestyle=linestyle)
       #labels += pylab.plot(x, memory[agent], label='Mem: ' + remap_names[agent], color=color, linestyle=linestyle)
 
+      print 'CPU Average for ' + agent + ': ' + str(cpu[agent][-1])
       print 'Memory Average for ' + agent + ': ' + str(memory[agent][-1])
     ax2.set_xlim(0, 5000)
     ax2.set_ylim(0, 2)
@@ -449,6 +470,10 @@ def main():
   else:
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
+    for agent in agent_list:
+      print 'Final Value for ' + agent + ': ' + str(smith[agent][-1])
+      print 'CPU Average for ' + agent + ': ' + str(cpu[agent][-1])
+      print 'Memory Average for ' + agent + ': ' + str(memory[agent][-1])
   
   if len(sys.argv) == 1:
     write_to_csv('blocksworld2.csv', 'Step Number', xs, y_labels, yss)
