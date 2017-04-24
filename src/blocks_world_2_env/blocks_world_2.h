@@ -75,6 +75,8 @@ namespace Blocks_World_2 {
     Environment & operator=(const Environment &);
 
   public:
+    enum class Goal {EXACT, COLOR, STACK, UNSTACK, ON_A_B};
+
     Environment();
 
     struct Block {
@@ -95,9 +97,10 @@ namespace Blocks_World_2 {
     typedef std::vector<Block> Stack;
     typedef std::vector<Stack> Stacks;
 
+    const Goal & get_goal() const {return m_goal;}
     const std::function<bool (const Environment::Block &lhs, const Environment::Block &rhs)> & get_match_test() const {return m_match_test;}
     const Stacks & get_blocks() const {return m_blocks;}
-    const Stacks & get_goal() const {return m_goal;}
+    const Stacks & get_target() const {return m_target;}
 
     bool success() const;
 
@@ -110,14 +113,22 @@ namespace Blocks_World_2 {
 
     void print_impl(ostream &os) const;
 
+    const Goal m_goal = dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "exact" ? Goal::EXACT
+                      : dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "color" ? Goal::COLOR
+                      : dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "stack" ? Goal::STACK
+                      : dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "unstack" ? Goal::UNSTACK
+                      : Goal::ON_A_B;
     const int64_t m_num_blocks = get_Option_Ranged<int64_t>(Options::get_global(), "num-blocks");
-    const int64_t m_num_goal_blocks = get_Option_Ranged<int64_t>(Options::get_global(), "num-goal-blocks");
+    const int64_t m_num_target_blocks = get_Option_Ranged<int64_t>(Options::get_global(), "num-goal-blocks");
 
     std::function<bool (const Environment::Block &lhs, const Environment::Block &rhs)> m_match_test;
 
+    const Environment::Block block_a = {1, 0};
+    const Environment::Block block_b = {2, 0};
+
     Zeni::Random m_random;
     Stacks m_blocks;
-    Stacks m_goal;
+    Stacks m_target;
   };
 
   class BLOCKS_WORLD_2_LINKAGE Agent : public Carli::Agent {
@@ -160,7 +171,7 @@ namespace Blocks_World_2 {
     const Rete::Symbol_Constant_String_Ptr_C m_name_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("name"));
     const Rete::Symbol_Constant_String_Ptr_C m_blocks_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("blocks"));
     const Rete::Symbol_Constant_String_Ptr_C m_discrepancy_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("discrepancy"));
-    const Rete::Symbol_Constant_String_Ptr_C m_goal_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("goal"));
+    const Rete::Symbol_Constant_String_Ptr_C m_target_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("goal"));
     const Rete::Symbol_Constant_String_Ptr_C m_stack_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("stack"));
     const Rete::Symbol_Constant_String_Ptr_C m_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("matches"));
     const Rete::Symbol_Constant_String_Ptr_C m_early_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("early-matches")); ///< Defective
@@ -172,7 +183,7 @@ namespace Blocks_World_2 {
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
     const Rete::Symbol_Constant_String_Ptr_C m_false_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("false"));
     const Rete::Symbol_Identifier_Ptr_C m_blocks_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("BLOCKS"));
-    const Rete::Symbol_Identifier_Ptr_C m_goal_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("GOAL"));
+    const Rete::Symbol_Identifier_Ptr_C m_target_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("GOAL"));
     const Rete::Symbol_Identifier_Ptr_C m_table_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("TABLE"));
     const Rete::Symbol_Identifier_Ptr_C m_table_stack_id = m_table_id; //Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("|"));
     const Rete::Symbol_Constant_Int_Ptr_C m_table_name = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(0));
@@ -180,7 +191,7 @@ namespace Blocks_World_2 {
     std::map<block_id, Rete::Symbol_Identifier_Ptr_C> m_block_ids;
     std::map<block_id, Rete::Symbol_Constant_Int_Ptr_C> m_block_names;
     std::map<block_id, Rete::Symbol_Identifier_Ptr_C> m_stack_ids;
-    std::map<block_id, Rete::Symbol_Identifier_Ptr_C> m_goal_stack_ids;
+    std::map<block_id, Rete::Symbol_Identifier_Ptr_C> m_target_stack_ids;
 
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
   };

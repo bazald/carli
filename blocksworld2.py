@@ -101,7 +101,7 @@ def main():
   memory_plot = False # scenario is not 0
   unrefinement_plot = False # not memory_plot
   two_sided_plot = memory_plot or unrefinement_plot
-  cumulative = False
+  cumulative = True
 
   if cumulative:
     reward_label = 'Cumulative Reward / \# Episodes'
@@ -471,9 +471,12 @@ def main():
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
     for agent in agent_list:
+      print '50k Value for ' + agent + ': ' + str(smith[agent][x.index(50000)])
+      print '50k CPU Average for ' + agent + ': ' + str(cpu[agent][x.index(50000)])
+      print '50k Memory Average for ' + agent + ': ' + str(memory[agent][x.index(50000)])
       print 'Final Value for ' + agent + ': ' + str(smith[agent][-1])
-      print 'CPU Average for ' + agent + ': ' + str(cpu[agent][-1])
-      print 'Memory Average for ' + agent + ': ' + str(memory[agent][-1])
+      print 'Final CPU Average for ' + agent + ': ' + str(cpu[agent][-1])
+      print 'Final Memory Average for ' + agent + ': ' + str(memory[agent][-1])
   
   if len(sys.argv) == 1:
     write_to_csv('blocksworld2.csv', 'Step Number', xs, y_labels, yss)

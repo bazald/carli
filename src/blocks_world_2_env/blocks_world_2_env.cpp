@@ -20,55 +20,93 @@ namespace Blocks_World_2 {
   }
 
   Environment::Environment() {
-    assert(m_num_goal_blocks <= m_num_blocks);
+//    assert(m_num_goal_blocks <= m_num_blocks);
 
-    const std::string goal = dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value();
-
-    if(goal == "exact") {
-      m_match_test = [](const Environment::Block &lhs, const Environment::Block &rhs)->bool{
-        return lhs.id == rhs.id;
-      };
-    }
-    else if(goal == "color") {
+    if(m_goal == Goal::COLOR) {
       m_match_test = [](const Environment::Block &lhs, const Environment::Block &rhs)->bool{
         return lhs.color == rhs.color;
       };
     }
-    else
-      abort();
+    else /*if(m_goal == Goal::EXACT)*/ {
+      m_match_test = [](const Environment::Block &lhs, const Environment::Block &rhs)->bool{
+        return lhs.id == rhs.id;
+      };
+    }
+//    else
+//      abort();
 
     init_impl();
   }
 
   bool Environment::success() const {
-    std::unordered_set<const Environment::Stack *> matched_stacks;
-    for(const auto &goal_stack : m_goal) {
-      const Environment::Stack * best_match = nullptr;
-      int64_t best_match_chaff = std::numeric_limits<int64_t>::max();
-      for(const auto &stack : m_blocks) {
-        if(matched_stacks.find(&stack) != matched_stacks.end())
-          continue;
-        if(goal_stack.size() < stack.size())
-          continue;
+    switch(m_goal) {
+    case Goal::EXACT:
+    case Goal::COLOR:
+      {
+        std::unordered_set<const Environment::Stack *> matched_stacks;
+        for(const auto &target_stack : m_target) {
+          const Environment::Stack * best_match = nullptr;
+          int64_t best_match_chaff = std::numeric_limits<int64_t>::max();
+          for(const auto &stack : m_blocks) {
+            if(matched_stacks.find(&stack) != matched_stacks.end())
+              continue;
+            if(target_stack.size() < stack.size())
+              continue;
 
-        const auto match = std::mismatch(stack.begin(), stack.end(), goal_stack.begin(), m_match_test);
+            const auto match = std::mismatch(stack.begin(), stack.end(), target_stack.begin(), m_match_test);
 
-        if(match.second == goal_stack.end()) {
-          const int64_t chaff = stack.end() - match.first;
-          if(chaff < best_match_chaff) {
-            best_match = &stack;
-            best_match_chaff = chaff;
+            if(match.second == target_stack.end()) {
+              const int64_t chaff = stack.end() - match.first;
+              if(chaff < best_match_chaff) {
+                best_match = &stack;
+                best_match_chaff = chaff;
+              }
+            }
           }
+
+          if(best_match)
+            matched_stacks.insert(best_match);
+          else
+            return false;
         }
+
+        return true;
       }
 
-      if(best_match)
-        matched_stacks.insert(best_match);
-      else
-        return false;
-    }
+    case Goal::STACK:
+      {
+        return m_blocks.size() == 1;
+      }
 
-    return true;
+    case Goal::UNSTACK:
+      {
+        for(const auto &stack : m_blocks) {
+          if(stack.size() != 1)
+            return false;
+        }
+
+        return true;
+      }
+
+    case Goal::ON_A_B:
+      {
+        for(const auto &stack : m_blocks) {
+          const auto found = std::find_if(stack.begin(), stack.end(), [this](const Environment::Block &block)->bool{return m_match_test(block, block_b);});
+          if(found == stack.end())
+            continue;
+          const auto fp1 = found + 1;
+          if(fp1 == stack.end())
+            continue;
+          if(m_match_test(*fp1, block_a))
+            return true;
+        }
+
+        return false;
+      }
+
+    default:
+      abort();
+    }
   }
 
   void Environment::init_impl() {
@@ -79,18 +117,22 @@ namespace Blocks_World_2 {
     for(int i = 1; i <= m_num_blocks; ++i)
       blocks.push_back(Block(i, m_random.rand_lt(g_num_colors)));
 
-    std::vector<Block> goal_blocks;
-    goal_blocks.reserve(m_num_goal_blocks);
-    for(int i = 1; i <= m_num_goal_blocks; ++i)
-      goal_blocks.push_back(blocks[i - 1]);
-
     std::shuffle(blocks.begin(), blocks.end(), m_random);
-    std::shuffle(goal_blocks.begin(), goal_blocks.end(), m_random);
 
     m_blocks = random_Stacks(blocks);
-    do {
-      m_goal = random_Stacks(goal_blocks);
-    } while(success());
+
+    if(m_goal == Goal::EXACT || m_goal == Goal::COLOR) {
+      std::vector<Block> target_blocks;
+      target_blocks.reserve(m_num_target_blocks);
+      for(int i = 0; i < m_num_target_blocks; ++i)
+        target_blocks.push_back(blocks[i]);
+
+      std::shuffle(target_blocks.begin(), target_blocks.end(), m_random);
+
+      do {
+        m_target = random_Stacks(target_blocks);
+      } while(success());
+    }
   }
 
   Environment::Stacks Environment::random_Stacks(const std::vector<Block> &blocks) {
@@ -152,36 +194,94 @@ namespace Blocks_World_2 {
 
   int64_t Environment::matching_blocks() const {
     int64_t best_match_total = 0u;
-    std::unordered_set<const Environment::Stack *> matched_stacks;
-    for(const auto &goal_stack : m_goal) {
-      const Environment::Stack * best_match = nullptr;
-      size_t best_match_size = 0u;
 
-      for(const auto &stack : m_blocks) {
-        if(matched_stacks.find(&stack) != matched_stacks.end())
-          continue;
-        if(goal_stack.size() < stack.size())
-          continue;
+    switch(m_goal) {
+    case Goal::EXACT:
+    case Goal::COLOR:
+      {
+        std::unordered_set<const Environment::Stack *> matched_stacks;
+        for(const auto &target_stack : m_target) {
+          const Environment::Stack * best_match = nullptr;
+          size_t best_match_size = 0u;
 
-        const auto match = std::mismatch(stack.begin(), stack.end(), goal_stack.begin(), m_match_test);
+          for(const auto &stack : m_blocks) {
+            if(matched_stacks.find(&stack) != matched_stacks.end())
+              continue;
+            if(target_stack.size() < stack.size())
+              continue;
 
-        if(match.first == stack.end()) {
-          if(match.second == goal_stack.end()) {
-            best_match = &stack;
-            best_match_size = stack.size();
-            break;
+            const auto match = std::mismatch(stack.begin(), stack.end(), target_stack.begin(), m_match_test);
+
+            if(match.first == stack.end()) {
+              if(match.second == target_stack.end()) {
+                best_match = &stack;
+                best_match_size = stack.size();
+                break;
+              }
+              else if(stack.size() > best_match_size) {
+                best_match = &stack;
+                best_match_size = stack.size();
+              }
+            }
           }
-          else if(stack.size() > best_match_size) {
-            best_match = &stack;
-            best_match_size = stack.size();
+
+          if(best_match) {
+            matched_stacks.insert(best_match);
+            best_match_total += best_match_size;
           }
         }
+
+        break;
       }
 
-      if(best_match) {
-        matched_stacks.insert(best_match);
-        best_match_total += best_match_size;
+    case Goal::STACK:
+      {
+        int64_t max_height = 0;
+        for(const auto &stack : m_blocks) {
+          if(int64_t(stack.size()) > max_height) {
+            best_match_total -= max_height;
+            max_height = stack.size();
+          }
+          else
+            best_match_total -= stack.size();
+        }
+
+        break;
       }
+
+    case Goal::UNSTACK:
+      {
+        for(const auto &stack : m_blocks)
+          best_match_total -= stack.size() - 1;
+
+        break;
+      }
+
+    case Goal::ON_A_B:
+      {
+        for(const auto &stack : m_blocks) {
+          auto founda = std::find_if(stack.begin(), stack.end(), [this](const Environment::Block &block)->bool{return m_match_test(block, block_a);});
+          auto foundb = std::find_if(stack.begin(), stack.end(), [this](const Environment::Block &block)->bool{return m_match_test(block, block_b);});
+          if(founda != stack.end()) {
+            if(foundb != stack.end()) {
+              if(foundb - founda > 0)
+                best_match_total = stack.end() - founda;
+              else if(founda - foundb != 1)
+                best_match_total = stack.end() - foundb;
+              break;
+            }
+            else
+              best_match_total -= stack.end() - founda;
+          }
+          else if(foundb != stack.end())
+            best_match_total -= stack.end() - foundb - 1;
+        }
+
+        break;
+      }
+
+    default:
+      abort();
     }
 
     return best_match_total;
@@ -195,10 +295,30 @@ namespace Blocks_World_2 {
       os << endl;
     }
     os << "Goal:" << endl;
-    for(const Stack &stack : m_goal) {
-      for(const Block &block : stack)
-        os << ' ' << (block.color == 0 ? 'r' : block.color == 1 ? 'g' : 'b') << char('@' + block.id);
-      os << endl;
+    switch(m_goal) {
+    case Goal::EXACT:
+    case Goal::COLOR:
+      for(const Stack &stack : m_target) {
+        for(const Block &block : stack)
+          os << ' ' << (block.color == 0 ? 'r' : block.color == 1 ? 'g' : 'b') << char('@' + block.id);
+        os << endl;
+      }
+      break;
+
+    case Goal::STACK:
+      os << " Stack" << endl;
+      break;
+
+    case Goal::UNSTACK:
+      os << " Unstack" << endl;
+      break;
+
+    case Goal::ON_A_B:
+      os << " .* 2 1 .*" << endl;
+      break;
+
+    default:
+      abort();
     }
   }
 
@@ -210,7 +330,7 @@ namespace Blocks_World_2 {
         m_block_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + block.id))));
         m_block_names[block.id] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(block.id));
         m_stack_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string("|") + char('@' + block.id)));
-        m_goal_stack_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(":") + char('@' + block.id)));
+        m_target_stack_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(":") + char('@' + block.id)));
       }
     }
 
@@ -234,7 +354,7 @@ namespace Blocks_World_2 {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
 
     const auto &blocks = env->get_blocks();
-    const auto &goal = env->get_goal();
+    const auto &target = env->get_target();
     std::list<Rete::WME_Ptr_C> wmes_current;
 
     std::ostringstream oss;
@@ -275,10 +395,10 @@ namespace Blocks_World_2 {
     }
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_blocks_attr, m_blocks_id));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_goal_attr, m_goal_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_target_attr, m_target_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_table_id, m_name_attr, m_table_name));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_blocks_id, m_stack_attr, m_table_stack_id));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_goal_id, m_stack_attr, m_table_stack_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_target_id, m_stack_attr, m_table_stack_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_top_attr, m_table_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_matches_attr, m_table_stack_id));
     if(get_total_step_count() < 5000) {
@@ -309,20 +429,20 @@ namespace Blocks_World_2 {
     }
 
     std::unordered_set<const Environment::Stack *> matched_stacks;
-    for(const auto &goal_stack : goal) {
+    for(const auto &target_stack : target) {
       const Environment::Stack * best_match = nullptr;
       size_t best_match_size = 0u;
 
       for(const auto &stack : blocks) {
         if(matched_stacks.find(&stack) != matched_stacks.end())
           continue;
-        if(goal_stack.size() < stack.size())
+        if(target_stack.size() < stack.size())
           continue;
 
-        const auto match = std::mismatch(stack.begin(), stack.end(), goal_stack.begin(), env->get_match_test());
+        const auto match = std::mismatch(stack.begin(), stack.end(), target_stack.begin(), env->get_match_test());
 
         if(match.first == stack.end()) {
-          if(match.second == goal_stack.end()) {
+          if(match.second == target_stack.end()) {
             best_match = &stack;
             best_match_size = stack.size();
             break;
@@ -335,25 +455,25 @@ namespace Blocks_World_2 {
       }
 
       if(best_match) {
-        const Rete::Symbol_Identifier_Ptr_C goal_id = m_goal_stack_ids[goal_stack.begin()->id];
+        const Rete::Symbol_Identifier_Ptr_C target_id = m_target_stack_ids[target_stack.begin()->id];
         const Rete::Symbol_Identifier_Ptr_C stack_id = m_stack_ids[(*best_match).begin()->id];
 
-        const auto bmend = goal_stack.size() < best_match->size() ? best_match->begin() + goal_stack.size() : best_match->end();
-        const auto match = std::mismatch(best_match->begin(), bmend, goal_stack.begin(), env->get_match_test());
+        const auto bmend = target_stack.size() < best_match->size() ? best_match->begin() + target_stack.size() : best_match->end();
+        const auto match = std::mismatch(best_match->begin(), bmend, target_stack.begin(), env->get_match_test());
 
-        wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_matches_attr, goal_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_matches_attr, target_id));
         if(get_total_step_count() < 5000) {
-          wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_early_matches_attr, goal_id));
-          if(xor_string(stack_id->value) ^ xor_string(goal_id->value))
-            wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_late_matches_attr, goal_id));
+          wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_early_matches_attr, target_id));
+          if(xor_string(stack_id->value) ^ xor_string(target_id->value))
+            wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_late_matches_attr, target_id));
         }
         else {
-          if(xor_string(stack_id->value) ^ xor_string(goal_id->value))
-            wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_early_matches_attr, goal_id));
-          wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_late_matches_attr, goal_id));
+          if(xor_string(stack_id->value) ^ xor_string(target_id->value))
+            wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_early_matches_attr, target_id));
+          wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_late_matches_attr, target_id));
         }
 
-        if(match.second != goal_stack.end()) {
+        if(match.second != target_stack.end()) {
           for(const auto &stack : blocks) {
             for(const auto &block : stack) {
               if(env->get_match_test()(block, *match.second)) {
@@ -379,50 +499,50 @@ namespace Blocks_World_2 {
     }
 
     int64_t discrepancy = 0;
-    for(const auto &goal_stack : goal) {
-      discrepancy += goal_stack.size();
+    for(const auto &target_stack : target) {
+      discrepancy += target_stack.size();
       for(const auto &stack : blocks) {
-        const auto gsend = stack.size() < goal_stack.size() ? goal_stack.begin() + stack.size() : goal_stack.end();
-        const auto match = std::mismatch(goal_stack.begin(), gsend, stack.begin(), env->get_match_test());
-        if(match.first != goal_stack.begin()) {
-          discrepancy -= match.first - goal_stack.begin();
-          for(auto bt = goal_stack.begin(); bt != match.first; ++bt)
+        const auto gsend = stack.size() < target_stack.size() ? target_stack.begin() + stack.size() : target_stack.end();
+        const auto match = std::mismatch(target_stack.begin(), gsend, stack.begin(), env->get_match_test());
+        if(match.first != target_stack.begin()) {
+          discrepancy -= match.first - target_stack.begin();
+          for(auto bt = target_stack.begin(); bt != match.first; ++bt)
             wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[bt->id], m_in_place_attr, m_true_value));
           break;
         }
       }
-      const Rete::Symbol_Identifier_Ptr_C goal_base_id = m_block_ids[goal_stack.begin()->id];
-      wmes_current.push_back(std::make_shared<Rete::WME>(goal_base_id, m_matches_top_attr, m_table_stack_id));
+      const Rete::Symbol_Identifier_Ptr_C target_base_id = m_block_ids[target_stack.begin()->id];
+      wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_matches_top_attr, m_table_stack_id));
       if(get_total_step_count() < 5000) {
-        wmes_current.push_back(std::make_shared<Rete::WME>(goal_base_id, m_early_matches_top_attr, m_table_stack_id));
-        if(xor_string(goal_base_id->value) ^ xor_string(m_table_stack_id->value))
-          wmes_current.push_back(std::make_shared<Rete::WME>(goal_base_id, m_late_matches_top_attr, m_table_stack_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_early_matches_top_attr, m_table_stack_id));
+        if(xor_string(target_base_id->value) ^ xor_string(m_table_stack_id->value))
+          wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
       }
       else {
-        if(xor_string(goal_base_id->value) ^ xor_string(m_table_stack_id->value))
-          wmes_current.push_back(std::make_shared<Rete::WME>(goal_base_id, m_early_matches_top_attr, m_table_stack_id));
-        wmes_current.push_back(std::make_shared<Rete::WME>(goal_base_id, m_late_matches_top_attr, m_table_stack_id));
+        if(xor_string(target_base_id->value) ^ xor_string(m_table_stack_id->value))
+          wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_early_matches_top_attr, m_table_stack_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
       }
     }
 //    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_discrepancy_attr, Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(discrepancy))));
 
-    for(const auto &goal_stack : goal) {
-      Rete::Symbol_Identifier_Ptr_C goal_stack_id = m_goal_stack_ids[goal_stack.begin()->id];
+    for(const auto &target_stack : target) {
+      Rete::Symbol_Identifier_Ptr_C target_stack_id = m_target_stack_ids[target_stack.begin()->id];
 
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_goal_id, m_stack_attr, goal_stack_id));
-      if(std::find(blocks.begin(), blocks.end(), goal_stack) == blocks.end())
-        wmes_current.push_back(std::make_shared<Rete::WME>(goal_stack_id, m_top_attr, m_block_ids[goal_stack.rbegin()->id]));
-      const Rete::Symbol_Identifier_Ptr_C goal_base_id = m_block_ids[goal_stack.begin()->id];
-      wmes_current.push_back(std::make_shared<Rete::WME>(goal_base_id, m_matches_top_attr, m_table_stack_id));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_target_id, m_stack_attr, target_stack_id));
+      if(std::find(blocks.begin(), blocks.end(), target_stack) == blocks.end())
+        wmes_current.push_back(std::make_shared<Rete::WME>(target_stack_id, m_top_attr, m_block_ids[target_stack.rbegin()->id]));
+      const Rete::Symbol_Identifier_Ptr_C target_base_id = m_block_ids[target_stack.begin()->id];
+      wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_matches_top_attr, m_table_stack_id));
       if(get_total_step_count() < 5000) {
-        wmes_current.push_back(std::make_shared<Rete::WME>(goal_base_id, m_early_matches_top_attr, m_table_stack_id));
-        if(xor_string(goal_base_id->value) ^ xor_string(m_table_stack_id->value))
-          wmes_current.push_back(std::make_shared<Rete::WME>(goal_base_id, m_late_matches_top_attr, m_table_stack_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_early_matches_top_attr, m_table_stack_id));
+        if(xor_string(target_base_id->value) ^ xor_string(m_table_stack_id->value))
+          wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
       }
       else {
-        if(xor_string(goal_base_id->value) ^ xor_string(m_table_stack_id->value))
-          wmes_current.push_back(std::make_shared<Rete::WME>(goal_base_id, m_early_matches_top_attr, m_table_stack_id));
-        wmes_current.push_back(std::make_shared<Rete::WME>(goal_base_id, m_late_matches_top_attr, m_table_stack_id));
+        if(xor_string(target_base_id->value) ^ xor_string(m_table_stack_id->value))
+          wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_early_matches_top_attr, m_table_stack_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
       }
     }
 
