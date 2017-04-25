@@ -176,6 +176,8 @@ namespace Blocks_World_2 {
     const Rete::Symbol_Constant_String_Ptr_C m_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("matches"));
     const Rete::Symbol_Constant_String_Ptr_C m_early_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("early-matches")); ///< Defective
     const Rete::Symbol_Constant_String_Ptr_C m_late_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("late-matches")); ///< Defective
+//    const Rete::Symbol_Constant_String_Ptr_C m_taller_than_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("taller-than")); ///< Distractor
+    const Rete::Symbol_Constant_String_Ptr_C m_tallest_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("tallest"));
     const Rete::Symbol_Constant_String_Ptr_C m_top_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top"));
     const Rete::Symbol_Constant_String_Ptr_C m_matches_top_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("matches-top"));
     const Rete::Symbol_Constant_String_Ptr_C m_early_matches_top_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("early-matches-top")); ///< Defective
@@ -194,6 +196,8 @@ namespace Blocks_World_2 {
     std::map<block_id, Rete::Symbol_Identifier_Ptr_C> m_target_stack_ids;
 
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
+
+//    double m_feature_generation_time = 0.0;
   };
 
 }

@@ -1,0 +1,54 @@
+# Blocks world 2 -- Restricted to what I think matters
+
+sp {blocks-world*rl-action*general
+  :feature 1 unsplit nil
+  #(<s> ^blocks <blocks>)
+  #(<s> ^goal <goal>)
+  #(<s> ^action <action>)
+  {(<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<block> ^name <block-name>)
+  (<action> ^block <block>)}
+  {(<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
+  (<action> ^dest <dest>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-is-table
+  :feature 2 fringe blocks-world*rl-action*general
+  #(<s> ^blocks <blocks>)
+  #(<s> ^goal <goal>)
+  #(<s> ^action <action>)
+  {(<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<block> ^name <block-name>)
+  (<action> ^block <block>)}
+  {(<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
+  (<action> ^dest <dest>)}
+  +{(<dest> ^name 0)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-is-not-table
+  :feature 2 fringe blocks-world*rl-action*general
+  #(<s> ^blocks <blocks>)
+  #(<s> ^goal <goal>)
+  #(<s> ^action <action>)
+  {(<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<block> ^name <block-name>)
+  (<action> ^block <block>)}
+  {(<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
+  (<action> ^dest <dest>)}
+  -{(<dest> ^name 0)}
+-->
+  = 0.0
+}

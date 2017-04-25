@@ -291,7 +291,7 @@ namespace Blocks_World_2 {
     os << "Blocks World (Table is Left):" << endl;
     for(const Stack &stack : m_blocks) {
       for(const Block &block : stack)
-        os << ' ' << (block.color == 0 ? 'r' : block.color == 1 ? 'g' : 'b') << char('@' + block.id);
+        os << ' ' << (block.color == 0 ? 'r' : block.color == 1 ? 'g' : 'b') << block.id;
       os << endl;
     }
     os << "Goal:" << endl;
@@ -300,7 +300,7 @@ namespace Blocks_World_2 {
     case Goal::COLOR:
       for(const Stack &stack : m_target) {
         for(const Block &block : stack)
-          os << ' ' << (block.color == 0 ? 'r' : block.color == 1 ? 'g' : 'b') << char('@' + block.id);
+          os << ' ' << (block.color == 0 ? 'r' : block.color == 1 ? 'g' : 'b') << block.id;
         os << endl;
       }
       break;
@@ -325,12 +325,15 @@ namespace Blocks_World_2 {
   Agent::Agent(const std::shared_ptr<Carli::Environment> &env)
    : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(variables, token);})
   {
+    std::ostringstream oss;
     for(const auto &stack : dynamic_pointer_cast<const Environment>(get_env())->get_blocks()) {
       for(const auto &block : stack) {
-        m_block_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(1, char('@' + block.id))));
+        oss << block.id;
+        m_block_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(oss.str()));
         m_block_names[block.id] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(block.id));
-        m_stack_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string("|") + char('@' + block.id)));
-        m_target_stack_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(":") + char('@' + block.id)));
+        m_stack_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string("|") + oss.str()));
+        m_target_stack_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(":") + oss.str()));
+        oss.clear();
       }
     }
 
@@ -339,6 +342,8 @@ namespace Blocks_World_2 {
   }
 
   Agent::~Agent() {
+//    std::cerr << "Feature Generation Time: " << m_feature_generation_time << std::endl;
+
     destroy();
   }
 
@@ -351,6 +356,9 @@ namespace Blocks_World_2 {
   }
 
   void Agent::generate_features() {
+//    using dseconds = std::chrono::duration<double, std::ratio<1,1>>;
+//    const auto start_time = std::chrono::high_resolution_clock::now();
+
     auto env = dynamic_pointer_cast<const Environment>(get_env());
 
     const auto &blocks = env->get_blocks();
@@ -358,6 +366,7 @@ namespace Blocks_World_2 {
     std::list<Rete::WME_Ptr_C> wmes_current;
 
     std::ostringstream oss;
+    int64_t max_height = 0;
     for(const auto &stack : blocks) {
       int64_t height = 0;
       for(const auto &block : stack) {
@@ -367,16 +376,17 @@ namespace Blocks_World_2 {
 
         wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_color_attr, std::make_shared<Rete::Symbol_Constant_Int>(block.color)));
 
-        const double brightness = m_random.frand_lte();
-        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
-        if(brightness > 0.5)
-          wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_glowing_attr, m_true_value));
+//        const double brightness = m_random.frand_lte();
+//        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
+//        if(brightness > 0.5)
+//          wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_glowing_attr, m_true_value));
       }
+      max_height = std::max(max_height, height);
 
       for(const auto &dest_stack : blocks) {
         if(stack == dest_stack)
           continue;
-        oss << "move-" << char('@' + stack.rbegin()->id) << '-' << char('@' + dest_stack.rbegin()->id);
+        oss << "move-" << stack.rbegin()->id << "-|" << dest_stack.begin()->id;
         Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
         oss.str("");
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, action_id));
@@ -385,7 +395,7 @@ namespace Blocks_World_2 {
       }
 
       if(stack.size() > 1) {
-        oss << "move-" << char('@' + stack.rbegin()->id) << "-TABLE";
+        oss << "move-" << stack.rbegin()->id << "-TABLE";
         Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
         oss.str("");
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, action_id));
@@ -426,7 +436,21 @@ namespace Blocks_World_2 {
 
       wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_top_attr, m_block_ids[stack.rbegin()->id]));
       ///wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_matches_attr, m_table_stack_id));
+      if(int64_t(stack.size()) == max_height)
+        wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_tallest_attr, m_true_value));
     }
+
+//    for(auto stack1 = blocks.begin(), send= blocks.end(); stack1 != send; ++stack1) {
+//      Rete::Symbol_Identifier_Ptr_C stack1_id = m_stack_ids[stack1->begin()->id];
+//      for(auto stack2 = stack1 + 1; stack2 != send; ++stack2) {
+//        Rete::Symbol_Identifier_Ptr_C stack2_id = m_stack_ids[stack2->begin()->id];
+//        const int64_t delta = int64_t(stack1->size()) - int64_t(stack2->size());
+//        if(delta > 0)
+//          wmes_current.push_back(std::make_shared<Rete::WME>(stack1_id, m_taller_than_attr, stack2_id));
+//        else if(delta < 0)
+//          wmes_current.push_back(std::make_shared<Rete::WME>(stack2_id, m_taller_than_attr, stack1_id));
+//      }
+//    }
 
     std::unordered_set<const Environment::Stack *> matched_stacks;
     for(const auto &target_stack : target) {
@@ -545,6 +569,9 @@ namespace Blocks_World_2 {
         wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
       }
     }
+
+//    const auto end_time = std::chrono::high_resolution_clock::now();
+//    m_feature_generation_time += std::chrono::duration_cast<dseconds>(end_time - start_time).count();
 
     Rete::Agenda::Locker locker(agenda);
     CPU_Accumulator cpu_accumulator(*this);

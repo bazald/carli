@@ -167,6 +167,11 @@ namespace Carli {
     if(!m_learning_rate)
       return false;
 
+    const auto parent_node = rete_action.parent_left();
+    if(m_rete_nodes_evaluated.find(parent_node) != m_rete_nodes_evaluated.end())
+      return false;
+    m_rete_nodes_evaluated.insert(parent_node);
+
     auto &general_node = debuggable_cast<Node &>(*rete_action.data);
     if(general_node.q_value_weight->type != Q_Value::Type::SPLIT)
       return true;
@@ -222,6 +227,11 @@ namespace Carli {
       return true;
     if(general.q_value_weight->depth >= m_split_max || !m_learning_rate)
       return false;
+
+    const auto parent_node = rete_action.parent_left();
+    if(m_rete_nodes_evaluated.find(parent_node) != m_rete_nodes_evaluated.end())
+      return false;
+    m_rete_nodes_evaluated.insert(parent_node);
 
     if(random.frand_lt() >= m_split_probability)
       return false;
@@ -600,6 +610,7 @@ namespace Carli {
   }
 
   Agent::~Agent() {
+    m_rete_nodes_evaluated.clear();
     excise_all();
   }
 
@@ -619,6 +630,7 @@ namespace Carli {
       dependency_collector.print(dependencies_out);
     }
 
+    m_rete_nodes_evaluated.clear();
     excise_all();
   //#ifdef DEBUG_OUTPUT
   //  std::cerr << *this << std::endl;
@@ -1656,8 +1668,11 @@ namespace Carli {
   bool Agent::unsplit_test_catde(Node_Split &general) {
     assert(general.q_value_weight);
     assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
-    assert(!general.children.empty());
+//    assert(!general.children.empty());
     assert(!general.blacklist_full);
+
+    if(general.children.empty())
+      return false;
 
     double boost_general = 1.0;
     double boost_children = 1.0;
@@ -1687,8 +1702,11 @@ namespace Carli {
   bool Agent::unsplit_test_policy(Node_Split &general) {
     assert(general.q_value_weight);
     assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
-    assert(!general.children.empty());
+//    assert(!general.children.empty());
     assert(!general.blacklist_full);
+
+    if(general.children.empty())
+      return false;
 
     if(general.q_value_fringe->update_count < m_unsplit_update_count)
       return false;
@@ -1768,8 +1786,11 @@ namespace Carli {
   bool Agent::unsplit_test_value(Node_Split &general) {
     assert(general.q_value_weight);
     assert(general.q_value_weight->type == Q_Value::Type::SPLIT);
-    assert(!general.children.empty());
+//    assert(!general.children.empty());
     assert(!general.blacklist_full);
+
+    if(general.children.empty())
+      return false;
 
     if(general.q_value_fringe->update_count < m_unsplit_update_count)
       return false;
@@ -2038,6 +2059,7 @@ namespace Carli {
 
   void Agent::generate_all_features() {
     m_nodes_active.swap(m_nodes_activating);
+    m_rete_nodes_evaluated.clear();
 
     generate_features();
 

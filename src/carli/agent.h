@@ -114,6 +114,7 @@ namespace Carli {
 
     std::list<Node_Ptr> m_nodes_active;
     std::list<Node_Ptr> m_nodes_activating;
+    std::unordered_set<Rete::Rete_Node_Ptr_C> m_rete_nodes_evaluated;
 
   protected:
     Action_Ptr_C choose_epsilon_greedy(const Node_Fringe * const &fringe, const int64_t &fringe_depth);

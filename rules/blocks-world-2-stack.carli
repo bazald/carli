@@ -1,0 +1,90 @@
+# Blocks world 2 -- Restricted to what I think matters
+
+sp {blocks-world*rl-action*general
+  :feature 1 unsplit nil
+  {(<s> ^action <action>)
+  {(<action> ^block <block>)
+  (<block> ^name <block-name>)}
+  {(<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)}}
+  {(<s> ^blocks <blocks>)
+  {(<blocks> ^stack <stack>)
+  (<stack> ^top <block>)}
+  {(<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)}}
+  (<s> ^goal <goal>)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*tallest-goal-stack
+  :feature 2 fringe blocks-world*rl-action*general
+  {(<s> ^action <action>)
+  {(<action> ^block <block>)
+  (<block> ^name <block-name>)}
+  {(<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)}}
+  {(<s> ^blocks <blocks>)
+  {(<blocks> ^stack <stack>)
+  (<stack> ^top <block>)}
+  {(<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)}}
+  (<s> ^goal <goal>)
+  +(<dest-stack> ^tallest true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*not-tallest-goal-stack
+  :feature 2 fringe blocks-world*rl-action*general
+  {(<s> ^action <action>)
+  {(<action> ^block <block>)
+  (<block> ^name <block-name>)}
+  {(<action> ^dest <dest>)
+  (<dest> ^name <dest-name>)}}
+  {(<s> ^blocks <blocks>)
+  {(<blocks> ^stack <stack>)
+  (<stack> ^top <block>)}
+  {(<blocks> ^stack <dest-stack>)
+  (<dest-stack> ^top <dest>)}}
+  (<s> ^goal <goal>)
+  -(<dest-stack> ^tallest true)
+-->
+  = 0.0
+}
+
+#sp {blocks-world*rl-fringe*stack-taller-than-goal-stack
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^blocks <blocks>)
+#  (<s> ^goal <goal>)
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  +(<stack> ^taller-than <dest-stack>)
+#-->
+#  = 0.0
+#}
+#
+#sp {blocks-world*rl-fringe*stack-not-taller-than-goal-stack
+#  :feature 2 fringe blocks-world*rl-action*general
+#  (<s> ^blocks <blocks>)
+#  (<s> ^goal <goal>)
+#  (<s> ^action <action>)
+#  (<action> ^block <block>)
+#  (<block> ^name <block-name>)
+#  (<action> ^dest <dest>)
+#  (<dest> ^name <dest-name>)
+#  (<blocks> ^stack <stack>)
+#  (<stack> ^top <block>)
+#  (<blocks> ^stack <dest-stack>)
+#  (<dest-stack> ^top <dest>)
+#  -(<stack> ^taller-than <dest-stack>)
+#-->
+#  = 0.0
+#}
