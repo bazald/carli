@@ -43,13 +43,71 @@ namespace Rete {
     return prev_h * 31 + new_val;
   }
 
-  template <typename CONTAINER, typename HASHER>
-  size_t hash_container(const CONTAINER &container, HASHER &hasher) {
-    size_t h = 0;
-    for(const auto &entry : container)
-      h = hash_combine(h, hasher(entry));
-    return h;
-  }
+  class compare_container_deref_eq {
+  public:
+    template <typename CONTAINER>
+    bool operator()(const CONTAINER &lhs, const CONTAINER &rhs) const {
+      if(lhs.size() != rhs.size())
+        return false;
+      for(auto lt = lhs.begin(), rt = rhs.begin(), lend = lhs.end(); lt != lend; ++lt, ++rt) {
+        if(*lt != *rt)
+          return false;
+      }
+      return true;
+    }
+  };
+
+  class compare_container_deref_lt {
+  public:
+    template <typename CONTAINER>
+    bool operator()(const CONTAINER &lhs, const CONTAINER &rhs) const {
+      if(lhs.size() < rhs.size())
+        return true;
+      if(lhs.size() > rhs.size())
+        return false;
+      for(auto lt = lhs.begin(), rt = rhs.begin(), lend = lhs.end(); lt != lend; ++lt, ++rt) {
+        if(*lt < *rt)
+          return true;
+        else if(*lt > *rt)
+          return false;
+      }
+      return false;
+    }
+  };
+
+  template <typename T>
+  class hash_container {
+  public:
+    template <typename CONTAINER, typename HASHER>
+    size_t operator()(const CONTAINER &container, const HASHER &hasher) const {
+      size_t h = 0;
+      for(const auto &entry : container)
+        h = hash_combine(h, hasher(entry));
+      return h;
+    }
+
+    template <typename CONTAINER>
+    size_t operator()(const CONTAINER &container) const {
+      return (*this)(container, std::hash<T>());
+    }
+  };
+
+  template <typename T>
+  class hash_container_deref {
+  public:
+    template <typename CONTAINER, typename HASHER>
+    size_t operator()(const CONTAINER &container, const HASHER &hasher = std::hash<T>()) const {
+      size_t h = 0;
+      for(const auto &entry : container)
+        h = hash_combine(h, hasher(*entry));
+      return h;
+    }
+
+    template <typename CONTAINER>
+    size_t operator()(const CONTAINER &container) const {
+      return (*this)(container, std::hash<T>());
+    }
+  };
 
   template <typename T>
   class hash_deref {
@@ -77,7 +135,7 @@ namespace std {
   struct hash<array<T, N>> {
     size_t operator()(const array<T, N> &a) const {
       hash<T> hasher;
-      return hash_container(a, hasher);
+      return Rete::hash_container<T>()(a, hasher);
     }
   };
 
@@ -92,7 +150,7 @@ namespace std {
   struct hash<unordered_set<Key, Hash, Pred, Alloc>> {
     size_t operator()(const unordered_set<Key, Hash, Pred, Alloc> &us) const {
       hash<Key> hasher;
-      return hash_container(us, hasher);
+      return Rete::hash_container<Key>()(us, hasher);
     }
   };
 
@@ -100,7 +158,7 @@ namespace std {
   struct hash<vector<T, Alloc>> {
     size_t operator()(const vector<T, Alloc> &v) const {
       hash<T> hasher;
-      return hash_container(v, hasher);
+      return Rete::hash_container<T>()(v, hasher);
     }
   };
 }

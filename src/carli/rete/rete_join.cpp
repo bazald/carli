@@ -10,8 +10,7 @@
 namespace Rete {
 
   Rete_Join::Rete_Join(WME_Bindings bindings_)
-   : bindings(bindings_),
-   matching_enabled(bindings_.size() == 1)
+   : bindings(bindings_)
   {
   }
 
@@ -68,19 +67,14 @@ namespace Rete {
 //      assert(find(input0_tokens, wme_token) == input0_tokens.end());
       input0_tokens.push_back(wme_token);
 
-      if(matching_enabled) {
-        const WME_Binding &binding = *bindings.begin();
-        const Symbol_Ptr_C &symbol = (*wme_token)[binding.first];
-        auto &match = matching[symbol];
-        match.first.push_back(wme_token);
-        for(const auto &other : match.second) {
+      std::list<Symbol_Ptr_C> index;
+      for(const auto &binding : bindings)
+        index.push_back((*wme_token)[binding.first]);
+      auto &match = matching[index];
+      match.first.push_back(wme_token);
+      for(const auto &other : match.second) {
 //          std::cerr << "Savings: " << match.second.size() << " / " << input1_tokens.size() << std::endl;
-          join_tokens(agent, wme_token, other);
-        }
-      }
-      else {
-        for(const auto &other : input1_tokens)
-          join_tokens(agent, wme_token, other);
+        join_tokens(agent, wme_token, other);
       }
     }
     if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
@@ -101,19 +95,14 @@ namespace Rete {
 //      assert(find(input1_tokens, wme_token) == input1_tokens.end());
       input1_tokens.push_back(wme_token);
 
-      if(matching_enabled) {
-        const WME_Binding &binding = *bindings.begin();
-        const Symbol_Ptr_C &symbol = (*wme_token)[binding.second];
-        auto &match = matching[symbol];
-        match.second.push_back(wme_token);
-        for(const auto &other : match.first) {
+      std::list<Symbol_Ptr_C> index;
+      for(const auto &binding : bindings)
+        index.push_back((*wme_token)[binding.second]);
+      auto &match = matching[index];
+      match.second.push_back(wme_token);
+      for(const auto &other : match.first) {
 //          std::cerr << "Savings: " << match.first.size() << " / " << input0_tokens.size() << std::endl;
-          join_tokens(agent, other, wme_token);
-        }
-      }
-      else {
-        for(const auto &other : input0_tokens)
-          join_tokens(agent, other, wme_token);
+        join_tokens(agent, other, wme_token);
       }
     }
   }
@@ -129,16 +118,14 @@ namespace Rete {
         // TODO: Avoid looping through non-existent pairs?
         input0_tokens.erase(found);
 
-        if(matching_enabled) {
-          const WME_Binding &binding = *bindings.begin();
-          const Symbol_Ptr_C &symbol = (*wme_token)[binding.first];
-          auto &match = matching[symbol];
-          auto found2 = find(match.first, wme_token);
-          if(found2 != match.first.end())
-            match.first.erase(found2);
-        }
-
-        for(const auto &other : input1_tokens) {
+        std::list<Symbol_Ptr_C> index;
+        for(const auto &binding : bindings)
+          index.push_back((*wme_token)[binding.first]);
+        auto &match = matching[index];
+        auto found = find(match.first, wme_token);
+        if(found != match.first.end())
+          match.first.erase(found);
+        for(const auto &other : match.second) {
           auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
           if(found_output != output_tokens.end()) {
             for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
@@ -160,16 +147,14 @@ namespace Rete {
         // TODO: Avoid looping through non-existent pairs?
         input1_tokens.erase(found);
 
-        if(matching_enabled) {
-          const WME_Binding &binding = *bindings.begin();
-          const Symbol_Ptr_C &symbol = (*wme_token)[binding.second];
-          auto &match = matching[symbol];
-          auto found2 = find(match.second, wme_token);
-          if(found2 != match.second.end())
-            match.second.erase(found2);
-        }
-
-        for(const auto &other : input0_tokens) {
+        std::list<Symbol_Ptr_C> index;
+        for(const auto &binding : bindings)
+          index.push_back((*wme_token)[binding.second]);
+        auto &match = matching[index];
+        auto found = find(match.second, wme_token);
+        if(found != match.second.end())
+          match.second.erase(found);
+        for(const auto &other : match.first) {
           auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
           if(found_output != output_tokens.end()) {
             for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {

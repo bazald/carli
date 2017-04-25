@@ -71,8 +71,7 @@ namespace Rete {
       bool connected1 : 1;
     } data;
 
-    std::unordered_map<Symbol_Ptr_C, std::pair<Output_Tokens, Output_Tokens>, hash_deref<Symbol>, Rete::compare_deref_eq> matching;
-    bool matching_enabled = false;
+    std::unordered_map<std::list<Symbol_Ptr_C>, std::pair<Output_Tokens, Output_Tokens>, Rete::hash_container_deref<Symbol>, Rete::compare_container_deref_eq> matching;
   };
 
   RETE_LINKAGE void bind_to_join(Rete_Agent &agent, const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
