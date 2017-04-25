@@ -21,7 +21,9 @@ namespace Rete {
     Rete_Node_Ptr parent_left() override {return input0->shared();}
     Rete_Node_Ptr parent_right() override {return input1->shared();}
 
-    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> get_output_tokens() const override;
+    Rete_Filter_Ptr_C get_filter(const int64_t &index) const override;
+
+    Output_Tokens get_output_tokens() const override;
     bool has_output_tokens() const override;
 
     void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
@@ -54,7 +56,7 @@ namespace Rete {
     Rete_Node * input0 = nullptr;
     Rete_Node * input1 = nullptr;
     std::list<std::pair<WME_Token_Ptr_C, size_t>, Zeni::Pool_Allocator<std::pair<WME_Token_Ptr_C, size_t>>> input0_tokens;
-    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> input1_tokens;
+    Output_Tokens input1_tokens;
   };
 
   RETE_LINKAGE void bind_to_negation_join(Rete_Agent &agent, const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);

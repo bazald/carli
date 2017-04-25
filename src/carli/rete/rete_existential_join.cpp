@@ -30,8 +30,16 @@ namespace Rete {
     }
   }
 
-  std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Rete_Existential_Join::get_output_tokens() const {
-    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> tokens;
+  Rete_Filter_Ptr_C Rete_Existential_Join::get_filter(const int64_t &index) const {
+    const int64_t left_size = parent_left()->get_token_size();
+    if(index < left_size)
+      return parent_left()->get_filter(index);
+    else
+      return parent_right()->get_filter(index - left_size);
+  }
+
+  Rete_Node::Output_Tokens Rete_Existential_Join::get_output_tokens() const {
+    Output_Tokens tokens;
     for(auto &wme_token : input0_tokens) {
       if(wme_token.second)
         tokens.push_back(wme_token.first);

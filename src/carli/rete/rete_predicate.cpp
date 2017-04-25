@@ -35,7 +35,11 @@ namespace Rete {
     }
   }
 
-  std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Rete_Predicate::get_output_tokens() const {
+  Rete_Filter_Ptr_C Rete_Predicate::get_filter(const int64_t &index) const {
+    return parent_left()->get_filter(index);
+  }
+
+  Rete_Node::Output_Tokens Rete_Predicate::get_output_tokens() const {
     return tokens;
   }
 

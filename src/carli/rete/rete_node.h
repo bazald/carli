@@ -67,7 +67,7 @@ namespace Rete {
     virtual void print_action(std::ostream &os) const = 0;
   };
 
-  class RETE_LINKAGE Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<char [384]>
+  class RETE_LINKAGE Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<char [512]>
   {
     Rete_Node(const Rete_Node &);
     Rete_Node & operator=(const Rete_Node &);
@@ -114,6 +114,8 @@ namespace Rete {
     };
     typedef Output::List::list_pointer_type Outputs;
 
+    typedef std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Output_Tokens;
+
     Rete_Node() {}
 
     virtual ~Rete_Node() {
@@ -157,7 +159,9 @@ namespace Rete {
     int64_t get_size() const {return size;}
     int64_t get_token_size() const {return token_size;}
 
-    virtual std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> get_output_tokens() const = 0;
+    virtual Rete_Filter_Ptr_C get_filter(const int64_t &index) const = 0;
+
+    virtual Output_Tokens get_output_tokens() const = 0;
     virtual bool has_output_tokens() const = 0;
 
     virtual void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0;

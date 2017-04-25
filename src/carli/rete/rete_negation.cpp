@@ -15,8 +15,12 @@ namespace Rete {
     }
   }
 
-  std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Rete_Negation::get_output_tokens() const {
-    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> tokens;
+  Rete_Filter_Ptr_C Rete_Negation::get_filter(const int64_t &index) const {
+    return parent_left()->get_filter(index);
+  }
+
+  Rete_Node::Output_Tokens Rete_Negation::get_output_tokens() const {
+    Output_Tokens tokens;
     if(input_tokens.empty())
       tokens.push_back(output_token);
     return tokens;

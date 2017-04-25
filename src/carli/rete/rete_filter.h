@@ -10,6 +10,8 @@ namespace Rete {
     Rete_Filter & operator=(const Rete_Filter &);
 
   public:
+    enum Index {LEFT = 0, CENTER = 1, RIGHT = 2};
+
     Rete_Filter(const WME &wme_);
 
     const WME & get_wme() const;
@@ -21,7 +23,10 @@ namespace Rete {
     Rete_Node_Ptr parent_left() override {abort();}
     Rete_Node_Ptr parent_right() override {abort();}
 
-    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> get_output_tokens() const override;
+    Rete_Filter_Ptr_C get_filter(const int64_t &index) const override;
+
+    Output_Tokens get_output_tokens() const override;
+    Output_Tokens get_output_tokens(const Index &index, const Symbol_Ptr_C &symbol) const;
     bool has_output_tokens() const override;
 
     void insert_wme(Rete_Agent &agent, const WME_Ptr_C &wme);
@@ -48,7 +53,9 @@ namespace Rete {
   private:
     WME m_wme;
     std::array<Symbol_Variable_Ptr_C, 3> m_variable;
-    std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> tokens;
+    Output_Tokens tokens;
+
+    std::unordered_map<Symbol_Ptr_C, Output_Tokens, hash_deref<Symbol>, Rete::compare_deref_eq> m_matching[3];
   };
 
   RETE_LINKAGE void bind_to_filter(Rete_Agent &agent, const Rete_Filter_Ptr &filter);

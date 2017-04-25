@@ -9,7 +9,11 @@
 
 namespace Rete {
 
-  Rete_Join::Rete_Join(WME_Bindings bindings_) : bindings(bindings_) {}
+  Rete_Join::Rete_Join(WME_Bindings bindings_)
+   : bindings(bindings_),
+   matching_enabled(bindings_.size() == 1)
+  {
+  }
 
   void Rete_Join::destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) {
     erase_output(output);
@@ -27,7 +31,15 @@ namespace Rete {
     }
   }
 
-  std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Rete_Join::get_output_tokens() const {
+  Rete_Filter_Ptr_C Rete_Join::get_filter(const int64_t &index) const {
+    const int64_t left_size = parent_left()->get_token_size();
+    if(index < left_size)
+      return parent_left()->get_filter(index);
+    else
+      return parent_right()->get_filter(index - left_size);
+  }
+
+  Rete_Node::Output_Tokens Rete_Join::get_output_tokens() const {
     return output_tokens;
   }
 
@@ -56,8 +68,20 @@ namespace Rete {
 //      assert(find(input0_tokens, wme_token) == input0_tokens.end());
       input0_tokens.push_back(wme_token);
 
-      for(const auto &other : input1_tokens)
-        join_tokens(agent, wme_token, other);
+      if(matching_enabled) {
+        const WME_Binding &binding = *bindings.begin();
+        const Symbol_Ptr_C &symbol = (*wme_token)[binding.first];
+        auto &match = matching[symbol];
+        match.first.push_back(wme_token);
+        for(const auto &other : match.second) {
+//          std::cerr << "Savings: " << match.second.size() << " / " << input1_tokens.size() << std::endl;
+          join_tokens(agent, wme_token, other);
+        }
+      }
+      else {
+        for(const auto &other : input1_tokens)
+          join_tokens(agent, wme_token, other);
+      }
     }
     if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
 //#ifdef DEBUG_OUTPUT
@@ -77,8 +101,20 @@ namespace Rete {
 //      assert(find(input1_tokens, wme_token) == input1_tokens.end());
       input1_tokens.push_back(wme_token);
 
-      for(const auto &other : input0_tokens)
-        join_tokens(agent, other, wme_token);
+      if(matching_enabled) {
+        const WME_Binding &binding = *bindings.begin();
+        const Symbol_Ptr_C &symbol = (*wme_token)[binding.second];
+        auto &match = matching[symbol];
+        match.second.push_back(wme_token);
+        for(const auto &other : match.first) {
+//          std::cerr << "Savings: " << match.first.size() << " / " << input0_tokens.size() << std::endl;
+          join_tokens(agent, other, wme_token);
+        }
+      }
+      else {
+        for(const auto &other : input0_tokens)
+          join_tokens(agent, other, wme_token);
+      }
     }
   }
 
@@ -92,6 +128,16 @@ namespace Rete {
       if(found != input0_tokens.end()) {
         // TODO: Avoid looping through non-existent pairs?
         input0_tokens.erase(found);
+
+        if(matching_enabled) {
+          const WME_Binding &binding = *bindings.begin();
+          const Symbol_Ptr_C &symbol = (*wme_token)[binding.first];
+          auto &match = matching[symbol];
+          auto found2 = find(match.first, wme_token);
+          if(found2 != match.first.end())
+            match.first.erase(found2);
+        }
+
         for(const auto &other : input1_tokens) {
           auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
           if(found_output != output_tokens.end()) {
@@ -113,6 +159,16 @@ namespace Rete {
       if(found != input1_tokens.end()) {
         // TODO: Avoid looping through non-existent pairs?
         input1_tokens.erase(found);
+
+        if(matching_enabled) {
+          const WME_Binding &binding = *bindings.begin();
+          const Symbol_Ptr_C &symbol = (*wme_token)[binding.second];
+          auto &match = matching[symbol];
+          auto found2 = find(match.second, wme_token);
+          if(found2 != match.second.end())
+            match.second.erase(found2);
+        }
+
         for(const auto &other : input0_tokens) {
           auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
           if(found_output != output_tokens.end()) {
