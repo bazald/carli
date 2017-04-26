@@ -34,17 +34,6 @@ namespace Rete {
     return tokens;
   }
 
-  Rete_Node::Output_Tokens Rete_Filter::get_output_tokens(const Index &index, const Symbol_Ptr_C &symbol) const {
-    if(m_variable[index]) {
-      const auto found = m_matching[index].find(symbol);
-      if(found != m_matching[index].end())
-        return found->second;
-    }
-    else if(*m_wme.symbols[index] == *symbol)
-      return tokens;
-    return Output_Tokens();
-  }
-
   bool Rete_Filter::has_output_tokens() const {
     return !tokens.empty();
   }
@@ -65,11 +54,6 @@ namespace Rete {
       const auto token = std::make_shared<WME_Token>(wme);
       tokens.push_back(token);
 
-      for(int i = 0; i != 2; ++i) {
-        if(m_variable[i])
-          m_matching[i][wme->symbols[i]].push_back(token);
-      }
-
       for(auto &output : *outputs_enabled)
         output.ptr->insert_wme_token(agent, tokens.back(), this);
     }
@@ -78,15 +62,6 @@ namespace Rete {
   void Rete_Filter::remove_wme(Rete_Agent &agent, const WME_Ptr_C &wme) {
     auto found = std::find_if(tokens.begin(), tokens.end(), [&wme](const WME_Token_Ptr_C &token)->bool{return *wme == *token->get_wme();});
     if(found != tokens.end()) {
-      for(int i = 0; i != 2; ++i) {
-        if(m_variable[i]) {
-          auto &matching_tokens = m_matching[i][wme->symbols[i]];
-          const auto found = std::find_if(matching_tokens.begin(), matching_tokens.end(), [&wme](const WME_Token_Ptr_C &token)->bool{return *wme == *token->get_wme();});
-          assert(found != matching_tokens.end());
-          matching_tokens.erase(found);
-        }
-      }
-
       for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
         if((*ot)->remove_wme_token(agent, *found, this))
           (*ot++)->disconnect(agent, this);

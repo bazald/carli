@@ -11,6 +11,7 @@
 *.cbp
 *.cscope_file_list
 *.d
+*.db
 *.depend
 *.dll
 *.dvi
@@ -22,6 +23,7 @@
 *.ipch
 *.kate-swp
 *.lastbuildstate
+*.lastcodeanalysissucceeded
 *.layout
 *.lib
 *.lof
@@ -30,6 +32,7 @@
 *.manifest
 *.o
 *.obj
+*.opendb
 *.opensdf
 *.orig
 *.out
@@ -40,6 +43,7 @@
 *.rc
 *.res
 *.save
+*.save-failed
 *.sdf
 *.sln
 *.so
@@ -80,6 +84,7 @@ core
 codeblocks_dbgrpt-*
 dump.txt
 git.h
+gmon.txt
 Makefile
 rules-out.txt
 seed.txt
