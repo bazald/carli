@@ -76,6 +76,21 @@ namespace Rete {
 //          std::cerr << "Savings: " << match.second.size() << " / " << input1_tokens.size() << std::endl;
         join_tokens(agent, wme_token, other);
       }
+//      for(const auto &other : input1_tokens) {
+//        bool match_success = true;
+//        for(auto &binding : bindings) {
+//          if(*(*wme_token)[binding.first] != *(*other)[binding.second])
+//            match_success = false;
+//        }
+//        if(match_success && find_deref(match.second, other) == match.second.end()) {
+//          std::cerr << "Excluded: " << *other << " from " << *wme_token << " on the basis of " << bindings << std::endl;
+//          std::cerr << "Index:";
+//          for(const auto &symbol : index)
+//            std::cerr << ' ' << symbol << ':' << *symbol;
+//          std::cerr << std::endl;
+//          abort();
+//        }
+//      }
     }
     if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
 //#ifdef DEBUG_OUTPUT
@@ -104,6 +119,21 @@ namespace Rete {
 //          std::cerr << "Savings: " << match.first.size() << " / " << input0_tokens.size() << std::endl;
         join_tokens(agent, other, wme_token);
       }
+//      for(const auto &other : input0_tokens) {
+//        bool match_success = true;
+//        for(auto &binding : bindings) {
+//          if(*(*other)[binding.first] != *(*wme_token)[binding.second])
+//            match_success = false;
+//        }
+//        if(match_success && find_deref(match.first, other) == match.first.end()) {
+//          std::cerr << "Excluded: " << *wme_token << " from " << *other << " on the basis of " << bindings << std::endl;
+//          std::cerr << "Index:";
+//          for(const auto &symbol : index)
+//            std::cerr << ' ' << symbol << ':' << *symbol;
+//          std::cerr << std::endl;
+//          abort();
+//        }
+//      }
     }
   }
 
@@ -123,19 +153,27 @@ namespace Rete {
           index.push_back((*wme_token)[binding.first]);
         auto &match = matching[index];
         auto found = find(match.first, wme_token);
-        if(found != match.first.end())
+        if(found != match.first.end()) {
           match.first.erase(found);
-        for(const auto &other : match.second) {
-          auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
-          if(found_output != output_tokens.end()) {
-            for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
-              if((*ot)->remove_wme_token(agent, *found_output, this))
-                (*ot++)->disconnect(agent, this);
-              else
-                ++ot;
+          if(match.first.empty() && match.second.empty())
+            matching.erase(index);
+          for(const auto &other : match.second) {
+            auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
+            if(found_output != output_tokens.end()) {
+              for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
+                if((*ot)->remove_wme_token(agent, *found_output, this))
+                  (*ot++)->disconnect(agent, this);
+                else
+                  ++ot;
+              }
+              output_tokens.erase(found_output);
             }
-            output_tokens.erase(found_output);
           }
+//          for(const auto &other : input1_tokens) {
+//            auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
+//            if(found_output != output_tokens.end())
+//              abort();
+//          }
         }
 
         emptied ^= input0_tokens.empty();
@@ -152,19 +190,27 @@ namespace Rete {
           index.push_back((*wme_token)[binding.second]);
         auto &match = matching[index];
         auto found = find(match.second, wme_token);
-        if(found != match.second.end())
+        if(found != match.second.end()) {
           match.second.erase(found);
-        for(const auto &other : match.first) {
-          auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
-          if(found_output != output_tokens.end()) {
-            for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
-              if((*ot)->remove_wme_token(agent, *found_output, this))
-                (*ot++)->disconnect(agent, this);
-              else
-                ++ot;
+          if(match.second.empty() && match.first.empty())
+            matching.erase(index);
+          for(const auto &other : match.first) {
+            auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
+            if(found_output != output_tokens.end()) {
+              for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
+                if((*ot)->remove_wme_token(agent, *found_output, this))
+                  (*ot++)->disconnect(agent, this);
+                else
+                  ++ot;
+              }
+              output_tokens.erase(found_output);
             }
-            output_tokens.erase(found_output);
           }
+//          for(const auto &other : input0_tokens) {
+//            auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
+//            if(found_output != output_tokens.end())
+//              abort();
+//          }
         }
 
         emptied ^= input1_tokens.empty();
@@ -270,10 +316,10 @@ namespace Rete {
   }
 
   void Rete_Join::join_tokens(Rete_Agent &agent, const WME_Token_Ptr_C &lhs, const WME_Token_Ptr_C &rhs) {
-    for(auto &binding : bindings) {
-      if(*(*lhs)[binding.first] != *(*rhs)[binding.second])
-        return;
-    }
+//    for(auto &binding : bindings) {
+//      if(*(*lhs)[binding.first] != *(*rhs)[binding.second])
+//        return;
+//    }
 
 //#ifdef DEBUG_OUTPUT
 //    std::cerr << "Joining " << *lhs << " and " << *rhs << std::endl;

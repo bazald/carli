@@ -18,6 +18,7 @@ namespace Rete {
   }
 
   std::ostream & WME::print(std::ostream &os) const {
+//    return os << '(' << symbols[0] << ':' << *symbols[0] << " ^" << symbols[1] << ':' << *symbols[1] << ' ' << symbols[2] << ':' << *symbols[2] << ')';
     return os << '(' << *symbols[0] << " ^" << *symbols[1] << ' ' << *symbols[2] << ')';
   }
 

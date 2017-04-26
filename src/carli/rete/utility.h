@@ -50,7 +50,7 @@ namespace Rete {
       if(lhs.size() != rhs.size())
         return false;
       for(auto lt = lhs.begin(), rt = rhs.begin(), lend = lhs.end(); lt != lend; ++lt, ++rt) {
-        if(*lt != *rt)
+        if(**lt != **rt)
           return false;
       }
       return true;
@@ -66,9 +66,9 @@ namespace Rete {
       if(lhs.size() > rhs.size())
         return false;
       for(auto lt = lhs.begin(), rt = rhs.begin(), lend = lhs.end(); lt != lend; ++lt, ++rt) {
-        if(*lt < *rt)
+        if(**lt < **rt)
           return true;
-        else if(*lt > *rt)
+        else if(**lt > **rt)
           return false;
       }
       return false;
