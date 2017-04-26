@@ -39,7 +39,9 @@ namespace Rete {
   }
 
   Rete_Node::Output_Tokens Rete_Join::get_output_tokens() const {
-    return output_tokens;
+    Output_Tokens output;
+    output.insert(output.end(), output_tokens.begin(), output_tokens.end());
+    return output;
   }
 
   bool Rete_Join::has_output_tokens() const {
@@ -49,7 +51,7 @@ namespace Rete {
   void Rete_Join::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
     assert(from == input0 || from == input1);
 
-    if(from == input0 && find(input0_tokens, wme_token) == input0_tokens.end()) {
+    if(from == input0) {
 //#ifdef DEBUG_OUTPUT
 //      std::cerr << this << " Joining left: " << *wme_token << std::endl;
 //#endif
@@ -58,23 +60,23 @@ namespace Rete {
 //#ifdef DEBUG_OUTPUT
 //        std::cerr << this << " Connecting right" << std::endl;
 //#endif
-        assert(input1_tokens.empty());
+        assert(!input1_count);
         input1->enable_output(agent, this);
         data.connected1 = true;
       }
 #endif
 
-//      assert(find(input0_tokens, wme_token) == input0_tokens.end());
-      input0_tokens.push_back(wme_token);
-
       std::list<Symbol_Ptr_C> index;
       for(const auto &binding : bindings)
         index.push_back((*wme_token)[binding.first]);
       auto &match = matching[index];
-      match.first.push_back(wme_token);
-      for(const auto &other : match.second) {
+      const auto inserted = match.first.insert(wme_token);
+      if(inserted.second) {
+        ++input0_count;
+        for(const auto &other : match.second) {
 //          std::cerr << "Savings: " << match.second.size() << " / " << input1_tokens.size() << std::endl;
-        join_tokens(agent, wme_token, other);
+          join_tokens(agent, *inserted.first, other);
+        }
       }
 //      for(const auto &other : input1_tokens) {
 //        bool match_success = true;
@@ -92,7 +94,7 @@ namespace Rete {
 //        }
 //      }
     }
-    if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
+    if(from == input1) {
 //#ifdef DEBUG_OUTPUT
 //      std::cerr << this << " Joining right: " << *wme_token << std::endl;
 //#endif
@@ -101,23 +103,23 @@ namespace Rete {
 //#ifdef DEBUG_OUTPUT
 //        std::cerr << this << " Connecting left" << std::endl;
 //#endif
-        assert(input0_tokens.empty());
+        assert(!input0_count);
         input0->enable_output(agent, this);
         data.connected0 = true;
       }
 #endif
 
-//      assert(find(input1_tokens, wme_token) == input1_tokens.end());
-      input1_tokens.push_back(wme_token);
-
       std::list<Symbol_Ptr_C> index;
       for(const auto &binding : bindings)
         index.push_back((*wme_token)[binding.second]);
       auto &match = matching[index];
-      match.second.push_back(wme_token);
-      for(const auto &other : match.first) {
+      const auto inserted = match.second.insert(wme_token);
+      if(inserted.second) {
+        ++input1_count;
+        for(const auto &other : match.first) {
 //          std::cerr << "Savings: " << match.first.size() << " / " << input0_tokens.size() << std::endl;
-        join_tokens(agent, other, wme_token);
+          join_tokens(agent, other, *inserted.first);
+        }
       }
 //      for(const auto &other : input0_tokens) {
 //        bool match_success = true;
@@ -143,21 +145,15 @@ namespace Rete {
     bool emptied = false;
 
     if(from == input0) {
-      auto found = find(input0_tokens, wme_token);
-      if(found != input0_tokens.end()) {
-        // TODO: Avoid looping through non-existent pairs?
-        input0_tokens.erase(found);
+      std::list<Symbol_Ptr_C> index;
+      for(const auto &binding : bindings)
+        index.push_back((*wme_token)[binding.first]);
+      auto &match = matching[index];
+      auto found2 = match.first.find(wme_token);
 
-        std::list<Symbol_Ptr_C> index;
-        for(const auto &binding : bindings)
-          index.push_back((*wme_token)[binding.first]);
-        auto &match = matching[index];
-        auto found2 = find(match.first, wme_token);
-        assert(found2 != match.first.end());
-
-        match.first.erase(found2);
+      if(found2 != match.first.end()) {
         for(const auto &other : match.second) {
-          auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
+          auto found_output = output_tokens.find(join_wme_tokens(*found2, other));
           if(found_output != output_tokens.end()) {
             for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
               if((*ot)->remove_wme_token(agent, *found_output, this))
@@ -168,33 +164,29 @@ namespace Rete {
             output_tokens.erase(found_output);
           }
         }
-        if(match.first.empty() && match.second.empty())
-          matching.erase(index);
+        match.first.erase(found2);
 //          for(const auto &other : input1_tokens) {
 //            auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
 //            if(found_output != output_tokens.end())
 //              abort();
 //          }
 
-        emptied ^= input0_tokens.empty();
+        emptied ^= !--input0_count;
       }
+
+      if(match.first.empty() && match.second.empty())
+        matching.erase(index);
     }
     if(from == input1) {
-      auto found = find(input1_tokens, wme_token);
-      if(found != input1_tokens.end()) {
-        // TODO: Avoid looping through non-existent pairs?
-        input1_tokens.erase(found);
+      std::list<Symbol_Ptr_C> index;
+      for(const auto &binding : bindings)
+        index.push_back((*wme_token)[binding.second]);
+      auto &match = matching[index];
+      auto found2 = match.second.find(wme_token);
 
-        std::list<Symbol_Ptr_C> index;
-        for(const auto &binding : bindings)
-          index.push_back((*wme_token)[binding.second]);
-        auto &match = matching[index];
-        auto found2 = find(match.second, wme_token);
-        assert(found2 != match.second.end());
-
-        match.second.erase(found2);
+      if(found2 != match.second.end()) {
         for(const auto &other : match.first) {
-          auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
+          auto found_output = output_tokens.find(join_wme_tokens(other, *found2));
           if(found_output != output_tokens.end()) {
             for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
               if((*ot)->remove_wme_token(agent, *found_output, this))
@@ -205,16 +197,18 @@ namespace Rete {
             output_tokens.erase(found_output);
           }
         }
-        if(match.second.empty() && match.first.empty())
-          matching.erase(index);
+        match.second.erase(found2);
 //          for(const auto &other : input0_tokens) {
 //            auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
 //            if(found_output != output_tokens.end())
 //              abort();
 //          }
 
-        emptied ^= input1_tokens.empty();
+        emptied ^= !--input1_count;
       }
+
+      if(match.second.empty() && match.first.empty())
+        matching.erase(index);
     }
 
     return emptied;
@@ -327,12 +321,12 @@ namespace Rete {
 
     assert(find_deref(output_tokens, join_wme_tokens(lhs, rhs)) == output_tokens.end());
 
-    output_tokens.push_back(join_wme_tokens(lhs, rhs));
+    const auto token = output_tokens.insert(join_wme_tokens(lhs, rhs));
     for(auto &output : *outputs_enabled)
-      output.ptr->insert_wme_token(agent, output_tokens.back(), this);
+      output.ptr->insert_wme_token(agent, *token.first, this);
   }
 
-  WME_Token_Ptr_C Rete_Join::join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs) {
+  WME_Token_Ptr_C Rete_Join::join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs) const {
     if(rhs->size())
       return std::make_shared<WME_Token>(lhs, rhs);
     else
@@ -356,19 +350,19 @@ namespace Rete {
 //#endif
       assert(data.connected0);
       assert(data.connected1);
-      assert(input0_tokens.empty());
+      assert(!input0_count);
 //#ifndef NDEBUG
 //      std::cerr << input1_tokens.size() << std::endl;
 //#endif
       input1->disable_output(agent, this);
-      input1_tokens.clear();
+      matching.clear();
+      input1_count = 0;
 //#ifndef NDEBUG
 //      std::cerr << typeid(*input1).name() << " failed to unpass" << input1_tokens.size() << std::endl;
 //      for(const auto &token : input1_tokens) {
 //        std::cerr << *token << std::endl;
 //      }
 //#endif
-      assert(input1_tokens.empty());
       data.connected1 = false;
     }
     else {
@@ -377,19 +371,19 @@ namespace Rete {
 //#endif
       assert(data.connected0);
       assert(data.connected1);
-      assert(input1_tokens.empty());
+      assert(!input1_count);
 //#ifndef NDEBUG
 //      std::cerr << input0_tokens.size() << std::endl;
 //#endif
       input0->disable_output(agent, this);
-      input0_tokens.clear();
+      matching.clear();
+      input0_count = 0;
 //#ifndef NDEBUG
 //      std::cerr << typeid(*input0).name() << " failed to unpass" << input0_tokens.size() << std::endl;
 //      for(const auto &token : input0_tokens) {
 //        std::cerr << *token << std::endl;
 //      }
 //#endif
-      assert(input0_tokens.empty());
       data.connected0 = false;
     }
     assert(data.connected0 || data.connected1);

@@ -50,7 +50,7 @@ namespace Rete {
   private:
     void join_tokens(Rete_Agent &agent, const WME_Token_Ptr_C &lhs, const WME_Token_Ptr_C &rhs);
 
-    WME_Token_Ptr_C join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs);
+    WME_Token_Ptr_C join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs) const;
 
     void disconnect(Rete_Agent &agent, const Rete_Node * const &from) override;
 
@@ -60,11 +60,11 @@ namespace Rete {
     WME_Bindings bindings;
     Rete_Node * input0 = nullptr;
     Rete_Node * input1 = nullptr;
-    Output_Tokens input0_tokens;
-    Output_Tokens input1_tokens;
-    Output_Tokens output_tokens;
+    int64_t input0_count = 0;
+    int64_t input1_count = 0;
 
-    std::unordered_map<std::list<Symbol_Ptr_C>, std::pair<Output_Tokens, Output_Tokens>, Rete::hash_container_deref<Symbol>, Rete::compare_container_deref_eq> matching;
+    std::unordered_map<std::list<Symbol_Ptr_C>, std::pair<Tokens, Tokens>, Rete::hash_container_deref<Symbol>, Rete::compare_container_deref_eq> matching;
+    Tokens output_tokens;
 
     struct Connected {
       Connected() : connected0(true), connected1(true) {}

@@ -114,6 +114,7 @@ namespace Rete {
     };
     typedef Output::List::list_pointer_type Outputs;
 
+    typedef std::unordered_set<WME_Token_Ptr_C, Rete::hash_deref<WME_Token>, Rete::compare_deref_eq> Tokens;
     typedef std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Output_Tokens;
 
     Rete_Node() {}
