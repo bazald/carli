@@ -55,10 +55,11 @@ namespace Rete {
     WME_Bindings bindings;
     Rete_Node * input0 = nullptr;
     Rete_Node * input1 = nullptr;
-    Output_Tokens input0_tokens;
-    Output_Tokens input1_tokens;
+    int64_t input0_count = 0;
+    int64_t input1_count = 0;
 
-    std::unordered_map<std::list<Symbol_Ptr_C>, std::pair<Output_Tokens, Output_Tokens>, Rete::hash_container_deref<Symbol>, Rete::compare_container_deref_eq> matching;
+    std::unordered_map<std::list<Symbol_Ptr_C>, std::pair<Tokens, Tokens>, Rete::hash_container_deref<Symbol>, Rete::compare_container_deref_eq> matching;
+    Tokens output_tokens;
   };
 
   RETE_LINKAGE void bind_to_negation_join(Rete_Agent &agent, const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);

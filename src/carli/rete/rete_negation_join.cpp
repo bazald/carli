@@ -32,51 +32,42 @@ namespace Rete {
   }
 
   Rete_Node::Output_Tokens Rete_Negation_Join::get_output_tokens() const {
-    Output_Tokens output_tokens;
-    for(const auto &match : matching) {
-      if(match.second.second.empty()) {
-        for(auto &wme_token : match.second.first)
-          output_tokens.push_back(wme_token);
-      }
-    }
-    return output_tokens;
+    Output_Tokens output;
+    output.insert(output.end(), output_tokens.begin(), output_tokens.end());
+    return output;
   }
 
   bool Rete_Negation_Join::has_output_tokens() const {
-    for(const auto &match : matching) {
-      if(!match.second.first.empty() && match.second.second.empty())
-        return true;
-    }
-    return false;
+    return !output_tokens.empty();
   }
 
   void Rete_Negation_Join::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
     assert(from == input0 || from == input1);
 
-    if(from == input0 && find(input0_tokens, wme_token) == input0_tokens.end()) {
-//      assert(find_key(input0_tokens, wme_token) == input0_tokens.end());
-      input0_tokens.push_back(wme_token);
-
+    if(from == input0) {
       std::list<Symbol_Ptr_C> index;
       for(const auto &binding : bindings)
         index.push_back((*wme_token)[binding.first]);
       auto &match = matching[index];
-      match.first.push_back(wme_token);
-      if(match.second.empty())
-        join_tokens(agent, wme_token);
+      const auto inserted = match.first.insert(wme_token);
+      if(inserted.second) {
+        ++input0_count;
+        if(match.second.empty())
+          join_tokens(agent, *inserted.first);
+      }
     }
-    if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
-//      assert(find(input1_tokens, wme_token) == input1_tokens.end());
-      input1_tokens.push_back(wme_token);
-
+    if(from == input1) {
       std::list<Symbol_Ptr_C> index;
       for(const auto &binding : bindings)
         index.push_back((*wme_token)[binding.second]);
       auto &match = matching[index];
-      match.second.push_back(wme_token);
-      if(match.second.size() == 1u) {
-        for(auto &other : match.first)
-          unjoin_tokens(agent, other);
+      const auto inserted = match.second.insert(wme_token);
+      if(inserted.second) {
+        ++input1_count;
+        if(match.second.size() == 1u) {
+          for(const auto &other : match.first)
+            unjoin_tokens(agent, other);
+        }
       }
     }
   }
@@ -87,52 +78,46 @@ namespace Rete {
     bool emptied = false;
 
     if(from == input0) {
-      auto found = find(input0_tokens, wme_token);
-      if(found != input0_tokens.end()) {
-        input0_tokens.erase(found);
+      std::list<Symbol_Ptr_C> index;
+      for(const auto &binding : bindings)
+        index.push_back((*wme_token)[binding.first]);
+      auto &match = matching[index];
+      auto found2 = match.first.find(wme_token);
 
-        std::list<Symbol_Ptr_C> index;
-        for(const auto &binding : bindings)
-          index.push_back((*wme_token)[binding.first]);
-        auto &match = matching[index];
-        auto found2 = find(match.first, wme_token);
-        assert(found2 != match.first.end());
-
-        match.first.erase(found2);
+      if(found2 != match.first.end()) {
         if(match.second.empty()) {
-          unjoin_tokens(agent, wme_token);
-          if(match.first.empty())
-            matching.erase(index);
+          unjoin_tokens(agent, *found2);
+          output_tokens.erase(*found2);
         }
+        match.first.erase(found2);
 
-        emptied ^= input0_tokens.empty();
+        emptied ^= !--input0_count;
       }
+
+      if(match.first.empty() && match.second.empty())
+        matching.erase(index);
     }
     if(from == input1) {
-      auto found = find(input1_tokens, wme_token);
-      if(found != input1_tokens.end()) {
-        // TODO: Avoid looping through non-existent pairs?
-        input1_tokens.erase(found);
+      std::list<Symbol_Ptr_C> index;
+      for(const auto &binding : bindings)
+        index.push_back((*wme_token)[binding.second]);
+      auto &match = matching[index];
+      auto found2 = match.second.find(wme_token);
 
-        std::list<Symbol_Ptr_C> index;
-        for(const auto &binding : bindings)
-          index.push_back((*wme_token)[binding.second]);
-        auto &match = matching[index];
-        auto found2 = find(match.second, wme_token);
-        assert(found2 != match.second.end());
-
-        match.second.erase(found2);
-        if(match.second.empty()) {
-          if(!match.first.empty()) {
-            for(auto &other : match.first)
-              join_tokens(agent, other);
+      if(found2 != match.second.end()) {
+        if(match.second.size() == 1) {
+          for(auto &other : match.first) {
+            join_tokens(agent, other);
+            output_tokens.erase(other);
           }
-          else
-            matching.erase(index);
         }
+        match.second.erase(found2);
 
-        emptied ^= input1_tokens.empty();
+        emptied ^= !--input1_count;
       }
+
+      if(match.second.empty() && match.first.empty())
+        matching.erase(index);
     }
 
     return emptied;
@@ -245,21 +230,13 @@ namespace Rete {
   }
 
   void Rete_Negation_Join::pass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
-    for(const auto &match : matching) {
-      if(match.second.second.empty()) {
-        for(auto &wme_token : match.second.first)
-          output->insert_wme_token(agent, wme_token, this);
-      }
-    }
+    for(auto &wme_token : output_tokens)
+      output->insert_wme_token(agent, wme_token, this);
   }
 
   void Rete_Negation_Join::unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
-    for(const auto &match : matching) {
-      if(match.second.second.empty()) {
-        for(auto &wme_token : match.second.first)
-          output->remove_wme_token(agent, wme_token, this);
-      }
-    }
+    for(auto &wme_token : output_tokens)
+      output->remove_wme_token(agent, wme_token, this);
   }
 
   void bind_to_negation_join(Rete_Agent &agent, const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
