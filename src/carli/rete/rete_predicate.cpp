@@ -39,7 +39,7 @@ namespace Rete {
     return parent_left()->get_filter(index);
   }
 
-  Rete_Node::Output_Tokens Rete_Predicate::get_output_tokens() const {
+  const Rete_Node::Tokens & Rete_Predicate::get_output_tokens() const {
     return tokens;
   }
 
@@ -63,10 +63,11 @@ namespace Rete {
         return;
     }
 
-    tokens.push_back(wme_token);
-
-    for(auto &output : *outputs_enabled)
-      output.ptr->insert_wme_token(agent, wme_token, this);
+    const auto inserted = tokens.insert(wme_token);
+    if(inserted.second) {
+      for(auto &output : *outputs_enabled)
+        output.ptr->insert_wme_token(agent, *inserted.first, this);
+    }
   }
 
   bool Rete_Predicate::remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
@@ -76,15 +77,15 @@ namespace Rete {
                                                                                                                           ) {
     assert(from == input);
 
-    auto found = find(tokens, wme_token);
+    auto found = tokens.find(wme_token);
     if(found != tokens.end()) {
-      tokens.erase(found);
       for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
-        if((*ot)->remove_wme_token(agent, wme_token, this))
+        if((*ot)->remove_wme_token(agent, *found, this))
           (*ot++)->disconnect(agent, this);
         else
           ++ot;
       }
+      tokens.erase(found);
     }
 
     return tokens.empty();

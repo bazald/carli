@@ -38,10 +38,8 @@ namespace Rete {
       return parent_right()->get_filter(index - left_size);
   }
 
-  Rete_Node::Output_Tokens Rete_Join::get_output_tokens() const {
-    Output_Tokens output;
-    output.insert(output.end(), output_tokens.begin(), output_tokens.end());
-    return output;
+  const Rete_Node::Tokens & Rete_Join::get_output_tokens() const {
+    return output_tokens;
   }
 
   bool Rete_Join::has_output_tokens() const {
@@ -319,11 +317,11 @@ namespace Rete {
 //    std::cerr << "Joining " << *lhs << " and " << *rhs << std::endl;
 //#endif
 
-    assert(find_deref(output_tokens, join_wme_tokens(lhs, rhs)) == output_tokens.end());
-
     const auto token = output_tokens.insert(join_wme_tokens(lhs, rhs));
-    for(auto &output : *outputs_enabled)
-      output.ptr->insert_wme_token(agent, *token.first, this);
+    if(token.second) {
+      for(auto &output : *outputs_enabled)
+        output.ptr->insert_wme_token(agent, *token.first, this);
+    }
   }
 
   WME_Token_Ptr_C Rete_Join::join_wme_tokens(const WME_Token_Ptr_C lhs, const WME_Token_Ptr_C &rhs) const {

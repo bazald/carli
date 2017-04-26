@@ -23,7 +23,7 @@ namespace Rete {
 
     Rete_Filter_Ptr_C get_filter(const int64_t &index) const override;
 
-    Output_Tokens get_output_tokens() const override;
+    const Tokens & get_output_tokens() const override;
     bool has_output_tokens() const override;
 
     void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) override;
@@ -48,7 +48,8 @@ namespace Rete {
 
   private:
     Rete_Node * input = nullptr;
-    Output_Tokens input_tokens;
+    Tokens input_tokens;
+    Tokens output_tokens;
     WME_Token_Ptr_C output_token;
   };
 

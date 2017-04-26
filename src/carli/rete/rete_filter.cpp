@@ -30,7 +30,7 @@ namespace Rete {
     return std::dynamic_pointer_cast<const Rete_Filter>(shared_from_this());
   }
 
-  Rete_Node::Output_Tokens Rete_Filter::get_output_tokens() const {
+  const Rete_Node::Tokens & Rete_Filter::get_output_tokens() const {
     return tokens;
   }
 
@@ -50,17 +50,15 @@ namespace Rete {
     if(m_variable[1] && m_variable[2] && *m_variable[1] == *m_variable[2] && *wme->symbols[1] != *wme->symbols[2])
       return;
 
-    if(std::find_if(tokens.begin(), tokens.end(), [&wme](const WME_Token_Ptr_C &token)->bool{return *wme == *token->get_wme();}) == tokens.end()) {
-      const auto token = std::make_shared<WME_Token>(wme);
-      tokens.push_back(token);
-
+    const auto inserted = tokens.insert(std::make_shared<WME_Token>(wme));
+    if(inserted.second) {
       for(auto &output : *outputs_enabled)
-        output.ptr->insert_wme_token(agent, tokens.back(), this);
+        output.ptr->insert_wme_token(agent, *inserted.first, this);
     }
   }
 
   void Rete_Filter::remove_wme(Rete_Agent &agent, const WME_Ptr_C &wme) {
-    auto found = std::find_if(tokens.begin(), tokens.end(), [&wme](const WME_Token_Ptr_C &token)->bool{return *wme == *token->get_wme();});
+    auto found = tokens.find(std::make_shared<WME_Token>(wme));
     if(found != tokens.end()) {
       for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
         if((*ot)->remove_wme_token(agent, *found, this))

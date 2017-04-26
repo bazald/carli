@@ -47,7 +47,7 @@ namespace Rete {
     return parent_left()->get_filter(index);
   }
 
-  Rete_Node::Output_Tokens Rete_Action::get_output_tokens() const {
+  const Rete_Node::Tokens & Rete_Action::get_output_tokens() const {
     abort();
   }
 
@@ -62,7 +62,7 @@ namespace Rete {
                                                                                                   ) {
     assert(from == input);
 
-    input_tokens.push_back(wme_token);
+    const auto inserted = input_tokens.insert(wme_token);
 
 //#ifdef DEBUG_OUTPUT
 //    std::cerr << "Firing action: ";
@@ -70,7 +70,7 @@ namespace Rete {
 //    std::cerr << std::endl;
 //#endif
 
-    agent.get_agenda().insert_action(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
+    agent.get_agenda().insert_action(debuggable_pointer_cast<Rete_Action>(shared()), *inserted.first);
   }
 
   bool Rete_Action::remove_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &
@@ -80,12 +80,12 @@ namespace Rete {
                                                                                                   ) {
     assert(from == input);
 
-    auto found = find(input_tokens, wme_token);
+    auto found = input_tokens.find(wme_token);
     if(found != input_tokens.end())
     // TODO: change from the 'if' to the 'assert', ensuring that we're not wasting time on non-existent removals
     //assert(found != input_tokens.end());
     {
-      agent.get_agenda().insert_retraction(debuggable_pointer_cast<Rete_Action>(shared()), wme_token);
+      agent.get_agenda().insert_retraction(debuggable_pointer_cast<Rete_Action>(shared()), *found);
 
       input_tokens.erase(found);
     }
@@ -94,7 +94,7 @@ namespace Rete {
   }
 
   bool Rete_Action::matches_wme_token(const WME_Token_Ptr_C &wme_token) const {
-    return find(input_tokens, wme_token) != input_tokens.end();
+    return input_tokens.find(wme_token) != input_tokens.end();
   }
 
   void Rete_Action::pass_tokens(Rete_Agent &, Rete_Node * const &) {

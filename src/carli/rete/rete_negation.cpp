@@ -2,7 +2,11 @@
 
 namespace Rete {
 
-  Rete_Negation::Rete_Negation() : output_token(std::make_shared<WME_Token>()) {}
+  Rete_Negation::Rete_Negation()
+    : output_token(std::make_shared<WME_Token>())
+  {
+    output_tokens.insert(output_token);
+  }
 
   void Rete_Negation::destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) {
     erase_output(output);
@@ -19,11 +23,8 @@ namespace Rete {
     return parent_left()->get_filter(index);
   }
 
-  Rete_Node::Output_Tokens Rete_Negation::get_output_tokens() const {
-    Output_Tokens tokens;
-    if(input_tokens.empty())
-      tokens.push_back(output_token);
-    return tokens;
+  const Rete_Node::Tokens & Rete_Negation::get_output_tokens() const {
+    return output_tokens;
   }
 
   bool Rete_Negation::has_output_tokens() const {
@@ -37,7 +38,7 @@ namespace Rete {
                                                                                                                          ) {
     assert(from == input);
 
-    input_tokens.push_back(wme_token);
+    input_tokens.insert(wme_token);
 
     if(input_tokens.size() == 1) {
       for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
@@ -46,6 +47,7 @@ namespace Rete {
         else
           ++ot;
       }
+      output_tokens.clear();
     }
   }
 
@@ -56,10 +58,11 @@ namespace Rete {
                                                                                                                         ) {
     assert(from == input);
 
-    auto found = find(input_tokens, wme_token);
+    auto found = input_tokens.find(wme_token);
     if(found != input_tokens.end()) {
       input_tokens.erase(found);
       if(input_tokens.empty()) {
+        output_tokens.insert(output_token);
         for(auto &output : *outputs_enabled)
           output.ptr->insert_wme_token(agent, output_token, this);
       }

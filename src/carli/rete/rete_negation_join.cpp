@@ -31,10 +31,8 @@ namespace Rete {
       return parent_right()->get_filter(index - left_size);
   }
 
-  Rete_Node::Output_Tokens Rete_Negation_Join::get_output_tokens() const {
-    Output_Tokens output;
-    output.insert(output.end(), output_tokens.begin(), output_tokens.end());
-    return output;
+  const Rete_Node::Tokens & Rete_Negation_Join::get_output_tokens() const {
+    return output_tokens;
   }
 
   bool Rete_Negation_Join::has_output_tokens() const {
