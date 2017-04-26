@@ -25,7 +25,7 @@ namespace Rete {
 
     Rete_Filter_Ptr_C get_filter(const int64_t &index) const override;
 
-    Output_Tokens get_output_tokens() const override;
+    const Tokens & get_output_tokens() const override;
     bool has_output_tokens() const override;
 
     void insert_wme(Rete_Agent &agent, const WME_Ptr_C &wme);
@@ -52,7 +52,7 @@ namespace Rete {
   private:
     WME m_wme;
     std::array<Symbol_Variable_Ptr_C, 3> m_variable;
-    Output_Tokens tokens;
+    Tokens tokens;
   };
 
   RETE_LINKAGE void bind_to_filter(Rete_Agent &agent, const Rete_Filter_Ptr &filter);

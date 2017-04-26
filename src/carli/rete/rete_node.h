@@ -115,7 +115,6 @@ namespace Rete {
     typedef Output::List::list_pointer_type Outputs;
 
     typedef std::unordered_set<WME_Token_Ptr_C, Rete::hash_deref<WME_Token>, Rete::compare_deref_eq> Tokens;
-    typedef std::list<WME_Token_Ptr_C, Zeni::Pool_Allocator<WME_Token_Ptr_C>> Output_Tokens;
 
     Rete_Node() {}
 
@@ -162,7 +161,7 @@ namespace Rete {
 
     virtual Rete_Filter_Ptr_C get_filter(const int64_t &index) const = 0;
 
-    virtual Output_Tokens get_output_tokens() const = 0;
+    virtual const Tokens & get_output_tokens() const = 0;
     virtual bool has_output_tokens() const = 0;
 
     virtual void insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) = 0;
@@ -247,42 +246,6 @@ namespace Rete {
     Rete_Data_Ptr data;
 
   protected:
-    template<typename CONTAINER, typename KEY>
-    typename CONTAINER::const_iterator find(CONTAINER &tokens, const KEY &token) const {
-//      return tokens.find(token);
-      return std::find(tokens.begin(), tokens.end(), token);
-    }
-
-    template<typename CONTAINER, typename KEY>
-    typename CONTAINER::iterator find(CONTAINER &tokens, const KEY &token) {
-//      return tokens.find(token);
-      return std::find(tokens.begin(), tokens.end(), token);
-    }
-
-    template<typename CONTAINER, typename KEY>
-    typename CONTAINER::const_iterator find_deref(CONTAINER &tokens, const KEY &token) const {
-//      return tokens.find(token);
-      return std::find_if(tokens.begin(), tokens.end(), [&token](const WME_Token_Ptr_C &tok){return *tok == *token;});
-    }
-
-    template<typename CONTAINER, typename KEY>
-    typename CONTAINER::iterator find_deref(CONTAINER &tokens, const KEY &token) {
-//      return tokens.find(token);
-      return std::find_if(tokens.begin(), tokens.end(), [&token](const WME_Token_Ptr_C &tok){return *tok == *token;});
-    }
-
-    template<typename CONTAINER, typename KEY>
-    typename CONTAINER::const_iterator find_key(CONTAINER &tokens, const KEY &token) const {
-//      return tokens.find(token);
-      return std::find_if(tokens.begin(), tokens.end(), [&token](const typename CONTAINER::value_type &tok){return tok.first == token;});
-    }
-
-    template<typename CONTAINER, typename KEY>
-    typename CONTAINER::iterator find_key(CONTAINER &tokens, const KEY &token) {
-//      return tokens.find(token);
-      return std::find_if(tokens.begin(), tokens.end(), [&token](const typename CONTAINER::value_type &tok){return tok.first == token;});
-    }
-
     bool destruction_suppressed = false;
     Output_Ptrs outputs_all;
     Outputs outputs_enabled;
