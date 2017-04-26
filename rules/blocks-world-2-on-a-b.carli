@@ -2,32 +2,28 @@
 
 sp {blocks-world*rl-action*general
   :feature 1 unsplit nil
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
 -->
   = 0.0
 }
 
 sp {blocks-world*rl-fringe*block-is-a
   :feature 2 fringe blocks-world*rl-action*general
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
   +(<block> ^name 1)
 -->
   = 0.0
@@ -35,16 +31,14 @@ sp {blocks-world*rl-fringe*block-is-a
 
 sp {blocks-world*rl-fringe*block-is-not-a
   :feature 2 fringe blocks-world*rl-action*general
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
   -(<block> ^name 1)
 -->
   = 0.0
@@ -52,16 +46,14 @@ sp {blocks-world*rl-fringe*block-is-not-a
 
 sp {blocks-world*rl-fringe*dest-is-b
   :feature 2 fringe blocks-world*rl-action*general
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
   +(<dest> ^name 2)
 -->
   = 0.0
@@ -69,16 +61,14 @@ sp {blocks-world*rl-fringe*dest-is-b
 
 sp {blocks-world*rl-fringe*dest-is-not-b
   :feature 2 fringe blocks-world*rl-action*general
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
   -(<dest> ^name 2)
 -->
   = 0.0
@@ -86,16 +76,14 @@ sp {blocks-world*rl-fringe*dest-is-not-b
 
 sp {blocks-world*rl-fringe*stack-contains-a
   :feature 2 fringe blocks-world*rl-action*general
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
   +{(<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^block <A>)
@@ -107,16 +95,14 @@ sp {blocks-world*rl-fringe*stack-contains-a
 
 sp {blocks-world*rl-fringe*stack-does-not-contain-a
   :feature 2 fringe blocks-world*rl-action*general
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
   -{(<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^block <A>)
@@ -128,16 +114,14 @@ sp {blocks-world*rl-fringe*stack-does-not-contain-a
 
 sp {blocks-world*rl-fringe*stack-contains-b
   :feature 2 fringe blocks-world*rl-action*general
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
   +{(<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^block <B>)
@@ -149,16 +133,14 @@ sp {blocks-world*rl-fringe*stack-contains-b
 
 sp {blocks-world*rl-fringe*stack-does-not-contain-b
   :feature 2 fringe blocks-world*rl-action*general
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
   -{(<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^block <B>)
@@ -170,16 +152,14 @@ sp {blocks-world*rl-fringe*stack-does-not-contain-b
 
 sp {blocks-world*rl-fringe*dest-stack-contains-a
   :feature 2 fringe blocks-world*rl-action*general
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
   +{(<s> ^blocks <blocks>)
   (<blocks> ^stack <dest-stack>)
   (<dest-stack> ^block <A>)
@@ -191,16 +171,14 @@ sp {blocks-world*rl-fringe*dest-stack-contains-a
 
 sp {blocks-world*rl-fringe*dest-stack-does-not-contain-a
   :feature 2 fringe blocks-world*rl-action*general
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
   -{(<s> ^blocks <blocks>)
   (<blocks> ^stack <dest-stack>)
   (<dest-stack> ^block <A>)
@@ -212,16 +190,14 @@ sp {blocks-world*rl-fringe*dest-stack-does-not-contain-a
 
 sp {blocks-world*rl-fringe*dest-stack-contains-b
   :feature 2 fringe blocks-world*rl-action*general
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
   +{(<s> ^blocks <blocks>)
   (<blocks> ^stack <dest-stack>)
   (<dest-stack> ^block <B>)
@@ -233,16 +209,14 @@ sp {blocks-world*rl-fringe*dest-stack-contains-b
 
 sp {blocks-world*rl-fringe*dest-stack-does-not-contain-b
   :feature 2 fringe blocks-world*rl-action*general
-  {(<s> ^blocks <blocks>)
+  (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
-  (<stack> ^action-out <action>)}
-  {(<s> ^blocks <blocks>)
-  (<blocks> ^stack <dest-stack>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
-  (<dest-stack> ^action-in <action>)}
   -{(<s> ^blocks <blocks>)
   (<blocks> ^stack <dest-stack>)
   (<dest-stack> ^block <B>)

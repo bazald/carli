@@ -2,42 +2,28 @@
 
 sp {blocks-world*rl-action*general
   :feature 1 unsplit nil
-  {
-    (<s> ^blocks <blocks>)             # 1
-    (<blocks> ^stack <stack>)          # 1 * S -> S
-    (<stack> ^top <block>)             # S * N -> S
-    (<block> ^name <block-name>)       # S * N -> S
-    (<stack> ^action-out <action>)     # S * S -> S
-  }                                    # S -> S
-  {
-    (<s> ^blocks <blocks>)             # 1
-    (<blocks> ^stack <dest-stack>)     # 1 * S -> S
-    (<dest-stack> ^top <dest>)         # S * N -> S
-    (<dest> ^name <dest-name>)         # S * N -> S
-    (<dest-stack> ^action-in <action>) # S * S -> S
-  }                                    # S * S -> S*S
-  #(<blocks> ^stack <dest-stack>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<block> ^name <block-name>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
+  (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
 -->
   = 0.0
 }
 
 sp {blocks-world*rl-fringe*dest-is-table
   :feature 2 fringe blocks-world*rl-action*general
-  {
-    (<s> ^blocks <blocks>)             # 1
-    (<blocks> ^stack <stack>)          # 1 * S -> S
-    (<stack> ^top <block>)             # S * N -> S
-    (<block> ^name <block-name>)       # S * N -> S
-    (<stack> ^action-out <action>)     # S * S -> S
-  }                                    # S -> S
-  {
-    (<s> ^blocks <blocks>)             # 1
-    (<blocks> ^stack <dest-stack>)     # 1 * S -> S
-    (<dest-stack> ^top <dest>)         # S * N -> S
-    (<dest> ^name <dest-name>)         # S * N -> S
-    (<dest-stack> ^action-in <action>) # S * S -> S
-  }                                    # S * S -> S*S
-  #(<blocks> ^stack <dest-stack>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<block> ^name <block-name>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
+  (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
   +{(<dest> ^name 0)}
 -->
   = 0.0
@@ -45,21 +31,14 @@ sp {blocks-world*rl-fringe*dest-is-table
 
 sp {blocks-world*rl-fringe*dest-is-not-table
   :feature 2 fringe blocks-world*rl-action*general
-  {
-    (<s> ^blocks <blocks>)             # 1
-    (<blocks> ^stack <stack>)          # 1 * S -> S
-    (<stack> ^top <block>)             # S * N -> S
-    (<block> ^name <block-name>)       # S * N -> S
-    (<stack> ^action-out <action>)     # S * S -> S
-  }                                    # S -> S
-  {
-    (<s> ^blocks <blocks>)             # 1
-    (<blocks> ^stack <dest-stack>)     # 1 * S -> S
-    (<dest-stack> ^top <dest>)         # S * N -> S
-    (<dest> ^name <dest-name>)         # S * N -> S
-    (<dest-stack> ^action-in <action>) # S * S -> S
-  }                                    # S * S -> S*S
-  #(<blocks> ^stack <dest-stack>)
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<block> ^name <block-name>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
+  (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
   -{(<dest> ^name 0)}
 -->
   = 0.0
