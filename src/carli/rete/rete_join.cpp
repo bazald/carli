@@ -156,8 +156,6 @@ namespace Rete {
         assert(found2 != match.first.end());
 
         match.first.erase(found2);
-        if(match.first.empty() && match.second.empty())
-          matching.erase(index);
         for(const auto &other : match.second) {
           auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
           if(found_output != output_tokens.end()) {
@@ -170,6 +168,8 @@ namespace Rete {
             output_tokens.erase(found_output);
           }
         }
+        if(match.first.empty() && match.second.empty())
+          matching.erase(index);
 //          for(const auto &other : input1_tokens) {
 //            auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
 //            if(found_output != output_tokens.end())
@@ -193,8 +193,6 @@ namespace Rete {
         assert(found2 != match.second.end());
 
         match.second.erase(found2);
-        if(match.second.empty() && match.first.empty())
-          matching.erase(index);
         for(const auto &other : match.first) {
           auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
           if(found_output != output_tokens.end()) {
@@ -207,6 +205,8 @@ namespace Rete {
             output_tokens.erase(found_output);
           }
         }
+        if(match.second.empty() && match.first.empty())
+          matching.erase(index);
 //          for(const auto &other : input0_tokens) {
 //            auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
 //            if(found_output != output_tokens.end())
