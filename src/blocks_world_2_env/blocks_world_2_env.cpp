@@ -91,17 +91,16 @@ namespace Blocks_World_2 {
     case Goal::ON_A_B:
       {
         for(const auto &stack : m_blocks) {
-          const auto found = std::find_if(stack.begin(), stack.end(), [this](const Environment::Block &block)->bool{return m_match_test(block, block_b);});
+          const auto found = std::find_if(stack.begin(), stack.end(), [](const Environment::Block &block)->bool{return block.id == 2;});
           if(found == stack.end())
             continue;
           const auto fp1 = found + 1;
           if(fp1 == stack.end())
-            continue;
-          if(m_match_test(*fp1, block_a))
-            return true;
+            return false;
+          return fp1->id == 1;
         }
 
-        return false;
+        abort();
       }
 
     default:
@@ -119,7 +118,9 @@ namespace Blocks_World_2 {
 
     std::shuffle(blocks.begin(), blocks.end(), m_random);
 
-    m_blocks = random_Stacks(blocks);
+    do {
+      m_blocks = random_Stacks(blocks);
+    } while((m_goal == Goal::STACK || m_goal == Goal::UNSTACK || m_goal == Goal::ON_A_B) && success());
 
     if(m_goal == Goal::EXACT || m_goal == Goal::COLOR) {
       std::vector<Block> target_blocks;
@@ -251,8 +252,7 @@ namespace Blocks_World_2 {
 
     case Goal::UNSTACK:
       {
-        for(const auto &stack : m_blocks)
-          best_match_total -= stack.size() - 1;
+        best_match_total = m_blocks.size();
 
         break;
       }
@@ -260,21 +260,32 @@ namespace Blocks_World_2 {
     case Goal::ON_A_B:
       {
         for(const auto &stack : m_blocks) {
-          auto founda = std::find_if(stack.begin(), stack.end(), [this](const Environment::Block &block)->bool{return m_match_test(block, block_a);});
-          auto foundb = std::find_if(stack.begin(), stack.end(), [this](const Environment::Block &block)->bool{return m_match_test(block, block_b);});
-          if(founda != stack.end()) {
-            if(foundb != stack.end()) {
-              if(foundb - founda > 0)
-                best_match_total = stack.end() - founda;
-              else if(founda - foundb != 1)
-                best_match_total = stack.end() - foundb;
-              break;
-            }
-            else
-              best_match_total -= stack.end() - founda;
-          }
-          else if(foundb != stack.end())
-            best_match_total -= stack.end() - foundb - 1;
+          auto founda = std::find_if(stack.begin(), stack.end(), [](const Environment::Block &block)->bool{return block.id == 1;});
+          auto foundb = std::find_if(stack.begin(), stack.end(), [](const Environment::Block &block)->bool{return block.id == 2;});
+
+          /// Neither A nor B
+          if(founda == stack.end() && foundb == stack.end())
+            best_match_total += stack.size(); ///< All blocks are fine
+
+          /// Only A
+          if(founda != stack.end() && foundb == stack.end())
+            best_match_total += founda - stack.begin(); ///< Every block below A is fine
+
+          /// B above A
+          if(founda != stack.end() && foundb > founda)
+            best_match_total += founda - stack.begin(); ///< Every block below A is fine; B will still only have to be moved once
+
+          /// Only B
+          if(founda == stack.end() && foundb != stack.end())
+            best_match_total += foundb - stack.begin() + 1; ///< Every block B and below is fine
+
+          /// A above B by more than 1
+          if(foundb != stack.end() && founda > foundb + 1)
+            best_match_total += foundb - stack.begin(); ///< Every block B and below is fine, but A will have to be moved twice
+
+          /// Goal
+          if(foundb != stack.end() && foundb + 1 == founda)
+            best_match_total = stack.size(); ///< No blocks have to be moved
         }
 
         break;
@@ -314,7 +325,7 @@ namespace Blocks_World_2 {
       break;
 
     case Goal::ON_A_B:
-      os << " .* 2 1 .*" << endl;
+      os << " On(A,B)" << endl;
       break;
 
     default:
@@ -429,6 +440,7 @@ namespace Blocks_World_2 {
       for(const auto &block : stack) {
         const Rete::Symbol_Identifier_Ptr_C block_id = m_block_ids[block.id];
         wmes_current.push_back(std::make_shared<Rete::WME>(m_blocks_id, m_block_attr, block_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_block_attr, block_id));
         wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_name_attr, m_block_names[block.id]));
       }
 
@@ -554,6 +566,10 @@ namespace Blocks_World_2 {
       Rete::Symbol_Identifier_Ptr_C target_stack_id = m_target_stack_ids[target_stack.begin()->id];
 
       wmes_current.push_back(std::make_shared<Rete::WME>(m_target_id, m_stack_attr, target_stack_id));
+      for(const auto &block : target_stack) {
+        const Rete::Symbol_Identifier_Ptr_C block_id = m_block_ids[block.id];
+        wmes_current.push_back(std::make_shared<Rete::WME>(target_stack_id, m_block_attr, block_id));
+      }
       if(std::find(blocks.begin(), blocks.end(), target_stack) == blocks.end())
         wmes_current.push_back(std::make_shared<Rete::WME>(target_stack_id, m_top_attr, m_block_ids[target_stack.rbegin()->id]));
       const Rete::Symbol_Identifier_Ptr_C target_base_id = m_block_ids[target_stack.begin()->id];

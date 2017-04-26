@@ -7,11 +7,11 @@ sp {blocks-world*rl-action*general
   #(<s> ^action <action>)
   {(<blocks> ^stack <stack>)
   (<stack> ^top <block>)
-  (<block> ^name <block-name>)
-  (<action> ^block <block>)}
+  (<block> ^name <block-name>)}
   {(<blocks> ^stack <dest-stack>)
   (<dest-stack> ^top <dest>)
-  (<dest> ^name <dest-name>)
+  (<dest> ^name <dest-name>)}
+  {(<action> ^block <block>)
   (<action> ^dest <dest>)}
 -->
   = 0.0
@@ -24,11 +24,11 @@ sp {blocks-world*rl-fringe*dest-is-table
   #(<s> ^action <action>)
   {(<blocks> ^stack <stack>)
   (<stack> ^top <block>)
-  (<block> ^name <block-name>)
-  (<action> ^block <block>)}
+  (<block> ^name <block-name>)}
   {(<blocks> ^stack <dest-stack>)
   (<dest-stack> ^top <dest>)
-  (<dest> ^name <dest-name>)
+  (<dest> ^name <dest-name>)}
+  {(<action> ^block <block>)
   (<action> ^dest <dest>)}
   +{(<dest> ^name 0)}
 -->
@@ -42,11 +42,11 @@ sp {blocks-world*rl-fringe*dest-is-not-table
   #(<s> ^action <action>)
   {(<blocks> ^stack <stack>)
   (<stack> ^top <block>)
-  (<block> ^name <block-name>)
-  (<action> ^block <block>)}
+  (<block> ^name <block-name>)}
   {(<blocks> ^stack <dest-stack>)
   (<dest-stack> ^top <dest>)
-  (<dest> ^name <dest-name>)
+  (<dest> ^name <dest-name>)}
+  {(<action> ^block <block>)
   (<action> ^dest <dest>)}
   -{(<dest> ^name 0)}
 -->

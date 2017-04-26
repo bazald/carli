@@ -123,9 +123,6 @@ namespace Blocks_World_2 {
 
     std::function<bool (const Environment::Block &lhs, const Environment::Block &rhs)> m_match_test;
 
-    const Environment::Block block_a = {1, 0};
-    const Environment::Block block_b = {2, 0};
-
     Zeni::Random m_random;
     Stacks m_blocks;
     Stacks m_target;
