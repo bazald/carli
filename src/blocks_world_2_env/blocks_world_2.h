@@ -157,6 +157,8 @@ namespace Blocks_World_2 {
      */
 
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
+    const Rete::Symbol_Constant_String_Ptr_C m_action_in_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action-in"));
+    const Rete::Symbol_Constant_String_Ptr_C m_action_out_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action-out"));
     const Rete::Symbol_Constant_String_Ptr_C m_block_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("block"));
     const Rete::Symbol_Constant_String_Ptr_C m_dest_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("dest"));
     const Rete::Symbol_Constant_String_Ptr_C m_color_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("color"));

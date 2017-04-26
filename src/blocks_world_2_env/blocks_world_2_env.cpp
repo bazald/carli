@@ -379,6 +379,8 @@ namespace Blocks_World_2 {
     std::ostringstream oss;
     int64_t max_height = 0;
     for(const auto &stack : blocks) {
+      const Rete::Symbol_Identifier_Ptr_C stack_id = m_stack_ids[stack.begin()->id];
+
       int64_t height = 0;
       for(const auto &block : stack) {
         const auto block_id = m_block_ids[block.id];
@@ -398,18 +400,23 @@ namespace Blocks_World_2 {
         if(stack == dest_stack)
           continue;
         oss << "move-" << stack.rbegin()->id << "-|" << dest_stack.begin()->id;
-        Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
+        const Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
+        const Rete::Symbol_Identifier_Ptr_C dest_id = m_stack_ids[dest_stack.begin()->id];
         oss.str("");
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, action_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(dest_id, m_action_in_attr, action_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_action_out_attr, action_id));
         wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_block_attr, m_block_ids[stack.rbegin()->id]));
         wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_dest_attr, m_block_ids[dest_stack.rbegin()->id]));
       }
 
       if(stack.size() > 1) {
         oss << "move-" << stack.rbegin()->id << "-TABLE";
-        Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
+        const Rete::Symbol_Identifier_Ptr_C action_id = std::make_shared<Rete::Symbol_Identifier>(oss.str());
         oss.str("");
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, action_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_table_id, m_action_in_attr, action_id));
+        wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_action_out_attr, action_id));
         wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_block_attr, m_block_ids[stack.rbegin()->id]));
         wmes_current.push_back(std::make_shared<Rete::WME>(action_id, m_dest_attr, m_table_id));
       }
