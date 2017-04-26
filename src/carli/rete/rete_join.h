@@ -64,14 +64,14 @@ namespace Rete {
     Output_Tokens input1_tokens;
     Output_Tokens output_tokens;
 
+    std::unordered_map<std::list<Symbol_Ptr_C>, std::pair<Output_Tokens, Output_Tokens>, Rete::hash_container_deref<Symbol>, Rete::compare_container_deref_eq> matching;
+
     struct Connected {
       Connected() : connected0(true), connected1(true) {}
 
       bool connected0 : 1;
       bool connected1 : 1;
     } data;
-
-    std::unordered_map<std::list<Symbol_Ptr_C>, std::pair<Output_Tokens, Output_Tokens>, Rete::hash_container_deref<Symbol>, Rete::compare_container_deref_eq> matching;
   };
 
   RETE_LINKAGE void bind_to_join(Rete_Agent &agent, const Rete_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);

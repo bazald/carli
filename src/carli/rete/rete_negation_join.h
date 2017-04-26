@@ -46,8 +46,8 @@ namespace Rete {
     virtual const WME_Bindings * get_bindings() const override {return &bindings;}
 
   private:
-    void join_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs);
-    void unjoin_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs);
+    void join_tokens(Rete_Agent &agent, const WME_Token_Ptr_C &lhs);
+    void unjoin_tokens(Rete_Agent &agent, const WME_Token_Ptr_C &lhs);
 
     void pass_tokens(Rete_Agent &agent, Rete_Node * const &output) override;
     void unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) override;
@@ -55,8 +55,10 @@ namespace Rete {
     WME_Bindings bindings;
     Rete_Node * input0 = nullptr;
     Rete_Node * input1 = nullptr;
-    std::list<std::pair<WME_Token_Ptr_C, size_t>, Zeni::Pool_Allocator<std::pair<WME_Token_Ptr_C, size_t>>> input0_tokens;
+    Output_Tokens input0_tokens;
     Output_Tokens input1_tokens;
+
+    std::unordered_map<std::list<Symbol_Ptr_C>, std::pair<Output_Tokens, Output_Tokens>, Rete::hash_container_deref<Symbol>, Rete::compare_container_deref_eq> matching;
   };
 
   RETE_LINKAGE void bind_to_negation_join(Rete_Agent &agent, const Rete_Negation_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);

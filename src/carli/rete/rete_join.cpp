@@ -152,29 +152,29 @@ namespace Rete {
         for(const auto &binding : bindings)
           index.push_back((*wme_token)[binding.first]);
         auto &match = matching[index];
-        auto found = find(match.first, wme_token);
-        if(found != match.first.end()) {
-          match.first.erase(found);
-          if(match.first.empty() && match.second.empty())
-            matching.erase(index);
-          for(const auto &other : match.second) {
-            auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
-            if(found_output != output_tokens.end()) {
-              for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
-                if((*ot)->remove_wme_token(agent, *found_output, this))
-                  (*ot++)->disconnect(agent, this);
-                else
-                  ++ot;
-              }
-              output_tokens.erase(found_output);
+        auto found2 = find(match.first, wme_token);
+        assert(found2 != match.first.end());
+
+        match.first.erase(found2);
+        if(match.first.empty() && match.second.empty())
+          matching.erase(index);
+        for(const auto &other : match.second) {
+          auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
+          if(found_output != output_tokens.end()) {
+            for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
+              if((*ot)->remove_wme_token(agent, *found_output, this))
+                (*ot++)->disconnect(agent, this);
+              else
+                ++ot;
             }
+            output_tokens.erase(found_output);
           }
+        }
 //          for(const auto &other : input1_tokens) {
 //            auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
 //            if(found_output != output_tokens.end())
 //              abort();
 //          }
-        }
 
         emptied ^= input0_tokens.empty();
       }
@@ -189,29 +189,29 @@ namespace Rete {
         for(const auto &binding : bindings)
           index.push_back((*wme_token)[binding.second]);
         auto &match = matching[index];
-        auto found = find(match.second, wme_token);
-        if(found != match.second.end()) {
-          match.second.erase(found);
-          if(match.second.empty() && match.first.empty())
-            matching.erase(index);
-          for(const auto &other : match.first) {
-            auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
-            if(found_output != output_tokens.end()) {
-              for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
-                if((*ot)->remove_wme_token(agent, *found_output, this))
-                  (*ot++)->disconnect(agent, this);
-                else
-                  ++ot;
-              }
-              output_tokens.erase(found_output);
+        auto found2 = find(match.second, wme_token);
+        assert(found2 != match.second.end());
+
+        match.second.erase(found2);
+        if(match.second.empty() && match.first.empty())
+          matching.erase(index);
+        for(const auto &other : match.first) {
+          auto found_output = find_deref(output_tokens, join_wme_tokens(other, wme_token));
+          if(found_output != output_tokens.end()) {
+            for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
+              if((*ot)->remove_wme_token(agent, *found_output, this))
+                (*ot++)->disconnect(agent, this);
+              else
+                ++ot;
             }
+            output_tokens.erase(found_output);
           }
+        }
 //          for(const auto &other : input0_tokens) {
 //            auto found_output = find_deref(output_tokens, join_wme_tokens(wme_token, other));
 //            if(found_output != output_tokens.end())
 //              abort();
 //          }
-        }
 
         emptied ^= input1_tokens.empty();
       }

@@ -63,12 +63,12 @@ namespace Rete {
     return existential;
   }
 
-  Rete_Existential_Join_Ptr Rete_Agent::make_existential_join(const WME_Bindings &bindings, const bool &match_tokens, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
+  Rete_Existential_Join_Ptr Rete_Agent::make_existential_join(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1) {
     CPU_Accumulator cpu_accumulator(*this);
 
-    if(auto existing = Rete_Existential_Join::find_existing(bindings, match_tokens, out0, out1))
+    if(auto existing = Rete_Existential_Join::find_existing(bindings, out0, out1))
       return existing;
-    auto existential_join = std::make_shared<Rete_Existential_Join>(bindings, match_tokens);
+    auto existential_join = std::make_shared<Rete_Existential_Join>(bindings);
     bind_to_existential_join(*this, existential_join, out0, out1);
     return existential_join;
   }

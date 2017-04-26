@@ -28,7 +28,6 @@ using namespace std;
 >=                                                    { yylval->predicate = Rete::Rete_Predicate::GTE; return PREDICATE; }
 \<                                                    { yylval->predicate = Rete::Rete_Predicate::LT; return PREDICATE; }
 \<=                                                   { yylval->predicate = Rete::Rete_Predicate::LTE; return PREDICATE; }
-\+=                                                   { yylval->csval = "+="; return EXISTENTIAL_MATCH; }
 =                                                     { yylval->csval = "="; return ASSIGNMENT; }
 excise                                                { yylval->csval = "excise"; return COMMAND_EXCISE; }
 excise-all                                            { yylval->csval = "excise-all"; return COMMAND_EXCISE_ALL; }

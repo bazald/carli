@@ -336,7 +336,7 @@ namespace Carli {
 //          new_test = agent.make_existential_join(bindings, false, ancestor_left, ancestor_right);
 
         if(dynamic_cast<const Rete::Rete_Existential_Join *>(ancestor_right.get()))
-          new_test = agent.make_existential_join(*ancestor_right->get_bindings(), false, ancestor_left, ancestor_right->parent_right());
+          new_test = agent.make_existential_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
         else
           new_test = agent.make_negation_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
       }
@@ -351,11 +351,11 @@ namespace Carli {
 #endif
           new_test = agent.make_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
         }
-        else if(const auto existential_join = dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get())) {
+        else if(dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get())) {
 #ifdef DEBUG_OUTPUT
           std::cerr << "  Existential Join" << std::endl;
 #endif
-          new_test = agent.make_existential_join(*ancestor_right->get_bindings(), existential_join->is_matching_tokens(), ancestor_left, ancestor_right->parent_right());
+          new_test = agent.make_existential_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
         }
         else if(dynamic_cast<Rete::Rete_Negation_Join *>(ancestor_right.get())) {
 #ifdef DEBUG_OUTPUT

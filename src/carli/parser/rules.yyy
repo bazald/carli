@@ -163,7 +163,6 @@ namespace Rete {
 %token <csval> COMMAND_SET_TOTAL_STEP_COUNT
 %token <csval> COMMAND_SOURCE
 %token <csval> COMMAND_SP
-%token <csval> EXISTENTIAL_MATCH
 %token <csval> FLAG_CREATION_TIME
 %token <csval> FLAG_FEATURE
 %token <fval> FLOAT
@@ -488,9 +487,6 @@ final_conditions:
   conditions { $$ = $1; }
   | '+' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential($2->first)), Rete::Variables()); delete $2; }
   | '-' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation($2->first)), Rete::Variables()); delete $2; }
-  | final_conditions EXISTENTIAL_MATCH condition_type { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(Rete::WME_Bindings(), true, $1->first, $3->first)), $1->second);
-                                                        delete $1;
-                                                        delete $3; }
   ;
 conditions:
   conditions condition_type { const vector<Rete::Parser_Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $2->second, false));
@@ -498,7 +494,7 @@ conditions:
                               delete $1;
                               delete $2; }
   | conditions '+' condition_type { const vector<Rete::Parser_Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $3->second, true));
-                                    $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings($1->second, $3->second), false, $1->first, $3->first)), variables);
+                                    $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings($1->second, $3->second), $1->first, $3->first)), variables);
                                     delete $1;
                                     delete $3; }
   | conditions '-' condition_type { const vector<Rete::Parser_Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $3->second, true));

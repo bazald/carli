@@ -356,7 +356,7 @@ extern int retelex \
 #undef YY_DECL
 #endif
 
-#line 63 "rules.lll"
+#line 62 "rules.lll"
 
 
 #line 363 "lex.rete.hh"

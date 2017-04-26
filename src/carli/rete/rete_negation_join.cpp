@@ -14,8 +14,8 @@ namespace Rete {
       //output_name(std::cerr, 3);
       //std::cerr << std::endl;
 
-      auto i0 = input0;
-      auto i1 = input1;
+      auto i0 = input0->shared();
+      auto i1 = input1->shared();
       auto o = shared();
       i0->destroy(agent, o);
       if(i0 != i1)
@@ -32,17 +32,19 @@ namespace Rete {
   }
 
   Rete_Node::Output_Tokens Rete_Negation_Join::get_output_tokens() const {
-    Output_Tokens tokens;
-    for(auto &wme_token : input0_tokens) {
-      if(!wme_token.second)
-        tokens.push_back(wme_token.first);
+    Output_Tokens output_tokens;
+    for(const auto &match : matching) {
+      if(match.second.second.empty()) {
+        for(auto &wme_token : match.second.first)
+          output_tokens.push_back(wme_token);
+      }
     }
-    return tokens;
+    return output_tokens;
   }
 
   bool Rete_Negation_Join::has_output_tokens() const {
-    for(auto &wme_token : input0_tokens) {
-      if(!wme_token.second)
+    for(const auto &match : matching) {
+      if(!match.second.first.empty() && match.second.second.empty())
         return true;
     }
     return false;
@@ -51,24 +53,31 @@ namespace Rete {
   void Rete_Negation_Join::insert_wme_token(Rete_Agent &agent, const WME_Token_Ptr_C &wme_token, const Rete_Node * const &from) {
     assert(from == input0 || from == input1);
 
-    if(from == input0 && find_key(input0_tokens, wme_token) == input0_tokens.end()) {
+    if(from == input0 && find(input0_tokens, wme_token) == input0_tokens.end()) {
 //      assert(find_key(input0_tokens, wme_token) == input0_tokens.end());
-      input0_tokens.emplace_back(wme_token, 0u);
+      input0_tokens.push_back(wme_token);
 
-      for(const auto &other : input1_tokens)
-        join_tokens(agent, input0_tokens.back(), other);
-
-      if(input0_tokens.back().second == 0u) {
-        for(auto &output : *outputs_enabled)
-          output.ptr->insert_wme_token(agent, wme_token, this);
-      }
+      std::list<Symbol_Ptr_C> index;
+      for(const auto &binding : bindings)
+        index.push_back((*wme_token)[binding.first]);
+      auto &match = matching[index];
+      match.first.push_back(wme_token);
+      if(match.second.empty())
+        join_tokens(agent, wme_token);
     }
     if(from == input1 && find(input1_tokens, wme_token) == input1_tokens.end()) {
 //      assert(find(input1_tokens, wme_token) == input1_tokens.end());
       input1_tokens.push_back(wme_token);
 
-      for(auto &other : input0_tokens)
-        join_tokens(agent, other, wme_token);
+      std::list<Symbol_Ptr_C> index;
+      for(const auto &binding : bindings)
+        index.push_back((*wme_token)[binding.second]);
+      auto &match = matching[index];
+      match.second.push_back(wme_token);
+      if(match.second.size() == 1u) {
+        for(auto &other : match.first)
+          unjoin_tokens(agent, other);
+      }
     }
   }
 
@@ -78,17 +87,23 @@ namespace Rete {
     bool emptied = false;
 
     if(from == input0) {
-      auto found = find_key(input0_tokens, wme_token);
+      auto found = find(input0_tokens, wme_token);
       if(found != input0_tokens.end()) {
-        if(found->second == 0u) {
-          for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
-            if((*ot)->remove_wme_token(agent, wme_token, this))
-              (*ot++)->disconnect(agent, this);
-            else
-              ++ot;
-          }
-        }
         input0_tokens.erase(found);
+
+        std::list<Symbol_Ptr_C> index;
+        for(const auto &binding : bindings)
+          index.push_back((*wme_token)[binding.first]);
+        auto &match = matching[index];
+        auto found2 = find(match.first, wme_token);
+        assert(found2 != match.first.end());
+
+        match.first.erase(found2);
+        if(match.second.empty()) {
+          unjoin_tokens(agent, wme_token);
+          if(match.first.empty())
+            matching.erase(index);
+        }
 
         emptied ^= input0_tokens.empty();
       }
@@ -98,8 +113,23 @@ namespace Rete {
       if(found != input1_tokens.end()) {
         // TODO: Avoid looping through non-existent pairs?
         input1_tokens.erase(found);
-        for(auto &other : input0_tokens)
-          unjoin_tokens(agent, other, wme_token);
+
+        std::list<Symbol_Ptr_C> index;
+        for(const auto &binding : bindings)
+          index.push_back((*wme_token)[binding.second]);
+        auto &match = matching[index];
+        auto found2 = find(match.second, wme_token);
+        assert(found2 != match.second.end());
+
+        match.second.erase(found2);
+        if(match.second.empty()) {
+          if(!match.first.empty()) {
+            for(auto &other : match.first)
+              join_tokens(agent, other);
+          }
+          else
+            matching.erase(index);
+        }
 
         emptied ^= input1_tokens.empty();
       }
@@ -160,10 +190,7 @@ namespace Rete {
   }
 
   bool Rete_Negation_Join::is_active() const {
-    for(auto &wme_token : input0_tokens)
-      if(!wme_token.second)
-        return true;
-    return false;
+    return Rete_Negation_Join::has_output_tokens();
   }
 
   std::vector<WME> Rete_Negation_Join::get_filter_wmes() const {
@@ -189,45 +216,49 @@ namespace Rete {
     return nullptr;
   }
 
-  void Rete_Negation_Join::join_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs) {
-    for(auto &binding : bindings) {
-      if(*(*lhs.first)[binding.first] != *(*rhs)[binding.second])
-        return;
-    }
+  void Rete_Negation_Join::join_tokens(Rete_Agent &agent, const WME_Token_Ptr_C &lhs) {
+//    for(auto &binding : bindings) {
+//      if(*(*lhs.first)[binding.first] != *(*rhs)[binding.second])
+//        return;
+//    }
 
-    if(++lhs.second == 1) {
-      for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
-        if((*ot)->remove_wme_token(agent, lhs.first, this))
-          (*ot++)->disconnect(agent, this);
-        else
-          ++ot;
+//    if(--lhs.second == 0) {
+    for(auto &output : *outputs_enabled)
+      output.ptr->insert_wme_token(agent, lhs, this);
+//    }
+  }
+
+  void Rete_Negation_Join::unjoin_tokens(Rete_Agent &agent, const WME_Token_Ptr_C &lhs) {
+//    for(auto &binding : bindings) {
+//      if(*(*lhs.first)[binding.first] != *(*rhs)[binding.second])
+//        return;
+//    }
+
+//    if(++lhs.second == 1) {
+    for(auto ot = outputs_enabled->begin(), oend = outputs_enabled->end(); ot != oend; ) {
+      if((*ot)->remove_wme_token(agent, lhs, this))
+        (*ot++)->disconnect(agent, this);
+      else
+        ++ot;
+    }
+//    }
+  }
+
+  void Rete_Negation_Join::pass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
+    for(const auto &match : matching) {
+      if(match.second.second.empty()) {
+        for(auto &wme_token : match.second.first)
+          output->insert_wme_token(agent, wme_token, this);
       }
     }
   }
 
-  void Rete_Negation_Join::unjoin_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs) {
-    for(auto &binding : bindings) {
-      if(*(*lhs.first)[binding.first] != *(*rhs)[binding.second])
-        return;
-    }
-
-    if(--lhs.second == 0) {
-      for(auto &output : *outputs_enabled)
-        output.ptr->insert_wme_token(agent, lhs.first, this);
-    }
-  }
-
-  void Rete_Negation_Join::pass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
-    for(auto &wme_token : input0_tokens) {
-      if(!wme_token.second)
-        output->insert_wme_token(agent, wme_token.first, this);
-    }
-  }
-
   void Rete_Negation_Join::unpass_tokens(Rete_Agent &agent, Rete_Node * const &output) {
-    for(auto &wme_token : input0_tokens) {
-      if(!wme_token.second)
-        output->remove_wme_token(agent, wme_token.first, this);
+    for(const auto &match : matching) {
+      if(match.second.second.empty()) {
+        for(auto &wme_token : match.second.first)
+          output->remove_wme_token(agent, wme_token, this);
+      }
     }
   }
 

@@ -12,7 +12,7 @@ namespace Rete {
     friend RETE_LINKAGE void bind_to_existential_join(Rete_Agent &agent, const Rete_Existential_Join_Ptr &join, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
   public:
-    Rete_Existential_Join(WME_Bindings bindings_, const bool &match_tokens_);
+    Rete_Existential_Join(WME_Bindings bindings_);
 
     void destroy(Rete_Agent &agent, const Rete_Node_Ptr &output) override;
 
@@ -32,7 +32,6 @@ namespace Rete {
     bool operator==(const Rete_Node &rhs) const override;
 
     bool disabled_input(const Rete_Node_Ptr &input) override;
-    bool is_matching_tokens() const {return data.match_tokens;}
 
     void print_details(std::ostream &os) const override; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
@@ -44,13 +43,13 @@ namespace Rete {
 
     std::vector<WME> get_filter_wmes() const override;
 
-    static Rete_Existential_Join_Ptr find_existing(const WME_Bindings &bindings, const bool &match_tokens, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
+    static Rete_Existential_Join_Ptr find_existing(const WME_Bindings &bindings, const Rete_Node_Ptr &out0, const Rete_Node_Ptr &out1);
 
     virtual const WME_Bindings * get_bindings() const override {return &bindings;}
 
   private:
-    void join_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs);
-    void unjoin_tokens(Rete_Agent &agent, std::pair<WME_Token_Ptr_C, size_t> &lhs, const WME_Token_Ptr_C &rhs);
+    void join_tokens(Rete_Agent &agent, const WME_Token_Ptr_C &lhs);
+    void unjoin_tokens(Rete_Agent &agent, const WME_Token_Ptr_C &lhs);
 
     void disconnect(Rete_Agent &agent, const Rete_Node * const &from) override;
 
@@ -60,15 +59,16 @@ namespace Rete {
     WME_Bindings bindings;
     Rete_Node * input0 = nullptr;
     Rete_Node * input1 = nullptr;
-    std::list<std::pair<WME_Token_Ptr_C, size_t>, Zeni::Pool_Allocator<std::pair<WME_Token_Ptr_C, size_t>>> input0_tokens;
+    Output_Tokens input0_tokens;
     Output_Tokens input1_tokens;
 
+    std::unordered_map<std::list<Symbol_Ptr_C>, std::pair<Output_Tokens, Output_Tokens>, Rete::hash_container_deref<Symbol>, Rete::compare_container_deref_eq> matching;
+
     struct Data {
-      Data(const bool &match_tokens_) : connected0(true), connected1(true), match_tokens(match_tokens_) {}
+      Data() : connected0(true), connected1(true) {}
 
       bool connected0 : 1;
       bool connected1 : 1;
-      bool match_tokens : 1;
     } data;
   };
 
