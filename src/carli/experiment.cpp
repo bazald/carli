@@ -76,6 +76,7 @@ namespace Carli {
     }), "<file> Redirect stdout to <file>");
     options.add_line("\n  Environment Options:");
     options.add(     make_shared<Option_Itemized>("bw2-goal", set<string>({"exact", "color", "stack", "unstack", "on-a-b"}), "exact"), "Set the goal for the Blocks World 2 agent.");
+    options.add(     make_shared<Option_Itemized>("bw2-reward", set<string>({"guiding", "blind"}), "blind"), "Set the reward function for the Blocks World 2 agent.");
     options.add(     make_shared<Option_Ranged<bool>>("ignore-x", false, true, true, true, false), "Simplify cart-pole from 4D to 2D, eliminating x and x-dot.");
     options.add(     make_shared<Option_Ranged<int64_t>>("num-blocks", 2, true, 1000, true, 3), "Number of blocks to generate in Blocks World 2.");
     options.add(     make_shared<Option_Ranged<int64_t>>("num-goal-blocks", 2, true, 1000, true, 3), "Number of blocks to include in goal for Blocks World 2.");

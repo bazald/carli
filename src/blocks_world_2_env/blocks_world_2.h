@@ -76,6 +76,7 @@ namespace Blocks_World_2 {
 
   public:
     enum class Goal {EXACT, COLOR, STACK, UNSTACK, ON_A_B};
+    enum class Reward {GUIDING, BLIND};
 
     Environment();
 
@@ -118,6 +119,7 @@ namespace Blocks_World_2 {
                       : dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "stack" ? Goal::STACK
                       : dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "unstack" ? Goal::UNSTACK
                       : Goal::ON_A_B;
+    const Reward m_reward = dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-reward"]).get_value() == "guiding" ? Reward::GUIDING : Reward::BLIND;
     const int64_t m_num_blocks = get_Option_Ranged<int64_t>(Options::get_global(), "num-blocks");
     const int64_t m_num_target_blocks = get_Option_Ranged<int64_t>(Options::get_global(), "num-goal-blocks");
 

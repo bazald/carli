@@ -188,9 +188,11 @@ namespace Blocks_World_2 {
     std::sort(m_blocks.begin(), m_blocks.end());
 
     const int64_t best_match_total_after = matching_blocks();
-    return std::make_pair(double(best_match_total_after - best_match_total_before), -1.0);
 
-//    return -1.0;
+    if(m_reward == Reward::GUIDING)
+      return std::make_pair(double(best_match_total_after - best_match_total_before), -1.0);
+    else
+      return std::make_pair(-1.0, -1.0);
   }
 
   int64_t Environment::matching_blocks() const {
