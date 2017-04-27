@@ -4,7 +4,7 @@
 import argparse, glob, os, random, shutil, subprocess, sys, thread, time
 import pp
 
-g_dir = 'experiment-bw2-long'
+g_dir = 'experiment-bw2-long-again'
 g_plotters = ['./blocksworld2.py']
 g_error = False
 

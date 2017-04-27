@@ -190,7 +190,7 @@ namespace Blocks_World_2 {
     const int64_t best_match_total_after = matching_blocks();
 
     if(m_reward == Reward::GUIDING)
-      return std::make_pair(double(best_match_total_after - best_match_total_before), -1.0);
+      return std::make_pair(double(best_match_total_after - best_match_total_before - 1.0 /* Because positive numbers are bad */), -1.0);
     else
       return std::make_pair(-1.0, -1.0);
   }
@@ -391,10 +391,10 @@ namespace Blocks_World_2 {
 
         wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_color_attr, std::make_shared<Rete::Symbol_Constant_Int>(block.color)));
 
-//        const double brightness = m_random.frand_lte();
-//        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
-//        if(brightness > 0.5)
-//          wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_glowing_attr, m_true_value));
+        const double brightness = m_random.frand_lte();
+        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
+        if(brightness > 0.5)
+          wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_glowing_attr, m_true_value));
       }
       max_height = std::max(max_height, height);
 

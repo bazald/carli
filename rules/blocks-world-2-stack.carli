@@ -14,7 +14,7 @@ sp {blocks-world*rl-action*general
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*tallest-goal-stack
+sp {blocks-world*rl-fringe*tallest-dest-stack
   :feature 2 fringe blocks-world*rl-action*general
   (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
@@ -29,7 +29,7 @@ sp {blocks-world*rl-fringe*tallest-goal-stack
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*not-tallest-goal-stack
+sp {blocks-world*rl-fringe*not-tallest-dest-stack
   :feature 2 fringe blocks-world*rl-action*general
   (<s> ^blocks <blocks>)
   (<blocks> ^stack <stack>)
@@ -44,7 +44,7 @@ sp {blocks-world*rl-fringe*not-tallest-goal-stack
   = 0.0
 }
 
-#sp {blocks-world*rl-fringe*stack-taller-than-goal-stack
+#sp {blocks-world*rl-fringe*stack-taller-than-dest-stack
 #  :feature 2 fringe blocks-world*rl-action*general
 #  (<s> ^blocks <blocks>)
 #  (<s> ^goal <goal>)
@@ -62,7 +62,7 @@ sp {blocks-world*rl-fringe*not-tallest-goal-stack
 #  = 0.0
 #}
 #
-#sp {blocks-world*rl-fringe*stack-not-taller-than-goal-stack
+#sp {blocks-world*rl-fringe*stack-not-taller-than-dest-stack
 #  :feature 2 fringe blocks-world*rl-action*general
 #  (<s> ^blocks <blocks>)
 #  (<s> ^goal <goal>)
