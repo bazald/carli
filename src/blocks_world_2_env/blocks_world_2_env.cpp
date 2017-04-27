@@ -393,7 +393,7 @@ namespace Blocks_World_2 {
 
         const double brightness = m_random.frand_lte();
         wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
-        if(brightness > 0.5)
+        if(brightness >= 0.5)
           wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_glowing_attr, m_true_value));
       }
       max_height = std::max(max_height, height);

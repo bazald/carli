@@ -1016,7 +1016,7 @@ namespace Carli {
     if(!m_learning_rate)
       return;
 
-    dump_rules(*this);
+//    dump_rules(*this);
     assert(!m_badness);
 
     const double target_next = m_discount_rate * std::get<0>(sum_value(nullptr, next, nullptr, std::numeric_limits<int64_t>::max()));
@@ -1457,12 +1457,14 @@ namespace Carli {
 
     if(!chosen) {
       if(!matches) {
-        std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
+        std::cerr << "WARNING: No feature in the fringe matches the current token for " << general.rete_action.lock()->get_name() << "!" << std::endl;
         dump_rules(*this);
 #if !defined(NDEBUG) && defined(_WINDOWS)
         __debugbreak();
 #elif !defined(NDEBUG)
         assert(false);
+//#else
+//        abort();
 #endif
       }
 
@@ -1561,12 +1563,14 @@ namespace Carli {
 
     if(chosen_axis == general.fringe_values.end()) {
       if(!matches) {
-        std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
+        std::cerr << "WARNING: No feature in the fringe matches the current token for " << general.rete_action.lock()->get_name() << "!" << std::endl;
         dump_rules(*this);
 #if !defined(NDEBUG) && defined(_WINDOWS)
         __debugbreak();
 #elif !defined(NDEBUG)
         assert(false);
+//#else
+//        abort();
 #endif
       }
 
@@ -1646,12 +1650,14 @@ namespace Carli {
 
     if(chosen_axis == general.fringe_values.end()) {
       if(!matches) {
-        std::cerr << "WARNING: No feature in the fringe matches the current token!" << std::endl;
+        std::cerr << "WARNING: No feature in the fringe matches the current token for " << general.rete_action.lock()->get_name() << "!" << std::endl;
         dump_rules(*this);
 #if !defined(NDEBUG) && defined(_WINDOWS)
         __debugbreak();
 #elif !defined(NDEBUG)
         assert(false);
+//#else
+//        abort();
 #endif
       }
 
@@ -1705,7 +1711,9 @@ namespace Carli {
 //    assert(!general.children.empty());
     assert(!general.blacklist_full);
 
-    if(general.children.empty())
+//    if(general.children.empty())
+//      return false;
+    if(general.fringe_values.empty())
       return false;
 
     if(general.q_value_fringe->update_count < m_unsplit_update_count)
