@@ -763,62 +763,62 @@ sp {blocks-world*rl-fringe*dest-brightness-upper
   = 0.0
 }
 
-#sp {blocks-world*rl-fringe*block-glowing
-#  :feature 2 fringe blocks-world*rl-action*general
-#  (<s> ^blocks <blocks>)
-#  (<blocks> ^stack <stack>)
-#  (<stack> ^top <block>)
-#  (<block> ^name <block-name>)
-#  (<stack> ^action-out <action>)
-#  (<dest-stack> ^action-in <action>)
-#  (<dest-stack> ^top <dest>)
-#  (<dest> ^name <dest-name>)
-#  +(<block> ^glowing true)
-#-->
-#  = 0.0
-#}
-#
-#sp {blocks-world*rl-fringe*block-not-glowing
-#  :feature 2 fringe blocks-world*rl-action*general
-#  (<s> ^blocks <blocks>)
-#  (<blocks> ^stack <stack>)
-#  (<stack> ^top <block>)
-#  (<block> ^name <block-name>)
-#  (<stack> ^action-out <action>)
-#  (<dest-stack> ^action-in <action>)
-#  (<dest-stack> ^top <dest>)
-#  (<dest> ^name <dest-name>)
-#  -(<block> ^glowing true)
-#-->
-#  = 0.0
-#}
+sp {blocks-world*rl-fringe*block-glowing
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<block> ^name <block-name>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
+  (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
+  +(<block> ^glowing true)
+-->
+  = 0.0
+}
 
-#sp {blocks-world*rl-fringe*dest-glowing
-#  :feature 2 fringe blocks-world*rl-action*general
-#  (<s> ^blocks <blocks>)
-#  (<blocks> ^stack <stack>)
-#  (<stack> ^top <block>)
-#  (<block> ^name <block-name>)
-#  (<stack> ^action-out <action>)
-#  (<dest-stack> ^action-in <action>)
-#  (<dest-stack> ^top <dest>)
-#  (<dest> ^name <dest-name>)
-#  +(<dest> ^glowing true)
-#-->
-#  = 0.0
-#}
-#
-#sp {blocks-world*rl-fringe*dest-not-glowing
-#  :feature 2 fringe blocks-world*rl-action*general
-#  (<s> ^blocks <blocks>)
-#  (<blocks> ^stack <stack>)
-#  (<stack> ^top <block>)
-#  (<block> ^name <block-name>)
-#  (<stack> ^action-out <action>)
-#  (<dest-stack> ^action-in <action>)
-#  (<dest-stack> ^top <dest>)
-#  (<dest> ^name <dest-name>)
-#  -(<dest> ^glowing true)
-#-->
-#  = 0.0
-#}
+sp {blocks-world*rl-fringe*block-not-glowing
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<block> ^name <block-name>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
+  (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
+  -(<block> ^glowing true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-glowing
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<block> ^name <block-name>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
+  (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
+  +(<dest> ^glowing true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*rl-fringe*dest-not-glowing
+  :feature 2 fringe blocks-world*rl-action*general
+  (<s> ^blocks <blocks>)
+  (<blocks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<block> ^name <block-name>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
+  (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
+  -(<dest> ^glowing true)
+-->
+  = 0.0
+}

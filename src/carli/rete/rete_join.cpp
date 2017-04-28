@@ -318,6 +318,7 @@ namespace Rete {
 //#endif
 
     const auto token = output_tokens.insert(join_wme_tokens(lhs, rhs));
+
     if(token.second) {
       for(auto &output : *outputs_enabled)
         output.ptr->insert_wme_token(agent, *token.first, this);

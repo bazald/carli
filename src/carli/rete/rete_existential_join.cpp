@@ -110,10 +110,8 @@ namespace Rete {
       auto found2 = match.first.find(wme_token);
 
       if(found2 != match.first.end()) {
-        if(!match.second.empty()) {
+        if(!match.second.empty())
           unjoin_tokens(agent, *found2);
-          output_tokens.erase(*found2);
-        }
         match.first.erase(found2);
 
         emptied ^= !--input0_count;
@@ -131,10 +129,8 @@ namespace Rete {
 
       if(found2 != match.second.end()) {
         if(match.second.size() == 1) {
-          for(auto &other : match.first) {
+          for(auto &other : match.first)
             unjoin_tokens(agent, other);
-            output_tokens.erase(other);
-          }
         }
         match.second.erase(found2);
 
@@ -250,8 +246,10 @@ namespace Rete {
 //    }
 
 //    if(++lhs.second == 1u) {
+    const auto token = output_tokens.insert(lhs);
+
     for(auto &output : *outputs_enabled)
-      output.ptr->insert_wme_token(agent, lhs, this);
+      output.ptr->insert_wme_token(agent, *token.first, this);
 //    }
   }
 
@@ -268,6 +266,8 @@ namespace Rete {
       else
         ++ot;
     }
+
+    output_tokens.erase(lhs);
 //    }
   }
 

@@ -1397,11 +1397,14 @@ namespace Carli {
 
     assert(general.q_value_weight->depth < m_split_max);
     assert(!general.fringe_values.empty());
+    assert(general.rete_action.lock()->is_active());
     Fringe_Values::iterator chosen_axis = general.fringe_values.end();
     Node_Fringe_Ptr chosen;
     size_t count = 0;
     size_t matches = 0;
+//    std::cerr << general.fringe_values.size() << std::endl;
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+//      std::cerr << "  " << fringe_axis->second.size() << std::endl;
       for(auto &fringe : fringe_axis->second) {
         if(!fringe->rete_action.lock()->is_active())
           continue;
@@ -2076,6 +2079,8 @@ namespace Carli {
       m_nodes_active.push_back(node);
       m_nodes_activating.pop_front();
       Rete::Agenda::Locker lock(agenda);
+//      std::cerr << "Testing action " << node->rete_action.lock()->get_name() << std::endl;
+//      assert(node->rete_action.lock()->is_active());
       node->decision();
     }
 

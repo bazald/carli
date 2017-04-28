@@ -65,8 +65,8 @@ namespace Rete {
     const auto inserted = input_tokens.insert(wme_token);
 
 //#ifdef DEBUG_OUTPUT
-//    std::cerr << "Firing action: ";
-//    output_name(std::cerr);
+//    std::cerr << "Firing action: " << get_name() << " on ";
+//    wme_token->print(std::cerr);
 //    std::cerr << std::endl;
 //#endif
 
@@ -79,6 +79,12 @@ namespace Rete {
 #endif
                                                                                                   ) {
     assert(from == input);
+
+//#ifdef DEBUG_OUTPUT
+//    std::cerr << "Retracting action: " << get_name() << " on ";
+//    wme_token->print(std::cerr);
+//    std::cerr << std::endl;
+//#endif
 
     auto found = input_tokens.find(wme_token);
     if(found != input_tokens.end())
@@ -121,7 +127,7 @@ namespace Rete {
     {
       const auto tokens = parent_left()->get_output_tokens();
 
-      os << "# Firing Count: " << tokens.size() << std::endl;
+      os << "# Matches: " << tokens.size() << std::endl;
 
       size_t matches = 0;
       for(const auto &token : tokens)
@@ -154,6 +160,7 @@ namespace Rete {
   }
 
   bool Rete_Action::is_active() const {
+//    return !parent_left()->get_output_tokens().empty();
     return !input_tokens.empty();
   }
 
