@@ -34,7 +34,10 @@ namespace Rete {
 
     bool operator==(const WME_Token &rhs) const;
 
-    size_t hash() const;
+    size_t get_hash() const {return m_hashval;}
+
+    bool eval_bindings(const bool &from_left, const WME_Bindings &bindings, const WME_Token &rhs, const bool &rhs_from_left) const;
+    size_t hash_bindings(const bool &from_left, const WME_Bindings &bindings) const;
 
     std::ostream & print(std::ostream &os) const;
 
@@ -45,6 +48,8 @@ namespace Rete {
     int64_t m_size;
 
     WME_Ptr_C m_wme;
+
+    size_t m_hashval;
   };
 
   Variable_Indices_Ptr_C bind_Variable_Indices(const WME_Bindings &bindings, const Variable_Indices_Ptr_C &indices, const Rete_Node &left, const Rete_Node &right);
@@ -59,7 +64,7 @@ RETE_LINKAGE std::ostream & operator<<(std::ostream &os, const Rete::WME_Token &
 namespace std {
   template <> struct hash<Rete::WME_Token> {
     size_t operator()(const Rete::WME_Token &wme_token) const {
-      return wme_token.hash();
+      return wme_token.get_hash();
     }
   };
 }

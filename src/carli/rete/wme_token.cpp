@@ -7,19 +7,22 @@
 namespace Rete {
 
   WME_Token::WME_Token()
-   : m_size(0)
+   : m_size(0),
+   m_hashval(-1)
   {
   }
 
   WME_Token::WME_Token(const WME_Ptr_C &wme)
    : m_size(1),
-   m_wme(wme)
+   m_wme(wme),
+   m_hashval(std::hash<WME>()(*m_wme))
   {
   }
 
   WME_Token::WME_Token(const WME_Token_Ptr_C &first, const WME_Token_Ptr_C &second)
    : m_wme_token(first, second),
-   m_size(first->m_size + second->m_size)
+   m_size(first->m_size + second->m_size),
+   m_hashval(hash_combine(std::hash<WME_Token_Ptr_C>()(m_wme_token.first), std::hash<WME_Token_Ptr_C>()(m_wme_token.second)))
   {
     assert(first->m_size);
     assert(second->m_size);
@@ -27,16 +30,6 @@ namespace Rete {
 
   bool WME_Token::operator==(const WME_Token &rhs) const {
     return m_wme_token == rhs.m_wme_token /*&& m_size == rhs.m_size*/ && m_wme == rhs.m_wme;
-  }
-
-  size_t WME_Token::hash() const {
-    if(m_wme)
-      return std::hash<WME>()(*m_wme);
-    else {
-      std::hash<WME_Token_Ptr_C> hasher;
-      return hash_combine(hasher(m_wme_token.first), hasher(m_wme_token.second));
-//        return hash_combine(m_wme_token.first->hash(), m_wme_token.second->hash());
-    }
   }
 
   std::ostream & WME_Token::print(std::ostream &os) const {
@@ -52,6 +45,21 @@ namespace Rete {
     }
 
     return os;
+  }
+
+  bool WME_Token::eval_bindings(const bool &from_left, const WME_Bindings &bindings, const WME_Token &rhs, const bool &rhs_from_left) const {
+    for(auto &binding : bindings) {
+      if(*(*this)[from_left ? binding.first : binding.second] != *(rhs)[rhs_from_left ? binding.first : binding.second])
+        return false;
+    }
+    return true;
+  }
+
+  size_t WME_Token::hash_bindings(const bool &from_left, const WME_Bindings &bindings) const {
+    size_t hashval = 0;
+    for(const auto &binding : bindings)
+      hashval = hash_combine(hashval, (*this)[from_left ? binding.first : binding.second]->hash());
+    return hashval;
   }
 
   const Symbol_Ptr_C & WME_Token::operator[](const WME_Token_Index &index) const {

@@ -62,7 +62,12 @@ namespace Rete {
     int64_t input0_count = 0;
     int64_t input1_count = 0;
 
-    std::unordered_map<std::list<Symbol_Ptr_C>, std::pair<Tokens, Tokens>, Rete::hash_container_deref<Symbol>, Rete::compare_container_deref_eq> matching;
+    std::unordered_map<std::pair<WME_Token_Ptr_C, bool>, std::pair<Tokens, Tokens>, std::function<size_t (const std::pair<WME_Token_Ptr_C, bool> &)>, std::function<bool (const std::pair<WME_Token_Ptr_C, bool> &, const std::pair<WME_Token_Ptr_C, bool> &)>> matching
+      = std::unordered_map<std::pair<WME_Token_Ptr_C, bool>, std::pair<Tokens, Tokens>, std::function<size_t (const std::pair<WME_Token_Ptr_C, bool> &)>, std::function<bool (const std::pair<WME_Token_Ptr_C, bool> &, const std::pair<WME_Token_Ptr_C, bool> &)>>(0, [this](const std::pair<WME_Token_Ptr_C, bool> &itoken)->size_t{
+        return itoken.first->hash_bindings(itoken.second, this->bindings);
+      }, [this](const std::pair<WME_Token_Ptr_C, bool> &lhs, const std::pair<WME_Token_Ptr_C, bool> &rhs)->bool{
+        return lhs.first->eval_bindings(lhs.second, this->bindings, *rhs.first, rhs.second);
+      });
     Tokens output_tokens;
 
     struct Data {

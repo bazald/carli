@@ -91,11 +91,11 @@ def write_to_csv(filename, x_label, xs, y_labels, yss):
     f.write('\n')
 
 def main():
-  # 1: ./blocksworld2.py experiment-bw2-long/catde-none-5k/*.out experiment-bw2-long/policy-none-5k/*.out experiment-bw2-long/value-none-5k/*.out
-  # 2: ./blocksworld2.py experiment-bw2-long/catde-catde-none-5k/*.out experiment-bw2-long/policy-policy-none-5k/*.out experiment-bw2-long/value-value-none-5k/*.out
-  # 3: ./blocksworld2.py experiment-bw2-long/catde-catde-bkls-5k/*.out experiment-bw2-long/policy-policy-bkls-5k/*.out experiment-bw2-long/value-value-bkls-5k/*.out
-  # 4: ./blocksworld2.py experiment-bw2-long/catde-catde-bst-5k/*.out experiment-bw2-long/policy-policy-bst-5k/*.out experiment-bw2-long/value-value-bst-5k/*.out
-  # 5: ./blocksworld2.py experiment-bw2-long/catde-catde-c300-5k/*.out experiment-bw2-long/policy-policy-c300-5k/*.out experiment-bw2-long/value-value-c300-5k/*.out
+  # 1: ./blocksworld2.py experiment-bw2-long-again/catde-none-5k/*.out experiment-bw2-long-again/policy-none-5k/*.out experiment-bw2-long-again/value-none-5k/*.out
+  # 2: ./blocksworld2.py experiment-bw2-long-again/catde-catde-none-5k/*.out experiment-bw2-long-again/policy-policy-none-5k/*.out experiment-bw2-long-again/value-value-none-5k/*.out
+  # 3: ./blocksworld2.py experiment-bw2-long-again/catde-catde-bkls-5k/*.out experiment-bw2-long-again/policy-policy-bkls-5k/*.out experiment-bw2-long-again/value-value-bkls-5k/*.out
+  # 4: ./blocksworld2.py experiment-bw2-long-again/catde-catde-bst-5k/*.out experiment-bw2-long-again/policy-policy-bst-5k/*.out experiment-bw2-long-again/value-value-bst-5k/*.out
+  # 5: ./blocksworld2.py experiment-bw2-long-again/catde-catde-c300-5k/*.out experiment-bw2-long-again/policy-policy-c300-5k/*.out experiment-bw2-long-again/value-value-c300-5k/*.out
   scenario = 0
 
   memory_plot = False # scenario is not 0
@@ -470,13 +470,15 @@ def main():
   else:
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
-    for agent in agent_list:
-      print '50k Value for ' + agent + ': ' + str(smith[agent][x.index(50000)])
-      print '50k CPU Average for ' + agent + ': ' + str(cpu[agent][x.index(50000)])
-      print '50k Memory Average for ' + agent + ': ' + str(memory[agent][x.index(50000)])
-      print 'Final Value for ' + agent + ': ' + str(smith[agent][-1])
-      print 'Final CPU Average for ' + agent + ': ' + str(cpu[agent][-1])
-      print 'Final Memory Average for ' + agent + ': ' + str(memory[agent][-1])
+    
+    if mode == 'multiple experiment evaluation':
+      for agent in agent_list:
+        #print '50k Value for ' + agent + ': ' + str(smith[agent][x.index(50000)])
+        #print '50k CPU Average for ' + agent + ': ' + str(cpu[agent][x.index(50000)])
+        #print '50k Memory Average for ' + agent + ': ' + str(memory[agent][x.index(50000)])
+        print 'Final Value for ' + agent + ': ' + str(smith[agent][-1])
+        print 'Final CPU Average for ' + agent + ': ' + str(cpu[agent][-1])
+        print 'Final Memory Average for ' + agent + ': ' + str(memory[agent][-1])
   
   if len(sys.argv) == 1:
     write_to_csv('blocksworld2.csv', 'Step Number', xs, y_labels, yss)

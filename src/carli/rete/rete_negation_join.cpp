@@ -43,10 +43,7 @@ namespace Rete {
     assert(from == input0 || from == input1);
 
     if(from == input0) {
-      std::list<Symbol_Ptr_C> index;
-      for(const auto &binding : bindings)
-        index.push_back((*wme_token)[binding.first]);
-      auto &match = matching[index];
+      auto &match = matching[std::make_pair(wme_token, true)];
       const auto inserted = match.first.insert(wme_token);
       if(inserted.second) {
         ++input0_count;
@@ -55,10 +52,7 @@ namespace Rete {
       }
     }
     if(from == input1) {
-      std::list<Symbol_Ptr_C> index;
-      for(const auto &binding : bindings)
-        index.push_back((*wme_token)[binding.second]);
-      auto &match = matching[index];
+      auto &match = matching[std::make_pair(wme_token, false)];
       const auto inserted = match.second.insert(wme_token);
       if(inserted.second) {
         ++input1_count;
@@ -76,9 +70,7 @@ namespace Rete {
     bool emptied = false;
 
     if(from == input0) {
-      std::list<Symbol_Ptr_C> index;
-      for(const auto &binding : bindings)
-        index.push_back((*wme_token)[binding.first]);
+      const auto index = std::make_pair(wme_token, true);
       auto &match = matching[index];
       auto found2 = match.first.find(wme_token);
 
@@ -94,9 +86,7 @@ namespace Rete {
         matching.erase(index);
     }
     if(from == input1) {
-      std::list<Symbol_Ptr_C> index;
-      for(const auto &binding : bindings)
-        index.push_back((*wme_token)[binding.second]);
+      const auto index = std::make_pair(wme_token, false);
       auto &match = matching[index];
       auto found2 = match.second.find(wme_token);
 

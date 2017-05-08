@@ -118,6 +118,22 @@ namespace Rete {
     }
   };
 
+  template <typename T>
+  class hash_deref_first {
+  public:
+    template <typename PairPtr>
+    size_t operator()(const PairPtr &pp) const {
+      return std::hash<T>()(*pp.first);
+    }
+  };
+
+  class RETE_LINKAGE nullhash {
+  public:
+    size_t operator()(const size_t &val) const {
+      return val;
+    }
+  };
+
   inline std::string to_string(const double &number) {
     std::ostringstream oss;
     oss << std::setprecision(20) << std::fixed << number;

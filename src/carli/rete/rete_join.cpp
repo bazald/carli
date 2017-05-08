@@ -64,10 +64,7 @@ namespace Rete {
       }
 #endif
 
-      std::list<Symbol_Ptr_C> index;
-      for(const auto &binding : bindings)
-        index.push_back((*wme_token)[binding.first]);
-      auto &match = matching[index];
+      auto &match = matching[std::make_pair(wme_token, true)];
       const auto inserted = match.first.insert(wme_token);
       if(inserted.second) {
         ++input0_count;
@@ -107,10 +104,7 @@ namespace Rete {
       }
 #endif
 
-      std::list<Symbol_Ptr_C> index;
-      for(const auto &binding : bindings)
-        index.push_back((*wme_token)[binding.second]);
-      auto &match = matching[index];
+      auto &match = matching[std::make_pair(wme_token, false)];
       const auto inserted = match.second.insert(wme_token);
       if(inserted.second) {
         ++input1_count;
@@ -143,9 +137,7 @@ namespace Rete {
     bool emptied = false;
 
     if(from == input0) {
-      std::list<Symbol_Ptr_C> index;
-      for(const auto &binding : bindings)
-        index.push_back((*wme_token)[binding.first]);
+      const auto index = std::make_pair(wme_token, true);
       auto &match = matching[index];
       auto found2 = match.first.find(wme_token);
 
@@ -154,7 +146,7 @@ namespace Rete {
           auto found_output = output_tokens.find(join_wme_tokens(*found2, other));
           if(found_output != output_tokens.end()) {
             for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
-              if((*ot)->remove_wme_token(agent, *found_output, this))
+              if((*ot)->remove_wme_token(agent, (*found_output), this))
                 (*ot++)->disconnect(agent, this);
               else
                 ++ot;
@@ -176,9 +168,7 @@ namespace Rete {
         matching.erase(index);
     }
     if(from == input1) {
-      std::list<Symbol_Ptr_C> index;
-      for(const auto &binding : bindings)
-        index.push_back((*wme_token)[binding.second]);
+      const auto index = std::make_pair(wme_token, false);
       auto &match = matching[index];
       auto found2 = match.second.find(wme_token);
 
@@ -187,7 +177,7 @@ namespace Rete {
           auto found_output = output_tokens.find(join_wme_tokens(other, *found2));
           if(found_output != output_tokens.end()) {
             for(auto ot = outputs_all.begin(), oend = outputs_all.end(); ot != oend; ) {
-              if((*ot)->remove_wme_token(agent, *found_output, this))
+              if((*ot)->remove_wme_token(agent, (*found_output), this))
                 (*ot++)->disconnect(agent, this);
               else
                 ++ot;
@@ -321,7 +311,7 @@ namespace Rete {
 
     if(token.second) {
       for(auto &output : *outputs_enabled)
-        output.ptr->insert_wme_token(agent, *token.first, this);
+        output.ptr->insert_wme_token(agent, (*token.first), this);
     }
   }
 
