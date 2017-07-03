@@ -121,6 +121,8 @@ solution "carli"
     includedirs { "C:\\Program Files\\Java\\jdk1.8.0_77\\include",
                   "C:\\Program Files\\Java\\jdk1.8.0_77\\include\\win32" }
 
+  include "src/advent"
+  include "src/advent_env"
   include "src/blocks_world"
   include "src/blocks_world_env"
   include "src/blocks_world_2"

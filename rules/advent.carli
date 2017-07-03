@@ -1,0 +1,132 @@
+# Blocks world 2 -- Restricted to what I think matters
+
+sp {advent*rl-action*general
+  :feature 1 unsplit nil
+  (<s> ^action <action>)
+  (<s> ^direction <direction>) # Relevant only to action(move)
+  (<s> ^item <item>)           # Relevant only to action(take) and action(drop)
+  (<s> ^weapon <weapon>)       # Relevant only to action(equip)
+  (<s> ^spell <spell>)         # Relevant only to action(cast)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*action-move
+  :feature 2 fringe advent*rl-action*general
+  (<s> ^action <action>)
+  (<s> ^direction <direction>) # Relevant only to action(move)
+  (<s> ^item <item>)           # Relevant only to action(take) and action(drop)
+  (<s> ^weapon <weapon>)       # Relevant only to action(equip)
+  (<s> ^spell <spell>)         # Relevant only to action(cast)
+  (<action> == 1)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*action-attack
+  :feature 2 fringe advent*rl-action*general
+  (<s> ^action <action>)
+  (<s> ^direction <direction>) # Relevant only to action(move)
+  (<s> ^item <item>)           # Relevant only to action(take) and action(drop)
+  (<s> ^weapon <weapon>)       # Relevant only to action(equip)
+  (<s> ^spell <spell>)         # Relevant only to action(cast)
+  (<action> == 2)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*action-take
+  :feature 2 fringe advent*rl-action*general
+  (<s> ^action <action>)
+  (<s> ^direction <direction>) # Relevant only to action(move)
+  (<s> ^item <item>)           # Relevant only to action(take) and action(drop)
+  (<s> ^weapon <weapon>)       # Relevant only to action(equip)
+  (<s> ^spell <spell>)         # Relevant only to action(cast)
+  (<action> == 3)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*action-drop
+  :feature 2 fringe advent*rl-action*general
+  (<s> ^action <action>)
+  (<s> ^direction <direction>) # Relevant only to action(move)
+  (<s> ^item <item>)           # Relevant only to action(take) and action(drop)
+  (<s> ^weapon <weapon>)       # Relevant only to action(equip)
+  (<s> ^spell <spell>)         # Relevant only to action(cast)
+  (<action> == 4)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*action-equip
+  :feature 2 fringe advent*rl-action*general
+  (<s> ^action <action>)
+  (<s> ^direction <direction>) # Relevant only to action(move)
+  (<s> ^item <item>)           # Relevant only to action(take) and action(drop)
+  (<s> ^weapon <weapon>)       # Relevant only to action(equip)
+  (<s> ^spell <spell>)         # Relevant only to action(cast)
+  (<action> == 5)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*action-cast
+  :feature 2 fringe advent*rl-action*general
+  (<s> ^action <action>)
+  (<s> ^direction <direction>) # Relevant only to action(move)
+  (<s> ^item <item>)           # Relevant only to action(take) and action(drop)
+  (<s> ^weapon <weapon>)       # Relevant only to action(equip)
+  (<s> ^spell <spell>)         # Relevant only to action(cast)
+  (<action> == 6)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*direction-north
+  :feature 2 fringe advent*rl-action*general
+  (<s> ^action <action>)
+  (<s> ^direction <direction>) # Relevant only to action(move)
+  (<s> ^item <item>)           # Relevant only to action(take) and action(drop)
+  (<s> ^weapon <weapon>)       # Relevant only to action(equip)
+  (<s> ^spell <spell>)         # Relevant only to action(cast)
+  (<direction> == 0)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*direction-south
+  :feature 2 fringe advent*rl-action*general
+  (<s> ^action <action>)
+  (<s> ^direction <direction>) # Relevant only to action(move)
+  (<s> ^item <item>)           # Relevant only to action(take) and action(drop)
+  (<s> ^weapon <weapon>)       # Relevant only to action(equip)
+  (<s> ^spell <spell>)         # Relevant only to action(cast)
+  (<direction> == 1)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*direction-east
+  :feature 2 fringe advent*rl-action*general
+  (<s> ^action <action>)
+  (<s> ^direction <direction>) # Relevant only to action(move)
+  (<s> ^item <item>)           # Relevant only to action(take) and action(drop)
+  (<s> ^weapon <weapon>)       # Relevant only to action(equip)
+  (<s> ^spell <spell>)         # Relevant only to action(cast)
+  (<direction> == 2)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*direction-west
+  :feature 2 fringe advent*rl-action*general
+  (<s> ^action <action>)
+  (<s> ^direction <direction>) # Relevant only to action(move)
+  (<s> ^item <item>)           # Relevant only to action(take) and action(drop)
+  (<s> ^weapon <weapon>)       # Relevant only to action(equip)
+  (<s> ^spell <spell>)         # Relevant only to action(cast)
+  (<direction> == 3)
+-->
+  = 0.0
+}
