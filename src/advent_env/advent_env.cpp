@@ -10,7 +10,8 @@ namespace Advent {
 
   bool Environment::success() const {
     ///< Player not dead ... and killed the dragon
-    return !failure() && m_water_dragon->health <= 0;
+    return !failure() && m_player_pos.first == 4 && m_player_pos.second == 3;
+//     return !failure() && m_water_dragon->health <= 0;
   }
 
   bool Environment::failure() const {
@@ -19,19 +20,22 @@ namespace Advent {
   }
 
   void Environment::init_impl() {
-    for(int x = 0; x != 7; ++x)
-      for(int y = 0; y != 7; ++y)
-        m_rooms[x][y] = y == 3 && x != 3 ? nullptr : std::make_shared<Room>();
+    m_player = Character();
+    m_player_pos = std::make_pair(2, 0);
+
+    for(int x = 0; x != 5; ++x)
+      for(int y = 0; y != 5; ++y)
+        m_rooms[x][y] = y == 2 && x != 2 ? nullptr : std::make_shared<Room>();
       
     m_player.items_max = 3;
     m_player.is_fleshy = true;
     m_player.print_char = '@';
     
-    m_water_dragon = m_rooms[5][5]->enemy = std::make_shared<Character>();
+    m_water_dragon = m_rooms[4][3]->enemy = std::make_shared<Character>();
     m_water_dragon->is_water = true;
     m_water_dragon->print_char = 'd';
     
-    m_troll = std::make_shared<Character>();
+    m_troll = m_rooms[2][2]->enemy = std::make_shared<Character>();
     m_troll->is_troll = true;
     m_troll->print_char = 't';
   }
@@ -116,7 +120,7 @@ namespace Advent {
       }
     }
     
-    return std::make_pair(-1.0, -1.0);
+    return std::make_pair(success() ? 10 : -1.0, -1.0);
   }
 
   void Environment::print_impl(ostream &os) const {
@@ -159,7 +163,7 @@ namespace Advent {
 //       m_spell_ids[Spell(i)] = m_item_ids[Item(i)];
 
     for(int64_t i = 0; i != env->get_Rooms_size(); ++i)
-      m_position_ids[i] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(i));
+      m_position_values[i] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(i));
 
     generate_rete();
     generate_features();
@@ -189,6 +193,10 @@ namespace Advent {
     const auto &player_pos = env->get_Player_pos();
     std::list<Rete::WME_Ptr_C> wmes_current;
     std::ostringstream oss;
+    
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_player_attr, m_player_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_x_attr, m_position_values[player_pos.first]));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_y_attr, m_position_values[player_pos.second]));
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_NONE]));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NONE], m_name_attr, m_move_value));

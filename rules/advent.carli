@@ -2,6 +2,7 @@
 
 sp {advent*rl-action*general
   :feature 1 unsplit nil
+  (<s> ^player <player>)
   (<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
@@ -12,6 +13,7 @@ sp {advent*rl-action*general
 
 sp {advent*rl-fringe*action-move
   :feature 2 fringe advent*rl-action*general
+  (<s> ^player <player>)
   (<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
@@ -23,6 +25,7 @@ sp {advent*rl-fringe*action-move
 
 sp {advent*rl-fringe*action-attack
   :feature 2 fringe advent*rl-action*general
+  (<s> ^player <player>)
   (<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
@@ -34,6 +37,7 @@ sp {advent*rl-fringe*action-attack
 
 sp {advent*rl-fringe*action-take
   :feature 2 fringe advent*rl-action*general
+  (<s> ^player <player>)
   (<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
@@ -45,6 +49,7 @@ sp {advent*rl-fringe*action-take
 
 sp {advent*rl-fringe*action-drop
   :feature 2 fringe advent*rl-action*general
+  (<s> ^player <player>)
   (<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
@@ -56,6 +61,7 @@ sp {advent*rl-fringe*action-drop
 
 sp {advent*rl-fringe*action-equip
   :feature 2 fringe advent*rl-action*general
+  (<s> ^player <player>)
   (<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
@@ -67,6 +73,7 @@ sp {advent*rl-fringe*action-equip
 
 sp {advent*rl-fringe*action-cast
   :feature 2 fringe advent*rl-action*general
+  (<s> ^player <player>)
   (<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
@@ -78,6 +85,7 @@ sp {advent*rl-fringe*action-cast
 
 sp {advent*rl-fringe*direction-none
   :feature 2 fringe advent*rl-action*general
+  (<s> ^player <player>)
   (<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
@@ -89,6 +97,7 @@ sp {advent*rl-fringe*direction-none
 
 sp {advent*rl-fringe*direction-north
   :feature 2 fringe advent*rl-action*general
+  (<s> ^player <player>)
   (<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
@@ -100,6 +109,7 @@ sp {advent*rl-fringe*direction-north
 
 sp {advent*rl-fringe*direction-south
   :feature 2 fringe advent*rl-action*general
+  (<s> ^player <player>)
   (<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
@@ -111,6 +121,7 @@ sp {advent*rl-fringe*direction-south
 
 sp {advent*rl-fringe*direction-east
   :feature 2 fringe advent*rl-action*general
+  (<s> ^player <player>)
   (<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
@@ -122,11 +133,64 @@ sp {advent*rl-fringe*direction-east
 
 sp {advent*rl-fringe*direction-west
   :feature 2 fringe advent*rl-action*general
+  (<s> ^player <player>)
   (<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
   (<action> ^item <item>)
   (<direction> == 4)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*player-x-lower
+  :feature 2 fringe advent*rl-action*general 1 0 3
+  (<s> ^player <player>)
+  (<s> ^action <action>)
+  (<action> ^name <name>)
+  (<action> ^direction <direction>)
+  (<action> ^item <item>)
+  {(<player> ^x <player-x>)
+   (<player-x> < 3)}
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*player-x-upper
+  :feature 2 fringe advent*rl-action*general 1 0 3
+  (<s> ^player <player>)
+  (<s> ^action <action>)
+  (<action> ^name <name>)
+  (<action> ^direction <direction>)
+  (<action> ^item <item>)
+  {(<player> ^x <player-x>)
+   (<player-x> >= 3)}
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*player-y-lower
+  :feature 2 fringe advent*rl-action*general 1 0 3
+  (<s> ^player <player>)
+  (<s> ^action <action>)
+  (<action> ^name <name>)
+  (<action> ^direction <direction>)
+  (<action> ^item <item>)
+  {(<player> ^y <player-y>)
+   (<player-y> < 3)}
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*player-y-upper
+  :feature 2 fringe advent*rl-action*general 1 0 3
+  (<s> ^player <player>)
+  (<s> ^action <action>)
+  (<action> ^name <name>)
+  (<action> ^direction <direction>)
+  (<action> ^item <item>)
+  {(<player> ^y <player-y>)
+   (<player-y> >= 3)}
 -->
   = 0.0
 }

@@ -450,9 +450,9 @@ namespace Advent {
     void print_impl(ostream &os) const;
 
     Zeni::Random m_random;
-    std::array<std::array<std::shared_ptr<Room>, 7>, 7> m_rooms;
+    std::array<std::array<std::shared_ptr<Room>, 5>, 5> m_rooms;
     Character m_player;
-    std::pair<int64_t, int64_t> m_player_pos = std::make_pair(3, 0);
+    std::pair<int64_t, int64_t> m_player_pos = std::make_pair(2, 0);
     
     std::shared_ptr<Character> m_water_dragon;
     std::shared_ptr<Character> m_troll;
@@ -486,10 +486,14 @@ namespace Advent {
      *            block ^matches-top stack
      */
 
+    const Rete::Symbol_Identifier_Ptr_C m_player_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("PLAYER"));
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
     const Rete::Symbol_Constant_String_Ptr_C m_name_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("name"));
     const Rete::Symbol_Constant_String_Ptr_C m_direction_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("direction"));
     const Rete::Symbol_Constant_String_Ptr_C m_item_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("item"));
+    const Rete::Symbol_Constant_String_Ptr_C m_player_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("player"));
+    const Rete::Symbol_Constant_String_Ptr_C m_x_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x"));
+    const Rete::Symbol_Constant_String_Ptr_C m_y_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("y"));
 //     const Rete::Symbol_Constant_String_Ptr_C m_weapon_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("weapon"));
 //     const Rete::Symbol_Constant_String_Ptr_C m_spell_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("spell"));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
@@ -503,8 +507,8 @@ namespace Advent {
     std::map<Item, Rete::Symbol_Constant_Int_Ptr_C> m_item_ids;
 //     std::map<Weapon, Rete::Symbol_Constant_Int_Ptr_C> m_weapon_ids;
 //     std::map<Spell, Rete::Symbol_Constant_Int_Ptr_C> m_spell_ids;
-    std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_position_ids;
     std::map<Direction, Rete::Symbol_Constant_Int_Ptr_C> m_direction_values;
+    std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_position_values;
 
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
 
