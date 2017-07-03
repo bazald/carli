@@ -24,9 +24,9 @@ namespace Advent {
 
   typedef int64_t block_id;
   
-  enum Direction : int64_t {DIR_NONE = 0, DIR_NORTH = 0, DIR_SOUTH = 1, DIR_EAST = 2, DIR_WEST = 3};
+  enum Direction : int64_t {DIR_NONE = 0, DIR_NORTH = 1, DIR_SOUTH = 2, DIR_EAST = 3, DIR_WEST = 4};
   enum Item : int64_t {ITEM_NONE = 0, SWORD = 1, MACE = 2, MAGIC_SWORD = 3, SCROLL_HEAL = 4, SCROLL_FIREBOLT = 5, SCROLL_ICEBOLT = 6};
-  enum Weapon : int64_t {WEAPON_FISTS = 0, WEAPON_SWORD = 1, WEAPON_MACE = 2, WEAPON_MAGIC_SWORD = 3};
+  enum Weapon : int64_t {WEAPON_FISTS = 0, WEAPON_MACE = 1, WEAPON_SWORD = 2, WEAPON_MAGIC_SWORD = 3};
   enum Spell : int64_t {SPELL_NONE = 0, SPELL_HEAL = 4, SPELL_FIREBOLT = 5, SPELL_ICEBOLT = 6};
   
   inline bool can_Equip(const Item &item) {
@@ -67,7 +67,7 @@ namespace Advent {
     Move(const Rete::Variable_Indices &variables, const Rete::WME_Token &token)
      : direction(Direction(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("direction")->second]).value))
     {
-      assert(direction == DIR_NORTH || direction == DIR_SOUTH || direction == DIR_EAST || direction == DIR_WEST);
+      assert(direction == DIR_NONE || direction == DIR_NORTH || direction == DIR_SOUTH || direction == DIR_EAST || direction == DIR_WEST);
     }
 
     Move * clone() const {
@@ -195,7 +195,7 @@ namespace Advent {
     }
 
     Equip(const Rete::Variable_Indices &variables, const Rete::WME_Token &token)
-     : weapon(Weapon(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("weapon")->second]).value))
+     : weapon(Weapon(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("item")->second]).value))
     {
       assert(can_Equip(Item(weapon)));
     }
@@ -232,7 +232,7 @@ namespace Advent {
     }
 
     Cast(const Rete::Variable_Indices &variables, const Rete::WME_Token &token)
-     : spell(Spell(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("spell")->second]).value))
+     : spell(Spell(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("item")->second]).value))
     {
       assert(can_Cast(Item(spell)));
     }
@@ -257,7 +257,7 @@ namespace Advent {
   };
 
   inline std::shared_ptr<Carli::Action> make_Action(const Rete::Variable_Indices &variables, const Rete::WME_Token &token) {
-    const int64_t action = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("action")->second]).value;
+    const int64_t action = debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("name")->second]).value;
     
     switch(action) {
       case 1:
@@ -286,6 +286,10 @@ namespace Advent {
       return rv;
     }
     
+    int64_t has(const int64_t index) const {
+      return items[index];
+    }
+    
     void give(const int64_t index) {
       assert(items.at(index));
       ++items[index];
@@ -308,16 +312,22 @@ namespace Advent {
       return *this;
     }
     
+    void clear() {
+      items = {{0, 0, 0, 0, 0, 0, 0}};
+    }
+    
   private:
     std::array<int64_t, 7> items = {{0, 0, 0, 0, 0, 0, 0}};
   };
   
-  struct ADVENT_LINKAGE Character {
+  class ADVENT_LINKAGE Character {
+  public:
     Items items;
     int64_t items_max = 1;
     Weapon weapon = WEAPON_FISTS;
     int64_t health = 10;
     int64_t health_max = 10;
+    bool is_dead = false;
     
     bool is_fleshy = false;
     bool is_skeletal = false;
@@ -325,9 +335,88 @@ namespace Advent {
     bool is_water = false;
     
     char print_char = 'm';
+    
+    void receive_attack(const Weapon &weapon) {
+      switch(weapon) {
+        case WEAPON_FISTS:
+          if(is_fleshy)
+            health -= 2;
+          else if(is_skeletal)
+            health -= 1;
+          else if(is_troll)
+            health -= 1;
+          break;
+          
+        case WEAPON_MACE:
+          if(is_fleshy)
+            health -= 3;
+          else if(is_skeletal)
+            health -= 5;
+          else if(is_troll)
+            health -= 3;
+          break;
+          
+        case WEAPON_SWORD:
+          if(is_fleshy)
+            health -= 5;
+          else if(is_skeletal)
+            health -= 3;
+          else if(is_troll)
+            health -= 3;
+          break;
+          
+        case WEAPON_MAGIC_SWORD:
+          if(is_water)
+            health -= 2;
+          else if(is_troll) {
+            health -= 11;
+            if(health <= 0)
+              is_dead = true;
+          }
+          else
+            health -= 10;
+          break;
+          
+        default:
+          abort();
+      }
+    }
+    
+    void receive_cast(const Spell &spell) {
+      switch(spell) {
+        case SPELL_HEAL:
+          if(is_fleshy)
+            health -= 2;
+          else if(is_skeletal)
+            health -= 1;
+          break;
+          
+        case SPELL_FIREBOLT:
+          if(is_fleshy)
+            health -= 10;
+          else if(!is_skeletal)
+            health -= 5;
+          if(is_troll && health <= 0)
+            is_dead = true;
+          break;
+          
+        case SPELL_ICEBOLT:
+          if(is_water) {
+            health -= 10;
+            is_water = false;
+          }
+          else if(!is_skeletal)
+            health -= 5;
+          break;
+          
+        default:
+          abort();
+      }
+    }
   };
   
-  struct ADVENT_LINKAGE Room {
+  class ADVENT_LINKAGE Room {
+  public:
     Items items;
     std::shared_ptr<Character> enemy;
   };
@@ -398,10 +487,11 @@ namespace Advent {
      */
 
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
+    const Rete::Symbol_Constant_String_Ptr_C m_name_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("name"));
     const Rete::Symbol_Constant_String_Ptr_C m_direction_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("direction"));
     const Rete::Symbol_Constant_String_Ptr_C m_item_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("item"));
-    const Rete::Symbol_Constant_String_Ptr_C m_weapon_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("weapon"));
-    const Rete::Symbol_Constant_String_Ptr_C m_spell_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("spell"));
+//     const Rete::Symbol_Constant_String_Ptr_C m_weapon_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("weapon"));
+//     const Rete::Symbol_Constant_String_Ptr_C m_spell_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("spell"));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
     const Rete::Symbol_Constant_Int_Ptr_C m_attack_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
     const Rete::Symbol_Constant_Int_Ptr_C m_take_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
@@ -409,11 +499,12 @@ namespace Advent {
     const Rete::Symbol_Constant_Int_Ptr_C m_equip_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(5));
     const Rete::Symbol_Constant_Int_Ptr_C m_cast_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(6));
 
-    std::map<Direction, Rete::Symbol_Constant_Int_Ptr_C> m_direction_ids;
+    std::map<Direction, Rete::Symbol_Identifier_Ptr_C> m_move_ids;
     std::map<Item, Rete::Symbol_Constant_Int_Ptr_C> m_item_ids;
-    std::map<Weapon, Rete::Symbol_Constant_Int_Ptr_C> m_weapon_ids;
-    std::map<Spell, Rete::Symbol_Constant_Int_Ptr_C> m_spell_ids;
+//     std::map<Weapon, Rete::Symbol_Constant_Int_Ptr_C> m_weapon_ids;
+//     std::map<Spell, Rete::Symbol_Constant_Int_Ptr_C> m_spell_ids;
     std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_position_ids;
+    std::map<Direction, Rete::Symbol_Constant_Int_Ptr_C> m_direction_values;
 
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
 
