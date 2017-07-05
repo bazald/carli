@@ -117,6 +117,8 @@ namespace Carli {
     std::list<Node_Ptr> m_nodes_activating;
     std::unordered_set<Rete::Rete_Node_Ptr_C> m_rete_nodes_evaluated;
 
+    const bool terse_out = get_Option_Ranged<bool>(Options::get_global(), "terse-out");
+
   protected:
     Action_Ptr_C choose_epsilon_greedy(const Node_Fringe * const &fringe, const int64_t &fringe_depth);
 #ifdef ENABLE_T_TEST

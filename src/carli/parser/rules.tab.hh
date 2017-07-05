@@ -82,7 +82,7 @@ typedef void *yyscan_t;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 142 "rules.yyy" /* yacc.c:1909  */
+#line 97 "rules.yyy" /* yacc.c:1909  */
 
   char cval;
   const char *csval;

@@ -63,6 +63,7 @@ namespace Carli {
 //    double min_int64(const ptrdiff_t offset, const int64_t value_accumulator = std::numeric_limits<int64_t>) const;
 
     void print_flags(std::ostream &os) const override;
+    bool print_grandparent_left(std::ostream &os) const override;
     void print_action(std::ostream &os) const override;
 
     virtual void action(const Rete::WME_Token &token);

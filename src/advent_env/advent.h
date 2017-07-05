@@ -360,16 +360,16 @@ namespace Advent {
           if(is_fleshy)
             health -= 5;
           else if(is_skeletal)
-            health -= 3;
+            health -= 2;
           else if(is_troll)
-            health -= 3;
+            health -= 4;
           break;
           
         case WEAPON_MAGIC_SWORD:
           if(is_water)
             health -= 2;
           else if(is_troll) {
-            health -= 11;
+            health -= 6;
             if(health <= 0)
               is_dead = true;
           }
@@ -385,26 +385,21 @@ namespace Advent {
     void receive_cast(const Spell &spell) {
       switch(spell) {
         case SPELL_HEAL:
-          if(is_fleshy)
-            health -= 2;
-          else if(is_skeletal)
-            health -= 1;
+          health = std::min(health + 5, health_max);
           break;
           
         case SPELL_FIREBOLT:
           if(is_fleshy)
-            health -= 10;
-          else if(!is_skeletal)
             health -= 5;
+          else if(!is_skeletal)
+            health -= 2;
           if(is_troll && health <= 0)
             is_dead = true;
           break;
           
         case SPELL_ICEBOLT:
-          if(is_water) {
-            health -= 10;
+          if(is_water)
             is_water = false;
-          }
           else if(!is_skeletal)
             health -= 5;
           break;
@@ -494,6 +489,7 @@ namespace Advent {
     const Rete::Symbol_Constant_String_Ptr_C m_player_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("player"));
     const Rete::Symbol_Constant_String_Ptr_C m_x_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x"));
     const Rete::Symbol_Constant_String_Ptr_C m_y_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("y"));
+    const Rete::Symbol_Constant_String_Ptr_C m_health_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("health"));
 //     const Rete::Symbol_Constant_String_Ptr_C m_weapon_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("weapon"));
 //     const Rete::Symbol_Constant_String_Ptr_C m_spell_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("spell"));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
@@ -509,6 +505,7 @@ namespace Advent {
 //     std::map<Spell, Rete::Symbol_Constant_Int_Ptr_C> m_spell_ids;
     std::map<Direction, Rete::Symbol_Constant_Int_Ptr_C> m_direction_values;
     std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_position_values;
+    std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_health_values;
 
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
 

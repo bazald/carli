@@ -49,88 +49,43 @@ namespace Rete {
     return flags;
   }
 
-  static vector<Parser_Variable> Variables() {
-    vector<Parser_Variable> rv;
-    return rv;
-  }
-  static vector<Parser_Variable> Variables(const Parser_Variable &variable) {
-    vector<Parser_Variable> rv;
-    rv.push_back(variable);
-    return rv;
-  }
-  static pair<Rete::Rete_Node_Ptr, vector<Parser_Variable>> *
-  Rete_Node_Ptr_and_Variables(const Rete::Rete_Node_Ptr &rete_node, const vector<Parser_Variable> &variables) {
-    return new pair<Rete::Rete_Node_Ptr, vector<Parser_Variable>>(rete_node, variables);
+  static pair<Rete::Rete_Node_Ptr, Variable_Indices> *
+  Rete_Node_Ptr_and_Variables(const Rete::Rete_Node_Ptr &rete_node, const Variable_Indices &variables) {
+    return new pair<Rete::Rete_Node_Ptr, Variable_Indices>(rete_node, variables);
   }
 
-  static Rete::WME_Token_Index find_index(const std::vector<Parser_Variable> &variables, const std::string &name) {
-    for(const auto &variable : variables) {
-      for(const auto &ni : variable.name_index) {
-        if(!ni.second.existential && ni.first == name)
-          return ni.second;
-      }
-    }
-    return Rete::WME_Token_Index(-1, -1, -1);
+  static Rete::WME_Token_Index find_index(const Variable_Indices &variables, const std::string &name) {
+    const auto found = variables.find(name);
+    return found != variables.end() && !found->second.existential ? found->second : Rete::WME_Token_Index(-1, -1, -1);
   }
 
-  static Rete::WME_Bindings join_bindings(const std::vector<Parser_Variable> &lhs,
-                                          const std::vector<Parser_Variable> &rhs)
+  static Rete::WME_Bindings join_bindings(const Variable_Indices &lhs,
+                                          const Variable_Indices &rhs)
   {
     Rete::WME_Bindings bindings;
     unordered_set<string> joined;
-    for(const Parser_Variable &lvar : lhs) {
-      for(const auto &lni : lvar.name_index) {
-        if(!lni.second.existential && !lni.first.empty() && joined.find(lni.first) == joined.end()) {
-          for(const Parser_Variable &rvar : rhs) {
-            for(const auto &rni : rvar.name_index) {
-              if(!rni.second.existential && lni.first == rni.first) {
-                bindings.insert(Rete::WME_Binding(lni.second, rni.second));
-                joined.insert(lni.first);
-                goto DONE_JOINING;
-              }
-            }
-          }
+    for(const auto &rvar : rhs) {
+      if(!rvar.second.existential) {
+        const auto found = lhs.find(rvar.first);
+        if(found != lhs.end() && !found->second.existential && joined.find(rvar.first) == joined.end()) {
+          bindings.insert(Rete::WME_Binding(found->second, rvar.second));
+          joined.insert(rvar.first);
         }
-        DONE_JOINING:
-          ;
       }
     }
     return bindings;
   }
 
-  static Rete::Variable_Indices_Ptr_C variables_to_indices(const vector<Parser_Variable> &variables) {
-    const auto indices = std::make_shared<Rete::Variable_Indices>();
-    for(const auto &variable : variables) {
-      for(const auto &ni : variable.name_index) {
-        if(ni.first.empty())
-          continue;
-        indices->insert(ni);
+  static Variable_Indices merge_variables(const Variable_Indices &lhs, const int64_t &lhs_size, const int64_t &lhs_token_size, const Variable_Indices &rhs, const bool &existential) {
+    Variable_Indices variables(lhs);
+    for(auto rvar : rhs) {
+      const auto found = lhs.find(rvar.first);
+      if(found == lhs.end() || found->second.existential) {
+        rvar.second.rete_row += lhs_size;
+        rvar.second.token_row += lhs_token_size;
+        rvar.second.existential = rvar.second.existential | existential;
+        variables.insert(rvar);
       }
-    }
-    return indices;
-  }
-
-  static vector<Parser_Variable> merge_variables(const vector<Parser_Variable> &lhs, const int64_t &lhs_size, const int64_t &lhs_token_size, const vector<Parser_Variable> &rhs, const bool &existential) {
-    vector<Parser_Variable> variables(lhs);
-    variables.reserve(variables.size() + rhs.size());
-    for(const Parser_Variable &var_ : rhs) {
-      Parser_Variable var(var_);
-      for(auto &ni : var.name_index) {
-        for(const Parser_Variable &existing_var : variables) {
-          for(const auto &existing_ni : existing_var.name_index) {
-            if(!existing_ni.second.existential && existing_ni.first == ni.first) {
-              ni.first.clear();
-              goto VAR_FOUND;
-            }
-          }
-        }
-        VAR_FOUND:
-        ni.second.rete_row += lhs_size;
-        ni.second.token_row += lhs_token_size;
-        ni.second.existential = ni.second.existential | existential;
-          ;
-      }
-      variables.push_back(var);
     }
     return variables;
   }
@@ -223,7 +178,7 @@ command:
                       const string &parent_node_name = get<2>(*get<1>(get<2>(*$2)));
                       const auto &feature =            get<3>(*get<1>(get<2>(*$2)));
                       const auto &q_value_value =                     get<3>(*$2);
-                      const auto variable_indices = variables_to_indices(variable_names);
+                      const auto variable_indices = std::make_shared<Rete::Variable_Indices>(variable_names);
                       const auto parent_action = agent.get_rule(parent_node_name);
 
                       const auto existing = agent.unname_rule(name, true);
@@ -423,7 +378,7 @@ rule:
                                             get<0>(*$3) = make_shared<int64_t>(agent.get_total_step_count());
                                           if(!get<1>(*$3))
                                             get<1>(*$3) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>();
-                                          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<Rete::Parser_Variable>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, Carli::Q_Value::Token>(*$4, *$2, *$3, Carli::Q_Value::Token());
+                                          $$ = new tuple<pair<Rete::Rete_Node_Ptr, Rete::Variable_Indices>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, Carli::Q_Value::Token>(*$4, *$2, *$3, Carli::Q_Value::Token());
                                           delete $2;
                                           delete $3;
                                           delete $4; }
@@ -432,7 +387,7 @@ rule:
             get<0>(*$3) = make_shared<int64_t>(agent.get_total_step_count());
           if(!get<1>(*$3))
             get<1>(*$3) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>();
-          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<Rete::Parser_Variable>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, Carli::Q_Value::Token>(*$4, *$2, *$3, Carli::Q_Value::Token($7, $8, $9, $10, $11));
+          $$ = new tuple<pair<Rete::Rete_Node_Ptr, Rete::Variable_Indices>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, Carli::Q_Value::Token>(*$4, *$2, *$3, Carli::Q_Value::Token($7, $8, $9, $10, $11));
           delete $2;
           delete $3;
           delete $4; }
@@ -441,7 +396,7 @@ rule:
             get<0>(*$3) = make_shared<int64_t>(agent.get_total_step_count());
           if(!get<1>(*$3))
             get<1>(*$3) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>();
-          $$ = new tuple<pair<Rete::Rete_Node_Ptr, vector<Rete::Parser_Variable>>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, Carli::Q_Value::Token>(*$4, *$2, *$3, Carli::Q_Value::Token($7, 0.0, 0.0, 0.0, 0));
+          $$ = new tuple<pair<Rete::Rete_Node_Ptr, Rete::Variable_Indices>, string, tuple<shared_ptr<int64_t>, shared_ptr<tuple<int64_t, string, string, Carli::Feature *>>>, Carli::Q_Value::Token>(*$4, *$2, *$3, Carli::Q_Value::Token($7, 0.0, 0.0, 0.0, 0));
           delete $2;
           delete $3;
           delete $4; }
@@ -485,19 +440,19 @@ flags:
   ;
 final_conditions:
   conditions { $$ = $1; }
-  | '+' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential($2->first)), Rete::Variables()); delete $2; }
-  | '-' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation($2->first)), Rete::Variables()); delete $2; }
+  | '+' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential($2->first)), Rete::Variable_Indices()); delete $2; }
+  | '-' conditions { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation($2->first)), Rete::Variable_Indices()); delete $2; }
   ;
 conditions:
-  conditions condition_type { const vector<Rete::Parser_Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $2->second, false));
+  conditions condition_type { const Rete::Variable_Indices variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $2->second, false));
                               $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_join(join_bindings($1->second, $2->second), $1->first, $2->first)), variables);
                               delete $1;
                               delete $2; }
-  | conditions '+' condition_type { const vector<Rete::Parser_Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $3->second, true));
+  | conditions '+' condition_type { const Rete::Variable_Indices variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $3->second, true));
                                     $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_existential_join(join_bindings($1->second, $3->second), $1->first, $3->first)), variables);
                                     delete $1;
                                     delete $3; }
-  | conditions '-' condition_type { const vector<Rete::Parser_Variable> variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $3->second, true));
+  | conditions '-' condition_type { const Rete::Variable_Indices variables(merge_variables($1->second, $1->first->get_size(), $1->first->get_token_size(), $3->second, true));
                                     $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_negation_join(join_bindings($1->second, $3->second), $1->first, $3->first)), variables);
                                     delete $1;
                                     delete $3; }
@@ -524,16 +479,19 @@ conditions:
   ;
 condition_group:
   '{' final_conditions '}' { $$ = $2; }
+  | '&' STRING { const auto referenced_action = agent.get_rule(*$2);
+                 $$ = Rete_Node_Ptr_and_Variables(referenced_action->parent_left(), *referenced_action->get_variables());
+                 delete $2; }
   ;
 condition_type:
   condition { $$ = $1; }
   | condition_group { $$ = $1; }
   ;
 condition:
-  '(' VARIABLE '^' symbol_constant symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *$4, *$5))), Variables(Rete::Parser_Variable(*$2, "", ""))); delete $2; delete $4; delete $5; }
-  | '(' VARIABLE '^' symbol_constant VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *$4, make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Third)))), Variables(Rete::Parser_Variable(*$2, "", *$5))); delete $2; delete $4; delete $5; }
-  | '(' VARIABLE '^' VARIABLE symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), *$5))), Variables(Rete::Parser_Variable(*$2, *$4, ""))); delete $2; delete $4; delete $5; }
-  | '(' VARIABLE '^' VARIABLE VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : *$4 == *$5 ? Rete::Symbol_Variable::Second : Rete::Symbol_Variable::Third)))), Variables(Rete::Parser_Variable(*$2, *$4, *$5))); delete $2; delete $4; delete $5; }
+  '(' VARIABLE '^' symbol_constant symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *$4, *$5))), Rete::Variable_Indices({{std::make_pair(*$2, Rete::WME_Token_Index(0, 0, 0))}})); delete $2; delete $4; delete $5; }
+  | '(' VARIABLE '^' symbol_constant VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), *$4, make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Third)))), Rete::Variable_Indices({{std::make_pair(*$2, Rete::WME_Token_Index(0, 0, 0)), std::make_pair(*$5, Rete::WME_Token_Index(0, 0, 2))}})); delete $2; delete $4; delete $5; }
+  | '(' VARIABLE '^' VARIABLE symbol_constant ')' { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), *$5))), Rete::Variable_Indices({{std::make_pair(*$2, Rete::WME_Token_Index(0, 0, 0)), std::make_pair(*$4, Rete::WME_Token_Index(0, 0, 1))}})); delete $2; delete $4; delete $5; }
+  | '(' VARIABLE '^' VARIABLE VARIABLE ')'  { $$ = Rete_Node_Ptr_and_Variables(Rete::Rete_Node_Ptr(agent.make_filter(Rete::WME(make_shared<Rete::Symbol_Variable>(Rete::Symbol_Variable::First), make_shared<Rete::Symbol_Variable>(*$2 == *$4 ? Rete::Symbol_Variable::First : Rete::Symbol_Variable::Second), make_shared<Rete::Symbol_Variable>(*$2 == *$5 ? Rete::Symbol_Variable::First : *$4 == *$5 ? Rete::Symbol_Variable::Second : Rete::Symbol_Variable::Third)))), Rete::Variable_Indices({{std::make_pair(*$2, Rete::WME_Token_Index(0, 0, 0)), std::make_pair(*$4, Rete::WME_Token_Index(0, 0, 1)), std::make_pair(*$5, Rete::WME_Token_Index(0, 0, 2))}})); delete $2; delete $4; delete $5; }
   ;
 symbol:
   symbol_constant { $$ = $1; }

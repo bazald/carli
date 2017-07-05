@@ -64,6 +64,7 @@ namespace Rete {
     virtual Rete_Node_Ptr cluster_root_ancestor() const = 0;
 
     virtual void print_flags(std::ostream &os) const = 0;
+    virtual bool print_grandparent_left(std::ostream &os) const = 0;
     virtual void print_action(std::ostream &os) const = 0;
   };
 
@@ -225,7 +226,7 @@ namespace Rete {
 
     virtual void print_details(std::ostream &os) const = 0; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
-    virtual void print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices) const = 0;
+    virtual void print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const bool &suppress_parent_left = false) const = 0;
 
     virtual void output_name(std::ostream &os, const int64_t &depth) const = 0;
 

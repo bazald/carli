@@ -135,10 +135,13 @@ namespace Rete {
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
   }
 
-  void Rete_Predicate::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices) const {
-    parent_left()->print_rule(os, indices);
+  void Rete_Predicate::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const bool &suppress_parent_left) const {
+    if(!suppress_parent_left) {
+      parent_left()->print_rule(os, indices);
+      os << std::endl << "  ";
+    }
 
-    os << std::endl << "  (<" << get_Variable_name(indices, m_lhs_index) << "> ";
+    os << "(<" << get_Variable_name(indices, m_lhs_index) << "> ";
 
     switch(m_predicate) {
       case EQ: os << "=="; break;

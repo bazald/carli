@@ -134,6 +134,19 @@ namespace Carli {
     }
   }
 
+  bool Node::print_grandparent_left(std::ostream &os) const {
+    if(!agent.terse_out)
+      return false;
+
+    const auto pa_lock = parent_action.lock();
+    if(!pa_lock)
+      return false;
+
+    os << '&' << pa_lock->get_name() << std::endl << "  ";
+
+    return true;
+  }
+
   void Node::print_action(std::ostream &os) const {
     const auto &q_value = q_value_weight ? q_value_weight : q_value_fringe;
 

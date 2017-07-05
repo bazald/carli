@@ -6,6 +6,7 @@
 #include "utility.h"
 
 #include <array>
+#include <map>
 #include <memory>
 
 #include "../linkage.h"
@@ -25,12 +26,10 @@ namespace Rete {
     }
 
     bool operator<(const WME_Token_Index &rhs) const {
-      return rete_row < rhs.rete_row ||
-             (rete_row == rhs.rete_row &&
-              (token_row < rhs.token_row ||
-               (token_row == rhs.token_row &&
-                (column < rhs.column ||
-                 (column == rhs.column && !existential && rhs.existential)))));
+      return (!existential && rhs.existential) || (existential == rhs.existential &&
+             (rete_row < rhs.rete_row || (rete_row == rhs.rete_row &&
+              (token_row < rhs.token_row || (token_row == rhs.token_row &&
+               (column < rhs.column))))));
     }
 
     int64_t rete_row;
@@ -38,7 +37,7 @@ namespace Rete {
     int8_t column;
     bool existential = false;
   };
-  typedef std::unordered_multimap<std::string, WME_Token_Index> Variable_Indices;
+  typedef std::map<std::string, WME_Token_Index> Variable_Indices;
   typedef std::shared_ptr<Variable_Indices> Variable_Indices_Ptr;
 
 }
