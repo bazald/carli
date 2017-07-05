@@ -113,7 +113,7 @@ namespace Rete {
     os << "  " << intptr_t(this) << " [label=\"F" << m_wme << "\"];" << std::endl;
   }
 
-  void Rete_Filter::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices) const {
+  void Rete_Filter::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const bool &) const {
     m_wme.print(os, indices);
   }
 

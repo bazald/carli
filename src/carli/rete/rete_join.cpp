@@ -241,14 +241,16 @@ namespace Rete {
     os << "  " << intptr_t(input1) << " -> " << intptr_t(this) << " [color=blue];" << std::endl;
   }
 
-  void Rete_Join::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices) const {
+  void Rete_Join::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const bool &suppress_parent_left) const {
     const auto pl = parent_left();
     const auto pr = parent_right();
     const bool prb = !dynamic_cast<const Rete_Filter *>(pr.get());
 
-    pl->print_rule(os, indices);
-
-    os << std::endl << "  ";
+    if(!suppress_parent_left) {
+      pl->print_rule(os, indices);
+      os << std::endl << "  ";
+    }
+    
     if(prb)
       os << '{';
 

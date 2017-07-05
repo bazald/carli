@@ -74,6 +74,7 @@ namespace Carli {
       this->cout2file.open(args.at(0));
       cout.rdbuf(this->cout2file.rdbuf());
     }), "<file> Redirect stdout to <file>");
+    options.add(     make_shared<Option_Ranged<bool>>("terse-out", false, true, true, true, true), "Output rules using references, making them more consise but harder to read.");
     options.add_line("\n  Environment Options:");
     options.add(     make_shared<Option_Itemized>("bw2-goal", set<string>({"exact", "color", "stack", "unstack", "on-a-b"}), "exact"), "Set the goal for the Blocks World 2 agent.");
     options.add(     make_shared<Option_Itemized>("bw2-reward", set<string>({"guiding", "blind"}), "blind"), "Set the reward function for the Blocks World 2 agent.");
