@@ -11,12 +11,12 @@ namespace Advent {
   bool Environment::success() const {
     ///< Player not dead ... and killed the dragon
 //     return !failure() && m_player_pos.first == 4 && m_player_pos.second == 3;
-    return !failure() && m_troll->health <= 0;
+    return !failure() && m_water_dragon->health <= 0;
   }
 
   bool Environment::failure() const {
     /// Player dead or (the bridge has been burned and the player moved to the wrong side of it)
-    return m_player.health <= 0 || (!m_rooms[3][3] && m_player_pos.second < 3);
+    return m_player.is_dead || (!m_rooms[3][3] && m_player_pos.second < 3);
   }
 
   void Environment::init_impl() {
@@ -35,10 +35,11 @@ namespace Advent {
     m_water_dragon->is_water = true;
     m_water_dragon->print_char = 'd';
     
-    m_troll = m_rooms[2][2]->enemy = std::make_shared<Character>();
-    m_troll->is_troll = true;
-    m_troll->print_char = 't';
-    m_troll->items.give(Item::ITEM_MAGIC_SWORD);
+//     m_troll = m_rooms[2][2]->enemy = std::make_shared<Character>();
+//     m_troll->is_troll = true;
+//     m_troll->print_char = 't';
+//     m_troll->items.give(Item::ITEM_MAGIC_SWORD);
+    m_rooms[2][2]->items.give(Item::ITEM_MAGIC_SWORD);
   }
 
   std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action) {
@@ -131,9 +132,16 @@ namespace Advent {
         room->items += room->enemy->items;
         room->enemy->items.clear();
       }
+      else
+        m_player.health -= 2;
     }
     
-    return std::make_pair(success() ? 1000.0 : -1.0, -1.0);
+    if(m_player.health <= 0) {
+      m_player.health = 0;
+      m_player.is_dead = true;
+    }
+    
+    return std::make_pair(success() ? 100.0 : failure() ? -100.0 : -1.0, -1.0);
   }
 
   void Environment::print_impl(ostream &os) const {
@@ -253,29 +261,31 @@ namespace Advent {
     wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NONE], m_name_attr, m_move_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NONE], m_direction_attr, m_direction_values[Direction::DIR_NONE]));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NONE], m_item_attr, m_item_values[Item::ITEM_NONE]));
-    if(env->get_Room(player_pos.first, player_pos.second + 1)) {
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_NORTH]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NORTH], m_name_attr, m_move_value));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NORTH], m_direction_attr, m_direction_values[Direction::DIR_NORTH]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NORTH], m_item_attr, m_item_values[Item::ITEM_NONE]));
-    }
-    if(env->get_Room(player_pos.first, player_pos.second - 1)) {
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_SOUTH]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_SOUTH], m_name_attr, m_move_value));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_SOUTH], m_direction_attr, m_direction_values[Direction::DIR_SOUTH]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_SOUTH], m_item_attr, m_item_values[Item::ITEM_NONE]));
-    }
-    if(env->get_Room(player_pos.first + 1, player_pos.second)) {
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_EAST]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_EAST], m_name_attr, m_move_value));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_EAST], m_direction_attr, m_direction_values[Direction::DIR_EAST]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_EAST], m_item_attr, m_item_values[Item::ITEM_NONE]));
-    }
-    if(env->get_Room(player_pos.first - 1, player_pos.second)) {
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_WEST]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_WEST], m_name_attr, m_move_value));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_WEST], m_direction_attr, m_direction_values[Direction::DIR_WEST]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_WEST], m_item_attr, m_item_values[Item::ITEM_NONE]));
+    if(!room->enemy) {
+      if(env->get_Room(player_pos.first, player_pos.second + 1)) {
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_NORTH]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NORTH], m_name_attr, m_move_value));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NORTH], m_direction_attr, m_direction_values[Direction::DIR_NORTH]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NORTH], m_item_attr, m_item_values[Item::ITEM_NONE]));
+      }
+      if(env->get_Room(player_pos.first, player_pos.second - 1)) {
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_SOUTH]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_SOUTH], m_name_attr, m_move_value));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_SOUTH], m_direction_attr, m_direction_values[Direction::DIR_SOUTH]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_SOUTH], m_item_attr, m_item_values[Item::ITEM_NONE]));
+      }
+      if(env->get_Room(player_pos.first + 1, player_pos.second)) {
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_EAST]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_EAST], m_name_attr, m_move_value));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_EAST], m_direction_attr, m_direction_values[Direction::DIR_EAST]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_EAST], m_item_attr, m_item_values[Item::ITEM_NONE]));
+      }
+      if(env->get_Room(player_pos.first - 1, player_pos.second)) {
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_WEST]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_WEST], m_name_attr, m_move_value));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_WEST], m_direction_attr, m_direction_values[Direction::DIR_WEST]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_WEST], m_item_attr, m_item_values[Item::ITEM_NONE]));
+      }
     }
     
     /// 2. Attack
@@ -311,12 +321,12 @@ namespace Advent {
     
     /// 5. Equip
 
-    if(player.weapon != Weapon::WEAPON_FISTS) {
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_equip_ids[Weapon::WEAPON_FISTS]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon::WEAPON_FISTS], m_name_attr, m_equip_value));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon::WEAPON_FISTS], m_direction_attr, m_direction_values[Direction::DIR_NONE]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon::WEAPON_FISTS], m_item_attr, m_item_values[Item(Weapon::WEAPON_FISTS)]));
-    }
+//     if(player.weapon != Weapon::WEAPON_FISTS) {
+//       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_equip_ids[Weapon::WEAPON_FISTS]));
+//       wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon::WEAPON_FISTS], m_name_attr, m_equip_value));
+//       wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon::WEAPON_FISTS], m_direction_attr, m_direction_values[Direction::DIR_NONE]));
+//       wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon::WEAPON_FISTS], m_item_attr, m_item_values[Item(Weapon::WEAPON_FISTS)]));
+//     }
     for(int i = 1; i != 4; ++i) {
       if(player.items.has(Item(i)) && player.weapon != Weapon(i)) {
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_equip_ids[Weapon(i)]));

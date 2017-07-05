@@ -384,7 +384,7 @@ namespace Advent {
           
         case WEAPON_MAGIC_SWORD:
           if(is_water)
-            health -= 2;
+            health -= 3;
           else if(is_troll) {
             health -= 6;
             if(health <= 0)
