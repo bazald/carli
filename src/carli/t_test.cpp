@@ -1,7 +1,6 @@
-#ifndef T_TEST_H
-#define T_TEST_H
-
 #include "t_test.h"
+
+#ifdef ENABLE_T_TEST
 
 #include <boost/math/distributions/students_t.hpp>
 

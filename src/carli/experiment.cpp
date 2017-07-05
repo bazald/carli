@@ -88,10 +88,16 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<double>>("eligibility-trace-decay-rate", 0.0, true, 1.0, true, 0.0), "Rate at which weights should lose credit.");
     options.add(     make_shared<Option_Ranged<double>>("eligibility-trace-decay-threshold", 0.0, true, 1.0, true, 0.0001), "Weights with credit below this threshold cease to receive updates.");
     options.add('g', make_shared<Option_Ranged<double>>("epsilon-greedy", 0.0, true, 1.0, true, 0.1), "Simple epsilon-greedy exploration rate.");
+#ifdef ENABLE_T_TEST
     options.add(     make_shared<Option_Itemized>("exploration", set<string>({"epsilon-greedy", "t-test"}), "epsilon-greedy"), "Epsilon-greedy or t-test exploration policy.");
+#else
+	options.add(make_shared<Option_Itemized>("exploration", set<string>({"epsilon-greedy"}), "epsilon-greedy"), "Currently only epsilon-greedy exploration is enabled.");
+#endif
     options.add('l', make_shared<Option_Ranged<double>>("learning-rate", 0.0, true, 1.0, true, 1.0), "");
     options.add(     make_shared<Option_Ranged<double>>("secondary-learning-rate", 0.0, true, 1.0, true, 1.0), "GQ(\\lambda) step-size-parameter. 0 disables.");
+#ifdef ENABLE_T_TEST
     options.add('t', make_shared<Option_Ranged<double>>("t-test", 0.0, true, 1.0, true, 0.95), "t-test confidence required to cease exploration.");
+#endif
     options.add(     make_shared<Option_Itemized>("policy", set<string>({"on-policy", "off-policy"}), "on-policy"), "Learn about greedy or optimal policy.");
     options.add_line("\n  Credit Assignment:");
     options.add('c', make_shared<Option_Itemized>("credit-assignment", set<string>({"all", "random", "specific", "even", "inv-update-count", "inv-log-update-count", "inv-root-update-count", "inv-depth", "epsilon-even-specific", "epsilon-even-depth"}), "even"), "How to split credit between weights.");

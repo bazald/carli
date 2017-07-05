@@ -8,7 +8,7 @@ namespace Rete {
 
   WME_Token::WME_Token()
    : m_size(0),
-   m_hashval(-1)
+   m_hashval(size_t(-1))
   {
   }
 

@@ -436,7 +436,7 @@ inline std::string Option_Ranged<double>::print() const {
 template <>
 inline void Option_Ranged<bool>::operator()(const Arguments &args) {
   std::string lower_case = args.at(0);
-  std::transform(lower_case.begin(), lower_case.end(), lower_case.begin(), ::tolower);
+  std::transform(lower_case.begin(), lower_case.end(), lower_case.begin(), [](const char &c)->char{return char(::tolower(c));});
   value = lower_case == "true" || atoi(args.at(0)) != 0;
 }
 

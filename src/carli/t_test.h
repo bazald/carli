@@ -1,6 +1,10 @@
 #ifndef T_TEST_H
 #define T_TEST_H
 
+//#define ENABLE_T_TEST
+
+#ifdef ENABLE_T_TEST
+
 /** A Students t test applied to two sets of data.
   * See http://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm
   * and http://www.boost.org/doc/libs/1_43_0/libs/math/doc/sf_and_dist/html/math_toolkit/dist/stat_tut/weg/st_eg/two_sample_students_t.html
@@ -41,5 +45,7 @@ namespace Carli {
                                        const int64_t &rhs_update_count, const double &rhs_mean, const double &rhs_variance);
 
 }
+
+#endif
 
 #endif

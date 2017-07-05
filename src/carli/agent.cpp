@@ -2,8 +2,6 @@
 
 //#include "../infinite_mario/infinite_mario.h"
 
-#include "t_test.h"
-
 namespace Carli {
 
 #ifdef NDEBUG
@@ -489,9 +487,12 @@ namespace Carli {
   Agent::Agent(const std::shared_ptr<Environment> &environment, const std::function<Carli::Action_Ptr_C (const Rete::Variable_Indices &variables, const Rete::WME_Token &token)> &get_action_)
     : get_action(get_action_),
     m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy(nullptr, std::numeric_limits<int64_t>::max());}),
-    m_exploration_policy(dynamic_cast<const Option_Itemized &>(Options::get_global()["exploration"]).get_value() == "epsilon-greedy"
-                         ? std::function<Action_Ptr_C ()>([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(nullptr, std::numeric_limits<int64_t>::max());})
-                         : std::function<Action_Ptr_C ()>([this]()->Action_Ptr_C{return this->choose_t_test(nullptr, std::numeric_limits<int64_t>::max());})),
+    m_exploration_policy(
+#ifdef ENABLE_T_TEST
+		                 dynamic_cast<const Option_Itemized &>(Options::get_global()["exploration"]).get_value() == "t-test" ?
+		                 std::function<Action_Ptr_C ()>([this]()->Action_Ptr_C{return this->choose_t_test(nullptr, std::numeric_limits<int64_t>::max());}) :
+#endif
+		                 std::function<Action_Ptr_C ()>([this]()->Action_Ptr_C{return this->choose_epsilon_greedy(nullptr, std::numeric_limits<int64_t>::max());})),
     m_environment(environment),
     m_credit_assignment(
       m_credit_assignment_code == "all" ?
@@ -901,6 +902,8 @@ namespace Carli {
       return choose_greedy(fringe, fringe_depth);
   }
 
+#ifdef ENABLE_T_TEST
+
   Action_Ptr_C Agent::choose_t_test(const Node_Fringe * const &fringe, const int64_t &fringe_depth) {
     const Q_Value * const parent_q = fringe ? dynamic_cast<Node *>(fringe->parent_action.lock()->data.get())->q_value_weight.get() : nullptr;
     const auto greedy = choose_greedy(fringe, fringe_depth);
@@ -927,6 +930,8 @@ namespace Carli {
 
     return gtewp;
   }
+
+#endif
 
   Action_Ptr_C Agent::choose_greedy(const Node_Fringe * const &fringe, const int64_t &fringe_depth) {
     auto greedies = choose_greedies(fringe, fringe_depth);

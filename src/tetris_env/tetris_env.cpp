@@ -150,172 +150,172 @@ namespace Tetris {
 
     switch(type) {
     case TET_SQUARE:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(1, 0);
-      tet[2] = std::make_pair(0, 1);
-      tet[3] = std::make_pair(1, 1);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(0, 1);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(1, 1);
       tet.width = 2;
       tet.height = 2;
       break;
 
     case TET_LINE_DOWN:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(0, 1);
-      tet[2] = std::make_pair(0, 2);
-      tet[3] = std::make_pair(0, 3);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(0, 1);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(0, 2);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(0, 3);
       tet.width = 1;
       tet.height = 4;
       break;
 
     case TET_LINE_RIGHT:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(1, 0);
-      tet[2] = std::make_pair(2, 0);
-      tet[3] = std::make_pair(3, 0);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(2, 0);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(3, 0);
       tet.width = 4;
       tet.height = 1;
       break;
 
     case TET_T:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(1, 0);
-      tet[2] = std::make_pair(2, 0);
-      tet[3] = std::make_pair(1, 1);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(2, 0);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(1, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_T_90:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(0, 1);
-      tet[2] = std::make_pair(1, 1);
-      tet[3] = std::make_pair(0, 2);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(0, 1);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(1, 1);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(0, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_T_180:
-      tet[0] = std::make_pair(1, 0);
-      tet[1] = std::make_pair(0, 1);
-      tet[2] = std::make_pair(1, 1);
-      tet[3] = std::make_pair(2, 1);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(0, 1);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(1, 1);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(2, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_T_270:
-      tet[0] = std::make_pair(1, 0);
-      tet[1] = std::make_pair(0, 1);
-      tet[2] = std::make_pair(1, 1);
-      tet[3] = std::make_pair(1, 2);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(0, 1);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(1, 1);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(1, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_L:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(0, 1);
-      tet[2] = std::make_pair(0, 2);
-      tet[3] = std::make_pair(1, 2);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(0, 1);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(0, 2);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(1, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_L_90:
-      tet[0] = std::make_pair(2, 0);
-      tet[1] = std::make_pair(0, 1);
-      tet[2] = std::make_pair(1, 1);
-      tet[3] = std::make_pair(2, 1);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(2, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(0, 1);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(1, 1);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(2, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_L_180:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(1, 0);
-      tet[2] = std::make_pair(1, 1);
-      tet[3] = std::make_pair(1, 2);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(1, 1);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(1, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_L_270:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(1, 0);
-      tet[2] = std::make_pair(2, 0);
-      tet[3] = std::make_pair(0, 1);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(2, 0);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(0, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_J:
-      tet[0] = std::make_pair(1, 0);
-      tet[1] = std::make_pair(1, 1);
-      tet[2] = std::make_pair(0, 2);
-      tet[3] = std::make_pair(1, 2);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(1, 1);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(0, 2);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(1, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_J_90:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(1, 0);
-      tet[2] = std::make_pair(2, 0);
-      tet[3] = std::make_pair(2, 1);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(2, 0);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(2, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_J_180:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(1, 0);
-      tet[2] = std::make_pair(0, 1);
-      tet[3] = std::make_pair(0, 2);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(0, 1);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(0, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_J_270:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(0, 1);
-      tet[2] = std::make_pair(1, 1);
-      tet[3] = std::make_pair(2, 1);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(0, 1);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(1, 1);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(2, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_S:
-      tet[0] = std::make_pair(1, 0);
-      tet[1] = std::make_pair(2, 0);
-      tet[2] = std::make_pair(0, 1);
-      tet[3] = std::make_pair(1, 1);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(2, 0);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(0, 1);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(1, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_S_90:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(0, 1);
-      tet[2] = std::make_pair(1, 1);
-      tet[3] = std::make_pair(1, 2);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(0, 1);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(1, 1);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(1, 2);
       tet.width = 2;
       tet.height = 3;
       break;
 
     case TET_Z:
-      tet[0] = std::make_pair(0, 0);
-      tet[1] = std::make_pair(1, 0);
-      tet[2] = std::make_pair(1, 1);
-      tet[3] = std::make_pair(2, 1);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(0, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(1, 1);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(2, 1);
       tet.width = 3;
       tet.height = 2;
       break;
 
     case TET_Z_90:
-      tet[0] = std::make_pair(1, 0);
-      tet[1] = std::make_pair(0, 1);
-      tet[2] = std::make_pair(1, 1);
-      tet[3] = std::make_pair(0, 2);
+      tet[0] = std::make_pair<uint8_t, uint8_t>(1, 0);
+      tet[1] = std::make_pair<uint8_t, uint8_t>(0, 1);
+      tet[2] = std::make_pair<uint8_t, uint8_t>(1, 1);
+      tet[3] = std::make_pair<uint8_t, uint8_t>(0, 2);
       tet.width = 2;
       tet.height = 3;
       break;

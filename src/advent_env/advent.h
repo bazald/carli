@@ -10,7 +10,7 @@
 
 #if !defined(_WINDOWS)
 #define ADVENT_LINKAGE
-#elif !defined(BLOCKS_WORLD_2_INTERNAL)
+#elif !defined(ADVENT_INTERNAL)
 #define ADVENT_LINKAGE __declspec(dllimport)
 #else
 #define ADVENT_LINKAGE __declspec(dllexport)
@@ -83,7 +83,7 @@ namespace Advent {
     }
 
     void print_impl(ostream &os) const {
-      os << "move(" << direction << ')';
+      os << "move(" << int(direction) << ')';
     }
 
     Direction direction;
@@ -139,7 +139,7 @@ namespace Advent {
     }
 
     void print_impl(ostream &os) const {
-      os << "equip(" << item << ')';
+      os << "equip(" << int(item) << ')';
     }
 
     Item item;
@@ -176,7 +176,7 @@ namespace Advent {
     }
 
     void print_impl(ostream &os) const {
-      os << "equip(" << item << ')';
+      os << "equip(" << int(item) << ')';
     }
 
     Item item;
@@ -213,7 +213,7 @@ namespace Advent {
     }
 
     void print_impl(ostream &os) const {
-      os << "equip(" << weapon << ')';
+      os << "equip(" << int(weapon) << ')';
     }
 
     Weapon weapon;
@@ -250,7 +250,7 @@ namespace Advent {
     }
 
     void print_impl(ostream &os) const {
-      os << "equip(" << spell << ')';
+      os << "equip(" << int(spell) << ')';
     }
 
     Spell spell;
@@ -336,8 +336,8 @@ namespace Advent {
     
     char print_char = 'm';
     
-    void receive_attack(const Weapon &weapon) {
-      switch(weapon) {
+    void receive_attack(const Weapon &enemy_weapon) {
+      switch(enemy_weapon) {
         case WEAPON_FISTS:
           if(is_fleshy)
             health -= 2;

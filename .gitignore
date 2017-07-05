@@ -51,6 +51,7 @@
 *.sync-conflict-*
 *.synctex.gz
 *.tlog
+*.tmp
 *.toc
 *.user
 *.vcxproj
@@ -58,6 +59,7 @@
 *_d
 *_p
 *_r
+/.vs
 /experiment-bw
 /experiment-bw2
 /experiment-mc

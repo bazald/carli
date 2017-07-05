@@ -110,7 +110,7 @@ namespace Advent {
         room->enemy->items.clear();
       }
       else if(room->enemy->is_troll) {
-        room->enemy->health = std::min(std::max(room->enemy->health, 0l) + 1, room->enemy->health_max);
+        room->enemy->health = std::min(std::max(room->enemy->health, 0ll) + 1, room->enemy->health_max);
       }
       else if(room->enemy->health <= 0) {
         room->enemy->health = 0;

@@ -10,6 +10,7 @@
 #include "feature.h"
 #include "node.h"
 #include "q_value.h"
+#include "t_test.h"
 #include "value_queue.h"
 
 #include <functional>
@@ -118,7 +119,9 @@ namespace Carli {
 
   protected:
     Action_Ptr_C choose_epsilon_greedy(const Node_Fringe * const &fringe, const int64_t &fringe_depth);
+#ifdef ENABLE_T_TEST
     Action_Ptr_C choose_t_test(const Node_Fringe * const &fringe, const int64_t &fringe_depth);
+#endif
     Action_Ptr_C choose_greedy(const Node_Fringe * const &fringe, const int64_t &fringe_depth);
     std::list<Action_Ptr_C, Zeni::Pool_Allocator<Action_Ptr_C>> choose_greedies(const Node_Fringe * const &fringe, const int64_t &fringe_depth);
     Action_Ptr_C choose_randomly();
@@ -239,7 +242,9 @@ namespace Carli {
 
     const bool m_on_policy = dynamic_cast<const Option_Itemized &>(Options::get_global()["policy"]).get_value() == "on-policy"; ///< for Sarsa/Q-learning selection
     const double m_epsilon = get_Option_Ranged<double>(Options::get_global(), "epsilon-greedy"); ///< for epsilon-greedy decision-making
+#ifdef ENABLE_T_TEST
     const double m_t_test = get_Option_Ranged<double>(Options::get_global(), "t-test"); ///< for t-test decision-making
+#endif
 
     const int64_t m_pseudoepisode_threshold = get_Option_Ranged<int64_t>(Options::get_global(), "pseudoepisode-threshold"); ///< For deciding how many steps indicates a pseudoepisode
     const double m_split_catde = get_Option_Ranged<double>(Options::get_global(), "split-catde");
