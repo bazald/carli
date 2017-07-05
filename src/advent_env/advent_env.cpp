@@ -95,10 +95,14 @@ namespace Advent {
       m_player.weapon = equip->weapon;
     }
     else if(const Cast * const cast = dynamic_cast<const Cast *>(&action)) {
-      assert(cast->spell == SPELL_HEAL || m_player.items.has(Item(cast->spell)));
-      assert(room->enemy);
-      room->enemy->receive_cast(cast->spell);
-      m_player.items.take(Item(cast->spell));
+      assert(cast->spell == SPELL_HEAL || (m_player.items.has(Item(cast->spell)) && room->enemy));
+      if(cast->spell == SPELL_HEAL) {
+        m_player.receive_cast(cast->spell);
+      }
+      else {
+        room->enemy->receive_cast(cast->spell);
+        m_player.items.take(Item(cast->spell));
+      }
     }
     else
       abort();
@@ -165,6 +169,9 @@ namespace Advent {
     for(int64_t i = 0; i != env->get_Rooms_size(); ++i)
       m_position_values[i] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(i));
 
+    for(int64_t i = 0; i != 11; ++i)
+      m_health_values[i] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(i));
+
     generate_rete();
     generate_features();
   }
@@ -197,6 +204,7 @@ namespace Advent {
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_player_attr, m_player_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_x_attr, m_position_values[player_pos.first]));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_y_attr, m_position_values[player_pos.second]));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_health_attr, m_health_values[player.health]));
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_NONE]));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NONE], m_name_attr, m_move_value));

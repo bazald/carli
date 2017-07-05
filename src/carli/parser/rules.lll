@@ -51,7 +51,7 @@ fringe                                                { yylval->sval = new strin
                                                       }
 [a-zA-Z0-9]+                                          { yylval->sval = new string(yytext); return STRING; }
 [a-zA-Z0-9./\\]+[a-zA-Z0-9./\\\-*]*[a-zA-Z0-9./\\]+   { yylval->sval = new string(yytext); return STRING; }
-[\^\(\)\{\}+\-\@]                                     { return yytext[0]; }
+[\^\(\)\{\}+\-\@\&]                                   { return yytext[0]; }
 \|                                                    { BEGIN(READ_STRING); return '|'; }
 <READ_STRING>\\\|                                     { yylval->sval = new string("\\|"); return STRING_PART_S; }
 <READ_STRING>\\t                                      { yylval->sval = new string("\\t"); return STRING_PART_S; }
