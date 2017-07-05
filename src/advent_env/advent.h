@@ -25,7 +25,7 @@ namespace Advent {
   typedef int64_t block_id;
   
   enum Direction : int64_t {DIR_NONE = 0, DIR_NORTH = 1, DIR_SOUTH = 2, DIR_EAST = 3, DIR_WEST = 4};
-  enum Item : int64_t {ITEM_NONE = 0, SWORD = 1, MACE = 2, MAGIC_SWORD = 3, SCROLL_HEAL = 4, SCROLL_FIREBOLT = 5, SCROLL_ICEBOLT = 6};
+  enum Item : int64_t {ITEM_NONE = 0, ITEM_SWORD = 1, ITEM_MACE = 2, ITEM_MAGIC_SWORD = 3, ITEM_FIREBOLT = 5, ITEM_ICEBOLT = 6};
   enum Weapon : int64_t {WEAPON_FISTS = 0, WEAPON_MACE = 1, WEAPON_SWORD = 2, WEAPON_MAGIC_SWORD = 3};
   enum Spell : int64_t {SPELL_NONE = 0, SPELL_HEAL = 4, SPELL_FIREBOLT = 5, SPELL_ICEBOLT = 6};
   
@@ -52,7 +52,24 @@ namespace Advent {
     return Spell(item);
   }
   
-  class ADVENT_LINKAGE Move : public Carli::Action {
+  class Move;
+  class Attack;
+  class Take;
+  class Drop;
+  class Equip;
+  class Cast;
+  
+  class ADVENT_LINKAGE Action : public Carli::Action {
+  public:
+    virtual int64_t compare(const Move &rhs) const = 0;
+    virtual int64_t compare(const Attack &rhs) const = 0;
+    virtual int64_t compare(const Take &rhs) const = 0;
+    virtual int64_t compare(const Drop &rhs) const = 0;
+    virtual int64_t compare(const Equip &rhs) const = 0;
+    virtual int64_t compare(const Cast &rhs) const = 0;
+  };
+  
+  class ADVENT_LINKAGE Move : public Action {
   public:
     Move()
      : direction(Direction())
@@ -74,13 +91,13 @@ namespace Advent {
       return new Move(direction);
     }
 
-    int64_t compare(const Action &rhs) const {
-      return compare(debuggable_cast<const Move &>(rhs));
-    }
-
-    int64_t compare(const Move &rhs) const {
-      return direction - rhs.direction;
-    }
+    int64_t compare(const Carli::Action &rhs) const {return -debuggable_cast<const Action *>(&rhs)->compare(*this);}
+    int64_t compare(const Move &rhs) const override {return direction - rhs.direction;}
+    int64_t compare(const Attack &) const override {return -1;}
+    int64_t compare(const Take &) const override {return -1;}
+    int64_t compare(const Drop &) const override {return -1;}
+    int64_t compare(const Equip &) const override {return -1;}
+    int64_t compare(const Cast &) const override {return -1;}
 
     void print_impl(ostream &os) const {
       os << "move(" << int(direction) << ')';
@@ -89,26 +106,26 @@ namespace Advent {
     Direction direction;
   };
   
-  class ADVENT_LINKAGE Attack : public Carli::Action {
+  class ADVENT_LINKAGE Attack : public Action {
   public:
     Attack * clone() const {
       return new Attack();
     }
 
-    int64_t compare(const Action &rhs) const {
-      return compare(debuggable_cast<const Attack &>(rhs));
-    }
-
-    int64_t compare(const Attack &) const {
-      return 0;
-    }
+    int64_t compare(const Carli::Action &rhs) const {return -debuggable_cast<const Action *>(&rhs)->compare(*this);}
+    int64_t compare(const Move &) const override {return 1;}
+    int64_t compare(const Attack &) const override {return 0;}
+    int64_t compare(const Take &) const override {return -1;}
+    int64_t compare(const Drop &) const override {return -1;}
+    int64_t compare(const Equip &) const override {return -1;}
+    int64_t compare(const Cast &) const override {return -1;}
 
     void print_impl(ostream &os) const {
       os << "attack()";
     }
   };
   
-  class ADVENT_LINKAGE Take : public Carli::Action {
+  class ADVENT_LINKAGE Take : public Action {
   public:
     Take()
      : item(Item())
@@ -130,13 +147,13 @@ namespace Advent {
       return new Take(item);
     }
 
-    int64_t compare(const Action &rhs) const {
-      return compare(debuggable_cast<const Take &>(rhs));
-    }
-
-    int64_t compare(const Take &rhs) const {
-      return item - rhs.item;
-    }
+    int64_t compare(const Carli::Action &rhs) const {return -debuggable_cast<const Action *>(&rhs)->compare(*this);}
+    int64_t compare(const Move &) const override {return 1;}
+    int64_t compare(const Attack &) const override {return 1;}
+    int64_t compare(const Take &rhs) const override {return item - rhs.item;}
+    int64_t compare(const Drop &) const override {return -1;}
+    int64_t compare(const Equip &) const override {return -1;}
+    int64_t compare(const Cast &) const override {return -1;}
 
     void print_impl(ostream &os) const {
       os << "equip(" << int(item) << ')';
@@ -145,7 +162,7 @@ namespace Advent {
     Item item;
   };
   
-  class ADVENT_LINKAGE Drop : public Carli::Action {
+  class ADVENT_LINKAGE Drop : public Action {
   public:
     Drop()
      : item(Item())
@@ -167,13 +184,13 @@ namespace Advent {
       return new Drop(item);
     }
 
-    int64_t compare(const Action &rhs) const {
-      return compare(debuggable_cast<const Drop &>(rhs));
-    }
-
-    int64_t compare(const Drop &rhs) const {
-      return item - rhs.item;
-    }
+    int64_t compare(const Carli::Action &rhs) const {return -debuggable_cast<const Action *>(&rhs)->compare(*this);}
+    int64_t compare(const Move &) const override {return 1;}
+    int64_t compare(const Attack &) const override {return 1;}
+    int64_t compare(const Take &) const override {return 1;}
+    int64_t compare(const Drop &rhs) const override {return item - rhs.item;}
+    int64_t compare(const Equip &) const override {return -1;}
+    int64_t compare(const Cast &) const override {return -1;}
 
     void print_impl(ostream &os) const {
       os << "equip(" << int(item) << ')';
@@ -182,7 +199,7 @@ namespace Advent {
     Item item;
   };
   
-  class ADVENT_LINKAGE Equip : public Carli::Action {
+  class ADVENT_LINKAGE Equip : public Action {
   public:
     Equip()
      : weapon(Weapon())
@@ -204,13 +221,13 @@ namespace Advent {
       return new Equip(weapon);
     }
 
-    int64_t compare(const Action &rhs) const {
-      return compare(debuggable_cast<const Equip &>(rhs));
-    }
-
-    int64_t compare(const Equip &rhs) const {
-      return weapon - rhs.weapon;
-    }
+    int64_t compare(const Carli::Action &rhs) const {return -debuggable_cast<const Action *>(&rhs)->compare(*this);}
+    int64_t compare(const Move &) const override {return 1;}
+    int64_t compare(const Attack &) const override {return 1;}
+    int64_t compare(const Take &) const override {return 1;}
+    int64_t compare(const Drop &) const override {return 1;}
+    int64_t compare(const Equip &rhs) const override {return weapon - rhs.weapon;}
+    int64_t compare(const Cast &) const override {return -1;}
 
     void print_impl(ostream &os) const {
       os << "equip(" << int(weapon) << ')';
@@ -219,7 +236,7 @@ namespace Advent {
     Weapon weapon;
   };
 
-  class ADVENT_LINKAGE Cast : public Carli::Action {
+  class ADVENT_LINKAGE Cast : public Action {
   public:
     Cast()
      : spell(Spell())
@@ -241,16 +258,16 @@ namespace Advent {
       return new Cast(spell);
     }
 
-    int64_t compare(const Action &rhs) const {
-      return compare(debuggable_cast<const Cast &>(rhs));
-    }
-
-    int64_t compare(const Cast &rhs) const {
-      return spell - rhs.spell;
-    }
+    int64_t compare(const Carli::Action &rhs) const {return -debuggable_cast<const Action *>(&rhs)->compare(*this);}
+    int64_t compare(const Move &) const override {return 1;}
+    int64_t compare(const Attack &) const override {return 1;}
+    int64_t compare(const Take &) const override {return 1;}
+    int64_t compare(const Drop &) const override {return 1;}
+    int64_t compare(const Equip &) const override {return 1;}
+    int64_t compare(const Cast &rhs) const override {return spell - rhs.spell;}
 
     void print_impl(ostream &os) const {
-      os << "equip(" << int(spell) << ')';
+      os << "cast(" << int(spell) << ')';
     }
 
     Spell spell;
@@ -291,7 +308,7 @@ namespace Advent {
     }
     
     void give(const int64_t index) {
-      assert(items.at(index));
+      assert(items.at(index) >= 0);
       ++items[index];
     }
     
@@ -344,7 +361,7 @@ namespace Advent {
           else if(is_skeletal)
             health -= 1;
           else if(is_troll)
-            health -= 1;
+            health -= 5;
           break;
           
         case WEAPON_MACE:
@@ -389,8 +406,8 @@ namespace Advent {
           break;
           
         case SPELL_FIREBOLT:
-          if(is_fleshy)
-            health -= 5;
+          if(is_fleshy || is_troll)
+            health -= 10;
           else if(!is_skeletal)
             health -= 2;
           if(is_troll && health <= 0)
@@ -482,16 +499,24 @@ namespace Advent {
      */
 
     const Rete::Symbol_Identifier_Ptr_C m_player_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("PLAYER"));
+    const Rete::Symbol_Identifier_Ptr_C m_enemy_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("ENEMY"));
+    const Rete::Symbol_Identifier_Ptr_C m_room_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("ROOM"));
+    const Rete::Symbol_Identifier_Ptr_C m_attack_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("ATTACK"));
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
     const Rete::Symbol_Constant_String_Ptr_C m_name_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("name"));
     const Rete::Symbol_Constant_String_Ptr_C m_direction_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("direction"));
     const Rete::Symbol_Constant_String_Ptr_C m_item_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("item"));
     const Rete::Symbol_Constant_String_Ptr_C m_player_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("player"));
+    const Rete::Symbol_Constant_String_Ptr_C m_enemy_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("enemy"));
     const Rete::Symbol_Constant_String_Ptr_C m_x_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x"));
     const Rete::Symbol_Constant_String_Ptr_C m_y_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("y"));
+    const Rete::Symbol_Constant_String_Ptr_C m_dead_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("dead"));
     const Rete::Symbol_Constant_String_Ptr_C m_health_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("health"));
-//     const Rete::Symbol_Constant_String_Ptr_C m_weapon_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("weapon"));
-//     const Rete::Symbol_Constant_String_Ptr_C m_spell_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("spell"));
+    const Rete::Symbol_Constant_String_Ptr_C m_in_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("in"));
+    const Rete::Symbol_Constant_String_Ptr_C m_has_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("has"));
+    const Rete::Symbol_Constant_String_Ptr_C m_equipped_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("equipped"));
+    const Rete::Symbol_Constant_Int_Ptr_C m_true_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
+    const Rete::Symbol_Constant_Int_Ptr_C m_false_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(0));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
     const Rete::Symbol_Constant_Int_Ptr_C m_attack_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
     const Rete::Symbol_Constant_Int_Ptr_C m_take_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
@@ -500,10 +525,14 @@ namespace Advent {
     const Rete::Symbol_Constant_Int_Ptr_C m_cast_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(6));
 
     std::map<Direction, Rete::Symbol_Identifier_Ptr_C> m_move_ids;
-    std::map<Item, Rete::Symbol_Constant_Int_Ptr_C> m_item_ids;
-//     std::map<Weapon, Rete::Symbol_Constant_Int_Ptr_C> m_weapon_ids;
-//     std::map<Spell, Rete::Symbol_Constant_Int_Ptr_C> m_spell_ids;
+    std::map<Item, Rete::Symbol_Identifier_Ptr_C> m_take_ids;
+    std::map<Item, Rete::Symbol_Identifier_Ptr_C> m_drop_ids;
+    std::map<Weapon, Rete::Symbol_Identifier_Ptr_C> m_equip_ids;
+    std::map<Spell, Rete::Symbol_Identifier_Ptr_C> m_cast_ids;
     std::map<Direction, Rete::Symbol_Constant_Int_Ptr_C> m_direction_values;
+    std::map<Item, Rete::Symbol_Constant_Int_Ptr_C> m_item_values;
+//     std::map<Weapon, Rete::Symbol_Constant_Int_Ptr_C> m_weapon_values;
+//     std::map<Spell, Rete::Symbol_Constant_Int_Ptr_C> m_spell_values;
     std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_position_values;
     std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_health_values;
 

@@ -10,8 +10,8 @@ namespace Advent {
 
   bool Environment::success() const {
     ///< Player not dead ... and killed the dragon
-    return !failure() && m_player_pos.first == 4 && m_player_pos.second == 3;
-//     return !failure() && m_water_dragon->health <= 0;
+//     return !failure() && m_player_pos.first == 4 && m_player_pos.second == 3;
+    return !failure() && m_troll->health <= 0;
   }
 
   bool Environment::failure() const {
@@ -38,6 +38,7 @@ namespace Advent {
     m_troll = m_rooms[2][2]->enemy = std::make_shared<Character>();
     m_troll->is_troll = true;
     m_troll->print_char = 't';
+    m_troll->items.give(Item::ITEM_MAGIC_SWORD);
   }
 
   std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action) {
@@ -69,11 +70,19 @@ namespace Advent {
           abort();
       }
       
-      if(move->direction != Direction::DIR_NONE) {
-        room = m_rooms[m_player_pos.first][m_player_pos.second];
-        assert(room);
-        if(room->enemy && !room->enemy->is_dead)
-          room->enemy->health = room->enemy->health_max;
+//       if(move->direction != Direction::DIR_NONE) {
+//         room = m_rooms[m_player_pos.first][m_player_pos.second];
+//         assert(room);
+//         if(room->enemy && !room->enemy->is_dead)
+//           room->enemy->health = room->enemy->health_max;
+//       }
+      if(m_player_pos.first == 0 && m_player_pos.second == 0) {
+        if(!m_player.items.has(Item::ITEM_FIREBOLT) && !room->items.has(Item::ITEM_FIREBOLT))
+          room->items.give(Item::ITEM_FIREBOLT);
+      }
+      else if(m_player_pos.first == 0 && m_player_pos.second == 1) {
+        if(!m_player.items.has(Item::ITEM_ICEBOLT) && !room->items.has(Item::ITEM_ICEBOLT))
+          room->items.give(Item::ITEM_ICEBOLT);
       }
     }
     else if(const Attack * const attack = dynamic_cast<const Attack *>(&action)) {
@@ -124,7 +133,7 @@ namespace Advent {
       }
     }
     
-    return std::make_pair(success() ? 10 : -1.0, -1.0);
+    return std::make_pair(success() ? 1000.0 : -1.0, -1.0);
   }
 
   void Environment::print_impl(ostream &os) const {
@@ -133,7 +142,7 @@ namespace Advent {
       os << "  ";
       for(int x = 0; x != int(m_rooms.size()); ++x) {
         const auto room = m_rooms[x][y];
-        if(room && room->enemy)
+        if(room && room->enemy && !room->enemy->is_dead)
           os << (m_player_pos.first == x && m_player_pos.second == y ? char(toupper(room->enemy->print_char)) : room->enemy->print_char);
         else if(room)
           os << (m_player_pos.first == x && m_player_pos.second == y ? m_player.print_char : '.');
@@ -148,6 +157,28 @@ namespace Advent {
    : Carli::Agent(env_, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return make_Action(variables, token);})
   {
     auto env = dynamic_pointer_cast<const Environment>(get_env());
+    std::ostringstream oss;
+
+    for(int64_t i : std::array<int64_t, 5>({{1, 2, 3, 5, 6}})) {
+      oss << "TAKE-" << i;
+      m_take_ids[Item(i)] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(oss.str()));
+      oss.str("");
+      oss << "DROP-" << i;
+      m_drop_ids[Item(i)] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(oss.str()));
+      oss.str("");
+    }
+
+    for(int64_t i = 0; i != 4; ++i) {
+      oss << "EQUIP-" << i;
+      m_equip_ids[Weapon(i)] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(oss.str()));
+      oss.str("");\
+    }
+
+    for(int64_t i = 4; i != 7; ++i) {
+      oss << "CAST-" << i;
+      m_cast_ids[Spell(i)] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(oss.str()));
+      oss.str("");\
+    }
 
     m_move_ids[DIR_NONE] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("WAIT"));
     m_move_ids[DIR_NORTH] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("MOVE-NORTH"));
@@ -158,13 +189,7 @@ namespace Advent {
       m_direction_values[Direction(i)] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(i));
 
     for(int64_t i = 0; i != 7; ++i)
-      m_item_ids[Item(i)] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(i));
-
-//     for(int64_t i = 0; i != 4; ++i)
-//       m_weapon_ids[Weapon(i)] = m_item_ids[Item(i)];
-
-//     for(int64_t i : std::list<int64_t>({{0, 4, 5, 6}}))
-//       m_spell_ids[Spell(i)] = m_item_ids[Item(i)];
+      m_item_values[Item(i)] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(i));
 
     for(int64_t i = 0; i != env->get_Rooms_size(); ++i)
       m_position_values[i] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(i));
@@ -198,41 +223,122 @@ namespace Advent {
 
     const auto &player = env->get_Player();
     const auto &player_pos = env->get_Player_pos();
+    const auto &room = env->get_Room(player_pos.first, player_pos.second);
+    const auto &enemy = room->enemy;
+
     std::list<Rete::WME_Ptr_C> wmes_current;
-    std::ostringstream oss;
     
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_player_attr, m_player_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_x_attr, m_position_values[player_pos.first]));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_y_attr, m_position_values[player_pos.second]));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_dead_attr, player.is_dead ? m_true_value : m_false_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_health_attr, m_health_values[player.health]));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_equipped_attr, m_item_values[Item(player.weapon)]));
+
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_in_attr, m_room_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_enemy_id, m_in_attr, m_room_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_enemy_id, m_dead_attr, (!enemy || enemy->is_dead) ? m_true_value : m_false_value));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_enemy_id, m_health_attr, m_health_values[enemy ? enemy->health : 0]));
+    
+    for(int i = 1; i != 7; ++i) {
+      if(room->items.has(Item(i)))
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_room_id, m_has_attr, m_item_values[Item(i)]));
+      if(player.items.has(Item(i)))
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_has_attr, m_item_values[Item(i)]));
+    }
+    
+    /// 1. Move
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_NONE]));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NONE], m_name_attr, m_move_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NONE], m_direction_attr, m_direction_values[Direction::DIR_NONE]));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NONE], m_item_attr, m_item_ids[Item::ITEM_NONE]));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NONE], m_item_attr, m_item_values[Item::ITEM_NONE]));
     if(env->get_Room(player_pos.first, player_pos.second + 1)) {
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_NORTH]));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NORTH], m_name_attr, m_move_value));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NORTH], m_direction_attr, m_direction_values[Direction::DIR_NORTH]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NORTH], m_item_attr, m_item_ids[Item::ITEM_NONE]));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NORTH], m_item_attr, m_item_values[Item::ITEM_NONE]));
     }
     if(env->get_Room(player_pos.first, player_pos.second - 1)) {
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_SOUTH]));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_SOUTH], m_name_attr, m_move_value));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_SOUTH], m_direction_attr, m_direction_values[Direction::DIR_SOUTH]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_SOUTH], m_item_attr, m_item_ids[Item::ITEM_NONE]));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_SOUTH], m_item_attr, m_item_values[Item::ITEM_NONE]));
     }
     if(env->get_Room(player_pos.first + 1, player_pos.second)) {
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_EAST]));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_EAST], m_name_attr, m_move_value));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_EAST], m_direction_attr, m_direction_values[Direction::DIR_EAST]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_EAST], m_item_attr, m_item_ids[Item::ITEM_NONE]));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_EAST], m_item_attr, m_item_values[Item::ITEM_NONE]));
     }
     if(env->get_Room(player_pos.first - 1, player_pos.second)) {
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_WEST]));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_WEST], m_name_attr, m_move_value));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_WEST], m_direction_attr, m_direction_values[Direction::DIR_WEST]));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_WEST], m_item_attr, m_item_ids[Item::ITEM_NONE]));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_WEST], m_item_attr, m_item_values[Item::ITEM_NONE]));
+    }
+    
+    /// 2. Attack
+    
+    if(room->enemy) {
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_attack_id));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_attack_id, m_name_attr, m_attack_value));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_attack_id, m_direction_attr, m_direction_values[Direction::DIR_NONE]));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_attack_id, m_item_attr, m_item_values[Item::ITEM_NONE]));
+    }
+    
+    /// 3. Take
+    
+    for(int i = 1; i != 7; ++i) {
+      if(room->items.has(Item(i))) {
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_take_ids[Item(i)]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_take_ids[Item(i)], m_name_attr, m_take_value));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_take_ids[Item(i)], m_direction_attr, m_direction_values[Direction::DIR_NONE]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_take_ids[Item(i)], m_item_attr, m_item_values[Item(i)]));
+      }
+    }
+    
+    /// 4. Drop
+    
+//     for(int i = 1; i != 7; ++i) {
+//       if(player.items.has(Item(i))) {
+//         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_drop_ids[Item(i)]));
+//         wmes_current.push_back(std::make_shared<Rete::WME>(m_drop_ids[Item(i)], m_name_attr, m_drop_value));
+//         wmes_current.push_back(std::make_shared<Rete::WME>(m_drop_ids[Item(i)], m_direction_attr, m_direction_values[Direction::DIR_NONE]));
+//         wmes_current.push_back(std::make_shared<Rete::WME>(m_drop_ids[Item(i)], m_item_attr, m_item_values[Item(i)]));
+//       }
+//     }
+    
+    /// 5. Equip
+
+    if(player.weapon != Weapon::WEAPON_FISTS) {
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_equip_ids[Weapon::WEAPON_FISTS]));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon::WEAPON_FISTS], m_name_attr, m_equip_value));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon::WEAPON_FISTS], m_direction_attr, m_direction_values[Direction::DIR_NONE]));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon::WEAPON_FISTS], m_item_attr, m_item_values[Item(Weapon::WEAPON_FISTS)]));
+    }
+    for(int i = 1; i != 4; ++i) {
+      if(player.items.has(Item(i)) && player.weapon != Weapon(i)) {
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_equip_ids[Weapon(i)]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon(i)], m_name_attr, m_equip_value));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon(i)], m_direction_attr, m_direction_values[Direction::DIR_NONE]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon(i)], m_item_attr, m_item_values[Item(i)]));
+      }
+    }
+    
+    /// 6. Cast
+
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_cast_ids[Spell::SPELL_HEAL]));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_cast_ids[Spell::SPELL_HEAL], m_name_attr, m_cast_value));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_cast_ids[Spell::SPELL_HEAL], m_direction_attr, m_direction_values[Direction::DIR_NONE]));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_cast_ids[Spell::SPELL_HEAL], m_item_attr, m_item_values[Item(Spell::SPELL_HEAL)]));
+    for(int i = 5; i != 7; ++i) {
+      if(player.items.has(Item(i)) && room->enemy && !room->enemy->is_dead) {
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_cast_ids[Spell(i)]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_cast_ids[Spell(i)], m_name_attr, m_cast_value));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_cast_ids[Spell(i)], m_direction_attr, m_direction_values[Direction::DIR_NONE]));
+        wmes_current.push_back(std::make_shared<Rete::WME>(m_cast_ids[Spell(i)], m_item_attr, m_item_values[Item(i)]));
+      }
     }
 
 //     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_item_attr, m_item_ids[Item::ITEM_NONE]));
