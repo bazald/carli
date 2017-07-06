@@ -513,8 +513,8 @@ namespace Advent {
     const Rete::Symbol_Constant_String_Ptr_C m_in_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("in"));
     const Rete::Symbol_Constant_String_Ptr_C m_has_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("has"));
     const Rete::Symbol_Constant_String_Ptr_C m_equipped_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("equipped"));
-    const Rete::Symbol_Constant_Int_Ptr_C m_true_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
-    const Rete::Symbol_Constant_Int_Ptr_C m_false_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(0));
+    const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
+    const Rete::Symbol_Constant_String_Ptr_C m_false_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("false"));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
     const Rete::Symbol_Constant_Int_Ptr_C m_attack_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
     const Rete::Symbol_Constant_Int_Ptr_C m_take_value = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));

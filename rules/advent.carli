@@ -1,4 +1,4 @@
-# Blocks world 2 -- Restricted to what I think matters
+# Advent
 
 sp {advent*rl-action*general
   :feature 1 unsplit nil
@@ -173,21 +173,21 @@ sp {advent*rl-fringe*player-health-upper
   = 0.0
 }
 
-sp {advent*rl-fringe*enemy-dead
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
-  +(<enemy> ^dead true)
--->
-  = 0.0
-}
-
-sp {advent*rl-fringe*enemy-not-dead
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
-  -(<enemy> ^dead true)
--->
-  = 0.0
-}
+#sp {advent*rl-fringe*enemy-dead
+#  :feature 2 fringe advent*rl-action*general
+#  &advent*rl-action*general
+#  +(<enemy> ^dead true)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*rl-fringe*enemy-not-dead
+#  :feature 2 fringe advent*rl-action*general
+#  &advent*rl-action*general
+#  -(<enemy> ^dead true)
+#-->
+#  = 0.0
+#}
 
 sp {advent*rl-fringe*enemy-health-lower
   :feature 2 fringe advent*rl-action*general 1 0 5
