@@ -782,8 +782,13 @@ namespace Carli {
 //#endif
 
 #ifndef NDEBUG
-    if(std::find(q_values.begin(), q_values.end(), q_value) != q_values.end())
+    if(std::find(q_values.begin(), q_values.end(), q_value) != q_values.end()) {
+      std::cerr << "BADNESS INCREMENT FOR " << *action << ": ";
+        if(q_value->feature)
+          std::cerr << *q_value->feature;
+        std::cerr << std::endl;
       increment_badness();
+    }
 #endif
     q_values.push_back(q_value);
   }
@@ -799,8 +804,13 @@ namespace Carli {
     if(found != q_values.end()) {
       q_values.erase(found);
 #ifndef NDEBUG
-      if(std::find(q_values.begin(), q_values.end(), q_value) != q_values.end())
+      if(std::find(q_values.begin(), q_values.end(), q_value) != q_values.end()) {
+        std::cerr << "BADNESS DECREMENT FOR " << *action << ": ";
+        if(q_value->feature)
+          std::cerr << *q_value->feature;
+        std::cerr << std::endl;
         decrement_badness();
+      }
 #endif
     }
 

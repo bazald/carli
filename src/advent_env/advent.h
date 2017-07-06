@@ -28,6 +28,7 @@ namespace Advent {
   enum Item : int64_t {ITEM_NONE = 0, ITEM_SWORD = 1, ITEM_MACE = 2, ITEM_MAGIC_SWORD = 3, ITEM_FIREBOLT = 5, ITEM_ICEBOLT = 6};
   enum Weapon : int64_t {WEAPON_FISTS = 0, WEAPON_MACE = 1, WEAPON_SWORD = 2, WEAPON_MAGIC_SWORD = 3};
   enum Spell : int64_t {SPELL_NONE = 0, SPELL_HEAL = 4, SPELL_FIREBOLT = 5, SPELL_ICEBOLT = 6};
+  enum Creature : int64_t {CREATURE_SOLID = 0, CREATURE_SKELETAL = 1, CREATURE_TROLL = 2, CREATURE_WATER = 3};
   
   inline bool can_Equip(const Item &item) {
     return item < 4;
@@ -345,47 +346,43 @@ namespace Advent {
     int64_t health = 10;
     int64_t health_max = 10;
     bool is_dead = false;
-    
-    bool is_fleshy = false;
-    bool is_skeletal = false;
-    bool is_troll = false;
-    bool is_water = false;
+    Creature creature = CREATURE_SOLID;
     
     char print_char = 'm';
     
     void receive_attack(const Weapon &enemy_weapon) {
       switch(enemy_weapon) {
         case WEAPON_FISTS:
-          if(is_fleshy)
+          if(creature == CREATURE_SOLID)
             health -= 2;
-          else if(is_skeletal)
+          else if(creature == CREATURE_SKELETAL)
             health -= 1;
-          else if(is_troll)
+          else if(creature == CREATURE_TROLL)
             health -= 5;
           break;
           
         case WEAPON_MACE:
-          if(is_fleshy)
+          if(creature == CREATURE_SOLID)
             health -= 3;
-          else if(is_skeletal)
+          else if(creature == CREATURE_SKELETAL)
             health -= 5;
-          else if(is_troll)
+          else if(creature == CREATURE_TROLL)
             health -= 3;
           break;
           
         case WEAPON_SWORD:
-          if(is_fleshy)
+          if(creature == CREATURE_SOLID)
             health -= 5;
-          else if(is_skeletal)
+          else if(creature == CREATURE_SKELETAL)
             health -= 2;
-          else if(is_troll)
+          else if(creature == CREATURE_TROLL)
             health -= 4;
           break;
           
         case WEAPON_MAGIC_SWORD:
-          if(is_water)
+          if(creature == CREATURE_WATER)
             health -= 3;
-          else if(is_troll) {
+          else if(creature == CREATURE_TROLL) {
             health -= 6;
             if(health <= 0)
               is_dead = true;
@@ -406,18 +403,18 @@ namespace Advent {
           break;
           
         case SPELL_FIREBOLT:
-          if(is_fleshy || is_troll)
+          if(creature == CREATURE_SOLID || creature == CREATURE_TROLL)
             health -= 10;
-          else if(!is_skeletal)
+          else if(creature != CREATURE_SKELETAL)
             health -= 2;
-          if(is_troll && health <= 0)
+          if(creature == CREATURE_TROLL && health <= 0)
             is_dead = true;
           break;
           
         case SPELL_ICEBOLT:
-          if(is_water)
-            is_water = false;
-          else if(!is_skeletal)
+          if(creature == CREATURE_WATER)
+            creature = CREATURE_SOLID;
+          else if(creature != CREATURE_SKELETAL)
             health -= 5;
           break;
           
@@ -508,6 +505,7 @@ namespace Advent {
     const Rete::Symbol_Constant_String_Ptr_C m_item_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("item"));
     const Rete::Symbol_Constant_String_Ptr_C m_player_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("player"));
     const Rete::Symbol_Constant_String_Ptr_C m_enemy_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("enemy"));
+    const Rete::Symbol_Constant_String_Ptr_C m_type_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("type"));
     const Rete::Symbol_Constant_String_Ptr_C m_x_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("x"));
     const Rete::Symbol_Constant_String_Ptr_C m_y_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("y"));
     const Rete::Symbol_Constant_String_Ptr_C m_dead_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("dead"));
@@ -535,6 +533,7 @@ namespace Advent {
 //     std::map<Spell, Rete::Symbol_Constant_Int_Ptr_C> m_spell_values;
     std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_position_values;
     std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_health_values;
+    std::map<Creature, Rete::Symbol_Constant_Int_Ptr_C> m_creature_values;
 
     std::list<Rete::WME_Ptr_C> m_wmes_prev;
 

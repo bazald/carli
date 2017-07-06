@@ -28,18 +28,17 @@ namespace Advent {
         m_rooms[x][y] = y == 2 && x != 2 ? nullptr : std::make_shared<Room>();
       
     m_player.items_max = 3;
-    m_player.is_fleshy = true;
     m_player.print_char = '@';
     
     m_water_dragon = m_rooms[4][3]->enemy = std::make_shared<Character>();
-    m_water_dragon->is_water = true;
+    m_water_dragon->creature = Creature::CREATURE_WATER;
     m_water_dragon->print_char = 'd';
     
-//     m_troll = m_rooms[2][2]->enemy = std::make_shared<Character>();
-//     m_troll->is_troll = true;
-//     m_troll->print_char = 't';
-//     m_troll->items.give(Item::ITEM_MAGIC_SWORD);
-    m_rooms[2][2]->items.give(Item::ITEM_MAGIC_SWORD);
+    m_troll = m_rooms[2][2]->enemy = std::make_shared<Character>();
+    m_troll->creature = Creature::CREATURE_TROLL;
+    m_troll->print_char = 't';
+    m_troll->items.give(Item::ITEM_MAGIC_SWORD);
+//     m_rooms[2][2]->items.give(Item::ITEM_MAGIC_SWORD);
   }
 
   std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action) {
@@ -123,7 +122,7 @@ namespace Advent {
         room->items += room->enemy->items;
         room->enemy->items.clear();
       }
-      else if(room->enemy->is_troll) {
+      else if(room->enemy->creature == CREATURE_TROLL) {
         room->enemy->health = std::min(std::max(room->enemy->health, int64_t()) + 1, room->enemy->health_max);
       }
       else if(room->enemy->health <= 0) {
@@ -205,6 +204,9 @@ namespace Advent {
     for(int64_t i = 0; i != 11; ++i)
       m_health_values[i] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(i));
 
+    for(int64_t i = 0; i != 4; ++i)
+      m_creature_values[Creature(i)] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(i));
+
     generate_rete();
     generate_features();
   }
@@ -244,7 +246,9 @@ namespace Advent {
     wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_equipped_attr, m_item_values[Item(player.weapon)]));
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_in_attr, m_room_id));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_enemy_id, m_in_attr, m_room_id));
+
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_room_id, m_enemy_attr, m_enemy_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_enemy_id, m_type_attr, m_creature_values[enemy ? Creature(enemy->creature) : Creature::CREATURE_SOLID]));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_enemy_id, m_dead_attr, (!enemy || enemy->is_dead) ? m_true_value : m_false_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_enemy_id, m_health_attr, m_health_values[enemy ? enemy->health : 0]));
     
@@ -261,7 +265,7 @@ namespace Advent {
     wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NONE], m_name_attr, m_move_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NONE], m_direction_attr, m_direction_values[Direction::DIR_NONE]));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NONE], m_item_attr, m_item_values[Item::ITEM_NONE]));
-    if(!room->enemy) {
+    if(!room->enemy || room->enemy->is_dead || (room->enemy->health == 1 && room->enemy->creature == CREATURE_TROLL)) {
       if(env->get_Room(player_pos.first, player_pos.second + 1)) {
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_NORTH]));
         wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_NORTH], m_name_attr, m_move_value));

@@ -2,14 +2,15 @@
 
 sp {advent*rl-action*general
   :feature 1 unsplit nil
-  (<s> ^player <player>)
-  (<player> ^in <room>)
+  {(<s> ^player <player>)
   (<player> ^equipped <weapon>)
-  (<enemy> ^in <room>)
-  (<s> ^action <action>)
+  (<player> ^in <room>)
+  (<room> ^enemy <enemy>)
+  (<enemy> ^type <enemy-type>)}
+  {(<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
-  (<action> ^item <item>)
+  (<action> ^item <item>)}
 -->
   = 0.0
 }
@@ -172,21 +173,21 @@ sp {advent*rl-fringe*player-health-upper
   = 0.0
 }
 
-#sp {advent*rl-fringe*enemy-dead
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
-#  +(<enemy> ^dead true)
-#-->
-#  = 0.0
-#}
-#
-#sp {advent*rl-fringe*enemy-not-dead
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
-#  -(<enemy> ^dead true)
-#-->
-#  = 0.0
-#}
+sp {advent*rl-fringe*enemy-dead
+  :feature 2 fringe advent*rl-action*general
+  &advent*rl-action*general
+  +(<enemy> ^dead true)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*enemy-not-dead
+  :feature 2 fringe advent*rl-action*general
+  &advent*rl-action*general
+  -(<enemy> ^dead true)
+-->
+  = 0.0
+}
 
 sp {advent*rl-fringe*enemy-health-lower
   :feature 2 fringe advent*rl-action*general 1 0 5
@@ -202,6 +203,38 @@ sp {advent*rl-fringe*enemy-health-upper
   &advent*rl-action*general
   {(<enemy> ^health <enemy-health>)
    (<enemy-health> >= 5)}
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*enemy-type-solid
+  :feature 2 fringe advent*rl-action*general
+  &advent*rl-action*general
+  (<enemy-type> == 0)
+-->
+  = 0.0
+}
+
+#sp {advent*rl-fringe*enemy-type-skeletal
+#  :feature 2 fringe advent*rl-action*general
+#  &advent*rl-action*general
+#  (<enemy-type> == 1)
+#-->
+#  = 0.0
+#}
+
+sp {advent*rl-fringe*enemy-type-troll
+  :feature 2 fringe advent*rl-action*general
+  &advent*rl-action*general
+  (<enemy-type> == 2)
+-->
+  = 0.0
+}
+
+sp {advent*rl-fringe*enemy-type-water
+  :feature 2 fringe advent*rl-action*general
+  &advent*rl-action*general
+  (<enemy-type> == 3)
 -->
   = 0.0
 }
