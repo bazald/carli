@@ -88,7 +88,8 @@ namespace Carli {
       Rete::compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> features;
 
     Fringe_Collector_All(const Node_Split_Ptr &split)
-      : root(split)
+      : root(split),
+      root_feature(debuggable_cast<Carli::Node &>(*split).q_value_fringe->feature)
     {
     }
 
@@ -104,6 +105,8 @@ namespace Carli {
         auto &node = debuggable_cast<Carli::Node &>(*rete_node.data);
         auto &feature = node.q_value_fringe->feature;
         if(!feature)
+          return;
+        if(root_feature && *root_feature == *feature)
           return;
 
         const auto found_axis = features.find(feature);
@@ -141,6 +144,7 @@ namespace Carli {
     }
 
     Node_Ptr root;
+    tracked_ptr<Feature> root_feature;
   };
 
   struct Fringe_Collector_Immediate {
@@ -187,8 +191,11 @@ namespace Carli {
       general.blacklist_full = true;
 
       for(auto &fringe_axis : general.fringe_values) {
-        for(auto &fringe : fringe_axis.second)
-          excise_rule(fringe->rete_action.lock()->get_name(), false);
+        for(auto &fringe : fringe_axis.second) {
+          const auto rete_action = fringe->rete_action.lock();
+          if(rete_action)
+            excise_rule(rete_action->get_name(), false);
+        }
       }
 
       general.fringe_values.clear();

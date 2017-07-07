@@ -401,10 +401,9 @@ namespace Carli {
             continue;
           bool found_non_existential = false;
           {
-            const auto found = old_variables->equal_range(variable.first);
-            std::find_if(found.first, found.second, [&found_non_existential,&old_token_size](const std::pair<std::string, Rete::WME_Token_Index> &variable)->bool {
-              return found_non_existential = !variable.second.existential;
-            });
+            const auto found = old_variables->find(variable.first);
+            if(found != old_variables->end() && !found->second.existential)
+              found_non_existential = true;
           }
           if(!found_non_existential) {
             if(!new_variables)
@@ -439,6 +438,7 @@ namespace Carli {
             }
             else if(new_index.token_row >= leaf_token_size) {
               /// Offset backward
+
               new_index.token_row -= new_token_size - leaf_token_size;
 #ifdef DEBUG_OUTPUT
               std::cerr << "new_index.token_row offset backward " << new_token_size << '-' << leaf_token_size << " = " << new_index << std::endl;
