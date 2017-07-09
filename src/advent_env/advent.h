@@ -404,7 +404,7 @@ namespace Advent {
           
         case SPELL_FIREBOLT:
           if(creature == CREATURE_SOLID || creature == CREATURE_TROLL)
-            health -= 10;
+            health -= 5;
           else if(creature != CREATURE_SKELETAL)
             health -= 2;
           if(creature == CREATURE_TROLL && health <= 0)

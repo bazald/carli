@@ -45,6 +45,8 @@ namespace Advent {
     auto room = m_rooms[m_player_pos.first][m_player_pos.second];
     assert(room);
     
+    bool killed_troll = m_troll->is_dead;
+    
     if(const Move * const move = dynamic_cast<const Move *>(&action)) {
       switch(move->direction) {
         case Direction::DIR_NONE:
@@ -139,8 +141,10 @@ namespace Advent {
       m_player.health = 0;
       m_player.is_dead = true;
     }
+
+    killed_troll ^= m_troll->is_dead;
     
-    return std::make_pair(success() ? 100.0 : failure() ? -100.0 : -1.0, -1.0);
+    return std::make_pair(success() ? 100.0 : failure() ? -100.0 : killed_troll ? 50.0 : -1.0, -1.0);
   }
 
   void Environment::print_impl(ostream &os) const {

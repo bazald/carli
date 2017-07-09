@@ -60,8 +60,11 @@
 *_p
 *_r
 /.vs
+/experiment-adv
 /experiment-bw
 /experiment-bw2
+/experiment-bw2-long
+/experiment-bw2-long-again
 /experiment-mc
 /experiment-pw
 /experiments
