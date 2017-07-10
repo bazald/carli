@@ -1,4 +1,4 @@
-# CPU time = 8.46302 seconds
+# CPU time = 7.62911 seconds
 
 set-total-step-count 40000
 
@@ -6,704 +6,307 @@ sp {blocks-world*rl-action*s1
   :creation-time 0
   :feature 1 split nil
   (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
   (<blocks> ^stack <stack>)
   (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
+  (<block> ^name <block-name>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
   (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
 -->
-  = 0.57069029413271288309
+  = -1.90209108773538293491 8294.37300615657295566052 0.20736450926664598549 -0.0149552067289472207 40000
 }
 
 sp {blocks-world*rl-fringe*s16
-  :creation-time 2
+  :creation-time 3
   :feature 2 split blocks-world*rl-action*s1
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
+  &blocks-world*rl-action*s1
+  -{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
   (<stack> ^matches <goal-stack>)}
 -->
-  = 0.10001607193660484729
+  = -0.7070866727909332905 7823.82416207536698493641 0.21441596541629989736 -0.00067495787951980519 36490
 }
 
 sp {blocks-world*rl-fringe*s27
-  :creation-time 2
+  :creation-time 3
   :feature 2 split blocks-world*rl-action*s1
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
+  &blocks-world*rl-action*s1
+  +{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
   (<stack> ^matches <goal-stack>)}
 -->
-  = 0.46714584021847871398
+  = -1.14038758792793104568 466.61372697770849526933 0.1331280248153234036 0.00206747130012304272 3506
 }
 
 sp {blocks-world*rl-fringe*s45
   :creation-time 10
   :feature 3 split blocks-world*rl-fringe*s27
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
+  &blocks-world*rl-fringe*s27
   -(<dest> ^name 0)
 -->
-  = 0.12607972597786470947
+  = -0.43931595267124678994 324.61163569864038436208 0.13708261642679070436 -0.00082765153076156696 2369
 }
 
 sp {blocks-world*rl-fringe*s38
-  :creation-time 10
-  :feature 3 split blocks-world*rl-fringe*s27
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
+  :creation-time 7
+  :feature 3 split blocks-world*rl-fringe*s16
+  &blocks-world*rl-fringe*s16
   +(<dest> ^name 0)
 -->
-  = 0.26999358259815675609
+  = -0.47893169686409242658 2151.93348655021372906049 0.15076952893927092481 0.01361795573074914278 14274
 }
 
 sp {blocks-world*rl-fringe*s71
-  :creation-time 5
-  :feature 3 split blocks-world*rl-fringe*s16
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
+  :creation-time 10
+  :feature 3 split blocks-world*rl-fringe*s27
+  &blocks-world*rl-fringe*s27
   +(<dest> ^name 0)
 -->
-  = 0.05070915556900901233
+  = -0.68085052646770016782 140.36807212235268593759 0.12389061970198825269 0.00882715725477973764 1134
 }
 
 sp {blocks-world*rl-fringe*s52
-  :creation-time 5
+  :creation-time 7
   :feature 3 split blocks-world*rl-fringe*s16
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
+  &blocks-world*rl-fringe*s16
   -(<dest> ^name 0)
 -->
-  = 0.11584885737796560279
+  = -0.21465553043926388632 5670.76150069482446269831 0.25529021296964948817 -0.01029194399847156889 22214
 }
 
-sp {blocks-world*rl-fringe*s62
-  :creation-time 30
-  :feature 4 split blocks-world*rl-fringe*s52
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  -(<dest> ^name 0)
-  -(<block> ^matches-top <dest-stack>)
+sp {blocks-world*rl-fringe*s1
+  :creation-time 17
+  :feature 4 split blocks-world*rl-fringe*s38
+  &blocks-world*rl-fringe*s38
+  -{(<s> ^goal <2>)
+  (<0> ^stack <2>)
+  (<dest-stack> ^matches <2>)}
 -->
-  = -0.17384200692045442826
-}
-
-sp {blocks-world*rl-fringe*s68
-  :creation-time 27
-  :feature 4 split blocks-world*rl-fringe*s45
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  -(<dest> ^name 0)
-  -{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
--->
-  = 0.05078520137796390527
-}
-
-sp {blocks-world*rl-fringe*s78
-  :creation-time 55
-  :feature 4 split blocks-world*rl-fringe*s71
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  +(<dest> ^name 0)
-  -(<block> ^matches-top <dest-stack>)
--->
-  = 0.00866829069529069518
-}
-
-sp {blocks-world*rl-fringe*u72
-  :creation-time 55
-  :feature 4 unsplit blocks-world*rl-fringe*s71
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  +(<dest> ^name 0)
-  +(<block> ^matches-top <dest-stack>)
--->
-  = -0.06165662240797226828
-}
-
-sp {blocks-world*rl-fringe*s81
-  :creation-time 30
-  :feature 4 split blocks-world*rl-fringe*s52
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  -(<dest> ^name 0)
-  +(<block> ^matches-top <dest-stack>)
--->
-  = 0.20600890239068905818
-}
-
-sp {blocks-world*rl-fringe*s65
-  :creation-time 27
-  :feature 4 split blocks-world*rl-fringe*s45
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  -(<dest> ^name 0)
-  +{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
--->
-  = -0.04979801250403747409
-}
-
-sp {blocks-world*rl-fringe*u42
-  :creation-time 14
-  :feature 4 unsplit blocks-world*rl-fringe*s38
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  +(<dest> ^name 0)
-  -{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
--->
-  = -0.10414428497860943323
+  = -0.35743478387823618414 1539.42053372631676211313 0.14804967625758000405 0.01448346369640372139 10399
 }
 
 sp {blocks-world*rl-fringe*s59
-  :creation-time 14
-  :feature 4 split blocks-world*rl-fringe*s38
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  +(<dest> ^name 0)
-  +{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
+  :creation-time 22
+  :feature 4 split blocks-world*rl-fringe*s52
+  &blocks-world*rl-fringe*s52
+  +{(<s> ^goal <2>)
+  (<0> ^stack <2>)
+  (<dest-stack> ^matches <2>)}
 -->
-  = 0.18298837278509280657
+  = 0.15537126988855587406 638.92693348859529578476 0.14198376299746562346 -0.02040276877612148473 4501
 }
 
-sp {blocks-world*rl-fringe*s63
-  :creation-time 42
-  :feature 5 split blocks-world*rl-fringe*s62
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  -(<dest> ^name 0)
-  -(<block> ^matches-top <dest-stack>)
-  +{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
+sp {blocks-world*rl-fringe*s78
+  :creation-time 267
+  :feature 4 split blocks-world*rl-fringe*s71
+  &blocks-world*rl-fringe*s71
+  +{(<s> ^goal <2>)
+  (<0> ^stack <2>)
+  (<dest-stack> ^matches <2>)}
 -->
-  = -0.32428812151756869486
+  = -0.4929776878132279827 94.48644939584349344841 0.30187364024231150283 0.00323061188605630904 314
+}
+
+sp {blocks-world*rl-fringe*s62
+  :creation-time 19
+  :feature 4 split blocks-world*rl-fringe*s45
+  &blocks-world*rl-fringe*s45
+  -(<block> ^matches-top <dest-stack>)
+-->
+  = -0.27679569608921567037 243.211786354479329475 0.12536690018272131364 0.00780049042010024039 1941
+}
+
+sp {blocks-world*rl-fringe*s68
+  :creation-time 22
+  :feature 4 split blocks-world*rl-fringe*s52
+  &blocks-world*rl-fringe*s52
+  -{(<s> ^goal <2>)
+  (<0> ^stack <2>)
+  (<dest-stack> ^matches <2>)}
+-->
+  = -0.3524499672076956136 5030.40392752059779013507 0.28407521614640829366 0.01497493090510486173 17709
+}
+
+sp {blocks-world*rl-fringe*s4
+  :creation-time 267
+  :feature 4 split blocks-world*rl-fringe*s71
+  &blocks-world*rl-fringe*s71
+  -{(<s> ^goal <2>)
+  (<0> ^stack <2>)
+  (<dest-stack> ^matches <2>)}
+-->
+  = -0.17463921875290774888 44.80152806265567733135 0.05490383341011725177 0.00914940373796365933 817
+}
+
+sp {blocks-world*rl-fringe*s81
+  :creation-time 19
+  :feature 4 split blocks-world*rl-fringe*s45
+  &blocks-world*rl-fringe*s45
+  +(<block> ^matches-top <dest-stack>)
+-->
+  = -0.14497621494697282563 74.99341727362099163656 0.17728940253811109606 -0.0037396489801225577 424
+}
+
+sp {blocks-world*rl-fringe*s65
+  :creation-time 17
+  :feature 4 split blocks-world*rl-fringe*s38
+  &blocks-world*rl-fringe*s38
+  +{(<s> ^goal <2>)
+  (<0> ^stack <2>)
+  (<dest-stack> ^matches <2>)}
+-->
+  = -0.10831631392761835453 611.13983567112620676198 0.15787647524441389413 0.00287870389473595962 3872
 }
 
 sp {blocks-world*rl-fringe*s82
-  :creation-time 6682
+  :creation-time 5567
   :feature 5 split blocks-world*rl-fringe*s81
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  -(<dest> ^name 0)
-  +(<block> ^matches-top <dest-stack>)
-  +{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
+  &blocks-world*rl-fringe*s81
+  +{(<s> ^goal <2>)
+  (<0> ^stack <2>)
+  (<dest-stack> ^matches <2>)}
 -->
-  = -0.40044631630245891563
+  = 0.02099565745419092883 2.78375049367831151059 0.55675009873566227991 0.00356354296062755867 6
 }
 
-sp {blocks-world*rl-fringe*f43
-  :creation-time 14
-  :feature 5 fringe blocks-world*rl-fringe*u42
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  +(<dest> ^name 0)
-  -{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
+sp {blocks-world*rl-fringe*s5
+  :creation-time 11277
+  :feature 5 split blocks-world*rl-fringe*s4
+  &blocks-world*rl-fringe*s4
   +(<block> ^matches-top <dest-stack>)
 -->
-  = 0.01705478754136306729
+  = -0.0363748795664042418 26.80124713760170962473 0.08673542762977899667 0.00560741867593127132 310
 }
 
-sp {blocks-world*rl-fringe*f44
-  :creation-time 14
-  :feature 5 fringe blocks-world*rl-fringe*u42
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  +(<dest> ^name 0)
-  -{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
+sp {blocks-world*rl-fringe*s6
+  :creation-time 11277
+  :feature 5 split blocks-world*rl-fringe*s4
+  &blocks-world*rl-fringe*s4
   -(<block> ^matches-top <dest-stack>)
 -->
-  = 0.01705478754136306729
-}
-
-sp {blocks-world*rl-fringe*f73
-  :creation-time 55
-  :feature 5 fringe blocks-world*rl-fringe*u72
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  +(<dest> ^name 0)
-  +(<block> ^matches-top <dest-stack>)
-  +{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
--->
-  = 0.12831768139837351761
+  = -0.1300001416754008321 17.72021769748977249037 0.03551145831160275324 0.0060753616114961103 500
 }
 
 sp {blocks-world*rl-fringe*s67
-  :creation-time 45
+  :creation-time 34
   :feature 5 split blocks-world*rl-fringe*s65
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  -(<dest> ^name 0)
-  +{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
+  &blocks-world*rl-fringe*s65
   -(<block> ^matches-top <dest-stack>)
 -->
-  = -0.4277240306421153937
-}
-
-sp {blocks-world*rl-fringe*s70
-  :creation-time 54
-  :feature 5 split blocks-world*rl-fringe*s68
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  -(<dest> ^name 0)
-  -{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
-  -(<block> ^matches-top <dest-stack>)
--->
-  = -0.07499908106436305177
+  = -0.33209432696486707037 88.27680594149225612455 0.1047174447704534439 0.00161560446645915567 844
 }
 
 sp {blocks-world*rl-fringe*s83
-  :creation-time 6682
+  :creation-time 5567
   :feature 5 split blocks-world*rl-fringe*s81
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  -(<dest> ^name 0)
-  +(<block> ^matches-top <dest-stack>)
-  -{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
+  &blocks-world*rl-fringe*s81
+  -{(<s> ^goal <2>)
+  (<0> ^stack <2>)
+  (<dest-stack> ^matches <2>)}
 -->
-  = -0.65491729462634673542
-}
-
-sp {blocks-world*rl-fringe*s64
-  :creation-time 42
-  :feature 5 split blocks-world*rl-fringe*s62
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  -(<dest> ^name 0)
-  -(<block> ^matches-top <dest-stack>)
-  -{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
--->
-  = 0.19161403460330830861
-}
-
-sp {blocks-world*rl-fringe*s69
-  :creation-time 54
-  :feature 5 split blocks-world*rl-fringe*s68
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  -(<dest> ^name 0)
-  -{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
-  +(<block> ^matches-top <dest-stack>)
--->
-  = -0.22064539631432628086
-}
-
-sp {blocks-world*rl-fringe*s61
-  :creation-time 34
-  :feature 5 split blocks-world*rl-fringe*s59
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  +(<dest> ^name 0)
-  +{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
-  -(<block> ^matches-top <dest-stack>)
--->
-  = -0.25542233808171116438
-}
-
-sp {blocks-world*rl-fringe*s66
-  :creation-time 45
-  :feature 5 split blocks-world*rl-fringe*s65
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  -(<dest> ^name 0)
-  +{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
-  +(<block> ^matches-top <dest-stack>)
--->
-  = 0.04238741568050518466
-}
-
-sp {blocks-world*rl-fringe*s60
-  :creation-time 34
-  :feature 5 split blocks-world*rl-fringe*s59
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  -{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  +(<dest> ^name 0)
-  +{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
-  +(<block> ^matches-top <dest-stack>)
--->
-  = 0.14161699838600053103
-}
-
-sp {blocks-world*rl-fringe*s79
-  :creation-time 1594
-  :feature 5 split blocks-world*rl-fringe*s78
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  +(<dest> ^name 0)
-  -(<block> ^matches-top <dest-stack>)
-  +{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
--->
-  = -0.46663872283755902792
+  = -0.22038985004171007809 54.58821459358424021957 0.13281804037368427629 -0.02341501441002470998 412
 }
 
 sp {blocks-world*rl-fringe*s80
-  :creation-time 1594
+  :creation-time 313
   :feature 5 split blocks-world*rl-fringe*s78
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  +(<dest> ^name 0)
+  &blocks-world*rl-fringe*s78
   -(<block> ^matches-top <dest-stack>)
-  -{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
 -->
-  = -0.57187518887712940341
+  = -0.37830690379155440528 69.06957578284298904236 0.26362433504901905401 0.01448030811877575215 263
 }
 
-sp {blocks-world*rl-fringe*f74
-  :creation-time 55
-  :feature 5 fringe blocks-world*rl-fringe*u72
-  (<s> ^blocks <blocks>)
-  (<s> ^goal <goal>)
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<block> ^name <block-name>)
-  (<action> ^dest <dest>)
-  (<dest> ^name <dest-name>)
-  (<blocks> ^stack <stack>)
-  (<stack> ^top <block>)
-  (<blocks> ^stack <dest-stack>)
-  (<dest-stack> ^top <dest>)
-  +{(<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
-  +(<dest> ^name 0)
-  +(<block> ^matches-top <dest-stack>)
-  -{(<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
+sp {blocks-world*rl-fringe*s3
+  :creation-time 10015
+  :feature 5 split blocks-world*rl-fringe*s1
+  &blocks-world*rl-fringe*s1
+  -(<block> ^matches-top <dest-stack>)
 -->
-  = 0.00000000000000001388
+  = -0.31699128366003676005 276.17464136044208089515 0.09731312239620933113 0.013577632288892829 2839
+}
+
+sp {blocks-world*rl-fringe*s2
+  :creation-time 10015
+  :feature 5 split blocks-world*rl-fringe*s1
+  &blocks-world*rl-fringe*s1
+  +(<block> ^matches-top <dest-stack>)
+-->
+  = -0.02140396080964264772 1260.84821147394700346922 0.16693343194412113561 0.00640571127703875969 7554
+}
+
+sp {blocks-world*rl-fringe*s64
+  :creation-time 33
+  :feature 5 split blocks-world*rl-fringe*s62
+  &blocks-world*rl-fringe*s62
+  -{(<s> ^goal <2>)
+  (<0> ^stack <2>)
+  (<dest-stack> ^matches <2>)}
+-->
+  = -0.21562909946828576202 212.02876172090867612496 0.11630760379643920177 0.01611627293880949982 1824
+}
+
+sp {blocks-world*rl-fringe*s69
+  :creation-time 179
+  :feature 5 split blocks-world*rl-fringe*s68
+  &blocks-world*rl-fringe*s68
+  +(<block> ^matches-top <dest-stack>)
+-->
+  = 0.47179068718158334583 4936.5992938408171539777 0.30442768215594578907 0.0097580811291857663 16217
+}
+
+sp {blocks-world*rl-fringe*s70
+  :creation-time 179
+  :feature 5 split blocks-world*rl-fringe*s68
+  &blocks-world*rl-fringe*s68
+  -(<block> ^matches-top <dest-stack>)
+-->
+  = -0.81490553118225228513 93.04906287680252319205 0.06253297236344255994 0.0072657787607564514 1489
+}
+
+sp {blocks-world*rl-fringe*s60
+  :creation-time 29
+  :feature 5 split blocks-world*rl-fringe*s59
+  &blocks-world*rl-fringe*s59
+  +(<block> ^matches-top <dest-stack>)
+-->
+  = 0.81957225601853023189 586.84770391436677527963 0.15156190700267738181 0.04376692011686356826 3873
+}
+
+sp {blocks-world*rl-fringe*s66
+  :creation-time 34
+  :feature 5 split blocks-world*rl-fringe*s65
+  &blocks-world*rl-fringe*s65
+  +(<block> ^matches-top <dest-stack>)
+-->
+  = 0.23982256929606635132 521.56594405565647321055 0.17258965719909213909 0.00527033840208357158 3023
+}
+
+sp {blocks-world*rl-fringe*s63
+  :creation-time 33
+  :feature 5 split blocks-world*rl-fringe*s62
+  &blocks-world*rl-fringe*s62
+  +{(<s> ^goal <2>)
+  (<0> ^stack <2>)
+  (<dest-stack> ^matches <2>)}
+-->
+  = -0.04830984138255049742 30.07624309189266398334 0.2685378847490416665 -0.00510667629586524126 113
+}
+
+sp {blocks-world*rl-fringe*s61
+  :creation-time 29
+  :feature 5 split blocks-world*rl-fringe*s59
+  &blocks-world*rl-fringe*s59
+  -(<block> ^matches-top <dest-stack>)
+-->
+  = -0.65463409980515063769 51.27984215127970912818 0.08217923421679440565 -0.06173474382627393287 625
+}
+
+sp {blocks-world*rl-fringe*s79
+  :creation-time 313
+  :feature 5 split blocks-world*rl-fringe*s78
+  &blocks-world*rl-fringe*s78
+  +(<block> ^matches-top <dest-stack>)
+-->
+  = -0.10381913298877949725 23.41614225139454674718 0.49821579258286269321 -0.00905037692834827212 48
 }

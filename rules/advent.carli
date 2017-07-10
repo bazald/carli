@@ -242,7 +242,7 @@ sp {advent*rl-fringe*enemy-type-water
 #sp {advent*rl-fringe*room-has-mace
 #  :feature 2 fringe advent*rl-action*general
 #  &advent*rl-action*general
-#  +(<player> ^has 1)
+#  +(<room> ^has 1)
 #-->
 #  = 0.0
 #}
@@ -250,7 +250,7 @@ sp {advent*rl-fringe*enemy-type-water
 #sp {advent*rl-fringe*room-has-no-mace
 #  :feature 2 fringe advent*rl-action*general
 #  &advent*rl-action*general
-#  -(<player> ^has 1)
+#  -(<room> ^has 1)
 #-->
 #  = 0.0
 #}
@@ -274,7 +274,7 @@ sp {advent*rl-fringe*enemy-type-water
 #sp {advent*rl-fringe*room-has-sword
 #  :feature 2 fringe advent*rl-action*general
 #  &advent*rl-action*general
-#  +(<player> ^has 2)
+#  +(<room> ^has 2)
 #-->
 #  = 0.0
 #}
@@ -282,7 +282,7 @@ sp {advent*rl-fringe*enemy-type-water
 #sp {advent*rl-fringe*room-has-no-sword
 #  :feature 2 fringe advent*rl-action*general
 #  &advent*rl-action*general
-#  -(<player> ^has 2)
+#  -(<room> ^has 2)
 #-->
 #  = 0.0
 #}
@@ -302,22 +302,22 @@ sp {advent*rl-fringe*enemy-type-water
 #-->
 #  = 0.0
 #}
-#
+
 #sp {advent*rl-fringe*room-has-magic-sword
 #  :feature 2 fringe advent*rl-action*general
 #  &advent*rl-action*general
-#  +(<player> ^has 3)
+#  +(<room> ^has 3)
 #-->
 #  = 0.0
 #}
-
-sp {advent*rl-fringe*room-has-no-magic-sword
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
-  -(<player> ^has 3)
--->
-  = 0.0
-}
+#
+#sp {advent*rl-fringe*room-has-no-magic-sword
+#  :feature 2 fringe advent*rl-action*general
+#  &advent*rl-action*general
+#  -(<room> ^has 3)
+#-->
+#  = 0.0
+#}
 
 sp {advent*rl-fringe*player-has-magic-sword
   :feature 2 fringe advent*rl-action*general
@@ -335,21 +335,21 @@ sp {advent*rl-fringe*player-has-no-magic-sword
   = 0.0
 }
 
-sp {advent*rl-fringe*room-has-firebolt
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
-  +(<player> ^has 5)
--->
-  = 0.0
-}
-
-sp {advent*rl-fringe*room-has-no-firebolt
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
-  -(<player> ^has 5)
--->
-  = 0.0
-}
+#sp {advent*rl-fringe*room-has-firebolt
+#  :feature 2 fringe advent*rl-action*general
+#  &advent*rl-action*general
+#  +(<room> ^has 5)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*rl-fringe*room-has-no-firebolt
+#  :feature 2 fringe advent*rl-action*general
+#  &advent*rl-action*general
+#  -(<room> ^has 5)
+#-->
+#  = 0.0
+#}
 
 sp {advent*rl-fringe*player-has-firebolt
   :feature 2 fringe advent*rl-action*general
@@ -367,21 +367,21 @@ sp {advent*rl-fringe*player-has-no-firebolt
   = 0.0
 }
 
-sp {advent*rl-fringe*room-has-icebolt
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
-  +(<player> ^has 6)
--->
-  = 0.0
-}
-
-sp {advent*rl-fringe*room-has-no-icebolt
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
-  -(<player> ^has 6)
--->
-  = 0.0
-}
+#sp {advent*rl-fringe*room-has-icebolt
+#  :feature 2 fringe advent*rl-action*general
+#  &advent*rl-action*general
+#  +(<room> ^has 6)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*rl-fringe*room-has-no-icebolt
+#  :feature 2 fringe advent*rl-action*general
+#  &advent*rl-action*general
+#  -(<room> ^has 6)
+#-->
+#  = 0.0
+#}
 
 sp {advent*rl-fringe*player-has-icebolt
   :feature 2 fringe advent*rl-action*general

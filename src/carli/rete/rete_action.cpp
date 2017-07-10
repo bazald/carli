@@ -154,6 +154,12 @@ namespace Rete {
     os << std::endl << '}' << std::endl;
   }
 
+  std::string Rete_Action::get_text_right() const {
+    std::ostringstream oss;
+    parent_left()->print_rule(oss, variables, true);
+    return oss.str();
+  }
+
   void Rete_Action::output_name(std::ostream &os, const int64_t &depth) const {
     os << "a(";
     if(input && depth)

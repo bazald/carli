@@ -192,7 +192,7 @@ def main():
   pylab.xlabel('Number of Blocks', fontsize=8)
   pylab.ylabel('CPU Time Per Step (s)', fontsize=8)
   
-#  pylab.xlim(xmax=10000)
+  pylab.xlim(xmax=72)
 #  if len(sys.argv) > 1:
 #    pylab.ylim(ymin=-500, ymax=0)
   pylab.ylim(ymin=0, ymax=10)

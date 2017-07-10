@@ -60,6 +60,8 @@
 *_p
 *_r
 /.vs
+/bw2-performance
+/bw2-performance-again
 /experiment-adv
 /experiment-bw
 /experiment-bw2
@@ -80,6 +82,7 @@
 /post-expansion-*
 /pre-expansion-*
 /puddle_world
+/stats
 /tetris
 .~lock.*
 .syncthing*

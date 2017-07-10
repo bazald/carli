@@ -46,6 +46,7 @@ namespace Rete {
     void print_details(std::ostream &os) const override; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
     void print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices = nullptr, const bool &suppress_parent_left = false) const override;
+    std::string get_text_right() const;
 
     void output_name(std::ostream &os, const int64_t &depth) const override;
 

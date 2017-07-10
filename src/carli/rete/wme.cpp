@@ -9,7 +9,9 @@ namespace Rete {
   }
 
   bool WME::operator==(const WME &rhs) const {
-    return *symbols[0] == *rhs.symbols[0] && *symbols[1] == *rhs.symbols[1] && *symbols[2] == *rhs.symbols[2];
+    return ((!symbols[0] && !rhs.symbols[0]) || (*symbols[0] == *rhs.symbols[0])) &&
+           ((!symbols[1] && !rhs.symbols[1]) || (*symbols[1] == *rhs.symbols[1])) &&
+           ((!symbols[2] && !rhs.symbols[2]) || (*symbols[2] == *rhs.symbols[2]));
   }
 
   bool WME::operator<(const WME &rhs) const {
