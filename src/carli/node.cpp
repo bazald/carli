@@ -341,9 +341,9 @@ namespace Carli {
 
     /// Add to the appropriate parent list
     if(parent_action_) {
-#ifndef NDEBUG
-      std::cerr << "Adding child node link from " << parent_action_->get_name() << " to " << this << std::endl;
-#endif
+//#ifndef NDEBUG
+//      std::cerr << "Adding child node link from " << parent_action_->get_name() << " to " << this << std::endl;
+//#endif
       debuggable_pointer_cast<Node_Split>(parent_action_->data)->children.push_back(new_leaf_data);
     }
 
