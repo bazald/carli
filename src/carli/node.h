@@ -20,6 +20,7 @@ namespace Carli {
   class Node_Fringe_Ranged;
 
   typedef std::shared_ptr<const Node> Node_Ptr_C;
+  typedef std::weak_ptr<const Node> Node_Ptr_W;
   typedef std::shared_ptr<const Node_Split> Node_Split_Ptr_C;
   typedef std::shared_ptr<const Node_Unsplit> Node_Unsplit_Ptr_C;
   typedef std::shared_ptr<const Node_Fringe> Node_Fringe_Ptr_C;
@@ -28,19 +29,47 @@ namespace Carli {
   typedef std::shared_ptr<Node_Split> Node_Split_Ptr;
   typedef std::shared_ptr<Node_Unsplit> Node_Unsplit_Ptr;
   typedef std::shared_ptr<Node_Fringe> Node_Fringe_Ptr;
+  typedef std::weak_ptr<Node_Fringe> Node_Fringe_Ptr_W;
 
-  typedef std::map<Feature *, std::list<Node_Fringe_Ptr>, Rete::compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> Fringe_Values;
+  typedef std::map<Feature *, std::list<Node_Fringe_Ptr_W>, Rete::compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> Fringe_Values;
 
   class Fringe_Axis_Selections : public std::map<tracked_ptr<Feature>, int64_t, Rete::compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> {
   public:
     ~Fringe_Axis_Selections();
   };
 
+#ifndef NDEBUG
+  class CARLI_LINKAGE Node_Tracker {
+    Node_Tracker() {}
+    Node_Tracker(const Node_Tracker &) {}
+
+  public:
+    static Node_Tracker & get();
+
+    size_t num_nodes() const;
+
+    void create(const Rete::Rete_Action &action);
+
+    void destroy(const Node &node);
+
+    void validate(Rete::Rete_Agent &agent);
+
+  private:
+    std::unordered_map<const Node *, std::string> m_names_from_nodes;
+    std::unordered_map<std::string, const Node *> m_nodes_from_names;
+    size_t m_good_validations = 0;
+  };
+#endif
+
   class CARLI_LINKAGE Node : public std::enable_shared_from_this<Node>, public Zeni::Pool_Allocator<Node_Split>, public Rete::Rete_Data {
     Node(const Node &) = delete;
     Node & operator=(const Node &) = delete;
 
   public:
+#ifndef NDEBUG
+    friend Node_Tracker;
+#endif
+
     Node(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_weight_, const tracked_ptr<Q_Value> &q_value_fringe_)
      : agent(agent_),
      parent_action(parent_action_),
@@ -89,6 +118,8 @@ namespace Carli {
     Node_Split & operator=(const Node_Split &) = delete;
 
   public:
+    friend class Node_Tracker;
+
     Node_Split(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_weight_, const tracked_ptr<Q_Value> &q_value_fringe_);
     ~Node_Split();
 
@@ -100,7 +131,7 @@ namespace Carli {
 
     void decision() override;
 
-    std::list<Node_Ptr> children; ///< Not cloned
+    std::list<Node_Ptr_W> children; ///< Not cloned
     Fringe_Axis_Selections fringe_axis_selections;
     int64_t fringe_axis_counter = 0;
     bool blacklist_full = false;
@@ -114,6 +145,8 @@ namespace Carli {
     Node_Unsplit & operator=(const Node_Unsplit &) = delete;
 
   public:
+    friend class Node_Tracker;
+
     Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const int64_t &depth_, const tracked_ptr<Feature> &feature_);
     Node_Unsplit(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_weight_, const tracked_ptr<Q_Value> &q_value_fringe_);
     ~Node_Unsplit();

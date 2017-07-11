@@ -148,6 +148,13 @@ namespace Rete {
     return Rete_Action_Ptr();
   }
 
+  std::set<std::string> Rete_Agent::get_rule_names() const {
+    std::set<std::string> rv;
+    for(auto rule : rules)
+      rv.insert(rule.first);
+    return rv;
+  }
+
   void Rete_Agent::excise_all() {
     Agenda::Locker locker(agenda);
 
@@ -170,10 +177,14 @@ namespace Rete {
 
     auto found = rules.find(name);
     if(found == rules.end()) {
-//        std::cerr << "Rule '" << name << "' not found." << std::endl;
+//#ifndef NDEBUG
+//      std::cerr << "Rule '" << name << "' not found." << std::endl;
+//#endif
     }
     else {
-//        std::cerr << "Rule '" << name << "' excised." << std::endl;
+#ifndef NDEBUG
+      std::cerr << "Rule '" << name << "' excised." << std::endl;
+#endif
       auto action = found->second;
       rules.erase(found);
       action->destroy(*this);
@@ -396,11 +407,15 @@ namespace Rete {
 
     auto found = rules.find(action->get_name());
     if(found == rules.end()) {
-//        std::cerr << "Rule '" << name << "' sourced." << std::endl;
+#ifndef NDEBUG
+      std::cerr << "Rule '" << action->get_name() << "' sourced." << std::endl;
+#endif
       rules[action->get_name()] = action;
     }
     else {
-//        std::cerr << "Rule '" << name << "' replaced." << std::endl;
+#ifndef NDEBUG
+      std::cerr << "Rule '" << action->get_name() << "' replaced." << std::endl;
+#endif
       assert(found->second != action);
       found->second->destroy(*this);
       if(user_command && output != "null")

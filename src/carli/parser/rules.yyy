@@ -334,12 +334,18 @@ command:
                           }
                           if(parent_action) {
                             auto &parent_data = dynamic_cast<Carli::Node_Split &>(*parent_action->data);
+#ifndef NDEBUG
+                            std::cerr << "Adding child node link from " << parent_action->get_name() << " to " << new_action_data << std::endl;
+#endif
                             parent_data.children.push_back(new_action_data);
                           }
                           else if(new_action_data->q_value_fringe->depth != 1) {
                             reteerror(&yylloc, yyscanner, agent, filename, source_path, "Ancestral relationship specified in :feature not found.");
                             YYABORT;
                           }
+#ifndef NDEBUG
+                          Carli::Node_Tracker::get().create(*new_action);
+#endif
                         }
                         else {
                           const auto new_q_value_fringe = new Carli::Q_Value(q_value_value, Carli::Q_Value::Type::FRINGE, q_value_depth, feature, timestamp);

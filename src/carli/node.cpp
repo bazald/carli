@@ -13,13 +13,97 @@ namespace Carli {
     }
   }
 
+#ifndef NDEBUG
+  Node_Tracker & Node_Tracker::get() {
+    static Node_Tracker node_tracker;
+    return node_tracker;
+  }
+
+  size_t Node_Tracker::num_nodes() const {
+    return m_names_from_nodes.size();
+  }
+
+  void Node_Tracker::create(const Rete::Rete_Action &action) {
+    const Node * const node = debuggable_cast<const Node *>(action.data.get());
+    const std::string node_name = action.get_name();
+
+    assert(m_names_from_nodes.find(node) == m_names_from_nodes.end());
+    assert(m_nodes_from_names.find(node_name) == m_nodes_from_names.end());
+    std::cerr << "Registering " << node_name << std::endl;
+    m_names_from_nodes[node] = node_name;
+    m_nodes_from_names[node_name] = node;
+  }
+
+  void Node_Tracker::destroy(const Node &node) {
+    const auto found = m_names_from_nodes.find(&node);
+    assert(found != m_names_from_nodes.end());
+    const auto found2 = m_nodes_from_names.find(found->second);
+    assert(found2 != m_nodes_from_names.end());
+    std::cerr << "Unregistering " << found->second << std::endl;
+    m_names_from_nodes.erase(found);
+    m_nodes_from_names.erase(found2);
+  }
+
+  void Node_Tracker::validate(Rete::Rete_Agent &agent) {
+    const auto rule_names = agent.get_rule_names();
+
+    for(const auto &name : rule_names) {
+      std::cerr << "Validating " << name << std::endl;
+      auto action = agent.get_rule(name);
+      if(const Node * const node = dynamic_cast<const Node *>(action->data.get())) {
+        assert(node->q_value_fringe->depth == 1 || !node->parent_action.expired());
+        assert(!node->rete_action.expired());
+        if(const Node_Split * const node_split = dynamic_cast<const Node_Split *>(node)) {
+          assert(m_names_from_nodes.find(node_split) != m_names_from_nodes.end());
+          for(auto child : node_split->children)
+            assert(!child.expired());
+          for(auto fringe : node_split->fringe_values) {
+            for(auto node : fringe.second)
+              assert(!node.expired());
+          }
+        }
+        else if(const Node_Unsplit * const node_unsplit = dynamic_cast<const Node_Unsplit *>(node)) {
+          assert(m_names_from_nodes.find(node_unsplit) != m_names_from_nodes.end());
+          for(auto fringe : node_unsplit->fringe_values) {
+            for(auto node : fringe.second)
+              assert(!node.expired());
+          }
+        }
+      }
+    }
+
+    for(auto name_from_node : m_names_from_nodes) {
+      std::cerr << name_from_node.second << " in rete?" << std::endl;
+      assert(rule_names.find(name_from_node.second) != rule_names.end());
+      assert(name_from_node.first->q_value_fringe->depth == 1 || !name_from_node.first->parent_action.expired());
+      assert(!name_from_node.first->rete_action.expired());
+    }
+
+    ++m_good_validations;
+  }
+#endif
+
   Node::~Node() {
     const auto pa_lock = parent_action.lock();
     if(pa_lock) {
       if(const auto split = dynamic_cast<Node_Split *>(pa_lock->data.get())) {
-        const auto found = std::find_if(split->children.begin(), split->children.end(), [this](const Node_Ptr &node){return node.get() == this;});
-        if(found != split->children.end())
+//        const auto found = std::find_if(split->children.begin(), split->children.end(), [this](const Node_Ptr_W &node){return node.lock().get() == this;});
+        const auto found = std::find_if(split->children.begin(), split->children.end(), [this](const Node_Ptr_W &node){return node.expired();});
+        if(found != split->children.end()) {
+#ifndef NDEBUG
+          std::cerr << "Erasing child node from " << split->rete_action.lock()->get_name() << std::endl;
+#endif
           split->children.erase(found);
+        }
+#ifndef NDEBUG
+        else {
+          std::cerr << "Children of " << pa_lock->get_name() << std::endl;
+          for(auto child : split->children)
+            std::cerr << "  " << child.lock() << std::endl;
+          std::cerr << "this is " << this << std::endl;
+        }
+//        assert(found != split->children.end());
+#endif
 
         //const auto found2 = split->fringe_values.find(q_value_fringe->feature.get());
         //if(found2 != split->fringe_values.end()) {
@@ -80,7 +164,7 @@ namespace Carli {
 
       for(auto &fringe_axis : split->fringe_values) {
         for(auto &fringe : fringe_axis.second) {
-          const auto cv = fringe->value_range(false);
+          const auto cv = fringe.lock()->value_range(false);
           child_values.first = std::min(child_values.first, cv.first);
           child_values.second = std::max(child_values.second, cv.second);
         }
@@ -210,8 +294,16 @@ namespace Carli {
     }
 
     /// Add to the appropriate parent list
-    if(parent_action_)
+    if(parent_action_) {
+#ifndef NDEBUG
+      std::cerr << "Adding child node link from " << parent_action_->get_name() << " to " << this << std::endl;
+#endif
       debuggable_pointer_cast<Node_Split>(parent_action_->data)->children.push_back(new_leaf_data);
+    }
+
+#ifndef NDEBUG
+    Node_Tracker::get().create(*new_leaf);
+#endif
 
     return new_leaf_data;
   }
@@ -248,8 +340,16 @@ namespace Carli {
     }
 
     /// Add to the appropriate parent list
-    if(parent_action_)
+    if(parent_action_) {
+#ifndef NDEBUG
+      std::cerr << "Adding child node link from " << parent_action_->get_name() << " to " << this << std::endl;
+#endif
       debuggable_pointer_cast<Node_Split>(parent_action_->data)->children.push_back(new_leaf_data);
+    }
+
+#ifndef NDEBUG
+    Node_Tracker::get().create(*new_leaf);
+#endif
 
     return new_leaf_data;
   }
@@ -537,6 +637,9 @@ namespace Carli {
 
   Node_Split::~Node_Split() {
     --agent.q_value_count;
+#ifndef NDEBUG
+    Node_Tracker::get().destroy(*this);
+#endif
   }
 
   Rete::Rete_Node_Ptr Node_Split::cluster_root_ancestor() const {
@@ -565,6 +668,9 @@ namespace Carli {
 
   Node_Unsplit::~Node_Unsplit() {
     --agent.q_value_count;
+#ifndef NDEBUG
+    Node_Tracker::get().destroy(*this);
+#endif
   }
 
   Rete::Rete_Node_Ptr Node_Unsplit::cluster_root_ancestor() const {

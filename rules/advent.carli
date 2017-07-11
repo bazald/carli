@@ -1,6 +1,6 @@
 # Advent
 
-sp {advent*rl-action*general
+sp {advent*general
   :feature 1 unsplit nil
   {(<s> ^player <player>)
   (<player> ^equipped <weapon>)
@@ -15,417 +15,417 @@ sp {advent*rl-action*general
   = 0.0
 }
 
-sp {advent*rl-fringe*action-move
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*action-move
+  :feature 2 fringe advent*general
+  &advent*general
   (<name> == 1)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*action-attack
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*action-attack
+  :feature 2 fringe advent*general
+  &advent*general
   (<name> == 2)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*action-take
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*action-take
+  :feature 2 fringe advent*general
+  &advent*general
   (<name> == 3)
 -->
   = 0.0
 }
 
-#sp {advent*rl-fringe*action-drop
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*action-drop
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  (<name> == 4)
 #-->
 #  = 0.0
 #}
 
-sp {advent*rl-fringe*action-equip
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*action-equip
+  :feature 2 fringe advent*general
+  &advent*general
   (<name> == 5)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*action-cast
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*action-cast
+  :feature 2 fringe advent*general
+  &advent*general
   (<name> == 6)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*direction-none
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*direction-none
+  :feature 2 fringe advent*general
+  &advent*general
   (<direction> == 0)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*direction-north
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*direction-north
+  :feature 2 fringe advent*general
+  &advent*general
   (<direction> == 1)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*direction-south
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*direction-south
+  :feature 2 fringe advent*general
+  &advent*general
   (<direction> == 2)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*direction-east
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*direction-east
+  :feature 2 fringe advent*general
+  &advent*general
   (<direction> == 3)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*direction-west
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*direction-west
+  :feature 2 fringe advent*general
+  &advent*general
   (<direction> == 4)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*player-x-lower
-  :feature 2 fringe advent*rl-action*general 1 0 3
-  &advent*rl-action*general
+sp {advent*player-x-lower
+  :feature 2 fringe advent*general 1 0 3
+  &advent*general
   {(<player> ^x <player-x>)
    (<player-x> < 3)}
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*player-x-upper
-  :feature 2 fringe advent*rl-action*general 1 3 5
-  &advent*rl-action*general
+sp {advent*player-x-upper
+  :feature 2 fringe advent*general 1 3 5
+  &advent*general
   {(<player> ^x <player-x>)
    (<player-x> >= 3)}
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*player-y-lower
-  :feature 2 fringe advent*rl-action*general 1 0 3
-  &advent*rl-action*general
+sp {advent*player-y-lower
+  :feature 2 fringe advent*general 1 0 3
+  &advent*general
   {(<player> ^y <player-y>)
    (<player-y> < 3)}
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*player-y-upper
-  :feature 2 fringe advent*rl-action*general 1 3 5
-  &advent*rl-action*general
+sp {advent*player-y-upper
+  :feature 2 fringe advent*general 1 3 5
+  &advent*general
   {(<player> ^y <player-y>)
    (<player-y> >= 3)}
 -->
   = 0.0
 }
 
-#sp {advent*rl-fringe*player-dead
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*player-dead
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  +(<player> ^dead true)
 #-->
 #  = 0.0
 #}
 #
-#sp {advent*rl-fringe*player-not-dead
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*player-not-dead
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  -(<player> ^dead true)
 #-->
 #  = 0.0
 #}
 
-sp {advent*rl-fringe*player-health-lower
-  :feature 2 fringe advent*rl-action*general 1 0 5
-  &advent*rl-action*general
+sp {advent*player-health-lower
+  :feature 2 fringe advent*general 1 0 5
+  &advent*general
   {(<player> ^health <player-health>)
    (<player-health> < 5)}
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*player-health-upper
-  :feature 2 fringe advent*rl-action*general 1 5 10
-  &advent*rl-action*general
+sp {advent*player-health-upper
+  :feature 2 fringe advent*general 1 5 10
+  &advent*general
   {(<player> ^health <player-health>)
    (<player-health> >= 5)}
 -->
   = 0.0
 }
 
-#sp {advent*rl-fringe*enemy-dead
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*enemy-dead
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  +(<enemy> ^dead true)
 #-->
 #  = 0.0
 #}
 #
-#sp {advent*rl-fringe*enemy-not-dead
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*enemy-not-dead
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  -(<enemy> ^dead true)
 #-->
 #  = 0.0
 #}
 
-sp {advent*rl-fringe*enemy-health-lower
-  :feature 2 fringe advent*rl-action*general 1 0 5
-  &advent*rl-action*general
+sp {advent*enemy-health-lower
+  :feature 2 fringe advent*general 1 0 5
+  &advent*general
   {(<enemy> ^health <enemy-health>)
    (<enemy-health> < 5)}
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*enemy-health-upper
-  :feature 2 fringe advent*rl-action*general 1 5 10
-  &advent*rl-action*general
+sp {advent*enemy-health-upper
+  :feature 2 fringe advent*general 1 5 10
+  &advent*general
   {(<enemy> ^health <enemy-health>)
    (<enemy-health> >= 5)}
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*enemy-type-solid
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*enemy-type-solid
+  :feature 2 fringe advent*general
+  &advent*general
   (<enemy-type> == 0)
 -->
   = 0.0
 }
 
-#sp {advent*rl-fringe*enemy-type-skeletal
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*enemy-type-skeletal
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  (<enemy-type> == 1)
 #-->
 #  = 0.0
 #}
 
-sp {advent*rl-fringe*enemy-type-troll
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*enemy-type-troll
+  :feature 2 fringe advent*general
+  &advent*general
   (<enemy-type> == 2)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*enemy-type-water
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*enemy-type-water
+  :feature 2 fringe advent*general
+  &advent*general
   (<enemy-type> == 3)
 -->
   = 0.0
 }
 
-#sp {advent*rl-fringe*room-has-mace
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*room-has-mace
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  +(<room> ^has 1)
 #-->
 #  = 0.0
 #}
 #
-#sp {advent*rl-fringe*room-has-no-mace
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*room-has-no-mace
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  -(<room> ^has 1)
 #-->
 #  = 0.0
 #}
 #
-#sp {advent*rl-fringe*player-has-mace
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*player-has-mace
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  +(<player> ^has 1)
 #-->
 #  = 0.0
 #}
 #
-#sp {advent*rl-fringe*player-has-no-mace
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*player-has-no-mace
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  -(<player> ^has 1)
 #-->
 #  = 0.0
 #}
 
-#sp {advent*rl-fringe*room-has-sword
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*room-has-sword
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  +(<room> ^has 2)
 #-->
 #  = 0.0
 #}
 #
-#sp {advent*rl-fringe*room-has-no-sword
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*room-has-no-sword
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  -(<room> ^has 2)
 #-->
 #  = 0.0
 #}
 #
-#sp {advent*rl-fringe*player-has-sword
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*player-has-sword
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  +(<player> ^has 2)
 #-->
 #  = 0.0
 #}
 #
-#sp {advent*rl-fringe*player-has-no-sword
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*player-has-no-sword
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  -(<player> ^has 2)
 #-->
 #  = 0.0
 #}
 
-#sp {advent*rl-fringe*room-has-magic-sword
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*room-has-magic-sword
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  +(<room> ^has 3)
 #-->
 #  = 0.0
 #}
 #
-#sp {advent*rl-fringe*room-has-no-magic-sword
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*room-has-no-magic-sword
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  -(<room> ^has 3)
 #-->
 #  = 0.0
 #}
 
-sp {advent*rl-fringe*player-has-magic-sword
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*player-has-magic-sword
+  :feature 2 fringe advent*general
+  &advent*general
   +(<player> ^has 3)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*player-has-no-magic-sword
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*player-has-no-magic-sword
+  :feature 2 fringe advent*general
+  &advent*general
   -(<player> ^has 3)
 -->
   = 0.0
 }
 
-#sp {advent*rl-fringe*room-has-firebolt
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*room-has-firebolt
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  +(<room> ^has 5)
 #-->
 #  = 0.0
 #}
 #
-#sp {advent*rl-fringe*room-has-no-firebolt
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*room-has-no-firebolt
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  -(<room> ^has 5)
 #-->
 #  = 0.0
 #}
 
-sp {advent*rl-fringe*player-has-firebolt
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*player-has-firebolt
+  :feature 2 fringe advent*general
+  &advent*general
   +(<player> ^has 5)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*player-has-no-firebolt
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*player-has-no-firebolt
+  :feature 2 fringe advent*general
+  &advent*general
   -(<player> ^has 5)
 -->
   = 0.0
 }
 
-#sp {advent*rl-fringe*room-has-icebolt
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*room-has-icebolt
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  +(<room> ^has 6)
 #-->
 #  = 0.0
 #}
 #
-#sp {advent*rl-fringe*room-has-no-icebolt
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*room-has-no-icebolt
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  -(<room> ^has 6)
 #-->
 #  = 0.0
 #}
 
-sp {advent*rl-fringe*player-has-icebolt
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*player-has-icebolt
+  :feature 2 fringe advent*general
+  &advent*general
   +(<player> ^has 6)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*player-has-no-icebolt
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*player-has-no-icebolt
+  :feature 2 fringe advent*general
+  &advent*general
   -(<player> ^has 6)
 -->
   = 0.0
 }
 
-sp {advent*rl-fringe*player-equipped-fists
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*player-equipped-fists
+  :feature 2 fringe advent*general
+  &advent*general
   (<weapon> == 0)
 -->
   = 0.0
 }
 
-#sp {advent*rl-fringe*player-equipped-mace
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*player-equipped-mace
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  (<weapon> == 1)
 #-->
 #  = 0.0
 #}
 
-#sp {advent*rl-fringe*player-equipped-sword
-#  :feature 2 fringe advent*rl-action*general
-#  &advent*rl-action*general
+#sp {advent*player-equipped-sword
+#  :feature 2 fringe advent*general
+#  &advent*general
 #  (<weapon> == 2)
 #-->
 #  = 0.0
 #}
 
-sp {advent*rl-fringe*player-equipped-magic-sword
-  :feature 2 fringe advent*rl-action*general
-  &advent*rl-action*general
+sp {advent*player-equipped-magic-sword
+  :feature 2 fringe advent*general
+  &advent*general
   (<weapon> == 3)
 -->
   = 0.0
