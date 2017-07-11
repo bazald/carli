@@ -29,7 +29,7 @@ namespace Carli {
 
     assert(m_names_from_nodes.find(node) == m_names_from_nodes.end());
     assert(m_nodes_from_names.find(node_name) == m_nodes_from_names.end());
-    std::cerr << "Registering " << node_name << std::endl;
+//    std::cerr << "Registering " << node_name << std::endl;
     m_names_from_nodes[node] = node_name;
     m_nodes_from_names[node_name] = node;
   }
@@ -39,7 +39,7 @@ namespace Carli {
     assert(found != m_names_from_nodes.end());
     const auto found2 = m_nodes_from_names.find(found->second);
     assert(found2 != m_nodes_from_names.end());
-    std::cerr << "Unregistering " << found->second << std::endl;
+//    std::cerr << "Unregistering " << found->second << std::endl;
     m_names_from_nodes.erase(found);
     m_nodes_from_names.erase(found2);
   }
@@ -48,7 +48,7 @@ namespace Carli {
     const auto rule_names = agent.get_rule_names();
 
     for(const auto &name : rule_names) {
-      std::cerr << "Validating " << name << std::endl;
+//      std::cerr << "Validating " << name << std::endl;
       auto action = agent.get_rule(name);
       if(const Node * const node = dynamic_cast<const Node *>(action->data.get())) {
         assert(node->q_value_fringe->depth == 1 || !node->parent_action.expired());
@@ -73,7 +73,7 @@ namespace Carli {
     }
 
     for(auto name_from_node : m_names_from_nodes) {
-      std::cerr << name_from_node.second << " in rete?" << std::endl;
+//      std::cerr << name_from_node.second << " in rete?" << std::endl;
       assert(rule_names.find(name_from_node.second) != rule_names.end());
       assert(name_from_node.first->q_value_fringe->depth == 1 || !name_from_node.first->parent_action.expired());
       assert(!name_from_node.first->rete_action.expired());
@@ -90,20 +90,20 @@ namespace Carli {
 //        const auto found = std::find_if(split->children.begin(), split->children.end(), [this](const Node_Ptr_W &node){return node.lock().get() == this;});
         const auto found = std::find_if(split->children.begin(), split->children.end(), [this](const Node_Ptr_W &node){return node.expired();});
         if(found != split->children.end()) {
-#ifndef NDEBUG
-          std::cerr << "Erasing child node from " << split->rete_action.lock()->get_name() << std::endl;
-#endif
+//#ifndef NDEBUG
+//          std::cerr << "Erasing child node from " << split->rete_action.lock()->get_name() << std::endl;
+//#endif
           split->children.erase(found);
         }
-#ifndef NDEBUG
-        else {
-          std::cerr << "Children of " << pa_lock->get_name() << std::endl;
-          for(auto child : split->children)
-            std::cerr << "  " << child.lock() << std::endl;
-          std::cerr << "this is " << this << std::endl;
-        }
-//        assert(found != split->children.end());
-#endif
+//#ifndef NDEBUG
+//        else {
+//          std::cerr << "Children of " << pa_lock->get_name() << std::endl;
+//          for(auto child : split->children)
+//            std::cerr << "  " << child.lock() << std::endl;
+//          std::cerr << "this is " << this << std::endl;
+//        }
+////        assert(found != split->children.end());
+//#endif
 
         //const auto found2 = split->fringe_values.find(q_value_fringe->feature.get());
         //if(found2 != split->fringe_values.end()) {
@@ -295,9 +295,9 @@ namespace Carli {
 
     /// Add to the appropriate parent list
     if(parent_action_) {
-#ifndef NDEBUG
-      std::cerr << "Adding child node link from " << parent_action_->get_name() << " to " << this << std::endl;
-#endif
+//#ifndef NDEBUG
+//      std::cerr << "Adding child node link from " << parent_action_->get_name() << " to " << this << std::endl;
+//#endif
       debuggable_pointer_cast<Node_Split>(parent_action_->data)->children.push_back(new_leaf_data);
     }
 
