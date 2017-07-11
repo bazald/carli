@@ -1757,9 +1757,9 @@ yyreduce:
                           }
                           if(parent_action) {
                             auto &parent_data = dynamic_cast<Carli::Node_Split &>(*parent_action->data);
-#ifndef NDEBUG
-                            std::cerr << "Adding child node link from " << parent_action->get_name() << " to " << new_action_data << std::endl;
-#endif
+//#ifndef NDEBUG
+//                            std::cerr << "Adding child node link from " << parent_action->get_name() << " to " << new_action_data << std::endl;
+//#endif
                             parent_data.children.push_back(new_action_data);
                           }
                           else if(new_action_data->q_value_fringe->depth != 1) {

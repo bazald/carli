@@ -182,9 +182,9 @@ namespace Rete {
 //#endif
     }
     else {
-#ifndef NDEBUG
-      std::cerr << "Rule '" << name << "' excised." << std::endl;
-#endif
+//#ifndef NDEBUG
+//      std::cerr << "Rule '" << name << "' excised." << std::endl;
+//#endif
       auto action = found->second;
       rules.erase(found);
       action->destroy(*this);
@@ -407,15 +407,15 @@ namespace Rete {
 
     auto found = rules.find(action->get_name());
     if(found == rules.end()) {
-#ifndef NDEBUG
-      std::cerr << "Rule '" << action->get_name() << "' sourced." << std::endl;
-#endif
+//#ifndef NDEBUG
+//      std::cerr << "Rule '" << action->get_name() << "' sourced." << std::endl;
+//#endif
       rules[action->get_name()] = action;
     }
     else {
-#ifndef NDEBUG
-      std::cerr << "Rule '" << action->get_name() << "' replaced." << std::endl;
-#endif
+//#ifndef NDEBUG
+//      std::cerr << "Rule '" << action->get_name() << "' replaced." << std::endl;
+//#endif
       assert(found->second != action);
       found->second->destroy(*this);
       if(user_command && output != "null")
