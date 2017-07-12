@@ -414,6 +414,13 @@ namespace Carli {
       }
     }
 
+    if(auto grandparent_action = unsplit.parent_action.lock()) {
+      auto &grandparent_node = debuggable_cast<Node_Split &>(*grandparent_action->data);
+      auto found = std::find_if(grandparent_node.children.begin(), grandparent_node.children.end(), [&rete_action](const Node_Ptr_W &node){return node.lock() == rete_action.data;});
+      assert(found != grandparent_node.children.end());
+      grandparent_node.children.erase(found);
+    }
+
 #ifndef NDEBUG
     } Node_Tracker::get().validate(*this);
 #endif
