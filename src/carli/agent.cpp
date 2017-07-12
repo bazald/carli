@@ -490,12 +490,15 @@ namespace Carli {
 //    std::cerr << std::endl;
 
 #ifdef DEBUG_OUTPUT
-    std::cerr << "Excising " << fringe_collector.excise.size() << " actions." << std::endl;
+    std::cerr << "Excising " << fringe_collector.excise.size() + 1 << " actions." << std::endl;
 #endif
 
     for(const auto &excise : fringe_collector.excise)
       excise_rule(excise->get_name(), false);
     fringe_collector.excise.clear();
+
+    /// Don't forget the root of the search for fringe nodes!
+    excise_rule(rete_action.get_name(), false);
 
     if(m_output_dot) {
       std::cerr << "Rete size after collapse: " << rete_size() << std::endl;

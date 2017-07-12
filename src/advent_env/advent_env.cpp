@@ -26,14 +26,14 @@ namespace Advent {
     for(int x = 0; x != 5; ++x)
       for(int y = 0; y != 5; ++y)
         m_rooms[x][y] = y == 2 && x != 2 ? nullptr : std::make_shared<Room>();
-      
+
     m_player.items_max = 3;
     m_player.print_char = '@';
-    
+
     m_water_dragon = m_rooms[4][3]->enemy = std::make_shared<Character>();
     m_water_dragon->creature = Creature::CREATURE_WATER;
     m_water_dragon->print_char = 'd';
-    
+
     m_troll = m_rooms[2][2]->enemy = std::make_shared<Character>();
     m_troll->creature = Creature::CREATURE_TROLL;
     m_troll->print_char = 't';
@@ -44,34 +44,34 @@ namespace Advent {
   std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action) {
     auto room = m_rooms[m_player_pos.first][m_player_pos.second];
     assert(room);
-    
+
     bool killed_troll = m_troll->is_dead;
-    
+
     if(const Move * const move = dynamic_cast<const Move *>(&action)) {
       switch(move->direction) {
         case Direction::DIR_NONE:
           break;
-          
+
         case Direction::DIR_NORTH:
           m_player_pos.second += 1;
           break;
-          
+
         case Direction::DIR_SOUTH:
           m_player_pos.second -= 1;
           break;
-          
+
         case Direction::DIR_EAST:
           m_player_pos.first += 1;
           break;
-          
+
         case Direction::DIR_WEST:
           m_player_pos.first -= 1;
           break;
-          
+
         default:
           abort();
       }
-      
+
 //       if(move->direction != Direction::DIR_NONE) {
 //         room = m_rooms[m_player_pos.first][m_player_pos.second];
 //         assert(room);
@@ -117,7 +117,7 @@ namespace Advent {
     }
     else
       abort();
-    
+
     if(room->enemy) {
       if(room->enemy->is_dead) {
         room->enemy->health = 0;
@@ -136,14 +136,14 @@ namespace Advent {
       else
         m_player.health -= 2;
     }
-    
+
     if(m_player.health <= 0) {
       m_player.health = 0;
       m_player.is_dead = true;
     }
 
     killed_troll ^= m_troll->is_dead;
-    
+
     return std::make_pair(success() ? 100.0 : failure() ? -100.0 : killed_troll ? 50.0 : -1.0, -1.0);
   }
 
@@ -241,7 +241,7 @@ namespace Advent {
     const auto &enemy = room->enemy;
 
     std::list<Rete::WME_Ptr_C> wmes_current;
-    
+
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_player_attr, m_player_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_x_attr, m_position_values[player_pos.first]));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_y_attr, m_position_values[player_pos.second]));
@@ -255,14 +255,14 @@ namespace Advent {
     wmes_current.push_back(std::make_shared<Rete::WME>(m_enemy_id, m_type_attr, m_creature_values[enemy ? Creature(enemy->creature) : Creature::CREATURE_SOLID]));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_enemy_id, m_dead_attr, (!enemy || enemy->is_dead) ? m_true_value : m_false_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_enemy_id, m_health_attr, m_health_values[enemy ? enemy->health : 0]));
-    
+
     for(int i = 1; i != 7; ++i) {
       if(room->items.has(Item(i)))
         wmes_current.push_back(std::make_shared<Rete::WME>(m_room_id, m_has_attr, m_item_values[Item(i)]));
       if(player.items.has(Item(i)))
         wmes_current.push_back(std::make_shared<Rete::WME>(m_player_id, m_has_attr, m_item_values[Item(i)]));
     }
-    
+
     /// 1. Move
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_ids[Direction::DIR_NONE]));
@@ -295,18 +295,18 @@ namespace Advent {
         wmes_current.push_back(std::make_shared<Rete::WME>(m_move_ids[Direction::DIR_WEST], m_item_attr, m_item_values[Item::ITEM_NONE]));
       }
     }
-    
+
     /// 2. Attack
-    
+
     if(room->enemy) {
       wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_attack_id));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_attack_id, m_name_attr, m_attack_value));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_attack_id, m_direction_attr, m_direction_values[Direction::DIR_NONE]));
       wmes_current.push_back(std::make_shared<Rete::WME>(m_attack_id, m_item_attr, m_item_values[Item::ITEM_NONE]));
     }
-    
+
     /// 3. Take
-    
+
     for(int i = 1; i != 7; ++i) {
       if(room->items.has(Item(i))) {
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_take_ids[Item(i)]));
@@ -315,9 +315,9 @@ namespace Advent {
         wmes_current.push_back(std::make_shared<Rete::WME>(m_take_ids[Item(i)], m_item_attr, m_item_values[Item(i)]));
       }
     }
-    
+
     /// 4. Drop
-    
+
 //     for(int i = 1; i != 7; ++i) {
 //       if(player.items.has(Item(i))) {
 //         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_drop_ids[Item(i)]));
@@ -326,7 +326,7 @@ namespace Advent {
 //         wmes_current.push_back(std::make_shared<Rete::WME>(m_drop_ids[Item(i)], m_item_attr, m_item_values[Item(i)]));
 //       }
 //     }
-    
+
     /// 5. Equip
 
 //     if(player.weapon != Weapon::WEAPON_FISTS) {
@@ -343,7 +343,7 @@ namespace Advent {
         wmes_current.push_back(std::make_shared<Rete::WME>(m_equip_ids[Weapon(i)], m_item_attr, m_item_values[Item(i)]));
       }
     }
-    
+
     /// 6. Cast
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_cast_ids[Spell::SPELL_HEAL]));
