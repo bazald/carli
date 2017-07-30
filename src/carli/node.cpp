@@ -44,7 +44,7 @@ namespace Carli {
     m_nodes_from_names.erase(found2);
   }
 
-  void Node_Tracker::validate(Rete::Rete_Agent &agent) {
+  void Node_Tracker::validate(Rete::Rete_Agent &agent, const Node * const ignore) {
     const auto rule_names = agent.get_rule_names();
 
     for(const auto &name : rule_names) {
@@ -73,6 +73,8 @@ namespace Carli {
     }
 
     for(auto name_from_node : m_names_from_nodes) {
+      if(name_from_node.first == ignore)
+        continue;
 //      std::cerr << name_from_node.second << " in rete?" << std::endl;
       assert(rule_names.find(name_from_node.second) != rule_names.end());
       assert(name_from_node.first->q_value_fringe->depth == 1 || !name_from_node.first->parent_action.expired());
@@ -218,24 +220,15 @@ namespace Carli {
     }
   }
 
-  bool Node::print_grandparent_left(std::ostream &os) const {
-    if(!agent.terse_out)
-      return false;
-
-    const auto pa_lock = parent_action.lock();
-    if(!pa_lock)
-      return false;
-
-    os << '&' << pa_lock->get_name() << std::endl << "  ";
-
-    return true;
-  }
-
   void Node::print_action(std::ostream &os) const {
     const auto &q_value = q_value_weight ? q_value_weight : q_value_fringe;
 
     os << "  = " << Rete::to_string(q_value->primary) << ' ' << Rete::to_string(q_value->primary_mean2) << ' ' << Rete::to_string(q_value->primary_variance)
        << ' ' << Rete::to_string(q_value->secondary) << ' ' << q_value->update_count;
+  }
+
+  Rete::Rete_Node_Ptr_C Node::get_suppress() const {
+    return agent.terse_out ? parent_action.lock() : nullptr;
   }
 
   void Node::action(const Rete::WME_Token &token) {
@@ -435,7 +428,7 @@ namespace Carli {
       }
 
       if(ancestor_found) {
-        /// Case 2: No new conditions to carry over, but must do a more involved token comparison
+        /// Case 2: No new conditions to carry over
 #ifdef DEBUG_OUTPUT
         std::cerr << "Fringe Case 2" << std::endl;
 #endif
@@ -454,30 +447,66 @@ namespace Carli {
           new_test = agent.make_negation_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
       }
       else {
-        /// Case 3: New conditions must be joined
+        /// Case 3: New conditions must be added
 #ifdef DEBUG_OUTPUT
         std::cerr << "Fringe Case 3" << std::endl;
 #endif
-        if(dynamic_cast<Rete::Rete_Join *>(ancestor_right.get())) {
-#ifdef DEBUG_OUTPUT
-          std::cerr << "  Join" << std::endl;
-#endif
-          new_test = agent.make_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
+
+        std::stack<Rete::Rete_Node_Ptr> rebase_right;
+        new_test = ancestor_left;
+
+        for(auto node = ancestor_right; node != parent_action.lock()->parent_left(); node = node->parent_left()) {
+          rebase_right.push(node);
         }
-        else if(dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get())) {
+
 #ifdef DEBUG_OUTPUT
-          std::cerr << "  Existential Join" << std::endl;
+        std::cerr << "Rebase node count = " << rebase_right.size() << std::endl;
 #endif
-          new_test = agent.make_existential_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
-        }
-        else if(dynamic_cast<Rete::Rete_Negation_Join *>(ancestor_right.get())) {
+
+        assert(!rebase_right.empty());
+        while(!rebase_right.empty()) {
+          auto test = rebase_right.top();
+          rebase_right.pop();
+
+          if(dynamic_cast<Rete::Rete_Join *>(test.get())) {
 #ifdef DEBUG_OUTPUT
-          std::cerr << "  Negation Join" << std::endl;
+            std::cerr << "  Join" << std::endl;
 #endif
-          new_test = agent.make_negation_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
+            new_test = agent.make_join(*test->get_bindings(), new_test, test->parent_right());
+          }
+          else if(dynamic_cast<Rete::Rete_Existential_Join *>(test.get())) {
+#ifdef DEBUG_OUTPUT
+            std::cerr << "  Existential Join" << std::endl;
+#endif
+            new_test = agent.make_existential_join(*test->get_bindings(), new_test, test->parent_right());
+          }
+          else if(dynamic_cast<Rete::Rete_Negation_Join *>(test.get())) {
+#ifdef DEBUG_OUTPUT
+            std::cerr << "  Negation Join" << std::endl;
+#endif
+            new_test = agent.make_negation_join(*test->get_bindings(), new_test, test->parent_right());
+          }
+          else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
+#ifdef DEBUG_OUTPUT
+            std::cerr << "  Predicate" << std::endl;
+#endif
+
+            auto new_lhs_index = predicate_node->get_lhs_index();
+            new_lhs_index.rete_row += new_test->get_size() - test->parent_left()->get_size();
+            new_lhs_index.token_row += new_test->get_token_size() - test->parent_left()->get_token_size();
+#ifdef DEBUG_OUTPUT
+            if(new_lhs_index != predicate_node->get_lhs_index())
+              std::cerr << "    Updated lhs_index from " << predicate_node->get_lhs_index() << " to " << new_lhs_index << std::endl;
+#endif
+
+            if(predicate_node->get_rhs())
+              new_test = agent.make_predicate_vc(predicate_node->get_predicate(), new_lhs_index, predicate_node->get_rhs(), new_test);
+            else
+              new_test = agent.make_predicate_vv(predicate_node->get_predicate(), new_lhs_index, predicate_node->get_rhs_index(), new_test);
+          }
+          else
+            abort();
         }
-        else
-          abort();
       }
 
       /// New conditions are possible for cases 2 and 3
@@ -497,7 +526,7 @@ namespace Carli {
 #ifdef DEBUG_OUTPUT
           std::cerr << "Considering Variable '" << variable.first << "' at " << variable.second << std::endl;
 #endif
-          if(variable.second.rete_row < ra_lock->parent_left()->parent_left()->get_size())
+          if(variable.second.rete_row < parent_action.lock()->get_size())
             continue;
           bool found_non_existential = false;
           {
@@ -569,7 +598,22 @@ namespace Carli {
               }
             }
             new_variables->insert(std::make_pair(variable.first, new_index));
+
+            Rete::WME_Bindings new_bindings;
+            for(auto binding : new_feature->bindings) {
+              if(binding.first == variable.second) {
 #ifdef DEBUG_OUTPUT
+                std::cerr << "Update binding from " << binding.first << " to " << new_index << std::endl;
+#endif
+                new_bindings.insert(std::make_pair(new_index, binding.second));
+              }
+              else
+                new_bindings.insert(binding);
+            }
+            new_feature->bindings = std::move(new_bindings);
+
+#ifdef DEBUG_OUTPUT
+            std::cerr << new_feature->bindings << std::endl;
             std::cerr << "new_index(" << variable.first << ") = " << new_index << std::endl;
 #endif
           }
@@ -623,6 +667,12 @@ namespace Carli {
 
     /// Add to the appropriate parent list
     leaf.fringe_values[new_action_data->q_value_fringe->feature.get()].push_back(new_action_data);
+
+#ifdef DEBUG_OUTPUT
+    std::cerr << *new_feature->indices << std::endl;
+    std::cerr << new_feature->axis << std::endl;
+    new_feature->print_axis(std::cerr);
+#endif
 
     return new_action_data;
   }

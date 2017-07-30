@@ -1,4 +1,5 @@
 #include "rete_existential.h"
+#include "rete_action.h"
 
 namespace Rete {
 
@@ -92,13 +93,18 @@ namespace Rete {
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
   }
 
-  void Rete_Existential::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const bool &) const {
+  void Rete_Existential::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const Rete_Node_Ptr_C &suppress) const {
+    if(suppress && this == suppress->parent_left().get()) {
+      os << '&' << dynamic_cast<const Rete_Action *>(suppress.get())->get_name();
+      return;
+    }
+
     os << '+';
     const bool pb = get_token_size() > 1;
     if(pb)
       os << '{';
 
-    parent_right()->print_rule(os, indices);
+    parent_right()->print_rule(os, indices, suppress);
 
     if(pb)
       os << '}';

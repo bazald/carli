@@ -355,7 +355,7 @@ def main():
   #pylab.xlim(xmax=10000)
   if len(sys.argv) > 1:
     if cumulative:
-      pylab.ylim(ymin=-400, ymax=0)
+      pylab.ylim(ymin=-250, ymax=0)
     else:
       pylab.ylim(ymin=-1000, ymax=0)
   

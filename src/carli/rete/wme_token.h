@@ -33,6 +33,7 @@ namespace Rete {
     }
 
     bool operator==(const WME_Token &rhs) const;
+    bool operator!=(const WME_Token &rhs) const;
 
     size_t get_hash() const {return m_hashval;}
 

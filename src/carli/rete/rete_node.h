@@ -64,8 +64,8 @@ namespace Rete {
     virtual Rete_Node_Ptr cluster_root_ancestor() const = 0;
 
     virtual void print_flags(std::ostream &os) const = 0;
-    virtual bool print_grandparent_left(std::ostream &os) const = 0;
     virtual void print_action(std::ostream &os) const = 0;
+    virtual Rete_Node_Ptr_C get_suppress() const = 0;
   };
 
   class RETE_LINKAGE Rete_Node : public std::enable_shared_from_this<Rete_Node>, public Zeni::Pool_Allocator<char [512]>
@@ -226,7 +226,7 @@ namespace Rete {
 
     virtual void print_details(std::ostream &os) const = 0; ///< Formatted for dot: http://www.graphviz.org/content/dot-language
 
-    virtual void print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const bool &suppress_parent_left = false) const = 0;
+    virtual void print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const Rete_Node_Ptr_C &suppress) const = 0;
 
     virtual void output_name(std::ostream &os, const int64_t &depth) const = 0;
 

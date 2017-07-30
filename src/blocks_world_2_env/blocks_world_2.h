@@ -158,6 +158,7 @@ namespace Blocks_World_2 {
      *            block ^matches-top stack
      */
 
+    const Rete::Symbol_Constant_String_Ptr_C m_above_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("above"));
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
     const Rete::Symbol_Constant_String_Ptr_C m_action_in_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action-in"));
     const Rete::Symbol_Constant_String_Ptr_C m_action_out_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action-out"));
@@ -168,16 +169,17 @@ namespace Blocks_World_2 {
     const Rete::Symbol_Constant_String_Ptr_C m_glowing_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("glowing")); ///< Distractor
     const Rete::Symbol_Constant_String_Ptr_C m_height_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("height")); ///< Distractor
     const Rete::Symbol_Constant_String_Ptr_C m_clear_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("clear")); ///< Legacy
+    const Rete::Symbol_Constant_String_Ptr_C m_on_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("on")); ///< Legacy
     const Rete::Symbol_Constant_String_Ptr_C m_in_place_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("in-place")); ///< Legacy
     const Rete::Symbol_Constant_String_Ptr_C m_name_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("name"));
     const Rete::Symbol_Constant_String_Ptr_C m_blocks_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("blocks"));
     const Rete::Symbol_Constant_String_Ptr_C m_discrepancy_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("discrepancy"));
+    const Rete::Symbol_Constant_String_Ptr_C m_higher_than_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("higher-than"));
     const Rete::Symbol_Constant_String_Ptr_C m_target_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("goal"));
     const Rete::Symbol_Constant_String_Ptr_C m_stack_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("stack"));
     const Rete::Symbol_Constant_String_Ptr_C m_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("matches"));
     const Rete::Symbol_Constant_String_Ptr_C m_early_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("early-matches")); ///< Defective
     const Rete::Symbol_Constant_String_Ptr_C m_late_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("late-matches")); ///< Defective
-//    const Rete::Symbol_Constant_String_Ptr_C m_taller_than_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("taller-than")); ///< Distractor
     const Rete::Symbol_Constant_String_Ptr_C m_tallest_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("tallest"));
     const Rete::Symbol_Constant_String_Ptr_C m_top_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top"));
     const Rete::Symbol_Constant_String_Ptr_C m_matches_top_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("matches-top"));

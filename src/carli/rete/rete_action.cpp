@@ -122,7 +122,7 @@ namespace Rete {
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
   }
 
-  void Rete_Action::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &, const bool &) const {
+  void Rete_Action::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &, const Rete_Node_Ptr_C &) const {
 #ifdef DEBUG_OUTPUT
     {
       const auto tokens = parent_left()->get_output_tokens();
@@ -137,14 +137,14 @@ namespace Rete {
     }
 #endif
 
+    const Rete_Node_Ptr_C suppress = data->get_suppress();
+
     os << "sp {" << name;
     if(data)
       data->print_flags(os);
     os << std::endl << "  ";
 
-    const bool printed_reference_left = data->print_grandparent_left(os);
-
-    parent_left()->print_rule(os, variables, printed_reference_left);
+    parent_left()->print_rule(os, variables, suppress);
 
     os << std::endl << "-->";
     if(data) {
@@ -152,12 +152,6 @@ namespace Rete {
       data->print_action(os);
     }
     os << std::endl << '}' << std::endl;
-  }
-
-  std::string Rete_Action::get_text_right() const {
-    std::ostringstream oss;
-    parent_left()->print_rule(oss, variables, true);
-    return oss.str();
   }
 
   void Rete_Action::output_name(std::ostream &os, const int64_t &depth) const {

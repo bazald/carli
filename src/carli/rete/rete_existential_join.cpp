@@ -1,5 +1,6 @@
 #include "rete_existential_join.h"
 
+#include "rete_action.h"
 #include "rete_existential.h"
 #include "rete_negation.h"
 
@@ -173,23 +174,26 @@ namespace Rete {
     os << "  " << intptr_t(input1) << " -> " << intptr_t(this) << " [color=blue];" << std::endl;
   }
 
-  void Rete_Existential_Join::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const bool &suppress_parent_left) const {
+  void Rete_Existential_Join::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const Rete_Node_Ptr_C &suppress) const {
+    if(suppress && this == suppress->parent_left().get()) {
+      os << '&' << dynamic_cast<const Rete_Action *>(suppress.get())->get_name();
+      return;
+    }
+
     const auto pl = parent_left();
     const auto pr = parent_right();
     const bool prb = !dynamic_cast<const Rete_Filter *>(pr.get());
 
-    if(!suppress_parent_left) {
-      pl->print_rule(os, indices);
-      os << std::endl << "  ";
-    }
-    
+    pl->print_rule(os, indices, suppress);
+    os << std::endl << "  ";
+
     os << '+';
     if(prb)
       os << '{';
 
     const auto bound = bind_Variable_Indices(bindings, indices, *pl, *pr);
 
-    pr->print_rule(os, bound);
+    pr->print_rule(os, bound, suppress);
 
     if(prb)
       os << '}';

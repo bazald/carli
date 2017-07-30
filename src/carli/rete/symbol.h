@@ -25,11 +25,30 @@ namespace Rete {
       return rete_row == rhs.rete_row && token_row == rhs.token_row && column == rhs.column && existential == rhs.existential;
     }
 
+    bool operator!=(const WME_Token_Index &rhs) const {
+      return rete_row != rhs.rete_row || token_row != rhs.token_row || column != rhs.column || existential != rhs.existential;
+    }
+
     bool operator<(const WME_Token_Index &rhs) const {
       return (!existential && rhs.existential) || (existential == rhs.existential &&
              (rete_row < rhs.rete_row || (rete_row == rhs.rete_row &&
               (token_row < rhs.token_row || (token_row == rhs.token_row &&
                (column < rhs.column))))));
+    }
+
+    bool operator<=(const WME_Token_Index &rhs) const {
+      return (!existential && rhs.existential) || (existential == rhs.existential &&
+             (rete_row < rhs.rete_row || (rete_row == rhs.rete_row &&
+              (token_row < rhs.token_row || (token_row == rhs.token_row &&
+               (column <= rhs.column))))));
+    }
+
+    bool operator>(const WME_Token_Index &rhs) const {
+      return !(rhs <= *this);
+    }
+
+    bool operator>=(const WME_Token_Index &rhs) const {
+      return !(rhs < *this);
     }
 
     int64_t rete_row;

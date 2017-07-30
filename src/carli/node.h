@@ -52,7 +52,7 @@ namespace Carli {
 
     void destroy(const Node &node);
 
-    void validate(Rete::Rete_Agent &agent);
+    void validate(Rete::Rete_Agent &agent, const Node * const ignore);
 
   private:
     std::unordered_map<const Node *, std::string> m_names_from_nodes;
@@ -92,8 +92,8 @@ namespace Carli {
 //    double min_int64(const ptrdiff_t offset, const int64_t value_accumulator = std::numeric_limits<int64_t>) const;
 
     void print_flags(std::ostream &os) const override;
-    bool print_grandparent_left(std::ostream &os) const override;
     void print_action(std::ostream &os) const override;
+    Rete::Rete_Node_Ptr_C get_suppress() const override;
 
     virtual void action(const Rete::WME_Token &token);
     virtual void decision() = 0;

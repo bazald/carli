@@ -170,7 +170,7 @@ namespace Carli {
       return false;
 
 #ifndef NDEBUG
-    Node_Tracker::get().validate(*this);
+    Node_Tracker::get().validate(*this, nullptr);
 #endif
 
     const auto parent_node = rete_action.parent_left();
@@ -290,9 +290,17 @@ namespace Carli {
         new_node->blacklist_full = true;
     }
 
+#ifndef NDEBUG
+    Node_Tracker::get().validate(*this, nullptr);
+#endif
+
     expand_fringe(rete_action, new_node->rete_action.lock(), chosen);
 
     excise_rule(rete_action.get_name(), false);
+
+#ifndef NDEBUG
+    Node_Tracker::get().validate(*this, &general);
+#endif
 
     if(m_output_dot) {
       std::cerr << "Rete size after expansion: " << rete_size() << std::endl;
@@ -312,10 +320,6 @@ namespace Carli {
 
   void Agent::expand_fringe(Rete::Rete_Action &rete_action, const Rete::Rete_Action_Ptr &parent_action, const Fringe_Values::iterator &specialization)
   {
-#ifndef NDEBUG
-    Node_Tracker::get().validate(*this); {
-#endif
-
     auto &unsplit = debuggable_cast<Node_Unsplit &>(*rete_action.data);
     auto &split = debuggable_cast<Node_Split &>(*parent_action->data);
 
@@ -420,10 +424,6 @@ namespace Carli {
       assert(found != grandparent_node.children.end());
       grandparent_node.children.erase(found);
     }
-
-#ifndef NDEBUG
-    } Node_Tracker::get().validate(*this);
-#endif
   }
 
   bool Agent::collapse_rete(Rete::Rete_Action &rete_action) {
@@ -718,7 +718,7 @@ namespace Carli {
 
     m_current = m_next;
     m_current_q_value = m_next_q_values[m_next];
-    m_current_q_value.sort([](const tracked_ptr<Q_Value> &lhs, const tracked_ptr<Q_Value> &rhs)->bool{return lhs->depth < rhs->depth;});
+//    m_current_q_value.sort([](const tracked_ptr<Q_Value> &lhs, const tracked_ptr<Q_Value> &rhs)->bool{return lhs->depth < rhs->depth;});
 
     if(!m_current) {
       std::cerr << "No action selected. Terminating." << std::endl;
@@ -799,10 +799,11 @@ namespace Carli {
   //  std::cerr << "Purging current value " << q_value << std::endl;
   //#endif
     assert(q_value);
-    auto found = std::find(m_current_q_value.begin(), m_current_q_value.end(), q_value);
+//    auto found = std::find(m_current_q_value.begin(), m_current_q_value.end(), q_value);
+    auto found = m_current_q_value.find(q_value);
     if(found != m_current_q_value.end()) {
       m_current_q_value.erase(found);
-      assert(std::find(m_current_q_value.begin(), m_current_q_value.end(), q_value) == m_current_q_value.end());
+//      assert(std::find(m_current_q_value.begin(), m_current_q_value.end(), q_value) == m_current_q_value.end());
     }
   }
 
@@ -816,26 +817,26 @@ namespace Carli {
 //    std::cerr << "insert_q_value_next(" << *action << ',' << q_value.get() << ") into {";
 //    for(auto &q : q_values) {
 //      if(action) {
-//        std::cerr << ' ' << q->value /* * q.weight */ << ':' << q->depth;
-//        if(q->type == Q_Value::Type::FRINGE)
+//        std::cerr << ' ' << q.first->value /* * q.weight */ << ':' << q.first->depth;
+//        if(q.first->type == Q_Value::Type::FRINGE)
 //          std::cerr << 'f';
-//        if(q->feature)
-//          std::cerr << ':' << *q->feature;
+//        if(q.first->feature)
+//          std::cerr << ':' << *q.first->feature;
 //      }
 //    }
 //    std::cerr << " }." << std::endl;
 //#endif
 
-#ifndef NDEBUG
-    if(std::find(q_values.begin(), q_values.end(), q_value) != q_values.end()) {
-      std::cerr << "BADNESS INCREMENT FOR " << *action << ": ";
-        if(q_value->feature)
-          std::cerr << *q_value->feature;
-        std::cerr << std::endl;
-      increment_badness();
-    }
-#endif
-    q_values.push_back(q_value);
+//#ifndef NDEBUG
+//    if(std::find(q_values.begin(), q_values.end(), q_value) != q_values.end()) {
+//      std::cerr << "BADNESS INCREMENT FOR " << *action << ": ";
+//        if(q_value->feature)
+//          std::cerr << *q_value->feature;
+//        std::cerr << std::endl;
+//      increment_badness();
+//    }
+//#endif
+    ++q_values[q_value];
   }
 
   void Agent::purge_q_value_next(const Action_Ptr_C &action, const tracked_ptr<Q_Value> &q_value) {
@@ -844,19 +845,21 @@ namespace Carli {
   //#endif
     assert(q_value);
     auto &q_values = m_next_q_values[action];
-    auto found = std::find(q_values.begin(), q_values.end(), q_value);
+//    auto found = std::find(q_values.begin(), q_values.end(), q_value);
+    auto found = q_values.find(q_value);
     assert(found != q_values.end());
     if(found != q_values.end()) {
-      q_values.erase(found);
-#ifndef NDEBUG
-      if(std::find(q_values.begin(), q_values.end(), q_value) != q_values.end()) {
-        std::cerr << "BADNESS DECREMENT FOR " << *action << ": ";
-        if(q_value->feature)
-          std::cerr << *q_value->feature;
-        std::cerr << std::endl;
-        decrement_badness();
-      }
-#endif
+      if(!--found->second)
+        q_values.erase(found);
+//#ifndef NDEBUG
+//      if(std::find(q_values.begin(), q_values.end(), q_value) != q_values.end()) {
+//        std::cerr << "BADNESS DECREMENT FOR " << *action << ": ";
+//        if(q_value->feature)
+//          std::cerr << *q_value->feature;
+//        std::cerr << std::endl;
+//        decrement_badness();
+//      }
+//#endif
     }
 
     if(q_values.empty())
@@ -868,11 +871,11 @@ namespace Carli {
 //    std::cerr << " from {";
 //    for(auto &q : q_values) {
 //      if(action) {
-//        std::cerr << ' ' << q->value /* * q.weight */ << ':' << q->depth;
-//        if(q->type == Q_Value::Type::FRINGE)
+//        std::cerr << ' ' << q.first->value /* * q.weight */ << ':' << q.first->depth;
+//        if(q.first->type == Q_Value::Type::FRINGE)
 //          std::cerr << 'f';
-//        if(q->feature)
-//          std::cerr << ':' << *q->feature;
+//        if(q.first->feature)
+//          std::cerr << ':' << *q.first->feature;
 //      }
 //    }
 //    std::cerr << " }." << std::endl;
@@ -1006,10 +1009,11 @@ namespace Carli {
 
     std::list<Action_Ptr_C, Zeni::Pool_Allocator<Action_Ptr_C>> greedies;
     double value = double();
-    const Q_Value * const parent_q = fringe ? dynamic_cast<Node *>(fringe->parent_action.lock()->data.get())->q_value_weight.get() : nullptr;
+    const tracked_ptr<Q_Value> parent_q = fringe ? dynamic_cast<Node *>(fringe->parent_action.lock()->data.get())->q_value_weight : nullptr;
     for(const auto &action_q : m_next_q_values) {
       double value_;
-      if(parent_q && std::find(action_q.second.begin(), action_q.second.end(), parent_q) == action_q.second.end())
+//      if(parent_q && std::find(action_q.second.begin(), action_q.second.end(), parent_q) == action_q.second.end())
+      if(parent_q && action_q.second.find(parent_q) == action_q.second.end())
         value_ = std::get<0>(sum_value(action_q.first.get(), action_q.second, nullptr, fringe_depth));
       else
         value_ = std::get<0>(sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value_fringe->feature.get() : nullptr, fringe_depth));
@@ -1046,16 +1050,16 @@ namespace Carli {
   }
 
   double Agent::probability_greedy(const Action_Ptr_C &action, const Node_Fringe * const &fringe, const int64_t &fringe_depth) {
-    const Q_Value * const parent_q = fringe ? dynamic_cast<Node *>(fringe->parent_action.lock()->data.get())->q_value_weight.get() : nullptr;
+    const tracked_ptr<Q_Value> parent_q = fringe ? dynamic_cast<Node *>(fringe->parent_action.lock()->data.get())->q_value_weight : nullptr;
     const auto &next_q_values_action = m_next_q_values[action];
-    if(parent_q && std::find(next_q_values_action.begin(), next_q_values_action.end(), parent_q) == next_q_values_action.end())
+    if(parent_q && next_q_values_action.find(parent_q) == next_q_values_action.end())
       return 0.0;
 
     double count = double();
     const double value = std::get<0>(sum_value(action.get(), next_q_values_action, fringe ? fringe->q_value_fringe->feature.get() : nullptr, fringe_depth));
 
     for(const auto &action_q : m_next_q_values) {
-      if(parent_q && std::find(action_q.second.begin(), action_q.second.end(), parent_q) == action_q.second.end())
+      if(parent_q && action_q.second.find(parent_q) == action_q.second.end())
         continue;
       const double value_ = std::get<0>(sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value_fringe->feature.get() : nullptr, fringe_depth));
 
@@ -1087,12 +1091,12 @@ namespace Carli {
     std::cerr << " current :";
 #endif
     for(const auto &q : current) {
-      ++q->update_count;
+      ++q.first->update_count;
 
-      if(q->type != Q_Value::Type::FRINGE) {
-        q_old += q->primary /* * q.weight */;
+      if(q.first->type != Q_Value::Type::FRINGE) {
+        q_old += q.first->primary /* * q.weight */;
 #ifdef DEBUG_OUTPUT
-        std::cerr << ' ' << q->primary;
+        std::cerr << ' ' << q.first->primary;
 #endif
       }
     }
@@ -1100,14 +1104,14 @@ namespace Carli {
     std::cerr << std::endl;
     std::cerr << " fringe  :";
     for(const auto &q : current) {
-      if(q->type == Q_Value::Type::FRINGE)
-        std::cerr << ' ' << q->primary;
+      if(q.first->type == Q_Value::Type::FRINGE)
+        std::cerr << ' ' << q.first->primary;
     }
     std::cerr << std::endl;
     std::cerr << " next    :";
     for(const auto &q : next) {
-      if(q->type != Q_Value::Type::FRINGE)
-        std::cerr << ' ' << q->primary;
+      if(q.first->type != Q_Value::Type::FRINGE)
+        std::cerr << ' ' << q.first->primary;
     }
     std::cerr << std::endl;
 #endif
@@ -1120,27 +1124,27 @@ namespace Carli {
         (*q_ptr)->eligibility *= rho;
     }
     for(const auto &q : current) {
-      if(!q->credit)
+      if(!q.first->credit)
         continue;
 
-      if(q->eligibility < 0.0)
-        q->eligible.insert_before(m_eligible);
+      if(q.first->eligibility < 0.0)
+        q.first->eligible.insert_before(m_eligible);
 
-      q->eligibility = (q->eligibility == -1.0 ? 0.0 : q->eligibility) + (m_secondary_learning_rate ? I * q->credit : q->credit);
-      q->eligibility_init = true;
+      q.first->eligibility = (q.first->eligibility == -1.0 ? 0.0 : q.first->eligibility) + (m_secondary_learning_rate ? I * q.first->credit : q.first->credit);
+      q.first->eligibility_init = true;
 
-      if(q->type != Q_Value::Type::FRINGE)
-        dot_w_phi += q->secondary;
+      if(q.first->type != Q_Value::Type::FRINGE)
+        dot_w_phi += q.first->secondary;
 
-      if(q->update_count > 1) {
+      if(q.first->update_count > 1) {
         const double delta = (target_value - q_old) * m_learning_rate;
         const double q_new = q_old + delta; ///< Could calculate like q_old post-update -- might be different
         const double mdelta = std::max(0.0, (target_value - q_old) * (target_value - q_new));
 
-        assert(q->primary_mean2 >= 0.0);
-        q->primary_mean2 += mdelta * q->credit;
-        assert(q->primary_mean2 >= 0.0);
-        q->primary_variance = q->primary_mean2 / (q->update_count - 1);
+        assert(q.first->primary_mean2 >= 0.0);
+        q.first->primary_mean2 += mdelta * q.first->credit;
+        assert(q.first->primary_mean2 >= 0.0);
+        q.first->primary_variance = q.first->primary_mean2 / (q.first->update_count - 1);
       }
     }
 
@@ -1222,16 +1226,16 @@ namespace Carli {
 
     if(m_secondary_learning_rate) {
       for(auto &q : next) {
-        if(q->credit) {
-          q->primary -= m_learning_rate * m_discount_rate * (1 - m_eligibility_trace_decay_rate) * dot_w_e;
-          q->update_totals();
+        if(q.first->credit) {
+          q.first->primary -= m_learning_rate * m_discount_rate * (1 - m_eligibility_trace_decay_rate) * dot_w_e;
+          q.first->update_totals();
         }
       }
 
       for(auto &q : current) {
-        if(q->credit) {
-          q->secondary -= m_learning_rate * m_secondary_learning_rate * dot_w_phi;
-          q->update_totals();
+        if(q.first->credit) {
+          q.first->secondary -= m_learning_rate * m_secondary_learning_rate * dot_w_phi;
+          q.first->update_totals();
         }
       }
     }
@@ -1254,8 +1258,8 @@ namespace Carli {
 #ifdef DEBUG_OUTPUT
     double q_new = double();
     for(const auto &q : current) {
-      if(q->type != Q_Value::Type::FRINGE)
-        q_new += q->primary /* * q.weight */;
+      if(q.first->type != Q_Value::Type::FRINGE)
+        q_new += q.first->primary /* * q.weight */;
     }
 
     std::cerr.unsetf(std::ios_base::floatfield);
@@ -1265,14 +1269,14 @@ namespace Carli {
     std::cerr.setf(std::ios_base::fixed, std::ios_base::floatfield);
 
     for(const auto &q : current) {
-      if(q->type == Q_Value::Type::UNSPLIT) {
-        std::cerr << " updates:  " << q->update_count << std::endl;
+      if(q.first->type == Q_Value::Type::UNSPLIT) {
+        std::cerr << " updates:  " << q.first->update_count << std::endl;
         if(m_mean_catde_queue_size)
-          std::cerr << " catde q:   " << q->catde << " of " << this->m_mean_catde_queue.mean() << ':' << this->m_mean_catde_queue.mean().get_stddev() << std::endl;
+          std::cerr << " catde q:   " << q.first->catde << " of " << this->m_mean_catde_queue.mean() << ':' << this->m_mean_catde_queue.mean().get_stddev() << std::endl;
         else
-          std::cerr << " catde:     " << q->catde << " of " << this->m_mean_catde << ':' << this->m_mean_catde.get_stddev() << std::endl;
+          std::cerr << " catde:     " << q.first->catde << " of " << this->m_mean_catde << ':' << this->m_mean_catde.get_stddev() << std::endl;
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
-        std::cerr << " matde:     " << q->matde << " of " << this->m_mean_matde << ':' << this->m_mean_matde.get_stddev() << std::endl;
+        std::cerr << " matde:     " << q.first->matde << " of " << this->m_mean_matde << ':' << this->m_mean_matde.get_stddev() << std::endl;
 #endif
       }
     }
@@ -1306,41 +1310,41 @@ namespace Carli {
     (this->*exploration)(value_list);
 
     for(const auto &q : value_list)
-      q->t0 = q->credit;
+      q.first->t0 = q.first->credit;
 
     (this->*target)(value_list);
 
     const double inverse = 1.0 - this->m_credit_assignment_epsilon;
     for(const auto &q : value_list)
-      q->credit = this->m_credit_assignment_epsilon * q->credit + inverse * q->t0;
+      q.first->credit = this->m_credit_assignment_epsilon * q.first->credit + inverse * q.first->t0;
   }
 
   void Agent::assign_credit_random(const Q_Value_List &value_list) {
     int32_t count = 0;
     for(const auto &q : value_list) {
-      if(q->type != Q_Value::Type::FRINGE)
+      if(q.first->type != Q_Value::Type::FRINGE)
         ++count;
     }
 
     count = random.rand_lt(count) + 1;
 
     for(const auto &q : value_list) {
-      if(q->type != Q_Value::Type::FRINGE)
-        q->credit = --count ? 0.0 : 1.0;
+      if(q.first->type != Q_Value::Type::FRINGE)
+        q.first->credit = --count ? 0.0 : 1.0;
       else
-        q->credit = m_fringe_learning_scale;
+        q.first->credit = m_fringe_learning_scale;
     }
   }
 
   void Agent::assign_credit_specific(const Q_Value_List &value_list) {
     tracked_ptr<Q_Value> last;
     for(const auto &q : value_list) {
-      if(q->type != Q_Value::Type::FRINGE) {
-        q->credit = 0.0;
-        last = q;
+      if(q.first->type != Q_Value::Type::FRINGE) {
+        q.first->credit = 0.0;
+        last = q.first;
       }
       else
-        q->credit = m_fringe_learning_scale;
+        q.first->credit = m_fringe_learning_scale;
     }
 
     if(last)
@@ -1350,29 +1354,29 @@ namespace Carli {
   void Agent::assign_credit_evenly(const Q_Value_List &value_list) {
     double count = double();
     for(const auto &q : value_list) {
-      if(q->type != Q_Value::Type::FRINGE)
+      if(q.first->type != Q_Value::Type::FRINGE)
         ++count;
     }
 
     for(const auto &q : value_list)
-      q->credit = q->type == Q_Value::Type::FRINGE ? m_fringe_learning_scale : 1.0 / count;
+      q.first->credit = q.first->type == Q_Value::Type::FRINGE ? m_fringe_learning_scale : 1.0 / count;
   }
 
   void Agent::assign_credit_all(const Q_Value_List &value_list) {
     for(const auto &q : value_list) {
-      if(q->type != Q_Value::Type::FRINGE)
-        q->credit = 1.0;
+      if(q.first->type != Q_Value::Type::FRINGE)
+        q.first->credit = 1.0;
       else
-        q->credit = m_fringe_learning_scale;
+        q.first->credit = m_fringe_learning_scale;
     }
   }
 
   void Agent::assign_credit_inv_update_count(const Q_Value_List &value_list) {
     double sum = double();
     for(const auto &q : value_list) {
-      if(q->type != Q_Value::Type::FRINGE) {
-        q->credit = 1.0 / q->update_count;
-        sum += q->credit;
+      if(q.first->type != Q_Value::Type::FRINGE) {
+        q.first->credit = 1.0 / q.first->update_count;
+        sum += q.first->credit;
       }
     }
 
@@ -1382,9 +1386,9 @@ namespace Carli {
   void Agent::assign_credit_inv_log_update_count(const Q_Value_List &value_list) {
     double sum = double();
     for(const auto &q : value_list) {
-      if(q->type != Q_Value::Type::FRINGE) {
-        q->credit = 1.0 / (std::log(double(q->update_count)) / this->m_credit_assignment_log_base_value + 1.0);
-        sum += q->credit;
+      if(q.first->type != Q_Value::Type::FRINGE) {
+        q.first->credit = 1.0 / (std::log(double(q.first->update_count)) / this->m_credit_assignment_log_base_value + 1.0);
+        sum += q.first->credit;
       }
     }
 
@@ -1394,9 +1398,9 @@ namespace Carli {
   void Agent::assign_credit_inv_root_update_count(const Q_Value_List &value_list) {
     double sum = double();
     for(const auto &q : value_list) {
-      if(q->type != Q_Value::Type::FRINGE) {
-        q->credit = 1.0 / std::pow(double(q->update_count), this->m_credit_assignment_root_value);
-        sum += q->credit;
+      if(q.first->type != Q_Value::Type::FRINGE) {
+        q.first->credit = 1.0 / std::pow(double(q.first->update_count), this->m_credit_assignment_root_value);
+        sum += q.first->credit;
       }
     }
 
@@ -1406,15 +1410,15 @@ namespace Carli {
   void Agent::assign_credit_inv_depth(const Q_Value_List &value_list) {
     size_t depth = 0;
     for(const auto &q : value_list) {
-      if(q->type != Q_Value::Type::FRINGE)
+      if(q.first->type != Q_Value::Type::FRINGE)
         ++depth;
     }
 
     double sum = double();
     for(const auto &q : value_list) {
-      if(q->type != Q_Value::Type::FRINGE) {
-        q->credit = 1.0 / std::pow(2.0, double(--depth));
-        sum += q->credit;
+      if(q.first->type != Q_Value::Type::FRINGE) {
+        q.first->credit = 1.0 / std::pow(2.0, double(--depth));
+        sum += q.first->credit;
       }
     }
 
@@ -1424,10 +1428,10 @@ namespace Carli {
   void Agent::assign_credit_normalize(const Q_Value_List &value_list, const double &sum) {
     if(m_credit_assignment_normalize || sum > 1.0) {
       for(const auto &q : value_list) {
-        if(q->type == Q_Value::Type::FRINGE)
-          q->credit = m_fringe_learning_scale;
+        if(q.first->type == Q_Value::Type::FRINGE)
+          q.first->credit = m_fringe_learning_scale;
         else
-          q->credit /= sum;
+          q.first->credit /= sum;
       }
     }
   }
@@ -1953,25 +1957,25 @@ namespace Carli {
     int64_t min_update_count = std::numeric_limits<int64_t>::max();
     size_t touched = 0u;
     for(auto &q : value_list) {
-      const bool fringe_contribution = axis && ((fringe_depth == std::numeric_limits<int64_t>::max() && !q->type_internal) || q->depth == fringe_depth);
-      const bool normal_contribution = q->type != Q_Value::Type::FRINGE && q->depth <= fringe_depth;
+      const bool fringe_contribution = axis && ((fringe_depth == std::numeric_limits<int64_t>::max() && !q.first->type_internal) || q.first->depth == fringe_depth);
+      const bool normal_contribution = q.first->type != Q_Value::Type::FRINGE && q.first->depth <= fringe_depth;
       const bool any_contribution = fringe_contribution || normal_contribution;
 #ifdef DEBUG_OUTPUT
       if(action && (!axis || any_contribution)) {
-        std::cerr << ' ' << q->primary << ';' << q->primary_variance << ':' << q->depth;
-        if(q->type == Q_Value::Type::FRINGE)
-          std::cerr << (q->type_internal ? 'i' : 'f');
-        if(q->feature)
-          std::cerr << ':' << *q->feature;
+        std::cerr << ' ' << q.first->primary << ';' << q.first->primary_variance << ':' << q.first->depth;
+        if(q.first->type == Q_Value::Type::FRINGE)
+          std::cerr << (q.first->type_internal ? 'i' : 'f');
+        if(q.first->feature)
+          std::cerr << ':' << *q.first->feature;
       }
 #endif
       if(any_contribution) {
-        sum += q->primary /* * q->weight */;
-        sum_variance += q->primary_variance;
+        sum += q.first->primary /* * q.first->weight */;
+        sum_variance += q.first->primary_variance;
 //        avg_update_count *= touched / (touched + 1.0);
-        min_update_count = std::min(min_update_count, q->update_count);
+        min_update_count = std::min(min_update_count, q.first->update_count);
         ++touched;
-//        avg_update_count += q->update_count / double(touched);
+//        avg_update_count += q.first->update_count / double(touched);
       }
     }
 
@@ -2143,7 +2147,7 @@ namespace Carli {
     generate_features();
 
 #ifndef NDEBUG
-      Node_Tracker::get().validate(*this);
+      Node_Tracker::get().validate(*this, nullptr);
 #endif
 
     while(!m_nodes_activating.empty()) {
@@ -2161,7 +2165,7 @@ namespace Carli {
     }
 
 #ifndef NDEBUG
-    Node_Tracker::get().validate(*this);
+    Node_Tracker::get().validate(*this, nullptr);
 #endif
 
     for(auto it = m_next_q_values.begin(), iend = m_next_q_values.end(); it != iend; ) {

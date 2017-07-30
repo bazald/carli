@@ -34,7 +34,7 @@ namespace Carli {
     typedef Feature feature_type;
     typedef Action action_type;
     typedef double reward_type;
-    typedef std::list<tracked_ptr<Q_Value>, Zeni::Pool_Allocator<tracked_ptr<Q_Value>>> Q_Value_List;
+    typedef std::unordered_map<tracked_ptr<Q_Value>, int64_t> Q_Value_List;
 
     bool respecialize(Rete::Rete_Action &rete_action);
     bool specialize(Rete::Rete_Action &rete_action);

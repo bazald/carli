@@ -32,6 +32,10 @@ namespace Rete {
     return m_wme_token == rhs.m_wme_token /*&& m_size == rhs.m_size*/ && m_wme == rhs.m_wme;
   }
 
+  bool WME_Token::operator!=(const WME_Token &rhs) const {
+    return m_wme_token != rhs.m_wme_token /*|| m_size != rhs.m_size*/ || m_wme != rhs.m_wme;
+  }
+
   std::ostream & WME_Token::print(std::ostream &os) const {
     if(m_size == 1) {
       assert(m_wme);

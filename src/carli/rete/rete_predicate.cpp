@@ -1,5 +1,6 @@
 #include "rete_predicate.h"
 
+#include "rete_action.h"
 #include "rete_existential.h"
 #include "rete_negation.h"
 
@@ -135,11 +136,14 @@ namespace Rete {
     os << "  " << intptr_t(input) << " -> " << intptr_t(this) << " [color=red];" << std::endl;
   }
 
-  void Rete_Predicate::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const bool &suppress_parent_left) const {
-    if(!suppress_parent_left) {
-      parent_left()->print_rule(os, indices);
-      os << std::endl << "  ";
+  void Rete_Predicate::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const Rete_Node_Ptr_C &suppress) const {
+    if(suppress && this == suppress->parent_left().get()) {
+      os << '&' << dynamic_cast<const Rete_Action *>(suppress.get())->get_name();
+      return;
     }
+
+    parent_left()->print_rule(os, indices, suppress);
+    os << std::endl << "  ";
 
     os << "(<" << get_Variable_name(indices, m_lhs_index) << "> ";
 

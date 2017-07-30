@@ -1,6 +1,6 @@
 # Blocks world -- Restricted to what I think matters
 
-sp {blocks-world*rl-action*general
+sp {blocks-world*general
   :feature 1 unsplit nil
   (<s> ^action <action>)
   (<action> ^block <block>)
@@ -13,183 +13,105 @@ sp {blocks-world*rl-action*general
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*block-clear
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*block-clear
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   +(<block> ^clear true)
 -->
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*block-not-clear
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*block-not-clear
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   -(<block> ^clear true)
 -->
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*dest-clear
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*dest-clear
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   +(<dest> ^clear true)
 -->
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*dest-not-clear
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*dest-not-clear
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   -(<dest> ^clear true)
 -->
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*dest-in-place
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*dest-in-place
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   +(<dest> ^in-place true)
 -->
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*dest-not-in-place
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*dest-not-in-place
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   -(<dest> ^in-place true)
 -->
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*block-name*1
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*block-name*1
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   (<block-name> == 1)
 -->
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*block-name*2
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*block-name*2
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   (<block-name> == 2)
 -->
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*block-name*3
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*block-name*3
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   (<block-name> == 3)
 -->
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*dest-name*0
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*dest-name*0
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   (<dest-name> == 0)
 -->
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*dest-name*1
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*dest-name*1
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   (<dest-name> == 1)
 -->
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*dest-name*2
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*dest-name*2
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   (<dest-name> == 2)
 -->
   = 0.0
 }
 
-sp {blocks-world*rl-fringe*dest-name*3
-  :feature 2 fringe blocks-world*rl-action*general
-  (<s> ^action <action>)
-  (<action> ^block <block>)
-  (<action> ^dest <dest>)
-  (<block> ^name <block-name>)
-  (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
+sp {blocks-world*dest-name*3
+  :feature 2 fringe blocks-world*general
+  &blocks-world*general
   (<dest-name> == 3)
 -->
   = 0.0

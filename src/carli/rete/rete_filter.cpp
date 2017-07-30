@@ -1,5 +1,6 @@
 #include "rete_filter.h"
 
+#include "rete_action.h"
 #include "rete_agent.h"
 
 namespace Rete {
@@ -113,7 +114,12 @@ namespace Rete {
     os << "  " << intptr_t(this) << " [label=\"F" << m_wme << "\"];" << std::endl;
   }
 
-  void Rete_Filter::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const bool &) const {
+  void Rete_Filter::print_rule(std::ostream &os, const Variable_Indices_Ptr_C &indices, const Rete_Node_Ptr_C &suppress) const {
+    if(suppress && this == suppress->parent_left().get()) {
+      os << '&' << dynamic_cast<const Rete_Action *>(suppress.get())->get_name();
+      return;
+    }
+
     m_wme.print(os, indices);
   }
 

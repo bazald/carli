@@ -19,8 +19,8 @@ namespace Carli {
     Feature & operator=(const Feature &) = delete;
 
   public:
-    Feature(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_)
-     : conditions(conditions_), bindings(bindings_), axis(axis_), indices(indices_)
+    Feature(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int64_t &arity_, const int64_t &max_arity_)
+     : conditions(conditions_), bindings(bindings_), axis(axis_), indices(indices_), arity(arity_), max_arity(max_arity_)
     {
     }
 
@@ -88,6 +88,8 @@ namespace Carli {
     Rete::WME_Bindings bindings;
     Rete::WME_Token_Index axis;
     Rete::Variable_Indices_Ptr_C indices;
+    int64_t arity = 0;
+    int64_t max_arity = 0;
   };
 
 }
@@ -130,14 +132,14 @@ namespace Carli {
     Feature_Enumerated & operator=(const Feature_Enumerated &) = delete;
 
   public:
-    Feature_Enumerated(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int64_t &value_)
-     : FEATURE(conditions_, bindings_, axis_, indices_),
+    Feature_Enumerated(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int &arity_, const int &max_arity_, const int64_t &value_)
+     : FEATURE(conditions_, bindings_, axis_, indices_, arity_, max_arity_),
      Feature_Enumerated_Data(value_)
     {
     }
 
     Feature_Enumerated * clone() const override {
-      return new Feature_Enumerated(this->conditions, this->bindings, this->axis, this->indices, value);
+      return new Feature_Enumerated(this->conditions, this->bindings, this->axis, this->indices, this->arity, this->max_arity, value);
     }
 
     int64_t get_depth() const override {return 1;}
@@ -202,14 +204,14 @@ namespace Carli {
     Feature_Ranged & operator=(const Feature_Ranged &) = delete;
 
   public:
-    Feature_Ranged(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_, const bool &integer_locked_)
-     : FEATURE(conditions_, bindings_, axis_, indices_),
+    Feature_Ranged(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int &arity_, const int &max_arity_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_, const bool &integer_locked_)
+     : FEATURE(conditions_, bindings_, axis_, indices_, arity_, max_arity_),
      Feature_Ranged_Data(bound_lower_, bound_upper_, depth_, upper_, integer_locked_)
     {
     }
 
     Feature_Ranged * clone() const override {
-      return new Feature_Ranged(this->conditions, this->bindings, this->axis, this->indices, bound_lower, bound_upper, depth, upper, integer_locked);
+      return new Feature_Ranged(this->conditions, this->bindings, this->axis, this->indices, this->arity, this->max_arity, bound_lower, bound_upper, depth, upper, integer_locked);
     }
 
     int64_t get_depth() const override {return depth;}

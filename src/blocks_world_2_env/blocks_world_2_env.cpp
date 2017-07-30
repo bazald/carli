@@ -461,17 +461,41 @@ namespace Blocks_World_2 {
         wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_tallest_attr, m_true_value));
     }
 
-//    for(auto stack1 = blocks.begin(), send= blocks.end(); stack1 != send; ++stack1) {
-//      Rete::Symbol_Identifier_Ptr_C stack1_id = m_stack_ids[stack1->begin()->id];
-//      for(auto stack2 = stack1 + 1; stack2 != send; ++stack2) {
-//        Rete::Symbol_Identifier_Ptr_C stack2_id = m_stack_ids[stack2->begin()->id];
-//        const int64_t delta = int64_t(stack1->size()) - int64_t(stack2->size());
-//        if(delta > 0)
-//          wmes_current.push_back(std::make_shared<Rete::WME>(stack1_id, m_taller_than_attr, stack2_id));
-//        else if(delta < 0)
-//          wmes_current.push_back(std::make_shared<Rete::WME>(stack2_id, m_taller_than_attr, stack1_id));
-//      }
-//    }
+    for(const auto &stack : blocks) {
+      int64_t block1_height = 1;
+      for(const auto &block1 : stack) {
+        const Rete::Symbol_Identifier_Ptr_C block1_id = m_block_ids[block1.id];
+        int64_t block2_height = 1;
+        for(const auto &block2 : stack) {
+          if(block2_height >= block1_height)
+            break;
+          const Rete::Symbol_Identifier_Ptr_C block2_id = m_block_ids[block2.id];
+          if(block1_height == block2_height + 1)
+            wmes_current.push_back(std::make_shared<Rete::WME>(block1_id, m_on_attr, block2_id));
+          wmes_current.push_back(std::make_shared<Rete::WME>(block1_id, m_above_attr, block2_id));
+          ++block2_height;
+        }
+        ++block1_height;
+      }
+    }
+
+    for(const auto &stack1 : blocks) {
+      int64_t block1_height = 1;
+      for(const auto &block1 : stack1) {
+        const Rete::Symbol_Identifier_Ptr_C block1_id = m_block_ids[block1.id];
+        for(const auto &stack2 : blocks) {
+          int64_t block2_height = 1;
+          for(const auto &block2 : stack2) {
+            if(block2_height >= block1_height)
+              break;
+            const Rete::Symbol_Identifier_Ptr_C block2_id = m_block_ids[block2.id];
+            wmes_current.push_back(std::make_shared<Rete::WME>(block1_id, m_higher_than_attr, block2_id));
+            ++block2_height;
+          }
+        }
+        ++block1_height;
+      }
+    }
 
     std::unordered_set<const Environment::Stack *> matched_stacks;
     for(const auto &target_stack : target) {
