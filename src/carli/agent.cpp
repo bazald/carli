@@ -353,6 +353,34 @@ namespace Carli {
     std::cerr << std::endl;
 #endif
 
+    /** Step 1.5: Detect whether a new & distinct variable needs to be created for Higher Order Grammar rules, along with new fringe nodes **/
+    std::string old_new_var_name;
+    Rete::WME_Token_Index old_new_var_index(-1, -1, -1);
+    if((*leaves.begin())->q_value_fringe->feature->max_arity > 0) {
+      const auto &vars = (*leaves.begin())->q_value_fringe->feature->indices;
+      const auto &parent_vars = parent_action->get_variables();
+
+      int64_t num_new_vars = 0;
+      {
+        auto vt = vars->begin();
+        const auto vend = vars->end();
+        auto pvt = parent_vars->begin();
+        while(vt != vend) {
+          if(*vt == *pvt) {
+            ++vt;
+            ++pvt;
+          }
+          else {
+            ++num_new_vars;
+            assert(num_new_vars < 2); /// Not sure how to cope with more than one new variable at a time -- probably not necessary
+            old_new_var_name = vt->first;
+            old_new_var_index = vt->second;
+            ++vt;
+          }
+        }
+      }
+    }
+
     /** Step 2: For each new leaf...
      *          ...create it, clone remaining fringe entries below the new leaf, and destroy the old fringe node
      */
@@ -383,17 +411,31 @@ namespace Carli {
             for(auto &fringe : fringe_axis.second)
               fringe.lock()->create_fringe(*node_unsplit, nullptr);
           }
+
+          /** Step 2.4: Create new fringe nodes if demanded by the HOG. */
+          if(old_new_var_index.rete_row != -1) {
+            for(auto &fringe : leaves)
+              fringe->create_fringe(*node_unsplit, nullptr, old_new_var_index);
+            for(auto &fringe_axis : unsplit.fringe_values) {
+              if(fringe_axis.first->indices->find(old_new_var_name) != fringe_axis.first->indices->end()) {
+                for(auto &fringe : fringe_axis.second)
+                  fringe.lock()->create_fringe(*node_unsplit, nullptr, old_new_var_index);
+              }
+            }
+          }
         }
       }
+    }
 
-      /** Step 2.4: Untrack the old fringe node. */
+    for(auto &leaf : leaves) {
+      /** Step 2.5: Untrack the old fringe node. */
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
       m_mean_matde.uncontribute(leaf->q_value->matde);
 #endif
       if(!m_mean_catde_queue_size)
         m_mean_catde.uncontribute(leaf->q_value_fringe->catde);
 
-      /** Step 2.5: Destroy the old leaf node. */
+      /** Step 2.6: Destroy the old leaf node. */
       excise_rule(leaf->rete_action.lock()->get_name(), false);
     }
 

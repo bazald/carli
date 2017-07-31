@@ -202,6 +202,9 @@ namespace Carli {
     else
       os << "unsplit";
 
+    if(q_value->feature && q_value->feature->max_arity > 0)
+      os << ' ' << q_value->feature->arity << ' ' << q_value->feature->max_arity;
+
     if(q_value->depth == 1)
       os << " nil";
     else {
@@ -347,13 +350,68 @@ namespace Carli {
     return new_leaf_data;
   }
 
-  Node_Fringe_Ptr Node::create_fringe(Node_Unsplit &leaf, Feature * const &feature_) {
+  Node_Fringe_Ptr Node::create_fringe(Node_Unsplit &leaf, Feature * const &feature_, const Rete::WME_Token_Index &old_new_var_index) {
     const auto lra_lock = leaf.rete_action.lock();
+    const auto ra_lock = rete_action.lock();
+    const auto ancestor_left = lra_lock->parent_left();
+    const auto ancestor_right = ra_lock->parent_left();
     const auto leaf_node_name = lra_lock->get_name();
     const auto new_feature = feature_ ? feature_ : q_value_fringe->feature ? q_value_fringe->feature->clone() : nullptr;
     const auto new_name = agent.next_rule_name(leaf_node_name.substr(0, leaf_node_name.find_last_of('*') + 1) + "f");
     const auto feature_enumerated_data = dynamic_cast<Feature_Enumerated_Data *>(new_feature);
     const auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(new_feature);
+
+    if(leaf.q_value_weight)
+      assert(leaf.q_value_weight->type == Q_Value::Type::UNSPLIT);
+    else
+      assert(leaf.q_value_fringe->depth == q_value_fringe->depth);
+
+    std::stack<Rete::Rete_Node_Ptr> rebase_right;
+    for(auto node = ancestor_right; node != parent_action.lock()->parent_left(); node = node->parent_left()) {
+      rebase_right.push(node);
+    }
+
+    /// Handle HOG
+    const bool hog = old_new_var_index.rete_row != -1;
+    std::string old_new_var_name;
+    Rete::WME_Token_Index new_new_var_index(-1, old_new_var_index.token_row + 1, old_new_var_index.column);
+    new_new_var_index.existential = old_new_var_index.existential;
+    std::string new_new_var_name;
+    Rete::Rete_Node_Ptr new_test = ancestor_left;
+    if(hog) {
+      old_new_var_name = std::find_if(new_feature->indices->begin(), new_feature->indices->end(), [&old_new_var_index](const std::pair<std::string, Rete::WME_Token_Index> &si)->bool {
+//        std::cerr << si.first << ',' << si.second << " =? " << old_new_var_index << std::endl;
+        return si.second == old_new_var_index;
+      })->first;
+
+#ifdef DEBUG_OUTPUT
+      std::cerr << "Old variable: " << old_new_var_name << " at " << old_new_var_index << std::endl;
+#endif
+
+      {
+        size_t last_hyphen_p1 = old_new_var_name.rfind('-') + 1;
+        std::ostringstream oss;
+        oss << old_new_var_name.substr(0, last_hyphen_p1) << atoi(old_new_var_name.substr(last_hyphen_p1).c_str()) + 1;
+        new_new_var_name = oss.str();
+      }
+
+      new_new_var_index.rete_row = old_new_var_index.rete_row + rebase_right.size();
+
+      Rete::WME_Bindings bindings;
+      for(auto binding : new_feature->bindings) {
+        if(binding.first == old_new_var_index)
+          binding.first = new_new_var_index;
+        if(binding.second == old_new_var_index)
+          binding.second = new_new_var_index;
+        bindings.insert(binding);
+      }
+      new_feature->bindings = std::move(bindings);
+      if(new_feature->axis == old_new_var_index)
+        new_feature->axis = new_new_var_index;
+      auto indices = std::make_shared<Rete::Variable_Indices>(*new_feature->indices);
+      (*indices)[new_new_var_name] = new_new_var_index;
+      new_feature->indices = indices;
+    }
 
 #ifdef DEBUG_OUTPUT
     std::cerr << "Parent feature ";
@@ -366,27 +424,7 @@ namespace Carli {
     std::cerr << "Creating fringe node for " << *new_feature << std::endl;
 #endif
 
-    const auto ancestor_left = lra_lock->parent_left();
-    if(leaf.q_value_weight)
-      assert(leaf.q_value_weight->type == Q_Value::Type::UNSPLIT);
-    else
-      assert(leaf.q_value_fringe->depth == q_value_fringe->depth);
-
-    const auto ra_lock = rete_action.lock();
-    Rete::Rete_Node_Ptr ancestor_right = ra_lock->parent_left();
-
-//    if(leaf.q_value->type != Q_Value::Type::FRINGE) {
-//      /// Collapsing rather the fringe rather than expanding it
-//      const int64_t dend = std::max(int64_t(2), leaf.q_value->depth);
-//      for(int64_t d = q_value->depth; d != dend; --d) {
-//        assert(dynamic_cast<Rete::Rete_Predicate *>(ancestor_right.get()) ||
-//          dynamic_cast<Rete::Rete_Existential_Join *>(ancestor_right.get()));
-//        ancestor_right = ancestor_right->parent_right(); ///< Pass through extra tests
-//      }
-//    }
-
-    Rete::Rete_Node_Ptr new_test;
-    auto old_variables = lra_lock->get_variables();
+    const auto old_variables = lra_lock->get_variables();
     Rete::Variable_Indices_Ptr new_variables;
 
     Rete::Rete_Node_Ptr_C ancestor_rightmost = ancestor_right;
@@ -419,78 +457,108 @@ namespace Carli {
 //        /// Case 2. No new conditions to carry over
 //        new_test = agent.make_existential_join(*ancestor_right->get_bindings(), false, ancestor_left, ancestor_right->parent_right());
 //      }
-      bool ancestor_found = false;
-      for(auto left = ancestor_left; !dynamic_cast<Rete::Rete_Filter *>(left.get()); left = left->parent_left()) {
-        if(left->parent_left()->get_token_owner() == ancestor_right->get_token_owner()) {
-          ancestor_found = true;
-          break;
-        }
-      }
 
-      if(ancestor_found) {
-        /// Case 2: No new conditions to carry over
+      if(!hog && *variables == *old_variables) {
 #ifdef DEBUG_OUTPUT
-        std::cerr << "Fringe Case 2" << std::endl;
+      std::cerr << "Fringe Case 2" << std::endl;
 #endif
-//          Rete::WME_Bindings bindings;
-//          for(const auto &variable : *variables) { ///< NOTE: Assume all are potentially multivalued
-//            const auto found = old_variables->find(variable.first);
-//            assert(found != old_variables->end());
-//            bindings.insert(Rete::WME_Binding(found->second, variable.second));
-//          }
-//
-//          new_test = agent.make_existential_join(bindings, false, ancestor_left, ancestor_right);
-
-        if(dynamic_cast<const Rete::Rete_Existential_Join *>(ancestor_right.get()))
-          new_test = agent.make_existential_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
-        else
-          new_test = agent.make_negation_join(*ancestor_right->get_bindings(), ancestor_left, ancestor_right->parent_right());
+        while(rebase_right.size() > 1)
+          rebase_right.pop();
       }
       else {
-        /// Case 3: New conditions must be added
 #ifdef DEBUG_OUTPUT
-        std::cerr << "Fringe Case 3" << std::endl;
-#endif
-
-        std::stack<Rete::Rete_Node_Ptr> rebase_right;
-        new_test = ancestor_left;
-
-        for(auto node = ancestor_right; node != parent_action.lock()->parent_left(); node = node->parent_left()) {
-          rebase_right.push(node);
-        }
-
-#ifdef DEBUG_OUTPUT
+        std::cerr << "Fringe Case 2" << std::endl;
         std::cerr << "Rebase node count = " << rebase_right.size() << std::endl;
 #endif
+      }
 
-        assert(!rebase_right.empty());
-        while(!rebase_right.empty()) {
-          auto test = rebase_right.top();
-          rebase_right.pop();
+      assert(!rebase_right.empty());
+      while(!rebase_right.empty()) {
+        auto test = rebase_right.top();
+        rebase_right.pop();
 
-          if(dynamic_cast<Rete::Rete_Join *>(test.get())) {
+        /// New exclusion between old_new and new_new for HOG
+        if(hog && rebase_right.empty()) {
 #ifdef DEBUG_OUTPUT
-            std::cerr << "  Join" << std::endl;
+          std::cerr << "  Predicate" << std::endl;
 #endif
+          new_test = agent.make_predicate_vv(Rete::Rete_Predicate::Predicate::NEQ, new_new_var_index, old_new_var_index, new_test);
+        }
+
+        if(dynamic_cast<Rete::Rete_Join *>(test.get())) {
+#ifdef DEBUG_OUTPUT
+          std::cerr << "  Join" << std::endl;
+#endif
+          if(hog) {
+            Rete::WME_Bindings bindings;
+            for(auto binding : *test->get_bindings()) {
+              if(binding.first == old_new_var_index)
+                binding.first = new_new_var_index;
+              if(binding.second == old_new_var_index)
+                binding.second = new_new_var_index;
+              bindings.insert(binding);
+            }
+            new_test = agent.make_join(bindings, new_test, test->parent_right());
+          }
+          else
             new_test = agent.make_join(*test->get_bindings(), new_test, test->parent_right());
-          }
-          else if(dynamic_cast<Rete::Rete_Existential_Join *>(test.get())) {
+        }
+        else if(dynamic_cast<Rete::Rete_Existential_Join *>(test.get())) {
 #ifdef DEBUG_OUTPUT
-            std::cerr << "  Existential Join" << std::endl;
+          std::cerr << "  Existential Join" << std::endl;
 #endif
+          if(hog) {
+            Rete::WME_Bindings bindings;
+            for(auto binding : *test->get_bindings()) {
+              if(binding.first == old_new_var_index)
+                binding.first = new_new_var_index;
+              if(binding.second == old_new_var_index)
+                binding.second = new_new_var_index;
+              bindings.insert(binding);
+            }
+            new_test = agent.make_existential_join(bindings, new_test, test->parent_right());
+          }
+          else
             new_test = agent.make_existential_join(*test->get_bindings(), new_test, test->parent_right());
-          }
-          else if(dynamic_cast<Rete::Rete_Negation_Join *>(test.get())) {
+        }
+        else if(dynamic_cast<Rete::Rete_Negation_Join *>(test.get())) {
 #ifdef DEBUG_OUTPUT
-            std::cerr << "  Negation Join" << std::endl;
+          std::cerr << "  Negation Join" << std::endl;
 #endif
+          if(hog) {
+            Rete::WME_Bindings bindings;
+            for(auto binding : *test->get_bindings()) {
+              if(binding.first == old_new_var_index)
+                binding.first = new_new_var_index;
+              if(binding.second == old_new_var_index)
+                binding.second = new_new_var_index;
+              bindings.insert(binding);
+            }
+            new_test = agent.make_negation_join(bindings, new_test, test->parent_right());
+          }
+          else
             new_test = agent.make_negation_join(*test->get_bindings(), new_test, test->parent_right());
-          }
-          else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
+        }
+        else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
 #ifdef DEBUG_OUTPUT
-            std::cerr << "  Predicate" << std::endl;
+          std::cerr << "  Predicate" << std::endl;
 #endif
+          if(hog) {
+            auto lhs_index = predicate_node->get_lhs_index();
+            if(lhs_index == old_new_var_index)
+              lhs_index = new_new_var_index;
 
+            if(predicate_node->get_rhs())
+              new_test = agent.make_predicate_vc(predicate_node->get_predicate(), lhs_index, predicate_node->get_rhs(), new_test);
+            else {
+              auto rhs_index = predicate_node->get_rhs_index();
+              if(rhs_index == old_new_var_index)
+                rhs_index = new_new_var_index;
+
+              new_test = agent.make_predicate_vv(predicate_node->get_predicate(), lhs_index, rhs_index, new_test);
+            }
+          }
+          else {
             auto new_lhs_index = predicate_node->get_lhs_index();
             new_lhs_index.rete_row += new_test->get_size() - test->parent_left()->get_size();
             new_lhs_index.token_row += new_test->get_token_size() - test->parent_left()->get_token_size();
@@ -504,13 +572,18 @@ namespace Carli {
             else
               new_test = agent.make_predicate_vv(predicate_node->get_predicate(), new_lhs_index, predicate_node->get_rhs_index(), new_test);
           }
-          else
-            abort();
         }
+        else
+          abort();
       }
 
-      /// New conditions are possible for cases 2 and 3
-      {
+      for(auto left = ancestor_left; !dynamic_cast<Rete::Rete_Filter *>(left.get()); left = left->parent_left()) {
+        if(left->parent_left()->get_token_owner() == ancestor_right->get_token_owner())
+          break;
+      }
+
+      /// New conditions are possible even without HOG
+      if(!hog) {
         const int64_t leaf_size = ancestor_left->get_size();
         const int64_t leaf_token_size = ancestor_left->get_token_size();
         const int64_t old_size = ra_lock->get_size();
@@ -654,11 +727,13 @@ namespace Carli {
     }
 
     /// Fix feature
-    if(new_feature->axis.rete_row >= lra_lock->parent_left()->get_size())
-      new_feature->axis.rete_row += ancestor_left->get_size() - lra_lock->parent_left()->get_size();
-    if(new_feature->axis.token_row >= lra_lock->parent_left()->get_token_size())
-      new_feature->axis.token_row += ancestor_left->get_token_size() - lra_lock->parent_left()->get_token_size();
-    new_feature->indices = new_variables ? new_variables : old_variables;
+    if(!hog) {
+      if(new_feature->axis.rete_row >= lra_lock->parent_left()->get_size())
+        new_feature->axis.rete_row += ancestor_left->get_size() - lra_lock->parent_left()->get_size();
+      if(new_feature->axis.token_row >= lra_lock->parent_left()->get_token_size())
+        new_feature->axis.token_row += ancestor_left->get_token_size() - lra_lock->parent_left()->get_token_size();
+      new_feature->indices = new_variables ? new_variables : old_variables;
+    }
 
     /// Create the actual action for the new fringe node
     auto new_action = agent.make_standard_action(new_test, new_name, false, new_feature->indices);
@@ -672,6 +747,9 @@ namespace Carli {
     std::cerr << *new_feature->indices << std::endl;
     std::cerr << new_feature->axis << std::endl;
     new_feature->print_axis(std::cerr);
+    std::cerr << std::endl;
+
+    new_action->print_rule(std::cerr);
 #endif
 
     return new_action_data;

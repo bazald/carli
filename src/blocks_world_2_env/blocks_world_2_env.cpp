@@ -378,6 +378,9 @@ namespace Blocks_World_2 {
     const auto &target = env->get_target();
     std::list<Rete::WME_Ptr_C> wmes_current;
 
+    if(env->get_goal() == Environment::Goal::ON_A_B)
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[1], m_goal_on_attr, m_block_ids[2]));
+
     std::ostringstream oss;
     int64_t max_height = 0;
     for(const auto &stack : blocks) {

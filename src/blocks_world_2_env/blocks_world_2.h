@@ -176,6 +176,7 @@ namespace Blocks_World_2 {
     const Rete::Symbol_Constant_String_Ptr_C m_discrepancy_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("discrepancy"));
     const Rete::Symbol_Constant_String_Ptr_C m_higher_than_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("higher-than"));
     const Rete::Symbol_Constant_String_Ptr_C m_target_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("goal"));
+    const Rete::Symbol_Constant_String_Ptr_C m_goal_on_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("goal-on"));
     const Rete::Symbol_Constant_String_Ptr_C m_stack_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("stack"));
     const Rete::Symbol_Constant_String_Ptr_C m_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("matches"));
     const Rete::Symbol_Constant_String_Ptr_C m_early_matches_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("early-matches")); ///< Defective
