@@ -354,19 +354,21 @@ namespace Carli {
 #endif
 
     /** Step 1.5: Detect whether a new & distinct variable needs to be created for Higher Order Grammar rules, along with new fringe nodes **/
-    std::string old_new_var_name;
-    Rete::WME_Token_Index old_new_var_index(-1, -1, -1);
+    std::string old_new_var_name, prev_var_name;
+    Rete::WME_Token_Index old_new_var_index(-1, -1, -1), prev_var_index(-1, -1, -1);
     if((*leaves.begin())->q_value_fringe->feature->max_arity > 0) {
       const auto &vars = (*leaves.begin())->q_value_fringe->feature->indices;
       const auto &parent_vars = parent_action->get_variables();
 
       int64_t num_new_vars = 0;
       {
+        auto pt = vars->end();
         auto vt = vars->begin();
         const auto vend = vars->end();
         auto pvt = parent_vars->begin();
         while(vt != vend) {
           if(*vt == *pvt) {
+            pt = vt;
             ++vt;
             ++pvt;
           }
@@ -375,6 +377,18 @@ namespace Carli {
             assert(num_new_vars < 2); /// Not sure how to cope with more than one new variable at a time -- probably not necessary
             old_new_var_name = vt->first;
             old_new_var_index = vt->second;
+
+            if(pt != vars->end()) {
+              size_t last_hyphen_p1 = pt->first.rfind('-') + 1;
+              std::ostringstream oss;
+              oss << pt->first.substr(0, last_hyphen_p1) << atoi(pt->first.substr(last_hyphen_p1).c_str()) + 1;
+              if(oss.str() == old_new_var_name) {
+                prev_var_name = oss.str();
+                prev_var_index = pt->second;
+              }
+            }
+
+            pt = vt;
             ++vt;
           }
         }
@@ -414,12 +428,50 @@ namespace Carli {
 
           /** Step 2.4: Create new fringe nodes if demanded by the HOG. */
           if(old_new_var_index.rete_row != -1) {
-            for(auto &fringe : leaves)
+            for(auto &fringe : leaves) {
               fringe->create_fringe(*node_unsplit, nullptr, old_new_var_index);
+
+              bool binary_feature_update = false;
+              auto test = fringe->rete_action.lock()->parent_left();
+              if(auto bindings = test->get_bindings()) {
+                for(auto binding : *bindings) {
+                  if(binding.first == prev_var_index || binding.second == prev_var_index) {
+                    binary_feature_update = true;
+                    break;
+                  }
+                }
+              }
+              else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
+                if(predicate_node->get_lhs_index() == prev_var_index || predicate_node->get_rhs_index() == prev_var_index)
+                  binary_feature_update = true;
+              }
+              if(binary_feature_update)
+                fringe->create_fringe(*node_unsplit, nullptr, old_new_var_index, prev_var_index);
+            }
             for(auto &fringe_axis : unsplit.fringe_values) {
               if(fringe_axis.first->indices->find(old_new_var_name) != fringe_axis.first->indices->end()) {
-                for(auto &fringe : fringe_axis.second)
-                  fringe.lock()->create_fringe(*node_unsplit, nullptr, old_new_var_index);
+                for(auto &fringe : fringe_axis.second) {
+                  auto flock = fringe.lock();
+
+                  flock->create_fringe(*node_unsplit, nullptr, old_new_var_index);
+
+                  bool binary_feature_update = false;
+                  auto test = flock->rete_action.lock()->parent_left();
+                  if(auto bindings = test->get_bindings()) {
+                    for(auto binding : *bindings) {
+                      if(binding.first == prev_var_index || binding.second == prev_var_index) {
+                        binary_feature_update = true;
+                        break;
+                      }
+                    }
+                  }
+                  else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
+                    if(predicate_node->get_lhs_index() == prev_var_index || predicate_node->get_rhs_index() == prev_var_index)
+                      binary_feature_update = true;
+                  }
+                  if(binary_feature_update)
+                    flock->create_fringe(*node_unsplit, nullptr, old_new_var_index, prev_var_index);
+                }
               }
             }
           }

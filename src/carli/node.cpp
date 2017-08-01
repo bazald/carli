@@ -350,7 +350,7 @@ namespace Carli {
     return new_leaf_data;
   }
 
-  Node_Fringe_Ptr Node::create_fringe(Node_Unsplit &leaf, Feature * const &feature_, const Rete::WME_Token_Index &old_new_var_index) {
+  Node_Fringe_Ptr Node::create_fringe(Node_Unsplit &leaf, Feature * const &feature_, const Rete::WME_Token_Index &old_new_var_index, const Rete::WME_Token_Index &prev_var_index) {
     const auto lra_lock = leaf.rete_action.lock();
     const auto ra_lock = rete_action.lock();
     const auto ancestor_left = lra_lock->parent_left();
@@ -485,59 +485,40 @@ namespace Carli {
           new_test = agent.make_predicate_vv(Rete::Rete_Predicate::Predicate::NEQ, new_new_var_index, old_new_var_index, new_test);
         }
 
-        if(dynamic_cast<Rete::Rete_Join *>(test.get())) {
-#ifdef DEBUG_OUTPUT
-          std::cerr << "  Join" << std::endl;
-#endif
+        if(auto bindings = test->get_bindings()) {
+          Rete::WME_Bindings updated_bindings;
+          auto bindings_ptr = hog ? &updated_bindings : bindings;
           if(hog) {
-            Rete::WME_Bindings bindings;
             for(auto binding : *test->get_bindings()) {
               if(binding.first == old_new_var_index)
                 binding.first = new_new_var_index;
+              else if(binding.first == prev_var_index)
+                binding.first = old_new_var_index;
               if(binding.second == old_new_var_index)
                 binding.second = new_new_var_index;
-              bindings.insert(binding);
+              else if(binding.second == prev_var_index)
+                binding.second = old_new_var_index;
+              updated_bindings.insert(binding);
             }
-            new_test = agent.make_join(bindings, new_test, test->parent_right());
           }
-          else
-            new_test = agent.make_join(*test->get_bindings(), new_test, test->parent_right());
-        }
-        else if(dynamic_cast<Rete::Rete_Existential_Join *>(test.get())) {
+          if(dynamic_cast<Rete::Rete_Join *>(test.get())) {
 #ifdef DEBUG_OUTPUT
-          std::cerr << "  Existential Join" << std::endl;
+            std::cerr << "  Join" << std::endl;
 #endif
-          if(hog) {
-            Rete::WME_Bindings bindings;
-            for(auto binding : *test->get_bindings()) {
-              if(binding.first == old_new_var_index)
-                binding.first = new_new_var_index;
-              if(binding.second == old_new_var_index)
-                binding.second = new_new_var_index;
-              bindings.insert(binding);
-            }
-            new_test = agent.make_existential_join(bindings, new_test, test->parent_right());
+            new_test = agent.make_join(*bindings_ptr, new_test, test->parent_right());
           }
-          else
-            new_test = agent.make_existential_join(*test->get_bindings(), new_test, test->parent_right());
-        }
-        else if(dynamic_cast<Rete::Rete_Negation_Join *>(test.get())) {
+          else if(dynamic_cast<Rete::Rete_Existential_Join *>(test.get())) {
 #ifdef DEBUG_OUTPUT
-          std::cerr << "  Negation Join" << std::endl;
+            std::cerr << "  Existential Join" << std::endl;
 #endif
-          if(hog) {
-            Rete::WME_Bindings bindings;
-            for(auto binding : *test->get_bindings()) {
-              if(binding.first == old_new_var_index)
-                binding.first = new_new_var_index;
-              if(binding.second == old_new_var_index)
-                binding.second = new_new_var_index;
-              bindings.insert(binding);
-            }
-            new_test = agent.make_negation_join(bindings, new_test, test->parent_right());
+            new_test = agent.make_existential_join(*bindings_ptr, new_test, test->parent_right());
           }
-          else
-            new_test = agent.make_negation_join(*test->get_bindings(), new_test, test->parent_right());
+          else if(dynamic_cast<Rete::Rete_Negation_Join *>(test.get())) {
+#ifdef DEBUG_OUTPUT
+            std::cerr << "  Negation Join" << std::endl;
+#endif
+            new_test = agent.make_negation_join(*bindings_ptr, new_test, test->parent_right());
+          }
         }
         else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
 #ifdef DEBUG_OUTPUT
@@ -547,6 +528,8 @@ namespace Carli {
             auto lhs_index = predicate_node->get_lhs_index();
             if(lhs_index == old_new_var_index)
               lhs_index = new_new_var_index;
+            else if(lhs_index == prev_var_index)
+              lhs_index = old_new_var_index;
 
             if(predicate_node->get_rhs())
               new_test = agent.make_predicate_vc(predicate_node->get_predicate(), lhs_index, predicate_node->get_rhs(), new_test);
@@ -554,6 +537,8 @@ namespace Carli {
               auto rhs_index = predicate_node->get_rhs_index();
               if(rhs_index == old_new_var_index)
                 rhs_index = new_new_var_index;
+              else if(rhs_index == prev_var_index)
+                rhs_index = old_new_var_index;
 
               new_test = agent.make_predicate_vv(predicate_node->get_predicate(), lhs_index, rhs_index, new_test);
             }
