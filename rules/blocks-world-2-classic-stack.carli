@@ -2,9 +2,8 @@
 
 sp {blocks-world*general
   :feature 1 unsplit nil
-  (<top> ^goal-on <bottom>)
   (<s> ^blocks <blocks>)
-  (<table> ^name 0) # table
+  (<table> ^name 0)
   (<s> ^action <action>)
   (<action> ^block <block-1>)
   (<block-1> ^name <block-name>)
@@ -14,66 +13,34 @@ sp {blocks-world*general
   = 0.0
 }
 
-sp {blocks-world*block-nullary-block-1-top-t
+sp {blocks-world*block-nullary-clear-1-t
   :feature 2 fringe blocks-world*general
   &blocks-world*general
-  +(<block-1> ^goal-on <bottom>)
+  +(<block-1> ^clear true)
 -->
   = 0.0
 }
 
-sp {blocks-world*block-nullary-block-1-top-f
+sp {blocks-world*block-nullary-clear-1-f
   :feature 2 fringe blocks-world*general
   &blocks-world*general
-  -(<block-1> ^goal-on <bottom>)
+  -(<block-1> ^clear true)
 -->
   = 0.0
 }
 
-sp {blocks-world*block-nullary-block-1-bottom-t
+sp {blocks-world*block-nullary-clear-2-t
   :feature 2 fringe blocks-world*general
   &blocks-world*general
-  +(<top> ^goal-on <block-1>)
+  +(<block-2> ^clear true)
 -->
   = 0.0
 }
 
-sp {blocks-world*block-nullary-block-1-bottom-f
+sp {blocks-world*block-nullary-clear-2-f
   :feature 2 fringe blocks-world*general
   &blocks-world*general
-  -(<top> ^goal-on <block-1>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-block-2-top-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<block-2> ^goal-on <bottom>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-block-2-top-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<block-2> ^goal-on <bottom>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-block-2-bottom-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<top> ^goal-on <block-2>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-block-2-bottom-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<top> ^goal-on <block-2>)
+  -(<block-2> ^clear true)
 -->
   = 0.0
 }

@@ -380,6 +380,16 @@ namespace Blocks_World_2 {
 
     if(env->get_goal() == Environment::Goal::ON_A_B)
       wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[1], m_goal_on_attr, m_block_ids[2]));
+    else if(env->get_goal() == Environment::Goal::EXACT) {
+      for(const auto &stack : target) {
+        Rete::Symbol_Identifier_Ptr_C prev_id = m_table_id;
+        for(const auto &block : stack) {
+          const Rete::Symbol_Identifier_Ptr_C block_id = m_block_ids[block.id];
+          wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_goal_on_attr, prev_id));
+          prev_id = block_id;
+        }
+      }
+    }
 
     std::ostringstream oss;
     int64_t max_height = 0;

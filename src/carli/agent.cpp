@@ -568,6 +568,10 @@ namespace Carli {
       for(const auto &feature_node : feature_axis.second) {
         auto &node = debuggable_cast<Node &>(*feature_node.second.node->data.get());
 
+        /// Throw away nodes considering 2 or more new variables
+        if(node.variables->size() > unsplit->variables->size() + 1)
+          continue;
+
         auto new_fringe = node.create_fringe(*unsplit, nullptr);
 
 //        std::cerr << "Collapsing: ";
@@ -1619,15 +1623,36 @@ namespace Carli {
 
     if(!chosen) {
       if(!matches) {
-        std::cerr << "WARNING: No feature in the fringe matches the current token for " << general.rete_action.lock()->get_name() << "!" << std::endl;
-        dump_rules(*this);
+        /// HOG Check
+        bool hog = true;
+        for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+          for(auto &fringe : fringe_axis->second) {
+            if(fringe.lock()->q_value_fringe->feature->arity == 0)
+              hog = false;
+          }
+        }
+
+        if(!hog) {
+          std::cerr << "WARNING: No feature in the fringe matches the current token for " << general.rete_action.lock()->get_name() << "!" << std::endl;
+
+          for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+            for(auto &fringe : fringe_axis->second) {
+              if(fringe.lock()->q_value_fringe->feature->arity == 0) {
+                fringe.lock()->rete_action.lock()->print_rule(std::cerr);
+              }
+            }
+          }
+
+          dump_rules(*this);
+
 #if !defined(NDEBUG) && defined(_WINDOWS)
-        __debugbreak();
+          __debugbreak();
 #elif !defined(NDEBUG)
-        assert(false);
+          assert(false);
 //#else
-//        abort();
+          abort();
 #endif
+        }
       }
 
       return general.fringe_values.end();
@@ -1727,15 +1752,36 @@ namespace Carli {
 
     if(chosen_axis == general.fringe_values.end()) {
       if(!matches) {
-        std::cerr << "WARNING: No feature in the fringe matches the current token for " << general.rete_action.lock()->get_name() << "!" << std::endl;
-        dump_rules(*this);
+        /// HOG Check
+        bool hog = true;
+        for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+          for(auto &fringe : fringe_axis->second) {
+            if(fringe.lock()->q_value_fringe->feature->arity == 0)
+              hog = false;
+          }
+        }
+
+        if(!hog) {
+          std::cerr << "WARNING: No feature in the fringe matches the current token for " << general.rete_action.lock()->get_name() << "!" << std::endl;
+
+          for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+            for(auto &fringe : fringe_axis->second) {
+              if(fringe.lock()->q_value_fringe->feature->arity == 0) {
+                fringe.lock()->rete_action.lock()->print_rule(std::cerr);
+              }
+            }
+          }
+
+          dump_rules(*this);
+
 #if !defined(NDEBUG) && defined(_WINDOWS)
-        __debugbreak();
+          __debugbreak();
 #elif !defined(NDEBUG)
-        assert(false);
+          assert(false);
 //#else
-//        abort();
+          abort();
 #endif
+        }
       }
 
       return general.fringe_values.end();
@@ -1817,15 +1863,36 @@ namespace Carli {
 
     if(chosen_axis == general.fringe_values.end()) {
       if(!matches) {
-        std::cerr << "WARNING: No feature in the fringe matches the current token for " << general.rete_action.lock()->get_name() << "!" << std::endl;
-        dump_rules(*this);
+        /// HOG Check
+        bool hog = true;
+        for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+          for(auto &fringe : fringe_axis->second) {
+            if(fringe.lock()->q_value_fringe->feature->arity == 0)
+              hog = false;
+          }
+        }
+
+        if(!hog) {
+          std::cerr << "WARNING: No feature in the fringe matches the current token for " << general.rete_action.lock()->get_name() << "!" << std::endl;
+
+          for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
+            for(auto &fringe : fringe_axis->second) {
+              if(fringe.lock()->q_value_fringe->feature->arity == 0) {
+                fringe.lock()->rete_action.lock()->print_rule(std::cerr);
+              }
+            }
+          }
+
+          dump_rules(*this);
+
 #if !defined(NDEBUG) && defined(_WINDOWS)
-        __debugbreak();
+          __debugbreak();
 #elif !defined(NDEBUG)
-        assert(false);
+          assert(false);
 //#else
-//        abort();
+          abort();
 #endif
+        }
       }
 
       return general.fringe_values.end();
