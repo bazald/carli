@@ -20,7 +20,11 @@ namespace Blocks_World_2 {
   }
 
   Environment::Environment() {
-//    assert(m_num_goal_blocks <= m_num_blocks);
+    assert(m_num_target_blocks <= m_num_blocks);
+    if(m_num_target_blocks > m_num_blocks) {
+      std::cerr << "Fewer blocks available than demanded by the goal configuration!" << std::endl;
+      abort();
+    }
 
     if(m_goal == Goal::COLOR) {
       m_match_test = [](const Environment::Block &lhs, const Environment::Block &rhs)->bool{
@@ -385,6 +389,7 @@ namespace Blocks_World_2 {
         Rete::Symbol_Identifier_Ptr_C prev_id = m_table_id;
         for(const auto &block : stack) {
           const Rete::Symbol_Identifier_Ptr_C block_id = m_block_ids[block.id];
+          assert(block.id);
           wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_goal_on_attr, prev_id));
           prev_id = block_id;
         }
@@ -593,6 +598,7 @@ namespace Blocks_World_2 {
           break;
         }
       }
+      assert(!target_stack.empty());
       const Rete::Symbol_Identifier_Ptr_C target_base_id = m_block_ids[target_stack.begin()->id];
       wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_matches_top_attr, m_table_stack_id));
       if(get_total_step_count() < 5000) {
