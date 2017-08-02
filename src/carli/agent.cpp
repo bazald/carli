@@ -196,9 +196,9 @@ namespace Carli {
 
       for(auto &fringe_axis : general.fringe_values) {
         for(auto &fringe : fringe_axis.second) {
-          const auto rete_action = fringe.lock()->rete_action.lock();
-          if(rete_action)
-            excise_rule(rete_action->get_name(), false);
+          const auto action = fringe.lock()->rete_action.lock();
+          if(action)
+            excise_rule(action->get_name(), false);
         }
       }
 

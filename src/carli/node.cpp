@@ -58,15 +58,15 @@ namespace Carli {
           for(auto child : node_split->children)
             assert(!child.expired());
           for(auto fringe : node_split->fringe_values) {
-            for(auto node : fringe.second)
-              assert(!node.expired());
+            for(auto node2 : fringe.second)
+              assert(!node2.expired());
           }
         }
         else if(const Node_Unsplit * const node_unsplit = dynamic_cast<const Node_Unsplit *>(node)) {
           assert(m_names_from_nodes.find(node_unsplit) != m_names_from_nodes.end());
           for(auto fringe : node_unsplit->fringe_values) {
-            for(auto node : fringe.second)
-              assert(!node.expired());
+            for(auto node2 : fringe.second)
+              assert(!node2.expired());
           }
         }
       }
@@ -793,10 +793,10 @@ namespace Carli {
 #endif
 
     if(auto bindings = new_action->parent_left()->get_bindings()) {
-      auto variables = new_action->get_variables();
+      auto vars = new_action->get_variables();
       for(auto binding : *bindings) {
-        if(std::find_if(variables->begin(), variables->end(), [&binding](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == binding.first;}) == new_variables->end() ||
-           std::find_if(variables->begin(), variables->end(), [&binding](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == binding.second;}) == new_variables->end())
+        if(std::find_if(vars->begin(), vars->end(), [&binding](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == binding.first;}) == vars->end() ||
+           std::find_if(vars->begin(), vars->end(), [&binding](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == binding.second;}) == vars->end())
         {
           std::cerr << "BINDING FAILURE!!!" << std::endl;
 
