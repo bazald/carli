@@ -79,8 +79,8 @@ namespace Carli {
     options.add(     make_shared<Option_Itemized>("bw2-goal", set<string>({"exact", "color", "stack", "unstack", "on-a-b"}), "exact"), "Set the goal for the Blocks World 2 agent.");
     options.add(     make_shared<Option_Itemized>("bw2-reward", set<string>({"guiding", "blind"}), "blind"), "Set the reward function for the Blocks World 2 agent.");
     options.add(     make_shared<Option_Ranged<bool>>("ignore-x", false, true, true, true, false), "Simplify cart-pole from 4D to 2D, eliminating x and x-dot.");
-    options.add(     make_shared<Option_Ranged<int64_t>>("num-blocks", 2, true, 1000, true, 3), "Number of blocks to generate in Blocks World 2.");
-    options.add(     make_shared<Option_Ranged<int64_t>>("num-goal-blocks", 2, true, 1000, true, 3), "Number of blocks to include in goal for Blocks World 2.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("num-blocks-min", 2, true, 1000, true, 3), "Minimum number of blocks to use in Blocks World 2.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("num-blocks-max", 2, true, 1000, true, 5), "Maximum number of blocks to use in Blocks World 2.");
     options.add(     make_shared<Option_Ranged<bool>>("random-start", false, true, true, true, false), "Should starting positions be randomized in mountain-car and puddle-world.");
     options.add(     make_shared<Option_Ranged<bool>>("reward-negative", false, true, true, true, true), "Use negative rewards per step in mountain-car rather than positive terminal rewards.");
     options.add(     make_shared<Option_Ranged<bool>>("set-goal", false, true, true, true, false), "Convert Cart Pole from an equilibrium task to a \"minimum time maneuver to a small goal region\" task.");
@@ -88,17 +88,19 @@ namespace Carli {
     options.add('d', make_shared<Option_Ranged<double>>("discount-rate", 0.0, true, 1.0, true, 1.0), "");
     options.add(     make_shared<Option_Ranged<double>>("eligibility-trace-decay-rate", 0.0, true, 1.0, true, 0.0), "Rate at which weights should lose credit.");
     options.add(     make_shared<Option_Ranged<double>>("eligibility-trace-decay-threshold", 0.0, true, 1.0, true, 0.0001), "Weights with credit below this threshold cease to receive updates.");
-    options.add('g', make_shared<Option_Ranged<double>>("epsilon-greedy", 0.0, true, 1.0, true, 0.1), "Simple epsilon-greedy exploration rate.");
+    options.add('g', make_shared<Option_Ranged<double>>("epsilon-greedy", 0.0, true, 1.0, true, 0.1), "Simple epsilon-greedy exploration rate to be used if epsilon-greedy exploration is selected.");
 #ifdef ENABLE_T_TEST
     options.add(     make_shared<Option_Itemized>("exploration", set<string>({"epsilon-greedy", "t-test"}), "epsilon-greedy"), "Epsilon-greedy or t-test exploration policy.");
 #else
-	options.add(make_shared<Option_Itemized>("exploration", set<string>({"epsilon-greedy"}), "epsilon-greedy"), "Currently only epsilon-greedy exploration is enabled.");
+    options.add(make_shared<Option_Itemized>("exploration", set<string>({"boltzmann", "epsilon-greedy"}), "epsilon-greedy"), "Choose between Boltzmann and epsilon-greedy exploration.");
 #endif
     options.add('l', make_shared<Option_Ranged<double>>("learning-rate", 0.0, true, 1.0, true, 1.0), "");
     options.add(     make_shared<Option_Ranged<double>>("secondary-learning-rate", 0.0, true, 1.0, true, 1.0), "GQ(\\lambda) step-size-parameter. 0 disables.");
 #ifdef ENABLE_T_TEST
     options.add('t', make_shared<Option_Ranged<double>>("t-test", 0.0, true, 1.0, true, 0.95), "t-test confidence required to cease exploration.");
 #endif
+    options.add(     make_shared<Option_Ranged<double>>("inverse-temperature", 0.0, false, numeric_limits<double>::max(), true, 1.0), "Inverse temperature to be used if Boltzmann exploration is selected.");
+    options.add(     make_shared<Option_Ranged<double>>("inverse-temperature-episodic-increment", 0.0, true, numeric_limits<double>::max(), true, 0.0), "Inverse temperature increment to be applied after each episode.");
     options.add(     make_shared<Option_Itemized>("policy", set<string>({"on-policy", "off-policy"}), "on-policy"), "Learn about greedy or optimal policy.");
     options.add_line("\n  Credit Assignment:");
     options.add('c', make_shared<Option_Itemized>("credit-assignment", set<string>({"all", "random", "specific", "even", "inv-update-count", "inv-log-update-count", "inv-root-update-count", "inv-depth", "epsilon-even-specific", "epsilon-even-depth"}), "even"), "How to split credit between weights.");

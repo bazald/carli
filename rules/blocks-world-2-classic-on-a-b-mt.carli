@@ -1,0 +1,2214 @@
+# CPU time = 5.64694 seconds
+
+set-total-step-count 9171
+
+sp {blocks-world*s1
+  :creation-time 0
+  :feature 1 split nil
+  (<top> ^goal-on <bottom>)
+  (<s> ^blocks <blocks>)
+  (<table> ^name 0)
+  (<s> ^action <action>)
+  (<action> ^block <block-1>)
+  (<block-1> ^name <block-name>)
+  (<action> ^dest <block-2>)
+  (<block-2> ^name <dest-name>)
+-->
+  = -3.34040148097264388838 1497.84929138226357281383 0.16334234366218794432 -0.16706613672020101391 9171
+}
+
+sp {blocks-world*s17
+  :creation-time 161
+  :feature 2 split blocks-world*s1
+  &blocks-world*s1
+  -(<top> ^goal-on <block-1>)
+-->
+  = -0.50152139271428164413 1162.40790174295125325443 0.15667986275009451735 0.09349471449532162359 7420
+}
+
+sp {blocks-world*s2
+  :creation-time 161
+  :feature 2 split blocks-world*s1
+  &blocks-world*s1
+  +(<top> ^goal-on <block-1>)
+-->
+  = -1.10047064391052096255 204.79648994430738184747 0.12896504404553360557 0.0778203362361486739 1589
+}
+
+sp {blocks-world*u163
+  :creation-time 818
+  :feature 3 unsplit blocks-world*s2
+  &blocks-world*s2
+  +(<block-1> ^above <bottom>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*s110
+  :creation-time 642
+  :feature 3 split blocks-world*s17
+  &blocks-world*s17
+  -(<block-1> ^goal-on <bottom>)
+-->
+  = -0.3901151211705580768 365.17507029260747231092 0.08778246882033834131 0.03240708126456967597 4161
+}
+
+sp {blocks-world*s111
+  :creation-time 642
+  :feature 3 split blocks-world*s17
+  &blocks-world*s17
+  +(<block-1> ^goal-on <bottom>)
+-->
+  = 0.58056131453357495698 727.05496635798908755532 0.24496461130660010519 0.05942190649533932167 2969
+}
+
+sp {blocks-world*s162
+  :creation-time 818
+  :feature 3 split blocks-world*s2
+  &blocks-world*s2
+  -(<block-1> ^above <bottom>)
+-->
+  = -0.29456035587683720989 142.60372808087291218726 0.11037440253937531864 0.09887937668041993367 1293
+}
+
+sp {blocks-world*s298
+  :creation-time 1238
+  :feature 4 split blocks-world*s110
+  &blocks-world*s110
+  -(<block-2> ^goal-on <bottom>)
+-->
+  = 0.10947365991867574753 337.40581065591788956226 0.09364579812820368609 0.01794595152599537044 3604
+}
+
+sp {blocks-world*s374
+  :creation-time 1361
+  :feature 4 split blocks-world*s111
+  &blocks-world*s111
+  -(<block-2> ^above <top>)
+-->
+  = 0.82070694482700512484 688.30625436752291079756 0.25038423221808764341 0.03233952827588965767 2750
+}
+
+sp {blocks-world*s299
+  :creation-time 1238
+  :feature 4 split blocks-world*s110
+  &blocks-world*s110
+  +(<block-2> ^goal-on <bottom>)
+-->
+  = -0.21808284250342688249 11.58694455145246848815 0.03310555586129276806 -0.01206606467482021494 351
+}
+
+sp {blocks-world*f185
+  :creation-time 818
+  :feature 4 fringe blocks-world*u163
+  &blocks-world*u163
+  +(<block-1> ^above <top>)
+-->
+  = -4.15660247867431298374 332.94333232405023181855 0.54221680725920595734 -0.36869918571711451927 0
+}
+
+sp {blocks-world*f184
+  :creation-time 818
+  :feature 4 fringe blocks-world*u163
+  &blocks-world*u163
+  -(<block-1> ^above <top>)
+-->
+  = -4.15660247867431298374 332.94333232405023181855 0.54221680725920595734 -0.36869918571711451927 0
+}
+
+sp {blocks-world*f186
+  :creation-time 818
+  :feature 4 fringe blocks-world*u163
+  &blocks-world*u163
+  -(<block-2> ^above <top>)
+-->
+  = -4.15660247867431298374 332.94333232405023181855 0.54221680725920595734 -0.36869918571711451927 0
+}
+
+sp {blocks-world*f191
+  :creation-time 818
+  :feature 4 fringe blocks-world*u163
+  &blocks-world*u163
+  +(<top> ^goal-on <block-2>)
+-->
+  = -4.15660247867431298374 332.94333232405023181855 0.54221680725920595734 -0.36869918571711451927 0
+}
+
+sp {blocks-world*f187
+  :creation-time 818
+  :feature 4 fringe blocks-world*u163
+  &blocks-world*u163
+  +(<block-2> ^above <top>)
+-->
+  = -4.15660247867431298374 332.94333232405023181855 0.54221680725920595734 -0.36869918571711451927 0
+}
+
+sp {blocks-world*f188
+  :creation-time 818
+  :feature 4 fringe blocks-world*u163
+  &blocks-world*u163
+  -(<block-2> ^above <bottom>)
+-->
+  = -4.15660247867431298374 332.94333232405023181855 0.54221680725920595734 -0.36869918571711451927 0
+}
+
+sp {blocks-world*f194
+  :creation-time 818
+  :feature 4 fringe blocks-world*u163
+  &blocks-world*u163
+  -(<block-2> ^goal-on <bottom>)
+-->
+  = -4.15660247867431298374 332.94333232405023181855 0.54221680725920595734 -0.36869918571711451927 0
+}
+
+sp {blocks-world*f195
+  :creation-time 818
+  :feature 4 fringe blocks-world*u163
+  &blocks-world*u163
+  +(<block-2> ^goal-on <bottom>)
+-->
+  = -4.15660247867431298374 332.94333232405023181855 0.54221680725920595734 -0.36869918571711451927 0
+}
+
+sp {blocks-world*f192
+  :creation-time 818
+  :feature 4 fringe blocks-world*u163
+  &blocks-world*u163
+  -(<block-1> ^goal-on <bottom>)
+-->
+  = -4.15660247867431298374 332.94333232405023181855 0.54221680725920595734 -0.36869918571711451927 0
+}
+
+sp {blocks-world*u375
+  :creation-time 1361
+  :feature 4 unsplit blocks-world*s111
+  &blocks-world*s111
+  +(<block-2> ^above <top>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*f190
+  :creation-time 818
+  :feature 4 fringe blocks-world*u163
+  &blocks-world*u163
+  -(<top> ^goal-on <block-2>)
+-->
+  = -4.15660247867431298374 332.94333232405023181855 0.54221680725920595734 -0.36869918571711451927 0
+}
+
+sp {blocks-world*f189
+  :creation-time 818
+  :feature 4 fringe blocks-world*u163
+  &blocks-world*u163
+  +(<block-2> ^above <bottom>)
+-->
+  = -4.15660247867431298374 332.94333232405023181855 0.54221680725920595734 -0.36869918571711451927 0
+}
+
+sp {blocks-world*f193
+  :creation-time 818
+  :feature 4 fringe blocks-world*u163
+  &blocks-world*u163
+  +(<block-1> ^goal-on <bottom>)
+-->
+  = -4.15660247867431298374 332.94333232405023181855 0.54221680725920595734 -0.36869918571711451927 0
+}
+
+sp {blocks-world*s322
+  :creation-time 1466
+  :feature 4 split blocks-world*s162
+  &blocks-world*s162
+  -(<block-2> ^goal-on <bottom>)
+-->
+  = 0.09754740882773105248 119.53443305049565026366 0.1272997157087280562 0.05782491653015463251 940
+}
+
+sp {blocks-world*s323
+  :creation-time 1466
+  :feature 4 split blocks-world*s162
+  &blocks-world*s162
+  +(<block-2> ^goal-on <bottom>)
+-->
+  = -0.09198118790724708893 5.62408740823668651387 0.04806912314732210423 0.00465564170327280834 118
+}
+
+sp {blocks-world*s605
+  :creation-time 2219
+  :feature 5 split blocks-world*s374
+  &blocks-world*s374
+  +(<top> ^goal-on <block-2>)
+-->
+  = 1.56041043594877826273 634.31569171087278391497 0.64594265958337349076 0.06829780256159240226 983
+}
+
+sp {blocks-world*s655
+  :creation-time 2400
+  :feature 5 split blocks-world*s298
+  &blocks-world*s298
+  +(<block-2> ^above <bottom>)
+-->
+  = -0.09115160371217724544 2.15706165481867095934 0.0103208691618118225 -0.0044459388007093651 210
+}
+
+sp {blocks-world*s604
+  :creation-time 2219
+  :feature 5 split blocks-world*s374
+  &blocks-world*s374
+  -(<top> ^goal-on <block-2>)
+-->
+  = -0.57100891502513262399 27.71910301732709314138 0.01787176210014641831 -0.04407096641228677725 1552
+}
+
+sp {blocks-world*s552
+  :creation-time 1945
+  :feature 5 split blocks-world*s322
+  &blocks-world*s322
+  -(<block-1> ^goal-on <bottom>)
+-->
+  = 0.27097575888768837826 112.73605363756824715438 0.15443295018844965805 0.04096889582745927294 731
+}
+
+sp {blocks-world*u965
+  :creation-time 4650
+  :feature 5 unsplit blocks-world*s299
+  &blocks-world*s299
+  +(<block-2> ^above <top>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*s422
+  :creation-time 1726
+  :feature 5 split blocks-world*s323
+  &blocks-world*s323
+  -(<block-1> ^goal-on <bottom>)
+-->
+  = -0.05368943828033418547 3.83386581187303221441 0.04406742312497738401 0.00359129873789697978 88
+}
+
+sp {blocks-world*s654
+  :creation-time 2400
+  :feature 5 split blocks-world*s298
+  &blocks-world*s298
+  -(<block-2> ^above <bottom>)
+-->
+  = 0.39836721731518770495 328.73190928098506446986 0.10590589860856478022 0.00618759266236776524 3105
+}
+
+sp {blocks-world*u553
+  :creation-time 1945
+  :feature 5 unsplit blocks-world*s322
+  &blocks-world*s322
+  +(<block-1> ^goal-on <bottom>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*f415
+  :creation-time 1466
+  :feature 5 fringe blocks-world*s323
+  &blocks-world*s323
+  +(<block-1> ^above <top>)
+-->
+  = -5.52061318360745545419 434.58936633707446617336 0.45493801444665538103 -0.21196000569033585093 0
+}
+
+sp {blocks-world*f398
+  :creation-time 1361
+  :feature 5 fringe blocks-world*u375
+  &blocks-world*u375
+  -(<block-2> ^above <bottom>)
+-->
+  = -5.44195920524703424803 495.5570098834047598757 0.5950042160681467962 -0.18354703888517159838 0
+}
+
+sp {blocks-world*f399
+  :creation-time 1361
+  :feature 5 fringe blocks-world*u375
+  &blocks-world*u375
+  +(<block-2> ^above <bottom>)
+-->
+  = -5.44195920524703424803 495.5570098834047598757 0.5950042160681467962 -0.18354703888517159838 0
+}
+
+sp {blocks-world*f421
+  :creation-time 1466
+  :feature 5 fringe blocks-world*s323
+  &blocks-world*s323
+  +(<top> ^goal-on <block-2>)
+-->
+  = -5.52061318360745545419 434.58936633707446617336 0.45493801444665538103 -0.21196000569033585093 0
+}
+
+sp {blocks-world*f395
+  :creation-time 1361
+  :feature 5 fringe blocks-world*u375
+  &blocks-world*u375
+  +(<block-1> ^above <top>)
+-->
+  = -5.44195920524703424803 495.5570098834047598757 0.5950042160681467962 -0.18354703888517159838 0
+}
+
+sp {blocks-world*f396
+  :creation-time 1361
+  :feature 5 fringe blocks-world*u375
+  &blocks-world*u375
+  -(<block-1> ^above <bottom>)
+-->
+  = -5.44195920524703424803 495.5570098834047598757 0.5950042160681467962 -0.18354703888517159838 0
+}
+
+sp {blocks-world*f397
+  :creation-time 1361
+  :feature 5 fringe blocks-world*u375
+  &blocks-world*u375
+  +(<block-1> ^above <bottom>)
+-->
+  = -5.44195920524703424803 495.5570098834047598757 0.5950042160681467962 -0.18354703888517159838 0
+}
+
+sp {blocks-world*f400
+  :creation-time 1361
+  :feature 5 fringe blocks-world*u375
+  &blocks-world*u375
+  -(<top> ^goal-on <block-2>)
+-->
+  = -5.44195920524703424803 495.5570098834047598757 0.5950042160681467962 -0.18354703888517159838 0
+}
+
+sp {blocks-world*f401
+  :creation-time 1361
+  :feature 5 fringe blocks-world*u375
+  &blocks-world*u375
+  +(<top> ^goal-on <block-2>)
+-->
+  = -5.44195920524703424803 495.5570098834047598757 0.5950042160681467962 -0.18354703888517159838 0
+}
+
+sp {blocks-world*f418
+  :creation-time 1466
+  :feature 5 fringe blocks-world*s323
+  &blocks-world*s323
+  -(<block-2> ^above <bottom>)
+-->
+  = -6.06140812474286949652 443.29945762722383051369 5.09539606468073369427 -0.29706711463269630524 88
+}
+
+sp {blocks-world*f403
+  :creation-time 1361
+  :feature 5 fringe blocks-world*u375
+  &blocks-world*u375
+  +(<block-2> ^goal-on <bottom>)
+-->
+  = -5.44195920524703424803 495.5570098834047598757 0.5950042160681467962 -0.18354703888517159838 0
+}
+
+sp {blocks-world*f414
+  :creation-time 1466
+  :feature 5 fringe blocks-world*s323
+  &blocks-world*s323
+  -(<block-1> ^above <top>)
+-->
+  = -6.06140812474286949652 443.29945762722383051369 5.09539606468073369427 -0.29706711463269630524 88
+}
+
+sp {blocks-world*f416
+  :creation-time 1466
+  :feature 5 fringe blocks-world*s323
+  &blocks-world*s323
+  -(<block-2> ^above <top>)
+-->
+  = -6.06140812474286949652 443.29945762722383051369 5.09539606468073369427 -0.29706711463269630524 88
+}
+
+sp {blocks-world*f394
+  :creation-time 1361
+  :feature 5 fringe blocks-world*u375
+  &blocks-world*u375
+  -(<block-1> ^above <top>)
+-->
+  = -5.44195920524703424803 495.5570098834047598757 0.5950042160681467962 -0.18354703888517159838 0
+}
+
+sp {blocks-world*f417
+  :creation-time 1466
+  :feature 5 fringe blocks-world*s323
+  &blocks-world*s323
+  +(<block-2> ^above <top>)
+-->
+  = -5.52061318360745545419 434.58936633707446617336 0.45493801444665538103 -0.21196000569033585093 0
+}
+
+sp {blocks-world*f419
+  :creation-time 1466
+  :feature 5 fringe blocks-world*s323
+  &blocks-world*s323
+  +(<block-2> ^above <bottom>)
+-->
+  = -5.52061318360745545419 434.58936633707446617336 0.45493801444665538103 -0.21196000569033585093 0
+}
+
+sp {blocks-world*f402
+  :creation-time 1361
+  :feature 5 fringe blocks-world*u375
+  &blocks-world*u375
+  -(<block-2> ^goal-on <bottom>)
+-->
+  = -5.44195920524703424803 495.5570098834047598757 0.5950042160681467962 -0.18354703888517159838 0
+}
+
+sp {blocks-world*s964
+  :creation-time 4650
+  :feature 5 split blocks-world*s299
+  &blocks-world*s299
+  -(<block-2> ^above <top>)
+-->
+  = -0.0299025992953543783 3.31334305126909978156 0.02285064173289034356 0.00454285643373016426 146
+}
+
+sp {blocks-world*f420
+  :creation-time 1466
+  :feature 5 fringe blocks-world*s323
+  &blocks-world*s323
+  -(<top> ^goal-on <block-2>)
+-->
+  = -6.06140812474286949652 443.29945762722383051369 5.09539606468073369427 -0.29706711463269630524 88
+}
+
+sp {blocks-world*u423
+  :creation-time 1726
+  :feature 5 unsplit blocks-world*s323
+  &blocks-world*s323
+  +(<block-1> ^goal-on <bottom>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*u1193
+  :creation-time 6827
+  :feature 6 unsplit blocks-world*s605
+  &blocks-world*s605
+  +(<block-2> ^goal-on <bottom>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*s1192
+  :creation-time 6827
+  :feature 6 split blocks-world*s605
+  &blocks-world*s605
+  -(<block-2> ^goal-on <bottom>)
+-->
+  = 0.03303699284951287785 7.39069065182063322794 0.01068018880320900817 -0.06968455553445540573 693
+}
+
+sp {blocks-world*s816
+  :creation-time 3023
+  :feature 6 split blocks-world*s552
+  &blocks-world*s552
+  -(<top> ^goal-on <block-2>)
+-->
+  = 0.42965764773599174342 108.97543924852054431085 0.28231979079927604914 0.03038099520554329858 387
+}
+
+sp {blocks-world*s746
+  :creation-time 3222
+  :feature 6 split blocks-world*s654
+  &blocks-world*s654
+  -(<block-1> ^above <top>)
+-->
+  = 0.24214566654629307574 190.33317548877636227189 0.12031174177545914117 0.0020161260860062564 1583
+}
+
+sp {blocks-world*f1047
+  :creation-time 4650
+  :feature 6 fringe blocks-world*u965
+  &blocks-world*u965
+  +(<block-2> ^above <bottom>)
+-->
+  = -7.49292846227416386995 1401.32951685177658873727 0.41473928503786711142 -0.0267959154590505233 0
+}
+
+sp {blocks-world*f1046
+  :creation-time 4650
+  :feature 6 fringe blocks-world*u965
+  &blocks-world*u965
+  -(<block-2> ^above <bottom>)
+-->
+  = -7.49292846227416386995 1401.32951685177658873727 0.41473928503786711142 -0.0267959154590505233 0
+}
+
+sp {blocks-world*f1044
+  :creation-time 4650
+  :feature 6 fringe blocks-world*u965
+  &blocks-world*u965
+  -(<block-1> ^above <bottom>)
+-->
+  = -7.49292846227416386995 1401.32951685177658873727 0.41473928503786711142 -0.0267959154590505233 0
+}
+
+sp {blocks-world*f1042
+  :creation-time 4650
+  :feature 6 fringe blocks-world*u965
+  &blocks-world*u965
+  -(<block-1> ^above <top>)
+-->
+  = -7.49292846227416386995 1401.32951685177658873727 0.41473928503786711142 -0.0267959154590505233 0
+}
+
+sp {blocks-world*f1039
+  :creation-time 4650
+  :feature 6 fringe blocks-world*s964
+  &blocks-world*s964
+  +(<block-2> ^above <bottom>)
+-->
+  = -7.48215619913121976481 1401.32952096674580388935 1401.32952096674580388935 -0.02447618675020304252 2
+}
+
+sp {blocks-world*f1036
+  :creation-time 4650
+  :feature 6 fringe blocks-world*s964
+  &blocks-world*s964
+  -(<block-1> ^above <bottom>)
+-->
+  = -7.2520679582442735267 1405.33779797245369991288 29.27787079109278423061 0.02713113216378823522 49
+}
+
+sp {blocks-world*f1034
+  :creation-time 4650
+  :feature 6 fringe blocks-world*s964
+  &blocks-world*s964
+  -(<block-1> ^above <top>)
+-->
+  = -7.21157928551520388538 1407.43678776960291543219 16.36554404383259253564 0.03999729618554415805 87
+}
+
+sp {blocks-world*f1045
+  :creation-time 4650
+  :feature 6 fringe blocks-world*u965
+  &blocks-world*u965
+  +(<block-1> ^above <bottom>)
+-->
+  = -7.49292846227416386995 1401.32951685177658873727 0.41473928503786711142 -0.0267959154590505233 0
+}
+
+sp {blocks-world*u947
+  :creation-time 4233
+  :feature 6 unsplit blocks-world*s655
+  &blocks-world*s655
+  +(<block-1> ^above <bottom>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*u946
+  :creation-time 4233
+  :feature 6 unsplit blocks-world*s655
+  &blocks-world*s655
+  -(<block-1> ^above <bottom>)
+-->
+  = -0.01677632866219804994 0.62653871521971493674 0.01333061096212159388 -0.00349372577562300293 48
+}
+
+sp {blocks-world*f1038
+  :creation-time 4650
+  :feature 6 fringe blocks-world*s964
+  &blocks-world*s964
+  -(<block-2> ^above <bottom>)
+-->
+  = -7.22202825585330998592 1407.38365431072998035233 16.75456731322297443398 0.03774222603765945566 85
+}
+
+sp {blocks-world*f949
+  :creation-time 3733
+  :feature 6 fringe blocks-world*s655
+  &blocks-world*s655
+  +(<top> ^goal-on <block-2>)
+-->
+  = -7.90839857486254516061 938.45691176594777971331 0.34930405646474932402 0.01758498317443998871 0
+}
+
+sp {blocks-world*f945
+  :creation-time 3733
+  :feature 6 fringe blocks-world*s655
+  &blocks-world*s655
+  +(<block-2> ^above <top>)
+-->
+  = -7.81513908742393592632 939.31455746813901441783 39.1381065611724565656 0.03584753466581197534 25
+}
+
+sp {blocks-world*f944
+  :creation-time 3733
+  :feature 6 fringe blocks-world*s655
+  &blocks-world*s655
+  -(<block-2> ^above <top>)
+-->
+  = -7.7894325381815683329 939.17977293131218630151 42.68998967869600846825 0.04118542337550863686 23
+}
+
+sp {blocks-world*f943
+  :creation-time 3733
+  :feature 6 fringe blocks-world*s655
+  &blocks-world*s655
+  +(<block-1> ^above <top>)
+-->
+  = -7.87328736070066970143 938.68943854885606015159 312.89647951628535338386 0.02469531284722045403 4
+}
+
+sp {blocks-world*f942
+  :creation-time 3733
+  :feature 6 fringe blocks-world*s655
+  &blocks-world*s655
+  -(<block-1> ^above <top>)
+-->
+  = -7.73252807418271714823 939.82367271923453699856 21.85636448184266455996 0.05208888333852458585 44
+}
+
+sp {blocks-world*f1037
+  :creation-time 4650
+  :feature 6 fringe blocks-world*s964
+  &blocks-world*s964
+  +(<block-1> ^above <bottom>)
+-->
+  = -7.46009237165051608542 1403.36650489700218713551 37.92882445667573421133 -0.01546026785838227127 38
+}
+
+sp {blocks-world*f1049
+  :creation-time 4650
+  :feature 6 fringe blocks-world*u965
+  &blocks-world*u965
+  +(<top> ^goal-on <block-2>)
+-->
+  = -7.49292846227416386995 1401.32951685177658873727 0.41473928503786711142 -0.0267959154590505233 0
+}
+
+sp {blocks-world*u817
+  :creation-time 3023
+  :feature 6 unsplit blocks-world*s552
+  &blocks-world*s552
+  +(<top> ^goal-on <block-2>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*f1043
+  :creation-time 4650
+  :feature 6 fringe blocks-world*u965
+  &blocks-world*u965
+  +(<block-1> ^above <top>)
+-->
+  = -7.49292846227416386995 1401.32951685177658873727 0.41473928503786711142 -0.0267959154590505233 0
+}
+
+sp {blocks-world*s494
+  :creation-time 2351
+  :feature 6 split blocks-world*s422
+  &blocks-world*s422
+  -(<block-2> ^above <top>)
+-->
+  = -0.02222843737490513491 2.05992366126897952228 0.03613901160121016365 0.00337887056729716797 58
+}
+
+sp {blocks-world*u897
+  :creation-time 3481
+  :feature 6 unsplit blocks-world*s604
+  &blocks-world*s604
+  +(<block-2> ^goal-on <bottom>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*s896
+  :creation-time 3481
+  :feature 6 split blocks-world*s604
+  &blocks-world*s604
+  -(<block-2> ^goal-on <bottom>)
+-->
+  = -0.3843260881581830879 23.68267661505709753555 0.01970272596926547076 -0.02929063641566574325 1203
+}
+
+sp {blocks-world*f1035
+  :creation-time 4650
+  :feature 6 fringe blocks-world*s964
+  &blocks-world*s964
+  +(<block-1> ^above <top>)
+-->
+  = -7.49292846227416386995 1401.32951685177658873727 0.41473928503786711142 -0.0267959154590505233 0
+}
+
+sp {blocks-world*f567
+  :creation-time 1945
+  :feature 6 fringe blocks-world*u553
+  &blocks-world*u553
+  +(<block-2> ^above <bottom>)
+-->
+  = -6.50572131516909912818 486.45229021877833019971 0.38975752096102322941 -0.12210725262166347016 0
+}
+
+sp {blocks-world*f566
+  :creation-time 1945
+  :feature 6 fringe blocks-world*u553
+  &blocks-world*u553
+  -(<block-2> ^above <bottom>)
+-->
+  = -6.50572131516909912818 486.45229021877833019971 0.38975752096102322941 -0.12210725262166347016 0
+}
+
+sp {blocks-world*f565
+  :creation-time 1945
+  :feature 6 fringe blocks-world*u553
+  &blocks-world*u553
+  +(<block-2> ^above <top>)
+-->
+  = -6.50572131516909912818 486.45229021877833019971 0.38975752096102322941 -0.12210725262166347016 0
+}
+
+sp {blocks-world*f562
+  :creation-time 1945
+  :feature 6 fringe blocks-world*u553
+  &blocks-world*u553
+  -(<block-1> ^above <top>)
+-->
+  = -6.50572131516909912818 486.45229021877833019971 0.38975752096102322941 -0.12210725262166347016 0
+}
+
+sp {blocks-world*f496
+  :creation-time 1726
+  :feature 6 fringe blocks-world*s422
+  &blocks-world*s422
+  -(<block-2> ^above <bottom>)
+-->
+  = -6.37482804733992569624 464.22539610613443983311 8.14430519484446335809 -0.21059367355543442968 58
+}
+
+sp {blocks-world*f948
+  :creation-time 3733
+  :feature 6 fringe blocks-world*s655
+  &blocks-world*s655
+  -(<top> ^goal-on <block-2>)
+-->
+  = -7.69891457235437304263 940.05630809639967537805 20.00119804460424788317 0.05889967054459876311 48
+}
+
+sp {blocks-world*f568
+  :creation-time 1945
+  :feature 6 fringe blocks-world*u553
+  &blocks-world*u553
+  -(<top> ^goal-on <block-2>)
+-->
+  = -6.50572131516909912818 486.45229021877833019971 0.38975752096102322941 -0.12210725262166347016 0
+}
+
+sp {blocks-world*f564
+  :creation-time 1945
+  :feature 6 fringe blocks-world*u553
+  &blocks-world*u553
+  -(<block-2> ^above <top>)
+-->
+  = -6.50572131516909912818 486.45229021877833019971 0.38975752096102322941 -0.12210725262166347016 0
+}
+
+sp {blocks-world*f492
+  :creation-time 1726
+  :feature 6 fringe blocks-world*s422
+  &blocks-world*s422
+  -(<block-1> ^above <top>)
+-->
+  = -6.37482804733992569624 464.22539610613443983311 8.14430519484446335809 -0.21059367355543442968 58
+}
+
+sp {blocks-world*u495
+  :creation-time 2351
+  :feature 6 unsplit blocks-world*s422
+  &blocks-world*s422
+  +(<block-2> ^above <top>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*f503
+  :creation-time 1726
+  :feature 6 fringe blocks-world*u423
+  &blocks-world*u423
+  +(<block-2> ^above <top>)
+-->
+  = -6.06465573492246967646 457.69182938454474651735 0.45278107169824555189 -0.16288839746590794144 0
+}
+
+sp {blocks-world*f504
+  :creation-time 1726
+  :feature 6 fringe blocks-world*u423
+  &blocks-world*u423
+  -(<block-2> ^above <bottom>)
+-->
+  = -6.06465573492246967646 457.69182938454474651735 0.45278107169824555189 -0.16288839746590794144 0
+}
+
+sp {blocks-world*f1048
+  :creation-time 4650
+  :feature 6 fringe blocks-world*u965
+  &blocks-world*u965
+  -(<top> ^goal-on <block-2>)
+-->
+  = -7.49292846227416386995 1401.32951685177658873727 0.41473928503786711142 -0.0267959154590505233 0
+}
+
+sp {blocks-world*f502
+  :creation-time 1726
+  :feature 6 fringe blocks-world*u423
+  &blocks-world*u423
+  -(<block-2> ^above <top>)
+-->
+  = -6.06465573492246967646 457.69182938454474651735 0.45278107169824555189 -0.16288839746590794144 0
+}
+
+sp {blocks-world*s747
+  :creation-time 3222
+  :feature 6 split blocks-world*s654
+  &blocks-world*s654
+  +(<block-1> ^above <top>)
+-->
+  = 0.21558783552215976531 136.85889022329394038024 0.10313405442599392348 -0.0023485411759425587 1328
+}
+
+sp {blocks-world*f505
+  :creation-time 1726
+  :feature 6 fringe blocks-world*u423
+  &blocks-world*u423
+  +(<block-2> ^above <bottom>)
+-->
+  = -6.06465573492246967646 457.69182938454474651735 0.45278107169824555189 -0.16288839746590794144 0
+}
+
+sp {blocks-world*s1040
+  :creation-time 5060
+  :feature 6 split blocks-world*s964
+  &blocks-world*s964
+  -(<top> ^goal-on <block-2>)
+-->
+  = 0.00536917739196084327 2.19221230981633086188 0.0254908408118178012 0.00825022764159588813 87
+}
+
+sp {blocks-world*f569
+  :creation-time 1945
+  :feature 6 fringe blocks-world*u553
+  &blocks-world*u553
+  +(<top> ^goal-on <block-2>)
+-->
+  = -6.50572131516909912818 486.45229021877833019971 0.38975752096102322941 -0.12210725262166347016 0
+}
+
+sp {blocks-world*u1041
+  :creation-time 5060
+  :feature 6 unsplit blocks-world*s964
+  &blocks-world*s964
+  +(<top> ^goal-on <block-2>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*f506
+  :creation-time 1726
+  :feature 6 fringe blocks-world*u423
+  &blocks-world*u423
+  -(<top> ^goal-on <block-2>)
+-->
+  = -6.06465573492246967646 457.69182938454474651735 0.45278107169824555189 -0.16288839746590794144 0
+}
+
+sp {blocks-world*f493
+  :creation-time 1726
+  :feature 6 fringe blocks-world*s422
+  &blocks-world*s422
+  +(<block-1> ^above <top>)
+-->
+  = -6.06465573492246967646 457.69182938454474651735 0.45278107169824555189 -0.16288839746590794144 0
+}
+
+sp {blocks-world*f499
+  :creation-time 1726
+  :feature 6 fringe blocks-world*s422
+  &blocks-world*s422
+  +(<top> ^goal-on <block-2>)
+-->
+  = -6.06465573492246967646 457.69182938454474651735 0.45278107169824555189 -0.16288839746590794144 0
+}
+
+sp {blocks-world*f498
+  :creation-time 1726
+  :feature 6 fringe blocks-world*s422
+  &blocks-world*s422
+  -(<top> ^goal-on <block-2>)
+-->
+  = -6.37482804733992569624 464.22539610613443983311 8.14430519484446335809 -0.21059367355543442968 58
+}
+
+sp {blocks-world*f497
+  :creation-time 1726
+  :feature 6 fringe blocks-world*s422
+  &blocks-world*s422
+  +(<block-2> ^above <bottom>)
+-->
+  = -6.06465573492246967646 457.69182938454474651735 0.45278107169824555189 -0.16288839746590794144 0
+}
+
+sp {blocks-world*f500
+  :creation-time 1726
+  :feature 6 fringe blocks-world*u423
+  &blocks-world*u423
+  -(<block-1> ^above <top>)
+-->
+  = -6.06465573492246967646 457.69182938454474651735 0.45278107169824555189 -0.16288839746590794144 0
+}
+
+sp {blocks-world*f501
+  :creation-time 1726
+  :feature 6 fringe blocks-world*u423
+  &blocks-world*u423
+  +(<block-1> ^above <top>)
+-->
+  = -6.06465573492246967646 457.69182938454474651735 0.45278107169824555189 -0.16288839746590794144 0
+}
+
+sp {blocks-world*f507
+  :creation-time 1726
+  :feature 6 fringe blocks-world*u423
+  &blocks-world*u423
+  +(<top> ^goal-on <block-2>)
+-->
+  = -6.06465573492246967646 457.69182938454474651735 0.45278107169824555189 -0.16288839746590794144 0
+}
+
+sp {blocks-world*f563
+  :creation-time 1945
+  :feature 6 fringe blocks-world*u553
+  &blocks-world*u553
+  +(<block-1> ^above <top>)
+-->
+  = -6.50572131516909912818 486.45229021877833019971 0.38975752096102322941 -0.12210725262166347016 0
+}
+
+sp {blocks-world*s1085
+  :creation-time 5326
+  :feature 7 split blocks-world*s816
+  &blocks-world*s816
+  +(<block-1> ^above <top>)
+-->
+  = 0.37194949884261052642 86.22605838858076765518 0.5194340866781973487 0.0221739351049425118 167
+}
+
+sp {blocks-world*s1264
+  :creation-time 7939
+  :feature 7 split blocks-world*s1192
+  &blocks-world*s1192
+  -(<block-1> ^above <bottom>)
+-->
+  = -0.06020894033000692008 0.46661130452058996454 0.00116072463811092035 -0.01530751896487480765 403
+}
+
+sp {blocks-world*u1265
+  :creation-time 7939
+  :feature 7 unsplit blocks-world*s1192
+  &blocks-world*s1192
+  +(<block-1> ^above <bottom>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*f1203
+  :creation-time 6827
+  :feature 7 fringe blocks-world*u1193
+  &blocks-world*u1193
+  +(<block-1> ^above <bottom>)
+-->
+  = -2.07958926478272454474 4152.12017952947735466296 3.19475275047599627243 0.29724706215584872915 0
+}
+
+sp {blocks-world*f1201
+  :creation-time 6827
+  :feature 7 fringe blocks-world*u1193
+  &blocks-world*u1193
+  +(<block-1> ^above <top>)
+-->
+  = -2.07958926478272454474 4152.12017952947735466296 3.19475275047599627243 0.29724706215584872915 0
+}
+
+sp {blocks-world*f1200
+  :creation-time 6827
+  :feature 7 fringe blocks-world*u1193
+  &blocks-world*u1193
+  -(<block-1> ^above <top>)
+-->
+  = -2.07958926478272454474 4152.12017952947735466296 3.19475275047599627243 0.29724706215584872915 0
+}
+
+sp {blocks-world*s1014
+  :creation-time 4589
+  :feature 7 split blocks-world*s747
+  &blocks-world*s747
+  -(<block-1> ^above <bottom>)
+-->
+  = 0.40508507065353371868 122.2778641429830912557 0.1858326202780898051 0.03348980407165679657 659
+}
+
+sp {blocks-world*f1205
+  :creation-time 6827
+  :feature 7 fringe blocks-world*u1193
+  &blocks-world*u1193
+  +(<block-2> ^above <bottom>)
+-->
+  = -2.07958926478272454474 4152.12017952947735466296 3.19475275047599627243 0.29724706215584872915 0
+}
+
+sp {blocks-world*u1070
+  :creation-time 5525
+  :feature 7 unsplit blocks-world*s1040
+  &blocks-world*s1040
+  -(<block-1> ^above <top>)
+-->
+  = 0.02962983609561889442 1.65976265637269815301 0.05354073085073220162 0.00816371444522928126 32
+}
+
+sp {blocks-world*u1084
+  :creation-time 5326
+  :feature 7 unsplit blocks-world*s816
+  &blocks-world*s816
+  -(<block-1> ^above <top>)
+-->
+  = 0.06209070947442958677 16.47018108469411856731 0.53129616402239088213 0.00390756865935378787 32
+}
+
+sp {blocks-world*f1080
+  :creation-time 5060
+  :feature 7 fringe blocks-world*u1041
+  &blocks-world*u1041
+  -(<block-2> ^above <bottom>)
+-->
+  = -7.53140766700700936553 1534.78652880524577994947 0.42621410855169583609 -0.04419677804903070217 0
+}
+
+sp {blocks-world*f1079
+  :creation-time 5060
+  :feature 7 fringe blocks-world*u1041
+  &blocks-world*u1041
+  +(<block-1> ^above <bottom>)
+-->
+  = -7.53140766700700936553 1534.78652880524577994947 0.42621410855169583609 -0.04419677804903070217 0
+}
+
+sp {blocks-world*f1078
+  :creation-time 5060
+  :feature 7 fringe blocks-world*u1041
+  &blocks-world*u1041
+  -(<block-1> ^above <bottom>)
+-->
+  = -7.53140766700700936553 1534.78652880524577994947 0.42621410855169583609 -0.04419677804903070217 0
+}
+
+sp {blocks-world*f1077
+  :creation-time 5060
+  :feature 7 fringe blocks-world*u1041
+  &blocks-world*u1041
+  +(<block-1> ^above <top>)
+-->
+  = -7.53140766700700936553 1534.78652880524577994947 0.42621410855169583609 -0.04419677804903070217 0
+}
+
+sp {blocks-world*f1076
+  :creation-time 5060
+  :feature 7 fringe blocks-world*u1041
+  &blocks-world*u1041
+  -(<block-1> ^above <top>)
+-->
+  = -7.53140766700700936553 1534.78652880524577994947 0.42621410855169583609 -0.04419677804903070217 0
+}
+
+sp {blocks-world*f1072
+  :creation-time 5060
+  :feature 7 fringe blocks-world*s1040
+  &blocks-world*s1040
+  -(<block-1> ^above <bottom>)
+-->
+  = -7.2657717074353511677 1538.01538558415859370143 66.87023415583298913134 0.01287575401301247965 24
+}
+
+sp {blocks-world*f1073
+  :creation-time 5060
+  :feature 7 fringe blocks-world*s1040
+  &blocks-world*s1040
+  +(<block-1> ^above <bottom>)
+-->
+  = -7.48038048692232493408 1535.97884949645890628744 219.42554992806554992057 -0.03076029001660203141 8
+}
+
+sp {blocks-world*f1011
+  :creation-time 4233
+  :feature 7 fringe blocks-world*u947
+  &blocks-world*u947
+  +(<top> ^goal-on <block-2>)
+-->
+  = -7.87945190837487707824 1206.42005759571884482284 0.37948684257226650285 -0.00705896262835481458 0
+}
+
+sp {blocks-world*f1010
+  :creation-time 4233
+  :feature 7 fringe blocks-world*u947
+  &blocks-world*u947
+  -(<top> ^goal-on <block-2>)
+-->
+  = -7.87945190837487707824 1206.42005759571884482284 0.37948684257226650285 -0.00705896262835481458 0
+}
+
+sp {blocks-world*f1007
+  :creation-time 4233
+  :feature 7 fringe blocks-world*u947
+  &blocks-world*u947
+  +(<block-1> ^above <top>)
+-->
+  = -7.87945190837487707824 1206.42005759571884482284 0.37948684257226650285 -0.00705896262835481458 0
+}
+
+sp {blocks-world*f1074
+  :creation-time 5060
+  :feature 7 fringe blocks-world*s1040
+  &blocks-world*s1040
+  -(<block-2> ^above <bottom>)
+-->
+  = -7.22472906763552202847 1539.21180577091581653804 51.30706019236386339344 0.02417687799508474317 31
+}
+
+sp {blocks-world*f1006
+  :creation-time 4233
+  :feature 7 fringe blocks-world*u947
+  &blocks-world*u947
+  -(<block-1> ^above <top>)
+-->
+  = -7.87945190837487707824 1206.42005759571884482284 0.37948684257226650285 -0.00705896262835481458 0
+}
+
+sp {blocks-world*f1005
+  :creation-time 4233
+  :feature 7 fringe blocks-world*u946
+  &blocks-world*u946
+  +(<top> ^goal-on <block-2>)
+-->
+  = -7.87945190837487707824 1206.42005759571884482284 0.37948684257226650285 -0.00705896262835481458 0
+}
+
+sp {blocks-world*f1002
+  :creation-time 4233
+  :feature 7 fringe blocks-world*u946
+  &blocks-world*u946
+  -(<block-2> ^above <top>)
+-->
+  = -7.76281212031282841224 1207.13348389148882233712 54.86970381324949386226 0.01617659588171240642 23
+}
+
+sp {blocks-world*f1000
+  :creation-time 4233
+  :feature 7 fringe blocks-world*u946
+  &blocks-world*u946
+  -(<block-1> ^above <top>)
+-->
+  = -7.6952000178183030954 1207.31519190594917745329 28.07709748618486500504 0.02956486859937202533 44
+}
+
+sp {blocks-world*s898
+  :creation-time 3586
+  :feature 7 split blocks-world*s896
+  &blocks-world*s896
+  -(<block-1> ^above <top>)
+-->
+  = -0.36334775095111343512 23.28160356375460082745 0.02005306077842773649 -0.02683221910483589087 1162
+}
+
+sp {blocks-world*f909
+  :creation-time 3481
+  :feature 7 fringe blocks-world*u897
+  &blocks-world*u897
+  +(<block-2> ^above <bottom>)
+-->
+  = -7.7672811576426976643 1035.49039670916386057797 0.69435840059938391811 -0.02561280464735488094 0
+}
+
+sp {blocks-world*f1081
+  :creation-time 5060
+  :feature 7 fringe blocks-world*u1041
+  &blocks-world*u1041
+  +(<block-2> ^above <bottom>)
+-->
+  = -7.53140766700700936553 1534.78652880524577994947 0.42621410855169583609 -0.04419677804903070217 0
+}
+
+sp {blocks-world*f908
+  :creation-time 3481
+  :feature 7 fringe blocks-world*u897
+  &blocks-world*u897
+  -(<block-2> ^above <bottom>)
+-->
+  = -7.7672811576426976643 1035.49039670916386057797 0.69435840059938391811 -0.02561280464735488094 0
+}
+
+sp {blocks-world*f906
+  :creation-time 3481
+  :feature 7 fringe blocks-world*u897
+  &blocks-world*u897
+  -(<block-1> ^above <bottom>)
+-->
+  = -7.7672811576426976643 1035.49039670916386057797 0.69435840059938391811 -0.02561280464735488094 0
+}
+
+sp {blocks-world*f905
+  :creation-time 3481
+  :feature 7 fringe blocks-world*u897
+  &blocks-world*u897
+  +(<block-1> ^above <top>)
+-->
+  = -7.7672811576426976643 1035.49039670916386057797 0.69435840059938391811 -0.02561280464735488094 0
+}
+
+sp {blocks-world*f904
+  :creation-time 3481
+  :feature 7 fringe blocks-world*u897
+  &blocks-world*u897
+  -(<block-1> ^above <top>)
+-->
+  = -7.7672811576426976643 1035.49039670916386057797 0.69435840059938391811 -0.02561280464735488094 0
+}
+
+sp {blocks-world*f1004
+  :creation-time 4233
+  :feature 7 fringe blocks-world*u946
+  &blocks-world*u946
+  -(<top> ^goal-on <block-2>)
+-->
+  = -7.66219493429334708168 1207.54782728311420214595 25.69250696347051388102 0.03625397214476749896 48
+}
+
+sp {blocks-world*f1009
+  :creation-time 4233
+  :feature 7 fringe blocks-world*u947
+  &blocks-world*u947
+  +(<block-2> ^above <top>)
+-->
+  = -7.87945190837487707824 1206.42005759571884482284 0.37948684257226650285 -0.00705896262835481458 0
+}
+
+sp {blocks-world*f829
+  :creation-time 3023
+  :feature 7 fringe blocks-world*u817
+  &blocks-world*u817
+  +(<block-2> ^above <bottom>)
+-->
+  = -7.86107525120648542583 534.44468130119673787704 0.27724142455422762232 -0.05400834241069171759 0
+}
+
+sp {blocks-world*f827
+  :creation-time 3023
+  :feature 7 fringe blocks-world*u817
+  &blocks-world*u817
+  +(<block-2> ^above <top>)
+-->
+  = -7.86107525120648542583 534.44468130119673787704 0.27724142455422762232 -0.05400834241069171759 0
+}
+
+sp {blocks-world*f824
+  :creation-time 3023
+  :feature 7 fringe blocks-world*u817
+  &blocks-world*u817
+  -(<block-1> ^above <top>)
+-->
+  = -7.86107525120648542583 534.44468130119673787704 0.27724142455422762232 -0.05400834241069171759 0
+}
+
+sp {blocks-world*f1001
+  :creation-time 4233
+  :feature 7 fringe blocks-world*u946
+  &blocks-world*u946
+  +(<block-1> ^above <top>)
+-->
+  = -7.84481250237631133615 1206.65258437862689788744 402.21752812620894701467 -0.00004299458823691387 4
+}
+
+sp {blocks-world*u669
+  :creation-time 2751
+  :feature 7 unsplit blocks-world*s494
+  &blocks-world*s494
+  +(<block-2> ^above <bottom>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*u668
+  :creation-time 2751
+  :feature 7 unsplit blocks-world*s494
+  &blocks-world*s494
+  -(<block-2> ^above <bottom>)
+-->
+  = 0.0026851672691735988 0.74815587221606294488 0.02770947674874307126 0.00287814106053782548 28
+}
+
+sp {blocks-world*f825
+  :creation-time 3023
+  :feature 7 fringe blocks-world*u817
+  &blocks-world*u817
+  +(<block-1> ^above <top>)
+-->
+  = -7.86107525120648542583 534.44468130119673787704 0.27724142455422762232 -0.05400834241069171759 0
+}
+
+sp {blocks-world*s1052
+  :creation-time 4990
+  :feature 7 split blocks-world*s746
+  &blocks-world*s746
+  -(<block-1> ^above <bottom>)
+-->
+  = -0.28867652469694982109 31.60400315062292619928 0.04185960682201712163 -0.03559508903664898583 756
+}
+
+sp {blocks-world*f677
+  :creation-time 2351
+  :feature 7 fringe blocks-world*u495
+  &blocks-world*u495
+  +(<top> ^goal-on <block-2>)
+-->
+  = -6.91609641293095567249 501.81134245016971817677 0.42609172774487102942 -0.11459222846792470329 0
+}
+
+sp {blocks-world*f676
+  :creation-time 2351
+  :feature 7 fringe blocks-world*u495
+  &blocks-world*u495
+  -(<top> ^goal-on <block-2>)
+-->
+  = -6.91609641293095567249 501.81134245016971817677 0.42609172774487102942 -0.11459222846792470329 0
+}
+
+sp {blocks-world*f674
+  :creation-time 2351
+  :feature 7 fringe blocks-world*u495
+  &blocks-world*u495
+  -(<block-2> ^above <bottom>)
+-->
+  = -6.91609641293095567249 501.81134245016971817677 0.42609172774487102942 -0.11459222846792470329 0
+}
+
+sp {blocks-world*f673
+  :creation-time 2351
+  :feature 7 fringe blocks-world*u495
+  &blocks-world*u495
+  +(<block-1> ^above <top>)
+-->
+  = -6.91609641293095567249 501.81134245016971817677 0.42609172774487102942 -0.11459222846792470329 0
+}
+
+sp {blocks-world*f667
+  :creation-time 2351
+  :feature 7 fringe blocks-world*s494
+  &blocks-world*s494
+  +(<block-1> ^above <top>)
+-->
+  = -6.91609641293095567249 501.81134245016971817677 0.42609172774487102942 -0.11459222846792470329 0
+}
+
+sp {blocks-world*f666
+  :creation-time 2351
+  :feature 7 fringe blocks-world*s494
+  &blocks-world*s494
+  -(<block-1> ^above <top>)
+-->
+  = -6.94328962159444618152 505.69309456611307496132 18.72937387281900356584 -0.11220631215834682426 28
+}
+
+sp {blocks-world*f670
+  :creation-time 2351
+  :feature 7 fringe blocks-world*s494
+  &blocks-world*s494
+  -(<top> ^goal-on <block-2>)
+-->
+  = -6.94328962159444618152 505.69309456611307496132 18.72937387281900356584 -0.11220631215834682426 28
+}
+
+sp {blocks-world*f675
+  :creation-time 2351
+  :feature 7 fringe blocks-world*u495
+  &blocks-world*u495
+  +(<block-2> ^above <bottom>)
+-->
+  = -6.91609641293095567249 501.81134245016971817677 0.42609172774487102942 -0.11459222846792470329 0
+}
+
+sp {blocks-world*f671
+  :creation-time 2351
+  :feature 7 fringe blocks-world*s494
+  &blocks-world*s494
+  +(<top> ^goal-on <block-2>)
+-->
+  = -6.91609641293095567249 501.81134245016971817677 0.42609172774487102942 -0.11459222846792470329 0
+}
+
+sp {blocks-world*f672
+  :creation-time 2351
+  :feature 7 fringe blocks-world*u495
+  &blocks-world*u495
+  -(<block-1> ^above <top>)
+-->
+  = -6.91609641293095567249 501.81134245016971817677 0.42609172774487102942 -0.11459222846792470329 0
+}
+
+sp {blocks-world*f1008
+  :creation-time 4233
+  :feature 7 fringe blocks-world*u947
+  &blocks-world*u947
+  -(<block-2> ^above <top>)
+-->
+  = -7.87945190837487707824 1206.42005759571884482284 0.37948684257226650285 -0.00705896262835481458 0
+}
+
+sp {blocks-world*f1204
+  :creation-time 6827
+  :feature 7 fringe blocks-world*u1193
+  &blocks-world*u1193
+  -(<block-2> ^above <bottom>)
+-->
+  = -2.07958926478272454474 4152.12017952947735466296 3.19475275047599627243 0.29724706215584872915 0
+}
+
+sp {blocks-world*f1075
+  :creation-time 5060
+  :feature 7 fringe blocks-world*s1040
+  &blocks-world*s1040
+  +(<block-2> ^above <bottom>)
+-->
+  = -7.51978687940781398424 1534.78652880524577994947 0.42621410855169583609 -0.04173416453580475194 1
+}
+
+sp {blocks-world*f828
+  :creation-time 3023
+  :feature 7 fringe blocks-world*u817
+  &blocks-world*u817
+  -(<block-2> ^above <bottom>)
+-->
+  = -7.86107525120648542583 534.44468130119673787704 0.27724142455422762232 -0.05400834241069171759 0
+}
+
+sp {blocks-world*f1003
+  :creation-time 4233
+  :feature 7 fringe blocks-world*u946
+  &blocks-world*u946
+  +(<block-2> ^above <top>)
+-->
+  = -7.77502898185649993223 1206.82676096792624775844 50.2844483736635936566 0.01377956173447884847 25
+}
+
+sp {blocks-world*u1071
+  :creation-time 5525
+  :feature 7 unsplit blocks-world*s1040
+  &blocks-world*s1040
+  +(<block-1> ^above <top>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*f907
+  :creation-time 3481
+  :feature 7 fringe blocks-world*u897
+  &blocks-world*u897
+  +(<block-1> ^above <bottom>)
+-->
+  = -7.7672811576426976643 1035.49039670916386057797 0.69435840059938391811 -0.02561280464735488094 0
+}
+
+sp {blocks-world*s1015
+  :creation-time 4589
+  :feature 7 split blocks-world*s747
+  &blocks-world*s747
+  +(<block-1> ^above <bottom>)
+-->
+  = -0.21184751319207051345 10.73935313326229845643 0.02594046650546448854 -0.03564077656516449755 415
+}
+
+sp {blocks-world*f826
+  :creation-time 3023
+  :feature 7 fringe blocks-world*u817
+  &blocks-world*u817
+  -(<block-2> ^above <top>)
+-->
+  = -7.86107525120648542583 534.44468130119673787704 0.27724142455422762232 -0.05400834241069171759 0
+}
+
+sp {blocks-world*u899
+  :creation-time 3586
+  :feature 7 unsplit blocks-world*s896
+  &blocks-world*s896
+  +(<block-1> ^above <top>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*s1053
+  :creation-time 4990
+  :feature 7 split blocks-world*s746
+  &blocks-world*s746
+  +(<block-1> ^above <bottom>)
+-->
+  = 0.535592881669765708 153.61467283513999859679 0.24897029632923825537 0.04244082230930211475 618
+}
+
+sp {blocks-world*f1202
+  :creation-time 6827
+  :feature 7 fringe blocks-world*u1193
+  &blocks-world*u1193
+  -(<block-1> ^above <bottom>)
+-->
+  = -2.07958926478272454474 4152.12017952947735466296 3.19475275047599627243 0.29724706215584872915 0
+}
+
+sp {blocks-world*s1248
+  :creation-time 7696
+  :feature 8 split blocks-world*s1053
+  &blocks-world*s1053
+  -(<block-2> ^above <top>)
+-->
+  = 0.09541968241222045788 51.70614302954664509571 0.16107832719484935224 -0.00829766548147769026 322
+}
+
+sp {blocks-world*s1150
+  :creation-time 6231
+  :feature 8 split blocks-world*s1052
+  &blocks-world*s1052
+  -(<block-2> ^above <top>)
+-->
+  = -0.09818194661700399561 26.19445884747054620334 0.07659198493412440467 -0.00175790878654584135 343
+}
+
+sp {blocks-world*f1296
+  :creation-time 8581
+  :feature 8 fringe blocks-world*s1085
+  &blocks-world*s1085
+  -(<block-2> ^above <bottom>)
+-->
+  = -3.80210188045983921157 2174.65565055020078943926 362.44260842503348385435 0.19423081038613385085 7
+}
+
+sp {blocks-world*f1274
+  :creation-time 7939
+  :feature 8 fringe blocks-world*u1265
+  &blocks-world*u1265
+  -(<block-2> ^above <bottom>)
+-->
+  = -0.95485457777317384043 4499.02291610976317315362 2.04875011550925334447 0.04050022671290104403 0
+}
+
+sp {blocks-world*f1273
+  :creation-time 7939
+  :feature 8 fringe blocks-world*u1265
+  &blocks-world*u1265
+  +(<block-1> ^above <top>)
+-->
+  = -0.95485457777317384043 4499.02291610976317315362 2.04875011550925334447 0.04050022671290104403 0
+}
+
+sp {blocks-world*u1249
+  :creation-time 7696
+  :feature 8 unsplit blocks-world*s1053
+  &blocks-world*s1053
+  +(<block-2> ^above <top>)
+-->
+  = -0.00210876026412900068 0.0471049983014793297 0.0471049983014793297 -0.0006633874269630079 2
+}
+
+sp {blocks-world*s1212
+  :creation-time 7030
+  :feature 8 split blocks-world*s1015
+  &blocks-world*s1015
+  -(<top> ^goal-on <block-2>)
+-->
+  = -0.06499411120976912593 5.07403878518273288023 0.04125234784701408558 -0.00454381895929011504 124
+}
+
+sp {blocks-world*f1116
+  :creation-time 5525
+  :feature 8 fringe blocks-world*u1071
+  &blocks-world*u1071
+  -(<block-2> ^above <bottom>)
+-->
+  = -7.24169252957339537602 1719.29064877193513893872 0.43702376069316900553 -0.01061207274081985008 0
+}
+
+sp {blocks-world*u1147
+  :creation-time 6661
+  :feature 8 unsplit blocks-world*s1014
+  &blocks-world*s1014
+  +(<block-2> ^above <top>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*f1115
+  :creation-time 5525
+  :feature 8 fringe blocks-world*u1071
+  &blocks-world*u1071
+  +(<block-1> ^above <bottom>)
+-->
+  = -7.24169252957339537602 1719.29064877193513893872 0.43702376069316900553 -0.01061207274081985008 0
+}
+
+sp {blocks-world*f1114
+  :creation-time 5525
+  :feature 8 fringe blocks-world*u1071
+  &blocks-world*u1071
+  -(<block-1> ^above <bottom>)
+-->
+  = -7.24169252957339537602 1719.29064877193513893872 0.43702376069316900553 -0.01061207274081985008 0
+}
+
+sp {blocks-world*f1111
+  :creation-time 5525
+  :feature 8 fringe blocks-world*u1070
+  &blocks-world*u1070
+  +(<block-1> ^above <bottom>)
+-->
+  = -7.17119820470327073991 1719.98222003131763813144 245.71174571875965852996 0.00401858914811010614 8
+}
+
+sp {blocks-world*f1110
+  :creation-time 5525
+  :feature 8 fringe blocks-world*u1070
+  &blocks-world*u1070
+  -(<block-1> ^above <bottom>)
+-->
+  = -6.97284567563400159429 1722.08320907067468397145 74.87318300307281049299 0.04486324835826045049 24
+}
+
+sp {blocks-world*f1101
+  :creation-time 5326
+  :feature 8 fringe blocks-world*u1084
+  &blocks-world*u1084
+  +(<block-2> ^above <bottom>)
+-->
+  = -7.69176274874248555591 1046.09808898702999613306 0.34947822264874128795 0.00810374872471525398 0
+}
+
+sp {blocks-world*f1100
+  :creation-time 5326
+  :feature 8 fringe blocks-world*u1084
+  &blocks-world*u1084
+  -(<block-2> ^above <bottom>)
+-->
+  = -7.21717293281480642975 1080.68546926488807002897 34.86082158918993911811 0.09451113867471935825 32
+}
+
+sp {blocks-world*f1099
+  :creation-time 5326
+  :feature 8 fringe blocks-world*u1084
+  &blocks-world*u1084
+  +(<block-2> ^above <top>)
+-->
+  = -7.64161166430371885383 1046.1696979623948209337 209.23393959247897555542 0.01684298073126390058 6
+}
+
+sp {blocks-world*f1117
+  :creation-time 5525
+  :feature 8 fringe blocks-world*u1071
+  &blocks-world*u1071
+  +(<block-2> ^above <bottom>)
+-->
+  = -7.24169252957339537602 1719.29064877193513893872 0.43702376069316900553 -0.01061207274081985008 0
+}
+
+sp {blocks-world*f1275
+  :creation-time 7939
+  :feature 8 fringe blocks-world*u1265
+  &blocks-world*u1265
+  +(<block-2> ^above <bottom>)
+-->
+  = -0.95485457777317384043 4499.02291610976317315362 2.04875011550925334447 0.04050022671290104403 0
+}
+
+sp {blocks-world*s988
+  :creation-time 4082
+  :feature 8 split blocks-world*s898
+  &blocks-world*s898
+  -(<block-1> ^above <bottom>)
+-->
+  = -0.16475533750518664422 16.80388076719543377635 0.02902224657546707137 -0.00742650345693438886 580
+}
+
+sp {blocks-world*u1301
+  :creation-time 8816
+  :feature 8 unsplit blocks-world*s1264
+  &blocks-world*s1264
+  +(<block-2> ^above <bottom>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*u1295
+  :creation-time 9047
+  :feature 8 unsplit blocks-world*s1085
+  &blocks-world*s1085
+  +(<block-2> ^above <top>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*f1297
+  :creation-time 8581
+  :feature 8 fringe blocks-world*s1085
+  &blocks-world*s1085
+  +(<block-2> ^above <bottom>)
+-->
+  = -4.01543142966483568301 2149.85239068309283538838 1.51741462203732901948 0.16404026647223937663 0
+}
+
+sp {blocks-world*s1300
+  :creation-time 8816
+  :feature 8 split blocks-world*s1264
+  &blocks-world*s1264
+  -(<block-2> ^above <bottom>)
+-->
+  = -0.01469100590262553338 0.10043708638853751647 0.00089675969989765644 -0.00224925823237233499 113
+}
+
+sp {blocks-world*s1151
+  :creation-time 6231
+  :feature 8 split blocks-world*s1052
+  &blocks-world*s1052
+  +(<block-2> ^above <top>)
+-->
+  = -0.06618614398453012693 1.63888021400859673626 0.012803751671942162 -0.00759435078782171469 129
+}
+
+sp {blocks-world*f936
+  :creation-time 3586
+  :feature 8 fringe blocks-world*u899
+  &blocks-world*u899
+  -(<block-2> ^above <bottom>)
+-->
+  = -7.82177344731398171973 1105.42063296667038230225 0.72928279835201625936 -0.02261226698690330106 0
+}
+
+sp {blocks-world*f935
+  :creation-time 3586
+  :feature 8 fringe blocks-world*u899
+  &blocks-world*u899
+  +(<block-1> ^above <bottom>)
+-->
+  = -7.82177344731398171973 1105.42063296667038230225 0.72928279835201625936 -0.02261226698690330106 0
+}
+
+sp {blocks-world*f781
+  :creation-time 2751
+  :feature 8 fringe blocks-world*u669
+  &blocks-world*u669
+  +(<top> ^goal-on <block-2>)
+-->
+  = -7.30030162429605056218 514.87211171653029850859 0.42329984445211743527 -0.09760725900151367984 0
+}
+
+sp {blocks-world*f779
+  :creation-time 2751
+  :feature 8 fringe blocks-world*u669
+  &blocks-world*u669
+  +(<block-1> ^above <top>)
+-->
+  = -7.30030162429605056218 514.87211171653029850859 0.42329984445211743527 -0.09760725900151367984 0
+}
+
+sp {blocks-world*f777
+  :creation-time 2751
+  :feature 8 fringe blocks-world*u668
+  &blocks-world*u668
+  +(<top> ^goal-on <block-2>)
+-->
+  = -7.30030162429605056218 514.87211171653029850859 0.42329984445211743527 -0.09760725900151367984 0
+}
+
+sp {blocks-world*f774
+  :creation-time 2751
+  :feature 8 fringe blocks-world*u668
+  &blocks-world*u668
+  -(<block-1> ^above <top>)
+-->
+  = -7.21438352236901803138 516.44323904818384107784 19.12752737215495812961 -0.07808253100940472369 28
+}
+
+sp {blocks-world*f778
+  :creation-time 2751
+  :feature 8 fringe blocks-world*u669
+  &blocks-world*u669
+  -(<block-1> ^above <top>)
+-->
+  = -7.30030162429605056218 514.87211171653029850859 0.42329984445211743527 -0.09760725900151367984 0
+}
+
+sp {blocks-world*f775
+  :creation-time 2751
+  :feature 8 fringe blocks-world*u668
+  &blocks-world*u668
+  +(<block-1> ^above <top>)
+-->
+  = -7.30030162429605056218 514.87211171653029850859 0.42329984445211743527 -0.09760725900151367984 0
+}
+
+sp {blocks-world*f1112
+  :creation-time 5525
+  :feature 8 fringe blocks-world*u1070
+  &blocks-world*u1070
+  -(<block-2> ^above <bottom>)
+-->
+  = -6.91821162610464135412 1722.7761462353489605448 57.42587154117829584266 0.0562657747108940981 31
+}
+
+sp {blocks-world*f1113
+  :creation-time 5525
+  :feature 8 fringe blocks-world*u1070
+  &blocks-world*u1070
+  +(<block-2> ^above <bottom>)
+-->
+  = -7.2298000107921422952 1719.29064877193513893872 0.43702376069316900553 -0.00817748851642622482 1
+}
+
+sp {blocks-world*f934
+  :creation-time 3586
+  :feature 8 fringe blocks-world*u899
+  &blocks-world*u899
+  -(<block-1> ^above <bottom>)
+-->
+  = -7.82177344731398171973 1105.42063296667038230225 0.72928279835201625936 -0.02261226698690330106 0
+}
+
+sp {blocks-world*u1294
+  :creation-time 9047
+  :feature 8 unsplit blocks-world*s1085
+  &blocks-world*s1085
+  -(<block-2> ^above <top>)
+-->
+  = 0.00751337341675518359 1.24651914536544072831 0.20775319089424013064 -0.00082509341763471983 7
+}
+
+sp {blocks-world*f937
+  :creation-time 3586
+  :feature 8 fringe blocks-world*u899
+  &blocks-world*u899
+  +(<block-2> ^above <bottom>)
+-->
+  = -7.82177344731398171973 1105.42063296667038230225 0.72928279835201625936 -0.02261226698690330106 0
+}
+
+sp {blocks-world*f1272
+  :creation-time 7939
+  :feature 8 fringe blocks-world*u1265
+  &blocks-world*u1265
+  -(<block-1> ^above <top>)
+-->
+  = -0.95485457777317384043 4499.02291610976317315362 2.04875011550925334447 0.04050022671290104403 0
+}
+
+sp {blocks-world*s1146
+  :creation-time 6661
+  :feature 8 split blocks-world*s1014
+  &blocks-world*s1014
+  -(<block-2> ^above <top>)
+-->
+  = 0.22477102327356707212 84.35993615758169994479 0.19216386368469634549 0.0061333314491893165 440
+}
+
+sp {blocks-world*f1098
+  :creation-time 5326
+  :feature 8 fringe blocks-world*u1084
+  &blocks-world*u1084
+  -(<block-2> ^above <top>)
+-->
+  = -7.2614390260561059165 1080.60284684748990002845 43.22411387389959713801 0.0869489049076643955 26
+}
+
+sp {blocks-world*f780
+  :creation-time 2751
+  :feature 8 fringe blocks-world*u669
+  &blocks-world*u669
+  -(<top> ^goal-on <block-2>)
+-->
+  = -7.30030162429605056218 514.87211171653029850859 0.42329984445211743527 -0.09760725900151367984 0
+}
+
+sp {blocks-world*u1213
+  :creation-time 7030
+  :feature 8 unsplit blocks-world*s1015
+  &blocks-world*s1015
+  +(<top> ^goal-on <block-2>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*f776
+  :creation-time 2751
+  :feature 8 fringe blocks-world*u668
+  &blocks-world*u668
+  -(<top> ^goal-on <block-2>)
+-->
+  = -7.21438352236901803138 516.44323904818384107784 19.12752737215495812961 -0.07808253100940472369 28
+}
+
+sp {blocks-world*s989
+  :creation-time 4082
+  :feature 8 split blocks-world*s898
+  &blocks-world*s898
+  +(<block-1> ^above <bottom>)
+-->
+  = -0.09465544336791360813 4.59103464587140575048 0.01448275913524102801 0.00160397978163768378 318
+}
+
+sp {blocks-world*f1311
+  :creation-time 9047
+  :feature 9 fringe blocks-world*u1295
+  &blocks-world*u1295
+  +(<block-2> ^above <bottom>)
+-->
+  = -3.60665104272691028342 2253.07184521174349356443 1.49947533833911794687 0.172390335364928593 0
+}
+
+sp {blocks-world*f1309
+  :creation-time 9047
+  :feature 9 fringe blocks-world*u1294
+  &blocks-world*u1294
+  +(<block-2> ^above <bottom>)
+-->
+  = -3.60665104272691028342 2253.07184521174349356443 1.49947533833911794687 0.172390335364928593 0
+}
+
+sp {blocks-world*f1308
+  :creation-time 9047
+  :feature 9 fringe blocks-world*u1294
+  &blocks-world*u1294
+  -(<block-2> ^above <bottom>)
+-->
+  = -3.57814201257304764781 2256.06349116062028770102 376.01058186010340023131 0.1757643732947151427 7
+}
+
+sp {blocks-world*s1306
+  :creation-time 9036
+  :feature 9 split blocks-world*s1248
+  &blocks-world*s1248
+  -(<top> ^goal-on <block-2>)
+-->
+  = -0.00045012329693587533 2.98960809638320457182 0.09965360321277348665 -0.0015471609492091901 31
+}
+
+sp {blocks-world*s1303
+  :creation-time 8911
+  :feature 9 split blocks-world*s1300
+  &blocks-world*s1300
+  +(<block-1> ^above <top>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*f1304
+  :creation-time 8816
+  :feature 9 fringe blocks-world*u1301
+  &blocks-world*u1301
+  -(<block-1> ^above <top>)
+-->
+  = -0.90066211440096388685 4660.90841661684498831164 1.58851452146845018021 0.00141918287294942602 0
+}
+
+sp {blocks-world*s1287
+  :creation-time 8792
+  :feature 9 split blocks-world*s1150
+  &blocks-world*s1150
+  +(<top> ^goal-on <block-2>)
+-->
+  = 0.00018227793582384195 0.0 0.0 0.00014134336341727446 1
+}
+
+sp {blocks-world*s1292
+  :creation-time 8624
+  :feature 9 split blocks-world*s1146
+  &blocks-world*s1146
+  -(<top> ^goal-on <block-2>)
+-->
+  = 0.03522706986624905834 11.32156264681181667697 0.11321562646811816899 0.00124360578817855547 101
+}
+
+sp {blocks-world*f1216
+  :creation-time 7030
+  :feature 9 fringe blocks-world*u1213
+  &blocks-world*u1213
+  -(<block-2> ^above <top>)
+-->
+  = -5.55260498201704422172 2724.1897027062468623626 0.64125715952497930328 -0.01936233420687630269 0
+}
+
+sp {blocks-world*s1169
+  :creation-time 6427
+  :feature 9 split blocks-world*s1151
+  &blocks-world*s1151
+  +(<top> ^goal-on <block-2>)
+-->
+  = -0.05107008258129243361 1.33042918451574965211 0.01446118678821466975 -0.00640434303104818296 93
+}
+
+sp {blocks-world*s1168
+  :creation-time 6427
+  :feature 9 split blocks-world*s1151
+  &blocks-world*s1151
+  -(<top> ^goal-on <block-2>)
+-->
+  = -0.00041200794064319391 0.01143840102763675828 0.00228768020552735148 0.00038203165649176965 6
+}
+
+sp {blocks-world*s1228
+  :creation-time 8227
+  :feature 9 split blocks-world*s989
+  &blocks-world*s989
+  -(<block-2> ^above <bottom>)
+-->
+  = 0.00956395100931809947 0.35603419297360167084 0.01318645159161487695 0.00779674642892723424 28
+}
+
+sp {blocks-world*f1305
+  :creation-time 8816
+  :feature 9 fringe blocks-world*u1301
+  &blocks-world*u1301
+  +(<block-1> ^above <top>)
+-->
+  = -0.90066211440096388685 4660.90841661684498831164 1.58851452146845018021 0.00141918287294942602 0
+}
+
+sp {blocks-world*s1302
+  :creation-time 8911
+  :feature 9 split blocks-world*s1300
+  &blocks-world*s1300
+  -(<block-1> ^above <top>)
+-->
+  = -0.01014103483349093615 0.06142096129882707728 0.00074903611340033016 -0.00139912811851862539 83
+}
+
+sp {blocks-world*s1293
+  :creation-time 8624
+  :feature 9 split blocks-world*s1146
+  &blocks-world*s1146
+  +(<top> ^goal-on <block-2>)
+-->
+  = -0.00188474778410003944 0.08854541845374605535 0.04427270922687302768 -0.00045840163711129996 3
+}
+
+sp {blocks-world*f1185
+  :creation-time 6661
+  :feature 9 fringe blocks-world*u1147
+  &blocks-world*u1147
+  +(<top> ^goal-on <block-2>)
+-->
+  = -5.69642991840934609371 2507.88232810553472518222 0.75795455881194229164 0.05687981812814707494 0
+}
+
+sp {blocks-world*f1260
+  :creation-time 7696
+  :feature 9 fringe blocks-world*u1249
+  &blocks-world*u1249
+  -(<top> ^goal-on <block-2>)
+-->
+  = -3.79290054775269602771 3334.31135015724885306554 3334.31135015724885306554 0.06094525814782019574 2
+}
+
+sp {blocks-world*s1307
+  :creation-time 9036
+  :feature 9 split blocks-world*s1248
+  &blocks-world*s1248
+  +(<top> ^goal-on <block-2>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*f1217
+  :creation-time 7030
+  :feature 9 fringe blocks-world*u1213
+  &blocks-world*u1213
+  +(<block-2> ^above <top>)
+-->
+  = -5.55260498201704422172 2724.1897027062468623626 0.64125715952497930328 -0.01936233420687630269 0
+}
+
+sp {blocks-world*s1229
+  :creation-time 8227
+  :feature 9 split blocks-world*s989
+  &blocks-world*s989
+  +(<block-2> ^above <bottom>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*s1056
+  :creation-time 4971
+  :feature 9 split blocks-world*s988
+  &blocks-world*s988
+  -(<block-2> ^above <bottom>)
+-->
+  = -0.01671360620827426827 13.21754955574205681046 0.07106209438570998405 0.01101060965099114053 187
+}
+
+sp {blocks-world*s1286
+  :creation-time 8792
+  :feature 9 split blocks-world*s1150
+  &blocks-world*s1150
+  -(<top> ^goal-on <block-2>)
+-->
+  = -0.0040395221965569229 2.93439425441746637446 0.0863057133652195968 0.00225421575741582879 35
+}
+
+sp {blocks-world*s1057
+  :creation-time 4971
+  :feature 9 split blocks-world*s988
+  &blocks-world*s988
+  +(<block-2> ^above <bottom>)
+-->
+  = -0.04781901426901512264 0.98324455299498492167 0.00812598804128086653 -0.00309621467757574759 122
+}
+
+sp {blocks-world*s1215
+  :creation-time 7519
+  :feature 9 split blocks-world*s1212
+  &blocks-world*s1212
+  +(<block-2> ^above <top>)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {blocks-world*s1214
+  :creation-time 7519
+  :feature 9 split blocks-world*s1212
+  &blocks-world*s1212
+  -(<block-2> ^above <top>)
+-->
+  = -0.04806379102362687977 3.88954747252827370829 0.04227768991878558258 -0.00161910393515020878 93
+}
+
+sp {blocks-world*f1261
+  :creation-time 7696
+  :feature 9 fringe blocks-world*u1249
+  &blocks-world*u1249
+  +(<top> ^goal-on <block-2>)
+-->
+  = -3.79049178811119968913 3334.19829816132551059127 1.06356956367063126834 0.06166864545025663169 0
+}
+
+sp {blocks-world*f1184
+  :creation-time 6661
+  :feature 9 fringe blocks-world*u1147
+  &blocks-world*u1147
+  -(<top> ^goal-on <block-2>)
+-->
+  = -5.69642991840934609371 2507.88232810553472518222 0.75795455881194229164 0.05687981812814707494 0
+}
+
+sp {blocks-world*f1310
+  :creation-time 9047
+  :feature 9 fringe blocks-world*u1295
+  &blocks-world*u1295
+  -(<block-2> ^above <bottom>)
+-->
+  = -3.60665104272691028342 2253.07184521174349356443 1.49947533833911794687 0.172390335364928593 0
+}

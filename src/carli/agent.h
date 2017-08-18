@@ -120,6 +120,7 @@ namespace Carli {
     const bool terse_out = get_Option_Ranged<bool>(Options::get_global(), "terse-out");
 
   protected:
+    Action_Ptr_C choose_boltzmann(const Node_Fringe * const &fringe, const int64_t &fringe_depth);
     Action_Ptr_C choose_epsilon_greedy(const Node_Fringe * const &fringe, const int64_t &fringe_depth);
 #ifdef ENABLE_T_TEST
     Action_Ptr_C choose_t_test(const Node_Fringe * const &fringe, const int64_t &fringe_depth);
@@ -247,6 +248,9 @@ namespace Carli {
 #ifdef ENABLE_T_TEST
     const double m_t_test = get_Option_Ranged<double>(Options::get_global(), "t-test"); ///< for t-test decision-making
 #endif
+    const double m_inverse_temperature_episodic_increment = get_Option_Ranged<double>(Options::get_global(), "inverse-temperature-episodic-increment"); ///< for Boltzmann decision-making
+    const double m_inverse_temperature_initial = get_Option_Ranged<double>(Options::get_global(), "inverse-temperature"); ///< for Boltzmann decision-making
+    double m_inverse_temperature = get_Option_Ranged<double>(Options::get_global(), "inverse-temperature"); ///< for Boltzmann decision-making
 
     const int64_t m_pseudoepisode_threshold = get_Option_Ranged<int64_t>(Options::get_global(), "pseudoepisode-threshold"); ///< For deciding how many steps indicates a pseudoepisode
     const double m_split_catde = get_Option_Ranged<double>(Options::get_global(), "split-catde");

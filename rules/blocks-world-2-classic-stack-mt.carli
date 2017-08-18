@@ -1,0 +1,35 @@
+# CPU time = 0.0397086 seconds
+
+set-total-step-count 279
+
+sp {blocks-world*s1
+  :creation-time 0
+  :feature 1 split nil
+  (<s> ^blocks <blocks>)
+  (<table> ^name 0)
+  (<s> ^action <action>)
+  (<action> ^block <block-1>)
+  (<block-1> ^name <block-name>)
+  (<action> ^dest <block-2>)
+  (<block-2> ^name <dest-name>)
+-->
+  = -1.35151987734285383702 109.34239257873799999743 0.39331795891632376216 -0.21396459452987154348 279
+}
+
+sp {blocks-world*s5
+  :creation-time 223
+  :feature 2 split blocks-world*s1
+  &blocks-world*s1
+  +(<block-2> ^higher-than <block-1>)
+-->
+  = -0.00532191907571460347 7.89353866118611957603 0.17541197024858043441 0.01497175677039005483 46
+}
+
+sp {blocks-world*s4
+  :creation-time 223
+  :feature 2 split blocks-world*s1
+  &blocks-world*s1
+  -(<block-2> ^higher-than <block-1>)
+-->
+  = -0.04428536619394787127 2.90130148165594459186 0.36266268520699307398 -0.00595006246537224497 9
+}

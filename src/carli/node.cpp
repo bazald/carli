@@ -438,7 +438,7 @@ namespace Carli {
       if(new_feature->axis == old_new_var_index)
         new_feature->axis = new_new_var_index;
       auto indices = std::make_shared<Rete::Variable_Indices>(*new_feature->indices);
-      (*indices)[new_new_var_name] = new_new_var_index;
+      indices->insert(std::make_pair(new_new_var_name, new_new_var_index));
       new_feature->indices = indices;
     }
 
@@ -795,8 +795,9 @@ namespace Carli {
     if(auto bindings = new_action->parent_left()->get_bindings()) {
       auto vars = new_action->get_variables();
       for(auto binding : *bindings) {
-        if(std::find_if(vars->begin(), vars->end(), [&binding](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == binding.first;}) == vars->end() ||
-           std::find_if(vars->begin(), vars->end(), [&binding](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == binding.second;}) == vars->end())
+        if(std::find_if(vars->begin(), vars->end(), [&binding](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == binding.first;}) == vars->end()
+//           || std::find_if(vars->begin(), vars->end(), [&binding](const std::pair<std::string, Rete::WME_Token_Index> &ind){return ind.second == binding.second;}) == vars->end()
+          )
         {
           std::cerr << "BINDING FAILURE!!!" << std::endl;
 

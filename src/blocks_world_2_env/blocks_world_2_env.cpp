@@ -20,12 +20,6 @@ namespace Blocks_World_2 {
   }
 
   Environment::Environment() {
-    assert(m_num_target_blocks <= m_num_blocks);
-    if(m_num_target_blocks > m_num_blocks) {
-      std::cerr << "Fewer blocks available than demanded by the goal configuration!" << std::endl;
-      abort();
-    }
-
     if(m_goal == Goal::COLOR) {
       m_match_test = [](const Environment::Block &lhs, const Environment::Block &rhs)->bool{
         return lhs.color == rhs.color;
@@ -113,11 +107,14 @@ namespace Blocks_World_2 {
   }
 
   void Environment::init_impl() {
-    assert(m_num_blocks > 0);
+    assert(m_num_blocks_min > 2);
+    assert(m_num_blocks_max >= m_num_blocks_min);
+
+    const int64_t num_blocks = m_num_blocks_min + (m_num_blocks_min != m_num_blocks_max ? m_random.rand_lte(m_num_blocks_max - m_num_blocks_min) : 0);
 
     std::vector<Block> blocks;
-    blocks.reserve(m_num_blocks);
-    for(int i = 1; i <= m_num_blocks; ++i)
+    blocks.reserve(num_blocks);
+    for(int i = 1; i <= num_blocks; ++i)
       blocks.push_back(Block(i, m_random.rand_lt(g_num_colors)));
 
     std::shuffle(blocks.begin(), blocks.end(), m_random);
@@ -128,8 +125,8 @@ namespace Blocks_World_2 {
 
     if(m_goal == Goal::EXACT || m_goal == Goal::COLOR) {
       std::vector<Block> target_blocks;
-      target_blocks.reserve(m_num_target_blocks);
-      for(int i = 0; i < m_num_target_blocks; ++i)
+      target_blocks.reserve(num_blocks);
+      for(int i = 0; i < num_blocks; ++i)
         target_blocks.push_back(blocks[i]);
 
       std::shuffle(target_blocks.begin(), target_blocks.end(), m_random);
@@ -339,19 +336,18 @@ namespace Blocks_World_2 {
     }
   }
 
-  Agent::Agent(const std::shared_ptr<Carli::Environment> &env)
-   : Carli::Agent(env, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(variables, token);})
+  Agent::Agent(const std::shared_ptr<Carli::Environment> &env_)
+   : Carli::Agent(env_, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(variables, token);})
   {
+    auto env = dynamic_pointer_cast<const Environment>(get_env());
     std::ostringstream oss;
-    for(const auto &stack : dynamic_pointer_cast<const Environment>(get_env())->get_blocks()) {
-      for(const auto &block : stack) {
-        oss << block.id;
-        m_block_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(oss.str()));
-        m_block_names[block.id] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(block.id));
-        m_stack_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string("|") + oss.str()));
-        m_target_stack_ids[block.id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(":") + oss.str()));
-        oss.str("");
-      }
+    for(int64_t block_id = 0; block_id != env->get_num_blocks_max() + 1; ++block_id) {
+      oss << block_id;
+      m_block_ids[block_id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(oss.str()));
+      m_block_names[block_id] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(block_id));
+      m_stack_ids[block_id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string("|") + oss.str()));
+      m_target_stack_ids[block_id] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(std::string(":") + oss.str()));
+      oss.str("");
     }
 
     generate_rete();

@@ -568,8 +568,13 @@ namespace Carli {
       for(const auto &feature_node : feature_axis.second) {
         auto &node = debuggable_cast<Node &>(*feature_node.second.node->data.get());
 
-        /// Throw away nodes considering 2 or more new variables
-        if(node.variables->size() > unsplit->variables->size() + 1)
+        /// Throw away nodes considering 2 or more new HOG variables
+        int64_t ncount = 0, ucount = 0;
+        for(auto var : *node.variables)
+          ncount += var.second.existential ? 0 : 1;
+        for(auto var : *unsplit->variables)
+          ucount += var.second.existential ? 0 : 1;
+        if(ncount > ucount + 1)
           continue;
 
         auto new_fringe = node.create_fringe(*unsplit, nullptr);
@@ -631,6 +636,8 @@ namespace Carli {
     : get_action(get_action_),
     m_target_policy([this]()->Action_Ptr_C{return this->choose_greedy(nullptr, std::numeric_limits<int64_t>::max());}),
     m_exploration_policy(
+		                 dynamic_cast<const Option_Itemized &>(Options::get_global()["exploration"]).get_value() == "boltzmann" ?
+		                 std::function<Action_Ptr_C ()>([this]()->Action_Ptr_C{return this->choose_boltzmann(nullptr, std::numeric_limits<int64_t>::max());}) :
 #ifdef ENABLE_T_TEST
 		                 dynamic_cast<const Option_Itemized &>(Options::get_global()["exploration"]).get_value() == "t-test" ?
 		                 std::function<Action_Ptr_C ()>([this]()->Action_Ptr_C{return this->choose_t_test(nullptr, std::numeric_limits<int64_t>::max());}) :
@@ -791,6 +798,8 @@ namespace Carli {
   }
 
   void Agent::init() {
+    m_inverse_temperature = std::log(m_inverse_temperature_initial + m_inverse_temperature_episodic_increment * m_episode_number);
+
     if(m_metastate != Metastate::NON_TERMINAL)
       ++m_episode_number;
     m_metastate = Metastate::NON_TERMINAL;
@@ -1049,6 +1058,41 @@ namespace Carli {
     };
 
     visit_preorder(visitor, true);
+  }
+
+  Action_Ptr_C Agent::choose_boltzmann(const Node_Fringe * const &fringe, const int64_t &fringe_depth) {
+    std::vector<double> values;
+    values.reserve(m_next_q_values.size());
+
+    double value_sum = 0.0;
+
+    const tracked_ptr<Q_Value> parent_q = fringe ? dynamic_cast<Node *>(fringe->parent_action.lock()->data.get())->q_value_weight : nullptr;
+    for(const auto &action_q : m_next_q_values) {
+      double value;
+      if(parent_q && action_q.second.find(parent_q) == action_q.second.end())
+        value = std::get<0>(sum_value(action_q.first.get(), action_q.second, nullptr, fringe_depth));
+      else
+        value = std::get<0>(sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value_fringe->feature.get() : nullptr, fringe_depth));
+
+      value = std::exp(value * m_inverse_temperature);
+
+      values.push_back(value);
+      value_sum += value;
+    }
+
+    double value = value_sum * random.frand_lt();
+
+    auto vt = values.begin();
+    for(const auto &action_q : m_next_q_values) {
+      if(value < *vt)
+        return action_q.first;
+
+      value -= *vt++;
+    }
+
+    std::cerr << "Boltzmann action selection failed!" << std::endl;
+
+    abort();
   }
 
   Action_Ptr_C Agent::choose_epsilon_greedy(const Node_Fringe * const &fringe, const int64_t &fringe_depth) {

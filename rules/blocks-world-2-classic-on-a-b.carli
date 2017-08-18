@@ -1,4 +1,8 @@
-# Blocks world 2 -- Restricted to what I think matters
+# time ./blocks_world_2 --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.01 --secondary-learning-rate 0.2 --policy on-policy --split-update-count 30 --split-test value --unsplit-test value --unsplit-update-count 100 --resplit-bias boost --concrete-update-count 300 --rules rules/blocks-world-2-classic-on-a-b.carli --num-episodes 100 --num-steps 0 --rules-out rules.carli --bw2-goal on-a-b --num-blocks-min 3 --num-blocks-max 5 --exploration boltzmann --inverse-temperature 25 --inverse-temperature-episodic-increment 5
+# 0.13 seconds
+# time ./blocks_world_2 --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.01 --secondary-learning-rate 0.2 --policy on-policy --split-update-count 30 --split-test value --unsplit-test value --unsplit-update-count 100 --resplit-bias boost --concrete-update-count 300 --rules rules/blocks-world-2-classic-on-a-b.carli --num-episodes 1500 --num-steps 0 --rules-out rules.carli --bw2-goal on-a-b --num-blocks-min 3 --num-blocks-max 7 --exploration boltzmann --inverse-temperature 50 --inverse-temperature-episodic-increment 5
+# 5.4-6.2 seconds
+# ./blocks_world_2 --epsilon-greedy 0 --learning-rate 0 --rules rules.carli --num-episodes 100 --bw2-goal on-a-b --num-blocks-min 10 --num-blocks-max 10
 
 sp {blocks-world*general
   :feature 1 unsplit nil
@@ -78,130 +82,66 @@ sp {blocks-world*block-nullary-block-2-bottom-f
   = 0.0
 }
 
-sp {blocks-world*block-nullary-1on0-t
+sp {blocks-world*block-nullary-1-above-top-t
   :feature 2 fringe blocks-world*general
   &blocks-world*general
-  +(<block-1> ^on <table>)
+  +(<block-1> ^above <top>)
 -->
   = 0.0
 }
 
-sp {blocks-world*block-nullary-1on0-f
+sp {blocks-world*block-nullary-1-above-top-f
   :feature 2 fringe blocks-world*general
   &blocks-world*general
-  -(<block-1> ^on <table>)
+  -(<block-1> ^above <top>)
 -->
   = 0.0
 }
 
-sp {blocks-world*block-nullary-2on0-t
+sp {blocks-world*block-nullary-1-above-bottom-t
   :feature 2 fringe blocks-world*general
   &blocks-world*general
-  +(<block-2> ^on <table>)
+  +(<block-1> ^above <bottom>)
 -->
   = 0.0
 }
 
-sp {blocks-world*block-nullary-2on0-f
+sp {blocks-world*block-nullary-1-above-bottom-f
   :feature 2 fringe blocks-world*general
   &blocks-world*general
-  -(<block-2> ^on <table>)
+  -(<block-1> ^above <bottom>)
 -->
   = 0.0
 }
 
-sp {blocks-world*block-nullary-2on1-t
+sp {blocks-world*block-nullary-2-above-top-t
   :feature 2 fringe blocks-world*general
   &blocks-world*general
-  +(<block-2> ^on <block-1>)
+  +(<block-2> ^above <top>)
 -->
   = 0.0
 }
 
-sp {blocks-world*block-nullary-2on1-f
+sp {blocks-world*block-nullary-2-above-top-f
   :feature 2 fringe blocks-world*general
   &blocks-world*general
-  -(<block-2> ^on <block-1>)
+  -(<block-2> ^above <top>)
 -->
   = 0.0
 }
 
-sp {blocks-world*block-nullary-1on2-t
+sp {blocks-world*block-nullary-2-above-bottom-t
   :feature 2 fringe blocks-world*general
   &blocks-world*general
-  +(<block-1> ^on <block-2>)
+  +(<block-2> ^above <bottom>)
 -->
   = 0.0
 }
 
-sp {blocks-world*block-nullary-1on2-f
+sp {blocks-world*block-nullary-2-above-bottom-f
   :feature 2 fringe blocks-world*general
   &blocks-world*general
-  -(<block-1> ^on <block-2>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-2above1-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<block-2> ^above <block-1>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-2above1-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<block-2> ^above <block-1>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-1above2-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<block-1> ^above <block-2>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-1above2-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<block-1> ^above <block-2>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-2higherthan1-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<block-2> ^higher-than <block-1>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-2higherthan1-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<block-2> ^higher-than <block-1>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-1higherthan2-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<block-1> ^higher-than <block-2>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-1higherthan2-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<block-1> ^higher-than <block-2>)
+  -(<block-2> ^above <bottom>)
 -->
   = 0.0
 }

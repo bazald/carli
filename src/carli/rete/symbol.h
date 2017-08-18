@@ -56,7 +56,7 @@ namespace Rete {
     int8_t column;
     bool existential = false;
   };
-  typedef std::map<std::string, WME_Token_Index> Variable_Indices;
+  typedef std::multimap<std::string, WME_Token_Index> Variable_Indices;
   typedef std::shared_ptr<Variable_Indices> Variable_Indices_Ptr;
 
 }

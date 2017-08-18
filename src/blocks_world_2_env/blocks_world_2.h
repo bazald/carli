@@ -99,6 +99,8 @@ namespace Blocks_World_2 {
     typedef std::vector<Stack> Stacks;
 
     const Goal & get_goal() const {return m_goal;}
+    const int64_t & get_num_blocks_min() const {return m_num_blocks_min;}
+    const int64_t & get_num_blocks_max() const {return m_num_blocks_max;}
     const std::function<bool (const Environment::Block &lhs, const Environment::Block &rhs)> & get_match_test() const {return m_match_test;}
     const Stacks & get_blocks() const {return m_blocks;}
     const Stacks & get_target() const {return m_target;}
@@ -120,8 +122,8 @@ namespace Blocks_World_2 {
                       : dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "unstack" ? Goal::UNSTACK
                       : Goal::ON_A_B;
     const Reward m_reward = dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-reward"]).get_value() == "guiding" ? Reward::GUIDING : Reward::BLIND;
-    const int64_t m_num_blocks = get_Option_Ranged<int64_t>(Options::get_global(), "num-blocks");
-    const int64_t m_num_target_blocks = get_Option_Ranged<int64_t>(Options::get_global(), "num-goal-blocks");
+    const int64_t m_num_blocks_min = get_Option_Ranged<int64_t>(Options::get_global(), "num-blocks-min");
+    const int64_t m_num_blocks_max = get_Option_Ranged<int64_t>(Options::get_global(), "num-blocks-max");
 
     std::function<bool (const Environment::Block &lhs, const Environment::Block &rhs)> m_match_test;
 

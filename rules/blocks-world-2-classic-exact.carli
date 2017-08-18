@@ -109,38 +109,6 @@ sp {blocks-world*block-nullary-2on0-f
   = 0.0
 }
 
-sp {blocks-world*block-nullary-2on1-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<block-2> ^on <block-1>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-2on1-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<block-2> ^on <block-1>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-1on2-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<block-1> ^on <block-2>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-1on2-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<block-1> ^on <block-2>)
--->
-  = 0.0
-}
-
 sp {blocks-world*block-unary-goal-on-30-t
   :feature 2 fringe 1 2 blocks-world*general
   &blocks-world*general
@@ -185,30 +153,8 @@ sp {blocks-world*block-unary-3on0-f
   = 0.0
 }
 
-sp {blocks-world*block-unary-clear-3-t
-  :feature 2 fringe 1 2 blocks-world*general
-  &blocks-world*general
-  (<blocks> ^block <block-3>)
-  (<block-3> != <block-1>)
-  (<block-3> != <block-2>)
-  +(<block-3> ^clear true)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-unary-clear-3-f
-  :feature 2 fringe 1 2 blocks-world*general
-  &blocks-world*general
-  (<blocks> ^block <block-3>)
-  (<block-3> != <block-1>)
-  (<block-3> != <block-2>)
-  -(<block-3> ^clear true)
--->
-  = 0.0
-}
-
 sp {blocks-world*block-binary-goal-on-13-t
-  :feature 2 fringe blocks-world*general
+  :feature 2 fringe 2 2 blocks-world*general
   &blocks-world*general
   (<blocks> ^block <block-3>)
   (<block-3> != <block-1>)
@@ -219,7 +165,7 @@ sp {blocks-world*block-binary-goal-on-13-t
 }
 
 sp {blocks-world*block-binary-goal-on-13-f
-  :feature 2 fringe blocks-world*general
+  :feature 2 fringe 2 2 blocks-world*general
   &blocks-world*general
   (<blocks> ^block <block-3>)
   (<block-3> != <block-1>)
@@ -230,7 +176,7 @@ sp {blocks-world*block-binary-goal-on-13-f
 }
 
 sp {blocks-world*block-binary-goal-on-31-t
-  :feature 2 fringe blocks-world*general
+  :feature 2 fringe 2 2 blocks-world*general
   &blocks-world*general
   (<blocks> ^block <block-3>)
   (<block-3> != <block-1>)
@@ -241,7 +187,7 @@ sp {blocks-world*block-binary-goal-on-31-t
 }
 
 sp {blocks-world*block-binary-goal-on-31-f
-  :feature 2 fringe blocks-world*general
+  :feature 2 fringe 2 2 blocks-world*general
   &blocks-world*general
   (<blocks> ^block <block-3>)
   (<block-3> != <block-1>)
@@ -252,7 +198,7 @@ sp {blocks-world*block-binary-goal-on-31-f
 }
 
 sp {blocks-world*block-binary-goal-on-23-t
-  :feature 2 fringe blocks-world*general
+  :feature 2 fringe 2 2 blocks-world*general
   &blocks-world*general
   (<blocks> ^block <block-3>)
   (<block-3> != <block-1>)
@@ -263,7 +209,7 @@ sp {blocks-world*block-binary-goal-on-23-t
 }
 
 sp {blocks-world*block-binary-goal-on-23-f
-  :feature 2 fringe blocks-world*general
+  :feature 2 fringe 2 2 blocks-world*general
   &blocks-world*general
   (<blocks> ^block <block-3>)
   (<block-3> != <block-1>)
@@ -274,7 +220,7 @@ sp {blocks-world*block-binary-goal-on-23-f
 }
 
 sp {blocks-world*block-binary-goal-on-32-t
-  :feature 2 fringe blocks-world*general
+  :feature 2 fringe 2 2 blocks-world*general
   &blocks-world*general
   (<blocks> ^block <block-3>)
   (<block-3> != <block-1>)
@@ -285,7 +231,7 @@ sp {blocks-world*block-binary-goal-on-32-t
 }
 
 sp {blocks-world*block-binary-goal-on-32-f
-  :feature 2 fringe blocks-world*general
+  :feature 2 fringe 2 2 blocks-world*general
   &blocks-world*general
   (<blocks> ^block <block-3>)
   (<block-3> != <block-1>)
