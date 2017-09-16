@@ -43,17 +43,17 @@ namespace Blocks_World {
       stack.push_front(1);
       stack.push_front(3);
     }
-    {
-      m_blocks.push_front(Stack());
-      Stack &stack = *m_blocks.begin();
-      stack.push_front(4);
-    }
-    {
-      m_blocks.push_front(Stack());
-      Stack &stack = *m_blocks.begin();
-      stack.push_front(6);
-      stack.push_front(5);
-    }
+//    {
+//      m_blocks.push_front(Stack());
+//      Stack &stack = *m_blocks.begin();
+//      stack.push_front(4);
+//    }
+//    {
+//      m_blocks.push_front(Stack());
+//      Stack &stack = *m_blocks.begin();
+//      stack.push_front(6);
+//      stack.push_front(5);
+//    }
   }
 
   std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action) {
@@ -94,17 +94,19 @@ namespace Blocks_World {
    m_block_ids({{Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("TABLE")),
                  Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("A")),
                  Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("B")),
-                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("C")),
-                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("D")),
-                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("E")),
-                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("F"))}}),
+                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("C"))//,
+//                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("D")),
+//                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("E")),
+////                 Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("F"))
+               }}),
    m_block_names({{Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(0)),
                    Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1)),
                    Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2)),
-                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3)),
-                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(4)),
-                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(5)),
-                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(6))}})
+                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3))//,
+//                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(4)),
+//                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(5)),
+//                   Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(6))
+                 }})
   {
     generate_rete();
     generate_features();
@@ -148,12 +150,12 @@ namespace Blocks_World {
       for(auto st = bt->begin(), send = bt->end(); st != send; ++st) {
         wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_block_attr, m_block_ids[size_t(*st)]));
         wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_name_attr, m_block_names[size_t(*st)]));
-        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
+//        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
 
-        const double brightness = m_random.frand_lte();
-        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
-        if(brightness > 0.5)
-          wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_glowing_attr, m_true_value));
+//        const double brightness = m_random.frand_lte();
+//        wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
+//        if(brightness > 0.5)
+//          wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*st)], m_glowing_attr, m_true_value));
       }
 
       wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[size_t(*bt->begin())], m_clear_attr, m_true_value));
@@ -173,7 +175,7 @@ namespace Blocks_World {
     wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[0], m_name_attr, m_block_names[0]));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[0], m_clear_attr, m_true_value));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[0], m_in_place_attr, m_true_value));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[0], m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(0)));
+//    wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[0], m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(0)));
 
     Rete::Agenda::Locker locker(agenda);
     CPU_Accumulator cpu_accumulator(*this);

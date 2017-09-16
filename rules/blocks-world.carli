@@ -7,8 +7,6 @@ sp {blocks-world*general
   (<action> ^dest <dest>)
   (<block> ^name <block-name>)
   (<dest> ^name <dest-name>)
-  (<block-name> <= 3)
-  (<dest-name> <= 3)
 -->
   = 0.0
 }
