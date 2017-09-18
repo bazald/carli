@@ -1075,10 +1075,10 @@ namespace Carli {
         value = std::get<0>(sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value_fringe->feature.get() : nullptr, fringe_depth));
 
       value = std::exp(value * m_inverse_temperature);
-      if(value > m_boltzmann_maximum_value)
-        value = m_boltzmann_maximum_value;
-      else if(value < m_boltzmann_minimum_value || std::isnan(value))
-        value = m_boltzmann_minimum_value;
+//      if(value > m_boltzmann_maximum_value)
+//        value = m_boltzmann_maximum_value;
+//      else if(value < m_boltzmann_minimum_value || std::isnan(value))
+//        value = m_boltzmann_minimum_value;
 
       values.push_back(value);
       value_sum += value;

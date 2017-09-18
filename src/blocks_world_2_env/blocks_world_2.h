@@ -175,6 +175,7 @@ namespace Blocks_World_2 {
     const Rete::Symbol_Constant_String_Ptr_C m_in_place_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("in-place")); ///< Legacy
     const Rete::Symbol_Constant_String_Ptr_C m_name_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("name"));
     const Rete::Symbol_Constant_String_Ptr_C m_blocks_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("blocks"));
+    const Rete::Symbol_Constant_String_Ptr_C m_stacks_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("stacks"));
     const Rete::Symbol_Constant_String_Ptr_C m_discrepancy_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("discrepancy"));
     const Rete::Symbol_Constant_String_Ptr_C m_higher_than_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("higher-than"));
     const Rete::Symbol_Constant_String_Ptr_C m_target_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("goal"));
@@ -191,6 +192,7 @@ namespace Blocks_World_2 {
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
     const Rete::Symbol_Constant_String_Ptr_C m_false_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("false"));
     const Rete::Symbol_Identifier_Ptr_C m_blocks_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("BLOCKS"));
+    const Rete::Symbol_Identifier_Ptr_C m_stacks_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("STACKS"));
     const Rete::Symbol_Identifier_Ptr_C m_target_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("GOAL"));
     const Rete::Symbol_Identifier_Ptr_C m_table_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("TABLE"));
     const Rete::Symbol_Identifier_Ptr_C m_table_stack_id = m_table_id; //Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("|"));

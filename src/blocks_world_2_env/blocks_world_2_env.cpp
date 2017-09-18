@@ -378,39 +378,39 @@ namespace Blocks_World_2 {
     const auto &target = env->get_target();
     std::list<Rete::WME_Ptr_C> wmes_current;
 
-    if(env->get_goal() == Environment::Goal::ON_A_B)
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[1], m_goal_on_attr, m_block_ids[2]));
-    else if(env->get_goal() == Environment::Goal::EXACT) {
-      for(const auto &stack : target) {
-        Rete::Symbol_Identifier_Ptr_C prev_id = m_table_id;
-        for(const auto &block : stack) {
-          const Rete::Symbol_Identifier_Ptr_C block_id = m_block_ids[block.id];
-          assert(block.id);
-          wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_goal_on_attr, prev_id));
-          prev_id = block_id;
-        }
-      }
-    }
+//    if(env->get_goal() == Environment::Goal::ON_A_B)
+//      wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[1], m_goal_on_attr, m_block_ids[2]));
+//    else if(env->get_goal() == Environment::Goal::EXACT) {
+//      for(const auto &stack : target) {
+//        Rete::Symbol_Identifier_Ptr_C prev_id = m_table_id;
+//        for(const auto &block : stack) {
+//          const Rete::Symbol_Identifier_Ptr_C block_id = m_block_ids[block.id];
+//          assert(block.id);
+//          wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_goal_on_attr, prev_id));
+//          prev_id = block_id;
+//        }
+//      }
+//    }
 
     std::ostringstream oss;
-    int64_t max_height = 0;
+//    int64_t max_height = 0;
     for(const auto &stack : blocks) {
       const Rete::Symbol_Identifier_Ptr_C stack_id = m_stack_ids[stack.begin()->id];
 
-      int64_t height = 0;
+//      int64_t height = 0;
       for(const auto &block : stack) {
         const auto block_id = m_block_ids[block.id];
 
-        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
-
-        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_color_attr, std::make_shared<Rete::Symbol_Constant_Int>(block.color)));
-
-        const double brightness = m_random.frand_lte();
-        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
-        if(brightness >= 0.5)
-          wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_glowing_attr, m_true_value));
+//        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
+//
+//        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_color_attr, std::make_shared<Rete::Symbol_Constant_Int>(block.color)));
+//
+//        const double brightness = m_random.frand_lte();
+//        wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
+//        if(brightness >= 0.5)
+//          wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_glowing_attr, m_true_value));
       }
-      max_height = std::max(max_height, height);
+//      max_height = std::max(max_height, height);
 
       for(const auto &dest_stack : blocks) {
         if(stack == dest_stack)
@@ -439,27 +439,28 @@ namespace Blocks_World_2 {
     }
 
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_blocks_attr, m_blocks_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_stacks_attr, m_stacks_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_target_attr, m_target_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_table_id, m_name_attr, m_table_name));
-    wmes_current.push_back(std::make_shared<Rete::WME>(m_blocks_id, m_stack_attr, m_table_stack_id));
+    wmes_current.push_back(std::make_shared<Rete::WME>(m_stacks_id, m_stack_attr, m_table_stack_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_target_id, m_stack_attr, m_table_stack_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_top_attr, m_table_id));
     wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_matches_attr, m_table_stack_id));
-    if(get_total_step_count() < 5000) {
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_early_matches_attr, m_table_stack_id));
-      if(xor_string(m_table_stack_id->value))
-        wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_late_matches_attr, m_table_stack_id));
-    }
-    else {
-      if(xor_string(m_table_stack_id->value))
-        wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_early_matches_attr, m_table_stack_id));
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_late_matches_attr, m_table_stack_id));
-    }
+//    if(get_total_step_count() < 5000) {
+//      wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_early_matches_attr, m_table_stack_id));
+//      if(xor_string(m_table_stack_id->value))
+//        wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_late_matches_attr, m_table_stack_id));
+//    }
+//    else {
+//      if(xor_string(m_table_stack_id->value))
+//        wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_early_matches_attr, m_table_stack_id));
+//      wmes_current.push_back(std::make_shared<Rete::WME>(m_table_stack_id, m_late_matches_attr, m_table_stack_id));
+//    }
 
     for(const auto &stack : blocks) {
       Rete::Symbol_Identifier_Ptr_C stack_id = m_stack_ids[stack.begin()->id];
 
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_blocks_id, m_stack_attr, stack_id));
+      wmes_current.push_back(std::make_shared<Rete::WME>(m_stacks_id, m_stack_attr, stack_id));
       for(const auto &block : stack) {
         const Rete::Symbol_Identifier_Ptr_C block_id = m_block_ids[block.id];
         wmes_current.push_back(std::make_shared<Rete::WME>(m_blocks_id, m_block_attr, block_id));
@@ -467,49 +468,49 @@ namespace Blocks_World_2 {
         wmes_current.push_back(std::make_shared<Rete::WME>(block_id, m_name_attr, m_block_names[block.id]));
       }
 
-      wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[stack.rbegin()->id], m_clear_attr, m_true_value));
+//      wmes_current.push_back(std::make_shared<Rete::WME>(m_block_ids[stack.rbegin()->id], m_clear_attr, m_true_value));
 
       wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_top_attr, m_block_ids[stack.rbegin()->id]));
       ///wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_matches_attr, m_table_stack_id));
-      if(int64_t(stack.size()) == max_height)
-        wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_tallest_attr, m_true_value));
+//      if(int64_t(stack.size()) == max_height)
+//        wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_tallest_attr, m_true_value));
     }
 
-    for(const auto &stack : blocks) {
-      int64_t block1_height = 1;
-      for(const auto &block1 : stack) {
-        const Rete::Symbol_Identifier_Ptr_C block1_id = m_block_ids[block1.id];
-        int64_t block2_height = 1;
-        for(const auto &block2 : stack) {
-          if(block2_height >= block1_height)
-            break;
-          const Rete::Symbol_Identifier_Ptr_C block2_id = m_block_ids[block2.id];
-          if(block1_height == block2_height + 1)
-            wmes_current.push_back(std::make_shared<Rete::WME>(block1_id, m_on_attr, block2_id));
-          wmes_current.push_back(std::make_shared<Rete::WME>(block1_id, m_above_attr, block2_id));
-          ++block2_height;
-        }
-        ++block1_height;
-      }
-    }
-
-    for(const auto &stack1 : blocks) {
-      int64_t block1_height = 1;
-      for(const auto &block1 : stack1) {
-        const Rete::Symbol_Identifier_Ptr_C block1_id = m_block_ids[block1.id];
-        for(const auto &stack2 : blocks) {
-          int64_t block2_height = 1;
-          for(const auto &block2 : stack2) {
-            if(block2_height >= block1_height)
-              break;
-            const Rete::Symbol_Identifier_Ptr_C block2_id = m_block_ids[block2.id];
-            wmes_current.push_back(std::make_shared<Rete::WME>(block1_id, m_higher_than_attr, block2_id));
-            ++block2_height;
-          }
-        }
-        ++block1_height;
-      }
-    }
+//    for(const auto &stack : blocks) {
+//      int64_t block1_height = 1;
+//      for(const auto &block1 : stack) {
+//        const Rete::Symbol_Identifier_Ptr_C block1_id = m_block_ids[block1.id];
+//        int64_t block2_height = 1;
+//        for(const auto &block2 : stack) {
+//          if(block2_height >= block1_height)
+//            break;
+//          const Rete::Symbol_Identifier_Ptr_C block2_id = m_block_ids[block2.id];
+//          if(block1_height == block2_height + 1)
+//            wmes_current.push_back(std::make_shared<Rete::WME>(block1_id, m_on_attr, block2_id));
+//          wmes_current.push_back(std::make_shared<Rete::WME>(block1_id, m_above_attr, block2_id));
+//          ++block2_height;
+//        }
+//        ++block1_height;
+//      }
+//    }
+//
+//    for(const auto &stack1 : blocks) {
+//      int64_t block1_height = 1;
+//      for(const auto &block1 : stack1) {
+//        const Rete::Symbol_Identifier_Ptr_C block1_id = m_block_ids[block1.id];
+//        for(const auto &stack2 : blocks) {
+//          int64_t block2_height = 1;
+//          for(const auto &block2 : stack2) {
+//            if(block2_height >= block1_height)
+//              break;
+//            const Rete::Symbol_Identifier_Ptr_C block2_id = m_block_ids[block2.id];
+//            wmes_current.push_back(std::make_shared<Rete::WME>(block1_id, m_higher_than_attr, block2_id));
+//            ++block2_height;
+//          }
+//        }
+//        ++block1_height;
+//      }
+//    }
 
     std::unordered_set<const Environment::Stack *> matched_stacks;
     for(const auto &target_stack : target) {
@@ -545,16 +546,16 @@ namespace Blocks_World_2 {
         const auto match = std::mismatch(best_match->begin(), bmend, target_stack.begin(), env->get_match_test());
 
         wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_matches_attr, target_id));
-        if(get_total_step_count() < 5000) {
-          wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_early_matches_attr, target_id));
-          if(xor_string(stack_id->value) ^ xor_string(target_id->value))
-            wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_late_matches_attr, target_id));
-        }
-        else {
-          if(xor_string(stack_id->value) ^ xor_string(target_id->value))
-            wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_early_matches_attr, target_id));
-          wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_late_matches_attr, target_id));
-        }
+//        if(get_total_step_count() < 5000) {
+//          wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_early_matches_attr, target_id));
+//          if(xor_string(stack_id->value) ^ xor_string(target_id->value))
+//            wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_late_matches_attr, target_id));
+//        }
+//        else {
+//          if(xor_string(stack_id->value) ^ xor_string(target_id->value))
+//            wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_early_matches_attr, target_id));
+//          wmes_current.push_back(std::make_shared<Rete::WME>(stack_id, m_late_matches_attr, target_id));
+//        }
 
         if(match.second != target_stack.end()) {
           for(const auto &stack : blocks) {
@@ -597,16 +598,16 @@ namespace Blocks_World_2 {
       assert(!target_stack.empty());
       const Rete::Symbol_Identifier_Ptr_C target_base_id = m_block_ids[target_stack.begin()->id];
       wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_matches_top_attr, m_table_stack_id));
-      if(get_total_step_count() < 5000) {
-        wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_early_matches_top_attr, m_table_stack_id));
-        if(xor_string(target_base_id->value) ^ xor_string(m_table_stack_id->value))
-          wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
-      }
-      else {
-        if(xor_string(target_base_id->value) ^ xor_string(m_table_stack_id->value))
-          wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_early_matches_top_attr, m_table_stack_id));
-        wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
-      }
+//      if(get_total_step_count() < 5000) {
+//        wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_early_matches_top_attr, m_table_stack_id));
+//        if(xor_string(target_base_id->value) ^ xor_string(m_table_stack_id->value))
+//          wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
+//      }
+//      else {
+//        if(xor_string(target_base_id->value) ^ xor_string(m_table_stack_id->value))
+//          wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_early_matches_top_attr, m_table_stack_id));
+//        wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
+//      }
     }
 //    wmes_current.push_back(std::make_shared<Rete::WME>(m_s_id, m_discrepancy_attr, Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(discrepancy))));
 
@@ -622,16 +623,16 @@ namespace Blocks_World_2 {
         wmes_current.push_back(std::make_shared<Rete::WME>(target_stack_id, m_top_attr, m_block_ids[target_stack.rbegin()->id]));
       const Rete::Symbol_Identifier_Ptr_C target_base_id = m_block_ids[target_stack.begin()->id];
       wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_matches_top_attr, m_table_stack_id));
-      if(get_total_step_count() < 5000) {
-        wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_early_matches_top_attr, m_table_stack_id));
-        if(xor_string(target_base_id->value) ^ xor_string(m_table_stack_id->value))
-          wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
-      }
-      else {
-        if(xor_string(target_base_id->value) ^ xor_string(m_table_stack_id->value))
-          wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_early_matches_top_attr, m_table_stack_id));
-        wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
-      }
+//      if(get_total_step_count() < 5000) {
+//        wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_early_matches_top_attr, m_table_stack_id));
+//        if(xor_string(target_base_id->value) ^ xor_string(m_table_stack_id->value))
+//          wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
+//      }
+//      else {
+//        if(xor_string(target_base_id->value) ^ xor_string(m_table_stack_id->value))
+//          wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_early_matches_top_attr, m_table_stack_id));
+//        wmes_current.push_back(std::make_shared<Rete::WME>(target_base_id, m_late_matches_top_attr, m_table_stack_id));
+//      }
     }
 
 //    const auto end_time = std::chrono::high_resolution_clock::now();

@@ -6,8 +6,8 @@
 
 sp {blocks-world*general
   :feature 1 unsplit nil
-  (<s> ^blocks <blocks>)
-  (<blocks> ^stack <stack>)
+  (<s> ^stacks <stacks>)
+  (<stacks> ^stack <stack>)
   (<stack> ^top <block>)
   (<block> ^name <block-name>)
   (<stack> ^action-out <action>)
