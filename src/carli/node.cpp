@@ -235,7 +235,13 @@ namespace Carli {
   }
 
   void Node::action(const Rete::WME_Token &token) {
-    agent.m_nodes_activating.push_back(shared_from_this());
+    const auto sft = shared_from_this();
+    if(std::find(agent.m_nodes_active.begin(), agent.m_nodes_active.end(), sft) == agent.m_nodes_active.end() &&
+       std::find(agent.m_nodes_activating.begin(), agent.m_nodes_activating.end(), sft) == agent.m_nodes_activating.end())
+    {
+      agent.m_nodes_activating.push_back(sft);
+    }
+
     if(q_value_weight)
       agent.insert_q_value_next(agent.get_action(*variables, token), q_value_weight);
     if(q_value_fringe)
@@ -243,13 +249,16 @@ namespace Carli {
   }
 
   void Node::retraction(const Rete::WME_Token &token) {
-    auto na = std::find(agent.m_nodes_active.begin(), agent.m_nodes_active.end(), shared_from_this());
+    const auto sft = shared_from_this();
+
+    auto na = std::find(agent.m_nodes_active.begin(), agent.m_nodes_active.end(), sft);
     if(na != agent.m_nodes_active.end())
       agent.m_nodes_active.erase(na);
-
-    na = std::find(agent.m_nodes_activating.begin(), agent.m_nodes_activating.end(), shared_from_this());
-    if(na != agent.m_nodes_activating.end())
-      agent.m_nodes_activating.erase(na);
+    else {
+      na = std::find(agent.m_nodes_activating.begin(), agent.m_nodes_activating.end(), sft);
+      if(na != agent.m_nodes_activating.end())
+        agent.m_nodes_activating.erase(na);
+    }
 
     if(q_value_weight)
       agent.purge_q_value_next(agent.get_action(*variables, token), q_value_weight);
