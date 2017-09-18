@@ -166,6 +166,10 @@ namespace Rete {
     return !input_tokens.empty();
   }
 
+  int64_t Rete_Action::num_input_tokens() const {
+    return int64_t(input_tokens.size());
+  }
+
   std::vector<WME> Rete_Action::get_filter_wmes() const {
     return input->get_filter_wmes();
   }

@@ -113,9 +113,8 @@ namespace Carli {
     const std::function<Carli::Action_Ptr_C (const Rete::Variable_Indices &variables, const Rete::WME_Token &token)> get_action;
     int64_t q_value_count = 0;
 
-    std::list<Node_Ptr> m_nodes_active;
-    std::list<Node_Ptr> m_nodes_activating;
-    std::unordered_set<Rete::Rete_Node_Ptr_C> m_rete_nodes_evaluated;
+    std::unordered_map<Node_Ptr, int64_t> m_nodes_active;
+    std::unordered_map<Node_Ptr, int64_t> m_nodes_activating;
 
     const bool terse_out = get_Option_Ranged<bool>(Options::get_global(), "terse-out");
 

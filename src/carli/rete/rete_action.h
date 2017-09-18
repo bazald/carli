@@ -50,6 +50,7 @@ namespace Rete {
     void output_name(std::ostream &os, const int64_t &depth) const override;
 
     bool is_active() const override;
+    int64_t num_input_tokens() const;
 
     std::vector<WME> get_filter_wmes() const override;
 

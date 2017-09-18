@@ -1,35 +1,79 @@
-# CPU time = 0.0397086 seconds
+# CPU time = 0.954048 seconds
 
-set-total-step-count 279
+set-total-step-count 4048
 
 sp {blocks-world*s1
   :creation-time 0
   :feature 1 split nil
   (<s> ^blocks <blocks>)
-  (<table> ^name 0)
+  (<block-0> ^name 0)
   (<s> ^action <action>)
   (<action> ^block <block-1>)
   (<block-1> ^name <block-name>)
   (<action> ^dest <block-2>)
   (<block-2> ^name <dest-name>)
 -->
-  = -1.35151987734285383702 109.34239257873799999743 0.39331795891632376216 -0.21396459452987154348 279
+  = -1.92354326597975711088 1057.72951301349667119212 0.26136138201470143771 -0.17771842715467939255 4048
 }
 
-sp {blocks-world*s5
-  :creation-time 223
+sp {blocks-world*s10
+  :creation-time 203
   :feature 2 split blocks-world*s1
   &blocks-world*s1
+  (<blocks> ^block <block-3>)
+  (<block-3> != <block-0>)
+  (<block-3> != <block-1>)
+  (<block-3> != <block-2>)
+  -(<block-3> ^higher-than <block-2>)
+-->
+  = -0.40323847429668885356 944.29704491093150409142 0.24571872102808522964 0.09240533137251547013 3844
+}
+
+sp {blocks-world*s11
+  :creation-time 203
+  :feature 2 split blocks-world*s1
+  &blocks-world*s1
+  (<blocks> ^block <block-3>)
+  (<block-3> != <block-0>)
+  (<block-3> != <block-1>)
+  (<block-3> != <block-2>)
+  +(<block-3> ^higher-than <block-2>)
+-->
+  = -0.19919102059026555507 14.45278533500629514208 0.10397687291371435214 0.00503056722337783934 140
+}
+
+sp {blocks-world*s17
+  :creation-time 446
+  :feature 3 split blocks-world*s10
+  &blocks-world*s10
   +(<block-2> ^higher-than <block-1>)
 -->
-  = -0.00532191907571460347 7.89353866118611957603 0.17541197024858043441 0.01497175677039005483 46
+  = 0.47850447207106466818 870.87486284072815578838 0.26820907386533049399 0.08384278530595173917 3248
 }
 
-sp {blocks-world*s4
-  :creation-time 223
-  :feature 2 split blocks-world*s1
-  &blocks-world*s1
+sp {blocks-world*s16
+  :creation-time 446
+  :feature 3 split blocks-world*s10
+  &blocks-world*s10
   -(<block-2> ^higher-than <block-1>)
 -->
-  = -0.04428536619394787127 2.90130148165594459186 0.36266268520699307398 -0.00595006246537224497 9
+  = -0.30120180510772170956 16.75889373518924330142 0.04761049356587853526 0.0227775710242364704 353
+}
+
+sp {blocks-world*s15
+  :creation-time 309
+  :feature 3 split blocks-world*s11
+  &blocks-world*s11
+  +(<block-2> ^higher-than <block-1>)
+-->
+  = -0.05262781543761957392 3.37483381564601003788 0.11637357984986242132 -0.00782591225360648908 30
+}
+
+sp {blocks-world*s14
+  :creation-time 309
+  :feature 3 split blocks-world*s11
+  &blocks-world*s11
+  -(<block-2> ^higher-than <block-1>)
+-->
+  = -0.07202785325947642925 5.00200520784258984008 0.06759466497084580527 0.0134787671363179682 75
 }

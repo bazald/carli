@@ -236,10 +236,16 @@ namespace Carli {
 
   void Node::action(const Rete::WME_Token &token) {
     const auto sft = shared_from_this();
-    if(std::find(agent.m_nodes_active.begin(), agent.m_nodes_active.end(), sft) == agent.m_nodes_active.end() &&
-       std::find(agent.m_nodes_activating.begin(), agent.m_nodes_activating.end(), sft) == agent.m_nodes_activating.end())
-    {
-      agent.m_nodes_activating.push_back(sft);
+
+    auto na = agent.m_nodes_active.find(sft);
+    if(na != agent.m_nodes_active.end())
+      ++na->second;
+    else {
+      na = agent.m_nodes_activating.find(sft);
+      if(na != agent.m_nodes_activating.end())
+        ++na->second;
+      else
+        agent.m_nodes_activating[sft] = 1;
     }
 
     if(q_value_weight)
@@ -251,13 +257,17 @@ namespace Carli {
   void Node::retraction(const Rete::WME_Token &token) {
     const auto sft = shared_from_this();
 
-    auto na = std::find(agent.m_nodes_active.begin(), agent.m_nodes_active.end(), sft);
-    if(na != agent.m_nodes_active.end())
-      agent.m_nodes_active.erase(na);
-    else {
-      na = std::find(agent.m_nodes_activating.begin(), agent.m_nodes_activating.end(), sft);
-      if(na != agent.m_nodes_activating.end())
+    auto na = agent.m_nodes_activating.find(sft);
+    if(na != agent.m_nodes_activating.end()) {
+      if(--na->second == 0)
         agent.m_nodes_activating.erase(na);
+    }
+    else {
+      na = agent.m_nodes_active.find(sft);
+      if(na != agent.m_nodes_active.end()) {
+        if(--na->second == 0)
+          agent.m_nodes_active.erase(na);
+      }
     }
 
     if(q_value_weight)
@@ -850,7 +860,8 @@ namespace Carli {
   }
 
   void Node_Split::decision() {
-    if(!rete_action.lock()->is_excised())
+    const auto locked = rete_action.lock();
+    if(locked && !locked->is_excised())
       agent.respecialize(*rete_action.lock());
   }
 
@@ -881,7 +892,8 @@ namespace Carli {
   }
 
   void Node_Unsplit::decision() {
-    if(!rete_action.lock()->is_excised())
+    const auto locked = rete_action.lock();
+    if(locked && !locked->is_excised())
       agent.specialize(*rete_action.lock());
   }
 

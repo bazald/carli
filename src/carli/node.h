@@ -95,9 +95,9 @@ namespace Carli {
     void print_action(std::ostream &os) const override;
     Rete::Rete_Node_Ptr_C get_suppress() const override;
 
-    virtual void action(const Rete::WME_Token &token);
+    void action(const Rete::WME_Token &token);
     virtual void decision() = 0;
-    virtual void retraction(const Rete::WME_Token &token);
+    void retraction(const Rete::WME_Token &token);
 
     Node_Split_Ptr create_split(const Rete::Rete_Action_Ptr &parent_action_);
     Node_Unsplit_Ptr create_unsplit(const Rete::Rete_Action_Ptr &parent_action_);
