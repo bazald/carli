@@ -203,7 +203,33 @@ namespace Blocks_World_2 {
     std::map<block_id, Rete::Symbol_Identifier_Ptr_C> m_stack_ids;
     std::map<block_id, Rete::Symbol_Identifier_Ptr_C> m_target_stack_ids;
 
-    std::unordered_set<Rete::WME_Ptr_C, Rete::hash_deref<Rete::WME>> m_wmes_prev;
+    std::unordered_map<Rete::WME_Ptr_C, bool, Rete::hash_deref<Rete::WME>, Rete::compare_deref_eq> m_wmes;
+
+    void clear_old_wmes() {
+      auto wt = m_wmes.begin(), wend = m_wmes.end();
+      while(wt != wend) {
+        if(wt->second)
+          wt++->second = false;
+        else {
+          {
+            CPU_Accumulator cpu_accumulator(*this);
+            remove_wme(wt->first);
+          }
+          wt = m_wmes.erase(wt);
+        }
+      }
+    }
+
+    void insert_new_wme(const Rete::WME_Ptr_C &wme) {
+      const auto found = m_wmes.find(wme);
+      if(found == m_wmes.end()) {
+        m_wmes[wme] = true;
+        CPU_Accumulator cpu_accumulator(*this);
+        insert_wme(wme);
+      }
+      else
+        found->second = true;
+    }
 
 //    double m_feature_generation_time = 0.0;
   };
