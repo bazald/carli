@@ -158,7 +158,7 @@ namespace std {
   template <typename T1, typename T2>
   struct hash<pair<T1, T2>> {
     size_t operator()(const pair<T1, T2> &p) const {
-      return hash_combine(hash<T1>()(p.first), hash<T2>()(p.second));
+      return Rete::hash_combine(hash<T1>()(p.first), hash<T2>()(p.second));
     }
   };
 

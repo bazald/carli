@@ -203,7 +203,7 @@ namespace Blocks_World_2 {
     std::map<block_id, Rete::Symbol_Identifier_Ptr_C> m_stack_ids;
     std::map<block_id, Rete::Symbol_Identifier_Ptr_C> m_target_stack_ids;
 
-    std::list<Rete::WME_Ptr_C> m_wmes_prev;
+    std::unordered_set<Rete::WME_Ptr_C, Rete::hash_deref<Rete::WME>> m_wmes_prev;
 
 //    double m_feature_generation_time = 0.0;
   };

@@ -47,7 +47,7 @@ namespace Rete {
     void run();
 
   private:
-    std::list<std::tuple<Rete_Action_Ptr_C, WME_Token_Ptr_C, bool>, Zeni::Pool_Allocator<std::tuple<Rete_Action_Ptr_C, WME_Token_Ptr_C, bool>>> agenda;
+    std::unordered_set<std::pair<Rete_Action_Ptr_C, WME_Token_Ptr_C>> agenda;
     int64_t m_locked = 0;
     int64_t m_manually_locked = 0;
   };
