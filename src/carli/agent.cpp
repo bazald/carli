@@ -421,22 +421,24 @@ namespace Carli {
             for(auto &fringe : leaves) {
               fringe->create_fringe(*node_unsplit, nullptr, old_new_var_index);
 
-              bool binary_feature_update = false;
-              auto test = fringe->rete_action.lock()->parent_left();
-              if(auto bindings = test->get_bindings()) {
-                for(auto binding : *bindings) {
-                  if(binding.first == prev_var_index || binding.second == prev_var_index) {
-                    binary_feature_update = true;
-                    break;
+              if(fringe->q_value_fringe->feature->arity == 2) {
+                bool binary_feature_update = false;
+                auto test = fringe->rete_action.lock()->parent_left();
+                if(auto bindings = test->get_bindings()) {
+                  for(auto binding : *bindings) {
+                    if(binding.first == prev_var_index || binding.second == prev_var_index) {
+                      binary_feature_update = true;
+                      break;
+                    }
                   }
                 }
+                else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
+                  if(predicate_node->get_lhs_index() == prev_var_index || predicate_node->get_rhs_index() == prev_var_index)
+                    binary_feature_update = true;
+                }
+                if(binary_feature_update)
+                  fringe->create_fringe(*node_unsplit, nullptr, old_new_var_index, prev_var_index);
               }
-              else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
-                if(predicate_node->get_lhs_index() == prev_var_index || predicate_node->get_rhs_index() == prev_var_index)
-                  binary_feature_update = true;
-              }
-              if(binary_feature_update)
-                fringe->create_fringe(*node_unsplit, nullptr, old_new_var_index, prev_var_index);
             }
             for(auto &fringe_axis : unsplit.fringe_values) {
               if(fringe_axis.first->indices->find(old_new_var_name) != fringe_axis.first->indices->end()) {
@@ -445,22 +447,24 @@ namespace Carli {
 
                   flock->create_fringe(*node_unsplit, nullptr, old_new_var_index);
 
-                  bool binary_feature_update = false;
-                  auto test = flock->rete_action.lock()->parent_left();
-                  if(auto bindings = test->get_bindings()) {
-                    for(auto binding : *bindings) {
-                      if(binding.first == prev_var_index || binding.second == prev_var_index) {
-                        binary_feature_update = true;
-                        break;
+                  if(flock->q_value_fringe->feature->arity == 2) {
+                    bool binary_feature_update = false;
+                    auto test = flock->rete_action.lock()->parent_left();
+                    if(auto bindings = test->get_bindings()) {
+                      for(auto binding : *bindings) {
+                        if(binding.first == prev_var_index || binding.second == prev_var_index) {
+                          binary_feature_update = true;
+                          break;
+                        }
                       }
                     }
+                    else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
+                      if(predicate_node->get_lhs_index() == prev_var_index || predicate_node->get_rhs_index() == prev_var_index)
+                        binary_feature_update = true;
+                    }
+                    if(binary_feature_update)
+                      flock->create_fringe(*node_unsplit, nullptr, old_new_var_index, prev_var_index);
                   }
-                  else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
-                    if(predicate_node->get_lhs_index() == prev_var_index || predicate_node->get_rhs_index() == prev_var_index)
-                      binary_feature_update = true;
-                  }
-                  if(binary_feature_update)
-                    flock->create_fringe(*node_unsplit, nullptr, old_new_var_index, prev_var_index);
                 }
               }
             }

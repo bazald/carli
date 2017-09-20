@@ -132,7 +132,7 @@ sp {blocks-world*block-unary-goal-on-30-f
 }
 
 sp {blocks-world*block-unary-3on0-t
-  :feature 2 fringe 2 2 blocks-world*general
+  :feature 2 fringe 1 2 blocks-world*general
   &blocks-world*general
   (<blocks> ^block <block-3>)
   (<block-3> != <block-1>)
@@ -143,7 +143,7 @@ sp {blocks-world*block-unary-3on0-t
 }
 
 sp {blocks-world*block-unary-3on0-f
-  :feature 2 fringe 2 2 blocks-world*general
+  :feature 2 fringe 1 2 blocks-world*general
   &blocks-world*general
   (<blocks> ^block <block-3>)
   (<block-3> != <block-1>)
