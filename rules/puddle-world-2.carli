@@ -1,0 +1,74 @@
+sp {puddle-world*rl-action*general
+  :feature 1 unsplit nil
+  (<s> ^move <move>)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*move-north
+  :feature 2 fringe puddle-world*rl-action*general
+  &puddle-world*rl-action*general
+  (<move> == 0)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*move-south
+  :feature 2 fringe puddle-world*rl-action*general
+  &puddle-world*rl-action*general
+  (<move> == 1)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*move-east
+  :feature 2 fringe puddle-world*rl-action*general
+  &puddle-world*rl-action*general
+  (<move> == 2)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*move-west
+  :feature 2 fringe puddle-world*rl-action*general
+  &puddle-world*rl-action*general
+  (<move> == 3)
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*x-lower
+  :feature 2 fringe puddle-world*rl-action*general 1 0.0 0.5
+  &puddle-world*rl-action*general
+  {(<s> ^x <x>)
+   (<x> < 0.5)}
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*x-upper
+  :feature 2 fringe puddle-world*rl-action*general 1 0.5 1.0
+  &puddle-world*rl-action*general
+  {(<s> ^x <x>)
+   (<x> >= 0.5)}
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*y-lower
+  :feature 2 fringe puddle-world*rl-action*general 1 0.0 0.5
+  &puddle-world*rl-action*general
+  {(<s> ^y <y>)
+   (<y> < 0.5)}
+-->
+  = 0.0
+}
+
+sp {puddle-world*rl-fringe*y-upper
+  :feature 2 fringe puddle-world*rl-action*general 1 0.5 1.0
+  &puddle-world*rl-action*general
+  {(<s> ^y <y>)
+   (<y> >= 0.5)}
+-->
+  = 0.0
+}
