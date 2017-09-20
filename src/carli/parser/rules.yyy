@@ -226,7 +226,21 @@ command:
                           }
                           else if(const auto feature_r = dynamic_cast<Carli::Feature_Ranged<Carli::Feature> *>(feature)) {
                             const auto &predicate = dynamic_cast<Rete::Rete_Predicate &>(*test_node_rightmost);
-                            feature_r->upper = predicate.get_predicate() == Rete::Rete_Predicate::GTE;
+                            switch(predicate.get_predicate()) {
+                              case Rete::Rete_Predicate::GT:
+                              case Rete::Rete_Predicate::GTE:
+                                feature_r->upper = true;
+                                break;
+
+                              case Rete::Rete_Predicate::LT:
+                              case Rete::Rete_Predicate::LTE:
+                                feature_r->upper = false;
+                                break;
+
+                              default:
+                                reteerror(&yylloc, yyscanner, agent, filename, source_path, "Invalid ranged feature predicate selection.");
+                                YYABORT;
+                            }
                           }
                           else {
                             reteerror(&yylloc, yyscanner, agent, filename, source_path, "Error reading enumerated/ranged feature value / predicate test.");
