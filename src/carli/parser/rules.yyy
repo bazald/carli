@@ -226,7 +226,18 @@ command:
                           }
                           else if(const auto feature_r = dynamic_cast<Carli::Feature_Ranged<Carli::Feature> *>(feature)) {
                             const auto &predicate = dynamic_cast<Rete::Rete_Predicate &>(*test_node_rightmost);
-                            feature_r->upper = predicate.get_predicate() == Rete::Rete_Predicate::GTE;
+                            switch(predicate.get_predicate()) {
+                              case Rete::Rete_Predicate::GT:
+                              case Rete::Rete_Predicate::GTE:
+                              case Rete::Rete_Predicate::LT:
+                              case Rete::Rete_Predicate::LTE:
+                                feature_r->predicate = predicate.get_predicate();
+                                break;
+
+                              default:
+                                reteerror(&yylloc, yyscanner, agent, filename, source_path, "Invalid ranged feature predicate selection.");
+                                YYABORT;
+                            }
                           }
                           else {
                             reteerror(&yylloc, yyscanner, agent, filename, source_path, "Error reading enumerated/ranged feature value / predicate test.");
@@ -439,7 +450,7 @@ flags:
                                                                         YYABORT;
                                                                       }
                                                                       $$ = $1;
-                                                                      get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$7, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $5, $6, $9, $10, $8, false /*FIXUP later*/, false));
+                                                                      get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$7, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $5, $6, $9, $10, $8, Rete::Rete_Predicate::EQ /*FIXUP later*/, false));
                                                                       delete $4;
                                                                       delete $7; }
   | flags FLAG_FEATURE INT NODE_TYPE INT INT STRING INT INT INT { if(get<1>(*$1)) {
@@ -447,7 +458,7 @@ flags:
                                                                     YYABORT;
                                                                   }
                                                                   $$ = $1;
-                                                                  get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$7, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $5, $6, $9, $10, $8, false /*FIXUP later*/, true));
+                                                                  get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$7, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $5, $6, $9, $10, $8, Rete::Rete_Predicate::EQ /*FIXUP later*/, true));
                                                                   delete $4;
                                                                   delete $7; }
   | flags FLAG_FEATURE INT NODE_TYPE INT INT STRING { if(get<1>(*$1)) {
@@ -466,7 +477,7 @@ flags:
                                                                 YYABORT;
                                                               }
                                                               $$ = $1;
-                                                              get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, 0, 0, $7, $8, $6, false /*FIXUP later*/, false));
+                                                              get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, 0, 0, $7, $8, $6, Rete::Rete_Predicate::EQ /*FIXUP later*/, false));
                                                               delete $4;
                                                               delete $5; }
   | flags FLAG_FEATURE INT NODE_TYPE STRING INT INT INT { if(get<1>(*$1)) {
@@ -474,7 +485,7 @@ flags:
                                                             YYABORT;
                                                           }
                                                           $$ = $1;
-                                                          get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, 0, 0, $7, $8, $6, false /*FIXUP later*/, true));
+                                                          get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, 0, 0, $7, $8, $6, Rete::Rete_Predicate::EQ /*FIXUP later*/, true));
                                                           delete $4;
                                                           delete $5; }
   | flags FLAG_FEATURE INT NODE_TYPE STRING { if(get<1>(*$1)) {

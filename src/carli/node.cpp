@@ -491,9 +491,9 @@ namespace Carli {
       std::cerr << "Fringe Case 1" << std::endl;
 #endif
       if(feature_enumerated_data)
-        new_test = agent.make_predicate_vc(feature_enumerated_data->predicate(), new_feature->axis, feature_enumerated_data->symbol_constant(), ancestor_left);
+        new_test = agent.make_predicate_vc(feature_enumerated_data->get_predicate(), new_feature->axis, feature_enumerated_data->symbol_constant(), ancestor_left);
       else
-        new_test = agent.make_predicate_vc(feature_ranged_data->predicate(), new_feature->axis, feature_ranged_data->symbol_constant(), ancestor_left);
+        new_test = agent.make_predicate_vc(feature_ranged_data->get_predicate(), new_feature->axis, feature_ranged_data->symbol_constant(), ancestor_left);
     }
     else {
 //      assert(dynamic_cast<const Rete::Rete_Join *>(ancestor_right.get()) ||

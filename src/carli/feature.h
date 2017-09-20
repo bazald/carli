@@ -115,7 +115,7 @@ namespace Carli {
       return value > rhs.value ? 1 : value < rhs.value ? -1 : 0;
     }
 
-    Rete::Rete_Predicate::Predicate predicate() const {
+    Rete::Rete_Predicate::Predicate get_predicate() const {
       return Rete::Rete_Predicate::EQ;
     }
 
@@ -160,11 +160,11 @@ namespace Carli {
 
   class CARLI_LINKAGE Feature_Ranged_Data {
   public:
-    Feature_Ranged_Data(const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_, const bool &integer_locked_)
+    Feature_Ranged_Data(const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const Rete::Rete_Predicate::Predicate &predicate_, const bool &integer_locked_)
      : bound_lower(bound_lower_),
      bound_upper(bound_upper_),
      depth(depth_),
-     upper(upper_),
+     predicate(predicate_),
      integer_locked(integer_locked_)
     {
     }
@@ -175,18 +175,35 @@ namespace Carli {
     }
 
     int64_t compare_value(const Feature_Ranged_Data &rhs) const {
-      return upper - rhs.upper;
+      return predicate - rhs.predicate;
     }
 
-    Rete::Rete_Predicate::Predicate predicate() const {
-      return upper ? Rete::Rete_Predicate::GTE : Rete::Rete_Predicate::LT;
+    Rete::Rete_Predicate::Predicate get_predicate() const {
+      return predicate;
     }
 
     Rete::Symbol_Ptr_C symbol_constant() const {
+      double value;
+
+      switch(predicate) {
+        case Rete::Rete_Predicate::GT:
+        case Rete::Rete_Predicate::GTE:
+          value = bound_lower;
+          break;
+
+        case Rete::Rete_Predicate::LT:
+        case Rete::Rete_Predicate::LTE:
+          value = bound_upper;
+          break;
+
+        default:
+          abort();
+      }
+
       if(integer_locked)
-        return std::make_shared<Rete::Symbol_Constant_Int>(int64_t(upper ? bound_lower : bound_upper));
+        return std::make_shared<Rete::Symbol_Constant_Int>(int64_t(value));
       else
-        return std::make_shared<Rete::Symbol_Constant_Float>(upper ? bound_lower : bound_upper);
+        return std::make_shared<Rete::Symbol_Constant_Float>(value);
     }
 
     double bound_lower; ///< inclusive
@@ -194,7 +211,7 @@ namespace Carli {
 
     int64_t depth; ///< 0 indicates unsplit
 
-    bool upper; ///< Is this the upper half (same bound_upper) or lower half (same bound_lower) of a split?
+    Rete::Rete_Predicate::Predicate predicate; ///< Is this the upper half (same bound_upper) or lower half (same bound_lower) of a split?
     bool integer_locked; ///< Is this restricted to integer values?
   };
 
@@ -204,14 +221,14 @@ namespace Carli {
     Feature_Ranged & operator=(const Feature_Ranged &) = delete;
 
   public:
-    Feature_Ranged(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int &arity_, const int &max_arity_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const bool &upper_, const bool &integer_locked_)
+    Feature_Ranged(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int &arity_, const int &max_arity_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const Rete::Rete_Predicate::Predicate &predicate_, const bool &integer_locked_)
      : FEATURE(conditions_, bindings_, axis_, indices_, arity_, max_arity_),
-     Feature_Ranged_Data(bound_lower_, bound_upper_, depth_, upper_, integer_locked_)
+     Feature_Ranged_Data(bound_lower_, bound_upper_, depth_, predicate_, integer_locked_)
     {
     }
 
     Feature_Ranged * clone() const override {
-      return new Feature_Ranged(this->conditions, this->bindings, this->axis, this->indices, this->arity, this->max_arity, bound_lower, bound_upper, depth, upper, integer_locked);
+      return new Feature_Ranged(this->conditions, this->bindings, this->axis, this->indices, this->arity, this->max_arity, bound_lower, bound_upper, depth, predicate, integer_locked);
     }
 
     int64_t get_depth() const override {return depth;}
@@ -235,12 +252,30 @@ namespace Carli {
 
       const double mpt = midpt();
 
+      Rete::Rete_Predicate::Predicate upper_predicate, lower_predicate;
+      switch(predicate) {
+        case Rete::Rete_Predicate::GT:
+        case Rete::Rete_Predicate::LTE:
+          upper_predicate = Rete::Rete_Predicate::GT;
+          lower_predicate = Rete::Rete_Predicate::LTE;
+          break;
+
+        case Rete::Rete_Predicate::GTE:
+        case Rete::Rete_Predicate::LT:
+          upper_predicate = Rete::Rete_Predicate::GTE;
+          lower_predicate = Rete::Rete_Predicate::LT;
+          break;
+
+        default:
+          abort();
+      }
+
       if(bound_lower != mpt) {
         {
           const auto refined_feature = clone();
           refined_feature->bound_upper = mpt;
           ++refined_feature->depth;
-          refined_feature->upper = false;
+          refined_feature->predicate = lower_predicate;
           refined_features.push_back(refined_feature);
         }
 
@@ -248,7 +283,7 @@ namespace Carli {
           const auto refined_feature = clone();
           refined_feature->bound_lower = mpt;
           ++refined_feature->depth;
-          refined_feature->upper = true;
+          refined_feature->predicate = upper_predicate;
           refined_features.push_back(refined_feature);
         }
       }
