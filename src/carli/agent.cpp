@@ -288,6 +288,9 @@ namespace Carli {
 
     excise_rule(rete_action.get_name(), false);
 
+//    dump_rules(*this);
+//    abort();
+
 #ifndef NDEBUG
     Node_Tracker::get().validate(*this, &general);
 #endif
@@ -389,7 +392,6 @@ namespace Carli {
       for(auto fvt = unsplit.fringe_values.begin(), fend = unsplit.fringe_values.end(); fvt != fend; ++fvt) {
         if(auto feature_n = dynamic_cast<Feature_NullHOG_Data *>(fvt->first)) {
           assert(fvt->second.size() == 1);
-          std::cerr << feature_n->value << " vs " << old_new_var_name << std::endl;
           if(feature_n->value == old_new_var_name) {
             null_hog = fvt->second.begin()->lock();
             unsplit.fringe_values.erase(fvt);
@@ -400,13 +402,13 @@ namespace Carli {
         }
       }
 
-      if(!null_hog) {
-        std::cerr << "No Null HOG rule found at time of HOG specialization: " << (*leaves.begin())->rete_action.lock()->get_name() << std::endl;
-        dump_rules(*this);
-        abort();
-      }
-      else
-        std::cerr << "Null HOG rule found at time of HOG specialization: " << (*leaves.begin())->rete_action.lock()->get_name() << std::endl;
+//      if(!null_hog) {
+//        std::cerr << "No Null HOG rule found at time of HOG specialization: " << (*leaves.begin())->rete_action.lock()->get_name() << std::endl;
+//        dump_rules(*this);
+//        abort();
+//      }
+//      else
+//        std::cerr << "Null HOG rule found at time of HOG specialization: " << (*leaves.begin())->rete_action.lock()->get_name() << std::endl;
     }
 
     /** Step 2: For each new leaf...
@@ -432,23 +434,31 @@ namespace Carli {
 
           /** Step 2.2: Create new ranged fringe nodes if the new leaf is refineable. */
           for(auto &refined_feature : refined) {
-            if(leaf != null_hog || node_unsplit->rete_action.lock()->get_variables()->find(old_new_var_name) == node_unsplit->rete_action.lock()->get_variables()->end())
+            if(leaf != null_hog || refined_feature->indices->find(old_new_var_name) == refined_feature->indices->end())
               node_unsplit->create_fringe(*node_unsplit, refined_feature);
           }
 
           /** Step 2.3 Create new fringe nodes. **/
           for(auto &fringe_axis : unsplit.fringe_values) {
             for(auto &fringe : fringe_axis.second) {
-              if(leaf != null_hog || node_unsplit->rete_action.lock()->get_variables()->find(old_new_var_name) == node_unsplit->rete_action.lock()->get_variables()->end())
+              if(leaf != null_hog || fringe.lock()->rete_action.lock()->get_variables()->find(old_new_var_name) == fringe.lock()->rete_action.lock()->get_variables()->end())
                 fringe.lock()->create_fringe(*node_unsplit, nullptr);
             }
           }
 
           /** Step 2.4: Create new fringe nodes if demanded by the HOG. */
-          if(old_new_var_index.rete_row != -1 && leaf != null_hog) {
+          if(old_new_var_index.rete_row != -1) {
             for(auto &fringe : leaves) {
-              if(fringe == null_hog)
-                continue;
+              if(leaf == null_hog) {
+                if(fringe == null_hog)
+                  continue;
+                if(fringe->rete_action.lock()->get_variables()->find(old_new_var_name) != fringe->rete_action.lock()->get_variables()->end())
+                  continue;
+              }
+              else if(fringe == null_hog) {
+                if(node_unsplit->rete_action.lock()->get_variables()->find(old_new_var_name) != node_unsplit->rete_action.lock()->get_variables()->end())
+                  continue;
+              }
 
               fringe->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_HOG, old_new_var_index);
 
@@ -471,36 +481,43 @@ namespace Carli {
                   fringe->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_HOG, old_new_var_index, prev_var_index);
               }
             }
-            for(auto &fringe_axis : unsplit.fringe_values) {
-              if(fringe_axis.first->indices->find(old_new_var_name) != fringe_axis.first->indices->end()) {
-                for(auto &fringe : fringe_axis.second) {
-                  auto flock = fringe.lock();
+            if(leaf != null_hog) {
+              for(auto &fringe_axis : unsplit.fringe_values) {
+                if(fringe_axis.first->indices->find(old_new_var_name) != fringe_axis.first->indices->end()) {
+                  for(auto &fringe : fringe_axis.second) {
+                    auto flock = fringe.lock();
 
-                  flock->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_HOG, old_new_var_index);
+                    auto vt = flock->rete_action.lock()->get_variables()->find(old_new_var_name);
+                    if(vt == flock->rete_action.lock()->get_variables()->end())
+                      continue;
 
-                  if(flock->q_value_fringe->feature->arity == 2) {
-                    bool binary_feature_update = false;
-                    auto test = flock->rete_action.lock()->parent_left();
-                    if(auto bindings = test->get_bindings()) {
-                      for(auto binding : *bindings) {
-                        if(binding.first == prev_var_index || binding.second == prev_var_index) {
-                          binary_feature_update = true;
-                          break;
+                    flock->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_HOG, vt->second);
+
+                    if(flock->q_value_fringe->feature->arity == 2) {
+                      bool binary_feature_update = false;
+                      auto test = flock->rete_action.lock()->parent_left();
+                      if(auto bindings = test->get_bindings()) {
+                        for(auto binding : *bindings) {
+                          if(binding.first == prev_var_index || binding.second == prev_var_index) {
+                            binary_feature_update = true;
+                            break;
+                          }
                         }
                       }
+                      else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
+                        if(predicate_node->get_lhs_index() == prev_var_index || predicate_node->get_rhs_index() == prev_var_index)
+                          binary_feature_update = true;
+                      }
+                      if(binary_feature_update)
+                        flock->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_HOG, vt->second, prev_var_index);
                     }
-                    else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
-                      if(predicate_node->get_lhs_index() == prev_var_index || predicate_node->get_rhs_index() == prev_var_index)
-                        binary_feature_update = true;
-                    }
-                    if(binary_feature_update)
-                      flock->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_HOG, old_new_var_index, prev_var_index);
                   }
                 }
               }
-            }
 
-            null_hog->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_NULL_HOG, old_null_hog_index);
+              if(null_hog)
+                null_hog->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_NULL_HOG, old_null_hog_index);
+            }
           }
         }
       }
@@ -585,6 +602,10 @@ namespace Carli {
     std::cerr << "Collapsing " << split << " to " << unsplit << std::endl;
 #endif
 
+    int64_t ucount = 0;
+    for(auto var : *unsplit->variables)
+      ucount += var.second.existential ? 0 : 1;
+
     /// Preserve some learning
     /// Already being done in node.cpp, but should attempt to do better
 //    unsplit->q_value->value = split->q_value->value;
@@ -596,11 +617,10 @@ namespace Carli {
         auto &node = debuggable_cast<Node &>(*feature_node.second.node->data.get());
 
         /// Throw away nodes considering 2 or more new HOG variables
-        int64_t ncount = 0, ucount = 0;
+        int64_t ncount = 0;
+        const int64_t count_existential = dynamic_cast<Feature_NullHOG_Data *>(feature_node.first.get()) ? 1 : 0;
         for(auto var : *node.variables)
-          ncount += var.second.existential ? 0 : 1;
-        for(auto var : *unsplit->variables)
-          ucount += var.second.existential ? 0 : 1;
+          ncount += var.second.existential ? count_existential : 1;
         if(ncount > ucount + 1)
           continue;
 
