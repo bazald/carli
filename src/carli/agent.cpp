@@ -305,9 +305,6 @@ namespace Carli {
 //    } Node_Tracker::get().validate(*this);
 //#endif
 
-    dump_rules(*this);
-    abort();
-
     return true;
   }
 
@@ -403,11 +400,12 @@ namespace Carli {
       }
 
       if(!null_hog) {
-        std::cerr << "No Null HOG rule found at time of HOG specialization." << std::endl;
+        std::cerr << "No Null HOG rule found at time of HOG specialization: " << (*leaves.begin())->rete_action.lock()->get_name() << std::endl;
+        dump_rules(*this);
         abort();
       }
       else
-        std::cerr << "Null HOG rule found at time of HOG specialization." << std::endl;
+        std::cerr << "Null HOG rule found at time of HOG specialization: " << (*leaves.begin())->rete_action.lock()->get_name() << std::endl;
     }
 
     /** Step 2: For each new leaf...
@@ -432,13 +430,17 @@ namespace Carli {
           const auto node_unsplit = leaf->create_unsplit(parent_action);
 
           /** Step 2.2: Create new ranged fringe nodes if the new leaf is refineable. */
-          for(auto &refined_feature : refined)
-            node_unsplit->create_fringe(*node_unsplit, refined_feature);
+          for(auto &refined_feature : refined) {
+            if(leaf != null_hog || node_unsplit->rete_action.lock()->get_variables()->find(old_new_var_name) == node_unsplit->rete_action.lock()->get_variables()->end())
+              node_unsplit->create_fringe(*node_unsplit, refined_feature);
+          }
 
           /** Step 2.3 Create new fringe nodes. **/
           for(auto &fringe_axis : unsplit.fringe_values) {
-            for(auto &fringe : fringe_axis.second)
-              fringe.lock()->create_fringe(*node_unsplit, nullptr);
+            for(auto &fringe : fringe_axis.second) {
+              if(leaf != null_hog || node_unsplit->rete_action.lock()->get_variables()->find(old_new_var_name) == node_unsplit->rete_action.lock()->get_variables()->end())
+                fringe.lock()->create_fringe(*node_unsplit, nullptr);
+            }
           }
 
           /** Step 2.4: Create new fringe nodes if demanded by the HOG. */
@@ -652,6 +654,9 @@ namespace Carli {
 //#endif
 
     ++m_unrefinements[split->rank()];
+
+    dump_rules(*this);
+    abort();
 
     return true;
   }

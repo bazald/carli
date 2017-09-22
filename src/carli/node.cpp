@@ -391,8 +391,9 @@ namespace Carli {
     return new_leaf_data;
   }
 
-  Node_Fringe_Ptr Node::create_fringe(Node_Unsplit &leaf, Feature * const &feature_, const Grammar &grammar, const Rete::WME_Token_Index &old_new_var_index_, const Rete::WME_Token_Index &prev_var_index) {
+  Node_Fringe_Ptr Node::create_fringe(Node_Unsplit &leaf, Feature * const &feature_, const Grammar &grammar, const Rete::WME_Token_Index &old_new_var_index_, const Rete::WME_Token_Index &prev_var_index_) {
     Rete::WME_Token_Index old_new_var_index = old_new_var_index_;
+    Rete::WME_Token_Index prev_var_index = prev_var_index_;
 
     const auto lra_lock = leaf.rete_action.lock();
     const auto ra_lock = rete_action.lock();
@@ -420,8 +421,19 @@ namespace Carli {
       rebase_right.push(node);
     }
     else {
-      for(auto node = ancestor_right; node != parent_action.lock()->parent_left(); node = node->parent_left())
+      for(auto node = ancestor_right; node != parent_action.lock()->parent_left(); node = node->parent_left()) {
         rebase_right.push(node);
+        if(dynamic_cast<Rete::Rete_Filter *>(node.get())) {
+          std::cerr << "Ancestral relationship failure: " << ra_lock->get_name() << std::endl;
+          const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();
+          if(!rules_out_file.empty()) {
+            std::ofstream rules_out((rules_out_file + ".bak").c_str());
+            rules_out << "set-total-step-count " << agent.get_total_step_count() << std::endl << std::endl;
+            agent.rete_print_rules(rules_out);
+          }
+          abort();
+        }
+      }
     }
 
     assert(grammar == GRAMMAR_NORMAL || old_new_var_index.rete_row != -1);
@@ -544,8 +556,27 @@ if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
       std::cerr << "Offsets are " << rebase_rete_offset << " && " << rebase_token_offset << " starting at " << rebase_offset_from << std::endl;
 } // #endif
 
-      if(grammar == GRAMMAR_NULL_HOG)
+      int64_t null_hog_offset = 0;
+      int64_t null_hog_token_offset = 0;
+      if(grammar == GRAMMAR_NULL_HOG) {
         new_test = ancestor_right->parent_right();
+
+if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
+        std::cerr << "Originals: " << old_new_var_index << " " << new_new_var_index << std::endl;
+} // #endif
+        auto gp = ra_lock->parent_left()->parent_left();
+        null_hog_offset = gp->get_size();
+        null_hog_token_offset = gp->get_token_size();
+        old_new_var_index.rete_row -= null_hog_offset;
+        old_new_var_index.token_row -= null_hog_token_offset;
+        old_new_var_index.existential = false;
+        new_new_var_index.rete_row -= null_hog_offset;
+        new_new_var_index.token_row -= null_hog_token_offset;
+        new_new_var_index.existential = false;
+if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
+        std::cerr << "Replacements: " << old_new_var_index << " " << new_new_var_index << std::endl;
+} // #endif
+      }
 
       assert(!rebase_right.empty());
       while(!rebase_right.empty()) {
@@ -605,7 +636,7 @@ if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
             std::cerr << "  Negation Join" << std::endl;
 } // #endif
             if(grammar == GRAMMAR_NULL_HOG && rebase_right.empty())
-              new_test = agent.make_negation_join(*bindings_ptr, test->parent_left(), new_test);
+              new_test = agent.make_negation_join(*bindings_ptr, ancestor_left, new_test);
             else
               new_test = agent.make_negation_join(*bindings_ptr, new_test, test->parent_right());
           }
@@ -618,7 +649,7 @@ if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
             auto lhs_index = predicate_node->get_lhs_index();
             if(lhs_index == old_new_var_index)
               lhs_index = new_new_var_index;
-            else if(rebase_right.empty() && lhs_index == prev_var_index)
+            else if((grammar == GRAMMAR_NULL_HOG || rebase_right.empty()) && lhs_index == prev_var_index)
               lhs_index = old_new_var_index;
 
             if(predicate_node->get_rhs())
@@ -627,9 +658,12 @@ if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
               auto rhs_index = predicate_node->get_rhs_index();
               if(rhs_index == old_new_var_index)
                 rhs_index = new_new_var_index;
-              else if(rebase_right.empty() && rhs_index == prev_var_index)
+              else if((grammar == GRAMMAR_NULL_HOG || rebase_right.empty()) && rhs_index == prev_var_index)
                 rhs_index = old_new_var_index;
 
+if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
+              std::cerr << "New Predicate Indices: " << lhs_index << " " << rhs_index << std::endl;
+} // #endif
               new_test = agent.make_predicate_vv(predicate_node->get_predicate(), lhs_index, rhs_index, new_test);
             }
           }
