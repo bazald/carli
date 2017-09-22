@@ -10,7 +10,10 @@ namespace Carli {
   static void dump_rules(const Agent &agent) {
     const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();
     if(!rules_out_file.empty()) {
-      std::ofstream rules_out((rules_out_file + ".bak").c_str());
+//      static int64_t count = 0;
+      std::ostringstream oss;
+      oss << rules_out_file << ".dump";// << ++count;
+      std::ofstream rules_out(oss.str().c_str());
       rules_out << "set-total-step-count " << agent.get_total_step_count() << std::endl << std::endl;
       agent.rete_print_rules(rules_out);
     }
@@ -389,18 +392,30 @@ namespace Carli {
         }
       }
 
-      for(auto fvt = unsplit.fringe_values.begin(), fend = unsplit.fringe_values.end(); fvt != fend; ++fvt) {
-        if(auto feature_n = dynamic_cast<Feature_NullHOG_Data *>(fvt->first)) {
-          assert(fvt->second.size() == 1);
+      for(auto leaf : leaves) {
+        if(auto feature_n = dynamic_cast<Feature_NullHOG_Data *>(leaf->q_value_fringe->feature.get())) {
+          assert(leaves.size() == 1);
           if(feature_n->value == old_new_var_name) {
-            null_hog = fvt->second.begin()->lock();
-            unsplit.fringe_values.erase(fvt);
-            leaves.push_back(null_hog);
-            old_null_hog_index = null_hog->rete_action.lock()->get_variables()->find(old_new_var_name)->second;
+            null_hog = leaf;
             break;
           }
         }
       }
+      if(!null_hog) {
+        for(auto fvt = unsplit.fringe_values.begin(), fend = unsplit.fringe_values.end(); fvt != fend; ++fvt) {
+          if(auto feature_n = dynamic_cast<Feature_NullHOG_Data *>(fvt->first)) {
+            assert(fvt->second.size() == 1);
+            if(feature_n->value == old_new_var_name) {
+              null_hog = fvt->second.begin()->lock();
+              unsplit.fringe_values.erase(fvt);
+              leaves.push_back(null_hog);
+              break;
+            }
+          }
+        }
+      }
+      if(null_hog)
+        old_null_hog_index = null_hog->rete_action.lock()->get_variables()->find(old_new_var_name)->second;
 
 //      if(!null_hog) {
 //        std::cerr << "No Null HOG rule found at time of HOG specialization: " << (*leaves.begin())->rete_action.lock()->get_name() << std::endl;
@@ -434,8 +449,7 @@ namespace Carli {
 
           /** Step 2.2: Create new ranged fringe nodes if the new leaf is refineable. */
           for(auto &refined_feature : refined) {
-            if(leaf != null_hog || refined_feature->indices->find(old_new_var_name) == refined_feature->indices->end())
-              node_unsplit->create_fringe(*node_unsplit, refined_feature);
+            node_unsplit->create_fringe(*node_unsplit, refined_feature);
           }
 
           /** Step 2.3 Create new fringe nodes. **/
@@ -486,10 +500,7 @@ namespace Carli {
                 if(fringe_axis.first->indices->find(old_new_var_name) != fringe_axis.first->indices->end()) {
                   for(auto &fringe : fringe_axis.second) {
                     auto flock = fringe.lock();
-
                     auto vt = flock->rete_action.lock()->get_variables()->find(old_new_var_name);
-                    if(vt == flock->rete_action.lock()->get_variables()->end())
-                      continue;
 
                     flock->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_HOG, vt->second);
 
