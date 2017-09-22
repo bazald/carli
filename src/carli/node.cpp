@@ -561,11 +561,11 @@ namespace Carli {
             for(auto binding : *test->get_bindings()) {
               if(binding.first == old_new_var_index)
                 binding.first = new_new_var_index;
-              else if(binding.first == prev_var_index)
+              else if(rebase_right.empty() && binding.first == prev_var_index)
                 binding.first = old_new_var_index;
               if(binding.second == old_new_var_index)
                 binding.second = new_new_var_index;
-              else if(binding.second == prev_var_index)
+              else if(rebase_right.empty() && binding.second == prev_var_index)
                 binding.second = old_new_var_index;
               updated_bindings.insert(binding);
             }
@@ -611,7 +611,7 @@ namespace Carli {
             auto lhs_index = predicate_node->get_lhs_index();
             if(lhs_index == old_new_var_index)
               lhs_index = new_new_var_index;
-            else if(lhs_index == prev_var_index)
+            else if(rebase_right.empty() && lhs_index == prev_var_index)
               lhs_index = old_new_var_index;
 
             if(predicate_node->get_rhs())
@@ -620,7 +620,7 @@ namespace Carli {
               auto rhs_index = predicate_node->get_rhs_index();
               if(rhs_index == old_new_var_index)
                 rhs_index = new_new_var_index;
-              else if(rhs_index == prev_var_index)
+              else if(rebase_right.empty() && rhs_index == prev_var_index)
                 rhs_index = old_new_var_index;
 
               new_test = agent.make_predicate_vv(predicate_node->get_predicate(), lhs_index, rhs_index, new_test);

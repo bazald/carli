@@ -4,9 +4,9 @@
 
 namespace Carli {
 
-#ifdef NDEBUG
-  inline void dump_rules(const Agent &) {}
-#else
+//#ifdef NDEBUG
+//  inline void dump_rules(const Agent &) {}
+//#else
   static void dump_rules(const Agent &agent) {
     const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();
     if(!rules_out_file.empty()) {
@@ -15,7 +15,7 @@ namespace Carli {
       agent.rete_print_rules(rules_out);
     }
   }
-#endif
+//#endif
 
   //struct Expiration_Detector {
   //  void operator()(Rete::Rete_Node &rete_node) {
@@ -304,6 +304,9 @@ namespace Carli {
 //#ifndef NDEBUG
 //    } Node_Tracker::get().validate(*this);
 //#endif
+
+    dump_rules(*this);
+    abort();
 
     return true;
   }
