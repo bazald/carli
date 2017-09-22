@@ -239,6 +239,35 @@ command:
                                 YYABORT;
                             }
                           }
+                          else if(const auto feature_n = dynamic_cast<Carli::Feature_NullHOG<Carli::Feature> *>(feature)) {
+                            /// TODO: Handle variable-to-variable relations
+                            if(Rete::Rete_Node * node_ptr = dynamic_cast<Rete::Rete_Negation_Join *>(parent.get())) {
+                              auto next_ptr = node_ptr->parent_right().get();
+                              while(dynamic_cast<Rete::Rete_Predicate *>(next_ptr))
+                                next_ptr = next_ptr->parent_left().get();
+                              if(Rete::Rete_Join * const join_ptr = dynamic_cast<Rete::Rete_Join *>(next_ptr)) {
+                                if(Rete::Rete_Filter * const filter_ptr = dynamic_cast<Rete::Rete_Filter *>(join_ptr->parent_right().get())) {
+                                  auto vt = variable_names.begin(); //, vend = variable.names.end();
+                                  auto pt = parent_action->get_variables()->begin(), pend = parent_action->get_variables()->end();
+                                  while(pt != pend && *vt == *pt)
+                                    ++pt, ++vt;
+                                  feature_n->value = vt->first;
+                                }
+                                else {
+                                  reteerror(&yylloc, yyscanner, agent, filename, source_path, "Error reading null HOG test (type 3).");
+                                  YYABORT;
+                                }
+                              }
+                              else {
+                                reteerror(&yylloc, yyscanner, agent, filename, source_path, "Error reading null HOG test (type 2).");
+                                YYABORT;
+                              }
+                            }
+                            else {
+                              reteerror(&yylloc, yyscanner, agent, filename, source_path, "Error reading null HOG test (type 1).");
+                              YYABORT;
+                            }
+                          }
                           else {
                             reteerror(&yylloc, yyscanner, agent, filename, source_path, "Error reading enumerated/ranged feature value / predicate test.");
                             YYABORT;
@@ -437,47 +466,55 @@ flags:
                                    }
                                    $$ = $1;
                                    get<0>(*$$) = make_shared<int64_t>($3); }
-  | flags FLAG_FEATURE INT NODE_TYPE INT INT STRING INT FLOAT FLOAT { if(get<1>(*$1)) {
-                                                                        reteerror(&yylloc, yyscanner, agent, filename, source_path, "Flag :feature set more than once.");
-                                                                        YYABORT;
-                                                                      }
-                                                                      if($5 < 0 || $5 > 2 || $6 < 0 || $6 > 2) {
-                                                                        reteerror(&yylloc, yyscanner, agent, filename, source_path, "Only nullary, unary, and binary features support.");
-                                                                        YYABORT;
-                                                                      }
-                                                                      if($5 > $6) {
-                                                                        reteerror(&yylloc, yyscanner, agent, filename, source_path, "Arity specified to be higher than declared maximum.");
-                                                                        YYABORT;
-                                                                      }
-                                                                      $$ = $1;
-                                                                      get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$7, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $5, $6, $9, $10, $8, Rete::Rete_Predicate::EQ /*FIXUP later*/, false));
-                                                                      delete $4;
-                                                                      delete $7; }
-  | flags FLAG_FEATURE INT NODE_TYPE INT INT STRING INT INT INT { if(get<1>(*$1)) {
+  | flags FLAG_FEATURE INT NODE_TYPE INT STRING INT FLOAT FLOAT { if(get<1>(*$1)) {
                                                                     reteerror(&yylloc, yyscanner, agent, filename, source_path, "Flag :feature set more than once.");
                                                                     YYABORT;
                                                                   }
+                                                                  if($5 < 1 || $5 > 2) {
+                                                                    reteerror(&yylloc, yyscanner, agent, filename, source_path, "Only unary and binary ranged HOG features support.");
+                                                                    YYABORT;
+                                                                  }
                                                                   $$ = $1;
-                                                                  get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$7, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $5, $6, $9, $10, $8, Rete::Rete_Predicate::EQ /*FIXUP later*/, true));
+                                                                  get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$6, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $5, $8, $9, $7, Rete::Rete_Predicate::EQ /*FIXUP later*/, false));
                                                                   delete $4;
-                                                                  delete $7; }
-  | flags FLAG_FEATURE INT NODE_TYPE INT INT STRING { if(get<1>(*$1)) {
-                                                        reteerror(&yylloc, yyscanner, agent, filename, source_path, "Flag :feature set more than once.");
-                                                        YYABORT;
-                                                      }
-                                                      $$ = $1;
-                                                      if($3 > 1)
-                                                        get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$7, new Carli::Feature_Enumerated<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $5, $6, 0 /*FIXUP later*/));
-                                                      else
-                                                        get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$7, nullptr);
-                                                      delete $4;
-                                                      delete $7; }
+                                                                  delete $6; }
+  | flags FLAG_FEATURE INT NODE_TYPE INT STRING INT INT INT { if(get<1>(*$1)) {
+                                                                reteerror(&yylloc, yyscanner, agent, filename, source_path, "Flag :feature set more than once.");
+                                                                YYABORT;
+                                                              }
+                                                              if($5 < 1 || $5 > 2) {
+                                                                reteerror(&yylloc, yyscanner, agent, filename, source_path, "Only unary and binary ranged HOG features support.");
+                                                                YYABORT;
+                                                              }
+                                                              $$ = $1;
+                                                              get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$6, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $5, $8, $9, $7, Rete::Rete_Predicate::EQ /*FIXUP later*/, true));
+                                                              delete $4;
+                                                              delete $6; }
+  | flags FLAG_FEATURE INT NODE_TYPE INT STRING { if(get<1>(*$1)) {
+                                                    reteerror(&yylloc, yyscanner, agent, filename, source_path, "Flag :feature set more than once.");
+                                                    YYABORT;
+                                                  }
+                                                  if($5 < 0 || $5 > 2) {
+                                                    reteerror(&yylloc, yyscanner, agent, filename, source_path, "Only null-HOG and unary and binary enumerable features supported.");
+                                                    YYABORT;
+                                                  }
+                                                  if($3 <= 1) {
+                                                    reteerror(&yylloc, yyscanner, agent, filename, source_path, "Cannot have a (HOG) root feature.");
+                                                    YYABORT;
+                                                  }
+                                                  $$ = $1;
+                                                  if($5 == 0)
+                                                    get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$6, new Carli::Feature_NullHOG<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index(), nullptr /*FIXUP later*/, 0, "" /*FIXUP later*/));
+                                                  else
+                                                    get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$6, new Carli::Feature_Enumerated<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, $5, 0 /*FIXUP later*/));
+                                                  delete $4;
+                                                  delete $6; }
   | flags FLAG_FEATURE INT NODE_TYPE STRING INT FLOAT FLOAT { if(get<1>(*$1)) {
                                                                 reteerror(&yylloc, yyscanner, agent, filename, source_path, "Flag :feature set more than once.");
                                                                 YYABORT;
                                                               }
                                                               $$ = $1;
-                                                              get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, 0, 0, $7, $8, $6, Rete::Rete_Predicate::EQ /*FIXUP later*/, false));
+                                                              get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, -1, $7, $8, $6, Rete::Rete_Predicate::EQ /*FIXUP later*/, false));
                                                               delete $4;
                                                               delete $5; }
   | flags FLAG_FEATURE INT NODE_TYPE STRING INT INT INT { if(get<1>(*$1)) {
@@ -485,7 +522,7 @@ flags:
                                                             YYABORT;
                                                           }
                                                           $$ = $1;
-                                                          get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, 0, 0, $7, $8, $6, Rete::Rete_Predicate::EQ /*FIXUP later*/, true));
+                                                          get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Ranged<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, -1, $7, $8, $6, Rete::Rete_Predicate::EQ /*FIXUP later*/, true));
                                                           delete $4;
                                                           delete $5; }
   | flags FLAG_FEATURE INT NODE_TYPE STRING { if(get<1>(*$1)) {
@@ -494,9 +531,9 @@ flags:
                                               }
                                               $$ = $1;
                                               if($3 > 1)
-                                                get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Enumerated<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, 0, 0, 0 /*FIXUP later*/));
+                                                get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, new Carli::Feature_Enumerated<Carli::Feature>(vector<Rete::WME>() /*FIXUP Later*/, Rete::WME_Bindings() /*FIXUP later*/, Rete::WME_Token_Index() /*FIXUP later*/, nullptr /*FIXUP later*/, -1, 0 /*FIXUP later*/));
                                               else
-                                                get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>($3, *$4, *$5, nullptr);
+                                                get<1>(*$$) = make_shared<tuple<int64_t, string, string, Carli::Feature *>>(1, *$4, "", nullptr);
                                               delete $4;
                                               delete $5; }
   ;

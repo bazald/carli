@@ -332,6 +332,7 @@ namespace Carli {
     }
     std::cerr << std::endl << "Carrying over detected:";
     for(auto &fringe_axis : unsplit.fringe_values) {
+      std::cerr << std::endl << "  ";
       for(auto &fringe_w : fringe_axis.second) {
         auto fringe = fringe_w.lock();
         std::cerr << ' ';
@@ -346,7 +347,8 @@ namespace Carli {
     /** Step 1.5: Detect whether a new & distinct variable needs to be created for Higher Order Grammar rules, along with new fringe nodes **/
     std::string old_new_var_name, prev_var_name;
     Rete::WME_Token_Index old_new_var_index(-1, -1, -1), prev_var_index(-1, -1, -1);
-    if((*leaves.begin())->q_value_fringe->feature->max_arity > 0) {
+    Node_Fringe_Ptr null_hog;
+    if((*leaves.begin())->q_value_fringe->feature->arity > -1) {
       const auto &vars = (*leaves.begin())->q_value_fringe->feature->indices;
       const auto &parent_vars = parent_action->get_variables();
 
@@ -383,10 +385,29 @@ namespace Carli {
           }
         }
       }
+
+      for(auto fvt = unsplit.fringe_values.begin(), fend = unsplit.fringe_values.end(); fvt != fend; ++fvt) {
+        if(auto feature_n = dynamic_cast<Feature_NullHOG_Data *>(fvt->first)) {
+          assert(fvt->second.size() == 1);
+          if(feature_n->value == old_new_var_name) {
+            null_hog = fvt->second.begin()->lock();
+            unsplit.fringe_values.erase(fvt);
+            leaves.push_back(null_hog);
+            break;
+          }
+        }
+      }
+
+      if(!null_hog) {
+        std::cerr << "No Null HOG rule found at time of HOG specialization." << std::endl;
+        abort();
+      }
+      else
+        std::cerr << "Null HOG rule found at time of HOG specialization." << std::endl;
     }
 
     /** Step 2: For each new leaf...
-     *          ...create it, clone remaining fringe entries below the new leaf, and destroy the old fringe node
+     *          ...create it, clone remaining fringe entries below the new leaf
      */
     for(auto &leaf : leaves) {
 //      if(leaf->q_value_fringe->depth <= m_split_max)
@@ -417,9 +438,12 @@ namespace Carli {
           }
 
           /** Step 2.4: Create new fringe nodes if demanded by the HOG. */
-          if(old_new_var_index.rete_row != -1) {
+          if(old_new_var_index.rete_row != -1 && leaf != null_hog) {
             for(auto &fringe : leaves) {
-              fringe->create_fringe(*node_unsplit, nullptr, old_new_var_index);
+              if(fringe == null_hog)
+                continue;
+
+              fringe->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_HOG, old_new_var_index);
 
               if(fringe->q_value_fringe->feature->arity == 2) {
                 bool binary_feature_update = false;
@@ -437,7 +461,7 @@ namespace Carli {
                     binary_feature_update = true;
                 }
                 if(binary_feature_update)
-                  fringe->create_fringe(*node_unsplit, nullptr, old_new_var_index, prev_var_index);
+                  fringe->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_HOG, old_new_var_index, prev_var_index);
               }
             }
             for(auto &fringe_axis : unsplit.fringe_values) {
@@ -445,7 +469,7 @@ namespace Carli {
                 for(auto &fringe : fringe_axis.second) {
                   auto flock = fringe.lock();
 
-                  flock->create_fringe(*node_unsplit, nullptr, old_new_var_index);
+                  flock->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_HOG, old_new_var_index);
 
                   if(flock->q_value_fringe->feature->arity == 2) {
                     bool binary_feature_update = false;
@@ -463,36 +487,38 @@ namespace Carli {
                         binary_feature_update = true;
                     }
                     if(binary_feature_update)
-                      flock->create_fringe(*node_unsplit, nullptr, old_new_var_index, prev_var_index);
+                      flock->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_HOG, old_new_var_index, prev_var_index);
                   }
                 }
               }
             }
+
+            null_hog->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_NULL_HOG, old_new_var_index);
           }
         }
       }
     }
 
     for(auto &leaf : leaves) {
-      /** Step 2.5: Untrack the old fringe node. */
+      /** Step 3.1: Untrack the old fringe node. */
 #ifdef TRACK_MEAN_ABSOLUTE_BELLMAN_ERROR
       m_mean_matde.uncontribute(leaf->q_value->matde);
 #endif
       if(!m_mean_catde_queue_size)
         m_mean_catde.uncontribute(leaf->q_value_fringe->catde);
 
-      /** Step 2.6: Destroy the old leaf node. */
+      /** Step 3.2: Destroy the old leaf node. */
       excise_rule(leaf->rete_action.lock()->get_name(), false);
     }
 
     if(split.blacklist_full) {
-      /** Step 3a: Excise all old fringe rules from the system */
+      /** Step 4a: Excise all old fringe rules from the system */
       for(auto &fringe_axis : unsplit.fringe_values)
         for(auto &fringe : fringe_axis.second)
           excise_rule(fringe.lock()->rete_action.lock()->get_name(), false);
     }
     else {
-      /** Step 3b: Convert fringe nodes to internal fringe values **/
+      /** Step 4b: Convert fringe nodes to internal fringe values **/
       split.fringe_values.swap(unsplit.fringe_values);
       for(auto &fringe_axis : split.fringe_values) {
         for(auto &fringe_w : fringe_axis.second) {
@@ -1666,7 +1692,7 @@ namespace Carli {
         bool hog = true;
         for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
           for(auto &fringe : fringe_axis->second) {
-            if(fringe.lock()->q_value_fringe->feature->arity == 0)
+            if(fringe.lock()->q_value_fringe->feature->arity == -1)
               hog = false;
           }
         }
@@ -1676,7 +1702,7 @@ namespace Carli {
 
           for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
             for(auto &fringe : fringe_axis->second) {
-              if(fringe.lock()->q_value_fringe->feature->arity == 0) {
+              if(fringe.lock()->q_value_fringe->feature->arity == -1) {
                 fringe.lock()->rete_action.lock()->print_rule(std::cerr);
               }
             }
@@ -1795,7 +1821,7 @@ namespace Carli {
         bool hog = true;
         for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
           for(auto &fringe : fringe_axis->second) {
-            if(fringe.lock()->q_value_fringe->feature->arity == 0)
+            if(fringe.lock()->q_value_fringe->feature->arity == -1)
               hog = false;
           }
         }
@@ -1805,7 +1831,7 @@ namespace Carli {
 
           for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
             for(auto &fringe : fringe_axis->second) {
-              if(fringe.lock()->q_value_fringe->feature->arity == 0) {
+              if(fringe.lock()->q_value_fringe->feature->arity == -1) {
                 fringe.lock()->rete_action.lock()->print_rule(std::cerr);
               }
             }
@@ -1906,7 +1932,7 @@ namespace Carli {
         bool hog = true;
         for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
           for(auto &fringe : fringe_axis->second) {
-            if(fringe.lock()->q_value_fringe->feature->arity == 0)
+            if(fringe.lock()->q_value_fringe->feature->arity == -1)
               hog = false;
           }
         }
@@ -1916,7 +1942,7 @@ namespace Carli {
 
           for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
             for(auto &fringe : fringe_axis->second) {
-              if(fringe.lock()->q_value_fringe->feature->arity == 0) {
+              if(fringe.lock()->q_value_fringe->feature->arity == -1) {
                 fringe.lock()->rete_action.lock()->print_rule(std::cerr);
               }
             }

@@ -19,8 +19,8 @@ namespace Carli {
     Feature & operator=(const Feature &) = delete;
 
   public:
-    Feature(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int64_t &arity_, const int64_t &max_arity_)
-     : conditions(conditions_), bindings(bindings_), axis(axis_), indices(indices_), arity(arity_), max_arity(max_arity_)
+    Feature(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int64_t &arity_)
+     : conditions(conditions_), bindings(bindings_), axis(axis_), indices(indices_), arity(arity_)
     {
     }
 
@@ -52,8 +52,6 @@ namespace Carli {
 
     virtual int64_t get_depth() const = 0;
     virtual int64_t compare_value(const Feature &rhs) const = 0;
-
-    virtual bool matches(const Rete::WME_Token &token) const = 0;
 
     virtual std::vector<Feature *> refined() const {return std::vector<Feature *>();}
 
@@ -88,8 +86,7 @@ namespace Carli {
     Rete::WME_Bindings bindings;
     Rete::WME_Token_Index axis;
     Rete::Variable_Indices_Ptr_C indices;
-    int64_t arity = 0;
-    int64_t max_arity = 0;
+    int64_t arity = -1;
   };
 
 }
@@ -132,24 +129,20 @@ namespace Carli {
     Feature_Enumerated & operator=(const Feature_Enumerated &) = delete;
 
   public:
-    Feature_Enumerated(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int &arity_, const int &max_arity_, const int64_t &value_)
-     : FEATURE(conditions_, bindings_, axis_, indices_, arity_, max_arity_),
+    Feature_Enumerated(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int &arity_, const int64_t &value_)
+     : FEATURE(conditions_, bindings_, axis_, indices_, arity_),
      Feature_Enumerated_Data(value_)
     {
     }
 
     Feature_Enumerated * clone() const override {
-      return new Feature_Enumerated(this->conditions, this->bindings, this->axis, this->indices, this->arity, this->max_arity, value);
+      return new Feature_Enumerated(this->conditions, this->bindings, this->axis, this->indices, this->arity, value);
     }
 
     int64_t get_depth() const override {return 1;}
 
     int64_t compare_value(const Carli::Feature &rhs) const override {
       return Feature_Enumerated_Data::compare_value(debuggable_cast<const Feature_Enumerated &>(rhs));
-    }
-
-    bool matches(const Rete::WME_Token &token) const override {
-      return *token[this->axis] == value;
     }
 
     void print(std::ostream &os) const override {
@@ -221,30 +214,20 @@ namespace Carli {
     Feature_Ranged & operator=(const Feature_Ranged &) = delete;
 
   public:
-    Feature_Ranged(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int &arity_, const int &max_arity_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const Rete::Rete_Predicate::Predicate &predicate_, const bool &integer_locked_)
-     : FEATURE(conditions_, bindings_, axis_, indices_, arity_, max_arity_),
+    Feature_Ranged(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int &arity_, const double &bound_lower_, const double &bound_upper_, const int64_t &depth_, const Rete::Rete_Predicate::Predicate &predicate_, const bool &integer_locked_)
+     : FEATURE(conditions_, bindings_, axis_, indices_, arity_),
      Feature_Ranged_Data(bound_lower_, bound_upper_, depth_, predicate_, integer_locked_)
     {
     }
 
     Feature_Ranged * clone() const override {
-      return new Feature_Ranged(this->conditions, this->bindings, this->axis, this->indices, this->arity, this->max_arity, bound_lower, bound_upper, depth, predicate, integer_locked);
+      return new Feature_Ranged(this->conditions, this->bindings, this->axis, this->indices, this->arity, bound_lower, bound_upper, depth, predicate, integer_locked);
     }
 
     int64_t get_depth() const override {return depth;}
 
     int64_t compare_value(const Carli::Feature &rhs) const override {
       return Feature_Ranged_Data::compare_value(debuggable_cast<const Feature_Ranged &>(rhs));
-    }
-
-    bool matches(const Rete::WME_Token &token) const override {
-      const Rete::Symbol * const symbol = debuggable_cast<const Rete::Symbol * const>(token[this->axis].get());
-      if(const auto symbol_cf = dynamic_cast<const Rete::Symbol_Constant_Float *>(symbol))
-        return bound_lower <= symbol_cf->value && symbol_cf->value < bound_upper;
-      else {
-        const auto &symbol_ci = debuggable_cast<const Rete::Symbol_Constant_Int &>(*symbol);
-        return bound_lower <= symbol_ci.value && symbol_ci.value < bound_upper;
-      }
     }
 
     std::vector<Carli::Feature *> refined() const override {
@@ -299,6 +282,59 @@ namespace Carli {
       else
         os << '[' << bound_lower << ',' << bound_upper << ')';
       os << ':' << depth;
+    }
+  };
+
+  class CARLI_LINKAGE Feature_NullHOG_Data {
+    Feature_NullHOG_Data(const Feature_NullHOG_Data &) = delete;
+    Feature_NullHOG_Data & operator=(const Feature_NullHOG_Data &) = delete;
+
+  public:
+    Feature_NullHOG_Data(const std::string &value_)
+     : value(value_)
+    {
+    }
+
+    int64_t compare_value(const Feature_NullHOG_Data &rhs) const {
+      return std::strcmp(value.c_str(), rhs.value.c_str());
+    }
+
+    Rete::Rete_Predicate::Predicate get_predicate() const {
+      return Rete::Rete_Predicate::NEQ;
+    }
+
+    Rete::Symbol_Ptr_C symbol_constant() const {
+      return std::make_shared<Rete::Symbol_Constant_String>(value);
+    }
+
+    std::string value;
+  };
+
+  template <typename FEATURE = Feature>
+  class Feature_NullHOG : public FEATURE, public Feature_NullHOG_Data {
+    Feature_NullHOG(const Feature_NullHOG &) = delete;
+    Feature_NullHOG & operator=(const Feature_NullHOG &) = delete;
+
+  public:
+    Feature_NullHOG(const std::vector<Rete::WME> &conditions_, const Rete::WME_Bindings &bindings_, const Rete::WME_Token_Index &axis_, const Rete::Variable_Indices_Ptr_C &indices_, const int &arity_, const std::string &value_)
+     : FEATURE(conditions_, bindings_, axis_, indices_, arity_),
+     Feature_NullHOG_Data(value_)
+    {
+    }
+
+    Feature_NullHOG * clone() const override {
+      return new Feature_NullHOG(this->conditions, this->bindings, this->axis, this->indices, this->arity, value);
+    }
+
+    int64_t get_depth() const override {return 1;}
+
+    int64_t compare_value(const Carli::Feature &rhs) const override {
+      return Feature_NullHOG_Data::compare_value(debuggable_cast<const Feature_NullHOG &>(rhs));
+    }
+
+    void print(std::ostream &os) const override {
+      this->print_axis(os);
+      os << "!=" << value;
     }
   };
 

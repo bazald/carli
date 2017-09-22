@@ -70,6 +70,8 @@ namespace Carli {
     friend Node_Tracker;
 #endif
 
+    enum Grammar {GRAMMAR_NORMAL, GRAMMAR_HOG, GRAMMAR_NULL_HOG};
+
     Node(Agent &agent_, const Rete::Rete_Action_Ptr &parent_action_, const Rete::Rete_Action_Ptr &rete_action_, const tracked_ptr<Q_Value> &q_value_weight_, const tracked_ptr<Q_Value> &q_value_fringe_)
      : agent(agent_),
      parent_action(parent_action_),
@@ -101,7 +103,7 @@ namespace Carli {
 
     Node_Split_Ptr create_split(const Rete::Rete_Action_Ptr &parent_action_);
     Node_Unsplit_Ptr create_unsplit(const Rete::Rete_Action_Ptr &parent_action_);
-    Node_Fringe_Ptr create_fringe(Node_Unsplit &leaf, Feature * const &feature_, const Rete::WME_Token_Index &old_new_var_index = Rete::WME_Token_Index(-1, -1, -1), const Rete::WME_Token_Index &prev_var_index = Rete::WME_Token_Index(-1, -1, -1));
+    Node_Fringe_Ptr create_fringe(Node_Unsplit &leaf, Feature * const &feature_, const Grammar &grammar = GRAMMAR_NORMAL, const Rete::WME_Token_Index &old_new_var_index = Rete::WME_Token_Index(-1, -1, -1), const Rete::WME_Token_Index &prev_var_index = Rete::WME_Token_Index(-1, -1, -1));
 
     Agent &agent;
     std::weak_ptr<Rete::Rete_Action> parent_action;

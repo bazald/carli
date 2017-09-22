@@ -202,8 +202,8 @@ namespace Carli {
     else
       os << "unsplit";
 
-    if(q_value->feature && q_value->feature->max_arity > 0)
-      os << ' ' << q_value->feature->arity << ' ' << q_value->feature->max_arity;
+    if(q_value->feature && q_value->feature->arity > -1)
+      os << ' ' << q_value->feature->arity;
 
     if(q_value->depth == 1)
       os << " nil";
@@ -391,7 +391,7 @@ namespace Carli {
     return new_leaf_data;
   }
 
-  Node_Fringe_Ptr Node::create_fringe(Node_Unsplit &leaf, Feature * const &feature_, const Rete::WME_Token_Index &old_new_var_index_, const Rete::WME_Token_Index &prev_var_index) {
+  Node_Fringe_Ptr Node::create_fringe(Node_Unsplit &leaf, Feature * const &feature_, const Grammar &grammar, const Rete::WME_Token_Index &old_new_var_index_, const Rete::WME_Token_Index &prev_var_index) {
     Rete::WME_Token_Index old_new_var_index = old_new_var_index_;
 
     const auto lra_lock = leaf.rete_action.lock();
@@ -410,14 +410,23 @@ namespace Carli {
       assert(leaf.q_value_fringe->depth == q_value_fringe->depth);
 
     std::stack<Rete::Rete_Node_Ptr> rebase_right;
-    for(auto node = ancestor_right; node != parent_action.lock()->parent_left(); node = node->parent_left()) {
-      rebase_right.push(node);
+    if(grammar == GRAMMAR_NULL_HOG) {
+      rebase_right.push(ancestor_right);
+      auto node = ancestor_right->parent_right();
+      do {
+        rebase_right.push(node);
+        node = node->parent_left();
+      } while(!dynamic_cast<Rete::Rete_Join *>(node.get()));
+    }
+    else {
+      for(auto node = ancestor_right; node != parent_action.lock()->parent_left(); node = node->parent_left())
+        rebase_right.push(node);
     }
 
-    const bool hog = old_new_var_index.rete_row != -1;
+    assert(grammar == GRAMMAR_NORMAL || old_new_var_index.rete_row != -1);
 
 #ifdef DEBUG_OUTPUT
-    std::cerr << new_name << " is " << (hog ? "" : "not ") << "HOG" << std::endl;
+    std::cerr << new_name << " is " << (grammar == GRAMMAR_HOG ? "" : grammar == GRAMMAR_NULL_HOG ? "null " : "not ") << "HOG" << std::endl;
 #endif
 
     /// Handle HOG
@@ -426,7 +435,7 @@ namespace Carli {
     new_new_var_index.existential = old_new_var_index.existential;
     std::string new_new_var_name;
     Rete::Rete_Node_Ptr new_test = ancestor_left;
-    if(hog) {
+    if(grammar != GRAMMAR_NORMAL) {
       old_new_var_name = std::find_if(new_feature->indices->begin(), new_feature->indices->end(), [&old_new_var_index](const std::pair<std::string, Rete::WME_Token_Index> &si)->bool {
 //        std::cerr << si.first << ',' << si.second << " =? " << old_new_var_index << std::endl;
         return si.second == old_new_var_index;
@@ -484,7 +493,7 @@ namespace Carli {
       }
     }
 
-    if(dynamic_cast<const Rete::Rete_Predicate *>(ancestor_rightmost.get())) {
+    if(grammar == GRAMMAR_NORMAL && dynamic_cast<const Rete::Rete_Predicate *>(ancestor_rightmost.get())) {
       assert(feature_enumerated_data || feature_ranged_data);
       /// Case 1. Refining of an existing variable
 #ifdef DEBUG_OUTPUT
@@ -506,7 +515,7 @@ namespace Carli {
 //        new_test = agent.make_existential_join(*ancestor_right->get_bindings(), false, ancestor_left, ancestor_right->parent_right());
 //      }
 
-      if(!hog && *variables == *old_variables) {
+      if(grammar == GRAMMAR_NORMAL && *variables == *old_variables) {
 #ifdef DEBUG_OUTPUT
       std::cerr << "Fringe Case 2" << std::endl;
 #endif
@@ -520,13 +529,16 @@ namespace Carli {
 #endif
       }
 
-    const int64_t rebase_rete_offset = lra_lock->parent_left()->get_size() - rebase_right.top()->parent_left()->get_size();
-    const int64_t rebase_token_offset = lra_lock->parent_left()->get_token_size() - rebase_right.top()->parent_left()->get_token_size();
-    const int64_t rebase_offset_from = rebase_right.top()->parent_left()->get_size();
+      const int64_t rebase_rete_offset = lra_lock->parent_left()->get_size() - rebase_right.top()->parent_left()->get_size();
+      const int64_t rebase_token_offset = lra_lock->parent_left()->get_token_size() - rebase_right.top()->parent_left()->get_token_size();
+      const int64_t rebase_offset_from = rebase_right.top()->parent_left()->get_size();
 
 #ifdef DEBUG_OUTPUT
     std::cerr << "Offsets are " << rebase_rete_offset << " && " << rebase_token_offset << " starting at " << rebase_offset_from << std::endl;
 #endif
+
+      if(grammar == GRAMMAR_NULL_HOG)
+        new_test = ancestor_right->parent_right();
 
       assert(!rebase_right.empty());
       while(!rebase_right.empty()) {
@@ -534,7 +546,7 @@ namespace Carli {
         rebase_right.pop();
 
         /// New exclusion between old_new and new_new for HOG
-        if(hog && rebase_right.empty()) {
+        if(grammar != GRAMMAR_NORMAL && rebase_right.empty()) {
 #ifdef DEBUG_OUTPUT
           std::cerr << "  HOG Predicate" << std::endl;
 #endif
@@ -544,8 +556,8 @@ namespace Carli {
 
         if(auto bindings = test->get_bindings()) {
           Rete::WME_Bindings updated_bindings;
-          auto bindings_ptr = hog ? &updated_bindings : bindings;
-          if(hog) {
+          auto bindings_ptr = grammar != GRAMMAR_NORMAL ? &updated_bindings : bindings;
+          if(grammar != GRAMMAR_NORMAL) {
             for(auto binding : *test->get_bindings()) {
               if(binding.first == old_new_var_index)
                 binding.first = new_new_var_index;
@@ -585,14 +597,17 @@ namespace Carli {
 #ifdef DEBUG_OUTPUT
             std::cerr << "  Negation Join" << std::endl;
 #endif
-            new_test = agent.make_negation_join(*bindings_ptr, new_test, test->parent_right());
+            if(grammar == GRAMMAR_NULL_HOG && rebase_right.empty())
+              new_test = agent.make_negation_join(*bindings_ptr, test->parent_left(), new_test);
+            else
+              new_test = agent.make_negation_join(*bindings_ptr, new_test, test->parent_right());
           }
         }
         else if(auto predicate_node = dynamic_cast<Rete::Rete_Predicate *>(test.get())) {
 #ifdef DEBUG_OUTPUT
           std::cerr << "  Predicate" << std::endl;
 #endif
-          if(hog) {
+          if(grammar != GRAMMAR_NORMAL) {
             auto lhs_index = predicate_node->get_lhs_index();
             if(lhs_index == old_new_var_index)
               lhs_index = new_new_var_index;
@@ -632,13 +647,13 @@ namespace Carli {
           abort();
       }
 
-      for(auto left = ancestor_left; !dynamic_cast<Rete::Rete_Filter *>(left.get()); left = left->parent_left()) {
-        if(left->parent_left()->get_token_owner() == ancestor_right->get_token_owner())
-          break;
-      }
+//      for(auto left = ancestor_left; !dynamic_cast<Rete::Rete_Filter *>(left.get()); left = left->parent_left()) {
+//        if(left->parent_left()->get_token_owner() == ancestor_right->get_token_owner())
+//          break;
+//      }
 
       /// New conditions are possible even without HOG
-      if(!hog) {
+      if(grammar == GRAMMAR_NORMAL) {
         const int64_t leaf_size = ancestor_left->get_size();
         const int64_t leaf_token_size = ancestor_left->get_token_size();
         const int64_t old_size = ra_lock->get_size();
@@ -782,7 +797,7 @@ namespace Carli {
     }
 
     /// Fix feature
-    if(!hog) {
+    if(grammar == GRAMMAR_NORMAL) {
       if(new_feature->axis.rete_row >= lra_lock->parent_left()->get_size())
         new_feature->axis.rete_row += ancestor_left->get_size() - lra_lock->parent_left()->get_size();
       if(new_feature->axis.token_row >= lra_lock->parent_left()->get_token_size())
