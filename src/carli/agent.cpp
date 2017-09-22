@@ -349,7 +349,7 @@ namespace Carli {
 
     /** Step 1.5: Detect whether a new & distinct variable needs to be created for Higher Order Grammar rules, along with new fringe nodes **/
     std::string old_new_var_name, prev_var_name;
-    Rete::WME_Token_Index old_new_var_index(-1, -1, -1), prev_var_index(-1, -1, -1);
+    Rete::WME_Token_Index old_new_var_index(-1, -1, -1), prev_var_index(-1, -1, -1), old_null_hog_index(-1, -1, -1);
     Node_Fringe_Ptr null_hog;
     if((*leaves.begin())->q_value_fringe->feature->arity > -1) {
       const auto &vars = (*leaves.begin())->q_value_fringe->feature->indices;
@@ -396,6 +396,7 @@ namespace Carli {
             null_hog = fvt->second.begin()->lock();
             unsplit.fringe_values.erase(fvt);
             leaves.push_back(null_hog);
+            old_null_hog_index = null_hog->rete_action.lock()->get_variables()->find(old_new_var_name)->second;
             break;
           }
         }
@@ -496,7 +497,7 @@ namespace Carli {
               }
             }
 
-            null_hog->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_NULL_HOG, old_new_var_index);
+            null_hog->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_NULL_HOG, old_null_hog_index);
           }
         }
       }
