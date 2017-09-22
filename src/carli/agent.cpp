@@ -389,6 +389,7 @@ namespace Carli {
       for(auto fvt = unsplit.fringe_values.begin(), fend = unsplit.fringe_values.end(); fvt != fend; ++fvt) {
         if(auto feature_n = dynamic_cast<Feature_NullHOG_Data *>(fvt->first)) {
           assert(fvt->second.size() == 1);
+          std::cerr << feature_n->value << " vs " << old_new_var_name << std::endl;
           if(feature_n->value == old_new_var_name) {
             null_hog = fvt->second.begin()->lock();
             unsplit.fringe_values.erase(fvt);
@@ -655,8 +656,8 @@ namespace Carli {
 
     ++m_unrefinements[split->rank()];
 
-    dump_rules(*this);
-    abort();
+//    dump_rules(*this);
+//    abort();
 
     return true;
   }

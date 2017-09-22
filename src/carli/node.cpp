@@ -425,12 +425,12 @@ namespace Carli {
         rebase_right.push(node);
         if(dynamic_cast<Rete::Rete_Filter *>(node.get())) {
           std::cerr << "Ancestral relationship failure: " << ra_lock->get_name() << std::endl;
-          const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();
-          if(!rules_out_file.empty()) {
-            std::ofstream rules_out((rules_out_file + ".bak").c_str());
-            rules_out << "set-total-step-count " << agent.get_total_step_count() << std::endl << std::endl;
-            agent.rete_print_rules(rules_out);
-          }
+//          const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();
+//          if(!rules_out_file.empty()) {
+//            std::ofstream rules_out((rules_out_file + ".bak").c_str());
+//            rules_out << "set-total-step-count " << agent.get_total_step_count() << std::endl << std::endl;
+//            agent.rete_print_rules(rules_out);
+//          }
           abort();
         }
       }
@@ -448,6 +448,7 @@ if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
     new_new_var_index.existential = old_new_var_index.existential;
     std::string new_new_var_name;
     Rete::Rete_Node_Ptr new_test = ancestor_left;
+    Rete::WME_Token_Index null_hog_left_old_new_var_index(-1, -1, -1);
     if(grammar != GRAMMAR_NORMAL) {
       old_new_var_name = std::find_if(new_feature->indices->begin(), new_feature->indices->end(), [&old_new_var_index](const std::pair<std::string, Rete::WME_Token_Index> &si)->bool {
 //        std::cerr << si.first << ',' << si.second << " =? " << old_new_var_index << std::endl;
@@ -485,7 +486,24 @@ if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
       if(new_feature->axis == old_new_var_index)
         new_feature->axis = new_new_var_index;
       auto indices = std::make_shared<Rete::Variable_Indices>(*new_feature->indices);
-      indices->insert(std::make_pair(new_new_var_name, new_new_var_index));
+      if(grammar == GRAMMAR_NULL_HOG) {
+        auto gp = ancestor_right->parent_left();
+        auto nnvi = new_new_var_index;
+        nnvi.rete_row += ancestor_left->get_size() - gp->get_size();
+        nnvi.token_row += ancestor_left->get_token_size() - gp->get_token_size();
+
+        auto vars = lra_lock->get_variables();
+        null_hog_left_old_new_var_index = vars->find(old_new_var_name)->second;
+        indices->find(old_new_var_name)->second = null_hog_left_old_new_var_index;
+        indices->insert(std::make_pair(new_new_var_name, nnvi));
+
+if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
+        std::cerr << "Changing feature " << dynamic_cast<Feature_NullHOG_Data *>(new_feature)->value << " to " << new_new_var_name << std::endl;
+} // #endif
+        dynamic_cast<Feature_NullHOG_Data *>(new_feature)->value = new_new_var_name;
+      }
+      else
+        indices->insert(std::make_pair(new_new_var_name, new_new_var_index));
       new_feature->indices = indices;
     }
 
@@ -564,7 +582,7 @@ if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
 if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
         std::cerr << "Originals: " << old_new_var_index << " " << new_new_var_index << std::endl;
 } // #endif
-        auto gp = ra_lock->parent_left()->parent_left();
+        auto gp = ancestor_right->parent_left();
         null_hog_offset = gp->get_size();
         null_hog_token_offset = gp->get_token_size();
         old_new_var_index.rete_row -= null_hog_offset;
@@ -635,8 +653,10 @@ if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
 if(grammar == GRAMMAR_NULL_HOG) { // #ifdef DEBUG_OUTPUT
             std::cerr << "  Negation Join" << std::endl;
 } // #endif
-            if(grammar == GRAMMAR_NULL_HOG && rebase_right.empty())
+            if(grammar == GRAMMAR_NULL_HOG && rebase_right.empty()) {
+              updated_bindings.insert(Rete::WME_Binding(null_hog_left_old_new_var_index, old_new_var_index));
               new_test = agent.make_negation_join(*bindings_ptr, ancestor_left, new_test);
+            }
             else
               new_test = agent.make_negation_join(*bindings_ptr, new_test, test->parent_right());
           }
