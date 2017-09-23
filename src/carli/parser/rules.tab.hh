@@ -61,19 +61,20 @@ typedef void *yyscan_t;
     COMMAND_EXIT = 262,
     COMMAND_INSERT_WME = 263,
     COMMAND_REMOVE_WME = 264,
-    COMMAND_SET_TOTAL_STEP_COUNT = 265,
-    COMMAND_SOURCE = 266,
-    COMMAND_SP = 267,
-    FLAG_CREATION_TIME = 268,
-    FLAG_FEATURE = 269,
-    FLOAT = 270,
-    INT = 271,
-    NODE_TYPE = 272,
-    STRING = 273,
-    STRING_PART_C = 274,
-    STRING_PART_S = 275,
-    VARIABLE = 276,
-    PREDICATE = 277
+    COMMAND_SET_RULE_NAME_INDEX = 265,
+    COMMAND_SET_TOTAL_STEP_COUNT = 266,
+    COMMAND_SOURCE = 267,
+    COMMAND_SP = 268,
+    FLAG_CREATION_TIME = 269,
+    FLAG_FEATURE = 270,
+    FLOAT = 271,
+    INT = 272,
+    NODE_TYPE = 273,
+    STRING = 274,
+    STRING_PART_C = 275,
+    STRING_PART_S = 276,
+    VARIABLE = 277,
+    PREDICATE = 278
   };
 #endif
 
@@ -96,7 +97,7 @@ union YYSTYPE
   Rete::Symbol_Ptr_C *symbol_ptr;
   Rete::Rete_Predicate::Predicate predicate;
 
-#line 100 "rules.tab.hh" /* yacc.c:1909  */
+#line 101 "rules.tab.hh" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

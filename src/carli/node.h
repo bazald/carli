@@ -20,12 +20,12 @@ namespace Carli {
   class Node_Fringe_Ranged;
 
   typedef std::shared_ptr<const Node> Node_Ptr_C;
-  typedef std::weak_ptr<const Node> Node_Ptr_W;
   typedef std::shared_ptr<const Node_Split> Node_Split_Ptr_C;
   typedef std::shared_ptr<const Node_Unsplit> Node_Unsplit_Ptr_C;
   typedef std::shared_ptr<const Node_Fringe> Node_Fringe_Ptr_C;
 
   typedef std::shared_ptr<Node> Node_Ptr;
+  typedef std::weak_ptr<Node> Node_Ptr_W;
   typedef std::shared_ptr<Node_Split> Node_Split_Ptr;
   typedef std::shared_ptr<Node_Unsplit> Node_Unsplit_Ptr;
   typedef std::shared_ptr<Node_Fringe> Node_Fringe_Ptr;
@@ -87,6 +87,9 @@ namespace Carli {
 
     int64_t rank() const override;
 
+    std::list<Node_Ptr> descendants();
+    virtual void descendants(std::list<Node_Ptr> &descendants_) = 0;
+
     Q_Value::Token sum_value(Q_Value::Token value_accumulator = Q_Value::Token()) const;
     std::pair<double, double> value_range(const bool &include_ancestors = true) const;
 
@@ -131,6 +134,9 @@ namespace Carli {
 
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
 
+    std::list<Node_Ptr> descendants() {return Node::descendants();}
+    void descendants(std::list<Node_Ptr> &descendants_) override;
+
     void decision() override;
 
     std::list<Node_Ptr_W> children; ///< Not cloned
@@ -159,6 +165,9 @@ namespace Carli {
 
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
 
+    std::list<Node_Ptr> descendants() {return Node::descendants();}
+    void descendants(std::list<Node_Ptr> &descendants_) override;
+
     void decision() override;
 
     Fringe_Values fringe_values; ///< Not cloned
@@ -184,6 +193,9 @@ namespace Carli {
     }
 
     Rete::Rete_Node_Ptr cluster_root_ancestor() const override;
+
+    std::list<Node_Ptr> descendants() {return Node::descendants();}
+    void descendants(std::list<Node_Ptr> &) override {}
 
     void decision() override {}
   };

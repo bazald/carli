@@ -43,6 +43,8 @@ namespace Rete {
     Agenda & get_agenda() {return agenda;}
     Rete_Action_Ptr get_rule(const std::string &name);
     std::set<std::string> get_rule_names() const;
+    int64_t get_rule_name_index() const {return rule_name_index;}
+    void set_rule_name_index(const int64_t &rule_name_index_) {rule_name_index = rule_name_index_;}
 
     void excise_all();
     void excise_filter(const Rete_Filter_Ptr &filter);

@@ -115,6 +115,7 @@ namespace Rete {
 %token <csval> COMMAND_EXIT
 %token <csval> COMMAND_INSERT_WME
 %token <csval> COMMAND_REMOVE_WME
+%token <csval> COMMAND_SET_RULE_NAME_INDEX
 %token <csval> COMMAND_SET_TOTAL_STEP_COUNT
 %token <csval> COMMAND_SOURCE
 %token <csval> COMMAND_SP
@@ -156,6 +157,7 @@ command:
                                                           delete $3;
                                                           delete $5;
                                                           delete $6; }
+  | COMMAND_SET_RULE_NAME_INDEX INT { agent.set_rule_name_index($2); }
   | COMMAND_SET_TOTAL_STEP_COUNT INT { agent.set_total_step_count($2); }
   | COMMAND_SOURCE string_or_literal { const int rv = rete_parse_file(agent, *$2, source_path);
                                        if(rv) {
@@ -180,6 +182,12 @@ command:
                       const auto &q_value_value =                     get<3>(*$2);
                       const auto variable_indices = std::make_shared<Rete::Variable_Indices>(variable_names);
                       const auto parent_action = agent.get_rule(parent_node_name);
+
+                      if(q_value_depth != 1 && !parent_action) {
+                        reteerror(&yylloc, yyscanner, agent, filename, source_path, "Parent action not found!");
+                        delete $2;
+                        break;
+                      }
 
                       const auto existing = agent.unname_rule(name, true);
                       if(existing) {
@@ -246,7 +254,7 @@ command:
                               while(dynamic_cast<Rete::Rete_Predicate *>(next_ptr))
                                 next_ptr = next_ptr->parent_left().get();
                               if(Rete::Rete_Join * const join_ptr = dynamic_cast<Rete::Rete_Join *>(next_ptr)) {
-                                if(Rete::Rete_Filter * const filter_ptr = dynamic_cast<Rete::Rete_Filter *>(join_ptr->parent_right().get())) {
+                                if(dynamic_cast<Rete::Rete_Filter *>(join_ptr->parent_right().get())) {
                                   auto vt = variable_names.begin(); //, vend = variable.names.end();
                                   auto pt = parent_action->get_variables()->begin(), pend = parent_action->get_variables()->end();
                                   while(pt != pend && *vt == *pt)

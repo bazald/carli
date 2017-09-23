@@ -35,6 +35,7 @@ insert-wme                                            { yylval->csval = "insert-
 exit                                                  { yylval->csval = "exit"; return COMMAND_EXIT; }
 remove-wme                                            { yylval->csval = "remove-wme"; return COMMAND_REMOVE_WME; }
 quit                                                  { yylval->csval = "quit"; return COMMAND_EXIT; }
+set-rule-name-index                                   { yylval->csval = "set-total-step-count"; return COMMAND_SET_RULE_NAME_INDEX; }
 set-total-step-count                                  { yylval->csval = "set-total-step-count"; return COMMAND_SET_TOTAL_STEP_COUNT; }
 source                                                { yylval->csval = "source"; return COMMAND_SOURCE; }
 sp                                                    { yylval->csval = "sp"; return COMMAND_SP; }

@@ -4,9 +4,9 @@
 
 namespace Carli {
 
-#ifdef NDEBUG
-  inline void dump_rules(const Agent &) {}
-#else
+//#ifdef NDEBUG
+//  inline void dump_rules(const Agent &) {}
+//#else
   static void dump_rules(const Agent &agent) {
     const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();
     if(!rules_out_file.empty()) {
@@ -17,12 +17,14 @@ namespace Carli {
       std::cerr << "Rule Dump #" << count << std::endl;
 //      if(count > 560) {
         std::ofstream rules_out(oss.str().c_str());
-        rules_out << "set-total-step-count " << agent.get_total_step_count() << std::endl << std::endl;
+        rules_out << "set-rule-name-index " << agent.get_rule_name_index() << std::endl
+                  << "set-total-step-count " << agent.get_total_step_count() << std::endl
+                  << std::endl;
         agent.rete_print_rules(rules_out);
 //      }
     }
   }
-#endif
+//#endif
 
   //struct Expiration_Detector {
   //  void operator()(Rete::Rete_Node &rete_node) {
@@ -98,6 +100,9 @@ namespace Carli {
       : root(split),
       root_feature(debuggable_cast<Carli::Node &>(*split).q_value_fringe->feature)
     {
+      auto descendants = split->descendants();
+      for(auto node : descendants)
+        (*this)(*node->rete_action.lock());
     }
 
     void operator()(Rete::Rete_Node &rete_node) {
@@ -588,7 +593,8 @@ namespace Carli {
 //    rete_action.visit_preorder(Expiration_Detector(), false);
 //#endif
 
-    auto fringe_collector = rete_action.parent_left()->visit_preorder(Fringe_Collector_All(split), true);
+    Fringe_Collector_All fringe_collector(split);
+//    auto fringe_collector = rete_action.parent_left()->visit_preorder(Fringe_Collector_All(split), true);
 
     if(fringe_collector.features.empty())
       return false;
@@ -661,13 +667,16 @@ namespace Carli {
 //    unsplit->rete_action.lock()->output_name(std::cerr, 3);
 //    std::cerr << std::endl;
 
-#ifdef DEBUG_OUTPUT
-    std::cerr << "Excising " << fringe_collector.excise.size() << " actions." << std::endl;
-#endif
+//#ifdef DEBUG_OUTPUT
+//    std::cerr << "Excising " << fringe_collector.excise.size() << " actions." << std::endl;
+//#endif
 
-    for(const auto &excise : fringe_collector.excise)
-      excise_rule(excise->get_name(), false);
-    fringe_collector.excise.clear();
+    for(auto fct = fringe_collector.excise.begin(), fend = fringe_collector.excise.end(); fct != fend; ) {
+      auto fringe = fct->get();
+      fct = fringe_collector.excise.erase(fct);
+//      std::cerr << "Excising " << fringe->get_name() << std::endl;
+      excise_rule(fringe->get_name(), false);
+    }
 
     if(auto grandparent_action = split->parent_action.lock()) {
       auto &grandparent_node = debuggable_cast<Node_Split &>(*grandparent_action->data);
@@ -1922,7 +1931,8 @@ namespace Carli {
 
         if(!fringe) {
           std::cerr << general.rete_action.lock()->get_name() << " has expired weak pointer in fringe!" << std::endl;
-//          dump_rules(*this);
+          dump_rules(*this);
+          abort();
           return general.fringe_values.end();
         }
 

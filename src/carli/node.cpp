@@ -140,6 +140,12 @@ namespace Carli {
     return q_value_fringe->depth;
   }
 
+  std::list<Node_Ptr> Node::descendants() {
+    std::list<Node_Ptr> rv;
+    descendants(rv);
+    return rv;
+  }
+
   Q_Value::Token Node::sum_value(Q_Value::Token value_accumulator) const
   {
     const auto pa_lock = parent_action.lock();
@@ -252,6 +258,11 @@ namespace Carli {
       agent.insert_q_value_next(agent.get_action(*variables, token), q_value_weight);
     if(q_value_fringe)
       agent.insert_q_value_next(agent.get_action(*variables, token), q_value_fringe);
+
+//    if(q_value_fringe->depth != 1 && !parent_action.lock()) {
+//      std::cerr << "Expired parent action found for " << rete_action.lock()->get_name() << std::endl;
+//      abort();
+//    }
   }
 
   void Node::retraction(const Rete::WME_Token &token) {
@@ -274,6 +285,11 @@ namespace Carli {
       agent.purge_q_value_next(agent.get_action(*variables, token), q_value_weight);
     if(q_value_fringe)
       agent.purge_q_value_next(agent.get_action(*variables, token), q_value_fringe);
+
+//    if(q_value_fringe->depth != 1 && !parent_action.lock()) {
+//      std::cerr << "Expired parent action found for " << rete_action.lock()->get_name() << std::endl;
+//      abort();
+//    }
   }
 
   Node_Split_Ptr Node::create_split(const Rete::Rete_Action_Ptr &parent_action_) {
@@ -935,6 +951,14 @@ namespace Carli {
     return rete_action.lock()->parent_left();
   }
 
+  void Node_Split::descendants(std::list<Node_Ptr> &descendants_) {
+    for(auto &child : children) {
+      auto clock = child.lock();
+      descendants_.push_back(clock);
+      clock->descendants(descendants_);
+    }
+  }
+
   void Node_Split::decision() {
     const auto locked = rete_action.lock();
     if(locked && !locked->is_excised())
@@ -965,6 +989,13 @@ namespace Carli {
 
   Rete::Rete_Node_Ptr Node_Unsplit::cluster_root_ancestor() const {
     return rete_action.lock()->parent_left();
+  }
+
+  void Node_Unsplit::descendants(std::list<Node_Ptr> &descendants_) {
+    for(auto &fringe_axis : fringe_values) {
+      for(auto &fringe : fringe_axis.second)
+        descendants_.push_back(fringe.lock());
+    }
   }
 
   void Node_Unsplit::decision() {
