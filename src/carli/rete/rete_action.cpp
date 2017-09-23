@@ -15,10 +15,10 @@ namespace Rete {
   }
 
   Rete_Action::~Rete_Action() {
-    if(!excised) {
+//    if(!excised) {
       for(auto &wme_token : input_tokens)
         retraction(*this, *wme_token);
-    }
+//    }
   }
 
   void Rete_Action::destroy(Rete_Agent &agent, const Rete_Node_Ptr &

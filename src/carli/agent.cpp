@@ -4,21 +4,25 @@
 
 namespace Carli {
 
-//#ifdef NDEBUG
-//  inline void dump_rules(const Agent &) {}
-//#else
+#ifdef NDEBUG
+  inline void dump_rules(const Agent &) {}
+#else
   static void dump_rules(const Agent &agent) {
     const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();
     if(!rules_out_file.empty()) {
-//      static int64_t count = 0;
+      static int64_t count = 0;
       std::ostringstream oss;
-      oss << rules_out_file << ".dump";// << ++count;
-      std::ofstream rules_out(oss.str().c_str());
-      rules_out << "set-total-step-count " << agent.get_total_step_count() << std::endl << std::endl;
-      agent.rete_print_rules(rules_out);
+//      oss << rules_out_file << ".dump";
+      oss << rules_out_file << '.' << ++count;
+      std::cerr << "Rule Dump #" << count << std::endl;
+//      if(count > 560) {
+        std::ofstream rules_out(oss.str().c_str());
+        rules_out << "set-total-step-count " << agent.get_total_step_count() << std::endl << std::endl;
+        agent.rete_print_rules(rules_out);
+//      }
     }
   }
-//#endif
+#endif
 
   //struct Expiration_Detector {
   //  void operator()(Rete::Rete_Node &rete_node) {
@@ -1904,6 +1908,10 @@ namespace Carli {
     if(general.q_value_weight->depth >= m_split_min && m_value_function_cap && q_value_count >= m_value_function_cap)
       return general.fringe_values.end();
 
+    /// Test for HOG exclusion -- difficult to detect before deciding to make an "unsplit" node
+    if(general.fringe_values.empty())
+      return general.fringe_values.end();
+
     assert(general.q_value_weight->depth < m_split_max);
     assert(!general.fringe_values.empty());
     size_t matches = 0;
@@ -1911,6 +1919,12 @@ namespace Carli {
     for(auto fringe_axis = general.fringe_values.begin(), fend = general.fringe_values.end(); fringe_axis != fend; ++fringe_axis) {
       for(auto &fringe_w : fringe_axis->second) {
         auto fringe = fringe_w.lock();
+
+        if(!fringe) {
+          std::cerr << general.rete_action.lock()->get_name() << " has expired weak pointer in fringe!" << std::endl;
+//          dump_rules(*this);
+          return general.fringe_values.end();
+        }
 
         if(!fringe->rete_action.lock()->is_active())
           continue;

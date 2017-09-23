@@ -60,6 +60,7 @@ solution "carli"
   end
 
   configuration "Debug"
+--     defines { "NDEBUG", "debuggable_cast=dynamic_cast", "debuggable_pointer_cast=std::dynamic_pointer_cast" }
     defines { "_DEBUG", "DEBUG", "debuggable_cast=dynamic_cast", "debuggable_pointer_cast=std::dynamic_pointer_cast" }
     defines { "DEBUG_OUTPUT" }
 --     defines { "DISABLE_POOL_ALLOCATOR" }
