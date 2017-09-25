@@ -420,6 +420,7 @@ namespace Carli {
     const auto new_name = agent.next_rule_name(leaf_node_name.substr(0, leaf_node_name.find_last_of('*') + 1) + "f");
     const auto feature_enumerated_data = dynamic_cast<Feature_Enumerated_Data *>(new_feature);
     const auto feature_ranged_data = dynamic_cast<Feature_Ranged_Data *>(new_feature);
+    const auto old_variables = lra_lock->get_variables();
 
     if(leaf.q_value_weight)
       assert(leaf.q_value_weight->type == Q_Value::Type::UNSPLIT);
@@ -427,6 +428,7 @@ namespace Carli {
       assert(leaf.q_value_fringe->depth == q_value_fringe->depth);
 
     std::stack<Rete::Rete_Node_Ptr> rebase_right;
+    std::pair<std::string, Rete::WME_Token_Index> rebase_index;
     if(grammar == GRAMMAR_NULL_HOG) {
       rebase_right.push(ancestor_right);
       auto node = ancestor_right->parent_right();
@@ -448,6 +450,69 @@ namespace Carli {
 //            agent.rete_print_rules(rules_out);
 //          }
           abort();
+        }
+      }
+      if(grammar == GRAMMAR_NORMAL) {
+        const auto ra_variables = ra_lock->get_variables();
+        if(ra_variables->size() > old_variables->size()) {
+          assert(ra_variables->size() == old_variables->size() + 1);
+          auto rv = ra_variables->begin();
+          for(auto lv = old_variables->begin(), lend = old_variables->end(); lv != lend; ++lv, ++rv) {
+            if(*lv != *rv)
+              break;
+          }
+
+          bool tests_rv = q_value_fringe->feature->axis == rv->second;
+          if(!tests_rv) {
+            for(auto binding : q_value_fringe->feature->bindings) {
+              if(binding.first == rv->second) {
+                tests_rv = true;
+                break;
+              }
+            }
+          }
+
+          if(tests_rv) {
+            Rete::Rete_Action_Ptr variable_introducer = ra_lock;
+            Rete::Rete_Action_Ptr vi_parent_action;
+            for(;;) {
+              vi_parent_action = dynamic_cast<Node *>(variable_introducer->data.get())->parent_action.lock();
+              const auto ancestor_next_vars = vi_parent_action->get_variables();
+              if(ancestor_next_vars->find(rv->first) == ancestor_next_vars->end())
+                break;
+              variable_introducer = vi_parent_action;
+            }
+            if(variable_introducer != ra_lock) {
+              /// We have discovered the action that introduces the variable
+              rebase_index = std::make_pair(rv->first, Rete::WME_Token_Index(ancestor_left->get_size(), ancestor_left->get_token_size(), rv->second.column));
+
+#ifdef DEBUG_OUTPUT
+              std::cerr << "Variable introducer found!" << std::endl;
+              std::cerr << *lra_lock->get_variables() << std::endl;
+              lra_lock->print_rule(std::cerr);
+              std::cerr << *ra_lock->get_variables() << std::endl;
+              ra_lock->print_rule(std::cerr);
+              std::cerr << *lra_lock->get_variables() << std::endl;
+              variable_introducer->print_rule(std::cerr);
+              std::cerr << "Sizes: " << lra_lock->get_size() << ' ' << ra_lock->get_size() << ' ' << variable_introducer->get_size() << std::endl;
+              std::cerr << "Rebase Index: " << rebase_index.first << " at " << rebase_index.second << std::endl;
+#endif
+
+              for(auto node = variable_introducer->parent_left()->parent_left(); node != vi_parent_action->parent_left(); node = node->parent_left()) {
+                rebase_right.push(node);
+                if(dynamic_cast<Rete::Rete_Filter *>(node.get())) {
+                  std::cerr << "Ancestral relationship failure: " << ra_lock->get_name() << std::endl;
+//                  const std::string rules_out_file = dynamic_cast<const Option_String &>(Options::get_global()["rules-out"]).get_value();
+//                  if(!rules_out_file.empty()) {
+//                    std::ofstream rules_out((rules_out_file + ".bak").c_str());
+//                    rules_out << "set-total-step-count " << agent.get_total_step_count() << std::endl << std::endl;
+//                    agent.rete_print_rules(rules_out);
+//                  }
+                  abort();
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -534,7 +599,6 @@ namespace Carli {
     std::cerr << "Creating fringe node for " << *new_feature << std::endl;
 #endif
 
-    const auto old_variables = lra_lock->get_variables();
     Rete::Variable_Indices_Ptr new_variables;
 
     Rete::Rete_Node_Ptr_C ancestor_rightmost = ancestor_right;
@@ -873,6 +937,13 @@ namespace Carli {
       }
     }
 
+    /// Fix heavily rebased variable in collapse
+    if(!rebase_index.first.empty()) {
+      if(!new_variables)
+        new_variables = std::make_shared<Rete::Variable_Indices>(*old_variables);
+      new_variables->insert(rebase_index);
+    }
+
     /// Fix feature
     if(grammar == GRAMMAR_NORMAL) {
       if(new_feature->axis.rete_row >= lra_lock->parent_left()->get_size())
@@ -917,8 +988,11 @@ namespace Carli {
           new_feature->print_axis(std::cerr);
           std::cerr << std::endl;
 
+          std::cerr << *lra_lock->get_variables() << std::endl;
           lra_lock->print_rule(std::cerr);
+          std::cerr << *ra_lock->get_variables() << std::endl;
           ra_lock->print_rule(std::cerr);
+          std::cerr << *new_action->get_variables() << std::endl;
           new_action->print_rule(std::cerr);
 
           std::cerr << binding << " of " << *bindings << std::endl;

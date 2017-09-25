@@ -133,14 +133,21 @@ namespace Carli {
           else if(depth_diff < 0)
             found_axis->second.clear();
 
-          auto &data = found_axis->second[feature];
+          Data &datum = found_axis->second[feature];
 
-          if(data.node) {
-            ++data.count;
-            data.aggregate_value += node.q_value_fringe->primary;
+          if(datum.node) {
+            ++datum.count;
+            datum.aggregate_value += node.q_value_fringe->primary;
+
+//            /// Prefer variable-introducer node to non-introducer -- incomplete solution
+//            const auto right_join = std::dynamic_pointer_cast<Rete::Rete_Join>(rete_node.parent_left());
+//            if(right_join) {
+//              const auto left_join = std::dynamic_pointer_cast<Rete::Rete_Join>(datum.node->parent_left());
+//              if(!left_join || right_join->parent_right()->get_size() > left_join->parent_right()->get_size())
+//                datum.node = rete_node.shared();
+//            }
           }
           else {
-            Data &datum = found_axis->second[feature];
             datum.node = rete_node.shared();
             datum.count = 1;
             datum.aggregate_value = node.q_value_fringe->primary;
