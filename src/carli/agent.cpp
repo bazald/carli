@@ -100,9 +100,9 @@ namespace Carli {
       : root(split),
       root_feature(debuggable_cast<Carli::Node &>(*split).q_value_fringe->feature)
     {
-      auto descendants = split->descendants();
-      for(auto node : descendants)
-        (*this)(*node->rete_action.lock());
+//      auto descendants = split->descendants();
+//      for(auto node : descendants)
+//        (*this)(*node->rete_action.lock());
     }
 
     void operator()(Rete::Rete_Node &rete_node) {
@@ -596,12 +596,28 @@ namespace Carli {
     auto split = debuggable_pointer_cast<Node_Split>(rete_action.data);
     assert(split);
 
+#ifndef NDEBUG
+    {
+      auto rule_names = get_rule_names();
+      for(auto name : rule_names) {
+        auto rule = get_rule(name);
+        auto data = dynamic_cast<Node *>(rule->data.get());
+        if(data) {
+          if(data->q_value_fringe->depth != 1 && data->parent_action.expired()) {
+            std::cerr << "Bad rule found pre-collapse: " << rule->get_name() << std::endl;
+            abort();
+          }
+        }
+      }
+    }
+#endif
+
 //#ifndef NDEBUG
 //    rete_action.visit_preorder(Expiration_Detector(), false);
 //#endif
 
     Fringe_Collector_All fringe_collector(split);
-//    auto fringe_collector = rete_action.parent_left()->visit_preorder(Fringe_Collector_All(split), true);
+    fringe_collector = rete_action.parent_left()->visit_preorder(fringe_collector, true);
 
     if(fringe_collector.features.empty())
       return false;
@@ -706,6 +722,20 @@ namespace Carli {
 //#endif
 
     ++m_unrefinements[split->rank()];
+
+#ifndef NDEBUG
+    auto rule_names = get_rule_names();
+    for(auto name : rule_names) {
+      auto rule = get_rule(name);
+      auto data = dynamic_cast<Node *>(rule->data.get());
+      if(data) {
+        if(data->q_value_fringe->depth != 1 && data->parent_action.expired()) {
+          std::cerr << "Bad rule found post-collapse: " << rule->get_name() << std::endl;
+          abort();
+        }
+      }
+    }
+#endif
 
 //    dump_rules(*this);
 //    abort();

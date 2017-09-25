@@ -102,13 +102,16 @@ solution "carli"
 --       linkoptions { "-Wl,-rpath,/home/bazald/Software/gperftools/lib",
 --                     "-Wl,-rpath-link,/home/bazald/Software/gperftools/lib" }
 --     configuration { "linux", "Debug" }
---      links { "tcmalloc" }
+--       links { "tcmalloc" }
 --     configuration { "linux", "Profiling" }
 --       links { "tcmalloc_and_profiler" }
+--     configuration { "linux", "Release" }
+--       links { "tcmalloc" }
     if _OPTIONS["clang"] == "true" then
       configuration "linux"
         buildoptions { "-Qunused-arguments" }
         buildoptions { "-Wno-deprecated-register", "-Wno-null-conversion", "-Wno-parentheses-equality", "-Wno-unneeded-internal-declaration" }
+--         linkoptions { "-stdlib=libc++" }
         links { "c++", "c++abi", "m", "c", "gcc_s", "gcc" }
     end
   end
