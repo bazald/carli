@@ -349,7 +349,7 @@ namespace Zeni {
     list_pointer_type find(const value_type &value, const COMPARE &compare = COMPARE()) {
       list_pointer_type ptr = this;
 
-      while(ptr && compare(value, **ptr) || compare(**ptr, value))
+      while(ptr && (compare(value, **ptr) || compare(**ptr, value)))
         ptr = ptr->m_next;
 
       return ptr;
@@ -428,7 +428,7 @@ namespace Zeni {
     void erase_from(list_pointer_type &ptr) {
       if(ptr == this)
         ptr = m_next;
-      
+
       if(m_prev)
         m_prev->m_next = m_next;
       if(m_next)
