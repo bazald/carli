@@ -347,11 +347,12 @@ namespace Zeni {
 
     template <typename COMPARE = std::less<TYPE>>
     list_pointer_type find(const value_type &value, const COMPARE &compare = COMPARE()) {
-      if(this)
-        if(compare(value, **this) || compare(**this, value))
-          return m_next->find(value, compare);
+      list_pointer_type ptr = this;
 
-      return this;
+      while(ptr && compare(value, **ptr) || compare(**ptr, value))
+        ptr = ptr->m_next;
+
+      return ptr;
     }
 
     /** insert this list entry into the list; requires this to have !prev() && !next()
