@@ -1276,6 +1276,7 @@ namespace Carli {
     if(!rules_out_file.empty()) {
       std::ofstream rules_out(rules_out_file.c_str());
       rules_out << "# CPU time = " << rete_cpu_time() << " seconds" << std::endl << std::endl;
+      rules_out << "set-rule-name-index " << get_rule_name_index() << std::endl;
       rules_out << "set-total-step-count " << m_total_step_count << std::endl << std::endl;
       rete_print_rules(rules_out);
     }

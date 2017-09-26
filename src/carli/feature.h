@@ -54,14 +54,28 @@ namespace Carli {
       if(bindings.size() != rhs.bindings.size())
         return bindings.size() < rhs.bindings.size() ? -1 : 1;
       for(auto lt = bindings.begin(), lend = bindings.end(), rt = rhs.bindings.begin(); lt != lend; ++lt, ++rt) {
-        auto lv = get_variable(lt->first);
-        auto rv = rhs.get_variable(rt->first);
-        if(lv != rv)
-          return std::strcmp(lv.c_str(), rv.c_str());
-        if(lt->first.column != rt->first.column)
-          return lt->first.column - rt->first.column;
+        auto llv = Rete::get_Variable_name(indices, lt->first);
+        auto lrv = Rete::get_Variable_name(rhs.indices, rt->first);
+        if(llv != lrv)
+          return std::strcmp(llv.c_str(), lrv.c_str());
+        if(llv.empty()) {
+          if(lt->first < rt->first)
+            return -1;
+          if(lt->first > rt->first)
+            return 1;
+        }
+//        if(lt->first.column != rt->first.column)
+//          return lt->first.column - rt->first.column;
+//        const auto offset_l = lt->first.rete_row - rt->first.rete_row;
+//        const auto offset_r = lt->second.rete_row - rt->second.rete_row;
+//        if(offset_l != offset_r)
+//          return offset_l - offset_r;
 
-        if(lv.empty()) {
+        auto rlv = Rete::get_Variable_name(indices, lt->second);
+        auto rrv = Rete::get_Variable_name(rhs.indices, rt->second);
+        if(rlv != rrv)
+          return std::strcmp(rlv.c_str(), rrv.c_str());
+        if(rlv.empty()) {
           if(lt->second < rt->second)
             return -1;
           if(lt->second > rt->second)
@@ -105,14 +119,6 @@ namespace Carli {
       std::ostringstream oss;
       print(oss);
       return oss.str();
-    }
-
-    std::string get_variable(const Rete::WME_Token_Index &wme_token_index) const {
-      for(auto index : *indices) {
-        if(index.second == wme_token_index)
-          return index.first;
-      }
-      return "";
     }
 
     std::vector<Rete::WME> conditions;
