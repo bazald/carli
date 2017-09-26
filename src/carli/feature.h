@@ -58,6 +58,8 @@ namespace Carli {
         auto rv = rhs.get_variable(rt->first);
         if(lv != rv)
           return std::strcmp(lv.c_str(), rv.c_str());
+        if(lt->first.column != rt->first.column)
+          return lt->first.column - rt->first.column;
 
         if(lv.empty()) {
           if(lt->second < rt->second)
