@@ -96,10 +96,21 @@ namespace Carli {
       std::map<tracked_ptr<Feature>, Data, Rete::compare_deref_lt>,
       Rete::compare_deref_memfun_lt<Feature, Feature, &Feature::compare_axis>> features;
 
+    Fringe_Collector_All(const Node_Unsplit_Ptr &unsplit)
+      : root(unsplit),
+      root_feature(debuggable_cast<Carli::Node &>(*unsplit).q_value_fringe->feature)
+    {
+      excise.insert(unsplit->rete_action.lock());
+//      auto descendants = split->descendants();
+//      for(auto node : descendants)
+//        (*this)(*node->rete_action.lock());
+    }
+
     Fringe_Collector_All(const Node_Split_Ptr &split)
       : root(split),
       root_feature(debuggable_cast<Carli::Node &>(*split).q_value_fringe->feature)
     {
+      excise.insert(split->rete_action.lock());
 //      auto descendants = split->descendants();
 //      for(auto node : descendants)
 //        (*this)(*node->rete_action.lock());
@@ -111,9 +122,9 @@ namespace Carli {
         return;
       }
 
-      excise.insert(debuggable_pointer_cast<Rete::Rete_Action>(rete_node.shared()));
+      if(dynamic_cast<Node *>(rete_node.data.get())->q_value_fringe->depth > root->q_value_fringe->depth) {
+        excise.insert(debuggable_pointer_cast<Rete::Rete_Action>(rete_node.shared()));
 
-      if(rete_node.data != root) {
         auto &node = debuggable_cast<Carli::Node &>(*rete_node.data);
         auto &feature = node.q_value_fringe->feature;
         if(!feature)
@@ -284,6 +295,102 @@ namespace Carli {
       rete_print(fout);
     }
 
+    for(auto name : get_rule_names()) {
+      auto rule = get_rule(name);
+      auto rule_fringe = dynamic_cast<Node_Fringe *>(rule->data.get());
+      for(auto sibling : rule->parent_left()->get_outputs_all()) {
+        auto sibling_action = dynamic_cast<Rete::Rete_Action *>(sibling.get());
+        if(!sibling_action || sibling_action == rule.get())
+          continue;
+        auto sibling_fringe = dynamic_cast<Node_Fringe *>(sibling->data.get());
+        if(!rule_fringe ^ !sibling_fringe)
+          continue;
+
+        if(rule_fringe) {
+          if(*rule_fringe->q_value_fringe->feature == *sibling_fringe->q_value_fringe->feature) {
+            std::cerr << "Identical fringe features found pre-expansion:" << std::endl;
+            rule->print_rule(std::cerr);
+            sibling_action->print_rule(std::cerr);
+            dump_rules(*this);
+            abort();
+          }
+        }
+        else {
+          std::cerr << "Two non-fringe siblings found pre-expansion:" << std::endl;
+          rule->print_rule(std::cerr);
+          sibling_action->print_rule(std::cerr);
+          dump_rules(*this);
+          abort();
+        }
+      }
+    }
+
+    {
+      auto descendants = general.descendants();
+
+      Fringe_Collector_All fringe_collector(std::dynamic_pointer_cast<Node_Unsplit>(general.rete_action.lock()->data));
+      fringe_collector = rete_action.parent_left()->visit_preorder(fringe_collector, true);
+
+      for(auto rule : fringe_collector.excise) {
+        auto node = std::dynamic_pointer_cast<Node>(rule->data);
+        if(node->q_value_fringe->depth == general.q_value_fringe->depth)
+          continue;
+        if(std::find(descendants.begin(), descendants.end(), node) != descendants.end())
+          continue;
+
+        std::cerr << "Unsplit:" << std::endl;
+        general.rete_action.lock()->print_rule(std::cerr);
+        std::cerr << "Missing descendant found (pre-expansion):" << std::endl;
+        rule->print_rule(std::cerr);
+
+        dump_rules(*this);
+
+        std::cerr << "Ancestor check:" << std::endl;
+        auto anode = node;
+        while(anode.get() != &general) {
+          auto palock = anode->parent_action.lock();
+          auto pnode = std::dynamic_pointer_cast<Node>(palock->data);
+
+          if(auto split = dynamic_cast<Node_Split *>(pnode.get())) {
+            std::cerr << "  Split: ";
+            bool found = false;
+            for(auto child : split->children) {
+              if(child.lock() == node) {
+                found = true;
+                break;
+              }
+            }
+            std::cerr << found << std::endl;
+            if(!found)
+              abort();
+          }
+          else if(auto unsplit = dynamic_cast<Node_Unsplit *>(pnode.get())) {
+            std::cerr << "  Unsplit: ";
+            bool found = false;
+            for(const auto &fringe_value : unsplit->fringe_values) {
+              for(const auto &fv : fringe_value.second) {
+                if(fv.lock() == node) {
+                  found = true;
+                  break;
+                }
+              }
+            }
+            std::cerr << found << std::endl;
+            if(!found)
+              abort();
+          }
+          else {
+            std::cerr << "  Other!" << std::endl;
+            abort();
+          }
+
+          anode = pnode;
+        }
+
+        abort();
+      }
+    }
+
     auto new_node = general.create_split(general.parent_action.lock());
 
     if(m_unsplit_test == "none" || general.q_value_fringe->depth < m_split_min)
@@ -306,6 +413,103 @@ namespace Carli {
     expand_fringe(rete_action, new_node->rete_action.lock(), chosen);
 
     excise_rule(rete_action.get_name(), false);
+
+    for(auto name : get_rule_names()) {
+      auto rule = get_rule(name);
+      auto rule_fringe = dynamic_cast<Node_Fringe *>(rule->data.get());
+      for(auto sibling : rule->parent_left()->get_outputs_all()) {
+        auto sibling_action = dynamic_cast<Rete::Rete_Action *>(sibling.get());
+        if(!sibling_action || sibling_action == rule.get())
+          continue;
+        auto sibling_fringe = dynamic_cast<Node_Fringe *>(sibling->data.get());
+        if(!rule_fringe ^ !sibling_fringe)
+          continue;
+
+        if(rule_fringe) {
+          if(*rule_fringe->q_value_fringe->feature == *sibling_fringe->q_value_fringe->feature) {
+            std::cerr << "Identical fringe features found post-expansion:" << std::endl;
+            rule->print_rule(std::cerr);
+            sibling_action->print_rule(std::cerr);
+            dump_rules(*this);
+            abort();
+          }
+        }
+        else {
+          std::cerr << "Two non-fringe siblings found post-expansion:" << std::endl;
+          rule->print_rule(std::cerr);
+          sibling_action->print_rule(std::cerr);
+          dump_rules(*this);
+          abort();
+        }
+      }
+    }
+
+    {
+      auto split = std::dynamic_pointer_cast<Node_Split>(new_node);
+      auto descendants = split->descendants();
+
+      Fringe_Collector_All fringe_collector(split);
+      fringe_collector = rete_action.parent_left()->visit_preorder(fringe_collector, true);
+
+      for(auto rule : fringe_collector.excise) {
+        auto node = std::dynamic_pointer_cast<Node>(rule->data);
+        if(node->q_value_fringe->depth == split->q_value_fringe->depth)
+          continue;
+        if(std::find(descendants.begin(), descendants.end(), node) != descendants.end())
+          continue;
+
+        std::cerr << "Split:" << std::endl;
+        new_node->rete_action.lock()->print_rule(std::cerr);
+        std::cerr << "Missing descendant found (post-expansion):" << std::endl;
+        rule->print_rule(std::cerr);
+
+        dump_rules(*this);
+
+        std::cerr << "Ancestor check:" << std::endl;
+        auto anode = node;
+        while(anode != split) {
+          auto palock = anode->parent_action.lock();
+          auto pnode = std::dynamic_pointer_cast<Node>(palock->data);
+
+          if(auto split = dynamic_cast<Node_Split *>(pnode.get())) {
+            std::cerr << "  Split: ";
+            bool found = false;
+            for(auto child : split->children) {
+              if(child.lock() == node) {
+                found = true;
+                break;
+              }
+            }
+            std::cerr << found << std::endl;
+            if(!found)
+              abort();
+          }
+          else if(auto unsplit = dynamic_cast<Node_Unsplit *>(pnode.get())) {
+            std::cerr << "  Unsplit: ";
+            bool found = false;
+            for(const auto &fringe_value : unsplit->fringe_values) {
+              for(const auto &fv : fringe_value.second) {
+                if(fv.lock() == node) {
+                  found = true;
+                  break;
+                }
+              }
+            }
+            std::cerr << found << std::endl;
+            if(!found)
+              abort();
+          }
+          else {
+            std::cerr << "  Other!" << std::endl;
+            abort();
+          }
+
+          anode = pnode;
+        }
+
+        abort();
+      }
+    }
 
 //    dump_rules(*this);
 //    abort();
@@ -616,8 +820,99 @@ namespace Carli {
 //    rete_action.visit_preorder(Expiration_Detector(), false);
 //#endif
 
+    auto descendants = split->descendants();
+
     Fringe_Collector_All fringe_collector(split);
     fringe_collector = rete_action.parent_left()->visit_preorder(fringe_collector, true);
+
+    for(auto name : get_rule_names()) {
+      auto rule = get_rule(name);
+      auto rule_fringe = dynamic_cast<Node_Fringe *>(rule->data.get());
+      for(auto sibling : rule->parent_left()->get_outputs_all()) {
+        auto sibling_action = dynamic_cast<Rete::Rete_Action *>(sibling.get());
+        if(!sibling_action || sibling_action == rule.get())
+          continue;
+        auto sibling_fringe = dynamic_cast<Node_Fringe *>(sibling->data.get());
+        if(!rule_fringe ^ !sibling_fringe)
+          continue;
+
+        if(rule_fringe) {
+          if(*rule_fringe->q_value_fringe->feature == *sibling_fringe->q_value_fringe->feature) {
+            std::cerr << "Identical fringe features found pre-collapse:" << std::endl;
+            rule->print_rule(std::cerr);
+            sibling_action->print_rule(std::cerr);
+            dump_rules(*this);
+            abort();
+          }
+        }
+        else {
+          std::cerr << "Two non-fringe siblings found pre-collapse:" << std::endl;
+          rule->print_rule(std::cerr);
+          sibling_action->print_rule(std::cerr);
+          dump_rules(*this);
+          abort();
+        }
+      }
+    }
+
+    for(auto rule : fringe_collector.excise) {
+      auto node = std::dynamic_pointer_cast<Node>(rule->data);
+      if(node->q_value_fringe->depth == split->q_value_fringe->depth)
+        continue;
+      if(std::find(descendants.begin(), descendants.end(), node) != descendants.end())
+        continue;
+
+      std::cerr << "Split:" << std::endl;
+      split->rete_action.lock()->print_rule(std::cerr);
+      std::cerr << "Missing descendant found (pre-collapse):" << std::endl;
+      rule->print_rule(std::cerr);
+
+      dump_rules(*this);
+
+      std::cerr << "Ancestor check:" << std::endl;
+      auto anode = node;
+      while(anode != split) {
+        auto palock = anode->parent_action.lock();
+        auto pnode = std::dynamic_pointer_cast<Node>(palock->data);
+
+        if(auto split = dynamic_cast<Node_Split *>(pnode.get())) {
+          std::cerr << "  Split: ";
+          bool found = false;
+          for(auto child : split->children) {
+            if(child.lock() == node) {
+              found = true;
+              break;
+            }
+          }
+          std::cerr << found << std::endl;
+          if(!found)
+            abort();
+        }
+        else if(auto unsplit = dynamic_cast<Node_Unsplit *>(pnode.get())) {
+          std::cerr << "  Unsplit: ";
+          bool found = false;
+          for(const auto &fringe_value : unsplit->fringe_values) {
+            for(const auto &fv : fringe_value.second) {
+              if(fv.lock() == node) {
+                found = true;
+                break;
+              }
+            }
+          }
+          std::cerr << found << std::endl;
+          if(!found)
+            abort();
+        }
+        else {
+          std::cerr << "  Other!" << std::endl;
+          abort();
+        }
+
+        anode = pnode;
+      }
+
+      abort();
+    }
 
     if(fringe_collector.features.empty())
       return false;
@@ -656,7 +951,9 @@ namespace Carli {
 
     /// Make new fringe
     Fringe_Values node_unsplit_fringe;
+//    int64_t axis_number = 0;
     for(const auto &feature_axis : fringe_collector.features) {
+//      std::cerr << "Axis " << ++axis_number << ":";
       for(const auto &feature_node : feature_axis.second) {
         auto &node = debuggable_cast<Node &>(*feature_node.second.node->data.get());
 
@@ -670,6 +967,8 @@ namespace Carli {
 
         auto new_fringe = node.create_fringe(*unsplit, nullptr);
 
+//        std::cerr << " " << new_fringe->rete_action.lock()->get_name();
+
 //        std::cerr << "Collapsing: ";
 //        node.rete_action.lock()->output_name(std::cerr, 3);
 //        std::cerr << std::endl;
@@ -678,6 +977,7 @@ namespace Carli {
 //        new_fringe->rete_action.lock()->output_name(std::cerr, 3);
 //        std::cerr << std::endl;
       }
+//      std::cerr << std::endl;
     }
 
     fringe_collector.features.clear();
@@ -736,6 +1036,102 @@ namespace Carli {
       }
     }
 #endif
+
+    for(auto name : get_rule_names()) {
+      auto rule = get_rule(name);
+      auto rule_fringe = dynamic_cast<Node_Fringe *>(rule->data.get());
+      for(auto sibling : rule->parent_left()->get_outputs_all()) {
+        auto sibling_action = dynamic_cast<Rete::Rete_Action *>(sibling.get());
+        if(!sibling_action || sibling_action == rule.get())
+          continue;
+        auto sibling_fringe = dynamic_cast<Node_Fringe *>(sibling->data.get());
+        if(!rule_fringe ^ !sibling_fringe)
+          continue;
+
+        if(rule_fringe) {
+          if(*rule_fringe->q_value_fringe->feature == *sibling_fringe->q_value_fringe->feature) {
+            std::cerr << "Identical fringe features found post-collapse:" << std::endl;
+            rule->print_rule(std::cerr);
+            sibling_action->print_rule(std::cerr);
+            dump_rules(*this);
+            abort();
+          }
+        }
+        else {
+          std::cerr << "Two non-fringe siblings found post-collapse:" << std::endl;
+          rule->print_rule(std::cerr);
+          sibling_action->print_rule(std::cerr);
+          dump_rules(*this);
+          abort();
+        }
+      }
+    }
+
+    {
+      auto descendants = unsplit->descendants();
+
+      Fringe_Collector_All fringe_collector(unsplit);
+      fringe_collector = rete_action.parent_left()->visit_preorder(fringe_collector, true);
+
+      for(auto rule : fringe_collector.excise) {
+        auto node = std::dynamic_pointer_cast<Node>(rule->data);
+        if(node->q_value_fringe->depth == unsplit->q_value_fringe->depth)
+          continue;
+        if(std::find(descendants.begin(), descendants.end(), node) != descendants.end())
+          continue;
+
+        std::cerr << "Unsplit:" << std::endl;
+        unsplit->rete_action.lock()->print_rule(std::cerr);
+        std::cerr << "Missing descendant found (post-collapse):" << std::endl;
+        rule->print_rule(std::cerr);
+
+        dump_rules(*this);
+
+        std::cerr << "Ancestor check:" << std::endl;
+        auto anode = node;
+        while(anode != unsplit) {
+          auto palock = anode->parent_action.lock();
+          auto pnode = std::dynamic_pointer_cast<Node>(palock->data);
+
+          if(auto split = dynamic_cast<Node_Split *>(pnode.get())) {
+            std::cerr << "  Split: ";
+            bool found = false;
+            for(auto child : split->children) {
+              if(child.lock() == node) {
+                found = true;
+                break;
+              }
+            }
+            std::cerr << found << std::endl;
+            if(!found)
+              abort();
+          }
+          else if(auto unsplit = dynamic_cast<Node_Unsplit *>(pnode.get())) {
+            std::cerr << "  Unsplit: ";
+            bool found = false;
+            for(const auto &fringe_value : unsplit->fringe_values) {
+              for(const auto &fv : fringe_value.second) {
+                if(fv.lock() == node) {
+                  found = true;
+                  break;
+                }
+              }
+            }
+            std::cerr << found << std::endl;
+            if(!found)
+              abort();
+          }
+          else {
+            std::cerr << "  Other!" << std::endl;
+            abort();
+          }
+
+          anode = pnode;
+        }
+
+        abort();
+      }
+    }
 
 //    dump_rules(*this);
 //    abort();

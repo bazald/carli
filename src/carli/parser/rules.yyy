@@ -189,6 +189,12 @@ command:
                         break;
                       }
 
+                      if(q_value_depth != 1 && !feature) {
+                        reteerror(&yylloc, yyscanner, agent, filename, source_path, "Missing feature!");
+                        delete $2;
+                        YYABORT;
+                      }
+
                       const auto existing = agent.unname_rule(name, true);
                       if(existing) {
                         parent->suppress_destruction(true);

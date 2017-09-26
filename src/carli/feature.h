@@ -46,8 +46,31 @@ namespace Carli {
     }
 
     int64_t compare_axis(const Feature &rhs) const {
-      return conditions < rhs.conditions ? -1 : conditions > rhs.conditions ? 1 :
-             bindings < rhs.bindings ? -1 : bindings > rhs.bindings ? 1 : 0;
+      if(conditions < rhs.conditions)
+        return -1;
+      if(conditions > rhs.conditions)
+        return 1;
+
+      if(bindings.size() != rhs.bindings.size())
+        return bindings.size() < rhs.bindings.size() ? -1 : 1;
+      for(auto lt = bindings.begin(), lend = bindings.end(), rt = rhs.bindings.begin(); lt != lend; ++lt, ++rt) {
+        auto lv = get_variable(lt->first);
+        auto rv = rhs.get_variable(rt->first);
+        if(lv != rv)
+          return std::strcmp(lv.c_str(), rv.c_str());
+
+        if(lv.empty()) {
+          if(lt->second < rt->second)
+            return -1;
+          if(lt->second > rt->second)
+            return 1;
+        }
+      }
+
+      return 0;
+
+//      return conditions < rhs.conditions ? -1 : conditions > rhs.conditions ? 1 :
+//             bindings < rhs.bindings ? -1 : bindings > rhs.bindings ? 1 : 0;
     }
 
     virtual int64_t get_depth() const = 0;
@@ -80,6 +103,14 @@ namespace Carli {
       std::ostringstream oss;
       print(oss);
       return oss.str();
+    }
+
+    std::string get_variable(const Rete::WME_Token_Index &wme_token_index) const {
+      for(auto index : *indices) {
+        if(index.second == wme_token_index)
+          return index.first;
+      }
+      return "";
     }
 
     std::vector<Rete::WME> conditions;
