@@ -673,12 +673,9 @@ namespace Carli {
 
       bool case_2 = false;
       {
-        auto jl = dynamic_cast<Rete::Rete_Join *>(ancestor_left.get());
-        auto jr = dynamic_cast<Rete::Rete_Join *>(ancestor_right.get());
-
-        if(jl && jr) {
-          auto grandparent_left = jl->parent_left();
-          auto grandparent_right = jr->parent_left();
+        if(!dynamic_cast<Rete::Rete_Filter *>(ancestor_left.get()) && !dynamic_cast<Rete::Rete_Filter *>(ancestor_right.get())) {
+          auto grandparent_left = ancestor_left->parent_left();
+          auto grandparent_right = ancestor_right->parent_left();
 
           int64_t left_count = 0, right_count = 0;
           for(auto variable : *old_variables) {
@@ -691,6 +688,8 @@ namespace Carli {
           }
 
           case_2 = left_count == right_count;
+
+//          std::cerr << "Case 2 Check: " << left_count << " == " << right_count << std::endl;
         }
       }
 
