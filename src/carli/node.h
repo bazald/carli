@@ -107,6 +107,7 @@ namespace Carli {
     Node_Split_Ptr create_split(const Rete::Rete_Action_Ptr &parent_action_);
     Node_Unsplit_Ptr create_unsplit(const Rete::Rete_Action_Ptr &parent_action_);
     Node_Fringe_Ptr create_fringe(Node_Unsplit &leaf, Feature * const &feature_, const Grammar &grammar = GRAMMAR_NORMAL, const Rete::WME_Token_Index &old_new_var_index = Rete::WME_Token_Index(-1, -1, -1), const Rete::WME_Token_Index &prev_var_index = Rete::WME_Token_Index(-1, -1, -1));
+    Node_Fringe_Ptr recreate_fringe(Node_Unsplit &leaf);
 
     Agent &agent;
     std::weak_ptr<Rete::Rete_Action> parent_action;

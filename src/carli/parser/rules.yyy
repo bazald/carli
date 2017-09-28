@@ -272,6 +272,13 @@ command:
                                   YYABORT;
                                 }
                               }
+                              else if(dynamic_cast<Rete::Rete_Filter *>(next_ptr)) {
+                                auto vt = variable_names.begin(); //, vend = variable.names.end();
+                                auto pt = parent_action->get_variables()->begin(), pend = parent_action->get_variables()->end();
+                                while(pt != pend && *vt == *pt)
+                                  ++pt, ++vt;
+                                feature_n->value = vt->first;
+                              }
                               else {
                                 reteerror(&yylloc, yyscanner, agent, filename, source_path, "Error reading null HOG test (type 2).");
                                 YYABORT;

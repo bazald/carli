@@ -44,11 +44,11 @@ namespace Rete {
     }
 
     bool operator>(const WME_Token_Index &rhs) const {
-      return !(rhs <= *this);
+      return rhs <= *this;
     }
 
     bool operator>=(const WME_Token_Index &rhs) const {
-      return !(rhs < *this);
+      return rhs < *this;
     }
 
     int64_t rete_row;

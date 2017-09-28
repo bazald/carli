@@ -147,7 +147,7 @@ namespace Rete {
     const auto found = std::find_if(indices->begin(), indices->end(), [index](const std::pair<std::string, WME_Token_Index> &ind)->bool {
       return ind.second.rete_row == index.rete_row && ind.second.column == index.column;
     });
-    assert(found != indices->end());
+//    assert(found != indices->end());
     if(found != indices->end())
       return found->first;
 

@@ -4,9 +4,7 @@ sp {advent*general
   :feature 1 unsplit nil
   {(<s> ^player <player>)
   (<player> ^equipped <weapon>)
-  (<player> ^in <room>)
-  (<room> ^enemy <enemy>)
-  (<enemy> ^type <enemy-type>)}
+  (<player> ^in <room>)}
   {(<s> ^action <action>)
   (<action> ^name <name>)
   (<action> ^direction <direction>)
@@ -173,68 +171,88 @@ sp {advent*player-health-upper
   = 0.0
 }
 
+sp {advent*no-enemy
+  :feature 2 fringe 0 advent*general
+  &advent*general
+  -(<room> ^enemy <enemy-1>)
+-->
+  = 0.0
+}
+
 #sp {advent*enemy-dead
-#  :feature 2 fringe advent*general
+#  :feature 2 fringe 1 advent*general
 #  &advent*general
-#  +(<enemy> ^dead true)
+#  (<room> ^enemy <enemy-1>)
+#  +(<enemy-1> ^dead true)
 #-->
 #  = 0.0
 #}
 #
 #sp {advent*enemy-not-dead
-#  :feature 2 fringe advent*general
+#  :feature 2 fringe 1 advent*general
 #  &advent*general
-#  -(<enemy> ^dead true)
+#  (<room> ^enemy <enemy-1>)
+#  -(<enemy-1> ^dead true)
 #-->
 #  = 0.0
 #}
 
 sp {advent*enemy-health-lower
-  :feature 2 fringe advent*general 1 0 5
+  :feature 2 fringe 1 advent*general 1 0 5
   &advent*general
-  {(<enemy> ^health <enemy-health>)
-   (<enemy-health> < 5)}
+  (<room> ^enemy <enemy-1>)
+  {(<enemy-1> ^health <enemy-health-1>)
+   (<enemy-health-1> < 5)}
 -->
   = 0.0
 }
 
 sp {advent*enemy-health-upper
-  :feature 2 fringe advent*general 1 5 10
+  :feature 2 fringe 1 advent*general 1 5 10
   &advent*general
-  {(<enemy> ^health <enemy-health>)
-   (<enemy-health> >= 5)}
+  (<room> ^enemy <enemy-1>)
+  {(<enemy-1> ^health <enemy-health-1>)
+   (<enemy-health-1> >= 5)}
 -->
   = 0.0
 }
 
 sp {advent*enemy-type-solid
-  :feature 2 fringe advent*general
+  :feature 2 fringe 1 advent*general
   &advent*general
-  (<enemy-type> == 0)
+  (<room> ^enemy <enemy-1>)
+  {(<enemy-1> ^type <enemy-type-1>)
+  (<enemy-type-1> == 0)}
 -->
   = 0.0
 }
 
 #sp {advent*enemy-type-skeletal
-#  :feature 2 fringe advent*general
+#  :feature 2 fringe 1 advent*general
 #  &advent*general
-#  (<enemy-type> == 1)
+#  (<room> ^enemy <enemy-1>)
+#  {(<enemy-1> ^type <enemy-type-1>)
+#  (<enemy-type-1> == 1)}
 #-->
 #  = 0.0
 #}
 
 sp {advent*enemy-type-troll
-  :feature 2 fringe advent*general
+  :feature 2 fringe 1 advent*general
   &advent*general
-  (<enemy-type> == 2)
+  (<room> ^enemy <enemy-1>)
+  {(<enemy-1> ^type <enemy-type-1>)
+  (<enemy-type-1> == 2)}
 -->
   = 0.0
 }
 
 sp {advent*enemy-type-water
-  :feature 2 fringe advent*general
+  :feature 2 fringe 1 advent*general
   &advent*general
-  (<enemy-type> == 3)
+  (<room> ^enemy <enemy-1>)
+  {(<enemy-1> ^type <enemy-type-1>)
+  (<enemy-type-1> == 3)}
 -->
   = 0.0
 }

@@ -132,31 +132,27 @@ namespace Carli {
         if(root_feature && *root_feature == *feature)
           return;
 
+        /// Force to children and internal fringe nodes
+        if(dynamic_cast<Node *>(rete_node.data.get())->parent_action.lock() != root->rete_action.lock())
+          return;
+
         const auto found_axis = features.find(feature);
         if(found_axis != features.end()) {
 #ifdef DEBUG_OUTPUT
           std::cerr << *found_axis->first << " =axis= " << *feature << std::endl;
 #endif
 
-          const int64_t depth_diff = feature->get_depth() - found_axis->second.begin()->first->get_depth();
-          if(depth_diff > 0)
-            return;
-          else if(depth_diff < 0)
-            found_axis->second.clear();
+//          const int64_t depth_diff = feature->get_depth() - found_axis->second.begin()->first->get_depth();
+//          if(depth_diff > 0)
+//            return;
+//          else if(depth_diff < 0)
+//            found_axis->second.clear();
 
           Data &datum = found_axis->second[feature];
 
           if(datum.node) {
             ++datum.count;
             datum.aggregate_value += node.q_value_fringe->primary;
-
-//            /// Prefer variable-introducer node to non-introducer -- incomplete solution
-//            const auto right_join = std::dynamic_pointer_cast<Rete::Rete_Join>(rete_node.parent_left());
-//            if(right_join) {
-//              const auto left_join = std::dynamic_pointer_cast<Rete::Rete_Join>(datum.node->parent_left());
-//              if(!left_join || right_join->parent_right()->get_size() > left_join->parent_right()->get_size())
-//                datum.node = rete_node.shared();
-//            }
           }
           else {
             datum.node = rete_node.shared();
@@ -572,48 +568,67 @@ namespace Carli {
 
     /** Step 1.5: Detect whether a new & distinct variable needs to be created for Higher Order Grammar rules, along with new fringe nodes **/
     std::string old_new_var_name, prev_var_name;
+//    std::unordered_set<Rete::WME_Token_Index> old_new_var_indices;
     Rete::WME_Token_Index old_new_var_index(-1, -1, -1), prev_var_index(-1, -1, -1), old_null_hog_index(-1, -1, -1);
     Node_Fringe_Ptr null_hog;
     if((*leaves.begin())->q_value_fringe->feature->arity > -1) {
       const auto &vars = (*leaves.begin())->q_value_fringe->feature->indices;
-      const auto &parent_vars = parent_action->get_variables();
+      const auto &unsplit_vars = rete_action.get_variables();
 
       int64_t num_new_vars = 0;
       {
-        auto pt = vars->end();
-        auto vt = vars->begin();
-        const auto vend = vars->end();
-        auto pvt = parent_vars->begin();
-        while(vt != vend) {
-          if(*vt == *pvt) {
-            pt = vt;
-            ++vt;
-            ++pvt;
-          }
-          else {
+        for(auto vt = vars->begin(), vend = vars->end(), pt = vars->end(), pend = unsplit_vars->end(); vt != vend; pt = vt++) {
+          if(unsplit_vars->find(vt->first) == pend) {
             ++num_new_vars;
-            assert(num_new_vars < 2); /// Not sure how to cope with more than one new variable at a time -- probably not necessary
+//            old_new_var_indices.insert(vt->second);
+
+            bool is_hog_variable = false;
+            for(auto node = (*leaves.begin())->rete_action.lock()->parent_left(); !dynamic_cast<Rete::Rete_Filter *>(node.get()); node = node->parent_left()) {
+              if(auto join_node = dynamic_cast<Rete::Rete_Join *>(node.get())) {
+                if(join_node->parent_left()->get_size() <= vt->second.rete_row) {
+                  is_hog_variable = join_node->parent_right()->get_size() == 1;
+                  break;
+                }
+              }
+            }
+            if(!is_hog_variable) {
+#ifdef DEBUG_OUTPUT
+              std::cerr << "Non-HOG variable skipped: " << vt->first << std::endl;
+#endif
+              continue;
+            }
+
+//            std::cerr << old_new_var_name << ':' << old_new_var_index << " < " << vt->first << ':' << vt->second << " = " << (old_new_var_index < vt->second) << std::endl;
+            if(!old_new_var_name.empty() && old_new_var_index < vt->second)
+              continue;
+
             old_new_var_name = vt->first;
             old_new_var_index = vt->second;
 
             if(pt != vars->end()) {
               size_t last_hyphen_p1 = pt->first.rfind('-') + 1;
-              std::ostringstream oss;
-              oss << pt->first.substr(0, last_hyphen_p1) << atoi(pt->first.substr(last_hyphen_p1).c_str()) + 1;
-              if(oss.str() == old_new_var_name) {
-                prev_var_name = oss.str();
-                prev_var_index = pt->second;
+              size_t last_hyphen_v1 = vt->first.rfind('-') + 1;
+              if(pt->first.substr(0, last_hyphen_p1) == vt->first.substr(0, last_hyphen_v1)) {
+                std::ostringstream oss;
+                oss << pt->first.substr(0, last_hyphen_p1) << atoi(pt->first.substr(last_hyphen_p1).c_str()) + 1;
+                if(oss.str() == old_new_var_name) {
+                  prev_var_name = oss.str();
+                  prev_var_index = pt->second;
+                }
+              }
+              else {
+                prev_var_name = "";
+                prev_var_index = Rete::WME_Token_Index(-1, -1, -1);
               }
             }
-
-            pt = vt;
-            ++vt;
           }
         }
       }
+//      std::cerr << "Number of new vars = " << num_new_vars << std::endl;
 
       for(auto leaf : leaves) {
         if(auto feature_n = dynamic_cast<Feature_NullHOG_Data *>(leaf->q_value_fringe->feature.get())) {
+//          std::cerr << "Null HOG leaf touched." << std::endl;
           assert(leaves.size() == 1);
           if(feature_n->value == old_new_var_name) {
             null_hog = leaf;
@@ -624,6 +639,7 @@ namespace Carli {
       if(!null_hog) {
         for(auto fvt = unsplit.fringe_values.begin(), fend = unsplit.fringe_values.end(); fvt != fend; ++fvt) {
           if(auto feature_n = dynamic_cast<Feature_NullHOG_Data *>(fvt->first)) {
+//            std::cerr << "Null HOG fringe touched." << std::endl;
             assert(fvt->second.size() == 1);
             if(feature_n->value == old_new_var_name) {
               null_hog = fvt->second.begin()->lock();
@@ -631,6 +647,8 @@ namespace Carli {
               leaves.push_back(null_hog);
               break;
             }
+            else
+              std::cerr << "Mismatch: " << feature_n->value << " " << old_new_var_name << std::endl;
           }
         }
       }
@@ -746,7 +764,7 @@ namespace Carli {
                 }
               }
 
-              if(null_hog)
+              if(null_hog && node_unsplit->rete_action.lock()->get_variables()->find(old_new_var_name) == node_unsplit->rete_action.lock()->get_variables()->end())
                 null_hog->create_fringe(*node_unsplit, nullptr, Node::GRAMMAR_NULL_HOG, old_null_hog_index);
             }
           }
@@ -941,9 +959,7 @@ namespace Carli {
     std::cerr << "Collapsing " << split << " to " << unsplit << std::endl;
 #endif
 
-    int64_t ucount = 0;
-    for(auto var : *unsplit->variables)
-      ucount += var.second.existential ? 0 : 1;
+//    const size_t unsplit_variables_size = unsplit->variables->size();
 
     /// Preserve some learning
     /// Already being done in node.cpp, but should attempt to do better
@@ -958,14 +974,15 @@ namespace Carli {
         auto &node = debuggable_cast<Node &>(*feature_node.second.node->data.get());
 
         /// Throw away nodes considering 2 or more new HOG variables
-        int64_t ncount = 0;
-        const int64_t count_existential = dynamic_cast<Feature_NullHOG_Data *>(feature_node.first.get()) ? 1 : 0;
-        for(auto var : *node.variables)
-          ncount += var.second.existential ? count_existential : 1;
-        if(ncount > ucount + 1)
-          continue;
+//        const size_t node_variables_size = node.variables->size();
+//        const size_t parent_variables_size = debuggable_cast<Node *>(node.parent_action.lock()->data.get())->variables->size();
+//        if(parent_variables_size > unsplit_variables_size && node_variables_size > parent_variables_size) {
+//          std::cerr << "Discarding:" << std::endl;
+//          node.rete_action.lock()->print_rule(std::cerr);
+//          continue;
+//        }
 
-        auto new_fringe = node.create_fringe(*unsplit, nullptr);
+        auto new_fringe = node.recreate_fringe(*unsplit);
 
 //        std::cerr << " " << new_fringe->rete_action.lock()->get_name();
 
@@ -1460,7 +1477,7 @@ namespace Carli {
     auto &q_values = m_next_q_values[action];
 //    auto found = std::find(q_values.begin(), q_values.end(), q_value);
     auto found = q_values.find(q_value);
-    assert(found != q_values.end());
+//    assert(found != q_values.end());
     if(found != q_values.end()) {
       if(!--found->second)
         q_values.erase(found);
