@@ -852,14 +852,14 @@ namespace Carli {
           std::cerr << "  Filter" << std::endl;
 #endif
           if(grammar == GRAMMAR_NULL_HOG) {
-            Rete::WME_Bindings bindings;
+            Rete::WME_Bindings bindings2;
 
-            for(int i = 0; i != 2; ++i) {
+            for(int8_t i = 0; i != 2; ++i) {
               if(dynamic_cast<const Rete::Symbol_Variable *>(filter_node->get_wme().symbols[i].get()))
-                bindings.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0, i), Rete::WME_Token_Index(0, 0, i)));
+                bindings2.insert(Rete::WME_Binding(Rete::WME_Token_Index(0, 0, i), Rete::WME_Token_Index(0, 0, i)));
             }
 
-            new_test = agent.make_join(bindings, new_test, test);
+            new_test = agent.make_join(bindings2, new_test, test);
           }
           else
             abort();

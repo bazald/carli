@@ -110,7 +110,7 @@ namespace Blocks_World_2 {
     assert(m_num_blocks_min > 2);
     assert(m_num_blocks_max >= m_num_blocks_min);
 
-    const int64_t num_blocks = m_num_blocks_min + (m_num_blocks_min != m_num_blocks_max ? m_random.rand_lte(m_num_blocks_max - m_num_blocks_min) : 0);
+    const int64_t num_blocks = m_num_blocks_min + (m_num_blocks_min != m_num_blocks_max ? m_random.rand_lte(int32_t(m_num_blocks_max - m_num_blocks_min)) : 0);
 
     std::vector<Block> blocks;
     blocks.reserve(num_blocks);
