@@ -389,6 +389,7 @@ namespace Blocks_World_2 {
     else if(env->get_goal() == Environment::Goal::EXACT) {
       for(const auto &stack : target) {
         Rete::Symbol_Identifier_Ptr_C prev_id = m_table_id;
+        insert_new_wme(std::make_shared<Rete::WME>(m_block_ids[stack.begin()->id], m_goal_on_attr, m_table_id));
         for(const auto &block : stack) {
           const Rete::Symbol_Identifier_Ptr_C block_id = m_block_ids[block.id];
           assert(block.id);
@@ -446,6 +447,7 @@ namespace Blocks_World_2 {
     insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_blocks_attr, m_blocks_id));
     insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_stacks_attr, m_stacks_id));
     insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_target_attr, m_target_id));
+    insert_new_wme(std::make_shared<Rete::WME>(m_blocks_id, m_block_attr, m_table_id));
     insert_new_wme(std::make_shared<Rete::WME>(m_table_id, m_name_attr, m_table_name));
     insert_new_wme(std::make_shared<Rete::WME>(m_stacks_id, m_stack_attr, m_table_stack_id));
     insert_new_wme(std::make_shared<Rete::WME>(m_target_id, m_stack_attr, m_table_stack_id));
@@ -485,6 +487,8 @@ namespace Blocks_World_2 {
       int64_t block1_height = 1;
       for(const auto &block1 : stack) {
         const Rete::Symbol_Identifier_Ptr_C block1_id = m_block_ids[block1.id];
+        if(block1_height == 1)
+          insert_new_wme(std::make_shared<Rete::WME>(block1_id, m_on_attr, m_table_id));
         int64_t block2_height = 1;
         for(const auto &block2 : stack) {
           if(block2_height >= block1_height)

@@ -271,6 +271,13 @@ namespace Carli {
 //      std::cerr << "Expired parent action found for " << rete_action.lock()->get_name() << std::endl;
 //      abort();
 //    }
+
+//    if(dynamic_cast<Feature_NullHOG_Data *>(q_value_fringe->feature.get())) {
+//      rete_action.lock()->print_rule(std::cerr);
+//      for(auto tok : rete_action.lock()->parent_left()->parent_right()->get_output_tokens())
+//        std::cerr << *tok << std::endl;
+//      abort();
+//    }
   }
 
   void Node::retraction(const Rete::WME_Token &token) {

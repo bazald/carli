@@ -112,7 +112,8 @@ sp {blocks-world*block-2on0-f
 sp {blocks-world*block-nullhog
   :feature 2 fringe 0 blocks-world*general
   &blocks-world*general
-  -{(<blocks> ^block <block-1>)
+  -{(<s> ^blocks <blocks>)
+  (<blocks> ^block <block-1>)
   (<blocks> ^block <block-2>)
   (<block-2> != <block-1>)
   (<blocks> ^block <block-3>)
