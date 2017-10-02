@@ -1,0 +1,686 @@
+Stack 3 Blocks in 0.01 Seconds
+Stack 4 Blocks in 0.01 Seconds
+Stack 5 Blocks in 0.02 Seconds
+Stack 6 Blocks in 0.02 Seconds
+Stack 7 Blocks in 0.02 Seconds
+Stack 8 Blocks in 0.01 Seconds
+Stack 9 Blocks in 0.02 Seconds
+Stack 10 Blocks in 0.02 Seconds
+Stack 11 Blocks in 0.02 Seconds
+Stack 12 Blocks in 0.02 Seconds
+Stack 13 Blocks in 0.03 Seconds
+Stack 14 Blocks in 0.02 Seconds
+Stack 15 Blocks in 0.02 Seconds
+Stack 16 Blocks in 0.04 Seconds
+Stack 17 Blocks in 0.04 Seconds
+Stack 18 Blocks in 0.04 Seconds
+Stack 19 Blocks in 0.04 Seconds
+Stack 20 Blocks in 0.05 Seconds
+Stack 21 Blocks in 0.04 Seconds
+Stack 22 Blocks in 0.06 Seconds
+Stack 23 Blocks in 0.04 Seconds
+Stack 24 Blocks in 0.07 Seconds
+Stack 25 Blocks in 0.11 Seconds
+Stack 26 Blocks in 0.09 Seconds
+Stack 27 Blocks in 0.08 Seconds
+Stack 28 Blocks in 0.14 Seconds
+Stack 29 Blocks in 0.10 Seconds
+Stack 30 Blocks in 0.13 Seconds
+Stack 31 Blocks in 0.13 Seconds
+Stack 32 Blocks in 0.18 Seconds
+Stack 33 Blocks in 0.23 Seconds
+Stack 34 Blocks in 0.20 Seconds
+Stack 35 Blocks in 0.25 Seconds
+Stack 36 Blocks in 0.18 Seconds
+Stack 37 Blocks in 0.11 Seconds
+Stack 38 Blocks in 0.16 Seconds
+Stack 39 Blocks in 0.22 Seconds
+Stack 40 Blocks in 0.21 Seconds
+Stack 41 Blocks in 0.26 Seconds
+Stack 42 Blocks in 0.34 Seconds
+Stack 43 Blocks in 0.26 Seconds
+Stack 44 Blocks in 0.45 Seconds
+Stack 45 Blocks in 0.34 Seconds
+Stack 46 Blocks in 0.36 Seconds
+Stack 47 Blocks in 0.31 Seconds
+Stack 48 Blocks in 0.31 Seconds
+Stack 49 Blocks in 0.60 Seconds
+Stack 50 Blocks in 0.45 Seconds
+Stack 51 Blocks in 0.49 Seconds
+Stack 52 Blocks in 0.47 Seconds
+Stack 53 Blocks in 0.55 Seconds
+Stack 54 Blocks in 0.63 Seconds
+Stack 55 Blocks in 0.48 Seconds
+Stack 56 Blocks in 0.58 Seconds
+Stack 57 Blocks in 0.93 Seconds
+Stack 58 Blocks in 0.69 Seconds
+Stack 59 Blocks in 0.72 Seconds
+Stack 60 Blocks in 0.61 Seconds
+Stack 61 Blocks in 0.50 Seconds
+Stack 62 Blocks in 0.77 Seconds
+Stack 63 Blocks in 0.93 Seconds
+Stack 64 Blocks in 0.64 Seconds
+Stack 65 Blocks in 0.58 Seconds
+Stack 66 Blocks in 0.90 Seconds
+Stack 67 Blocks in 1.26 Seconds
+Stack 68 Blocks in 1.04 Seconds
+Stack 69 Blocks in 1.33 Seconds
+Stack 70 Blocks in 1.52 Seconds
+Stack 71 Blocks in 1.71 Seconds
+Stack 72 Blocks in 1.31 Seconds
+Stack 73 Blocks in 1.86 Seconds
+Stack 74 Blocks in 2.23 Seconds
+Stack 75 Blocks in 1.30 Seconds
+Stack 76 Blocks in 1.79 Seconds
+Stack 77 Blocks in 1.44 Seconds
+Stack 78 Blocks in 1.96 Seconds
+Stack 79 Blocks in 1.92 Seconds
+Stack 80 Blocks in 1.50 Seconds
+Stack 81 Blocks in 1.80 Seconds
+Stack 82 Blocks in 1.82 Seconds
+Stack 83 Blocks in 2.30 Seconds
+Stack 84 Blocks in 2.47 Seconds
+Stack 85 Blocks in 2.75 Seconds
+Stack 86 Blocks in 2.42 Seconds
+Stack 87 Blocks in 2.29 Seconds
+Stack 88 Blocks in 2.54 Seconds
+Stack 89 Blocks in 2.85 Seconds
+Stack 90 Blocks in 2.78 Seconds
+Stack 91 Blocks in 1.39 Seconds
+Stack 92 Blocks in 3.76 Seconds
+Stack 93 Blocks in 4.04 Seconds
+Stack 94 Blocks in 3.00 Seconds
+Stack 95 Blocks in 4.05 Seconds
+Stack 96 Blocks in 2.43 Seconds
+Stack 97 Blocks in 3.01 Seconds
+Stack 98 Blocks in 4.66 Seconds
+Stack 99 Blocks in 4.06 Seconds
+Stack 100 Blocks in 2.29 Seconds
+Unstack 3 Blocks in 0.01 Seconds
+Unstack 4 Blocks in 0.01 Seconds
+Unstack 5 Blocks in 0.02 Seconds
+Unstack 6 Blocks in 0.02 Seconds
+Unstack 7 Blocks in 0.02 Seconds
+Unstack 8 Blocks in 0.02 Seconds
+Unstack 9 Blocks in 0.02 Seconds
+Unstack 10 Blocks in 0.03 Seconds
+Unstack 11 Blocks in 0.04 Seconds
+Unstack 12 Blocks in 0.04 Seconds
+Unstack 13 Blocks in 0.05 Seconds
+Unstack 14 Blocks in 0.06 Seconds
+Unstack 15 Blocks in 0.08 Seconds
+Unstack 16 Blocks in 0.09 Seconds
+Unstack 17 Blocks in 0.12 Seconds
+Unstack 18 Blocks in 0.16 Seconds
+Unstack 19 Blocks in 0.19 Seconds
+Unstack 20 Blocks in 0.21 Seconds
+Unstack 21 Blocks in 0.26 Seconds
+Unstack 22 Blocks in 0.34 Seconds
+Unstack 23 Blocks in 0.34 Seconds
+Unstack 24 Blocks in 0.41 Seconds
+Unstack 25 Blocks in 0.49 Seconds
+Unstack 26 Blocks in 0.58 Seconds
+Unstack 27 Blocks in 0.62 Seconds
+Unstack 28 Blocks in 0.76 Seconds
+Unstack 29 Blocks in 0.81 Seconds
+Unstack 30 Blocks in 0.88 Seconds
+Unstack 31 Blocks in 1.10 Seconds
+Unstack 32 Blocks in 1.23 Seconds
+Unstack 33 Blocks in 1.53 Seconds
+Unstack 34 Blocks in 1.44 Seconds
+Unstack 35 Blocks in 1.84 Seconds
+Unstack 36 Blocks in 1.76 Seconds
+Unstack 37 Blocks in 1.90 Seconds
+Unstack 38 Blocks in 2.09 Seconds
+Unstack 39 Blocks in 2.36 Seconds
+Unstack 40 Blocks in 2.47 Seconds
+Unstack 41 Blocks in 2.94 Seconds
+Unstack 42 Blocks in 3.06 Seconds
+Unstack 43 Blocks in 3.55 Seconds
+Unstack 44 Blocks in 3.37 Seconds
+Unstack 45 Blocks in 3.58 Seconds
+Unstack 46 Blocks in 3.88 Seconds
+Unstack 47 Blocks in 4.15 Seconds
+Unstack 48 Blocks in 4.44 Seconds
+Unstack 49 Blocks in 5.13 Seconds
+Unstack 50 Blocks in 5.37 Seconds
+Unstack 51 Blocks in 5.73 Seconds
+Unstack 52 Blocks in 6.23 Seconds
+Unstack 53 Blocks in 6.83 Seconds
+Unstack 54 Blocks in 6.71 Seconds
+Unstack 55 Blocks in 7.34 Seconds
+Unstack 56 Blocks in 7.50 Seconds
+Unstack 57 Blocks in 7.93 Seconds
+Unstack 58 Blocks in 8.62 Seconds
+Unstack 59 Blocks in 8.79 Seconds
+Unstack 60 Blocks in 9.33 Seconds
+Unstack 61 Blocks in 9.77 Seconds
+Unstack 62 Blocks in 10.56 Seconds
+Unstack 63 Blocks in 11.08 Seconds
+Unstack 64 Blocks in 11.73 Seconds
+Unstack 65 Blocks in 12.27 Seconds
+Unstack 66 Blocks in 13.07 Seconds
+Unstack 67 Blocks in 13.57 Seconds
+Unstack 68 Blocks in 14.60 Seconds
+Unstack 69 Blocks in 15.15 Seconds
+Unstack 70 Blocks in 15.86 Seconds
+Unstack 71 Blocks in 16.74 Seconds
+Unstack 72 Blocks in 18.01 Seconds
+Unstack 73 Blocks in 18.74 Seconds
+Unstack 74 Blocks in 18.93 Seconds
+Unstack 75 Blocks in 19.34 Seconds
+Unstack 76 Blocks in 20.18 Seconds
+Unstack 77 Blocks in 21.12 Seconds
+Unstack 78 Blocks in 22.36 Seconds
+Unstack 79 Blocks in 23.37 Seconds
+Unstack 80 Blocks in 24.10 Seconds
+Unstack 81 Blocks in 28.02 Seconds
+Unstack 82 Blocks in 30.27 Seconds
+Unstack 83 Blocks in 33.26 Seconds
+Unstack 84 Blocks in 33.86 Seconds
+Unstack 85 Blocks in 32.46 Seconds
+Unstack 86 Blocks in 32.92 Seconds
+Unstack 87 Blocks in 34.20 Seconds
+Unstack 88 Blocks in 35.94 Seconds
+Unstack 89 Blocks in 36.19 Seconds
+Unstack 90 Blocks in 37.42 Seconds
+Unstack 91 Blocks in 38.69 Seconds
+Unstack 92 Blocks in 43.79 Seconds
+Unstack 93 Blocks in 46.34 Seconds
+Unstack 94 Blocks in 49.03 Seconds
+Unstack 95 Blocks in 50.26 Seconds
+Unstack 96 Blocks in 52.43 Seconds
+Unstack 97 Blocks in 54.04 Seconds
+Unstack 98 Blocks in 55.16 Seconds
+Unstack 99 Blocks in 58.36 Seconds
+Unstack 100 Blocks in 65.64 Seconds
+On(a,b) 3 Blocks in 0.02 Seconds
+On(a,b) 4 Blocks in 0.02 Seconds
+On(a,b) 5 Blocks in 0.02 Seconds
+On(a,b) 6 Blocks in 0.02 Seconds
+On(a,b) 7 Blocks in 0.07 Seconds
+On(a,b) 8 Blocks in 0.05 Seconds
+On(a,b) 9 Blocks in 0.05 Seconds
+On(a,b) 10 Blocks in 0.07 Seconds
+On(a,b) 11 Blocks in 0.05 Seconds
+On(a,b) 12 Blocks in 0.34 Seconds
+On(a,b) 13 Blocks in 0.03 Seconds
+On(a,b) 14 Blocks in 0.17 Seconds
+On(a,b) 15 Blocks in 0.10 Seconds
+On(a,b) 16 Blocks in 0.07 Seconds
+On(a,b) 17 Blocks in 0.08 Seconds
+On(a,b) 18 Blocks in 0.37 Seconds
+On(a,b) 19 Blocks in 0.64 Seconds
+On(a,b) 20 Blocks in 0.52 Seconds
+On(a,b) 21 Blocks in 0.37 Seconds
+On(a,b) 22 Blocks in 0.83 Seconds
+On(a,b) 23 Blocks in 0.35 Seconds
+On(a,b) 24 Blocks in 0.27 Seconds
+On(a,b) 25 Blocks in 1.79 Seconds
+On(a,b) 26 Blocks in 0.54 Seconds
+On(a,b) 27 Blocks in 0.37 Seconds
+On(a,b) 28 Blocks in 1.02 Seconds
+On(a,b) 29 Blocks in 2.18 Seconds
+On(a,b) 30 Blocks in 0.94 Seconds
+On(a,b) 31 Blocks in 0.07 Seconds
+On(a,b) 32 Blocks in 5.11 Seconds
+On(a,b) 33 Blocks in 5.81 Seconds
+On(a,b) 34 Blocks in 0.10 Seconds
+On(a,b) 35 Blocks in 1.90 Seconds
+On(a,b) 36 Blocks in 1.53 Seconds
+On(a,b) 37 Blocks in 1.67 Seconds
+On(a,b) 38 Blocks in 9.11 Seconds
+On(a,b) 39 Blocks in 2.80 Seconds
+On(a,b) 40 Blocks in 2.61 Seconds
+On(a,b) 41 Blocks in 3.73 Seconds
+On(a,b) 42 Blocks in 9.78 Seconds
+On(a,b) 43 Blocks in 0.42 Seconds
+On(a,b) 44 Blocks in 4.19 Seconds
+On(a,b) 45 Blocks in 1.15 Seconds
+On(a,b) 46 Blocks in 1.41 Seconds
+On(a,b) 47 Blocks in 0.60 Seconds
+On(a,b) 48 Blocks in 2.84 Seconds
+On(a,b) 49 Blocks in 2.90 Seconds
+On(a,b) 50 Blocks in 3.93 Seconds
+On(a,b) 51 Blocks in 6.31 Seconds
+On(a,b) 52 Blocks in 3.20 Seconds
+On(a,b) 53 Blocks in 2.21 Seconds
+On(a,b) 54 Blocks in 0.23 Seconds
+On(a,b) 55 Blocks in 11.51 Seconds
+On(a,b) 56 Blocks in 12.12 Seconds
+On(a,b) 57 Blocks in 2.71 Seconds
+On(a,b) 58 Blocks in 1.20 Seconds
+On(a,b) 59 Blocks in 2.55 Seconds
+On(a,b) 60 Blocks in 9.08 Seconds
+On(a,b) 61 Blocks in 0.72 Seconds
+On(a,b) 62 Blocks in 2.17 Seconds
+On(a,b) 63 Blocks in 4.07 Seconds
+On(a,b) 64 Blocks in 7.59 Seconds
+On(a,b) 65 Blocks in 2.12 Seconds
+On(a,b) 66 Blocks in 1.54 Seconds
+On(a,b) 67 Blocks in 3.52 Seconds
+On(a,b) 68 Blocks in 10.51 Seconds
+On(a,b) 69 Blocks in 22.98 Seconds
+On(a,b) 70 Blocks in 10.53 Seconds
+On(a,b) 71 Blocks in 12.46 Seconds
+On(a,b) 72 Blocks in 27.22 Seconds
+On(a,b) 73 Blocks in 6.69 Seconds
+On(a,b) 74 Blocks in 19.84 Seconds
+On(a,b) 75 Blocks in 16.04 Seconds
+On(a,b) 76 Blocks in 8.09 Seconds
+On(a,b) 77 Blocks in 6.02 Seconds
+On(a,b) 78 Blocks in 15.38 Seconds
+On(a,b) 79 Blocks in 9.69 Seconds
+On(a,b) 80 Blocks in 19.40 Seconds
+On(a,b) 81 Blocks in 4.30 Seconds
+On(a,b) 82 Blocks in 54.49 Seconds
+On(a,b) 83 Blocks in 55.06 Seconds
+On(a,b) 84 Blocks in 31.60 Seconds
+On(a,b) 85 Blocks in 72.60 Seconds
+On(a,b) 86 Blocks in 15.27 Seconds
+On(a,b) 87 Blocks in 1.22 Seconds
+On(a,b) 88 Blocks in 13.18 Seconds
+On(a,b) 89 Blocks in 5.93 Seconds
+On(a,b) 90 Blocks in 7.27 Seconds
+On(a,b) 91 Blocks in 61.27 Seconds
+On(a,b) 92 Blocks in 5.48 Seconds
+On(a,b) 93 Blocks in 16.86 Seconds
+On(a,b) 94 Blocks in 4.28 Seconds
+On(a,b) 95 Blocks in 14.84 Seconds
+On(a,b) 96 Blocks in 1.01 Seconds
+On(a,b) 97 Blocks in 19.77 Seconds
+On(a,b) 98 Blocks in 5.18 Seconds
+On(a,b) 99 Blocks in 62.48 Seconds
+On(a,b) 100 Blocks in 55.30 Seconds
+Exact 3 Blocks in 0.02 Seconds
+Exact 4 Blocks in 0.02 Seconds
+Exact 5 Blocks in 0.02 Seconds
+Exact 6 Blocks in 0.03 Seconds
+Exact 7 Blocks in 0.02 Seconds
+Exact 8 Blocks in 0.02 Seconds
+Exact 9 Blocks in 0.03 Seconds
+Exact 10 Blocks in 0.02 Seconds
+Exact 11 Blocks in 0.03 Seconds
+Exact 12 Blocks in 0.03 Seconds
+Exact 13 Blocks in 0.03 Seconds
+Exact 14 Blocks in 0.03 Seconds
+Exact 15 Blocks in 0.04 Seconds
+Exact 16 Blocks in 0.04 Seconds
+Exact 17 Blocks in 0.05 Seconds
+Exact 18 Blocks in 0.04 Seconds
+Exact 19 Blocks in 0.06 Seconds
+Exact 20 Blocks in 0.07 Seconds
+Exact 21 Blocks in 0.07 Seconds
+Exact 22 Blocks in 0.07 Seconds
+Exact 23 Blocks in 0.09 Seconds
+Exact 24 Blocks in 0.07 Seconds
+Exact 25 Blocks in 0.09 Seconds
+Exact 26 Blocks in 0.08 Seconds
+Exact 27 Blocks in 0.11 Seconds
+Exact 28 Blocks in 0.12 Seconds
+Exact 29 Blocks in 0.12 Seconds
+Exact 30 Blocks in 0.13 Seconds
+Exact 31 Blocks in 0.16 Seconds
+Exact 32 Blocks in 0.10 Seconds
+Exact 33 Blocks in 0.17 Seconds
+Exact 34 Blocks in 0.13 Seconds
+Exact 35 Blocks in 0.23 Seconds
+Exact 36 Blocks in 0.26 Seconds
+Exact 37 Blocks in 0.18 Seconds
+Exact 38 Blocks in 0.24 Seconds
+Exact 39 Blocks in 0.26 Seconds
+Exact 40 Blocks in 0.25 Seconds
+Exact 41 Blocks in 0.27 Seconds
+Exact 42 Blocks in 0.31 Seconds
+Exact 43 Blocks in 0.27 Seconds
+Exact 44 Blocks in 0.34 Seconds
+Exact 45 Blocks in 0.35 Seconds
+Exact 46 Blocks in 0.36 Seconds
+Exact 47 Blocks in 0.45 Seconds
+Exact 48 Blocks in 0.45 Seconds
+Exact 49 Blocks in 0.45 Seconds
+Exact 50 Blocks in 0.43 Seconds
+Exact 51 Blocks in 0.46 Seconds
+Exact 52 Blocks in 0.48 Seconds
+Exact 53 Blocks in 0.40 Seconds
+Exact 54 Blocks in 0.51 Seconds
+Exact 55 Blocks in 0.55 Seconds
+Exact 56 Blocks in 0.55 Seconds
+Exact 57 Blocks in 0.59 Seconds
+Exact 58 Blocks in 0.45 Seconds
+Exact 59 Blocks in 0.59 Seconds
+Exact 60 Blocks in 0.69 Seconds
+Exact 61 Blocks in 0.66 Seconds
+Exact 62 Blocks in 0.72 Seconds
+Exact 63 Blocks in 0.92 Seconds
+Exact 64 Blocks in 1.08 Seconds
+Exact 65 Blocks in 0.83 Seconds
+Exact 66 Blocks in 1.00 Seconds
+Exact 67 Blocks in 1.14 Seconds
+Exact 68 Blocks in 0.96 Seconds
+Exact 69 Blocks in 1.32 Seconds
+Exact 70 Blocks in 1.10 Seconds
+Exact 71 Blocks in 1.11 Seconds
+Exact 72 Blocks in 0.92 Seconds
+Exact 73 Blocks in 1.26 Seconds
+Exact 74 Blocks in 1.28 Seconds
+Exact 75 Blocks in 1.35 Seconds
+Exact 76 Blocks in 1.85 Seconds
+Exact 77 Blocks in 1.57 Seconds
+Exact 78 Blocks in 1.39 Seconds
+Exact 79 Blocks in 1.42 Seconds
+Exact 80 Blocks in 1.57 Seconds
+Exact 81 Blocks in 1.80 Seconds
+Exact 82 Blocks in 1.66 Seconds
+Exact 83 Blocks in 1.60 Seconds
+Exact 84 Blocks in 1.78 Seconds
+Exact 85 Blocks in 1.84 Seconds
+Exact 86 Blocks in 1.94 Seconds
+Exact 87 Blocks in 2.04 Seconds
+Exact 88 Blocks in 1.43 Seconds
+Exact 89 Blocks in 1.78 Seconds
+Exact 90 Blocks in 1.85 Seconds
+Exact 91 Blocks in 2.23 Seconds
+Exact 92 Blocks in 2.08 Seconds
+Exact 93 Blocks in 2.40 Seconds
+Exact 94 Blocks in 2.31 Seconds
+Exact 95 Blocks in 2.62 Seconds
+Exact 96 Blocks in 2.08 Seconds
+Exact 97 Blocks in 2.40 Seconds
+Exact 98 Blocks in 2.54 Seconds
+Exact 99 Blocks in 2.63 Seconds
+Exact 100 Blocks in 2.81 Seconds
+Exact Disabled Node Sharing 3 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 4 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 5 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 6 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 7 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 8 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 9 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 10 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 11 Blocks in 0.03 Seconds
+Exact Disabled Node Sharing 12 Blocks in 0.03 Seconds
+Exact Disabled Node Sharing 13 Blocks in 0.03 Seconds
+Exact Disabled Node Sharing 14 Blocks in 0.04 Seconds
+Exact Disabled Node Sharing 15 Blocks in 0.04 Seconds
+Exact Disabled Node Sharing 16 Blocks in 0.04 Seconds
+Exact Disabled Node Sharing 17 Blocks in 0.04 Seconds
+Exact Disabled Node Sharing 18 Blocks in 0.05 Seconds
+Exact Disabled Node Sharing 19 Blocks in 0.06 Seconds
+Exact Disabled Node Sharing 20 Blocks in 0.05 Seconds
+Exact Disabled Node Sharing 21 Blocks in 0.06 Seconds
+Exact Disabled Node Sharing 22 Blocks in 0.06 Seconds
+Exact Disabled Node Sharing 23 Blocks in 0.09 Seconds
+Exact Disabled Node Sharing 24 Blocks in 0.09 Seconds
+Exact Disabled Node Sharing 25 Blocks in 0.07 Seconds
+Exact Disabled Node Sharing 26 Blocks in 0.09 Seconds
+Exact Disabled Node Sharing 27 Blocks in 0.12 Seconds
+Exact Disabled Node Sharing 28 Blocks in 0.10 Seconds
+Exact Disabled Node Sharing 29 Blocks in 0.12 Seconds
+Exact Disabled Node Sharing 30 Blocks in 0.11 Seconds
+Exact Disabled Node Sharing 31 Blocks in 0.12 Seconds
+Exact Disabled Node Sharing 32 Blocks in 0.11 Seconds
+Exact Disabled Node Sharing 33 Blocks in 0.19 Seconds
+Exact Disabled Node Sharing 34 Blocks in 0.16 Seconds
+Exact Disabled Node Sharing 35 Blocks in 0.20 Seconds
+Exact Disabled Node Sharing 36 Blocks in 0.15 Seconds
+Exact Disabled Node Sharing 37 Blocks in 0.23 Seconds
+Exact Disabled Node Sharing 38 Blocks in 0.19 Seconds
+Exact Disabled Node Sharing 39 Blocks in 0.21 Seconds
+Exact Disabled Node Sharing 40 Blocks in 0.21 Seconds
+Exact Disabled Node Sharing 41 Blocks in 0.25 Seconds
+Exact Disabled Node Sharing 42 Blocks in 0.24 Seconds
+Exact Disabled Node Sharing 43 Blocks in 0.27 Seconds
+Exact Disabled Node Sharing 44 Blocks in 0.29 Seconds
+Exact Disabled Node Sharing 45 Blocks in 0.25 Seconds
+Exact Disabled Node Sharing 46 Blocks in 0.29 Seconds
+Exact Disabled Node Sharing 47 Blocks in 0.42 Seconds
+Exact Disabled Node Sharing 48 Blocks in 0.33 Seconds
+Exact Disabled Node Sharing 49 Blocks in 0.31 Seconds
+Exact Disabled Node Sharing 50 Blocks in 0.55 Seconds
+Exact Disabled Node Sharing 51 Blocks in 0.39 Seconds
+Exact Disabled Node Sharing 52 Blocks in 0.42 Seconds
+Exact Disabled Node Sharing 53 Blocks in 0.46 Seconds
+Exact Disabled Node Sharing 54 Blocks in 0.56 Seconds
+Exact Disabled Node Sharing 55 Blocks in 0.62 Seconds
+Exact Disabled Node Sharing 56 Blocks in 0.50 Seconds
+Exact Disabled Node Sharing 57 Blocks in 0.55 Seconds
+Exact Disabled Node Sharing 58 Blocks in 0.60 Seconds
+Exact Disabled Node Sharing 59 Blocks in 0.77 Seconds
+Exact Disabled Node Sharing 60 Blocks in 0.49 Seconds
+Exact Disabled Node Sharing 61 Blocks in 0.83 Seconds
+Exact Disabled Node Sharing 62 Blocks in 0.60 Seconds
+Exact Disabled Node Sharing 63 Blocks in 0.87 Seconds
+Exact Disabled Node Sharing 64 Blocks in 1.00 Seconds
+Exact Disabled Node Sharing 65 Blocks in 0.79 Seconds
+Exact Disabled Node Sharing 66 Blocks in 0.57 Seconds
+Exact Disabled Node Sharing 67 Blocks in 0.93 Seconds
+Exact Disabled Node Sharing 68 Blocks in 0.90 Seconds
+Exact Disabled Node Sharing 69 Blocks in 0.98 Seconds
+Exact Disabled Node Sharing 70 Blocks in 0.94 Seconds
+Exact Disabled Node Sharing 71 Blocks in 1.19 Seconds
+Exact Disabled Node Sharing 72 Blocks in 1.12 Seconds
+Exact Disabled Node Sharing 73 Blocks in 1.07 Seconds
+Exact Disabled Node Sharing 74 Blocks in 1.58 Seconds
+Exact Disabled Node Sharing 75 Blocks in 1.39 Seconds
+Exact Disabled Node Sharing 76 Blocks in 1.17 Seconds
+Exact Disabled Node Sharing 77 Blocks in 1.41 Seconds
+Exact Disabled Node Sharing 78 Blocks in 1.27 Seconds
+Exact Disabled Node Sharing 79 Blocks in 1.50 Seconds
+Exact Disabled Node Sharing 80 Blocks in 1.26 Seconds
+Exact Disabled Node Sharing 81 Blocks in 1.79 Seconds
+Exact Disabled Node Sharing 82 Blocks in 1.72 Seconds
+Exact Disabled Node Sharing 83 Blocks in 1.52 Seconds
+Exact Disabled Node Sharing 84 Blocks in 1.85 Seconds
+Exact Disabled Node Sharing 85 Blocks in 2.03 Seconds
+Exact Disabled Node Sharing 86 Blocks in 1.78 Seconds
+Exact Disabled Node Sharing 87 Blocks in 1.89 Seconds
+Exact Disabled Node Sharing 88 Blocks in 1.87 Seconds
+Exact Disabled Node Sharing 89 Blocks in 1.64 Seconds
+Exact Disabled Node Sharing 90 Blocks in 2.01 Seconds
+Exact Disabled Node Sharing 91 Blocks in 2.03 Seconds
+Exact Disabled Node Sharing 92 Blocks in 2.24 Seconds
+Exact Disabled Node Sharing 93 Blocks in 2.30 Seconds
+Exact Disabled Node Sharing 94 Blocks in 2.32 Seconds
+Exact Disabled Node Sharing 95 Blocks in 2.86 Seconds
+Exact Disabled Node Sharing 96 Blocks in 2.53 Seconds
+Exact Disabled Node Sharing 97 Blocks in 2.78 Seconds
+Exact Disabled Node Sharing 98 Blocks in 2.22 Seconds
+Exact Disabled Node Sharing 99 Blocks in 2.66 Seconds
+Exact Disabled Node Sharing 100 Blocks in 2.78 Seconds
+Exact Flushing WMEs 3 Blocks in 0.02 Seconds
+Exact Flushing WMEs 4 Blocks in 0.02 Seconds
+Exact Flushing WMEs 5 Blocks in 0.02 Seconds
+Exact Flushing WMEs 6 Blocks in 0.02 Seconds
+Exact Flushing WMEs 7 Blocks in 0.02 Seconds
+Exact Flushing WMEs 8 Blocks in 0.03 Seconds
+Exact Flushing WMEs 9 Blocks in 0.03 Seconds
+Exact Flushing WMEs 10 Blocks in 0.04 Seconds
+Exact Flushing WMEs 11 Blocks in 0.03 Seconds
+Exact Flushing WMEs 12 Blocks in 0.04 Seconds
+Exact Flushing WMEs 13 Blocks in 0.05 Seconds
+Exact Flushing WMEs 14 Blocks in 0.07 Seconds
+Exact Flushing WMEs 15 Blocks in 0.06 Seconds
+Exact Flushing WMEs 16 Blocks in 0.07 Seconds
+Exact Flushing WMEs 17 Blocks in 0.09 Seconds
+Exact Flushing WMEs 18 Blocks in 0.10 Seconds
+Exact Flushing WMEs 19 Blocks in 0.08 Seconds
+Exact Flushing WMEs 20 Blocks in 0.16 Seconds
+Exact Flushing WMEs 21 Blocks in 0.16 Seconds
+Exact Flushing WMEs 22 Blocks in 0.14 Seconds
+Exact Flushing WMEs 23 Blocks in 0.19 Seconds
+Exact Flushing WMEs 24 Blocks in 0.31 Seconds
+Exact Flushing WMEs 25 Blocks in 0.24 Seconds
+Exact Flushing WMEs 26 Blocks in 0.32 Seconds
+Exact Flushing WMEs 27 Blocks in 0.30 Seconds
+Exact Flushing WMEs 28 Blocks in 0.40 Seconds
+Exact Flushing WMEs 29 Blocks in 0.40 Seconds
+Exact Flushing WMEs 30 Blocks in 0.40 Seconds
+Exact Flushing WMEs 31 Blocks in 0.51 Seconds
+Exact Flushing WMEs 32 Blocks in 0.45 Seconds
+Exact Flushing WMEs 33 Blocks in 0.65 Seconds
+Exact Flushing WMEs 34 Blocks in 0.43 Seconds
+Exact Flushing WMEs 35 Blocks in 0.71 Seconds
+Exact Flushing WMEs 36 Blocks in 0.77 Seconds
+Exact Flushing WMEs 37 Blocks in 0.76 Seconds
+Exact Flushing WMEs 38 Blocks in 0.69 Seconds
+Exact Flushing WMEs 39 Blocks in 1.28 Seconds
+Exact Flushing WMEs 40 Blocks in 1.59 Seconds
+Exact Flushing WMEs 41 Blocks in 0.99 Seconds
+Exact Flushing WMEs 42 Blocks in 1.28 Seconds
+Exact Flushing WMEs 43 Blocks in 1.38 Seconds
+Exact Flushing WMEs 44 Blocks in 1.58 Seconds
+Exact Flushing WMEs 45 Blocks in 1.21 Seconds
+Exact Flushing WMEs 46 Blocks in 1.88 Seconds
+Exact Flushing WMEs 47 Blocks in 1.29 Seconds
+Exact Flushing WMEs 48 Blocks in 1.88 Seconds
+Exact Flushing WMEs 49 Blocks in 2.48 Seconds
+Exact Flushing WMEs 50 Blocks in 1.99 Seconds
+Exact Flushing WMEs 51 Blocks in 2.58 Seconds
+Exact Flushing WMEs 52 Blocks in 2.58 Seconds
+Exact Flushing WMEs 53 Blocks in 3.19 Seconds
+Exact Flushing WMEs 54 Blocks in 2.20 Seconds
+Exact Flushing WMEs 55 Blocks in 2.64 Seconds
+Exact Flushing WMEs 56 Blocks in 2.90 Seconds
+Exact Flushing WMEs 57 Blocks in 2.70 Seconds
+Exact Flushing WMEs 58 Blocks in 3.61 Seconds
+Exact Flushing WMEs 59 Blocks in 2.74 Seconds
+Exact Flushing WMEs 60 Blocks in 3.38 Seconds
+Exact Flushing WMEs 61 Blocks in 4.23 Seconds
+Exact Flushing WMEs 62 Blocks in 3.87 Seconds
+Exact Flushing WMEs 63 Blocks in 5.33 Seconds
+Exact Flushing WMEs 64 Blocks in 5.46 Seconds
+Exact Flushing WMEs 65 Blocks in 7.30 Seconds
+Exact Flushing WMEs 66 Blocks in 4.06 Seconds
+Exact Flushing WMEs 67 Blocks in 6.68 Seconds
+Exact Flushing WMEs 68 Blocks in 6.45 Seconds
+Exact Flushing WMEs 69 Blocks in 6.45 Seconds
+Exact Flushing WMEs 70 Blocks in 5.93 Seconds
+Exact Flushing WMEs 71 Blocks in 6.04 Seconds
+Exact Flushing WMEs 72 Blocks in 6.17 Seconds
+Exact Flushing WMEs 73 Blocks in 8.72 Seconds
+Exact Flushing WMEs 74 Blocks in 7.18 Seconds
+Exact Flushing WMEs 75 Blocks in 7.74 Seconds
+Exact Flushing WMEs 76 Blocks in 7.57 Seconds
+Exact Flushing WMEs 77 Blocks in 7.85 Seconds
+Exact Flushing WMEs 78 Blocks in 9.31 Seconds
+Exact Flushing WMEs 79 Blocks in 9.36 Seconds
+Exact Flushing WMEs 80 Blocks in 10.53 Seconds
+Exact Flushing WMEs 81 Blocks in 9.18 Seconds
+Exact Flushing WMEs 82 Blocks in 9.80 Seconds
+Exact Flushing WMEs 83 Blocks in 12.37 Seconds
+Exact Flushing WMEs 84 Blocks in 10.79 Seconds
+Exact Flushing WMEs 85 Blocks in 13.59 Seconds
+Exact Flushing WMEs 86 Blocks in 9.96 Seconds
+Exact Flushing WMEs 87 Blocks in 13.46 Seconds
+Exact Flushing WMEs 88 Blocks in 12.88 Seconds
+Exact Flushing WMEs 89 Blocks in 16.43 Seconds
+Exact Flushing WMEs 90 Blocks in 13.82 Seconds
+Exact Flushing WMEs 91 Blocks in 13.73 Seconds
+Exact Flushing WMEs 92 Blocks in 16.63 Seconds
+Exact Flushing WMEs 93 Blocks in 14.41 Seconds
+Exact Flushing WMEs 94 Blocks in 14.34 Seconds
+Exact Flushing WMEs 95 Blocks in 26.12 Seconds
+Exact Flushing WMEs 96 Blocks in 17.12 Seconds
+Exact Flushing WMEs 97 Blocks in 21.30 Seconds
+Exact Flushing WMEs 98 Blocks in 17.83 Seconds
+Exact Flushing WMEs 99 Blocks in 17.37 Seconds
+Exact Flushing WMEs 100 Blocks in 24.22 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 3 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 4 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 5 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 6 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 7 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 8 Blocks in 0.03 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 9 Blocks in 0.03 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 10 Blocks in 0.04 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 11 Blocks in 0.05 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 12 Blocks in 0.04 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 13 Blocks in 0.08 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 14 Blocks in 0.06 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 15 Blocks in 0.09 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 16 Blocks in 0.07 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 17 Blocks in 0.11 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 18 Blocks in 0.10 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 19 Blocks in 0.15 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 20 Blocks in 0.16 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 21 Blocks in 0.16 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 22 Blocks in 0.19 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 23 Blocks in 0.23 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 24 Blocks in 0.22 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 25 Blocks in 0.31 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 26 Blocks in 0.25 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 27 Blocks in 0.48 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 28 Blocks in 0.33 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 29 Blocks in 0.46 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 30 Blocks in 0.32 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 31 Blocks in 0.57 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 32 Blocks in 0.59 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 33 Blocks in 0.57 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 34 Blocks in 0.56 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 35 Blocks in 0.79 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 36 Blocks in 0.61 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 37 Blocks in 1.10 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 38 Blocks in 1.10 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 39 Blocks in 1.19 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 40 Blocks in 0.88 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 41 Blocks in 1.08 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 42 Blocks in 0.92 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 43 Blocks in 1.19 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 44 Blocks in 1.43 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 45 Blocks in 1.82 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 46 Blocks in 1.14 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 47 Blocks in 1.30 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 48 Blocks in 1.63 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 49 Blocks in 1.69 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 50 Blocks in 2.54 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 51 Blocks in 2.19 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 52 Blocks in 2.62 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 53 Blocks in 2.47 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 54 Blocks in 2.35 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 55 Blocks in 2.28 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 56 Blocks in 3.47 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 57 Blocks in 2.69 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 58 Blocks in 3.61 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 59 Blocks in 3.04 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 60 Blocks in 3.11 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 61 Blocks in 2.71 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 62 Blocks in 5.85 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 63 Blocks in 3.79 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 64 Blocks in 4.51 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 65 Blocks in 5.39 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 66 Blocks in 5.07 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 67 Blocks in 6.35 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 68 Blocks in 7.09 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 69 Blocks in 7.25 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 70 Blocks in 5.81 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 71 Blocks in 5.44 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 72 Blocks in 5.61 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 73 Blocks in 7.09 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 74 Blocks in 4.56 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 75 Blocks in 9.63 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 76 Blocks in 7.36 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 77 Blocks in 7.77 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 78 Blocks in 8.11 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 79 Blocks in 6.97 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 80 Blocks in 8.04 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 81 Blocks in 11.21 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 82 Blocks in 7.16 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 83 Blocks in 10.08 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 84 Blocks in 10.27 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 85 Blocks in 9.15 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 86 Blocks in 10.97 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 87 Blocks in 10.08 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 88 Blocks in 12.42 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 89 Blocks in 12.11 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 90 Blocks in 12.11 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 91 Blocks in 13.94 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 92 Blocks in 17.17 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 93 Blocks in 15.31 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 94 Blocks in 14.70 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 95 Blocks in 11.76 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 96 Blocks in 14.21 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 97 Blocks in 16.12 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 98 Blocks in 19.33 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 99 Blocks in 11.62 Seconds
+Exact Disabled Node Sharing & Flushing WMEs 100 Blocks in 18.19 Seconds
