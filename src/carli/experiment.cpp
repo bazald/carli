@@ -5,6 +5,7 @@
 #include "utility/getopt.h"
 #include "utility/memory_pool.h"
 
+#include <csignal>
 #include <cstring>
 #include <ctime>
 #include <limits>
@@ -216,6 +217,10 @@ namespace Carli {
       do {
         const double reward = agent->act();
         ++total_steps;
+
+//        std::cerr << total_steps << std::endl;
+//        if(total_steps == 80449)
+//          std::raise(SIGINT);
 
 #ifdef DEBUG_OUTPUT
         cerr << *env << *agent;

@@ -30,11 +30,12 @@
 #ifndef ZENI_RANDOM_H
 #define ZENI_RANDOM_H
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <random>
-#include <stdint.h>
 
 #include "../linkage.h"
 
@@ -110,14 +111,14 @@ namespace Zeni {
 
     /// Get a random floating point number in the range [0.0, 1.0)
     double frand_lt() {
-      double rv = rand() / double(rand_max() + 1.0);
+      double rv = std::min(std::max(rand() / double(rand_max() + 1.0), 0.0), 1.0 - std::numeric_limits<double>::epsilon() / std::numeric_limits<double>::radix);
       log1("frand_lt", rv);
       return rv;
     }
 
     /// Get a random floating point number in the range [0.0, 1.0]
     double frand_lte() {
-      double rv = rand() / double(rand_max());
+      double rv = std::min(std::max(rand() / double(rand_max()), 0.0), 1.0);
       log1("frand_lte", rv);
       return rv;
     }
@@ -125,7 +126,7 @@ namespace Zeni {
     /// Get a random integer in the range [0, mod)
     int32_t rand_lt(const int32_t &mod) {
       assert(mod <= rand_max() + 1 || rand_max() == std::numeric_limits<int32_t>::max());
-      int32_t rv = int32_t(frand_lt() * mod);
+      int32_t rv = std::min(std::max(int32_t(frand_lt() * mod), 0), mod - 1);
       log2("rand_lt", mod, rv);
       return rv;
     }
@@ -133,7 +134,7 @@ namespace Zeni {
     /// Get a random integer in the range [0, mod]
     int32_t rand_lte(const int32_t &mod) {
       assert(mod <= rand_max());
-      int32_t rv = int32_t(frand_lt() * (mod + 1));
+      int32_t rv = std::min(std::max(int32_t(frand_lt() * (mod + 1)), 0), mod);
       log2("rand_lte", mod, rv);
       return rv;
     }
