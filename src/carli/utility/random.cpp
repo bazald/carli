@@ -3,7 +3,7 @@
 namespace Zeni {
 
   Random & Random::get() {
-    static Random g_random(0);
+    static Random g_random(std::random_device{}());
     return g_random;
   }
 
