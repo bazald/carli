@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import argparse
 import hashlib, os, re
 import pylab
 from matplotlib import rc
@@ -91,12 +92,24 @@ def write_to_csv(filename, x_label, xs, y_labels, yss):
     f.write('\n')
 
 def main():
-  # 1: ./blocksworld2.py experiment-bw2-long-again/catde-none-5k/*.out experiment-bw2-long-again/policy-none-5k/*.out experiment-bw2-long-again/value-none-5k/*.out
-  # 2: ./blocksworld2.py experiment-bw2-long-again/catde-catde-none-5k/*.out experiment-bw2-long-again/policy-policy-none-5k/*.out experiment-bw2-long-again/value-value-none-5k/*.out
-  # 3: ./blocksworld2.py experiment-bw2-long-again/catde-catde-bkls-5k/*.out experiment-bw2-long-again/policy-policy-bkls-5k/*.out experiment-bw2-long-again/value-value-bkls-5k/*.out
-  # 4: ./blocksworld2.py experiment-bw2-long-again/catde-catde-bst-5k/*.out experiment-bw2-long-again/policy-policy-bst-5k/*.out experiment-bw2-long-again/value-value-bst-5k/*.out
-  # 5: ./blocksworld2.py experiment-bw2-long-again/catde-catde-c300-5k/*.out experiment-bw2-long-again/policy-policy-c300-5k/*.out experiment-bw2-long-again/value-value-c300-5k/*.out
+  parser = argparse.ArgumentParser("./blocksworld2.py")
+  parser.add_argument("--scenario", help="Which graph should be generated?")
+  args, filenames = parser.parse_known_args()
+
   scenario = 0
+  if args.scenario:
+    scenario = args.scenario
+
+  # 1: ./blocksworld2.py --scenario 1 experiment-bw2/catde-none/*.out experiment-bw2/policy-none/*.out experiment-bw2/value-none/*.out
+  # 2: ./blocksworld2.py --scenario 2 experiment-bw2/catde-catde-none/*.out experiment-bw2/policy-policy-none/*.out experiment-bw2/value-value-none/*.out
+  # 3: ./blocksworld2.py --scenario 3 experiment-bw2/catde-catde-bkls/*.out experiment-bw2/policy-policy-bkls/*.out experiment-bw2/value-value-bkls/*.out
+  # 4: ./blocksworld2.py --scenario 4 experiment-bw2/catde-catde-bst/*.out experiment-bw2/policy-policy-bst/*.out experiment-bw2/value-value-bst/*.out
+  # 5: ./blocksworld2.py --scenario 5 experiment-bw2/catde-catde-c500/*.out experiment-bw2/policy-policy-c500/*.out experiment-bw2/value-value-c500/*.out
+  # 6: ./blocksworld2.py --scenario 6 experiment-bw2/catde-none-d/*.out experiment-bw2/policy-none-d/*.out experiment-bw2/value-none-d/*.out
+  # 7: ./blocksworld2.py --scenario 7 experiment-bw2/catde-catde-none-d/*.out experiment-bw2/policy-policy-none-d/*.out experiment-bw2/value-value-none-d/*.out
+  # 8: ./blocksworld2.py --scenario 8 experiment-bw2/catde-catde-bkls-d/*.out experiment-bw2/policy-policy-bkls-d/*.out experiment-bw2/value-value-bkls-d/*.out
+  # 9: ./blocksworld2.py --scenario 9 experiment-bw2/catde-catde-bst-d/*.out experiment-bw2/policy-policy-bst-d/*.out experiment-bw2/value-value-bst-d/*.out
+  # 10: ./blocksworld2.py --scenario 10 experiment-bw2/catde-catde-c900-d/*.out experiment-bw2/policy-policy-c900-d/*.out experiment-bw2/value-value-c900-d/*.out
 
   memory_plot = False # scenario is not 0
   unrefinement_plot = False # not memory_plot
@@ -110,7 +123,7 @@ def main():
     reward_label = 'Reward Within an Episode'
     val0 = 4
 
-  if len(sys.argv) == 1:
+  if len(filenames) == 1:
     f = open('stdout.txt', 'r')
     seed = int(f.readline().split(' ', 1)[1])
     x = []
@@ -135,7 +148,7 @@ def main():
     title='Blocks World (seed ' + str(seed) + ')'
   else:
     files = {}
-    for filename in sys.argv[1:]:
+    for filename in filenames[1:]:
       f = open(filename, 'r')
       seed = int(f.readline().split(' ', 1)[1])
       
@@ -251,7 +264,7 @@ def main():
   pylab.axes(rect)
   
   labels = []
-  if len(sys.argv) == 1:
+  if len(filenames) == 1:
     #if val0 == 4:
       #for i in range(1, len(smith)):
         #smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
@@ -289,62 +302,83 @@ def main():
           labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
       
       #remap_names = {}
-      remap_names['catde-catde-bkls'] = 'CATDE SBN'
-      remap_names['catde-catde-bkls-5k'] = 'CATDE SBD'
-      remap_names['catde-catde-bst'] = 'CATDE SON'
-      remap_names['catde-catde-bst-5k'] = 'CATDE SOD'
-      remap_names['catde-catde-c300'] = 'CATDE SCN'
-      remap_names['catde-catde-c300-5k'] = 'CATDE SCD'
-      remap_names['catde-catde-none'] = 'CATDE SNN'
-      remap_names['catde-catde-none-5k'] = 'CATDE SND'
-      remap_names['catde-none'] = 'CATDE NNN'
-      remap_names['catde-none-5k'] = 'CATDE NND'
-      remap_names['policy-policy-bkls'] = 'Policy SBN'
-      remap_names['policy-policy-bkls-5k'] = 'Policy SBD'
-      remap_names['policy-policy-bst'] = 'Policy SON'
-      remap_names['policy-policy-bst-5k'] = 'Policy SOD'
-      remap_names['policy-policy-c300'] = 'Policy SCN'
-      remap_names['policy-policy-c300-5k'] = 'Policy SCD'
-      remap_names['policy-policy-none'] = 'Policy SNN'
-      remap_names['policy-policy-none-5k'] = 'Policy SND'
-      remap_names['policy-none'] = 'Policy NNN'
-      remap_names['policy-none-5k'] = 'Policy NND'
-      remap_names['value-value-bkls'] = 'Value SBN'
-      remap_names['value-value-bkls-5k'] = 'Value SBD'
-      remap_names['value-value-bst'] = 'Value SON'
-      remap_names['value-value-bst-5k'] = 'Value SOD'
-      remap_names['value-value-c300'] = 'Value SCN'
-      remap_names['value-value-c300-5k'] = 'Value SCD'
-      remap_names['value-value-none'] = 'Value SNN'
-      remap_names['value-value-none-5k'] = 'Value SND'
-      remap_names['value-none'] = 'Value NNN'
-      remap_names['value-none-5k'] = 'Value NND'
+      remap_names['catde-none'] = 'CATDE RNN'
+      remap_names['catde-none-d'] = 'CATDE RND'
+      remap_names['policy-none'] = 'Policy RNN'
+      remap_names['policy-none-d'] = 'Policy RND'
+      remap_names['value-none'] = 'Value RNN'
+      remap_names['value-none-d'] = 'Value RND'
+      remap_names['catde-catde-none'] = 'CATDE RUN'
+      remap_names['catde-catde-none-d'] = 'CATDE RUD'
+      remap_names['policy-policy-none'] = 'Policy RUN'
+      remap_names['policy-policy-none-d'] = 'Policy RUD'
+      remap_names['value-value-none'] = 'Value RUN'
+      remap_names['value-value-none-d'] = 'Value RUD'
+      remap_names['catde-catde-bkls'] = 'CATDE RBN'
+      remap_names['catde-catde-bkls-d'] = 'CATDE RBD'
+      remap_names['policy-policy-bkls'] = 'Policy RBN'
+      remap_names['policy-policy-bkls-d'] = 'Policy RBD'
+      remap_names['value-value-bkls'] = 'Value RBN'
+      remap_names['value-value-bkls-d'] = 'Value RBD'
+      remap_names['catde-catde-bst'] = 'CATDE RON'
+      remap_names['catde-catde-bst-d'] = 'CATDE ROD'
+      remap_names['policy-policy-bst'] = 'Policy RON'
+      remap_names['policy-policy-bst-d'] = 'Policy ROD'
+      remap_names['value-value-bst'] = 'Value RON'
+      remap_names['value-value-bst-d'] = 'Value ROD'
+      remap_names['catde-catde-c500'] = 'CATDE RCN'
+      remap_names['catde-catde-c900-d'] = 'CATDE RCD'
+      remap_names['policy-policy-c500'] = 'Policy RCN'
+      remap_names['policy-policy-c900-d'] = 'Policy RCD'
+      remap_names['value-value-c500'] = 'Value RCN'
+      remap_names['value-value-c900-d'] = 'Value RCD'
       
       if scenario == 1:
-        agent_list = ['catde-none-5k', 'policy-none-5k', 'value-none-5k']
+        agent_list = ['catde-none', 'policy-none', 'value-none']
       elif scenario == 2:
-        agent_list = ['catde-catde-none-5k', 'policy-policy-none-5k', 'value-value-none-5k']
+        agent_list = ['catde-catde-none', 'policy-policy-none', 'value-value-none']
       elif scenario == 3:
-        agent_list = ['catde-catde-bkls-5k', 'policy-policy-bkls-5k', 'value-value-bkls-5k']
+        agent_list = ['catde-catde-bkls', 'policy-policy-bkls', 'value-value-bkls']
       elif scenario == 4:
-        agent_list = ['catde-catde-bst-5k', 'policy-policy-bst-5k', 'value-value-bst-5k']
+        agent_list = ['catde-catde-bst', 'policy-policy-bst', 'value-value-bst']
       elif scenario == 5:
-        agent_list = ['catde-catde-c300-5k', 'policy-policy-c300-5k', 'value-value-c300-5k']
-      if scenario > 0 and scenario < 6:
+        agent_list = ['catde-catde-c500', 'policy-policy-c500', 'value-value-c500']
+      elif scenario == 6:
+        agent_list = ['catde-none-d', 'policy-none-d', 'value-none-d']
+      elif scenario == 7:
+        agent_list = ['catde-catde-none-d', 'policy-policy-none-d', 'value-value-none-d']
+      elif scenario == 8:
+        agent_list = ['catde-catde-bkls-d', 'policy-policy-bkls-d', 'value-value-bkls-d']
+      elif scenario == 9:
+        agent_list = ['catde-catde-bst-d', 'policy-policy-bst-d', 'value-value-bst-d']
+      elif scenario == 10:
+        agent_list = ['catde-catde-c900-d', 'policy-policy-c900-d', 'value-value-c900-d']
+      if scenario > 0:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
           yss.append(smith[agent])
           
-          if agent is 'catde-none-5k' or agent is 'catde-catde-none-5k' or agent is 'catde-catde-bkls-5k' or agent is 'catde-catde-bst-5k' or agent is 'catde-catde-c300-5k':
+          if agent.find('catde') != -1:
             color = 'red'
-            linestyle = ':'
-          elif agent is 'policy-none-5k' or agent is 'policy-policy-none-5k' or agent is 'policy-policy-bkls-5k' or agent is 'policy-policy-bst-5k' or agent is 'policy-policy-c300-5k':
+          elif agent.find('policy') != -1:
             color = 'green'
-            linestyle = '--'
-          elif agent is 'value-none-5k' or agent is 'value-value-none-5k' or agent is 'value-value-bkls-5k' or agent is 'value-value-bst-5k' or agent is 'value-value-c300-5k':
+          elif agent.find('value') != -1:
             color = 'blue'
-            linestyle = '-'
-          
+          else:
+            color = None
+
+          linestyle = '-'
+          #if agent.find('-') == agent.rfind('-'):
+            #linestyle = '-'
+          #elif agent.find('bkls') != -1:
+            #linestyle = '-.'
+          #elif agent.find('bst') != -1:
+            #linestyle = '-.'
+          #elif agent.find('00') != -1:
+            #linestyle = '--'
+          #else:
+            #linestyle = ':'
+
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
   
   pylab.grid(False)
@@ -353,7 +387,7 @@ def main():
   pylab.ylabel(reward_label, fontsize=8)
   
   #pylab.xlim(xmax=10000)
-  if len(sys.argv) > 1:
+  if len(filenames) > 1:
     if cumulative:
       pylab.ylim(ymin=-250, ymax=0)
     else:
@@ -417,8 +451,8 @@ def main():
       al2.append(str(a))
     ax2.set_yticklabels(al2)
 
-    if scenario is 5:
-      pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(-0.05,0.25,1,1))
+    #if scenario is 5:
+      #pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(-0.05,0.25,1,1))
   elif unrefinement_plot:
     ax2 = fig.axes[0].twinx()
     ax2.xaxis.set_major_formatter(CommaFormatter())
@@ -480,7 +514,7 @@ def main():
         print 'Final CPU Average for ' + agent + ': ' + str(cpu[agent][-1])
         print 'Final Memory Average for ' + agent + ': ' + str(memory[agent][-1])
   
-  if len(sys.argv) == 1:
+  if len(filenames) == 1:
     write_to_csv('blocksworld2.csv', 'Step Number', xs, y_labels, yss)
     pylab.savefig('blocksworld2.eps')
     pylab.savefig('blocksworld2.png', dpi=1200)

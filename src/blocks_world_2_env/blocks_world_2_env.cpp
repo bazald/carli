@@ -116,6 +116,7 @@ namespace Blocks_World_2 {
     blocks.reserve(num_blocks);
     for(int i = 1; i <= num_blocks; ++i)
       blocks.push_back(Block(i, m_random.rand_lt(g_num_colors)));
+    m_table = Block(0, m_random.rand_lt(g_num_colors));
 
     std::shuffle(blocks.begin(), blocks.end(), m_random);
 
@@ -376,6 +377,7 @@ namespace Blocks_World_2 {
 
     const auto &blocks = env->get_blocks();
     const auto &target = env->get_target();
+    const auto &table = env->get_table();
 
     if(get_Option_Ranged<bool>(Options::get_global(), "rete-flush-wmes")) {
       Rete::Agenda::Locker locker(agenda);
@@ -404,18 +406,18 @@ namespace Blocks_World_2 {
     for(const auto &stack : blocks) {
       const Rete::Symbol_Identifier_Ptr_C stack_id = m_stack_ids[stack.begin()->id];
 
-//      int64_t height = 0;
-//      for(const auto &block : stack) {
-//        const auto block_id = m_block_ids[block.id];
-//        insert_new_wme(std::make_shared<Rete::WME>(block_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
-//
-//        insert_new_wme(std::make_shared<Rete::WME>(block_id, m_color_attr, std::make_shared<Rete::Symbol_Constant_Int>(block.color)));
-//
-//        const double brightness = m_random.frand_lte();
-//        insert_new_wme(std::make_shared<Rete::WME>(block_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
-//        if(brightness >= 0.5)
-//          insert_new_wme(std::make_shared<Rete::WME>(block_id, m_glowing_attr, m_true_value));
-//      }
+      int64_t height = 0;
+      for(const auto &block : stack) {
+        const auto block_id = m_block_ids[block.id];
+        insert_new_wme(std::make_shared<Rete::WME>(block_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(++height)));
+
+        insert_new_wme(std::make_shared<Rete::WME>(block_id, m_color_attr, std::make_shared<Rete::Symbol_Constant_Int>(block.color)));
+
+        const double brightness = m_random.frand_lte();
+        insert_new_wme(std::make_shared<Rete::WME>(block_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
+        if(brightness >= 0.5)
+          insert_new_wme(std::make_shared<Rete::WME>(block_id, m_glowing_attr, m_true_value));
+      }
       max_height = std::max(max_height, int64_t(stack.size()));
 
       for(const auto &dest_stack : blocks) {
@@ -443,6 +445,12 @@ namespace Blocks_World_2 {
         insert_new_wme(std::make_shared<Rete::WME>(action_id, m_dest_attr, m_table_id));
       }
     }
+    insert_new_wme(std::make_shared<Rete::WME>(m_table_id, m_height_attr, std::make_shared<Rete::Symbol_Constant_Int>(0)));
+    insert_new_wme(std::make_shared<Rete::WME>(m_table_id, m_color_attr, std::make_shared<Rete::Symbol_Constant_Int>(table.color)));
+    const double brightness = m_random.frand_lte();
+    insert_new_wme(std::make_shared<Rete::WME>(m_table_id, m_brightness_attr, std::make_shared<Rete::Symbol_Constant_Float>(brightness)));
+    if(brightness >= 0.5)
+      insert_new_wme(std::make_shared<Rete::WME>(m_table_id, m_glowing_attr, m_true_value));
 
     insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_blocks_attr, m_blocks_id));
     insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_stacks_attr, m_stacks_id));

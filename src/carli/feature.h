@@ -46,47 +46,47 @@ namespace Carli {
     }
 
     int64_t compare_axis(const Feature &rhs) const {
-      if(conditions < rhs.conditions)
-        return -1;
-      if(conditions > rhs.conditions)
-        return 1;
+//      if(conditions < rhs.conditions)
+//        return -1;
+//      if(conditions > rhs.conditions)
+//        return 1;
+//
+//      if(bindings.size() != rhs.bindings.size())
+//        return bindings.size() < rhs.bindings.size() ? -1 : 1;
+//      for(auto lt = bindings.begin(), lend = bindings.end(), rt = rhs.bindings.begin(); lt != lend; ++lt, ++rt) {
+//        auto llv = Rete::get_Variable_name(indices, lt->first);
+//        auto lrv = Rete::get_Variable_name(rhs.indices, rt->first);
+//        if(llv != lrv)
+//          return std::strcmp(llv.c_str(), lrv.c_str());
+//        if(llv.empty()) {
+//          if(lt->first < rt->first)
+//            return -1;
+//          if(lt->first > rt->first)
+//            return 1;
+//        }
+////        if(lt->first.column != rt->first.column)
+////          return lt->first.column - rt->first.column;
+////        const auto offset_l = lt->first.rete_row - rt->first.rete_row;
+////        const auto offset_r = lt->second.rete_row - rt->second.rete_row;
+////        if(offset_l != offset_r)
+////          return offset_l - offset_r;
+//
+//        auto rlv = Rete::get_Variable_name(indices, lt->second);
+//        auto rrv = Rete::get_Variable_name(rhs.indices, rt->second);
+//        if(rlv != rrv)
+//          return std::strcmp(rlv.c_str(), rrv.c_str());
+//        if(rlv.empty()) {
+//          if(lt->second < rt->second)
+//            return -1;
+//          if(lt->second > rt->second)
+//            return 1;
+//        }
+//      }
+//
+//      return 0;
 
-      if(bindings.size() != rhs.bindings.size())
-        return bindings.size() < rhs.bindings.size() ? -1 : 1;
-      for(auto lt = bindings.begin(), lend = bindings.end(), rt = rhs.bindings.begin(); lt != lend; ++lt, ++rt) {
-        auto llv = Rete::get_Variable_name(indices, lt->first);
-        auto lrv = Rete::get_Variable_name(rhs.indices, rt->first);
-        if(llv != lrv)
-          return std::strcmp(llv.c_str(), lrv.c_str());
-        if(llv.empty()) {
-          if(lt->first < rt->first)
-            return -1;
-          if(lt->first > rt->first)
-            return 1;
-        }
-//        if(lt->first.column != rt->first.column)
-//          return lt->first.column - rt->first.column;
-//        const auto offset_l = lt->first.rete_row - rt->first.rete_row;
-//        const auto offset_r = lt->second.rete_row - rt->second.rete_row;
-//        if(offset_l != offset_r)
-//          return offset_l - offset_r;
-
-        auto rlv = Rete::get_Variable_name(indices, lt->second);
-        auto rrv = Rete::get_Variable_name(rhs.indices, rt->second);
-        if(rlv != rrv)
-          return std::strcmp(rlv.c_str(), rrv.c_str());
-        if(rlv.empty()) {
-          if(lt->second < rt->second)
-            return -1;
-          if(lt->second > rt->second)
-            return 1;
-        }
-      }
-
-      return 0;
-
-//      return conditions < rhs.conditions ? -1 : conditions > rhs.conditions ? 1 :
-//             bindings < rhs.bindings ? -1 : bindings > rhs.bindings ? 1 : 0;
+      return conditions < rhs.conditions ? -1 : conditions > rhs.conditions ? 1 :
+             bindings < rhs.bindings ? -1 : bindings > rhs.bindings ? 1 : 0;
     }
 
     virtual int64_t get_depth() const = 0;

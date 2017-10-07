@@ -104,6 +104,7 @@ namespace Blocks_World_2 {
     const std::function<bool (const Environment::Block &lhs, const Environment::Block &rhs)> & get_match_test() const {return m_match_test;}
     const Stacks & get_blocks() const {return m_blocks;}
     const Stacks & get_target() const {return m_target;}
+    const Block & get_table() const {return m_table;}
 
     bool success() const;
 
@@ -130,6 +131,7 @@ namespace Blocks_World_2 {
     Zeni::Random m_random;
     Stacks m_blocks;
     Stacks m_target;
+    Block m_table = Block(0, 0);
   };
 
   class BLOCKS_WORLD_2_LINKAGE Agent : public Carli::Agent {
