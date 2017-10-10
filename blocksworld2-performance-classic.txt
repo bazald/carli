@@ -1,0 +1,13 @@
+
+Stack 3-5 in .107 Seconds
+Stack (Full) 3-5 in .726 Seconds
+Stack 3-7 in 1.299 Seconds
+Stack (Full) 3-7 in 21.422 Seconds
+Unstack 3-5 in .353 Seconds
+Unstack (Full) 3-5 in 5.496 Seconds
+Unstack 3-7 in 4.265 Seconds
+Unstack (Full) 3-7 in 49.281 Seconds
+On(a,b) 3-5 in .705 Seconds
+On(a,b) (Full) 3-5 in 4.567 Seconds
+On(a,b) 3-7 in 3.365 Seconds
+On(a,b) (Full) 3-7 in 58.097 Seconds

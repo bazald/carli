@@ -1,0 +1,91 @@
+# time ./blocks_world_2 --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.03 --secondary-learning-rate 0.01 --policy on-policy --rules rules/blocks-world-2-nonrrl.carli --num-episodes 100 --num-steps 0 --rules-out rules.carli --bw2-goal exact --num-blocks-min 3 --num-blocks-max 5 --exploration boltzmann --inverse-temperature 25 --inverse-temperature-episodic-increment 5
+# 0.4-1.5 seconds
+# time ./blocks_world_2 --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.03 --secondary-learning-rate 0.01 --policy on-policy --rules rules/blocks-world-2-nonrrl.carli --num-episodes 1500 --num-steps 0 --rules-out rules.carli --bw2-goal exact --num-blocks-min 3 --num-blocks-max 7 --exploration boltzmann --inverse-temperature 50 --inverse-temperature-episodic-increment 5
+# 4.5-7.2 seconds
+# ./blocks_world_2 --epsilon-greedy 0 --learning-rate 0 --rules rules.carli --num-episodes 100 --bw2-goal exact --num-blocks-min 10 --num-blocks-max 10
+
+sp {blocks-world*general
+  :feature 1 split nil
+  (<s> ^stacks <stacks>)
+  (<stacks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<block> ^name <block-name>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
+  (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
+-->
+  = 0.0
+}
+
+sp {blocks-world*stack-matches-goal-stack
+  :feature 1 split nil
+  &blocks-world*general
+  +{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<stack> ^matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*stack-not-matches-goal-stack
+  :feature 1 split nil
+  &blocks-world*general
+  -{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<stack> ^matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-matches-goal-stack
+  :feature 1 split nil
+  &blocks-world*general
+  +{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<dest-stack> ^matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-not-matches-goal-stack
+  :feature 1 split nil
+  &blocks-world*general
+  -{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<dest-stack> ^matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*top-matches-dest-stack
+  :feature 1 split nil
+  &blocks-world*general
+  +(<block> ^matches-top <dest-stack>)
+-->
+  = 0.0
+}
+
+sp {blocks-world*top-not-matches-dest-stack
+  :feature 1 split nil
+  &blocks-world*general
+  -(<block> ^matches-top <dest-stack>)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-is-table
+  :feature 1 split nil
+  &blocks-world*general
+  +(<dest> ^name 0)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-is-not-table
+  :feature 1 split nil
+  &blocks-world*general
+  -(<dest> ^name 0)
+-->
+  = 0.0
+}

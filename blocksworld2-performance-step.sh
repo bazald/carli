@@ -4,7 +4,7 @@ CMD="time -f "%e" ./blocks_world_2 --output null --learning-rate 0 --secondary-l
 MAX=100
 
 FILE=blocksworld2-performance-step.out
-#echo "" > $FILE
+echo "" > $FILE
 
 for i in $(seq 3 $MAX)
 do
@@ -22,7 +22,7 @@ done
 
 for i in $(seq 3 $MAX)
 do
-  TIME=$({ time $CMD --num-blocks-min $i --num-blocks-max $i --num-steps 1 --bw2-goal on-a-b --rules rules/blocks-world-2-classic-on-a-b.carli ; } 2>&1 | head -n 1)
+  TIME=$({ time $CMD --num-blocks-min $i --num-blocks-max $i --num-steps 1 --bw2-goal on-a-b --rules rules/blocks-world-2-classic-on-a-b-mt.carli ; } 2>&1 | head -n 1)
   echo "On(a,b) $i Blocks in $TIME Seconds" >> $FILE
   echo "On(a,b) $i Blocks in $TIME Seconds"
 done
