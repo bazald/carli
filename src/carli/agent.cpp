@@ -1597,13 +1597,36 @@ namespace Carli {
       else
         value = std::get<0>(sum_value(action_q.first.get(), action_q.second, fringe ? fringe->q_value_fringe->feature.get() : nullptr, fringe_depth));
 
-      value = std::exp(value * m_inverse_temperature);
-//      if(value > m_boltzmann_maximum_value)
-//        value = m_boltzmann_maximum_value;
-//      else if(value < m_boltzmann_minimum_value || std::isnan(value))
-//        value = m_boltzmann_minimum_value;
-
       values.push_back(value);
+    }
+
+    // For IEEE-compatible type double, overflow is guaranteed if 709.8 < arg, and underflow is guaranteed if arg < -708.4
+
+    double min_value = *values.begin(), max_value = min_value;
+    for(auto &value : values) {
+      value *= m_inverse_temperature;
+
+      if(value < min_value)
+        min_value = value;
+      else if(value > max_value)
+        max_value = value;
+    }
+
+    if(max_value - min_value > 1218.2) {
+      for(auto &value : values)
+        value = (value - min_value) / (max_value - min_value) * 1218.2 -608.4;
+    }
+    else if(min_value < -608.4) {
+      for(auto &value : values)
+        value += -608.4 - min_value;
+    }
+    else if(max_value > 609.8) {
+      for(auto &value : values)
+        value += 609.8 - max_value;
+    }
+
+    for(auto &value : values) {
+      value = std::exp(value);
       value_sum += value;
     }
 

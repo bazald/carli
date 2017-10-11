@@ -326,11 +326,17 @@ def main():
       remap_names['policy-policy-bst-d'] = 'Policy ROD'
       remap_names['value-value-bst'] = 'Value RON'
       remap_names['value-value-bst-d'] = 'Value ROD'
+      remap_names['catde-catde-c50'] = 'CATDE RCN'
       remap_names['catde-catde-c500'] = 'CATDE RCN'
+      remap_names['catde-catde-c50-d'] = 'CATDE RCD'
       remap_names['catde-catde-c900-d'] = 'CATDE RCD'
+      remap_names['policy-policy-c50'] = 'Policy RCN'
       remap_names['policy-policy-c500'] = 'Policy RCN'
+      remap_names['policy-policy-c50-d'] = 'Policy RCD'
       remap_names['policy-policy-c900-d'] = 'Policy RCD'
+      remap_names['value-value-c50'] = 'Value RCN'
       remap_names['value-value-c500'] = 'Value RCN'
+      remap_names['value-value-c50-d'] = 'Value RCD'
       remap_names['value-value-c900-d'] = 'Value RCD'
       
       if scenario == 1:

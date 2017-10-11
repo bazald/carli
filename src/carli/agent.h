@@ -250,8 +250,6 @@ namespace Carli {
     const double m_inverse_temperature_episodic_increment = get_Option_Ranged<double>(Options::get_global(), "inverse-temperature-episodic-increment"); ///< for Boltzmann decision-making
     const double m_inverse_temperature_initial = get_Option_Ranged<double>(Options::get_global(), "inverse-temperature"); ///< for Boltzmann decision-making
     double m_inverse_temperature = get_Option_Ranged<double>(Options::get_global(), "inverse-temperature"); ///< for Boltzmann decision-making
-    const double m_boltzmann_maximum_value = get_Option_Ranged<double>(Options::get_global(), "boltzmann-maximum-value"); ///< for Boltzmann decision-making
-    const double m_boltzmann_minimum_value = get_Option_Ranged<double>(Options::get_global(), "boltzmann-minimum-value"); ///< for Boltzmann decision-making
 
     const int64_t m_pseudoepisode_threshold = get_Option_Ranged<int64_t>(Options::get_global(), "pseudoepisode-threshold"); ///< For deciding how many steps indicates a pseudoepisode
     const double m_split_catde = get_Option_Ranged<double>(Options::get_global(), "split-catde");
