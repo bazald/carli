@@ -129,6 +129,7 @@ def main():
     x = []
     xs = []
     smith = []
+    cpu = []
     memory = []
     unrefinements = []
     while True:
@@ -140,6 +141,7 @@ def main():
         x.append(int(split[0]))#) / 10000.0)
         xs.append(int(split[0]))
         smith.append(float(split[val0 + 1]))
+        cpu.append(float(split[9]))
         memory.append(float(split[7]))
         unrefinements.append(map(int, split[10].split(':')))
     f.close()
@@ -511,7 +513,15 @@ def main():
     # lower right
     pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2)
     
-    if mode == 'multiple experiment evaluation':
+    if mode == 'single experiment evaluation':
+      for agent in agent_list:
+        #print '50k Value for ' + agent + ': ' + str(smith[agent][x.index(50000)])
+        #print '50k CPU Average for ' + agent + ': ' + str(cpu[agent][x.index(50000)])
+        #print '50k Memory Average for ' + agent + ': ' + str(memory[agent][x.index(50000)])
+        print 'Final Value for ' + agent + ': ' + str(smith['avg'][-1])
+        print 'Final CPU Average for ' + agent + ': ' + str(cpu[agent][-1])
+        print 'Final Memory Average for ' + agent + ': ' + str(memory[agent][-1])
+    elif mode == 'multiple experiment evaluation':
       for agent in agent_list:
         #print '50k Value for ' + agent + ': ' + str(smith[agent][x.index(50000)])
         #print '50k CPU Average for ' + agent + ': ' + str(cpu[agent][x.index(50000)])

@@ -12,45 +12,49 @@ g_base_command = "./blocks_world_2 --output experiment --discount-rate 0.9 --eli
 
 g_ep_tuples = []
 
-g_ep_tuples.append(("value-none",         "--split-test value  --unsplit-test none   --split-update-count 20                                                                                --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("catde-none",         "--split-test catde  --unsplit-test none   --split-update-count 20                                                                                --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("policy-none",        "--split-test policy --unsplit-test none   --split-update-count 20                                                                                --rules rules/blocks-world-2.carli"))
+g_ep_tuples.append(("lfa",                "                                                                                                                                                 --rules rules/blocks-world-2-nonrrl.carli"))
 
-g_ep_tuples.append(("value-value-none",   "--split-test value  --unsplit-test value  --split-update-count 20 --unsplit-update-count 50 --resplit-bias none                                  --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("catde-catde-none",   "--split-test catde  --unsplit-test catde  --split-update-count 20 --unsplit-update-count 50 --resplit-bias none                                  --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("policy-policy-none", "--split-test policy --unsplit-test policy --split-update-count 20 --unsplit-update-count 50 --resplit-bias none                                  --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("value-none",         "--split-test value  --unsplit-test none   --split-update-count 20                                                                                --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("catde-none",         "--split-test catde  --unsplit-test none   --split-update-count 20                                                                                --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("policy-none",        "--split-test policy --unsplit-test none   --split-update-count 20                                                                                --rules rules/blocks-world-2.carli"))
 
-g_ep_tuples.append(("value-value-bkls",   "--split-test value  --unsplit-test value  --split-update-count 20 --unsplit-update-count 50 --resplit-bias blacklist                             --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("catde-catde-bkls",   "--split-test catde  --unsplit-test catde  --split-update-count 20 --unsplit-update-count 50 --resplit-bias blacklist                             --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("policy-policy-bkls", "--split-test policy --unsplit-test policy --split-update-count 20 --unsplit-update-count 50 --resplit-bias blacklist                             --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("value-value-none",   "--split-test value  --unsplit-test value  --split-update-count 20 --unsplit-update-count 50 --resplit-bias none                                  --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("catde-catde-none",   "--split-test catde  --unsplit-test catde  --split-update-count 20 --unsplit-update-count 50 --resplit-bias none                                  --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("policy-policy-none", "--split-test policy --unsplit-test policy --split-update-count 20 --unsplit-update-count 50 --resplit-bias none                                  --rules rules/blocks-world-2.carli"))
 
-g_ep_tuples.append(("value-value-bst",    "--split-test value  --unsplit-test value  --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost                                 --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("catde-catde-bst",    "--split-test catde  --unsplit-test catde  --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost                                 --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("policy-policy-bst",  "--split-test policy --unsplit-test policy --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost                                 --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("value-value-bkls",   "--split-test value  --unsplit-test value  --split-update-count 20 --unsplit-update-count 50 --resplit-bias blacklist                             --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("catde-catde-bkls",   "--split-test catde  --unsplit-test catde  --split-update-count 20 --unsplit-update-count 50 --resplit-bias blacklist                             --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("policy-policy-bkls", "--split-test policy --unsplit-test policy --split-update-count 20 --unsplit-update-count 50 --resplit-bias blacklist                             --rules rules/blocks-world-2.carli"))
 
-g_ep_tuples.append(("value-value-c500",   "--split-test value  --unsplit-test value  --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost     --concrete-update-count 500 --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("catde-catde-c500",   "--split-test catde  --unsplit-test catde  --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost     --concrete-update-count 500 --rules rules/blocks-world-2.carli"))
-g_ep_tuples.append(("policy-policy-c500", "--split-test policy --unsplit-test policy --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost     --concrete-update-count 500 --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("value-value-bst",    "--split-test value  --unsplit-test value  --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost                                 --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("catde-catde-bst",    "--split-test catde  --unsplit-test catde  --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost                                 --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("policy-policy-bst",  "--split-test policy --unsplit-test policy --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost                                 --rules rules/blocks-world-2.carli"))
 
-g_ep_tuples.append(("value-none-d",         "--split-test value  --unsplit-test none   --split-update-count 30                                                                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("catde-none-d",         "--split-test catde  --unsplit-test none   --split-update-count 30                                                                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("policy-none-d",        "--split-test policy --unsplit-test none   --split-update-count 30                                                                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("value-value-c500",   "--split-test value  --unsplit-test value  --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost     --concrete-update-count 500 --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("catde-catde-c500",   "--split-test catde  --unsplit-test catde  --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost     --concrete-update-count 500 --rules rules/blocks-world-2.carli"))
+#g_ep_tuples.append(("policy-policy-c500", "--split-test policy --unsplit-test policy --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost     --concrete-update-count 500 --rules rules/blocks-world-2.carli"))
 
-g_ep_tuples.append(("value-value-none-d",   "--split-test value  --unsplit-test value  --split-update-count 30 --unsplit-update-count 100 --resplit-bias none                                  --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("catde-catde-none-d",   "--split-test catde  --unsplit-test catde  --split-update-count 30 --unsplit-update-count 100 --resplit-bias none                                  --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("policy-policy-none-d", "--split-test policy --unsplit-test policy --split-update-count 30 --unsplit-update-count 100 --resplit-bias none                                  --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("lfa-d",                "                                                                                                                                                  --rules rules/blocks-world-2-distractors-but-not-defective-nonrrl.carli"))
 
-g_ep_tuples.append(("value-value-bkls-d",   "--split-test value  --unsplit-test value  --split-update-count 30 --unsplit-update-count 100 --resplit-bias blacklist                             --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("catde-catde-bkls-d",   "--split-test catde  --unsplit-test catde  --split-update-count 30 --unsplit-update-count 100 --resplit-bias blacklist                             --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("policy-policy-bkls-d", "--split-test policy --unsplit-test policy --split-update-count 30 --unsplit-update-count 100 --resplit-bias blacklist                             --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("value-none-d",         "--split-test value  --unsplit-test none   --split-update-count 30                                                                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("catde-none-d",         "--split-test catde  --unsplit-test none   --split-update-count 30                                                                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("policy-none-d",        "--split-test policy --unsplit-test none   --split-update-count 30                                                                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
 
-g_ep_tuples.append(("value-value-bst-d",    "--split-test value  --unsplit-test value  --split-update-count 30 --unsplit-update-count 100 --resplit-bias boost                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("catde-catde-bst-d",    "--split-test catde  --unsplit-test catde  --split-update-count 30 --unsplit-update-count 100 --resplit-bias boost                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("policy-policy-bst-d",  "--split-test policy --unsplit-test policy --split-update-count 30 --unsplit-update-count 100 --resplit-bias boost                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("value-value-none-d",   "--split-test value  --unsplit-test value  --split-update-count 30 --unsplit-update-count 100 --resplit-bias none                                  --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("catde-catde-none-d",   "--split-test catde  --unsplit-test catde  --split-update-count 30 --unsplit-update-count 100 --resplit-bias none                                  --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("policy-policy-none-d", "--split-test policy --unsplit-test policy --split-update-count 30 --unsplit-update-count 100 --resplit-bias none                                  --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
 
-g_ep_tuples.append(("value-value-c900-d",   "--split-test value  --unsplit-test value  --split-update-count 30 --unsplit-update-count 100 --resplit-bias boost     --concrete-update-count 900 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("catde-catde-c900-d",   "--split-test catde  --unsplit-test catde  --split-update-count 30 --unsplit-update-count 100 --resplit-bias boost     --concrete-update-count 900 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
-g_ep_tuples.append(("policy-policy-c900-d", "--split-test policy --unsplit-test policy --split-update-count 30 --unsplit-update-count 100 --resplit-bias boost     --concrete-update-count 900 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("value-value-bkls-d",   "--split-test value  --unsplit-test value  --split-update-count 30 --unsplit-update-count 100 --resplit-bias blacklist                             --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("catde-catde-bkls-d",   "--split-test catde  --unsplit-test catde  --split-update-count 30 --unsplit-update-count 100 --resplit-bias blacklist                             --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("policy-policy-bkls-d", "--split-test policy --unsplit-test policy --split-update-count 30 --unsplit-update-count 100 --resplit-bias blacklist                             --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+
+#g_ep_tuples.append(("value-value-bst-d",    "--split-test value  --unsplit-test value  --split-update-count 30 --unsplit-update-count 100 --resplit-bias boost                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("catde-catde-bst-d",    "--split-test catde  --unsplit-test catde  --split-update-count 30 --unsplit-update-count 100 --resplit-bias boost                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("policy-policy-bst-d",  "--split-test policy --unsplit-test policy --split-update-count 30 --unsplit-update-count 100 --resplit-bias boost                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+
+#g_ep_tuples.append(("value-value-c900-d",   "--split-test value  --unsplit-test value  --split-update-count 30 --unsplit-update-count 100 --resplit-bias boost     --concrete-update-count 900 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("catde-catde-c900-d",   "--split-test catde  --unsplit-test catde  --split-update-count 30 --unsplit-update-count 100 --resplit-bias boost     --concrete-update-count 900 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+#g_ep_tuples.append(("policy-policy-c900-d", "--split-test policy --unsplit-test policy --split-update-count 30 --unsplit-update-count 100 --resplit-bias boost     --concrete-update-count 900 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
 
 parser = argparse.ArgumentParser(description='Run Blocks World 2 experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,

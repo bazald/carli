@@ -4,35 +4,35 @@ CMD="time -f "%e" ./blocks_world_2 --output null --learning-rate 0 --secondary-l
 MAX=100
 
 FILE=blocksworld2-performance-episode.out
-echo "" > $FILE
-
-for i in $(seq 3 $MAX)
-do
-  TIME=$({ time $CMD --num-blocks-min $i --num-blocks-max $i --num-episodes 1 --bw2-goal stack --rules rules/blocks-world-2-classic-stack-mt.carli ; } 2>&1 | head -n 1)
-  echo "Stack $i Blocks in $TIME Seconds" >> $FILE
-  echo "Stack $i Blocks in $TIME Seconds"
-done
-
-for i in $(seq 3 $MAX)
-do
-  TIME=$({ time $CMD --num-blocks-min $i --num-blocks-max $i --num-episodes 1 --bw2-goal unstack --rules rules/blocks-world-2-classic-unstack-mt.carli ; } 2>&1 | head -n 1)
-  echo "Unstack $i Blocks in $TIME Seconds" >> $FILE
-  echo "Unstack $i Blocks in $TIME Seconds"
-done
-
-for i in $(seq 3 $MAX)
-do
-  TIME=$({ time $CMD --num-blocks-min $i --num-blocks-max $i --num-episodes 1 --bw2-goal on-a-b --rules rules/blocks-world-2-classic-on-a-b-mt.carli ; } 2>&1 | head -n 1)
-  echo "On(a,b) $i Blocks in $TIME Seconds" >> $FILE
-  echo "On(a,b) $i Blocks in $TIME Seconds"
-done
-
-for i in $(seq 3 $MAX)
-do
-  TIME=$({ time $CMD --num-blocks-min $i --num-blocks-max $i --num-episodes 1 --bw2-goal exact --rules rules/blocks-world-2-trained.carli ; } 2>&1 | head -n 1)
-  echo "Exact $i Blocks in $TIME Seconds" >> $FILE
-  echo "Exact $i Blocks in $TIME Seconds"
-done
+#echo "" > $FILE
+#
+#for i in $(seq 3 $MAX)
+#do
+#  TIME=$({ time $CMD --num-blocks-min $i --num-blocks-max $i --num-episodes 1 --bw2-goal stack --rules rules/blocks-world-2-classic-stack-mt.carli ; } 2>&1 | head -n 1)
+#  echo "Stack $i Blocks in $TIME Seconds" >> $FILE
+#  echo "Stack $i Blocks in $TIME Seconds"
+#done
+#
+#for i in $(seq 3 $MAX)
+#do
+#  TIME=$({ time $CMD --num-blocks-min $i --num-blocks-max $i --num-episodes 1 --bw2-goal unstack --rules rules/blocks-world-2-classic-unstack-mt.carli ; } 2>&1 | head -n 1)
+#  echo "Unstack $i Blocks in $TIME Seconds" >> $FILE
+#  echo "Unstack $i Blocks in $TIME Seconds"
+#done
+#
+#for i in $(seq 3 $MAX)
+#do
+#  TIME=$({ time $CMD --num-blocks-min $i --num-blocks-max $i --num-episodes 1 --bw2-goal on-a-b --rules rules/blocks-world-2-classic-on-a-b-mt.carli ; } 2>&1 | head -n 1)
+#  echo "On(a,b) $i Blocks in $TIME Seconds" >> $FILE
+#  echo "On(a,b) $i Blocks in $TIME Seconds"
+#done
+#
+#for i in $(seq 3 $MAX)
+#do
+#  TIME=$({ time $CMD --num-blocks-min $i --num-blocks-max $i --num-episodes 1 --bw2-goal exact --rules rules/blocks-world-2-trained.carli ; } 2>&1 | head -n 1)
+#  echo "Exact $i Blocks in $TIME Seconds" >> $FILE
+#  echo "Exact $i Blocks in $TIME Seconds"
+#done
 
 for i in $(seq 3 $MAX)
 do
@@ -41,12 +41,12 @@ do
   echo "Exact Disabled Node Sharing $i Blocks in $TIME Seconds"
 done
 
-for i in $(seq 3 $MAX)
-do
-  TIME=$({ time $CMD --num-blocks-min $i --num-blocks-max $i --num-episodes 1 --bw2-goal exact --rules rules/blocks-world-2-trained.carli --rete-flush-wmes true ; } 2>&1 | head -n 1)
-  echo "Exact Flushing WMEs $i Blocks in $TIME Seconds" >> $FILE
-  echo "Exact Flushing WMEs $i Blocks in $TIME Seconds"
-done
+#for i in $(seq 3 $MAX)
+#do
+#  TIME=$({ time $CMD --num-blocks-min $i --num-blocks-max $i --num-episodes 1 --bw2-goal exact --rules rules/blocks-world-2-trained.carli --rete-flush-wmes true ; } 2>&1 | head -n 1)
+#  echo "Exact Flushing WMEs $i Blocks in $TIME Seconds" >> $FILE
+#  echo "Exact Flushing WMEs $i Blocks in $TIME Seconds"
+#done
 
 for i in $(seq 3 $MAX)
 do

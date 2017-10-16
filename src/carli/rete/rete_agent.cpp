@@ -78,9 +78,11 @@ namespace Rete {
 
     auto filter = std::make_shared<Rete_Filter>(wme);
 
-    for(auto &existing_filter : filters) {
-      if(*existing_filter == *filter)
-        return existing_filter;
+    if(!get_Option_Ranged<bool>(Options::get_global(), "rete-disable-node-sharing")) {
+      for(auto &existing_filter : filters) {
+        if(*existing_filter == *filter)
+          return existing_filter;
+      }
     }
 
     bind_to_filter(*this, filter);
