@@ -25,6 +25,7 @@ namespace Carli {
     virtual ~Environment() {}
 
     void init() {
+      m_step_count = 0;
       init_impl();
     }
 
@@ -36,6 +37,8 @@ namespace Carli {
     }
 
     std::pair<reward_type, reward_type> transition(const Action &action) {
+      ++m_step_count;
+      ++m_total_step_count;
       return transition_impl(action);
     }
 
@@ -44,6 +47,8 @@ namespace Carli {
     }
 
     int64_t get_scenario() const {return m_scenario;}
+    int64_t get_step_count() const {return m_step_count;}
+    int64_t get_total_step_count() const {return m_total_step_count;}
 
   private:
     virtual void init_impl() = 0;
@@ -53,6 +58,9 @@ namespace Carli {
 
     const int64_t m_scenario = get_Option_Ranged<int64_t>(Options::get_global(), "scenario");
     bool m_altered = false;
+
+    int64_t m_step_count = 0;
+    int64_t m_total_step_count = 0;
   };
 
 }

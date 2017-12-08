@@ -243,7 +243,9 @@ namespace Carli {
   //#endif
 
     const bool m_on_policy = dynamic_cast<const Option_Itemized &>(Options::get_global()["policy"]).get_value() == "on-policy"; ///< for Sarsa/Q-learning selection
-    const double m_epsilon = get_Option_Ranged<double>(Options::get_global(), "epsilon-greedy"); ///< for epsilon-greedy decision-making
+    const double m_inverse_epsilon_episodic_increment = get_Option_Ranged<double>(Options::get_global(), "inverse-epsilon-episodic-increment"); ///< for epsilon-greedy decision-making
+    const double m_epsilon_initial = get_Option_Ranged<double>(Options::get_global(), "epsilon-greedy"); ///< for epsilon-greedy decision-making
+    double m_epsilon = get_Option_Ranged<double>(Options::get_global(), "epsilon-greedy"); ///< for epsilon-greedy decision-making
 #ifdef ENABLE_T_TEST
     const double m_t_test = get_Option_Ranged<double>(Options::get_global(), "t-test"); ///< for t-test decision-making
 #endif

@@ -8,30 +8,27 @@ g_dir = 'experiment-adv'
 g_plotters = ['./advent.py']
 g_error = False
 
-g_base_command = "./advent --output experiment --print-every 1000 --epsilon-greedy 0.1 --discount-rate 0.9 --eligibility-trace-decay-rate 0.3 --learning-rate 0.1 --secondary-learning-rate 0.1 --policy off-policy --split-update-count 20 --unsplit-update-count 100"
+g_base_command = "./advent --output experiment --print-every 1000 --discount-rate 0.99 --eligibility-trace-decay-rate 0.3 --learning-rate 0.03 --secondary-learning-rate 0.01 --policy on-policy --split-update-count 50 --unsplit-update-count 100 --exploration boltzmann --inverse-temperature 5 --inverse-temperature-episodic-increment 0.01"
 
 g_ep_tuples = []
 
 g_ep_tuples.append(("catde-none",          "--split-test catde  --unsplit-test none                                                         --rules rules/advent.carli"))
-#g_ep_tuples.append(("catde-catde-none",    "--split-test catde  --unsplit-test catde  --resplit-bias none                                   --rules rules/advent.carli"))
-#g_ep_tuples.append(("catde-catde-bkls",    "--split-test catde  --unsplit-test catde  --resplit-bias blacklist                              --rules rules/advent.carli"))
-#g_ep_tuples.append(("catde-catde-bst",     "--split-test catde  --unsplit-test catde  --resplit-bias boost                                  --rules rules/advent.carli"))
-#g_ep_tuples.append(("catde-catde-c500",    "--split-test catde  --unsplit-test catde  --resplit-bias boost     --concrete-update-count 500  --rules rules/advent.carli"))
-#g_ep_tuples.append(("catde-catde-c300",   "--split-test catde  --unsplit-test catde  --resplit-bias boost     --concrete-update-count 300 --rules rules/advent.carli"))
+##g_ep_tuples.append(("catde-catde-none",    "--split-test catde  --unsplit-test catde  --resplit-bias none                                   --rules rules/advent.carli"))
+##g_ep_tuples.append(("catde-catde-bkls",    "--split-test catde  --unsplit-test catde  --resplit-bias blacklist                              --rules rules/advent.carli"))
+##g_ep_tuples.append(("catde-catde-bst",     "--split-test catde  --unsplit-test catde  --resplit-bias boost                                  --rules rules/advent.carli"))
+g_ep_tuples.append(("catde-catde-c200",   "--split-test catde  --unsplit-test catde  --resplit-bias boost     --concrete-update-count 200 --rules rules/advent.carli"))
 
 g_ep_tuples.append(("value-none",          "--split-test value  --unsplit-test none                                                         --rules rules/advent.carli"))
-#g_ep_tuples.append(("value-value-none",    "--split-test value  --unsplit-test value  --resplit-bias none                                   --rules rules/advent.carli"))
-#g_ep_tuples.append(("value-value-bkls",    "--split-test value  --unsplit-test value  --resplit-bias blacklist                              --rules rules/advent.carli"))
-#g_ep_tuples.append(("value-value-bst",     "--split-test value  --unsplit-test value  --resplit-bias boost                                  --rules rules/advent.carli"))
-#g_ep_tuples.append(("value-value-c500",    "--split-test value  --unsplit-test value  --resplit-bias boost     --concrete-update-count 500  --rules rules/advent.carli"))
-#g_ep_tuples.append(("value-value-c300",   "--split-test value  --unsplit-test value  --resplit-bias boost     --concrete-update-count 300 --rules rules/advent.carli"))
+##g_ep_tuples.append(("value-value-none",    "--split-test value  --unsplit-test value  --resplit-bias none                                   --rules rules/advent.carli"))
+##g_ep_tuples.append(("value-value-bkls",    "--split-test value  --unsplit-test value  --resplit-bias blacklist                              --rules rules/advent.carli"))
+##g_ep_tuples.append(("value-value-bst",     "--split-test value  --unsplit-test value  --resplit-bias boost                                  --rules rules/advent.carli"))
+g_ep_tuples.append(("value-value-c200",   "--split-test value  --unsplit-test value  --resplit-bias boost     --concrete-update-count 200 --rules rules/advent.carli"))
 
 g_ep_tuples.append(("policy-none",         "--split-test policy --unsplit-test none                                                         --rules rules/advent.carli"))
-#g_ep_tuples.append(("policy-policy-none",  "--split-test policy --unsplit-test policy --resplit-bias none                                   --rules rules/advent.carli"))
-#g_ep_tuples.append(("policy-policy-bkls",  "--split-test policy --unsplit-test policy --resplit-bias blacklist                              --rules rules/advent.carli"))
-#g_ep_tuples.append(("policy-policy-bst",   "--split-test policy --unsplit-test policy --resplit-bias boost                                  --rules rules/advent.carli"))
-#g_ep_tuples.append(("policy-policy-c500",  "--split-test policy --unsplit-test policy --resplit-bias boost     --concrete-update-count 500  --rules rules/advent.carli"))
-#g_ep_tuples.append(("policy-policy-c300", "--split-test policy --unsplit-test policy --resplit-bias boost     --concrete-update-count 300 --rules rules/advent.carli"))
+##g_ep_tuples.append(("policy-policy-none",  "--split-test policy --unsplit-test policy --resplit-bias none                                   --rules rules/advent.carli"))
+##g_ep_tuples.append(("policy-policy-bkls",  "--split-test policy --unsplit-test policy --resplit-bias blacklist                              --rules rules/advent.carli"))
+##g_ep_tuples.append(("policy-policy-bst",   "--split-test policy --unsplit-test policy --resplit-bias boost                                  --rules rules/advent.carli"))
+g_ep_tuples.append(("policy-policy-c200", "--split-test policy --unsplit-test policy --resplit-bias boost     --concrete-update-count 200 --rules rules/advent.carli"))
 
 parser = argparse.ArgumentParser(description='Run Advent experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,
@@ -41,7 +38,7 @@ parser.add_argument('-r', '--runs', metavar='N', type=int,
                    action='store', default=1,
                    help='number of runs per experiment')
 parser.add_argument('-n', '--num-steps', metavar='N', type=int,
-                   action='store', default=2000000,
+                   action='store', default=500000,
                    help='number of steps per run')
 
 args = parser.parse_args()

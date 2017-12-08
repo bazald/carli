@@ -308,8 +308,10 @@ def main():
       remap_names['catde-none-d'] = 'CATDE RND'
       remap_names['policy-none'] = 'Policy RNN'
       remap_names['policy-none-d'] = 'Policy RND'
-      remap_names['value-none'] = 'Value RNN'
-      remap_names['value-none-d'] = 'Value RND'
+      remap_names['value-none'] = 'Value RNN B'
+      remap_names['value-none-d'] = 'Value RND B'
+      remap_names['egreedy-value-none'] = 'Value RNN $\\epsilon$'
+      remap_names['egreedy-value-none-d'] = 'Value RND $\\epsilon$'
       remap_names['catde-catde-none'] = 'CATDE RUN'
       remap_names['catde-catde-none-d'] = 'CATDE RUD'
       remap_names['policy-policy-none'] = 'Policy RUN'
@@ -336,10 +338,10 @@ def main():
       remap_names['policy-policy-c500'] = 'Policy RCN'
       remap_names['policy-policy-c50-d'] = 'Policy RCD'
       remap_names['policy-policy-c900-d'] = 'Policy RCD'
-      remap_names['value-value-c50'] = 'Value RCN'
-      remap_names['value-value-c500'] = 'Value RCN'
-      remap_names['value-value-c50-d'] = 'Value RCD'
-      remap_names['value-value-c900-d'] = 'Value RCD'
+      remap_names['value-value-c50'] = 'Value RCN B'
+      remap_names['value-value-c500'] = 'Value RCN $\\epsilon$'
+      remap_names['value-value-c50-d'] = 'Value RCD B'
+      remap_names['value-value-c900-d'] = 'Value RCD $\\epsilon$'
       
       if scenario == 1:
         agent_list = ['catde-none', 'policy-none', 'value-none']

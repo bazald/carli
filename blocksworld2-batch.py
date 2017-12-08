@@ -12,7 +12,10 @@ g_base_command = "./blocks_world_2 --output experiment --discount-rate 0.9 --eli
 
 g_ep_tuples = []
 
-g_ep_tuples.append(("lfa",                "                                                                                                                                                 --rules rules/blocks-world-2-nonrrl.carli"))
+#g_ep_tuples.append(("lfa",                "                                                                                                                                                 --rules rules/blocks-world-2-nonrrl.carli"))
+
+g_ep_tuples.append(("value-none-de",       "--split-test value  --unsplit-test none   --split-update-count 20 --inverse-epsilon-episodic-increment 0.1                                       --rules rules/blocks-world-2.carli"))
+g_ep_tuples.append(("catde-none-de",       "--split-test catde  --unsplit-test none   --split-update-count 20 --inverse-epsilon-episodic-increment 0.1                                       --rules rules/blocks-world-2.carli"))
 
 #g_ep_tuples.append(("value-none",         "--split-test value  --unsplit-test none   --split-update-count 20                                                                                --rules rules/blocks-world-2.carli"))
 #g_ep_tuples.append(("catde-none",         "--split-test catde  --unsplit-test none   --split-update-count 20                                                                                --rules rules/blocks-world-2.carli"))
@@ -34,7 +37,10 @@ g_ep_tuples.append(("lfa",                "                                     
 #g_ep_tuples.append(("catde-catde-c500",   "--split-test catde  --unsplit-test catde  --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost     --concrete-update-count 500 --rules rules/blocks-world-2.carli"))
 #g_ep_tuples.append(("policy-policy-c500", "--split-test policy --unsplit-test policy --split-update-count 20 --unsplit-update-count 50 --resplit-bias boost     --concrete-update-count 500 --rules rules/blocks-world-2.carli"))
 
-g_ep_tuples.append(("lfa-d",                "                                                                                                                                                  --rules rules/blocks-world-2-distractors-but-not-defective-nonrrl.carli"))
+#g_ep_tuples.append(("lfa-d",                "                                                                                                                                                  --rules rules/blocks-world-2-distractors-but-not-defective-nonrrl.carli"))
+
+g_ep_tuples.append(("value-none-de-d",       "--split-test value  --unsplit-test none   --split-update-count 30 --inverse-epsilon-episodic-increment 0.1                                        --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
+g_ep_tuples.append(("catde-none-de-d",       "--split-test catde  --unsplit-test none   --split-update-count 30 --inverse-epsilon-episodic-increment 0.1                                        --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
 
 #g_ep_tuples.append(("value-none-d",         "--split-test value  --unsplit-test none   --split-update-count 30                                                                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))
 #g_ep_tuples.append(("catde-none-d",         "--split-test catde  --unsplit-test none   --split-update-count 30                                                                                 --rules rules/blocks-world-2-distractors-but-not-defective.carli"))

@@ -117,11 +117,11 @@ namespace Blocks_World_2 {
 
     void print_impl(ostream &os) const;
 
-    const Goal m_goal = dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "exact" ? Goal::EXACT
-                      : dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "color" ? Goal::COLOR
-                      : dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "stack" ? Goal::STACK
-                      : dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "unstack" ? Goal::UNSTACK
-                      : Goal::ON_A_B;
+    Goal m_goal = dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "exact" ? Goal::EXACT
+                : dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "color" ? Goal::COLOR
+                : dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "stack" ? Goal::STACK
+                : dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-goal"]).get_value() == "unstack" ? Goal::UNSTACK
+                : Goal::ON_A_B;
     const Reward m_reward = dynamic_cast<const Option_Itemized &>(Options::get_global()["bw2-reward"]).get_value() == "guiding" ? Reward::GUIDING : Reward::BLIND;
     const int64_t m_num_blocks_min = get_Option_Ranged<int64_t>(Options::get_global(), "num-blocks-min");
     const int64_t m_num_blocks_max = get_Option_Ranged<int64_t>(Options::get_global(), "num-blocks-max");

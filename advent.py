@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import argparse
 import hashlib, os, re
 import pylab
 from matplotlib import rc
@@ -91,12 +92,19 @@ def write_to_csv(filename, x_label, xs, y_labels, yss):
     f.write('\n')
 
 def main():
+  parser = argparse.ArgumentParser("./blocksworld2.py")
+  parser.add_argument("--scenario", help="Which graph should be generated?")
+  args, filenames = parser.parse_known_args()
+
+  scenario = 0
+  if args.scenario:
+    scenario = int(args.scenario)
+
   # 1: ./advent.py experiment-adv/catde-none/*.out experiment-adv/policy-none/*.out experiment-adv/value-none/*.out
   # 2: ./advent.py experiment-adv/catde-catde-none/*.out experiment-adv/policy-policy-none/*.out experiment-adv/value-value-none/*.out
   # 3: ./advent.py experiment-adv/catde-catde-bkls/*.out experiment-adv/policy-policy-bkls/*.out experiment-adv/value-value-bkls/*.out
   # 4: ./advent.py experiment-adv/catde-catde-bst/*.out experiment-adv/policy-policy-bst/*.out experiment-adv/value-value-bst/*.out
   # 5: ./advent.py experiment-adv/catde-catde-c500/*.out experiment-adv/policy-policy-c500/*.out experiment-adv/value-value-c500/*.out
-  scenario = 0
 
   memory_plot = False # scenario is not 0
   unrefinement_plot = False # not memory_plot
@@ -110,7 +118,7 @@ def main():
     reward_label = 'Reward Within an Episode'
     val0 = 4
 
-  if len(sys.argv) == 1:
+  if len(filenames) == 0:
     f = open('stdout.txt', 'r')
     seed = int(f.readline().split(' ', 1)[1])
     x = []
@@ -135,7 +143,7 @@ def main():
     title='Blocks World (seed ' + str(seed) + ')'
   else:
     files = {}
-    for filename in sys.argv[1:]:
+    for filename in filenames:
       f = open(filename, 'r')
       seed = int(f.readline().split(' ', 1)[1])
       
@@ -251,7 +259,7 @@ def main():
   pylab.axes(rect)
   
   labels = []
-  if len(sys.argv) == 1:
+  if len(filenames) == 0:
     #if val0 == 4:
       #for i in range(1, len(smith)):
         #smith[i] = 0.95 * smith[i - 1] + 0.05 * smith[i];
@@ -292,21 +300,21 @@ def main():
       remap_names['catde-catde-bkls'] = 'CATDE SBN'
       remap_names['catde-catde-bst'] = 'CATDE SON'
       remap_names['catde-catde-c500'] = 'CATDE SCN'
-      remap_names['catde-catde-c1000'] = 'CATDE SCN'
+      remap_names['catde-catde-c200'] = 'CATDE SCN'
       remap_names['catde-catde-c500-even'] = 'CATDE SCN'
       remap_names['catde-catde-none'] = 'CATDE SNN'
       remap_names['catde-none'] = 'CATDE NNN'
       remap_names['policy-policy-bkls'] = 'Policy SBN'
       remap_names['policy-policy-bst'] = 'Policy SON'
       remap_names['policy-policy-c500'] = 'Policy SCN'
-      remap_names['policy-policy-c1000'] = 'Policy SCN'
+      remap_names['policy-policy-c200'] = 'Policy SCN'
       remap_names['policy-policy-c500-even'] = 'Policy SCN'
       remap_names['policy-policy-none'] = 'Policy SNN'
       remap_names['policy-none'] = 'Policy NNN'
       remap_names['value-value-bkls'] = 'Value SBN'
       remap_names['value-value-bst'] = 'Value SON'
       remap_names['value-value-c500'] = 'Value SCN'
-      remap_names['value-value-c1000'] = 'Value SCN'
+      remap_names['value-value-c200'] = 'Value SCN'
       remap_names['value-value-c500-even'] = 'Value SCN'
       remap_names['value-value-none'] = 'Value SNN'
       remap_names['value-none'] = 'Value NNN'
@@ -320,21 +328,22 @@ def main():
       elif scenario == 4:
         agent_list = ['catde-catde-bst', 'policy-policy-bst', 'value-value-bst']
       elif scenario == 5:
-        agent_list = ['catde-catde-c500', 'policy-policy-c500', 'value-value-c500']
+        agent_list = ['catde-catde-c200', 'policy-policy-c200', 'value-value-c200']
       if scenario > 0 and scenario < 6:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
           yss.append(smith[agent])
           
-          if agent is 'catde-none' or agent is 'catde-catde-none' or agent is 'catde-catde-bkls' or agent is 'catde-catde-bst' or agent is 'catde-catde-c500':
+          linestyle ='-'
+          if agent is 'catde-none' or agent is 'catde-catde-none' or agent is 'catde-catde-bkls' or agent is 'catde-catde-bst' or agent is 'catde-catde-c200':
             color = 'red'
-            linestyle = ':'
-          elif agent is 'policy-none' or agent is 'policy-policy-none' or agent is 'policy-policy-bkls' or agent is 'policy-policy-bst' or agent is 'policy-policy-c500':
+#            linestyle = ':'
+          elif agent is 'policy-none' or agent is 'policy-policy-none' or agent is 'policy-policy-bkls' or agent is 'policy-policy-bst' or agent is 'policy-policy-c200':
             color = 'green'
-            linestyle = '--'
-          elif agent is 'value-none' or agent is 'value-value-none' or agent is 'value-value-bkls' or agent is 'value-value-bst' or agent is 'value-value-c500':
+#            linestyle = '--'
+          elif agent is 'value-none' or agent is 'value-value-none' or agent is 'value-value-bkls' or agent is 'value-value-bst' or agent is 'value-value-c200':
             color = 'blue'
-            linestyle = '-'
+#            linestyle = '-'
           
           labels += pylab.plot(x, smith[agent], label=remap_names[agent], color=color, linestyle=linestyle)
   
@@ -344,9 +353,9 @@ def main():
   pylab.ylabel(reward_label, fontsize=8)
   
   #pylab.xlim(xmax=10000)
-  if len(sys.argv) > 1:
+  if len(filenames) > 1:
     if cumulative:
-      pylab.ylim(ymin=-3000, ymax=0)
+      pylab.ylim(ymin=-500, ymax=0)
     else:
       pylab.ylim(ymin=-10000, ymax=0)
   
@@ -471,7 +480,7 @@ def main():
         print 'Final CPU Average for ' + agent + ': ' + str(cpu[agent][-1])
         print 'Final Memory Average for ' + agent + ': ' + str(memory[agent][-1])
   
-  if len(sys.argv) == 1:
+  if len(filenames) == 1:
     write_to_csv('advent.csv', 'Step Number', xs, y_labels, yss)
     pylab.savefig('advent.eps')
     pylab.savefig('advent.png', dpi=1200)

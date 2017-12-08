@@ -107,6 +107,95 @@ namespace Blocks_World_2 {
   }
 
   void Environment::init_impl() {
+    /// Begin scenario shenanigans
+
+    switch(get_scenario()) {
+      case 1:
+        if(get_total_step_count() < 50000 || get_total_step_count() >= 100000)
+          m_goal = Goal::STACK;
+        else
+          m_goal = Goal::UNSTACK;
+        break;
+
+      case 2:
+        if(get_total_step_count() < 50000 || get_total_step_count() >= 100000)
+          m_goal = Goal::STACK;
+        else
+          m_goal = Goal::ON_A_B;
+        break;
+
+      case 3:
+        if(get_total_step_count() < 50000 || get_total_step_count() >= 100000)
+          m_goal = Goal::UNSTACK;
+        else
+          m_goal = Goal::STACK;
+        break;
+
+      case 4:
+        if(get_total_step_count() < 50000 || get_total_step_count() >= 100000)
+          m_goal = Goal::UNSTACK;
+        else
+          m_goal = Goal::ON_A_B;
+        break;
+
+      case 5:
+        if(get_total_step_count() < 50000 || get_total_step_count() >= 100000)
+          m_goal = Goal::ON_A_B;
+        else
+          m_goal = Goal::STACK;
+        break;
+
+      case 6:
+        if(get_total_step_count() < 50000 || get_total_step_count() >= 100000)
+          m_goal = Goal::ON_A_B;
+        else
+          m_goal = Goal::UNSTACK;
+        break;
+
+      case 7:
+        if(get_total_step_count() < 50000 || get_total_step_count() >= 100000) {
+          if(m_goal == Goal::COLOR) {
+            m_match_test = [](const Environment::Block &lhs, const Environment::Block &rhs)->bool{
+              return lhs.id == rhs.id;
+            };
+            m_goal = Goal::EXACT;
+          }
+        }
+        else {
+          if(m_goal == Goal::EXACT) {
+            m_match_test = [](const Environment::Block &lhs, const Environment::Block &rhs)->bool{
+              return lhs.color == rhs.color;
+            };
+            m_goal = Goal::COLOR;
+          }
+        }
+        break;
+
+      case 8:
+        if(get_total_step_count() < 50000 || get_total_step_count() >= 100000) {
+          if(m_goal == Goal::EXACT) {
+            m_match_test = [](const Environment::Block &lhs, const Environment::Block &rhs)->bool{
+              return lhs.color == rhs.color;
+            };
+            m_goal = Goal::COLOR;
+          }
+        }
+        else {
+          if(m_goal == Goal::COLOR) {
+            m_match_test = [](const Environment::Block &lhs, const Environment::Block &rhs)->bool{
+              return lhs.id == rhs.id;
+            };
+            m_goal = Goal::EXACT;
+          }
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    /// Begin normal init
+
     assert(m_num_blocks_min > 2);
     assert(m_num_blocks_max >= m_num_blocks_min);
 
