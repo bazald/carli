@@ -1,13 +1,13 @@
 
-Stack 3-5 in .131 Seconds
-Stack (Full) 3-5 in .135 Seconds
-Stack 3-7 in 1.299 Seconds
-Stack (Full) 3-7 in 1.476 Seconds
-Unstack 3-5 in .386 Seconds
-Unstack (Full) 3-5 in .865 Seconds
-Unstack 3-7 in 4.250 Seconds
-Unstack (Full) 3-7 in 6.874 Seconds
-On(a,b) 3-5 in .739 Seconds
-On(a,b) (Full) 3-5 in 1.206 Seconds
-On(a,b) 3-7 in 3.325 Seconds
-On(a,b) (Full) 3-7 in 8.104 Seconds
+Stack 3-5 in .140 Seconds
+Stack (Full) 3-5 in .604 Seconds
+Stack 3-7 in 1.288 Seconds
+Stack (Full) 3-7 in 19.857 Seconds
+Unstack 3-5 in .419 Seconds
+Unstack (Full) 3-5 in 4.842 Seconds
+Unstack 3-7 in 4.217 Seconds
+Unstack (Full) 3-7 in 41.160 Seconds
+On(a,b) 3-5 in .730 Seconds
+On(a,b) (Full) 3-5 in 4.378 Seconds
+On(a,b) 3-7 in 3.462 Seconds
+On(a,b) (Full) 3-7 in 59.864 Seconds
