@@ -25,6 +25,7 @@ namespace Carli {
     virtual ~Environment() {}
 
     void init() {
+      ++m_episode_count;
       m_step_count = 0;
       init_impl();
     }
@@ -47,6 +48,7 @@ namespace Carli {
     }
 
     int64_t get_scenario() const {return m_scenario;}
+    int64_t get_episode_count() const {return m_episode_count;}
     int64_t get_step_count() const {return m_step_count;}
     int64_t get_total_step_count() const {return m_total_step_count;}
 
@@ -59,6 +61,7 @@ namespace Carli {
     const int64_t m_scenario = get_Option_Ranged<int64_t>(Options::get_global(), "scenario");
     bool m_altered = false;
 
+    int64_t m_episode_count = -1;
     int64_t m_step_count = 0;
     int64_t m_total_step_count = 0;
   };

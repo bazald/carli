@@ -61,6 +61,7 @@ namespace Carli {
     options.add_line("\n  Experiment Options:");
     options.add(     make_shared<Option_Ranged<int64_t>>("num-episodes", 0, true, numeric_limits<int64_t>::max(), true, 0), "Maximum number of episodes; 0 disables.");
     options.add('n', make_shared<Option_Ranged<int64_t>>("num-steps", 0, true, numeric_limits<int64_t>::max(), true, 50000), "Maximum number of steps; 0 disables.");
+    options.add(     make_shared<Option_Ranged<int64_t>>("step-cutoff", 0, true, numeric_limits<int64_t>::max(), true, 0), "Maximum number of steps per episode before failure; 0 disables.");
     options.add('o', make_shared<Option_Itemized>("output", set<string>({"null", "simple", "experiment"}), "simple"), "What kind of output should be generated.");
     options.add('p', make_shared<Option_Ranged<int64_t>>("print-every", 1, true, numeric_limits<int64_t>::max(), true, 100), "How many steps per line of output.");
     options.add('r', make_shared<Option_String>("rules", "default"), "Which .carli rules should the agent load?");
@@ -188,6 +189,7 @@ namespace Carli {
 
     const auto num_episodes = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["num-episodes"]).get_value();
     const auto num_steps = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["num-steps"]).get_value();
+    const auto step_cutoff = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["step-cutoff"]).get_value();
     const auto output = dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value();
 
     int64_t total_steps = -dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["skip-steps"]).get_value();
@@ -213,9 +215,11 @@ namespace Carli {
 #endif
 
       bool done = false;
+      int64_t steps = 0;
       do {
         const double reward = agent->act();
         ++total_steps;
+        ++steps;
 
 //        std::cerr << total_steps << std::endl;
 //        if(total_steps == 80449)
@@ -232,7 +236,10 @@ namespace Carli {
             agent->visit_reset_update_count();
         }
 
-        done = agent->get_metastate() != Metastate::NON_TERMINAL /*|| agent->get_step_count() >= 5000*/ || (num_steps && total_steps > 0 && total_steps >= num_steps);
+        done = agent->get_metastate() != Metastate::NON_TERMINAL
+          // || agent->get_step_count() >= 5000
+          || (num_steps && total_steps > 0 && total_steps >= num_steps)
+          || (step_cutoff != 0 && steps >= step_cutoff);
 
         if(output == "experiment" && total_steps > -1)
           experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, agent->q_value_count, agent->get_unrefinements());

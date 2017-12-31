@@ -199,7 +199,38 @@ namespace Blocks_World_2 {
     assert(m_num_blocks_min > 2);
     assert(m_num_blocks_max >= m_num_blocks_min);
 
-    const int64_t num_blocks = m_num_blocks_min + (m_num_blocks_min != m_num_blocks_max ? m_random.rand_lte(int32_t(m_num_blocks_max - m_num_blocks_min)) : 0);
+    int64_t num_blocks = 0;
+    if(get_Option_Ranged<int64_t>(Options::get_global(), "num-episodes") == 156) {
+      int64_t eps = 0;
+      for(num_blocks = 3; num_blocks != 10; ++num_blocks) {
+        eps += 3 * num_blocks;
+        if(eps >= get_episode_count())
+          break;
+      }
+    }
+    else if(get_Option_Ranged<int64_t>(Options::get_global(), "num-episodes") <= 100) {
+//       if(get_episode_count() <= 15)
+//         num_blocks = 3;
+//       else if(get_episode_count() <= 40)
+//         num_blocks = 4;
+//       else
+//         num_blocks = 5;
+      
+//       if(get_step_count() < 5000)
+//         num_blocks = 3;
+//       else if(get_step_count() < 15000)
+//         num_blocks = 3 + m_random.rand_lte(int32_t(1));
+//       else
+//         num_blocks = 3 + m_random.rand_lte(int32_t(2));
+      
+      if(get_step_count() < 50000)
+        num_blocks = 3 + m_random.rand_lte(int32_t(1));
+      else
+        num_blocks = 3 + m_random.rand_lte(int32_t(2));
+    }
+    else {
+      num_blocks = m_num_blocks_min + (m_num_blocks_min != m_num_blocks_max ? m_random.rand_lte(int32_t(m_num_blocks_max - m_num_blocks_min)) : 0);
+    }
 
     std::vector<Block> blocks;
     blocks.reserve(num_blocks);
@@ -570,6 +601,8 @@ namespace Blocks_World_2 {
         insert_new_wme(std::make_shared<Rete::WME>(m_blocks_id, m_block_attr, block_id));
         insert_new_wme(std::make_shared<Rete::WME>(stack_id, m_block_attr, block_id));
         insert_new_wme(std::make_shared<Rete::WME>(block_id, m_name_attr, m_block_names[block.id]));
+        insert_new_wme(std::make_shared<Rete::WME>(block_id, m_above_attr, m_table_id));
+        insert_new_wme(std::make_shared<Rete::WME>(block_id, m_higher_than_attr, m_table_id));
       }
 
       insert_new_wme(std::make_shared<Rete::WME>(m_block_ids[stack.rbegin()->id], m_clear_attr, m_true_value));

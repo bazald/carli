@@ -1,0 +1,392 @@
+Exact 3 Blocks in 0.02 Seconds
+Exact 4 Blocks in 0.02 Seconds
+Exact 5 Blocks in 0.02 Seconds
+Exact 6 Blocks in 0.03 Seconds
+Exact 7 Blocks in 0.02 Seconds
+Exact 8 Blocks in 0.02 Seconds
+Exact 9 Blocks in 0.03 Seconds
+Exact 10 Blocks in 0.02 Seconds
+Exact 11 Blocks in 0.03 Seconds
+Exact 12 Blocks in 0.03 Seconds
+Exact 13 Blocks in 0.03 Seconds
+Exact 14 Blocks in 0.03 Seconds
+Exact 15 Blocks in 0.04 Seconds
+Exact 16 Blocks in 0.04 Seconds
+Exact 17 Blocks in 0.05 Seconds
+Exact 18 Blocks in 0.04 Seconds
+Exact 19 Blocks in 0.06 Seconds
+Exact 20 Blocks in 0.07 Seconds
+Exact 21 Blocks in 0.07 Seconds
+Exact 22 Blocks in 0.07 Seconds
+Exact 23 Blocks in 0.09 Seconds
+Exact 24 Blocks in 0.07 Seconds
+Exact 25 Blocks in 0.09 Seconds
+Exact 26 Blocks in 0.08 Seconds
+Exact 27 Blocks in 0.11 Seconds
+Exact 28 Blocks in 0.12 Seconds
+Exact 29 Blocks in 0.12 Seconds
+Exact 30 Blocks in 0.13 Seconds
+Exact 31 Blocks in 0.16 Seconds
+Exact 32 Blocks in 0.10 Seconds
+Exact 33 Blocks in 0.17 Seconds
+Exact 34 Blocks in 0.13 Seconds
+Exact 35 Blocks in 0.23 Seconds
+Exact 36 Blocks in 0.26 Seconds
+Exact 37 Blocks in 0.18 Seconds
+Exact 38 Blocks in 0.24 Seconds
+Exact 39 Blocks in 0.26 Seconds
+Exact 40 Blocks in 0.25 Seconds
+Exact 41 Blocks in 0.27 Seconds
+Exact 42 Blocks in 0.31 Seconds
+Exact 43 Blocks in 0.27 Seconds
+Exact 44 Blocks in 0.34 Seconds
+Exact 45 Blocks in 0.35 Seconds
+Exact 46 Blocks in 0.36 Seconds
+Exact 47 Blocks in 0.45 Seconds
+Exact 48 Blocks in 0.45 Seconds
+Exact 49 Blocks in 0.45 Seconds
+Exact 50 Blocks in 0.43 Seconds
+Exact 51 Blocks in 0.46 Seconds
+Exact 52 Blocks in 0.48 Seconds
+Exact 53 Blocks in 0.40 Seconds
+Exact 54 Blocks in 0.51 Seconds
+Exact 55 Blocks in 0.55 Seconds
+Exact 56 Blocks in 0.55 Seconds
+Exact 57 Blocks in 0.59 Seconds
+Exact 58 Blocks in 0.45 Seconds
+Exact 59 Blocks in 0.59 Seconds
+Exact 60 Blocks in 0.69 Seconds
+Exact 61 Blocks in 0.66 Seconds
+Exact 62 Blocks in 0.72 Seconds
+Exact 63 Blocks in 0.92 Seconds
+Exact 64 Blocks in 1.08 Seconds
+Exact 65 Blocks in 0.83 Seconds
+Exact 66 Blocks in 1.00 Seconds
+Exact 67 Blocks in 1.14 Seconds
+Exact 68 Blocks in 0.96 Seconds
+Exact 69 Blocks in 1.32 Seconds
+Exact 70 Blocks in 1.10 Seconds
+Exact 71 Blocks in 1.11 Seconds
+Exact 72 Blocks in 0.92 Seconds
+Exact 73 Blocks in 1.26 Seconds
+Exact 74 Blocks in 1.28 Seconds
+Exact 75 Blocks in 1.35 Seconds
+Exact 76 Blocks in 1.85 Seconds
+Exact 77 Blocks in 1.57 Seconds
+Exact 78 Blocks in 1.39 Seconds
+Exact 79 Blocks in 1.42 Seconds
+Exact 80 Blocks in 1.57 Seconds
+Exact 81 Blocks in 1.80 Seconds
+Exact 82 Blocks in 1.66 Seconds
+Exact 83 Blocks in 1.60 Seconds
+Exact 84 Blocks in 1.78 Seconds
+Exact 85 Blocks in 1.84 Seconds
+Exact 86 Blocks in 1.94 Seconds
+Exact 87 Blocks in 2.04 Seconds
+Exact 88 Blocks in 1.43 Seconds
+Exact 89 Blocks in 1.78 Seconds
+Exact 90 Blocks in 1.85 Seconds
+Exact 91 Blocks in 2.23 Seconds
+Exact 92 Blocks in 2.08 Seconds
+Exact 93 Blocks in 2.40 Seconds
+Exact 94 Blocks in 2.31 Seconds
+Exact 95 Blocks in 2.62 Seconds
+Exact 96 Blocks in 2.08 Seconds
+Exact 97 Blocks in 2.40 Seconds
+Exact 98 Blocks in 2.54 Seconds
+Exact 99 Blocks in 2.63 Seconds
+Exact 100 Blocks in 2.81 Seconds
+Exact Disabled Node Sharing 3 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 4 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 5 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 6 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 7 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 8 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing 9 Blocks in 0.03 Seconds
+Exact Disabled Node Sharing 10 Blocks in 0.03 Seconds
+Exact Disabled Node Sharing 11 Blocks in 0.03 Seconds
+Exact Disabled Node Sharing 12 Blocks in 0.04 Seconds
+Exact Disabled Node Sharing 13 Blocks in 0.04 Seconds
+Exact Disabled Node Sharing 14 Blocks in 0.03 Seconds
+Exact Disabled Node Sharing 15 Blocks in 0.04 Seconds
+Exact Disabled Node Sharing 16 Blocks in 0.04 Seconds
+Exact Disabled Node Sharing 17 Blocks in 0.06 Seconds
+Exact Disabled Node Sharing 18 Blocks in 0.06 Seconds
+Exact Disabled Node Sharing 19 Blocks in 0.06 Seconds
+Exact Disabled Node Sharing 20 Blocks in 0.10 Seconds
+Exact Disabled Node Sharing 21 Blocks in 0.09 Seconds
+Exact Disabled Node Sharing 22 Blocks in 0.10 Seconds
+Exact Disabled Node Sharing 23 Blocks in 0.12 Seconds
+Exact Disabled Node Sharing 24 Blocks in 0.10 Seconds
+Exact Disabled Node Sharing 25 Blocks in 0.11 Seconds
+Exact Disabled Node Sharing 26 Blocks in 0.13 Seconds
+Exact Disabled Node Sharing 27 Blocks in 0.13 Seconds
+Exact Disabled Node Sharing 28 Blocks in 0.14 Seconds
+Exact Disabled Node Sharing 29 Blocks in 0.19 Seconds
+Exact Disabled Node Sharing 30 Blocks in 0.16 Seconds
+Exact Disabled Node Sharing 31 Blocks in 0.14 Seconds
+Exact Disabled Node Sharing 32 Blocks in 0.24 Seconds
+Exact Disabled Node Sharing 33 Blocks in 0.23 Seconds
+Exact Disabled Node Sharing 34 Blocks in 0.21 Seconds
+Exact Disabled Node Sharing 35 Blocks in 0.32 Seconds
+Exact Disabled Node Sharing 36 Blocks in 0.27 Seconds
+Exact Disabled Node Sharing 37 Blocks in 0.33 Seconds
+Exact Disabled Node Sharing 38 Blocks in 0.24 Seconds
+Exact Disabled Node Sharing 39 Blocks in 0.23 Seconds
+Exact Disabled Node Sharing 40 Blocks in 0.36 Seconds
+Exact Disabled Node Sharing 41 Blocks in 0.32 Seconds
+Exact Disabled Node Sharing 42 Blocks in 0.33 Seconds
+Exact Disabled Node Sharing 43 Blocks in 0.29 Seconds
+Exact Disabled Node Sharing 44 Blocks in 0.42 Seconds
+Exact Disabled Node Sharing 45 Blocks in 0.48 Seconds
+Exact Disabled Node Sharing 46 Blocks in 0.51 Seconds
+Exact Disabled Node Sharing 47 Blocks in 0.55 Seconds
+Exact Disabled Node Sharing 48 Blocks in 0.49 Seconds
+Exact Disabled Node Sharing 49 Blocks in 0.49 Seconds
+Exact Disabled Node Sharing 50 Blocks in 0.54 Seconds
+Exact Disabled Node Sharing 51 Blocks in 0.55 Seconds
+Exact Disabled Node Sharing 52 Blocks in 0.62 Seconds
+Exact Disabled Node Sharing 53 Blocks in 0.71 Seconds
+Exact Disabled Node Sharing 54 Blocks in 0.67 Seconds
+Exact Disabled Node Sharing 55 Blocks in 0.52 Seconds
+Exact Disabled Node Sharing 56 Blocks in 0.56 Seconds
+Exact Disabled Node Sharing 57 Blocks in 0.65 Seconds
+Exact Disabled Node Sharing 58 Blocks in 0.61 Seconds
+Exact Disabled Node Sharing 59 Blocks in 0.64 Seconds
+Exact Disabled Node Sharing 60 Blocks in 0.63 Seconds
+Exact Disabled Node Sharing 61 Blocks in 0.76 Seconds
+Exact Disabled Node Sharing 62 Blocks in 0.92 Seconds
+Exact Disabled Node Sharing 63 Blocks in 0.80 Seconds
+Exact Disabled Node Sharing 64 Blocks in 0.76 Seconds
+Exact Disabled Node Sharing 65 Blocks in 0.87 Seconds
+Exact Disabled Node Sharing 66 Blocks in 1.32 Seconds
+Exact Disabled Node Sharing 67 Blocks in 1.24 Seconds
+Exact Disabled Node Sharing 68 Blocks in 1.00 Seconds
+Exact Disabled Node Sharing 69 Blocks in 0.84 Seconds
+Exact Disabled Node Sharing 70 Blocks in 1.18 Seconds
+Exact Disabled Node Sharing 71 Blocks in 0.97 Seconds
+Exact Disabled Node Sharing 72 Blocks in 1.12 Seconds
+Exact Disabled Node Sharing 73 Blocks in 0.94 Seconds
+Exact Disabled Node Sharing 74 Blocks in 1.22 Seconds
+Exact Disabled Node Sharing 75 Blocks in 1.47 Seconds
+Exact Disabled Node Sharing 76 Blocks in 1.88 Seconds
+Exact Disabled Node Sharing 77 Blocks in 1.26 Seconds
+Exact Disabled Node Sharing 78 Blocks in 1.62 Seconds
+Exact Disabled Node Sharing 79 Blocks in 1.78 Seconds
+Exact Disabled Node Sharing 80 Blocks in 1.86 Seconds
+Exact Disabled Node Sharing 81 Blocks in 1.70 Seconds
+Exact Disabled Node Sharing 82 Blocks in 1.56 Seconds
+Exact Disabled Node Sharing 83 Blocks in 1.68 Seconds
+Exact Disabled Node Sharing 84 Blocks in 1.85 Seconds
+Exact Disabled Node Sharing 85 Blocks in 1.77 Seconds
+Exact Disabled Node Sharing 86 Blocks in 1.87 Seconds
+Exact Disabled Node Sharing 87 Blocks in 1.80 Seconds
+Exact Disabled Node Sharing 88 Blocks in 1.82 Seconds
+Exact Disabled Node Sharing 89 Blocks in 1.86 Seconds
+Exact Disabled Node Sharing 90 Blocks in 2.39 Seconds
+Exact Disabled Node Sharing 91 Blocks in 1.95 Seconds
+Exact Disabled Node Sharing 92 Blocks in 2.15 Seconds
+Exact Disabled Node Sharing 93 Blocks in 1.95 Seconds
+Exact Disabled Node Sharing 94 Blocks in 2.30 Seconds
+Exact Disabled Node Sharing 95 Blocks in 2.31 Seconds
+Exact Disabled Node Sharing 96 Blocks in 2.69 Seconds
+Exact Disabled Node Sharing 97 Blocks in 2.44 Seconds
+Exact Disabled Node Sharing 98 Blocks in 2.84 Seconds
+Exact Disabled Node Sharing 99 Blocks in 2.92 Seconds
+Exact Disabled Node Sharing 100 Blocks in 2.78 Seconds
+Exact Disabled Caching 3 Blocks in 0.02 Seconds
+Exact Disabled Caching 4 Blocks in 0.02 Seconds
+Exact Disabled Caching 5 Blocks in 0.02 Seconds
+Exact Disabled Caching 6 Blocks in 0.02 Seconds
+Exact Disabled Caching 7 Blocks in 0.02 Seconds
+Exact Disabled Caching 8 Blocks in 0.03 Seconds
+Exact Disabled Caching 9 Blocks in 0.03 Seconds
+Exact Disabled Caching 10 Blocks in 0.04 Seconds
+Exact Disabled Caching 11 Blocks in 0.03 Seconds
+Exact Disabled Caching 12 Blocks in 0.04 Seconds
+Exact Disabled Caching 13 Blocks in 0.05 Seconds
+Exact Disabled Caching 14 Blocks in 0.07 Seconds
+Exact Disabled Caching 15 Blocks in 0.06 Seconds
+Exact Disabled Caching 16 Blocks in 0.07 Seconds
+Exact Disabled Caching 17 Blocks in 0.09 Seconds
+Exact Disabled Caching 18 Blocks in 0.10 Seconds
+Exact Disabled Caching 19 Blocks in 0.08 Seconds
+Exact Disabled Caching 20 Blocks in 0.16 Seconds
+Exact Disabled Caching 21 Blocks in 0.16 Seconds
+Exact Disabled Caching 22 Blocks in 0.14 Seconds
+Exact Disabled Caching 23 Blocks in 0.19 Seconds
+Exact Disabled Caching 24 Blocks in 0.31 Seconds
+Exact Disabled Caching 25 Blocks in 0.24 Seconds
+Exact Disabled Caching 26 Blocks in 0.32 Seconds
+Exact Disabled Caching 27 Blocks in 0.30 Seconds
+Exact Disabled Caching 28 Blocks in 0.40 Seconds
+Exact Disabled Caching 29 Blocks in 0.40 Seconds
+Exact Disabled Caching 30 Blocks in 0.40 Seconds
+Exact Disabled Caching 31 Blocks in 0.51 Seconds
+Exact Disabled Caching 32 Blocks in 0.45 Seconds
+Exact Disabled Caching 33 Blocks in 0.65 Seconds
+Exact Disabled Caching 34 Blocks in 0.43 Seconds
+Exact Disabled Caching 35 Blocks in 0.71 Seconds
+Exact Disabled Caching 36 Blocks in 0.77 Seconds
+Exact Disabled Caching 37 Blocks in 0.76 Seconds
+Exact Disabled Caching 38 Blocks in 0.69 Seconds
+Exact Disabled Caching 39 Blocks in 1.28 Seconds
+Exact Disabled Caching 40 Blocks in 1.59 Seconds
+Exact Disabled Caching 41 Blocks in 0.99 Seconds
+Exact Disabled Caching 42 Blocks in 1.28 Seconds
+Exact Disabled Caching 43 Blocks in 1.38 Seconds
+Exact Disabled Caching 44 Blocks in 1.58 Seconds
+Exact Disabled Caching 45 Blocks in 1.21 Seconds
+Exact Disabled Caching 46 Blocks in 1.88 Seconds
+Exact Disabled Caching 47 Blocks in 1.29 Seconds
+Exact Disabled Caching 48 Blocks in 1.88 Seconds
+Exact Disabled Caching 49 Blocks in 2.48 Seconds
+Exact Disabled Caching 50 Blocks in 1.99 Seconds
+Exact Disabled Caching 51 Blocks in 2.58 Seconds
+Exact Disabled Caching 52 Blocks in 2.58 Seconds
+Exact Disabled Caching 53 Blocks in 3.19 Seconds
+Exact Disabled Caching 54 Blocks in 2.20 Seconds
+Exact Disabled Caching 55 Blocks in 2.64 Seconds
+Exact Disabled Caching 56 Blocks in 2.90 Seconds
+Exact Disabled Caching 57 Blocks in 2.70 Seconds
+Exact Disabled Caching 58 Blocks in 3.61 Seconds
+Exact Disabled Caching 59 Blocks in 2.74 Seconds
+Exact Disabled Caching 60 Blocks in 3.38 Seconds
+Exact Disabled Caching 61 Blocks in 4.23 Seconds
+Exact Disabled Caching 62 Blocks in 3.87 Seconds
+Exact Disabled Caching 63 Blocks in 5.33 Seconds
+Exact Disabled Caching 64 Blocks in 5.46 Seconds
+Exact Disabled Caching 65 Blocks in 7.30 Seconds
+Exact Disabled Caching 66 Blocks in 4.06 Seconds
+Exact Disabled Caching 67 Blocks in 6.68 Seconds
+Exact Disabled Caching 68 Blocks in 6.45 Seconds
+Exact Disabled Caching 69 Blocks in 6.45 Seconds
+Exact Disabled Caching 70 Blocks in 5.93 Seconds
+Exact Disabled Caching 71 Blocks in 6.04 Seconds
+Exact Disabled Caching 72 Blocks in 6.17 Seconds
+Exact Disabled Caching 73 Blocks in 8.72 Seconds
+Exact Disabled Caching 74 Blocks in 7.18 Seconds
+Exact Disabled Caching 75 Blocks in 7.74 Seconds
+Exact Disabled Caching 76 Blocks in 7.57 Seconds
+Exact Disabled Caching 77 Blocks in 7.85 Seconds
+Exact Disabled Caching 78 Blocks in 9.31 Seconds
+Exact Disabled Caching 79 Blocks in 9.36 Seconds
+Exact Disabled Caching 80 Blocks in 10.53 Seconds
+Exact Disabled Caching 81 Blocks in 9.18 Seconds
+Exact Disabled Caching 82 Blocks in 9.80 Seconds
+Exact Disabled Caching 83 Blocks in 12.37 Seconds
+Exact Disabled Caching 84 Blocks in 10.79 Seconds
+Exact Disabled Caching 85 Blocks in 13.59 Seconds
+Exact Disabled Caching 86 Blocks in 9.96 Seconds
+Exact Disabled Caching 87 Blocks in 13.46 Seconds
+Exact Disabled Caching 88 Blocks in 12.88 Seconds
+Exact Disabled Caching 89 Blocks in 16.43 Seconds
+Exact Disabled Caching 90 Blocks in 13.82 Seconds
+Exact Disabled Caching 91 Blocks in 13.73 Seconds
+Exact Disabled Caching 92 Blocks in 16.63 Seconds
+Exact Disabled Caching 93 Blocks in 14.41 Seconds
+Exact Disabled Caching 94 Blocks in 14.34 Seconds
+Exact Disabled Caching 95 Blocks in 26.12 Seconds
+Exact Disabled Caching 96 Blocks in 17.12 Seconds
+Exact Disabled Caching 97 Blocks in 21.30 Seconds
+Exact Disabled Caching 98 Blocks in 17.83 Seconds
+Exact Disabled Caching 99 Blocks in 17.37 Seconds
+Exact Disabled Caching 100 Blocks in 24.22 Seconds
+Exact Disabled Node Sharing and Disabled Caching 3 Blocks in 0.01 Seconds
+Exact Disabled Node Sharing and Disabled Caching 4 Blocks in 0.01 Seconds
+Exact Disabled Node Sharing and Disabled Caching 5 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing and Disabled Caching 6 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing and Disabled Caching 7 Blocks in 0.02 Seconds
+Exact Disabled Node Sharing and Disabled Caching 8 Blocks in 0.03 Seconds
+Exact Disabled Node Sharing and Disabled Caching 9 Blocks in 0.04 Seconds
+Exact Disabled Node Sharing and Disabled Caching 10 Blocks in 0.06 Seconds
+Exact Disabled Node Sharing and Disabled Caching 11 Blocks in 0.06 Seconds
+Exact Disabled Node Sharing and Disabled Caching 12 Blocks in 0.05 Seconds
+Exact Disabled Node Sharing and Disabled Caching 13 Blocks in 0.09 Seconds
+Exact Disabled Node Sharing and Disabled Caching 14 Blocks in 0.14 Seconds
+Exact Disabled Node Sharing and Disabled Caching 15 Blocks in 0.10 Seconds
+Exact Disabled Node Sharing and Disabled Caching 16 Blocks in 0.14 Seconds
+Exact Disabled Node Sharing and Disabled Caching 17 Blocks in 0.19 Seconds
+Exact Disabled Node Sharing and Disabled Caching 18 Blocks in 0.15 Seconds
+Exact Disabled Node Sharing and Disabled Caching 19 Blocks in 0.17 Seconds
+Exact Disabled Node Sharing and Disabled Caching 20 Blocks in 0.18 Seconds
+Exact Disabled Node Sharing and Disabled Caching 21 Blocks in 0.30 Seconds
+Exact Disabled Node Sharing and Disabled Caching 22 Blocks in 0.29 Seconds
+Exact Disabled Node Sharing and Disabled Caching 23 Blocks in 0.42 Seconds
+Exact Disabled Node Sharing and Disabled Caching 24 Blocks in 0.34 Seconds
+Exact Disabled Node Sharing and Disabled Caching 25 Blocks in 0.39 Seconds
+Exact Disabled Node Sharing and Disabled Caching 26 Blocks in 0.50 Seconds
+Exact Disabled Node Sharing and Disabled Caching 27 Blocks in 0.56 Seconds
+Exact Disabled Node Sharing and Disabled Caching 28 Blocks in 0.54 Seconds
+Exact Disabled Node Sharing and Disabled Caching 29 Blocks in 0.49 Seconds
+Exact Disabled Node Sharing and Disabled Caching 30 Blocks in 0.70 Seconds
+Exact Disabled Node Sharing and Disabled Caching 31 Blocks in 0.73 Seconds
+Exact Disabled Node Sharing and Disabled Caching 32 Blocks in 0.63 Seconds
+Exact Disabled Node Sharing and Disabled Caching 33 Blocks in 0.67 Seconds
+Exact Disabled Node Sharing and Disabled Caching 34 Blocks in 0.80 Seconds
+Exact Disabled Node Sharing and Disabled Caching 35 Blocks in 1.45 Seconds
+Exact Disabled Node Sharing and Disabled Caching 36 Blocks in 1.16 Seconds
+Exact Disabled Node Sharing and Disabled Caching 37 Blocks in 1.25 Seconds
+Exact Disabled Node Sharing and Disabled Caching 38 Blocks in 1.31 Seconds
+Exact Disabled Node Sharing and Disabled Caching 39 Blocks in 1.27 Seconds
+Exact Disabled Node Sharing and Disabled Caching 40 Blocks in 1.28 Seconds
+Exact Disabled Node Sharing and Disabled Caching 41 Blocks in 1.62 Seconds
+Exact Disabled Node Sharing and Disabled Caching 42 Blocks in 1.92 Seconds
+Exact Disabled Node Sharing and Disabled Caching 43 Blocks in 1.86 Seconds
+Exact Disabled Node Sharing and Disabled Caching 44 Blocks in 1.94 Seconds
+Exact Disabled Node Sharing and Disabled Caching 45 Blocks in 1.49 Seconds
+Exact Disabled Node Sharing and Disabled Caching 46 Blocks in 2.11 Seconds
+Exact Disabled Node Sharing and Disabled Caching 47 Blocks in 2.81 Seconds
+Exact Disabled Node Sharing and Disabled Caching 48 Blocks in 2.92 Seconds
+Exact Disabled Node Sharing and Disabled Caching 49 Blocks in 2.52 Seconds
+Exact Disabled Node Sharing and Disabled Caching 50 Blocks in 3.49 Seconds
+Exact Disabled Node Sharing and Disabled Caching 51 Blocks in 3.83 Seconds
+Exact Disabled Node Sharing and Disabled Caching 52 Blocks in 3.96 Seconds
+Exact Disabled Node Sharing and Disabled Caching 53 Blocks in 3.95 Seconds
+Exact Disabled Node Sharing and Disabled Caching 54 Blocks in 2.71 Seconds
+Exact Disabled Node Sharing and Disabled Caching 55 Blocks in 5.67 Seconds
+Exact Disabled Node Sharing and Disabled Caching 56 Blocks in 3.93 Seconds
+Exact Disabled Node Sharing and Disabled Caching 57 Blocks in 5.46 Seconds
+Exact Disabled Node Sharing and Disabled Caching 58 Blocks in 4.99 Seconds
+Exact Disabled Node Sharing and Disabled Caching 59 Blocks in 5.54 Seconds
+Exact Disabled Node Sharing and Disabled Caching 60 Blocks in 7.53 Seconds
+Exact Disabled Node Sharing and Disabled Caching 61 Blocks in 8.97 Seconds
+Exact Disabled Node Sharing and Disabled Caching 62 Blocks in 10.99 Seconds
+Exact Disabled Node Sharing and Disabled Caching 63 Blocks in 7.47 Seconds
+Exact Disabled Node Sharing and Disabled Caching 64 Blocks in 9.34 Seconds
+Exact Disabled Node Sharing and Disabled Caching 65 Blocks in 8.30 Seconds
+Exact Disabled Node Sharing and Disabled Caching 66 Blocks in 9.13 Seconds
+Exact Disabled Node Sharing and Disabled Caching 67 Blocks in 9.08 Seconds
+Exact Disabled Node Sharing and Disabled Caching 68 Blocks in 9.47 Seconds
+Exact Disabled Node Sharing and Disabled Caching 69 Blocks in 8.35 Seconds
+Exact Disabled Node Sharing and Disabled Caching 70 Blocks in 9.96 Seconds
+Exact Disabled Node Sharing and Disabled Caching 71 Blocks in 10.57 Seconds
+Exact Disabled Node Sharing and Disabled Caching 72 Blocks in 9.53 Seconds
+Exact Disabled Node Sharing and Disabled Caching 73 Blocks in 10.37 Seconds
+Exact Disabled Node Sharing and Disabled Caching 74 Blocks in 8.90 Seconds
+Exact Disabled Node Sharing and Disabled Caching 75 Blocks in 16.34 Seconds
+Exact Disabled Node Sharing and Disabled Caching 76 Blocks in 11.66 Seconds
+Exact Disabled Node Sharing and Disabled Caching 77 Blocks in 14.03 Seconds
+Exact Disabled Node Sharing and Disabled Caching 78 Blocks in 17.23 Seconds
+Exact Disabled Node Sharing and Disabled Caching 79 Blocks in 17.24 Seconds
+Exact Disabled Node Sharing and Disabled Caching 80 Blocks in 14.33 Seconds
+Exact Disabled Node Sharing and Disabled Caching 81 Blocks in 24.32 Seconds
+Exact Disabled Node Sharing and Disabled Caching 82 Blocks in 17.73 Seconds
+Exact Disabled Node Sharing and Disabled Caching 83 Blocks in 14.33 Seconds
+Exact Disabled Node Sharing and Disabled Caching 84 Blocks in 23.78 Seconds
+Exact Disabled Node Sharing and Disabled Caching 85 Blocks in 16.96 Seconds
+Exact Disabled Node Sharing and Disabled Caching 86 Blocks in 17.08 Seconds
+Exact Disabled Node Sharing and Disabled Caching 87 Blocks in 17.12 Seconds
+Exact Disabled Node Sharing and Disabled Caching 88 Blocks in 18.76 Seconds
+Exact Disabled Node Sharing and Disabled Caching 89 Blocks in 25.52 Seconds
+Exact Disabled Node Sharing and Disabled Caching 90 Blocks in 24.89 Seconds
+Exact Disabled Node Sharing and Disabled Caching 91 Blocks in 26.00 Seconds
+Exact Disabled Node Sharing and Disabled Caching 92 Blocks in 28.26 Seconds
+Exact Disabled Node Sharing and Disabled Caching 93 Blocks in 26.83 Seconds
+Exact Disabled Node Sharing and Disabled Caching 94 Blocks in 31.19 Seconds
+Exact Disabled Node Sharing and Disabled Caching 95 Blocks in 19.58 Seconds
+Exact Disabled Node Sharing and Disabled Caching 96 Blocks in 32.36 Seconds
+Exact Disabled Node Sharing and Disabled Caching 97 Blocks in 29.13 Seconds
+Exact Disabled Node Sharing and Disabled Caching 98 Blocks in 21.61 Seconds
+Exact Disabled Node Sharing and Disabled Caching 99 Blocks in 35.95 Seconds
+Exact Disabled Node Sharing and Disabled Caching 100 Blocks in 30.72 Seconds

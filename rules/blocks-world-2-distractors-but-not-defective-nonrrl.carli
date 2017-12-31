@@ -1,0 +1,293 @@
+sp {blocks-world*general
+  :feature 1 split nil
+  (<s> ^stacks <stacks>)
+  (<stacks> ^stack <stack>)
+  (<stack> ^top <block>)
+  (<block> ^name <block-name>)
+  (<stack> ^action-out <action>)
+  (<dest-stack> ^action-in <action>)
+  (<dest-stack> ^top <dest>)
+  (<dest> ^name <dest-name>)
+-->
+  = 0.0
+}
+
+sp {blocks-world*stack-matches-goal-stack
+  :feature 1 split nil
+  &blocks-world*general
+  +{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<stack> ^matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*stack-not-matches-goal-stack
+  :feature 1 split nil
+  &blocks-world*general
+  -{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<stack> ^matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-matches-goal-stack
+  :feature 1 split nil
+  &blocks-world*general
+  +{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<dest-stack> ^matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-not-matches-goal-stack
+  :feature 1 split nil
+  &blocks-world*general
+  -{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<dest-stack> ^matches <goal-stack>)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*top-matches-dest-stack
+  :feature 1 split nil
+  &blocks-world*general
+  +(<block> ^matches-top <dest-stack>)
+-->
+  = 0.0
+}
+
+sp {blocks-world*top-not-matches-dest-stack
+  :feature 1 split nil
+  &blocks-world*general
+  -(<block> ^matches-top <dest-stack>)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-is-table
+  :feature 1 split nil
+  &blocks-world*general
+  +(<dest> ^name 0)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-is-not-table
+  :feature 1 split nil
+  &blocks-world*general
+  -(<dest> ^name 0)
+-->
+  = 0.0
+}
+
+sp {blocks-world*block-height-lower
+  :feature 1 split nil 1 0 2
+  &blocks-world*general
+  {(<block> ^height <block-height>)
+   (<block-height> < 2)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*block-height-upper
+  :feature 1 split nil 1 2 4
+  &blocks-world*general
+  {(<block> ^height <block-height>)
+   (<block-height> >= 2)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-height-lower
+  :feature 1 split nil 1 0 2
+  &blocks-world*general
+  {(<dest> ^height <dest-height>)
+   (<dest-height> < 2)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-height-upper
+  :feature 1 split nil 1 2 4
+  &blocks-world*general
+  {(<dest> ^height <dest-height>)
+   (<dest-height> >= 2)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*block-brightness-lower
+  :feature 1 split nil 1 0.0 0.5
+  &blocks-world*general
+  {(<block> ^brightness <block-brightness>)
+   (<block-brightness> < 0.5)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*block-brightness-upper
+  :feature 1 split nil 1 0.5 1.0
+  &blocks-world*general
+  {(<block> ^brightness <block-brightness>)
+   (<block-brightness> >= 0.5)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-brightness-lower
+  :feature 1 split nil 1 0.0 0.5
+  &blocks-world*general
+  {(<dest> ^brightness <dest-brightness>)
+   (<dest-brightness> < 0.5)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-brightness-upper
+  :feature 1 split nil 1 0.5 1.0
+  &blocks-world*general
+  {(<dest> ^brightness <dest-brightness>)
+   (<dest-brightness> >= 0.5)}
+-->
+  = 0.0
+}
+
+sp {blocks-world*block-glowing
+  :feature 1 split nil
+  &blocks-world*general
+  +(<block> ^glowing true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*block-not-glowing
+  :feature 1 split nil
+  &blocks-world*general
+  -(<block> ^glowing true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-glowing
+  :feature 1 split nil
+  &blocks-world*general
+  +(<dest> ^glowing true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-not-glowing
+  :feature 1 split nil
+  &blocks-world*general
+  -(<dest> ^glowing true)
+-->
+  = 0.0
+}
+
+sp {blocks-world*block-name*1
+  :feature 1 split nil
+  &blocks-world*general
+  (<block-name> == 1)
+-->
+  = 0.0
+}
+
+sp {blocks-world*block-name*2
+  :feature 1 split nil
+  &blocks-world*general
+  (<block-name> == 2)
+-->
+  = 0.0
+}
+
+sp {blocks-world*block-name*3
+  :feature 1 split nil
+  &blocks-world*general
+  (<block-name> == 3)
+-->
+  = 0.0
+}
+
+sp {blocks-world*block-name*4
+  :feature 1 split nil
+  &blocks-world*general
+  (<block-name> == 4)
+-->
+  = 0.0
+}
+
+sp {blocks-world*block-name*5
+  :feature 1 split nil
+  &blocks-world*general
+  (<block-name> == 5)
+-->
+  = 0.0
+}
+
+sp {blocks-world*block-name*6
+  :feature 1 split nil
+  &blocks-world*general
+  (<block-name> == 6)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-name*0
+  :feature 1 split nil
+  &blocks-world*general
+  (<dest-name> == 0)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-name*1
+  :feature 1 split nil
+  &blocks-world*general
+  (<dest-name> == 1)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-name*2
+  :feature 1 split nil
+  &blocks-world*general
+  (<dest-name> == 2)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-name*3
+  :feature 1 split nil
+  &blocks-world*general
+  (<dest-name> == 3)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-name*4
+  :feature 1 split nil
+  &blocks-world*general
+  (<dest-name> == 4)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-name*5
+  :feature 1 split nil
+  &blocks-world*general
+  (<dest-name> == 5)
+-->
+  = 0.0
+}
+
+sp {blocks-world*dest-name*6
+  :feature 1 split nil
+  &blocks-world*general
+  (<dest-name> == 6)
+-->
+  = 0.0
+}

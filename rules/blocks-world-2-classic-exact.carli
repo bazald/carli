@@ -3,44 +3,11 @@
 sp {blocks-world*general
   :feature 1 unsplit nil
   (<s> ^blocks <blocks>)
-  (<table> ^name 0) # table
   (<s> ^action <action>)
   (<action> ^block <block-1>)
   (<block-1> ^name <block-name>)
   (<action> ^dest <block-2>)
   (<block-2> ^name <dest-name>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-goal-on-10-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<block-1> ^goal-on <table>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-goal-on-10-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<block-1> ^goal-on <table>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-goal-on-20-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<block-2> ^goal-on <table>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-goal-on-20-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<block-2> ^goal-on <table>)
 -->
   = 0.0
 }
@@ -77,38 +44,6 @@ sp {blocks-world*block-goal-on-21-f
   = 0.0
 }
 
-sp {blocks-world*block-1on0-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<block-1> ^on <table>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-1on0-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<block-1> ^on <table>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-2on0-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<block-2> ^on <table>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-2on0-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<block-2> ^on <table>)
--->
-  = 0.0
-}
-
 sp {blocks-world*block-nullhog
   :feature 2 fringe 0 blocks-world*general
   &blocks-world*general
@@ -119,50 +54,6 @@ sp {blocks-world*block-nullhog
   (<blocks> ^block <block-3>)
   (<block-3> != <block-1>)
   (<block-3> != <block-2>)}
--->
-  = 0.0
-}
-
-sp {blocks-world*block-unary-goal-on-30-t
-  :feature 2 fringe 1 blocks-world*general
-  &blocks-world*general
-  (<blocks> ^block <block-3>)
-  (<block-3> != <block-1>)
-  (<block-3> != <block-2>)
-  +(<block-3> ^goal-on <table>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-unary-goal-on-30-f
-  :feature 2 fringe 1 blocks-world*general
-  &blocks-world*general
-  (<blocks> ^block <block-3>)
-  (<block-3> != <block-1>)
-  (<block-3> != <block-2>)
-  -(<block-3> ^goal-on <table>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-unary-3on0-t
-  :feature 2 fringe 1 blocks-world*general
-  &blocks-world*general
-  (<blocks> ^block <block-3>)
-  (<block-3> != <block-1>)
-  (<block-3> != <block-2>)
-  +(<block-3> ^on <table>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-unary-3on0-f
-  :feature 2 fringe 1 blocks-world*general
-  &blocks-world*general
-  (<blocks> ^block <block-3>)
-  (<block-3> != <block-1>)
-  (<block-3> != <block-2>)
-  -(<block-3> ^on <table>)
 -->
   = 0.0
 }

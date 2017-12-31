@@ -98,7 +98,7 @@ def main():
 
   scenario = 0
   if args.scenario:
-    scenario = args.scenario
+    scenario = int(args.scenario)
 
   # 1: ./blocksworld2.py --scenario 1 experiment-bw2/catde-none/*.out experiment-bw2/policy-none/*.out experiment-bw2/value-none/*.out
   # 2: ./blocksworld2.py --scenario 2 experiment-bw2/catde-catde-none/*.out experiment-bw2/policy-policy-none/*.out experiment-bw2/value-value-none/*.out
@@ -151,6 +151,7 @@ def main():
   else:
     files = {}
     for filename in filenames[1:]:
+    #for filename in filenames:
       f = open(filename, 'r')
       seed = int(f.readline().split(' ', 1)[1])
       
@@ -169,6 +170,8 @@ def main():
       files[group].smith['min'] = []
       files[group].smith['max'] = []
       files[group].smith['mem'] = []
+      files[group].smith['mem_min'] = []
+      files[group].smith['mem_max'] = []
       files[group].smith['cpu'] = []
       files[group].smith['unr'] = []
       done = False
@@ -190,6 +193,8 @@ def main():
               y_avg = float(split[val0 + 1])
               y_max = float(split[val0 + 2])
               y_mem = float(split[7])
+              y_mem_min = float(split[7])
+              y_mem_max = float(split[7])
               y_cpu = float(split[9]) * 1000.0
               y_unr = map(float, split[10].split(':'))
               y_count = 1
@@ -200,6 +205,8 @@ def main():
               y_avg = y_avg * mul0 + float(split[val0 + 1]) * mul1
               y_max = max(y_max, float(split[val0 + 2]))
               y_mem = y_mem * mul0 + float(split[7]) * mul1
+              y_mem_min = min(y_mem_min, float(split[7]))
+              y_mem_max = max(y_mem_max, float(split[7]))
               y_cpu = y_cpu * mul0 + float(split[9]) * 1000.0 * mul1
               unr = map(float, split[10].split(':'))
               for i in range(0, min(len(y_unr), len(unr))):
@@ -216,6 +223,8 @@ def main():
           files[group].smith['avg'].append(y_avg)
           files[group].smith['max'].append(y_max)
           files[group].smith['mem'].append(y_mem)
+          files[group].smith['mem_min'].append(y_mem_min)
+          files[group].smith['mem_max'].append(y_mem_max)
           files[group].smith['cpu'].append(y_cpu)
           files[group].smith['unr'].append(y_unr)
       
@@ -229,8 +238,12 @@ def main():
     memory = {}
     cpu = {}
     unrefinements = {}
+    smith_min = {}
+    smith_max = {}
+    mem_min = {}
+    mem_max = {}
 
-    if len(files) == 1:
+    if len(files) == 1 and False:
       title='Blocks World (' + group.rsplit('/',1)[1].replace('_', '\_') + ')'
       smith = files[group].smith
       mode = 'single experiment evaluation'
@@ -241,6 +254,10 @@ def main():
       memory[agent] = smith['mem']
       cpu[agent] = smith['cpu']
       unrefinements[agent] = smith['unr']
+      smith_min[agent] = smith['min']
+      smith_max[agent] = smith['max']
+      mem_min[agent] = smith['mem_min']
+      mem_max[agent] = smith['mem_max']
     else:
       title='Blocks World (' + group.rsplit('/',1)[0].replace('_', '\_') + ')'
       
@@ -253,6 +270,10 @@ def main():
         memory[agent] = files[group].smith['mem']
         cpu[agent] = files[group].smith['cpu']
         unrefinements[agent] = files[group].smith['unr']
+        smith_min[agent] = files[group].smith['min']
+        smith_max[agent] = files[group].smith['max']
+        mem_min[agent] = files[group].smith['mem_min']
+        mem_max[agent] = files[group].smith['mem_max']
       
       mode = 'multiple experiment evaluation'
 
@@ -260,7 +281,7 @@ def main():
   fig.canvas.set_window_title('Blocks World')
   
   if two_sided_plot:
-    rect = [0.17,0.17,0.70,0.80]
+    rect = [0.19,0.17,0.65,0.80]
   else:
     rect = [0.17,0.17,0.80,0.80]
   pylab.axes(rect)
@@ -304,14 +325,20 @@ def main():
           labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
       
       #remap_names = {}
+      remap_names['mt4'] = 'HOG'
+      remap_names['mt5'] = 'HOG'
       remap_names['catde-none'] = 'CATDE RNN'
       remap_names['catde-none-d'] = 'CATDE RND'
       remap_names['policy-none'] = 'Policy RNN'
       remap_names['policy-none-d'] = 'Policy RND'
-      remap_names['value-none'] = 'Value RNN B'
-      remap_names['value-none-d'] = 'Value RND B'
-      remap_names['egreedy-value-none'] = 'Value RNN $\\epsilon$'
-      remap_names['egreedy-value-none-d'] = 'Value RND $\\epsilon$'
+      remap_names['value-none'] = 'Value RNN'
+      remap_names['value-none-d'] = 'Value RND'
+      #remap_names['value-none'] = 'Value RNN B'
+      #remap_names['value-none-d'] = 'Value RND B'
+      remap_names['egreedy-value-none'] = 'Value RNN'
+      remap_names['egreedy-value-none-d'] = 'Value RND'
+      #remap_names['egreedy-value-none'] = 'Value RNN $\\epsilon$'
+      #remap_names['egreedy-value-none-d'] = 'Value RND $\\epsilon$'
       remap_names['catde-catde-none'] = 'CATDE RUN'
       remap_names['catde-catde-none-d'] = 'CATDE RUD'
       remap_names['policy-policy-none'] = 'Policy RUN'
@@ -338,10 +365,14 @@ def main():
       remap_names['policy-policy-c500'] = 'Policy RCN'
       remap_names['policy-policy-c50-d'] = 'Policy RCD'
       remap_names['policy-policy-c900-d'] = 'Policy RCD'
-      remap_names['value-value-c50'] = 'Value RCN B'
-      remap_names['value-value-c500'] = 'Value RCN $\\epsilon$'
-      remap_names['value-value-c50-d'] = 'Value RCD B'
-      remap_names['value-value-c900-d'] = 'Value RCD $\\epsilon$'
+      remap_names['value-value-c50'] = 'Value RCN'
+      #remap_names['value-value-c50'] = 'Value RCN B'
+      remap_names['value-value-c500'] = 'Value RCN'
+      #remap_names['value-value-c500'] = 'Value RCN $\\epsilon$'
+      remap_names['value-value-c50-d'] = 'Value RCD'
+      #remap_names['value-value-c50-d'] = 'Value RCD B'
+      remap_names['value-value-c900-d'] = 'Value RCD'
+      #remap_names['value-value-c900-d'] = 'Value RCD $\\epsilon$'
       
       if scenario == 1:
         agent_list = ['catde-none', 'policy-none', 'value-none']
@@ -363,19 +394,39 @@ def main():
         agent_list = ['catde-catde-bst-d', 'policy-policy-bst-d', 'value-value-bst-d']
       elif scenario == 10:
         agent_list = ['catde-catde-c900-d', 'policy-policy-c900-d', 'value-value-c900-d']
+      elif scenario == 11:
+        agent_list = ['value-none', 'value-value-none', 'value-value-bkls', 'value-value-bst', 'value-value-c500']
+      elif scenario == 12:
+        agent_list = ['value-none-d', 'value-value-none-d', 'value-value-bkls-d', 'value-value-bst-d', 'value-value-c900-d']
+      elif scenario == 13:
+        agent_list = ['mt4']
+      elif scenario == 14:
+        agent_list = ['mt5']
       if scenario > 0:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
           yss.append(smith[agent])
           
-          if agent.find('catde') != -1:
-            color = 'red'
-          elif agent.find('policy') != -1:
-            color = 'green'
-          elif agent.find('value') != -1:
-            color = 'blue'
-          else:
-            color = None
+          if scenario < 11:
+            if agent.find('catde') != -1:
+              color = 'red'
+            elif agent.find('policy') != -1:
+              color = 'green'
+            elif agent.find('value') != -1:
+              color = 'blue'
+          elif scenario < 13:
+            if agent.find('value-value-none') != -1:
+              color = 'red'
+            elif agent.find('-none') != -1:
+              color = 'green'
+            elif agent.find('-bkls') != -1:
+              color = 'yellow'
+            elif agent.find('-bst') != -1:
+              color = 'orange'
+            elif agent.find('-c') != -1:
+              color = 'blue'
+          #else:
+            #color = None
 
           linestyle = '-'
           #if agent.find('-') == agent.rfind('-'):
@@ -396,12 +447,15 @@ def main():
   pylab.xlabel('Step Number', fontsize=8)
   pylab.ylabel(reward_label, fontsize=8)
   
+  pylab.ylim(ymax=0)
   #pylab.xlim(xmax=10000)
-  if len(filenames) > 1:
-    if cumulative:
-      pylab.ylim(ymin=-250, ymax=0)
-    else:
-      pylab.ylim(ymin=-1000, ymax=0)
+  #if len(filenames) > 1:
+    #if cumulative:
+      #pylab.ylim(ymin=-250, ymax=0)
+      #pylab.xlim(xmin=0, xmax=10000)
+      #pylab.ylim(ymin=-50, ymax=0)
+    #else:
+      #pylab.ylim(ymin=-1000, ymax=0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
@@ -422,10 +476,10 @@ def main():
     ax2.yaxis.set_major_formatter(CommaFormatter())
 
     for agent in agent_list:
-      y_labels.append('CPU: ' + remap_names[agent])
-      yss.append(cpu[agent])
-      #y_labels.append('Mem: ' + remap_names[agent])
+      #y_labels.append('CPU: ' + remap_names[agent])
       #yss.append(memory[agent])
+      y_labels.append('Mem: ' + remap_names[agent])
+      yss.append(memory[agent])
       
       color = 'red'
       if agent is 'sof4' or agent is 'fof4' or agent is 'cof4' or agent is 'vof4' or agent is 'pof4':
@@ -434,19 +488,21 @@ def main():
         linestyle = '--'
       elif agent is 'sonf4' or agent is 'fonf4' or agent is 'conf4' or agent is 'vonf4' or agent is 'ponf4':
         linestyle = '-.'
+      else:
+        linestyle = '-'
         
-      labels += pylab.plot(x, cpu[agent], label='CPU: ' + remap_names[agent], color=color, linestyle=linestyle)
-      #labels += pylab.plot(x, memory[agent], label='Mem: ' + remap_names[agent], color=color, linestyle=linestyle)
+      #labels += pylab.plot(x, cpu[agent], label='CPU: ' + remap_names[agent], color=color, linestyle=linestyle)
+      labels += pylab.plot(x, memory[agent], label='Mem: ' + remap_names[agent], color=color, linestyle=linestyle)
 
       print 'CPU Average for ' + agent + ': ' + str(cpu[agent][-1])
       print 'Memory Average for ' + agent + ': ' + str(memory[agent][-1])
-    ax2.set_xlim(0, 5000)
-    ax2.set_ylim(0, 2)
+    #ax2.set_xlim(0, 5000)
+    #ax2.set_ylim(0, 2)
     #ax2.set_ylim(0, 100)
     
     #ax2.set_ylabel(r"Temperature ($^\circ$C)")
-    ax2.set_ylabel('CPU Time / Step (Milliseconds)')
-    #ax2.set_ylabel('Number of Tiles / Weights')
+    #ax2.set_ylabel('CPU Time / Step (Milliseconds)')
+    ax2.set_ylabel('Number of Tiles or Weights')
     #fig.axes[0].spines['left'].set_color('red')
     fig.axes[0].tick_params(axis='y', colors='blue')
     #fig.axes[0].yaxis.label.set_color('blue')
@@ -531,6 +587,32 @@ def main():
         print 'Final Value for ' + agent + ': ' + str(smith[agent][-1])
         print 'Final CPU Average for ' + agent + ': ' + str(cpu[agent][-1])
         print 'Final Memory Average for ' + agent + ': ' + str(memory[agent][-1])
+  
+  #xposition = [5000, 15000]
+  #for x in range(1,13):
+    #print [4000 * x]
+    #print [smith[agent][40 * x]]
+    #print [smith[agent][40 * x] - smith_min[agent][40 * x], smith_max[agent][40 * x] - smith[agent][40 * x]]
+    #fig.axes[0].errorbar([4000 * x], [smith[agent][40 * x]], yerr=[[smith[agent][40 * x] - smith_min[agent][40 * x]], [smith_max[agent][40 * x] - smith[agent][40 * x]]], ecolor='blue')
+  #for x in range(1,13):
+    #print [4000 * x - 2000]
+    #print [memory[agent][int(40 * x - 20)]]
+    #print [memory[agent][int(40 * x - 20)] - mem_min[agent][int(40 * x - 20)], mem_max[agent][int(40 * x - 20)] - memory[agent][int(40 * x - 20)]]
+    #ax2.errorbar([4000 * x - 2000], [memory[agent][int(40 * x - 20)]], yerr=[[memory[agent][int(40 * x - 20)] - mem_min[agent][int(40 * x - 20)]], [mem_max[agent][int(40 * x - 20)] - memory[agent][int(40 * x - 20)]]], ecolor='red')
+
+  #xposition = [50000]
+  #for xc in xposition:
+    #plt.axvline(x=xc, color='green', linestyle=':')
+  #for x in range(1,13):
+    #print [8000 * x]
+    #print [smith[agent][80 * x]]
+    #print [smith[agent][80 * x] - smith_min[agent][80 * x], smith_max[agent][80 * x] - smith[agent][80 * x]]
+    #fig.axes[0].errorbar([8000 * x], [smith[agent][80 * x]], yerr=[[smith[agent][80 * x] - smith_min[agent][80 * x]], [smith_max[agent][80 * x] - smith[agent][80 * x]]], ecolor='blue')
+  #for x in range(1,13):
+    #print [8000 * x - 4000]
+    #print [memory[agent][int(80 * x - 40)]]
+    #print [memory[agent][int(80 * x - 40)] - mem_min[agent][int(80 * x - 40)], mem_max[agent][int(80 * x - 40)] - memory[agent][int(80 * x - 40)]]
+    #ax2.errorbar([8000 * x - 4000], [memory[agent][int(80 * x - 40)]], yerr=[[memory[agent][int(80 * x - 40)] - mem_min[agent][int(80 * x - 40)]], [mem_max[agent][int(80 * x - 40)] - memory[agent][int(80 * x - 40)]]], ecolor='red')
   
   if len(filenames) == 1:
     write_to_csv('blocksworld2.csv', 'Step Number', xs, y_labels, yss)

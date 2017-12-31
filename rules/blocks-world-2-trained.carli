@@ -1,6 +1,7 @@
-# CPU time = 14.2002 seconds
+# CPU time = 6.89612 seconds
 
-set-total-step-count 50000
+set-rule-name-index 43
+set-total-step-count 20000
 
 sp {blocks-world*s1
   :creation-time 0
@@ -14,58 +15,58 @@ sp {blocks-world*s1
   (<dest-stack> ^top <dest>)
   (<dest> ^name <dest-name>)
 -->
-  = -1.60566267308496279931 11359.09124920219437626656 0.2271863687114181185 0.00333042256336693165 50000
+  = -3.07591796791687244195 4141.0320698567329600337 0.20706195659066617409 -0.01900215301125034867 20000
 }
 
 sp {blocks-world*s2
-  :creation-time 2
+  :creation-time 55
   :feature 2 split blocks-world*s1
   &blocks-world*s1
   +(<block> ^matches-top <dest-stack>)
 -->
-  = -0.57324983287493180839 10251.8798060776389320381 0.27686083356497986907 0.01769954632154869048 37030
+  = -0.19730751515946245989 3912.77324226006066965056 0.21991756082846564135 0.00341705142900014872 17793
 }
 
 sp {blocks-world*s9
-  :creation-time 2
+  :creation-time 55
   :feature 2 split blocks-world*s1
   &blocks-world*s1
   -(<block> ^matches-top <dest-stack>)
 -->
-  = -0.99285680016147914717 1104.28723010523890479817 0.08516791841009092867 -0.00252450241360924589 12967
+  = -0.8325505294475918916 184.7387667759631710851 0.08592500780277356753 -0.00198754686183655414 2151
 }
 
 sp {blocks-world*s14
-  :creation-time 6
+  :creation-time 131
   :feature 3 split blocks-world*s9
   &blocks-world*s9
   +(<dest> ^name 0)
 -->
-  = -0.39279742538594392132 705.41979392615007782297 0.10259159306663032107 0.0045964623379499258 6877
+  = 0.07684966003703590232 163.00901573372672714868 0.08170877981640436993 0.00579627941307855714 1996
 }
 
 sp {blocks-world*s15
-  :creation-time 6
+  :creation-time 131
   :feature 3 split blocks-world*s9
   &blocks-world*s9
   -(<dest> ^name 0)
 -->
-  = -0.5863839615354751178 397.72112800823191491872 0.06533943289111744657 -0.00309408499626928016 6088
+  = -0.35401770047459185653 9.15503066419439015533 0.08556103424480739073 -0.00246996768387721527 108
 }
 
 sp {blocks-world*s5
-  :creation-time 8
+  :creation-time 155
   :feature 3 split blocks-world*s2
   &blocks-world*s2
   +{(<s> ^goal <goal>)
   (<goal> ^stack <goal-stack>)
   (<dest-stack> ^matches <goal-stack>)}
 -->
-  = -0.54833096141201043139 10250.09751596497881109826 0.27684260677825733854 0.02503703829880715367 37026
+  = 0.18876150315785569789 3892.18690992726669719559 0.21924108093996882984 0.00707804998275628986 17754
 }
 
 sp {blocks-world*u6
-  :creation-time 8
+  :creation-time 155
   :feature 3 unsplit blocks-world*s2
   &blocks-world*s2
   -{(<s> ^goal <goal>)
@@ -75,30 +76,26 @@ sp {blocks-world*u6
   = 0.0 0.0 0.0 0.0 0
 }
 
-sp {blocks-world*s24
-  :creation-time 18
+sp {blocks-world*s27
+  :creation-time 218
   :feature 4 split blocks-world*s5
   &blocks-world*s5
-  +{(<s> ^goal <goal>)
-  (<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
+  -(<dest> ^name 0)
 -->
-  = -0.60897853297876947121 155.49525778435011602596 0.08455424566848837586 0.04552419642820781237 1840
+  = 0.27872221454630941029 3130.254544424994946894 0.25511446979828811266 0.00365294421470105683 12271
 }
 
-sp {blocks-world*s23
-  :creation-time 13
-  :feature 4 split blocks-world*s15
-  &blocks-world*s15
-  -{(<s> ^goal <goal>)
-  (<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
+sp {blocks-world*s26
+  :creation-time 218
+  :feature 4 split blocks-world*s5
+  &blocks-world*s5
+  +(<dest> ^name 0)
 -->
-  = -0.3245468498575813654 194.62013083483952868846 0.06044103442075762084 -0.00078162702667153533 3221
+  = 0.0052593491777780093 740.05655314938246647216 0.13588992896610033179 0.00409924222777619061 5447
 }
 
 sp {blocks-world*u19
-  :creation-time 25
+  :creation-time 312
   :feature 4 unsplit blocks-world*s14
   &blocks-world*s14
   -{(<s> ^goal <goal>)
@@ -108,199 +105,207 @@ sp {blocks-world*u19
   = 0.0 0.0 0.0 0.0 0
 }
 
-sp {blocks-world*s22
-  :creation-time 13
-  :feature 4 split blocks-world*s15
-  &blocks-world*s15
-  +{(<s> ^goal <goal>)
-  (<goal> ^stack <goal-stack>)
-  (<dest-stack> ^matches <goal-stack>)}
--->
-  = -0.24840740847433773197 201.98333085743135484336 0.07054953924464944792 0.00151875572217565792 2864
-}
-
 sp {blocks-world*s18
-  :creation-time 25
+  :creation-time 312
   :feature 4 split blocks-world*s14
   &blocks-world*s14
   +{(<s> ^goal <goal>)
   (<goal> ^stack <goal-stack>)
   (<dest-stack> ^matches <goal-stack>)}
 -->
-  = -0.38394244756061141066 704.84985071656137733953 0.10253852934485908899 0.00708691163663121605 6875
+  = 0.23280920368523269626 160.25544784010290300102 0.08122425131277390131 0.00714684373681677941 1974
 }
 
-sp {blocks-world*s25
-  :creation-time 18
-  :feature 4 split blocks-world*s5
-  &blocks-world*s5
+sp {blocks-world*u23
+  :creation-time 254
+  :feature 4 unsplit blocks-world*s15
+  &blocks-world*s15
   -{(<s> ^goal <goal>)
   (<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
+  (<dest-stack> ^matches <goal-stack>)}
 -->
-  = 0.0784065806464812054 10093.15926259165644296445 0.28689233570937883178 -0.01551347513156991868 35182
+  = -0.06852080672879873324 1.30352021537714213295 0.03950061258718612356 -0.0003096216311745788 34
 }
 
 sp {blocks-world*f31
-  :creation-time 8
+  :creation-time 155
   :feature 4 fringe blocks-world*u6
   &blocks-world*u6
   -(<dest> ^name 0)
 -->
-  = -0.08457670860176087768 5.36768025382293778591 1.11573491247221401323 -0.02514963659010986674 0
+  = -3.43086698303382764408 96.77165903346798359053 1.0348321987488224849 -0.03355671020703236002 0
 }
 
 sp {blocks-world*f30
-  :creation-time 8
+  :creation-time 155
   :feature 4 fringe blocks-world*u6
   &blocks-world*u6
   +(<dest> ^name 0)
 -->
-  = -0.08457670860176087768 5.36768025382293778591 1.11573491247221401323 -0.02514963659010986674 0
+  = -3.43086698303382764408 96.77165903346798359053 1.0348321987488224849 -0.03355671020703236002 0
+}
+
+sp {blocks-world*u22
+  :creation-time 254
+  :feature 4 unsplit blocks-world*s15
+  &blocks-world*s15
+  +{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<dest-stack> ^matches <goal-stack>)}
+-->
+  = -0.03148637745466625198 1.10941889717420694161 0.0482356042249655198 -0.00005301037167089871 24
 }
 
 sp {blocks-world*f28
-  :creation-time 8
+  :creation-time 155
   :feature 4 fringe blocks-world*u6
   &blocks-world*u6
   +{(<s> ^goal <goal>)
   (<goal> ^stack <goal-stack>)
   (<stack> ^matches <goal-stack>)}
 -->
-  = -0.08457670860176087768 5.36768025382293778591 1.11573491247221401323 -0.02514963659010986674 0
+  = -3.43086698303382764408 96.77165903346798359053 1.0348321987488224849 -0.03355671020703236002 0
 }
 
 sp {blocks-world*f29
-  :creation-time 8
+  :creation-time 155
   :feature 4 fringe blocks-world*u6
   &blocks-world*u6
   -{(<s> ^goal <goal>)
   (<goal> ^stack <goal-stack>)
   (<stack> ^matches <goal-stack>)}
 -->
-  = -0.08457670860176087768 5.36768025382293778591 1.11573491247221401323 -0.02514963659010986674 0
-}
-
-sp {blocks-world*s40
-  :creation-time 50
-  :feature 5 split blocks-world*s18
-  &blocks-world*s18
-  +{(<s> ^goal <goal>)
-  (<goal> ^stack <goal-stack>)
-  (<stack> ^matches <goal-stack>)}
--->
-  = -0.30781232915273143425 59.88825147474638299627 0.04043771200185441311 0.03162817967669937641 1482
-}
-
-sp {blocks-world*s37
-  :creation-time 47
-  :feature 5 split blocks-world*s24
-  &blocks-world*s24
-  -(<dest> ^name 0)
--->
-  = -0.33929323752317708252 79.96644173623822382524 0.12494756521287223028 0.0164346686317203769 641
-}
-
-sp {blocks-world*s36
-  :creation-time 47
-  :feature 5 split blocks-world*s24
-  &blocks-world*s24
-  +(<dest> ^name 0)
--->
-  = -0.2600684951070030837 74.82915573291026589686 0.06261854036226800757 0.03145439815332323058 1196
-}
-
-sp {blocks-world*s38
-  :creation-time 34
-  :feature 5 split blocks-world*s25
-  &blocks-world*s25
-  +(<dest> ^name 0)
--->
-  = -0.24558104404885014449 2063.56461371832756412914 0.19484133827951349849 0.00153041858379594168 10592
+  = -3.43086698303382764408 96.77165903346798359053 1.0348321987488224849 -0.03355671020703236002 0
 }
 
 sp {blocks-world*s35
-  :creation-time 30
-  :feature 5 split blocks-world*s23
-  &blocks-world*s23
+  :creation-time 343
+  :feature 5 split blocks-world*s27
+  &blocks-world*s27
   -{(<s> ^goal <goal>)
   (<goal> ^stack <goal-stack>)
   (<stack> ^matches <goal-stack>)}
 -->
-  = -0.25010962684200654937 69.30110041213345084543 0.05230271729217619153 -0.00105521131436325322 1326
+  = 0.62135502342213311255 3088.84411926538041370804 0.25714653007537296991 0.00598869868017391348 12013
+}
+
+sp {blocks-world*f42
+  :creation-time 312
+  :feature 5 fringe blocks-world*u19
+  &blocks-world*u19
+  +{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<stack> ^matches <goal-stack>)}
+-->
+  = -4.74482019777341967881 153.93143911856020622508 0.70031928596032910761 -0.04414599082846229483 0
 }
 
 sp {blocks-world*s33
-  :creation-time 27
-  :feature 5 split blocks-world*s22
-  &blocks-world*s22
+  :creation-time 285
+  :feature 5 split blocks-world*s26
+  &blocks-world*s26
   -{(<s> ^goal <goal>)
   (<goal> ^stack <goal-stack>)
   (<stack> ^matches <goal-stack>)}
 -->
-  = -0.07185793015996007338 115.7623787003613529123 0.08055837070310463421 0.0043665032125761484 1438
+  = 0.26332718980846636647 719.04675485531720369181 0.14148893247841740073 0.00545012378708534164 5083
 }
 
-sp {blocks-world*s39
-  :creation-time 34
-  :feature 5 split blocks-world*s25
-  &blocks-world*s25
-  -(<dest> ^name 0)
+sp {blocks-world*f38
+  :creation-time 254
+  :feature 5 fringe blocks-world*u23
+  &blocks-world*u23
+  +{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<stack> ^matches <goal-stack>)}
 -->
-  = 0.3431065415253113926 8028.06277717872217181139 0.32656969357599652248 -0.01223843202607779145 24584
+  = -4.65281285476755979147 136.23200825909728450824 8.51450051619358028177 -0.04375995818166075746 17
 }
 
 sp {blocks-world*s41
-  :creation-time 50
+  :creation-time 597
   :feature 5 split blocks-world*s18
   &blocks-world*s18
   -{(<s> ^goal <goal>)
   (<goal> ^stack <goal-stack>)
   (<stack> ^matches <goal-stack>)}
 -->
-  = -0.06303569493284556791 643.82259965478510821413 0.11949194499903212363 -0.02126737839207259312 5389
+  = 0.19335345132889655839 149.84141052080369149735 0.08099535703827226429 0.00609750752849229187 1851
 }
 
-sp {blocks-world*f42
-  :creation-time 25
-  :feature 5 fringe blocks-world*u19
-  &blocks-world*u19
+sp {blocks-world*f36
+  :creation-time 254
+  :feature 5 fringe blocks-world*u22
+  &blocks-world*u22
   +{(<s> ^goal <goal>)
   (<goal> ^stack <goal-stack>)
   (<stack> ^matches <goal-stack>)}
 -->
-  = -0.19647583371088392368 12.83140306762901339255 1.02274255015626036602 -0.05607842650073807667 0
+  = -4.60919437772082574156 135.70390565937537985519 27.14078113187507668158 -0.04344333200364227515 6
+}
+
+sp {blocks-world*f37
+  :creation-time 254
+  :feature 5 fringe blocks-world*u22
+  &blocks-world*u22
+  -{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<stack> ^matches <goal-stack>)}
+-->
+  = -4.64546553020163521808 136.37996777146443605488 8.02235104538026178034 -0.04367397697646048516 18
 }
 
 sp {blocks-world*s32
-  :creation-time 27
-  :feature 5 split blocks-world*s22
-  &blocks-world*s22
+  :creation-time 285
+  :feature 5 split blocks-world*s26
+  &blocks-world*s26
   +{(<s> ^goal <goal>)
   (<goal> ^stack <goal-stack>)
   (<stack> ^matches <goal-stack>)}
 -->
-  = -0.16676878792792346196 85.38439168577743032529 0.06004528247944967284 -0.00029653787176070636 1423
+  = -0.16982307366667229176 15.47192946079412578797 0.0452395598268834076 -0.00066428670024299558 343
 }
 
 sp {blocks-world*s34
-  :creation-time 30
-  :feature 5 split blocks-world*s23
-  &blocks-world*s23
+  :creation-time 343
+  :feature 5 split blocks-world*s27
+  &blocks-world*s27
   +{(<s> ^goal <goal>)
   (<goal> ^stack <goal-stack>)
   (<stack> ^matches <goal-stack>)}
 -->
-  = -0.0615403563799653136 124.25139862619744235417 0.06574148075460181651 0.00357017515258799267 1891
+  = -0.46375683516466503775 18.30282683504848151301 0.07992500801331214877 -0.00380621465737867844 230
+}
+
+sp {blocks-world*s40
+  :creation-time 597
+  :feature 5 split blocks-world*s18
+  &blocks-world*s18
+  +{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<stack> ^matches <goal-stack>)}
+-->
+  = 0.02095770622474234929 5.16583140848106037168 0.05271256539266388347 0.00060495152270641033 99
+}
+
+sp {blocks-world*f39
+  :creation-time 254
+  :feature 5 fringe blocks-world*u23
+  &blocks-world*u23
+  -{(<s> ^goal <goal>)
+  (<goal> ^stack <goal-stack>)
+  (<stack> ^matches <goal-stack>)}
+-->
+  = -4.67755001174607887293 136.10991316834108033618 8.50686957302131752101 -0.04400064735111611225 17
 }
 
 sp {blocks-world*f43
-  :creation-time 25
+  :creation-time 312
   :feature 5 fringe blocks-world*u19
   &blocks-world*u19
   -{(<s> ^goal <goal>)
   (<goal> ^stack <goal-stack>)
   (<stack> ^matches <goal-stack>)}
 -->
-  = -0.19647583371088392368 12.83140306762901339255 1.02274255015626036602 -0.05607842650073807667 0
+  = -4.74482019777341967881 153.93143911856020622508 0.70031928596032910761 -0.04414599082846229483 0
 }

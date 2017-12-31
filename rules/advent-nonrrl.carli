@@ -1,0 +1,450 @@
+# Advent
+
+sp {advent*general
+  :feature 1 split nil
+  {(<s> ^player <player>)
+  (<player> ^equipped <weapon>)
+  (<player> ^in <room>)}
+  {(<s> ^action <action>)
+  (<action> ^name <name>)
+  (<action> ^direction <direction>)
+  (<action> ^item <item>)}
+-->
+  = 0.0
+}
+
+sp {advent*action-move
+  :feature 1 split nil
+  &advent*general
+  (<name> == 1)
+-->
+  = 0.0
+}
+
+sp {advent*action-attack
+  :feature 1 split nil
+  &advent*general
+  (<name> == 2)
+-->
+  = 0.0
+}
+
+sp {advent*action-take
+  :feature 1 split nil
+  &advent*general
+  (<name> == 3)
+-->
+  = 0.0
+}
+
+#sp {advent*action-drop
+#  :feature 1 split nil
+#  &advent*general
+#  (<name> == 4)
+#-->
+#  = 0.0
+#}
+
+sp {advent*action-equip
+  :feature 1 split nil
+  &advent*general
+  (<name> == 5)
+-->
+  = 0.0
+}
+
+sp {advent*action-cast
+  :feature 1 split nil
+  &advent*general
+  (<name> == 6)
+-->
+  = 0.0
+}
+
+sp {advent*direction-none
+  :feature 1 split nil
+  &advent*general
+  (<direction> == 0)
+-->
+  = 0.0
+}
+
+sp {advent*direction-north
+  :feature 1 split nil
+  &advent*general
+  (<direction> == 1)
+-->
+  = 0.0
+}
+
+sp {advent*direction-south
+  :feature 1 split nil
+  &advent*general
+  (<direction> == 2)
+-->
+  = 0.0
+}
+
+sp {advent*direction-east
+  :feature 1 split nil
+  &advent*general
+  (<direction> == 3)
+-->
+  = 0.0
+}
+
+sp {advent*direction-west
+  :feature 1 split nil
+  &advent*general
+  (<direction> == 4)
+-->
+  = 0.0
+}
+
+sp {advent*player-x-lower
+  :feature 1 split nil 1 0 3
+  &advent*general
+  {(<player> ^x <player-x>)
+   (<player-x> < 3)}
+-->
+  = 0.0
+}
+
+sp {advent*player-x-upper
+  :feature 1 split nil 1 3 5
+  &advent*general
+  {(<player> ^x <player-x>)
+   (<player-x> >= 3)}
+-->
+  = 0.0
+}
+
+sp {advent*player-y-lower
+  :feature 1 split nil 1 0 3
+  &advent*general
+  {(<player> ^y <player-y>)
+   (<player-y> < 3)}
+-->
+  = 0.0
+}
+
+sp {advent*player-y-upper
+  :feature 1 split nil 1 3 5
+  &advent*general
+  {(<player> ^y <player-y>)
+   (<player-y> >= 3)}
+-->
+  = 0.0
+}
+
+#sp {advent*player-dead
+#  :feature 1 split nil
+#  &advent*general
+#  +(<player> ^dead true)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*player-not-dead
+#  :feature 1 split nil
+#  &advent*general
+#  -(<player> ^dead true)
+#-->
+#  = 0.0
+#}
+
+sp {advent*player-health-lower
+  :feature 1 split nil 1 0 5
+  &advent*general
+  {(<player> ^health <player-health>)
+   (<player-health> < 5)}
+-->
+  = 0.0
+}
+
+sp {advent*player-health-upper
+  :feature 1 split nil 1 5 10
+  &advent*general
+  {(<player> ^health <player-health>)
+   (<player-health> >= 5)}
+-->
+  = 0.0
+}
+
+sp {advent*no-enemy
+  :feature 2 fringe 0 advent*general
+  &advent*general
+  -(<room> ^enemy <enemy-1>)
+-->
+  = 0.0
+}
+
+#sp {advent*enemy-dead
+#  :feature 2 fringe 1 advent*general
+#  &advent*general
+#  (<room> ^enemy <enemy-1>)
+#  +(<enemy-1> ^dead true)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*enemy-not-dead
+#  :feature 2 fringe 1 advent*general
+#  &advent*general
+#  (<room> ^enemy <enemy-1>)
+#  -(<enemy-1> ^dead true)
+#-->
+#  = 0.0
+#}
+
+sp {advent*enemy-health-lower
+  :feature 2 fringe 1 advent*general 1 0 5
+  &advent*general
+  (<room> ^enemy <enemy-1>)
+  {(<enemy-1> ^health <enemy-health-1>)
+   (<enemy-health-1> < 5)}
+-->
+  = 0.0
+}
+
+sp {advent*enemy-health-upper
+  :feature 2 fringe 1 advent*general 1 5 10
+  &advent*general
+  (<room> ^enemy <enemy-1>)
+  {(<enemy-1> ^health <enemy-health-1>)
+   (<enemy-health-1> >= 5)}
+-->
+  = 0.0
+}
+
+sp {advent*enemy-type-solid
+  :feature 2 fringe 1 advent*general
+  &advent*general
+  (<room> ^enemy <enemy-1>)
+  {(<enemy-1> ^type <enemy-type-1>)
+  (<enemy-type-1> == 0)}
+-->
+  = 0.0
+}
+
+#sp {advent*enemy-type-skeletal
+#  :feature 2 fringe 1 advent*general
+#  &advent*general
+#  (<room> ^enemy <enemy-1>)
+#  {(<enemy-1> ^type <enemy-type-1>)
+#  (<enemy-type-1> == 1)}
+#-->
+#  = 0.0
+#}
+
+sp {advent*enemy-type-troll
+  :feature 2 fringe 1 advent*general
+  &advent*general
+  (<room> ^enemy <enemy-1>)
+  {(<enemy-1> ^type <enemy-type-1>)
+  (<enemy-type-1> == 2)}
+-->
+  = 0.0
+}
+
+sp {advent*enemy-type-water
+  :feature 2 fringe 1 advent*general
+  &advent*general
+  (<room> ^enemy <enemy-1>)
+  {(<enemy-1> ^type <enemy-type-1>)
+  (<enemy-type-1> == 3)}
+-->
+  = 0.0
+}
+
+#sp {advent*room-has-mace
+#  :feature 1 split nil
+#  &advent*general
+#  +(<room> ^has 1)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*room-has-no-mace
+#  :feature 1 split nil
+#  &advent*general
+#  -(<room> ^has 1)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*player-has-mace
+#  :feature 1 split nil
+#  &advent*general
+#  +(<player> ^has 1)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*player-has-no-mace
+#  :feature 1 split nil
+#  &advent*general
+#  -(<player> ^has 1)
+#-->
+#  = 0.0
+#}
+
+#sp {advent*room-has-sword
+#  :feature 1 split nil
+#  &advent*general
+#  +(<room> ^has 2)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*room-has-no-sword
+#  :feature 1 split nil
+#  &advent*general
+#  -(<room> ^has 2)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*player-has-sword
+#  :feature 1 split nil
+#  &advent*general
+#  +(<player> ^has 2)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*player-has-no-sword
+#  :feature 1 split nil
+#  &advent*general
+#  -(<player> ^has 2)
+#-->
+#  = 0.0
+#}
+
+#sp {advent*room-has-magic-sword
+#  :feature 1 split nil
+#  &advent*general
+#  +(<room> ^has 3)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*room-has-no-magic-sword
+#  :feature 1 split nil
+#  &advent*general
+#  -(<room> ^has 3)
+#-->
+#  = 0.0
+#}
+
+sp {advent*player-has-magic-sword
+  :feature 1 split nil
+  &advent*general
+  +(<player> ^has 3)
+-->
+  = 0.0
+}
+
+sp {advent*player-has-no-magic-sword
+  :feature 1 split nil
+  &advent*general
+  -(<player> ^has 3)
+-->
+  = 0.0
+}
+
+#sp {advent*room-has-firebolt
+#  :feature 1 split nil
+#  &advent*general
+#  +(<room> ^has 5)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*room-has-no-firebolt
+#  :feature 1 split nil
+#  &advent*general
+#  -(<room> ^has 5)
+#-->
+#  = 0.0
+#}
+
+sp {advent*player-has-firebolt
+  :feature 1 split nil
+  &advent*general
+  +(<player> ^has 5)
+-->
+  = 0.0
+}
+
+sp {advent*player-has-no-firebolt
+  :feature 1 split nil
+  &advent*general
+  -(<player> ^has 5)
+-->
+  = 0.0
+}
+
+#sp {advent*room-has-icebolt
+#  :feature 1 split nil
+#  &advent*general
+#  +(<room> ^has 6)
+#-->
+#  = 0.0
+#}
+#
+#sp {advent*room-has-no-icebolt
+#  :feature 1 split nil
+#  &advent*general
+#  -(<room> ^has 6)
+#-->
+#  = 0.0
+#}
+
+sp {advent*player-has-icebolt
+  :feature 1 split nil
+  &advent*general
+  +(<player> ^has 6)
+-->
+  = 0.0
+}
+
+sp {advent*player-has-no-icebolt
+  :feature 1 split nil
+  &advent*general
+  -(<player> ^has 6)
+-->
+  = 0.0
+}
+
+sp {advent*player-equipped-fists
+  :feature 1 split nil
+  &advent*general
+  (<weapon> == 0)
+-->
+  = 0.0
+}
+
+#sp {advent*player-equipped-mace
+#  :feature 1 split nil
+#  &advent*general
+#  (<weapon> == 1)
+#-->
+#  = 0.0
+#}
+
+#sp {advent*player-equipped-sword
+#  :feature 1 split nil
+#  &advent*general
+#  (<weapon> == 2)
+#-->
+#  = 0.0
+#}
+
+sp {advent*player-equipped-magic-sword
+  :feature 1 split nil
+  &advent*general
+  (<weapon> == 3)
+-->
+  = 0.0
+}
