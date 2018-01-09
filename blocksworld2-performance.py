@@ -158,7 +158,7 @@ def main():
     y_labels.append(agent)
     yss.append(smith[agent])
     
-    labels += pylab.plot(x, smith[agent], label=agent, linestyle='solid')
+    labels += pylab.semilogy(x, smith[agent], label=agent, linestyle='solid')
 
   remap_names = {}
   #remap_names['Exact Disabled Node Sharing & Flushing WMEs'] = 'Exact Disabled Node Sharing \\& Flushing WMEs'

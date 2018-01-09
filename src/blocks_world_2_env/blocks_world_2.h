@@ -81,6 +81,7 @@ namespace Blocks_World_2 {
     Environment();
 
     struct Block {
+      Block() {}
       Block(const block_id &id_, const int32_t &color_) : id(id_), color(color_) {}
 
       bool operator==(const Block &rhs) const {
@@ -91,8 +92,8 @@ namespace Blocks_World_2 {
         return id < rhs.id || (id == rhs.id && color < rhs.color);
       }
 
-      block_id id;
-      int32_t color;
+      block_id id = 0;
+      int32_t color = 0;
     };
 
     typedef std::vector<Block> Stack;
@@ -107,6 +108,8 @@ namespace Blocks_World_2 {
     const Block & get_table() const {return m_table;}
 
     bool success() const;
+
+    int64_t num_steps_to_goal() const;
 
   private:
     void init_impl();

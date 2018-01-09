@@ -98,15 +98,15 @@ solution "carli"
     includedirs { "src" }
 
   if _ACTION == "gmake" then
---     configuration { "linux" }
---       linkoptions { "-Wl,-rpath,/home/bazald/Software/gperftools/lib",
---                     "-Wl,-rpath-link,/home/bazald/Software/gperftools/lib" }
---     configuration { "linux", "Debug" }
---       links { "tcmalloc" }
---     configuration { "linux", "Profiling" }
---       links { "tcmalloc_and_profiler" }
---     configuration { "linux", "Release" }
---       links { "tcmalloc" }
+    configuration { "linux" }
+      linkoptions { "-Wl,-rpath,/home/bazald/Software/gperftools/lib",
+                    "-Wl,-rpath-link,/home/bazald/Software/gperftools/lib" }
+    configuration { "linux", "Debug" }
+      links { "tcmalloc" }
+    configuration { "linux", "Profiling" }
+      links { "tcmalloc_and_profiler" }
+    configuration { "linux", "Release" }
+      links { "tcmalloc" }
     if _OPTIONS["clang"] == "true" then
       configuration "linux"
         buildoptions { "-Qunused-arguments" }

@@ -2,6 +2,8 @@
 
 #include "carli/parser/rete_parser.h"
 
+#include <queue>
+
 namespace Blocks_World_2 {
 
   using Carli::Metastate;
@@ -106,6 +108,140 @@ namespace Blocks_World_2 {
     }
   }
 
+  int64_t Environment::num_steps_to_goal() const {
+    struct State {
+      State(const Stacks &stacks_, const int64_t &num_steps_, const int64_t &heuristic_) : stacks(stacks_), num_steps(num_steps_), heuristic(heuristic_) {}
+
+      bool operator<(const State &rhs) const {
+        return num_steps + heuristic > rhs.num_steps + rhs.heuristic || // Opposite of normal meaning so priority_queue behaves correctly with std::less
+          num_steps > rhs.num_steps || (num_steps == rhs.num_steps && (heuristic > rhs.heuristic || (heuristic == rhs.heuristic && stacks > rhs.stacks)));
+      }
+
+      Stacks stacks;
+      int64_t num_steps;
+      int64_t heuristic;
+    };
+    std::priority_queue<State> astar;
+
+    auto target = get_target();
+    std::sort(target.begin(), target.end());
+
+    const auto heuristic = [this,&target](const Stacks &stacks)->int64_t {
+      return 0;
+
+//      std::map<Block, Block> target_below;
+//      for(auto &target_stack : target) {
+//        for(auto t1 = target_stack.begin(), t2 = t1 + 1; t2 != target_stack.end(); t1 = t2, ++t2) {
+//          target_below[*t2] = *t1;
+//        }
+//      }
+
+//      std::map<Block, Block> stack_below;
+//      for(auto &stack : stacks) {
+//        for(auto s1 = stack.begin(), s2 = s1 + 1; s2 != stack.end(); s1 = s2, ++s2) {
+//          stack_below[*s2] = *s1;
+//        }
+//      }
+
+      std::map<Block, bool> in_place;
+      size_t dist = 0;
+      for(auto &target_stack : target) {
+        auto matching_stack = std::find_if(stacks.begin(), stacks.end(), [&target_stack](const Stack &stack)->bool{return *stack.begin() == *target_stack.begin();});
+        if(matching_stack == stacks.end()) {
+//          std::cerr << "c" << target_stack.size() << std::endl;
+          dist += target_stack.size();
+        }
+        else {
+          auto tt = target_stack.begin();
+          auto mt = matching_stack->begin();
+          size_t dist2 = target_stack.end() - tt;
+          while(tt != target_stack.end() && mt != matching_stack->end()) {
+            if(*tt == *mt) {
+              --dist2;
+              in_place[*tt] = true;
+            }
+            else
+              break;
+            ++tt;
+            ++mt;
+          }
+//          const auto match = std::mismatch(target_stack.begin(), target_stack.end(), matching_stack->begin(), this->get_match_test());
+//          std::cerr << "i" << target_stack.end() - tt << std::endl;
+          dist += dist2;
+        }
+      }
+
+//      for(auto &stack : stacks) {
+//        std::set<Block> seeking;
+//        for(auto st = stack.rbegin(); st != stack.rend(); ++st) {
+//          if(seeking.find(*st) != seeking.end())
+//            ++dist;
+//          if(!in_place[*st])
+//            seeking.insert(target_below[*st]);
+//        }
+//      }
+
+      return int64_t(dist);
+    };
+
+    std::set<Stacks> states_evaluated;
+
+    {
+      auto blocks = m_blocks;
+      std::sort(blocks.begin(), blocks.end());
+      states_evaluated.insert(blocks);
+      astar.push(State(blocks, 0, heuristic(blocks)));
+    }
+
+    int64_t num_steps = 0;
+    while(!astar.empty()) {
+      const auto state = astar.top();
+      astar.pop();
+
+      std::cerr << astar.size() << ' ' << state.num_steps << ' ' << state.heuristic << std::endl;
+
+      if(state.stacks == target) {
+        num_steps = state.num_steps;
+        std::cerr << "Num steps = " << num_steps << std::endl;
+        break;
+      }
+
+      for(auto st = state.stacks.begin(), send = state.stacks.end(); st != send; ++st) {
+        if(st->size() > 1) {
+          Stacks next = state.stacks;
+          auto ni = next.begin() + (st - state.stacks.begin());
+          auto block = *ni->rbegin();
+          ni->pop_back();
+          next.push_back({block});
+          std::sort(next.begin(), next.end());
+          if(states_evaluated.find(next) == states_evaluated.end()) {
+            states_evaluated.insert(next);
+            astar.push(State(next, state.num_steps + 1, heuristic(next)));
+          }
+        }
+
+        for(auto tt = state.stacks.begin(); tt != send; ++tt) {
+          if(st == tt)
+            continue;
+          Stacks next = state.stacks;
+          auto ni = next.begin() + (st - state.stacks.begin());
+          auto ti = next.begin() + (tt - state.stacks.begin());
+          ti->push_back(*ni->rbegin());
+          ni->pop_back();
+          if(ni->empty())
+            next.erase(ni);
+          std::sort(next.begin(), next.end());
+          if(states_evaluated.find(next) == states_evaluated.end()) {
+            states_evaluated.insert(next);
+            astar.push(State(next, state.num_steps + 1, heuristic(next)));
+          }
+        }
+      }
+    }
+
+    return num_steps;
+  }
+
   void Environment::init_impl() {
     /// Begin scenario shenanigans
 
@@ -200,35 +336,36 @@ namespace Blocks_World_2 {
     assert(m_num_blocks_max >= m_num_blocks_min);
 
     int64_t num_blocks = 0;
-    if(get_Option_Ranged<int64_t>(Options::get_global(), "num-episodes") == 156) {
-      int64_t eps = 0;
-      for(num_blocks = 3; num_blocks != 10; ++num_blocks) {
-        eps += 3 * num_blocks;
-        if(eps >= get_episode_count())
-          break;
-      }
-    }
-    else if(get_Option_Ranged<int64_t>(Options::get_global(), "num-episodes") <= 100) {
-//       if(get_episode_count() <= 15)
-//         num_blocks = 3;
-//       else if(get_episode_count() <= 40)
-//         num_blocks = 4;
-//       else
-//         num_blocks = 5;
-      
-//       if(get_step_count() < 5000)
-//         num_blocks = 3;
-//       else if(get_step_count() < 15000)
-//         num_blocks = 3 + m_random.rand_lte(int32_t(1));
-//       else
-//         num_blocks = 3 + m_random.rand_lte(int32_t(2));
-      
-      if(get_step_count() < 50000)
-        num_blocks = 3 + m_random.rand_lte(int32_t(1));
-      else
-        num_blocks = 3 + m_random.rand_lte(int32_t(2));
-    }
-    else {
+//    if(get_Option_Ranged<int64_t>(Options::get_global(), "num-episodes") == 156) {
+//      int64_t eps = 0;
+//      for(num_blocks = 3; num_blocks != 10; ++num_blocks) {
+//        eps += 3 * num_blocks;
+//        if(eps >= get_episode_count())
+//          break;
+//      }
+//    }
+//    else if(get_Option_Ranged<int64_t>(Options::get_global(), "num-episodes") <= 100) {
+////       if(get_episode_count() <= 15)
+////         num_blocks = 3;
+////       else if(get_episode_count() <= 40)
+////         num_blocks = 4;
+////       else
+////         num_blocks = 5;
+//
+////       if(get_step_count() < 5000)
+////         num_blocks = 3;
+////       else if(get_step_count() < 15000)
+////         num_blocks = 3 + m_random.rand_lte(int32_t(1));
+////       else
+////         num_blocks = 3 + m_random.rand_lte(int32_t(2));
+//
+//      if(get_step_count() < 50000)
+//        num_blocks = 3 + m_random.rand_lte(int32_t(1));
+//      else
+//        num_blocks = 3 + m_random.rand_lte(int32_t(2));
+//    }
+//    else
+    {
       num_blocks = m_num_blocks_min + (m_num_blocks_min != m_num_blocks_max ? m_random.rand_lte(int32_t(m_num_blocks_max - m_num_blocks_min)) : 0);
     }
 
@@ -255,6 +392,8 @@ namespace Blocks_World_2 {
       do {
         m_target = random_Stacks(target_blocks);
       } while(success());
+
+      num_steps_to_goal();
     }
   }
 

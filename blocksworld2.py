@@ -589,15 +589,17 @@ def main():
         print 'Final Memory Average for ' + agent + ': ' + str(memory[agent][-1])
   
   #xposition = [5000, 15000]
+  #for xc in xposition:
+    #plt.axvline(x=xc, color='green', linestyle=':')
   #for x in range(1,13):
-    #print [4000 * x]
-    #print [smith[agent][40 * x]]
-    #print [smith[agent][40 * x] - smith_min[agent][40 * x], smith_max[agent][40 * x] - smith[agent][40 * x]]
+    ##print [4000 * x]
+    ##print [smith[agent][40 * x]]
+    ##print [smith[agent][40 * x] - smith_min[agent][40 * x], smith_max[agent][40 * x] - smith[agent][40 * x]]
     #fig.axes[0].errorbar([4000 * x], [smith[agent][40 * x]], yerr=[[smith[agent][40 * x] - smith_min[agent][40 * x]], [smith_max[agent][40 * x] - smith[agent][40 * x]]], ecolor='blue')
   #for x in range(1,13):
-    #print [4000 * x - 2000]
-    #print [memory[agent][int(40 * x - 20)]]
-    #print [memory[agent][int(40 * x - 20)] - mem_min[agent][int(40 * x - 20)], mem_max[agent][int(40 * x - 20)] - memory[agent][int(40 * x - 20)]]
+    ##print [4000 * x - 2000]
+    ##print [memory[agent][int(40 * x - 20)]]
+    ##print [memory[agent][int(40 * x - 20)] - mem_min[agent][int(40 * x - 20)], mem_max[agent][int(40 * x - 20)] - memory[agent][int(40 * x - 20)]]
     #ax2.errorbar([4000 * x - 2000], [memory[agent][int(40 * x - 20)]], yerr=[[memory[agent][int(40 * x - 20)] - mem_min[agent][int(40 * x - 20)]], [mem_max[agent][int(40 * x - 20)] - memory[agent][int(40 * x - 20)]]], ecolor='red')
 
   #xposition = [50000]
