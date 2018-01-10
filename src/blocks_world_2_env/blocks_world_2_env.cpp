@@ -211,7 +211,7 @@ namespace Blocks_World_2 {
       std::unordered_map<Block, bool> in_place;
       size_t dist = 0;
       for(auto &target_stack : target) {
-        auto matching_stack = std::find_if(stacks.begin(), stacks.end(), [&target_stack](const Stack &stack)->bool{return *stack.begin() == *target_stack.begin();});
+        auto matching_stack = std::find_if(stacks.begin(), stacks.end(), [this,&target_stack](const Stack &stack)->bool{return this->m_match_test(*stack.begin(), *target_stack.begin());});
         if(matching_stack == stacks.end()) {
 //          std::cerr << "c" << target_stack.size() << std::endl;
           dist += target_stack.size();
@@ -221,7 +221,7 @@ namespace Blocks_World_2 {
           auto mt = matching_stack->begin();
           size_t dist2 = target_stack.size();
           while(tt != target_stack.end() && mt != matching_stack->end()) {
-            if(*tt == *mt) {
+            if(this->m_match_test(*tt, *mt)) {
               --dist2;
               in_place[*tt] = true;
             }
@@ -317,8 +317,89 @@ namespace Blocks_World_2 {
 
       const auto stacks = Stacks_SSL_to_Stacks(state->stacks);
 
+      std::unordered_map<Block, std::pair<Stacks::const_iterator, Stack::const_iterator>> target_pos;
+      for(auto tt = target.begin(); tt != target.end(); ++tt) {
+        for(auto t2 = tt->begin(); t2 != tt->end(); ++t2)
+          target_pos[*t2] = std::make_pair(tt, t2);
+      }
+
+      std::unordered_map<Block, std::pair<Stacks::const_iterator, Stack::const_iterator>> stack_pos;
+      for(auto st = stacks.begin(); st != stacks.end(); ++st) {
+        for(auto s2 = st->begin(); s2 != st->end(); ++s2)
+          stack_pos[*s2] = std::make_pair(st, s2);
+      }
+
+      std::unordered_map<Block, bool> in_place;
+      for(auto &target_stack : target) {
+        auto matching_stack = std::find_if(stacks.begin(), stacks.end(), [&target_stack](const Stack &stack)->bool{return *stack.begin() == *target_stack.begin();});
+        if(matching_stack != stacks.end()) {
+          auto tt = target_stack.begin();
+          auto mt = matching_stack->begin();
+          while(tt != target_stack.end() && mt != matching_stack->end()) {
+            if(*tt == *mt) {
+              in_place[*tt] = true;
+            }
+            else
+              break;
+            ++tt;
+            ++mt;
+          }
+        }
+      }
+      
+      bool move_into_place_found = false;
+      for(auto st = stacks.begin(), send = stacks.end(); st != send && !move_into_place_found; ++st) {
+        const auto block = *st->rbegin();
+        if(in_place[block])
+          continue;
+        if(target_pos[block].second == target_pos[block].first->begin()) {
+          /// Consider only moving the block into place on the table
+          move_into_place_found = true;
+          
+          Stacks next = stacks;
+          auto ni = next.begin() + (st - stacks.begin());
+          ni->pop_back();
+          next.push_back({block});
+          std::sort(next.begin(), next.end());
+          auto next_ssl = Stacks_to_Stacks_SSL(next);
+          if(states_evaluated.find(next_ssl) == states_evaluated.end()) {
+            states_evaluated.insert(next_ssl);
+            astar.insert(std::make_shared<State>(next_ssl, state->num_steps + 1, heuristic(next), state));
+          }
+          
+          break;
+        }
+        else {
+          const auto target_dest = *(target_pos[block].second - 1);
+          if(in_place[target_dest] && stack_pos[target_dest].second + 1 == stack_pos[target_dest].first->end()) {
+            /// Consider only moving the block into place on the target block beneath
+            move_into_place_found = true;
+            const auto tt = stack_pos[target_dest].first;
+
+            Stacks next = stacks;
+            auto ni = next.begin() + (st - stacks.begin());
+            auto ti = next.begin() + (tt - stacks.begin());
+            ti->push_back(*ni->rbegin());
+            ni->pop_back();
+            if(ni->empty())
+              next.erase(ni);
+            std::sort(next.begin(), next.end());
+            auto next_ssl = Stacks_to_Stacks_SSL(next);
+            if(states_evaluated.find(next_ssl) == states_evaluated.end()) {
+              states_evaluated.insert(next_ssl);
+              astar.insert(std::make_shared<State>(next_ssl, state->num_steps + 1, heuristic(next), state));
+            }
+
+            break;
+          }
+        }
+      }
+      
+      if(move_into_place_found)
+        continue;
+      
       for(auto st = stacks.begin(), send = stacks.end(); st != send; ++st) {
-        if(st->size() > 1) {
+        if(st->size() > 1 && !in_place[*st->rbegin()]) {
           Stacks next = stacks;
           auto ni = next.begin() + (st - stacks.begin());
           auto block = *ni->rbegin();
@@ -332,23 +413,23 @@ namespace Blocks_World_2 {
           }
         }
 
-        for(auto tt = stacks.begin(); tt != send; ++tt) {
-          if(st == tt)
-            continue;
-          Stacks next = stacks;
-          auto ni = next.begin() + (st - stacks.begin());
-          auto ti = next.begin() + (tt - stacks.begin());
-          ti->push_back(*ni->rbegin());
-          ni->pop_back();
-          if(ni->empty())
-            next.erase(ni);
-          std::sort(next.begin(), next.end());
-          auto next_ssl = Stacks_to_Stacks_SSL(next);
-          if(states_evaluated.find(next_ssl) == states_evaluated.end()) {
-            states_evaluated.insert(next_ssl);
-            astar.insert(std::make_shared<State>(next_ssl, state->num_steps + 1, heuristic(next), state));
-          }
-        }
+//         for(auto tt = stacks.begin(); tt != send; ++tt) {
+//           if(st == tt)
+//             continue;
+//           Stacks next = stacks;
+//           auto ni = next.begin() + (st - stacks.begin());
+//           auto ti = next.begin() + (tt - stacks.begin());
+//           ti->push_back(*ni->rbegin());
+//           ni->pop_back();
+//           if(ni->empty())
+//             next.erase(ni);
+//           std::sort(next.begin(), next.end());
+//           auto next_ssl = Stacks_to_Stacks_SSL(next);
+//           if(states_evaluated.find(next_ssl) == states_evaluated.end()) {
+//             states_evaluated.insert(next_ssl);
+//             astar.insert(std::make_shared<State>(next_ssl, state->num_steps + 1, heuristic(next), state));
+//           }
+//         }
       }
     }
 
@@ -490,22 +571,61 @@ namespace Blocks_World_2 {
 
     std::shuffle(blocks.begin(), blocks.end(), m_random);
 
-    do {
-      m_blocks = random_Stacks(blocks);
-    } while((m_goal == Goal::STACK || m_goal == Goal::UNSTACK || m_goal == Goal::ON_A_B) && success());
-
     if(m_goal == Goal::EXACT || m_goal == Goal::COLOR) {
-      std::vector<Block> target_blocks;
-      target_blocks.reserve(num_blocks);
-      for(int i = 0; i < num_blocks; ++i)
-        target_blocks.push_back(blocks[i]);
-
+      std::vector<Block> target_blocks = blocks;
       std::shuffle(target_blocks.begin(), target_blocks.end(), m_random);
 
-      do {
-        m_target = random_Stacks(target_blocks);
-      } while(success());
+      m_target = random_Stacks(target_blocks);
+    }
 
+    do {
+      m_blocks = random_Stacks(blocks);
+    } while(success());
+
+    if(m_goal == Goal::STACK) {
+      m_num_steps_to_goal = 0;
+      size_t largest = 0;
+      for(auto st = m_blocks.begin(); st != m_blocks.end(); ++st) {
+        if(st->size() > largest) {
+          m_num_steps_to_goal += int64_t(largest);
+          largest = st->size();
+        }
+        else
+          m_num_steps_to_goal += int64_t(st->size());
+      }
+    }
+    else if(m_goal == Goal::UNSTACK) {
+      m_num_steps_to_goal = 0;
+      for(auto st = m_blocks.begin(); st != m_blocks.end(); ++st)
+        m_num_steps_to_goal += int64_t(st->size() - 1);
+    }
+    else if(m_goal == Goal::ON_A_B) {
+      m_num_steps_to_goal = 0;
+      for(auto st = m_blocks.begin(); st != m_blocks.end(); ++st) {
+        Stack::iterator block_1 = st->end(), block_2 = st->end();
+        for(auto bt = st->begin(); bt != st->end(); ++bt) {
+          if(bt->id == 1)
+            block_1 = bt;
+          else if(bt->id == 2)
+            block_2 = bt;
+        }
+        
+        if(block_1 != st->end()) {
+          if(block_2 != st->end()) {
+            if(block_1 < block_2)
+              m_num_steps_to_goal += int64_t(st->end() - block_1);
+            else
+              m_num_steps_to_goal += int64_t(st->end() - block_2);
+            break;
+          }
+          else
+            m_num_steps_to_goal += int64_t(st->end() - block_1);
+        }
+        else if(block_2 != st->end())
+          m_num_steps_to_goal += int64_t(st->end() - block_2 - 1);
+      }
+    }
+    else if(m_goal == Goal::EXACT /*|| m_goal == Goal::COLOR*/) {
       static bool skip_first = true;
       if(skip_first)
         skip_first = false;
