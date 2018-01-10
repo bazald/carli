@@ -14,12 +14,15 @@ namespace Carli {
     reset_stats();
   }
 
-  void Experimental_Output::print(const int64_t &total_steps, const int64_t &episode_number, const int64_t &step_count, const double &reward, const bool &done, const int64_t &q_value_count, const std::map<int64_t, int64_t> &unrefinements) {
+  void Experimental_Output::print(const int64_t &total_steps, const int64_t &episode_number, const int64_t &step_count, const double &reward, const bool &done, const int64_t &q_value_count, const std::map<int64_t, int64_t> &unrefinements, const double &optimal_reward) {
     m_cumulative_reward += reward;
+    m_cumulative_optimal_reward += optimal_reward;
     m_simple_reward += reward;
+    m_simple_optimal_reward += optimal_reward;
 
     if(done) {
       const double cumulative_reward_per_episode = m_cumulative_reward / episode_number;
+      const double cumulative_optimal_per_episode = m_cumulative_optimal_reward / episode_number;
 
       using dseconds = std::chrono::duration<double, std::ratio<1,1>>;
       dseconds prev_total = std::chrono::duration_cast<dseconds>(m_current - m_start);
@@ -35,9 +38,11 @@ namespace Carli {
         m_cumulative_min = std::min(m_cumulative_min, cumulative_reward_per_episode);
         m_cumulative_mean += s2 * cumulative_reward_per_episode / m_print_every;
         m_cumulative_max = std::max(m_cumulative_max, cumulative_reward_per_episode);
+        m_cumulative_optimal += s2 * cumulative_optimal_per_episode / m_print_every;
         m_simple_min = std::min(m_simple_min, m_simple_reward);
         m_simple_mean += s2 * m_simple_reward / m_print_every;
         m_simple_max = std::max(m_simple_max, m_simple_reward);
+        m_simple_optimal += s2 * m_simple_optimal_reward / m_print_every;
 
         const auto time_passed = prev_total.count() + (current_total.count() - prev_total.count()) * (steps - total_steps + step_count) / step_count;
 
@@ -58,6 +63,8 @@ namespace Carli {
               std::cout << found->second;
           }
 
+          std::cout << ' ' << m_cumulative_optimal << ' ' << m_simple_optimal;
+
           std::cout << std::endl;
 
           reset_stats();
@@ -65,6 +72,7 @@ namespace Carli {
       }
 
       m_simple_reward = 0.0;
+      m_simple_optimal_reward = 0.0;
     }
   }
 
@@ -74,10 +82,12 @@ namespace Carli {
     m_cumulative_min = DBL_MAX;
     m_cumulative_mean = 0.0;
     m_cumulative_max = -DBL_MAX;
+    m_cumulative_optimal = 0.0;
 
     m_simple_min = DBL_MAX;
     m_simple_mean = 0.0;
     m_simple_max = -DBL_MAX;
+    m_simple_optimal = 0.0;
   }
 
 }

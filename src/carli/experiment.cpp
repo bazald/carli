@@ -205,9 +205,9 @@ namespace Carli {
         break;
 
       env->init();
-//#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
       cerr << *env;
-//#endif
+#endif
 
       agent->init();
 #ifdef DEBUG_OUTPUT
@@ -221,9 +221,9 @@ namespace Carli {
         ++total_steps;
         ++steps;
 
-//        std::cerr << total_steps << std::endl;
-//        if(total_steps == 80449)
-//          std::raise(SIGINT);
+        //        std::cerr << total_steps << std::endl;
+        //        if(total_steps == 80449)
+        //          std::raise(SIGINT);
 
 #ifdef DEBUG_OUTPUT
         cerr << *env << *agent;
@@ -242,7 +242,7 @@ namespace Carli {
           || (step_cutoff != 0 && steps >= step_cutoff);
 
         if(output == "experiment" && total_steps > -1)
-          experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, agent->q_value_count, agent->get_unrefinements());
+          experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, agent->q_value_count, agent->get_unrefinements(), done ? env->optimal_reward() : 0.0);
       } while(!done);
 
       if(agent->get_metastate() == Metastate::SUCCESS) {
@@ -256,8 +256,13 @@ namespace Carli {
         ++failures;
       }
 
-      if(output == "simple")
-        cout << " in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward." << endl;
+      if(output == "simple") {
+        cout << " in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward";
+        const double optimal = env->optimal_reward();
+        if(optimal)
+          cout << " out of " << optimal;
+        cout << "." << endl;
+      }
     }
 
     on_episode_termination(agent);

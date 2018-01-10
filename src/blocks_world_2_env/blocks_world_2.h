@@ -109,9 +109,11 @@ namespace Blocks_World_2 {
 
     bool success() const;
 
-    int64_t num_steps_to_goal() const;
+    double optimal_reward() const {return double(-m_num_steps_to_goal);}
 
   private:
+    int64_t calculate_num_steps_to_goal() const;
+
     void init_impl();
     Stacks random_Stacks(const std::vector<Block> &blocks);
 
@@ -135,6 +137,8 @@ namespace Blocks_World_2 {
     Stacks m_blocks;
     Stacks m_target;
     Block m_table = Block(0, 0);
+
+    int64_t m_num_steps_to_goal = 0;
   };
 
   class BLOCKS_WORLD_2_LINKAGE Agent : public Carli::Agent {
