@@ -294,7 +294,7 @@ namespace Blocks_World_2 {
         std::stack<std::shared_ptr<State>> states;
         for(auto ss = state; ss; ss = ss->prev_state)
           states.push(ss);
-        int64_t step = 0;
+        //int64_t step = 0;
         while(!states.empty()) {
           auto ss = states.top();
           states.pop();

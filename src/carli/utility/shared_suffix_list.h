@@ -186,11 +186,11 @@ namespace Zeni {
 
     /// return an iterator_const pointing to this list entry; only the beginning if !prev()
     iterator_const begin() const {
-      return iterator_const(shared_from_this());
+      return iterator_const(this->shared_from_this());
     }
     /// return an iterator pointing to this list entry; only the beginning if !prev()
     iterator begin() {
-      return iterator(shared_from_this());
+      return iterator(this->shared_from_this());
     }
     /// return an iterator_const pointing to an empty list entry of the appropriate size
     iterator_const end() const {
