@@ -71,7 +71,7 @@ namespace Zeni {
       }
       iterator next() const {
         if(m_pointer->m_next)
-          return iterator(m_pointer->m_prev);
+          return iterator(m_pointer->m_next);
         else
           return iterator(m_offset);
       }
@@ -175,7 +175,7 @@ namespace Zeni {
       }
       iterator_const next() const {
         if(m_pointer->m_next)
-          return iterator_const(m_pointer->m_prev);
+          return iterator_const(m_pointer->m_next);
         else
           return iterator_const(m_offset);
       }

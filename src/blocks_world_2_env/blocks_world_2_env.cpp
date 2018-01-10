@@ -1,7 +1,9 @@
 #include "blocks_world_2.h"
 
 #include "carli/parser/rete_parser.h"
+#include "carli/utility/shared_suffix_list.h"
 
+#include <algorithm>
 #include <queue>
 
 namespace Blocks_World_2 {
@@ -109,15 +111,53 @@ namespace Blocks_World_2 {
   }
 
   int64_t Environment::num_steps_to_goal() const {
+    typedef Zeni::Shared_Suffix_List<Block> Stack_SSL;
+    typedef Zeni::Shared_Suffix_List<Stack_SSL::list_pointer_type> Stacks_SSL;
+
+    std::unordered_set<Stack_SSL::list_pointer_type, Rete::hash_deref<Stack_SSL>, Rete::compare_deref_eq> all_stacks;
+    std::unordered_set<Stacks_SSL::list_pointer_type, Rete::hash_deref<Stacks_SSL>, Rete::compare_deref_eq> all_stackses;
+
+    const auto Stack_to_Stack_SSL = [&all_stacks](const Stack &stack)->Stack_SSL::list_pointer_type {
+      Stack_SSL::list_pointer_type stack_ssl;
+      for(auto st = stack.rbegin(); st != stack.rend(); ++st) {
+        Stack_SSL::list_pointer_type insertion = std::make_shared<Stack_SSL>(*st, stack_ssl);
+        auto inserted = all_stacks.insert(insertion);
+        stack_ssl = *inserted.first;
+      }
+      return stack_ssl;
+    };
+    const auto Stack_SSL_to_Stack = [&all_stacks](const Stack_SSL::list_pointer_type &stack_ssl)->Stack {
+      Stack stack;
+      for(auto st = stack_ssl->begin(); st != stack_ssl->end(); ++st)
+        stack.push_back(*st);
+      return stack;
+    };
+
+    const auto Stacks_to_Stacks_SSL = [&all_stackses,&Stack_to_Stack_SSL](const Stacks &stacks)->Stacks_SSL::list_pointer_type {
+      Stacks_SSL::list_pointer_type stacks_ssl;
+      for(auto st = stacks.rbegin(); st != stacks.rend(); ++st) {
+        Stacks_SSL::list_pointer_type insertion = std::make_shared<Stacks_SSL>(Stack_to_Stack_SSL(*st), stacks_ssl);
+        auto inserted = all_stackses.insert(insertion);
+        stacks_ssl = *inserted.first;
+      }
+      return stacks_ssl;
+    };
+    const auto Stacks_SSL_to_Stacks = [&all_stackses,&Stack_SSL_to_Stack](const Stacks_SSL::list_pointer_type &stacks_ssl)->Stacks {
+      Stacks stacks;
+      for(auto st = stacks_ssl->begin(); st != stacks_ssl->end(); ++st)
+        stacks.push_back(Stack_SSL_to_Stack(*st));
+      return stacks;
+    };
+
     struct State {
-      State(const Stacks &stacks_, const int64_t &num_steps_, const int64_t &heuristic_) : stacks(stacks_), num_steps(num_steps_), heuristic(heuristic_) {}
+      State(const Stacks_SSL::list_pointer_type &stacks_, const int64_t &num_steps_, const int64_t &heuristic_) : stacks(stacks_), num_steps(num_steps_), heuristic(heuristic_) {}
 
       bool operator<(const State &rhs) const {
         return num_steps + heuristic > rhs.num_steps + rhs.heuristic || // Opposite of normal meaning so priority_queue behaves correctly with std::less
           num_steps > rhs.num_steps || (num_steps == rhs.num_steps && (heuristic > rhs.heuristic || (heuristic == rhs.heuristic && stacks > rhs.stacks)));
       }
 
-      Stacks stacks;
+      Stacks_SSL::list_pointer_type stacks;
       int64_t num_steps;
       int64_t heuristic;
     };
@@ -125,9 +165,28 @@ namespace Blocks_World_2 {
 
     auto target = get_target();
     std::sort(target.begin(), target.end());
+    const auto target_ssl = Stacks_to_Stacks_SSL(target);
+
+    //for(auto stack : target) {
+    //  std::cerr << "  ";
+    //  for(auto block : stack) {
+    //    std::cerr << block.id << ' ';
+    //  }
+    //  std::cerr << std::endl;
+    //}
+    //target = Stacks_SSL_to_Stacks(target_ssl);
+    //for(auto stack : target) {
+    //  std::cerr << "  ";
+    //  for(auto block : stack) {
+    //    std::cerr << block.id << ' ';
+    //  }
+    //  std::cerr << std::endl;
+    //}
+    //const auto target_ssl2 = Stacks_to_Stacks_SSL(target);
+    //exit(42);
 
     const auto heuristic = [this,&target](const Stacks &stacks)->int64_t {
-      return 0;
+      //return 0;
 
 //      std::map<Block, Block> target_below;
 //      for(auto &target_stack : target) {
@@ -184,13 +243,14 @@ namespace Blocks_World_2 {
       return int64_t(dist);
     };
 
-    std::set<Stacks> states_evaluated;
+    std::unordered_set<Stacks_SSL::list_pointer_type, Rete::hash_deref<Stacks_SSL>, Rete::compare_deref_eq> states_evaluated;
 
     {
       auto blocks = m_blocks;
       std::sort(blocks.begin(), blocks.end());
-      states_evaluated.insert(blocks);
-      astar.push(State(blocks, 0, heuristic(blocks)));
+      auto blocks_ssl = Stacks_to_Stacks_SSL(blocks);
+      states_evaluated.insert(blocks_ssl);
+      astar.push(State(blocks_ssl, 0, heuristic(blocks)));
     }
 
     int64_t num_steps = 0;
@@ -200,40 +260,44 @@ namespace Blocks_World_2 {
 
       std::cerr << astar.size() << ' ' << state.num_steps << ' ' << state.heuristic << std::endl;
 
-      if(state.stacks == target) {
+      if(state.stacks == target_ssl) {
         num_steps = state.num_steps;
         std::cerr << "Num steps = " << num_steps << std::endl;
         break;
       }
 
-      for(auto st = state.stacks.begin(), send = state.stacks.end(); st != send; ++st) {
+      const auto stacks = Stacks_SSL_to_Stacks(state.stacks);
+
+      for(auto st = stacks.begin(), send = stacks.end(); st != send; ++st) {
         if(st->size() > 1) {
-          Stacks next = state.stacks;
-          auto ni = next.begin() + (st - state.stacks.begin());
+          Stacks next = stacks;
+          auto ni = next.begin() + (st - stacks.begin());
           auto block = *ni->rbegin();
           ni->pop_back();
           next.push_back({block});
           std::sort(next.begin(), next.end());
-          if(states_evaluated.find(next) == states_evaluated.end()) {
-            states_evaluated.insert(next);
-            astar.push(State(next, state.num_steps + 1, heuristic(next)));
+          auto next_ssl = Stacks_to_Stacks_SSL(next);
+          if(states_evaluated.find(next_ssl) == states_evaluated.end()) {
+            states_evaluated.insert(next_ssl);
+            astar.push(State(next_ssl, state.num_steps + 1, heuristic(next)));
           }
         }
 
-        for(auto tt = state.stacks.begin(); tt != send; ++tt) {
+        for(auto tt = stacks.begin(); tt != send; ++tt) {
           if(st == tt)
             continue;
-          Stacks next = state.stacks;
-          auto ni = next.begin() + (st - state.stacks.begin());
-          auto ti = next.begin() + (tt - state.stacks.begin());
+          Stacks next = stacks;
+          auto ni = next.begin() + (st - stacks.begin());
+          auto ti = next.begin() + (tt - stacks.begin());
           ti->push_back(*ni->rbegin());
           ni->pop_back();
           if(ni->empty())
             next.erase(ni);
           std::sort(next.begin(), next.end());
-          if(states_evaluated.find(next) == states_evaluated.end()) {
-            states_evaluated.insert(next);
-            astar.push(State(next, state.num_steps + 1, heuristic(next)));
+          auto next_ssl = Stacks_to_Stacks_SSL(next);
+          if(states_evaluated.find(next_ssl) == states_evaluated.end()) {
+            states_evaluated.insert(next_ssl);
+            astar.push(State(next_ssl, state.num_steps + 1, heuristic(next)));
           }
         }
       }

@@ -241,4 +241,13 @@ namespace Blocks_World_2 {
 
 }
 
+namespace std {
+  template <>
+  struct hash<Blocks_World_2::Environment::Block> {
+    size_t operator()(const Blocks_World_2::Environment::Block &block) const {
+      return Rete::hash_combine(std::hash<int64_t>()(block.id), std::hash<int64_t>()(block.color));
+    }
+  };
+}
+
 #endif
