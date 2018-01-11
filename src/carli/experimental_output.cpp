@@ -14,7 +14,7 @@ namespace Carli {
     reset_stats();
   }
 
-  void Experimental_Output::print(const int64_t &total_steps, const int64_t &episode_number, const int64_t &step_count, const double &reward, const bool &done, const int64_t &q_value_count, const std::map<int64_t, int64_t> &unrefinements, const double &optimal_reward) {
+  void Experimental_Output::print(const int64_t &total_steps, const int64_t &episode_number, const int64_t &step_count, const double &reward, const bool &done, const int64_t &q_value_count, const std::map<int64_t, int64_t> &unrefinements, const bool &evaluate_optimality, const double &optimal_reward) {
     m_cumulative_reward += reward;
     m_cumulative_optimal_reward += optimal_reward;
     m_simple_reward += reward;
@@ -63,7 +63,8 @@ namespace Carli {
               std::cout << found->second;
           }
 
-          std::cout << ' ' << m_cumulative_optimal << ' ' << m_simple_optimal;
+          if(evaluate_optimality)
+            std::cout << ' ' << m_cumulative_optimal << ' ' << m_simple_optimal;
 
           std::cout << std::endl;
 

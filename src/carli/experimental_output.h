@@ -15,7 +15,7 @@ namespace Carli {
   public:
     Experimental_Output(const int64_t &print_every = 1);
 
-    void print(const int64_t &total_steps, const int64_t &episode_number, const int64_t &step_count, const double &reward, const bool &done, const int64_t &q_value_count, const std::map<int64_t, int64_t> &unrefinements, const double &optimal_reward);
+    void print(const int64_t &total_steps, const int64_t &episode_number, const int64_t &step_count, const double &reward, const bool &done, const int64_t &q_value_count, const std::map<int64_t, int64_t> &unrefinements, const bool &evaluate_optimality, const double &optimal_reward);
 
   private:
     void reset_stats();

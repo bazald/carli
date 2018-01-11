@@ -582,7 +582,9 @@ namespace Blocks_World_2 {
       m_blocks = random_Stacks(blocks);
     } while(success());
 
-    if(m_goal == Goal::STACK) {
+    if(!m_evaluate_optimality) {
+    }
+    else if(m_goal == Goal::STACK) {
       m_num_steps_to_goal = 0;
       size_t largest = 0;
       for(auto st = m_blocks.begin(); st != m_blocks.end(); ++st) {

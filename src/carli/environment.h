@@ -52,6 +52,7 @@ namespace Carli {
     int64_t get_step_count() const {return m_step_count;}
     int64_t get_total_step_count() const {return m_total_step_count;}
 
+    virtual bool supports_optimal() const {return false;}
     virtual double optimal_reward() const {return 0.0;}
 
   private:

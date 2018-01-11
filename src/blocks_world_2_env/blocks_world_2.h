@@ -109,6 +109,7 @@ namespace Blocks_World_2 {
 
     bool success() const;
 
+    bool supports_optimal() const {return m_goal != Goal::COLOR;}
     double optimal_reward() const {return double(-m_num_steps_to_goal);}
 
   private:
@@ -138,6 +139,7 @@ namespace Blocks_World_2 {
     Stacks m_target;
     Block m_table = Block(0, 0);
 
+    const bool m_evaluate_optimality = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["evaluate-optimality"]).get_value() && supports_optimal() && dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value() != "null";
     int64_t m_num_steps_to_goal = 0;
   };
 

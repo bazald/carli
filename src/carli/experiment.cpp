@@ -64,6 +64,7 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<int64_t>>("step-cutoff", 0, true, numeric_limits<int64_t>::max(), true, 0), "Maximum number of steps per episode before failure; 0 disables.");
     options.add('o', make_shared<Option_Itemized>("output", set<string>({"null", "simple", "experiment"}), "simple"), "What kind of output should be generated.");
     options.add('p', make_shared<Option_Ranged<int64_t>>("print-every", 1, true, numeric_limits<int64_t>::max(), true, 100), "How many steps per line of output.");
+    options.add(     make_shared<Option_Ranged<bool>>("evaluate-optimality", false, true, true, true, false), "Evaluate optimality if supported.");
     options.add('r', make_shared<Option_String>("rules", "default"), "Which .carli rules should the agent load?");
     options.add(     make_shared<Option_String>("rules-out", ""), "Where should final .carli rules be saved?");
     options.add(     make_shared<Option_Ranged<int64_t>>("scenario", 0, true, numeric_limits<int64_t>::max(), true, 0), "Which experimental scenario should be run, environment specific.");
@@ -191,6 +192,7 @@ namespace Carli {
     const auto num_steps = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["num-steps"]).get_value();
     const auto step_cutoff = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["step-cutoff"]).get_value();
     const auto output = dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value();
+    const auto evaluate_optimality = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["evaluate-optimality"]).get_value() && env->supports_optimal() && output != "null";
 
     int64_t total_steps = -dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["skip-steps"]).get_value();
     if(total_steps > 0) {
@@ -242,7 +244,7 @@ namespace Carli {
           || (step_cutoff != 0 && steps >= step_cutoff);
 
         if(output == "experiment" && total_steps > -1)
-          experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, agent->q_value_count, agent->get_unrefinements(), done ? env->optimal_reward() : 0.0);
+          experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, agent->q_value_count, agent->get_unrefinements(), evaluate_optimality, evaluate_optimality && done ? env->optimal_reward() : 0.0);
       } while(!done);
 
       if(agent->get_metastate() == Metastate::SUCCESS) {
@@ -258,9 +260,8 @@ namespace Carli {
 
       if(output == "simple") {
         cout << " in " << agent->get_step_count() << " moves, yielding " << agent->get_total_reward() << " total reward";
-        const double optimal = env->optimal_reward();
-        if(optimal)
-          cout << " out of " << optimal;
+        if(evaluate_optimality)
+          cout << " out of " << env->optimal_reward();
         cout << "." << endl;
       }
     }
