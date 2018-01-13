@@ -207,9 +207,9 @@ namespace Carli {
         break;
 
       env->init();
-#ifdef DEBUG_OUTPUT
+//#ifdef DEBUG_OUTPUT
       cerr << *env;
-#endif
+//#endif
 
       agent->init();
 #ifdef DEBUG_OUTPUT

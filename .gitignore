@@ -82,6 +82,7 @@
 /post-expansion-*
 /pre-expansion-*
 /puddle_world
+/sliding_puzzle
 /stats
 /tetris
 .~lock.*

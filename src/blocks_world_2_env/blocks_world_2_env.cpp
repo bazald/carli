@@ -154,7 +154,11 @@ namespace Blocks_World_2 {
 
       bool operator<(const State &rhs) const {
         return num_steps + heuristic < rhs.num_steps + rhs.heuristic ||
-          num_steps < rhs.num_steps || (num_steps == rhs.num_steps && (heuristic < rhs.heuristic || (heuristic == rhs.heuristic && stacks < rhs.stacks)));
+              (num_steps + heuristic == rhs.num_steps + rhs.heuristic &&
+                (num_steps < rhs.num_steps ||
+                (num_steps == rhs.num_steps &&
+                  (heuristic < rhs.heuristic ||
+                  (heuristic == rhs.heuristic && stacks < rhs.stacks)))));
       }
 
       std::shared_ptr<State> prev_state;
@@ -291,13 +295,13 @@ namespace Blocks_World_2 {
       //std::cerr << astar.size() << ' ' << state->num_steps << ' ' << state->heuristic << std::endl;
 
       if(state->stacks == target_ssl) {
-        std::stack<std::shared_ptr<State>> states;
-        for(auto ss = state; ss; ss = ss->prev_state)
-          states.push(ss);
+        //std::stack<std::shared_ptr<State>> states;
+        //for(auto ss = state; ss; ss = ss->prev_state)
+          //states.push(ss);
         //int64_t step = 0;
-        while(!states.empty()) {
-          auto ss = states.top();
-          states.pop();
+        //while(!states.empty()) {
+          //auto ss = states.top();
+          //states.pop();
 
           //auto stacks = Stacks_SSL_to_Stacks(ss->stacks);
           //std::cerr << "Step " << step++ << " -- " << ss->num_steps << "+" << ss->heuristic << std::endl;
@@ -308,7 +312,7 @@ namespace Blocks_World_2 {
           //  }
           //  std::cerr << std::endl;
           //}
-        }
+        //}
 
         num_steps = state->num_steps;
         //std::cerr << "Num steps = " << num_steps << std::endl;
