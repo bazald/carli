@@ -71,8 +71,8 @@ namespace Sliding_Puzzle {
     typedef std::vector<int64_t> Grid;
 
     const Grid & get_grid() const {return m_grid;}
-    int64_t get_grid_x() const {return m_grid_x;}
-    int64_t get_grid_y() const {return m_grid_y;}
+    int64_t get_grid_w() const {return m_grid_w;}
+    int64_t get_grid_h() const {return m_grid_h;}
 
     bool success() const;
 
@@ -84,6 +84,7 @@ namespace Sliding_Puzzle {
     int64_t calculate_num_steps_to_goal() const;
 
     std::pair<int64_t, int64_t> remaining_problem_size(const Grid &grid) const;
+    bool solveable(const Grid &grid, const int64_t &initial_x = 0, const int64_t &initial_y = 0) const;
 
     void init_impl();
 
@@ -93,8 +94,8 @@ namespace Sliding_Puzzle {
 
     Zeni::Random m_random;
     Grid m_grid;
-    int64_t m_grid_x;
-    int64_t m_grid_y;
+    int64_t m_grid_w;
+    int64_t m_grid_h;
 
     const bool m_evaluate_optimality = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["evaluate-optimality"]).get_value() && supports_optimal() && dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value() != "null";
     int64_t m_num_steps_to_goal = 0;
