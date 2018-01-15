@@ -82,8 +82,10 @@ namespace Carli {
     options.add(     make_shared<Option_Itemized>("bw2-goal", set<string>({"exact", "color", "stack", "unstack", "on-a-b"}), "exact"), "Set the goal for the Blocks World 2 agent.");
     options.add(     make_shared<Option_Itemized>("bw2-reward", set<string>({"guiding", "blind"}), "blind"), "Set the reward function for the Blocks World 2 agent.");
     options.add(     make_shared<Option_Ranged<bool>>("ignore-x", false, true, true, true, false), "Simplify cart-pole from 4D to 2D, eliminating x and x-dot.");
-    options.add(     make_shared<Option_Ranged<int64_t>>("num-blocks-min", 2, true, 1000, true, 3), "Minimum number of blocks to use in Blocks World 2.");
-    options.add(     make_shared<Option_Ranged<int64_t>>("num-blocks-max", 2, true, 1000, true, 5), "Maximum number of blocks to use in Blocks World 2.");
+    options.add(make_shared<Option_Ranged<int64_t>>("num-blocks-min", 2, true, 1000, true, 3), "Minimum number of blocks to use in Blocks World 2.");
+    options.add(make_shared<Option_Ranged<int64_t>>("num-blocks-max", 2, true, 1000, true, 5), "Maximum number of blocks to use in Blocks World 2.");
+    options.add(make_shared<Option_Ranged<int64_t>>("grid-width", 1, true, 50, true, 4), "Grid width for Sliding Puzzle.");
+    options.add(make_shared<Option_Ranged<int64_t>>("grid-height", 1, true, 50, true, 4), "Grid height for Sliding Puzzle.");
     options.add(     make_shared<Option_Ranged<bool>>("random-start", false, true, true, true, false), "Should starting positions be randomized in mountain-car and puddle-world.");
     options.add(     make_shared<Option_Ranged<bool>>("reward-negative", false, true, true, true, true), "Use negative rewards per step in mountain-car rather than positive terminal rewards.");
     options.add(     make_shared<Option_Ranged<bool>>("set-goal", false, true, true, true, false), "Convert Cart Pole from an equilibrium task to a \"minimum time maneuver to a small goal region\" task.");
@@ -207,9 +209,9 @@ namespace Carli {
         break;
 
       env->init();
-//#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
       cerr << *env;
-//#endif
+#endif
 
       agent->init();
 #ifdef DEBUG_OUTPUT

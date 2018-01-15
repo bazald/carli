@@ -313,9 +313,9 @@ namespace Blocks_World_2 {
           //  std::cerr << std::endl;
           //}
         //}
+        //std::cerr << "Num steps = " << num_steps << std::endl;
 
         num_steps = state->num_steps;
-        //std::cerr << "Num steps = " << num_steps << std::endl;
         break;
       }
 

@@ -5,3 +5,30 @@ sp {sliding-puzzle*general
 -->
   = 0.0
 }
+
+sp {sliding-puzzle*dimensionality*increases
+  :feature 2 fringe sliding-puzzle*general
+  &sliding-puzzle*general
+  +{(<action> ^dimensionality <dim>)
+    (<dim> == 1)}
+-->
+  = 0.0
+}
+
+sp {sliding-puzzle*dimensionality*decreases
+  :feature 2 fringe sliding-puzzle*general
+  &sliding-puzzle*general
+  +{(<action> ^dimensionality <dim>)
+    (<dim> == 2)}
+-->
+  = 0.0
+}
+
+sp {sliding-puzzle*dimensionality*unchanged
+  :feature 2 fringe sliding-puzzle*general
+  &sliding-puzzle*general
+  +{(<action> ^dimensionality <dim>)
+    (<dim> == 3)}
+-->
+  = 0.0
+}

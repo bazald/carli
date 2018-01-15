@@ -70,20 +70,42 @@ namespace Sliding_Puzzle {
 
     typedef std::vector<int64_t> Grid;
 
-    const Grid & get_grid() const {return m_grid;}
-    int64_t get_grid_w() const {return m_grid_w;}
-    int64_t get_grid_h() const {return m_grid_h;}
+    const Grid & get_grid() const { return m_grid; }
+    int64_t get_grid_w() const { return m_grid_w; }
+    int64_t get_grid_h() const { return m_grid_h; }
 
     bool success() const;
 
-    bool supports_optimal() const {return true;}
-    double optimal_reward() const {return double(-m_num_steps_to_goal);}
+    bool supports_optimal() const { return true; }
+    double optimal_reward() const { return double(-m_num_steps_to_goal); }
+
+    std::pair<int64_t, int64_t> target_pos(const int64_t &number) const;
+    std::pair<int64_t, int64_t> grid_pos(const Grid &grid, const int64_t &number) const;
+
+    template <typename TYPE>
+    int64_t manhattan_distance(const Grid &grid, const TYPE &numbers) const {
+      int64_t manhattan = 0;
+      for(int64_t i : numbers) {
+        const auto gp = grid_pos(grid, i);
+        const auto tp = target_pos(i);
+        manhattan += distance(gp, tp);
+      }
+      return manhattan;
+    }
+
+    static int64_t distance(const std::pair<int64_t, int64_t> &lhs, const std::pair<int64_t, int64_t> &rhs) {
+      return std::abs(lhs.first - rhs.first) + std::abs(lhs.second - rhs.second);
+    }
+
+    int64_t inversions_column(const Grid &grid, const int64_t &column, const int64_t &starting_row = 0) const;
+    int64_t inversions_row(const Grid &grid, const int64_t &row, const int64_t &starting_column = 0) const;
+
+    std::pair<int64_t, int64_t> remaining_problem_size(const Grid &grid) const;
 
   private:
     bool success(const Grid &grid) const;
     int64_t calculate_num_steps_to_goal() const;
 
-    std::pair<int64_t, int64_t> remaining_problem_size(const Grid &grid) const;
     bool solveable(const Grid &grid, const int64_t &initial_x = 0, const int64_t &initial_y = 0) const;
 
     void init_impl();
@@ -94,8 +116,8 @@ namespace Sliding_Puzzle {
 
     Zeni::Random m_random;
     Grid m_grid;
-    int64_t m_grid_w;
-    int64_t m_grid_h;
+    const int64_t m_grid_w = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["grid-width"]).get_value();
+    const int64_t m_grid_h = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["grid-height"]).get_value();
 
     const bool m_evaluate_optimality = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["evaluate-optimality"]).get_value() && supports_optimal() && dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value() != "null";
     int64_t m_num_steps_to_goal = 0;
@@ -119,17 +141,39 @@ namespace Sliding_Puzzle {
     Zeni::Random m_random;
 
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
+    const Rete::Symbol_Constant_String_Ptr_C m_dimensionality_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("dimensionality"));
     const Rete::Symbol_Constant_String_Ptr_C m_move_direction_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("move-direction"));
     const Rete::Symbol_Identifier_Ptr_C m_move_up_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-up"));
     const Rete::Symbol_Identifier_Ptr_C m_move_down_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-down"));
     const Rete::Symbol_Identifier_Ptr_C m_move_left_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-left"));
     const Rete::Symbol_Identifier_Ptr_C m_move_right_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-right"));
+    const Rete::Symbol_Constant_Int_Ptr_C m_dimensionality_increases = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
+    const Rete::Symbol_Constant_Int_Ptr_C m_dimensionality_decreases = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
+    const Rete::Symbol_Constant_Int_Ptr_C m_dimensionality_unchanged = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_up = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_down = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_left = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_right = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(4));
 
     std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_tile_names;
+
+    template <typename TYPE>
+    int64_t manhattan_snake(const Environment &env, const Environment::Grid &grid, const TYPE &numbers) const {
+      int64_t manhattan = 0;
+      const auto blank = env.grid_pos(grid, 0);
+      for(auto nt = numbers.begin(), n2 = ++numbers.begin(); n2 != numbers.end(); nt = n2, ++n2) {
+        const auto ntpos = env.grid_pos(grid, *nt);
+        const auto n2pos = env.grid_pos(grid, *n2);
+
+        int64_t dist = env.distance(ntpos, n2pos);
+        if(env.distance(ntpos, blank) + env.distance(blank, n2pos) == dist)
+          --dist; /// If blank tile inbetween, reduce distance by 1
+        --dist; /// Want adjacent, not overlapping
+
+        manhattan += dist;
+      }
+      return manhattan;
+    }
 
     std::unordered_map<Rete::WME_Ptr_C, bool, Rete::hash_deref<Rete::WME>, Rete::compare_deref_eq> m_wmes;
 
