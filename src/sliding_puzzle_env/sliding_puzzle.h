@@ -146,6 +146,10 @@ namespace Sliding_Puzzle {
     const Rete::Symbol_Constant_String_Ptr_C m_left_snake_manhattan_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-snake-manhattan"));
     const Rete::Symbol_Constant_String_Ptr_C m_top_snake_dist_to_blank_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-snake-dist-to-blank"));
     const Rete::Symbol_Constant_String_Ptr_C m_left_snake_dist_to_blank_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-snake-dist-to-blank"));
+    const Rete::Symbol_Constant_String_Ptr_C m_top_left_ccw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-left-ccw-dist"));
+    const Rete::Symbol_Constant_String_Ptr_C m_top_right_cw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-right-cw-dist"));
+    const Rete::Symbol_Constant_String_Ptr_C m_left_top_cw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-top-cw-dist"));
+    const Rete::Symbol_Constant_String_Ptr_C m_left_bottom_ccw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-bottom-ccw-dist"));
     const Rete::Symbol_Constant_String_Ptr_C m_move_direction_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("move-direction"));
     const Rete::Symbol_Identifier_Ptr_C m_move_up_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-up"));
     const Rete::Symbol_Identifier_Ptr_C m_move_down_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-down"));

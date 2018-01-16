@@ -537,11 +537,68 @@ namespace Sliding_Puzzle {
       fringe_left.insert(j * grid_w + (grid_w - rps.first) + 1);
     fringe_left.erase(grid_w * grid_h);
 
+    const auto top_left_ccw_dist =
+      [this,&env,&grid_w,&grid_h]
+      (const Environment::Grid &grid, const std::pair<int64_t, int64_t> &rps)->int64_t
+    {
+      const int64_t top_left = (grid_h - rps.second + 1) * grid_w - rps.first + 1;
+      const auto pos = env->grid_pos(grid, top_left);
+
+      if(pos.second == grid_h - rps.second)
+        return pos.first - (grid_w - rps.first);
+      else
+        return rps.first + env->distance(pos, env->grid_pos(grid, (grid_h - rps.second + 2) * grid_w));
+    };
+
+    const auto top_right_cw_dist =
+      [this,&env,&grid_w,&grid_h]
+      (const Environment::Grid &grid, const std::pair<int64_t, int64_t> &rps)->int64_t
+    {
+      const int64_t top_right = (grid_h - rps.second + 1) * grid_w;
+      const auto pos = env->grid_pos(grid, top_right);
+
+      if(pos.second == grid_h - rps.second)
+        return grid_w - pos.first;
+      else
+        return rps.first + env->distance(pos, env->grid_pos(grid, (grid_h - rps.second + 2) * grid_w - rps.first + 1));
+    };
+
+    const auto left_top_cw_dist =
+      [this,&env,&grid_w,&grid_h]
+      (const Environment::Grid &grid, const std::pair<int64_t, int64_t> &rps)->int64_t
+    {
+      const int64_t left_top = (grid_h - rps.second + 1) * grid_w - rps.first + 1;
+      const auto pos = env->grid_pos(grid, left_top);
+
+      if(pos.first == grid_w - rps.first)
+        return pos.second - (grid_h - rps.second);
+      else
+        return rps.second + env->distance(pos, env->grid_pos(grid, grid_h * grid_w - rps.first + 2));
+    };
+
+    const auto left_bottom_ccw_dist =
+      [this,&env,&grid_w,&grid_h]
+      (const Environment::Grid &grid, const std::pair<int64_t, int64_t> &rps)->int64_t
+    {
+      const int64_t left_bottom = grid_h * grid_w - rps.first + 1;
+      const auto pos = env->grid_pos(grid, left_bottom);
+
+      if(pos.first == grid_w - rps.first)
+        return grid_h - pos.second;
+      else
+        return rps.second + env->distance(pos, env->grid_pos(grid, (grid_h - rps.second + 1) * grid_w - rps.first + 2));
+    };
+
     const int64_t top_snake_manhattan = snake_manhattan(*env, grid, fringe_top);
     const int64_t left_snake_manhattan = snake_manhattan(*env, grid, fringe_left);
 
     const int64_t top_snake_dtb = snake_dist_to_blank(*env, grid, fringe_top);
     const int64_t left_snake_dtb = snake_dist_to_blank(*env, grid, fringe_left);
+
+    const int64_t top_left_ccw = top_left_ccw_dist(grid, rps);
+    const int64_t top_right_cw = top_right_cw_dist(grid, rps);
+    const int64_t left_top_cw = left_top_cw_dist(grid, rps);
+    const int64_t left_bottom_ccw = left_bottom_ccw_dist(grid, rps);
 
     for(int64_t tile = 0; tile != int64_t(env->get_grid().size()); ++tile) {
       if(!m_tile_names[tile])
@@ -555,8 +612,26 @@ namespace Sliding_Puzzle {
 
     Rete::Agenda::Locker locker(agenda);
 
+    const auto generate_relative_attribute =
+      [this]
+      (const int64_t &current, const int64_t &next, const Rete::Symbol_Identifier_Ptr_C &id, const Rete::Symbol_Constant_String_Ptr_C &attr)
+    {
+      if(next > current)
+        insert_new_wme(std::make_shared<Rete::WME>(id, attr, m_increases));
+      else if(next < current)
+        insert_new_wme(std::make_shared<Rete::WME>(id, attr, m_decreases));
+      else
+        insert_new_wme(std::make_shared<Rete::WME>(id, attr, m_unchanged));
+    };
+
     const auto generate_action =
-      [this,&env,&grid,&grid_w,&grid_h,&blank,&rps,&fringe_top,&fringe_left,&top_snake_manhattan,&left_snake_manhattan,&top_snake_dtb,&left_snake_dtb]
+      [this, &env, &generate_relative_attribute,
+       &grid, &grid_w, &grid_h, &blank, &rps,
+       &fringe_top, &fringe_left,
+       &top_left_ccw_dist, &top_right_cw_dist, &left_top_cw_dist, &left_bottom_ccw_dist,
+       &top_snake_manhattan, &left_snake_manhattan,
+       &top_snake_dtb, &left_snake_dtb,
+       &top_left_ccw, &top_right_cw, &left_top_cw, &left_bottom_ccw]
       (const std::pair<int64_t,int64_t> &pos, const Rete::Symbol_Identifier_Ptr_C &move_id, const Rete::Symbol_Constant_Int_Ptr_C &move_name)
     {
       Environment::Grid next(env->get_grid());
@@ -573,37 +648,16 @@ namespace Sliding_Puzzle {
       else
         insert_new_wme(std::make_shared<Rete::WME>(move_id, m_dimensionality_attr, m_unchanged));
 
-      const int64_t tsm_next = snake_manhattan(*env, next, fringe_top);
-      if(tsm_next > top_snake_manhattan)
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_top_snake_manhattan_attr, m_increases));
-      else if(tsm_next < top_snake_manhattan)
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_top_snake_manhattan_attr, m_decreases));
-      else
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_top_snake_manhattan_attr, m_unchanged));
+      generate_relative_attribute(top_snake_manhattan, snake_manhattan(*env, next, fringe_top), move_id, m_top_snake_manhattan_attr);
+      generate_relative_attribute(left_snake_manhattan, snake_manhattan(*env, next, fringe_left), move_id, m_left_snake_manhattan_attr);
 
-      const int64_t lsm_next = snake_manhattan(*env, next, fringe_left);
-      if(lsm_next > left_snake_manhattan)
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_left_snake_manhattan_attr, m_increases));
-      else if(lsm_next < left_snake_manhattan)
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_left_snake_manhattan_attr, m_decreases));
-      else
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_left_snake_manhattan_attr, m_unchanged));
+      generate_relative_attribute(top_snake_dtb, snake_dist_to_blank(*env, next, fringe_top), move_id, m_top_snake_dist_to_blank_attr);
+      generate_relative_attribute(left_snake_dtb, snake_dist_to_blank(*env, next, fringe_left), move_id, m_left_snake_dist_to_blank_attr);
 
-      const int64_t ts_dtb_next = snake_dist_to_blank(*env, next, fringe_top);
-      if(ts_dtb_next > top_snake_dtb)
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_top_snake_dist_to_blank_attr, m_increases));
-      else if(ts_dtb_next < top_snake_dtb)
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_top_snake_dist_to_blank_attr, m_decreases));
-      else
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_top_snake_dist_to_blank_attr, m_unchanged));
-
-      const int64_t ls_dtb_next = snake_dist_to_blank(*env, next, fringe_left);
-      if(ls_dtb_next > left_snake_dtb)
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_left_snake_dist_to_blank_attr, m_increases));
-      else if(ls_dtb_next < left_snake_dtb)
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_left_snake_dist_to_blank_attr, m_decreases));
-      else
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_left_snake_dist_to_blank_attr, m_unchanged));
+      generate_relative_attribute(top_left_ccw, top_left_ccw_dist(next, rps_next), move_id, m_top_left_ccw_dist_attr);
+      generate_relative_attribute(top_right_cw, top_right_cw_dist(next, rps_next), move_id, m_top_right_cw_dist_attr);
+      generate_relative_attribute(left_top_cw, left_top_cw_dist(next, rps_next), move_id, m_left_top_cw_dist_attr);
+      generate_relative_attribute(left_bottom_ccw, left_bottom_ccw_dist(next, rps_next), move_id, m_left_bottom_ccw_dist_attr);
     };
 
     if(blank.second + 1 != grid_h)
