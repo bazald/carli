@@ -142,14 +142,18 @@ namespace Sliding_Puzzle {
 
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
     const Rete::Symbol_Constant_String_Ptr_C m_dimensionality_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("dimensionality"));
+    const Rete::Symbol_Constant_String_Ptr_C m_top_snake_manhattan_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-snake-manhattan"));
+    const Rete::Symbol_Constant_String_Ptr_C m_left_snake_manhattan_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-snake-manhattan"));
+    const Rete::Symbol_Constant_String_Ptr_C m_top_snake_dist_to_blank_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-snake-dist-to-blank"));
+    const Rete::Symbol_Constant_String_Ptr_C m_left_snake_dist_to_blank_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-snake-dist-to-blank"));
     const Rete::Symbol_Constant_String_Ptr_C m_move_direction_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("move-direction"));
     const Rete::Symbol_Identifier_Ptr_C m_move_up_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-up"));
     const Rete::Symbol_Identifier_Ptr_C m_move_down_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-down"));
     const Rete::Symbol_Identifier_Ptr_C m_move_left_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-left"));
     const Rete::Symbol_Identifier_Ptr_C m_move_right_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-right"));
-    const Rete::Symbol_Constant_Int_Ptr_C m_dimensionality_increases = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
-    const Rete::Symbol_Constant_Int_Ptr_C m_dimensionality_decreases = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
-    const Rete::Symbol_Constant_Int_Ptr_C m_dimensionality_unchanged = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
+    const Rete::Symbol_Constant_Int_Ptr_C m_increases = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
+    const Rete::Symbol_Constant_Int_Ptr_C m_decreases = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
+    const Rete::Symbol_Constant_Int_Ptr_C m_unchanged = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_up = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_down = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_left = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
@@ -158,19 +162,35 @@ namespace Sliding_Puzzle {
     std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_tile_names;
 
     template <typename TYPE>
-    int64_t manhattan_snake(const Environment &env, const Environment::Grid &grid, const TYPE &numbers) const {
+    int64_t snake_manhattan(const Environment &env, const Environment::Grid &grid, const TYPE &numbers) const {
       int64_t manhattan = 0;
       const auto blank = env.grid_pos(grid, 0);
       for(auto nt = numbers.begin(), n2 = ++numbers.begin(); n2 != numbers.end(); nt = n2, ++n2) {
         const auto ntpos = env.grid_pos(grid, *nt);
         const auto n2pos = env.grid_pos(grid, *n2);
 
+        const int64_t dist_through_blank = env.distance(ntpos, blank) + env.distance(blank, n2pos);
         int64_t dist = env.distance(ntpos, n2pos);
-        if(env.distance(ntpos, blank) + env.distance(blank, n2pos) == dist)
+        if(dist_through_blank == dist)
           --dist; /// If blank tile inbetween, reduce distance by 1
         --dist; /// Want adjacent, not overlapping
 
         manhattan += dist;
+      }
+      return manhattan;
+    }
+
+    template <typename TYPE>
+    int64_t snake_dist_to_blank(const Environment &env, const Environment::Grid &grid, const TYPE &numbers) const {
+      int64_t manhattan = std::numeric_limits<int64_t>::max();
+      const auto blank = env.grid_pos(grid, 0);
+      for(auto nt = numbers.begin(), n2 = ++numbers.begin(); n2 != numbers.end(); nt = n2, ++n2) {
+        const auto ntpos = env.grid_pos(grid, *nt);
+        const auto n2pos = env.grid_pos(grid, *n2);
+
+        const int64_t dist_through_blank = env.distance(ntpos, blank) + env.distance(blank, n2pos);
+        const int64_t dist = env.distance(ntpos, n2pos);
+        manhattan = std::min(manhattan, (dist_through_blank - dist) / 2);
       }
       return manhattan;
     }

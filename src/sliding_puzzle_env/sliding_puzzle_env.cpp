@@ -40,7 +40,7 @@ namespace Sliding_Puzzle {
 
   std::pair<int64_t, int64_t> Environment::grid_pos(const Grid &grid, const int64_t &number) const {
     const int64_t i = int64_t(std::distance(grid.begin(), std::find(grid.begin(), grid.end(), number)));
-    return std::make_pair(i % m_grid_w, i / m_grid_h);
+    return std::make_pair(i % m_grid_w, i / m_grid_w);
   }
 
   int64_t Environment::inversions_column(const Grid &grid, const int64_t &column, const int64_t &starting_row) const {
@@ -537,8 +537,11 @@ namespace Sliding_Puzzle {
       fringe_left.insert(j * grid_w + (grid_w - rps.first) + 1);
     fringe_left.erase(grid_w * grid_h);
 
-    const int64_t fringe_top_manhattan = manhattan_snake(*env, grid, fringe_top);
-    const int64_t fringe_left_manhattan = manhattan_snake(*env, grid, fringe_left);
+    const int64_t top_snake_manhattan = snake_manhattan(*env, grid, fringe_top);
+    const int64_t left_snake_manhattan = snake_manhattan(*env, grid, fringe_left);
+
+    const int64_t top_snake_dtb = snake_dist_to_blank(*env, grid, fringe_top);
+    const int64_t left_snake_dtb = snake_dist_to_blank(*env, grid, fringe_left);
 
     for(int64_t tile = 0; tile != int64_t(env->get_grid().size()); ++tile) {
       if(!m_tile_names[tile])
@@ -552,66 +555,65 @@ namespace Sliding_Puzzle {
 
     Rete::Agenda::Locker locker(agenda);
 
-    if(blank.second + 1 != grid_h) {
-      Environment::Grid next(grid);
-      std::swap(next[blank.second * grid_w + blank.first], next[(blank.second + 1) * grid_w + blank.first]);
+    const auto generate_action =
+      [this,&env,&grid,&grid_w,&grid_h,&blank,&rps,&fringe_top,&fringe_left,&top_snake_manhattan,&left_snake_manhattan,&top_snake_dtb,&left_snake_dtb]
+      (const std::pair<int64_t,int64_t> &pos, const Rete::Symbol_Identifier_Ptr_C &move_id, const Rete::Symbol_Constant_Int_Ptr_C &move_name)
+    {
+      Environment::Grid next(env->get_grid());
+      std::swap(next[blank.second * grid_w + blank.first], next[pos.second * grid_w + pos.first]);
+
+      insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, move_id));
+      insert_new_wme(std::make_shared<Rete::WME>(move_id, m_move_direction_attr, move_name));
+
       const auto rps_next = env->remaining_problem_size(next);
-
-      insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_up_id));
-      insert_new_wme(std::make_shared<Rete::WME>(m_move_up_id, m_move_direction_attr, m_move_direction_up));
-
       if(rps_next.first > rps.first || rps_next.second > rps.second)
-        insert_new_wme(std::make_shared<Rete::WME>(m_move_up_id, m_dimensionality_attr, m_dimensionality_increases));
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_dimensionality_attr, m_increases));
       else if(rps_next.first < rps.first || rps_next.second < rps.second)
-        insert_new_wme(std::make_shared<Rete::WME>(m_move_up_id, m_dimensionality_attr, m_dimensionality_decreases));
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_dimensionality_attr, m_decreases));
       else
-        insert_new_wme(std::make_shared<Rete::WME>(m_move_up_id, m_dimensionality_attr, m_dimensionality_unchanged));
-    }
-    if(blank.second) {
-      Environment::Grid next(grid);
-      std::swap(next[blank.second * grid_w + blank.first], next[(blank.second - 1) * grid_w + blank.first]);
-      const auto rps_next = env->remaining_problem_size(next);
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_dimensionality_attr, m_unchanged));
 
-      insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_down_id));
-      insert_new_wme(std::make_shared<Rete::WME>(m_move_down_id, m_move_direction_attr, m_move_direction_down));
-
-      if(rps_next.first > rps.first || rps_next.second > rps.second)
-        insert_new_wme(std::make_shared<Rete::WME>(m_move_down_id, m_dimensionality_attr, m_dimensionality_increases));
-      else if(rps_next.first < rps.first || rps_next.second < rps.second)
-        insert_new_wme(std::make_shared<Rete::WME>(m_move_down_id, m_dimensionality_attr, m_dimensionality_decreases));
+      const int64_t tsm_next = snake_manhattan(*env, next, fringe_top);
+      if(tsm_next > top_snake_manhattan)
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_top_snake_manhattan_attr, m_increases));
+      else if(tsm_next < top_snake_manhattan)
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_top_snake_manhattan_attr, m_decreases));
       else
-        insert_new_wme(std::make_shared<Rete::WME>(m_move_down_id, m_dimensionality_attr, m_dimensionality_unchanged));
-    }
-    if(blank.first + 1 != grid_w) {
-      Environment::Grid next(grid);
-      std::swap(next[blank.second * grid_w + blank.first], next[blank.second * grid_w + blank.first + 1]);
-      const auto rps_next = env->remaining_problem_size(next);
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_top_snake_manhattan_attr, m_unchanged));
 
-      insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_left_id));
-      insert_new_wme(std::make_shared<Rete::WME>(m_move_left_id, m_move_direction_attr, m_move_direction_left));
-
-      if(rps_next.first > rps.first || rps_next.second > rps.second)
-        insert_new_wme(std::make_shared<Rete::WME>(m_move_left_id, m_dimensionality_attr, m_dimensionality_increases));
-      else if(rps_next.first < rps.first || rps_next.second < rps.second)
-        insert_new_wme(std::make_shared<Rete::WME>(m_move_left_id, m_dimensionality_attr, m_dimensionality_decreases));
+      const int64_t lsm_next = snake_manhattan(*env, next, fringe_left);
+      if(lsm_next > left_snake_manhattan)
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_left_snake_manhattan_attr, m_increases));
+      else if(lsm_next < left_snake_manhattan)
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_left_snake_manhattan_attr, m_decreases));
       else
-        insert_new_wme(std::make_shared<Rete::WME>(m_move_left_id, m_dimensionality_attr, m_dimensionality_unchanged));
-    }
-    if(blank.first) {
-      Environment::Grid next(grid);
-      std::swap(next[blank.second * grid_w + blank.first], next[blank.second * grid_w + blank.first - 1]);
-      const auto rps_next = env->remaining_problem_size(next);
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_left_snake_manhattan_attr, m_unchanged));
 
-      insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_right_id));
-      insert_new_wme(std::make_shared<Rete::WME>(m_move_right_id, m_move_direction_attr, m_move_direction_right));
-
-      if(rps_next.first > rps.first || rps_next.second > rps.second)
-        insert_new_wme(std::make_shared<Rete::WME>(m_move_right_id, m_dimensionality_attr, m_dimensionality_increases));
-      else if(rps_next.first < rps.first || rps_next.second < rps.second)
-        insert_new_wme(std::make_shared<Rete::WME>(m_move_right_id, m_dimensionality_attr, m_dimensionality_decreases));
+      const int64_t ts_dtb_next = snake_dist_to_blank(*env, next, fringe_top);
+      if(ts_dtb_next > top_snake_dtb)
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_top_snake_dist_to_blank_attr, m_increases));
+      else if(ts_dtb_next < top_snake_dtb)
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_top_snake_dist_to_blank_attr, m_decreases));
       else
-        insert_new_wme(std::make_shared<Rete::WME>(m_move_right_id, m_dimensionality_attr, m_dimensionality_unchanged));
-    }
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_top_snake_dist_to_blank_attr, m_unchanged));
+
+      const int64_t ls_dtb_next = snake_dist_to_blank(*env, next, fringe_left);
+      if(ls_dtb_next > left_snake_dtb)
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_left_snake_dist_to_blank_attr, m_increases));
+      else if(ls_dtb_next < left_snake_dtb)
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_left_snake_dist_to_blank_attr, m_decreases));
+      else
+        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_left_snake_dist_to_blank_attr, m_unchanged));
+    };
+
+    if(blank.second + 1 != grid_h)
+      generate_action(std::make_pair(blank.first, blank.second + 1), m_move_up_id, m_move_direction_up);
+    if(blank.second)
+      generate_action(std::make_pair(blank.first, blank.second - 1), m_move_down_id, m_move_direction_down);
+    if(blank.first + 1 != grid_w)
+      generate_action(std::make_pair(blank.first + 1, blank.second), m_move_left_id, m_move_direction_left);
+    if(blank.first)
+      generate_action(std::make_pair(blank.first - 1, blank.second), m_move_right_id, m_move_direction_right);
 
     clear_old_wmes();
   }
