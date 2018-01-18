@@ -31,16 +31,25 @@ namespace Sliding_Puzzle {
     return success(m_grid);
   }
 
-  std::pair<int64_t, int64_t> Environment::target_pos(const int64_t &number) const {
-    if(number)
-      return std::make_pair((number - 1) % m_grid_w, (number - 1) / m_grid_w);
+  int64_t Environment::target_index(const int64_t &tile) const {
+    if(tile)
+      return tile - 1;
     else
-      return std::make_pair(m_grid_w - 1, m_grid_h - 1);
+      return m_grid_w * m_grid_h - 1;
   }
 
-  std::pair<int64_t, int64_t> Environment::grid_pos(const Grid &grid, const int64_t &number) const {
-    const int64_t i = int64_t(std::distance(grid.begin(), std::find(grid.begin(), grid.end(), number)));
-    return std::make_pair(i % m_grid_w, i / m_grid_w);
+  int64_t Environment::grid_index(const Grid &grid, const int64_t &tile) const {
+    return int64_t(std::distance(grid.begin(), std::find(grid.begin(), grid.end(), tile)));
+  }
+
+  std::pair<int64_t, int64_t> Environment::target_pos(const int64_t &tile) const {
+    const int64_t index = target_index(tile);
+    return std::make_pair(index % m_grid_w, index / m_grid_w);
+  }
+
+  std::pair<int64_t, int64_t> Environment::grid_pos(const Grid &grid, const int64_t &tile) const {
+    const int64_t index = grid_index(grid, tile);
+    return std::make_pair(index % m_grid_w, index / m_grid_w);
   }
 
   int64_t Environment::inversions_column(const Grid &grid, const int64_t &column, const int64_t &starting_row) const {
@@ -111,10 +120,14 @@ namespace Sliding_Puzzle {
   }
 
   bool Environment::success(const Environment::Grid &grid) const {
-    for(int64_t i = 1; i != int64_t(grid.size()); ++i) {
-      if(m_grid[i - 1] != i)
+    for(int64_t i = 1; i <= m_grid_w; ++i) {
+      if(grid[i - 1] != i)
         return false;
     }
+    //for(int64_t i = 1; i != m_grid_w * m_grid_h; ++i) {
+    //  if(grid[i - 1] != i)
+    //    return false;
+    //}
     return true;
   }
 
@@ -220,14 +233,14 @@ namespace Sliding_Puzzle {
       if(approximate)
         rps_min = remaining_problem_size(m_grid);
 
-      //std::cerr << "Initial " << rps_min.first << 'x' << rps_min.second << ':' << std::endl;
-      //for(int64_t j = 0; j != m_grid_h; ++j) {
-      //  std::cerr << ' ';
-      //  for(int64_t i = 0; i != m_grid_w; ++i) {
-      //    std::cerr << ' ' << m_grid[j * m_grid_w + i];
-      //  }
-      //  std::cerr << std::endl;
-      //}
+      std::cerr << "Initial " << rps_min.first << 'x' << rps_min.second << ':' << std::endl;
+      for(int64_t j = 0; j != m_grid_h; ++j) {
+        std::cerr << ' ';
+        for(int64_t i = 0; i != m_grid_w; ++i) {
+          std::cerr << ' ' << m_grid[j * m_grid_w + i];
+        }
+        std::cerr << std::endl;
+      }
     }
 
     int64_t num_steps = 0;
@@ -600,6 +613,46 @@ namespace Sliding_Puzzle {
     const int64_t left_top_cw = left_top_cw_dist(grid, rps);
     const int64_t left_bottom_ccw = left_bottom_ccw_dist(grid, rps);
 
+    //int64_t moves_to_blank_tlccw = 0;
+    //if(top_left_ccw && top_left_ccw <= rps.first)
+    //  moves_to_blank_tlccw = moves_to_blank(*env, grid, std::make_pair(grid_w - top_left_ccw, grid_h - rps.second), fringe_top);
+    //else if(top_left_ccw > rps.first) {
+    //  const auto pos = env->grid_pos(grid, *fringe_top.begin());
+    //  if(pos.first + 1 != grid_w)
+    //    moves_to_blank_tlccw = moves_to_blank(*env, grid, std::make_pair(pos.first + 1, pos.second), fringe_top);
+    //  if(pos.second != grid_h - rps.second)
+    //    moves_to_blank_tlccw = moves_to_blank(*env, grid, std::make_pair(pos.first, pos.second - 1), fringe_top);
+    //}
+
+    //int64_t moves_to_blank_trcc = 0;
+    //int64_t moves_to_blank_ltcw = 0;
+    //int64_t moves_to_blank_lbccw = 0;
+
+    const std::pair<int64_t, int64_t> lwccw_snake1_dist_len = top_left_ccw_snake_distlen(*env, grid, rps, fringe_top);
+    std::pair<int64_t, int64_t> lwccw_snake2_dist_len;
+    if(lwccw_snake1_dist_len.second < int64_t(fringe_top.size())) {
+      const Environment::Grid distances = top_left_ccw_distances(*env, rps);
+      Environment::Grid distances_rest = distances_rps_init(*env, rps);
+      auto rest = fringe_top;
+      for(int64_t i = lwccw_snake1_dist_len.second; i; --i) {
+        const int64_t tile = *rest.begin();
+        const int64_t index = env->grid_index(grid, tile);
+        distances_rest[index] = -1;
+
+        if(i == 1) {
+          const int64_t target_dist = distances[index] + 1;
+          for(int64_t i = 0; i != grid_w * grid_h; ++i) {
+            if(distances[i] == target_dist)
+              distances_rest[i] = 0;
+          }
+        }
+
+        rest.erase(tile);
+      }
+      transitive_closure_distances(distances_rest, *env);
+      lwccw_snake2_dist_len = snake_distlen(*env, grid, distances_rest, rest);
+    }
+
     for(int64_t tile = 0; tile != int64_t(env->get_grid().size()); ++tile) {
       if(!m_tile_names[tile])
         m_tile_names[tile] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(tile));
@@ -631,16 +684,18 @@ namespace Sliding_Puzzle {
        &top_left_ccw_dist, &top_right_cw_dist, &left_top_cw_dist, &left_bottom_ccw_dist,
        &top_snake_manhattan, &left_snake_manhattan,
        &top_snake_dtb, &left_snake_dtb,
-       &top_left_ccw, &top_right_cw, &left_top_cw, &left_bottom_ccw]
+       &top_left_ccw, &top_right_cw, &left_top_cw, &left_bottom_ccw
+       //&moves_to_blank_tlccw,&moves_to_blank_trcc,&moves_to_blank_ltcw,&moves_to_blank_lbccw
+      ]
       (const std::pair<int64_t,int64_t> &pos, const Rete::Symbol_Identifier_Ptr_C &move_id, const Rete::Symbol_Constant_Int_Ptr_C &move_name)
     {
-      Environment::Grid next(env->get_grid());
-      std::swap(next[blank.second * grid_w + blank.first], next[pos.second * grid_w + pos.first]);
+      Environment::Grid grid_next = env->get_grid();
+      std::swap(grid_next[blank.second * grid_w + blank.first], grid_next[pos.second * grid_w + pos.first]);
 
       insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, move_id));
       insert_new_wme(std::make_shared<Rete::WME>(move_id, m_move_direction_attr, move_name));
 
-      const auto rps_next = env->remaining_problem_size(next);
+      const auto rps_next = env->remaining_problem_size(grid_next);
       if(rps_next.first > rps.first || rps_next.second > rps.second)
         insert_new_wme(std::make_shared<Rete::WME>(move_id, m_dimensionality_attr, m_increases));
       else if(rps_next.first < rps.first || rps_next.second < rps.second)
@@ -648,16 +703,37 @@ namespace Sliding_Puzzle {
       else
         insert_new_wme(std::make_shared<Rete::WME>(move_id, m_dimensionality_attr, m_unchanged));
 
-      generate_relative_attribute(top_snake_manhattan, snake_manhattan(*env, next, fringe_top), move_id, m_top_snake_manhattan_attr);
-      generate_relative_attribute(left_snake_manhattan, snake_manhattan(*env, next, fringe_left), move_id, m_left_snake_manhattan_attr);
+      generate_relative_attribute(top_snake_manhattan, snake_manhattan(*env, grid_next, fringe_top), move_id, m_top_snake_manhattan_attr);
+      //generate_relative_attribute(left_snake_manhattan, snake_manhattan(*env, grid_next, fringe_left), move_id, m_left_snake_manhattan_attr);
 
-      generate_relative_attribute(top_snake_dtb, snake_dist_to_blank(*env, next, fringe_top), move_id, m_top_snake_dist_to_blank_attr);
-      generate_relative_attribute(left_snake_dtb, snake_dist_to_blank(*env, next, fringe_left), move_id, m_left_snake_dist_to_blank_attr);
+      generate_relative_attribute(top_snake_dtb, snake_dist_to_blank(*env, grid_next, fringe_top), move_id, m_top_snake_dist_to_blank_attr);
+      //generate_relative_attribute(left_snake_dtb, snake_dist_to_blank(*env, grid_next, fringe_left), move_id, m_left_snake_dist_to_blank_attr);
 
-      generate_relative_attribute(top_left_ccw, top_left_ccw_dist(next, rps_next), move_id, m_top_left_ccw_dist_attr);
-      generate_relative_attribute(top_right_cw, top_right_cw_dist(next, rps_next), move_id, m_top_right_cw_dist_attr);
-      generate_relative_attribute(left_top_cw, left_top_cw_dist(next, rps_next), move_id, m_left_top_cw_dist_attr);
-      generate_relative_attribute(left_bottom_ccw, left_bottom_ccw_dist(next, rps_next), move_id, m_left_bottom_ccw_dist_attr);
+      const int64_t tlccwd_next = top_left_ccw_dist(grid_next, rps_next);
+      //const int64_t trcwd_next = top_right_cw_dist(grid_next, rps_next);
+      //const int64_t ltcwd_next = left_top_cw_dist(grid_next, rps_next);
+      //const int64_t lbccwd_next = left_bottom_ccw_dist(grid_next, rps_next);
+
+      generate_relative_attribute(top_left_ccw, tlccwd_next, move_id, m_top_left_ccw_dist_attr);
+      //generate_relative_attribute(top_right_cw, trcwd_next, move_id, m_top_right_cw_dist_attr);
+      //generate_relative_attribute(left_top_cw, ltcwd_next, move_id, m_left_top_cw_dist_attr);
+      //generate_relative_attribute(left_bottom_ccw, lbccwd_next, move_id, m_left_bottom_ccw_dist_attr);
+
+      //int64_t mtb_tl_ccw_next = 0;
+      //if(tlccwd_next && tlccwd_next <= rps_next.first)
+      //  mtb_tl_ccw_next = moves_to_blank(*env, grid_next, std::make_pair(grid_w - tlccwd_next, grid_h - rps_next.second), fringe_top);
+      //else if(tlccwd_next > rps_next.first) {
+      //  const auto target_blank = env->grid_pos(grid_next, *fringe_top.begin());
+      //  if(target_blank.first + 1 != grid_w)
+      //    mtb_tl_ccw_next = moves_to_blank(*env, grid_next, std::make_pair(target_blank.first + 1, blank.second), fringe_top);
+      //  if(target_blank.second != grid_h - rps_next.second)
+      //    mtb_tl_ccw_next = moves_to_blank(*env, grid_next, std::make_pair(target_blank.first, blank.second - 1), fringe_top);
+      //}
+
+      //generate_relative_attribute(moves_to_blank_tlccw, mtb_tl_ccw_next, move_id, m_moves_to_blank_tl_ccw_attr);
+      //generate_relative_attribute(moves_to_blank_trcc, mtb_tr_cw_next, move_id, m_moves_to_blank_tr_cw_attr);
+      //generate_relative_attribute(moves_to_blank_ltcw, mtb_lt_cw_next, move_id, m_moves_to_blank_lt_cw_attr);
+      //generate_relative_attribute(moves_to_blank_lbccw, mtb_lb_ccw_next, move_id, m_moves_to_blank_lb_ccw_attr);
     };
 
     if(blank.second + 1 != grid_h)
