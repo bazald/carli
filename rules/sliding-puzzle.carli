@@ -6,272 +6,191 @@ sp {sliding-puzzle*general
   = 0.0
 }
 
-sp {sliding-puzzle*dimensionality-increases
+#sp {sliding-puzzle*dimensionality-increases
+#  :feature 2 fringe sliding-puzzle*general
+#  &sliding-puzzle*general
+#  +{(<action> ^dimensionality <dim>)
+#    (<dim> == 1)}
+#-->
+#  = 0.0
+#}
+#
+#sp {sliding-puzzle*dimensionality-decreases
+#  :feature 2 fringe sliding-puzzle*general
+#  &sliding-puzzle*general
+#  +{(<action> ^dimensionality <dim>)
+#    (<dim> == 2)}
+#-->
+#  = 0.0
+#}
+#
+#sp {sliding-puzzle*dimensionality-unchanged
+#  :feature 2 fringe sliding-puzzle*general
+#  &sliding-puzzle*general
+#  +{(<action> ^dimensionality <dim>)
+#    (<dim> == 3)}
+#-->
+#  = 0.0
+#}
+
+sp {sliding-puzzle*snake1-length-increases
   :feature 2 fringe sliding-puzzle*general
   &sliding-puzzle*general
-  +{(<action> ^dimensionality <dim>)
-    (<dim> == 1)}
+  +{(<action> ^snake1-length <s1l>)
+    (<s1l> == 1)}
 -->
   = 0.0
 }
 
-sp {sliding-puzzle*dimensionality-decreases
+sp {sliding-puzzle*snake1-length-decreases
   :feature 2 fringe sliding-puzzle*general
   &sliding-puzzle*general
-  +{(<action> ^dimensionality <dim>)
-    (<dim> == 2)}
+  +{(<action> ^snake1-length <s1l>)
+    (<s1l> == 2)}
 -->
   = 0.0
 }
 
-sp {sliding-puzzle*dimensionality-unchanged
+sp {sliding-puzzle*snake1-length-unchanged
   :feature 2 fringe sliding-puzzle*general
   &sliding-puzzle*general
-  +{(<action> ^dimensionality <dim>)
-    (<dim> == 3)}
+  +{(<action> ^snake1-length <s1l>)
+    (<s1l> == 3)}
 -->
   = 0.0
 }
 
-sp {sliding-puzzle*top-snake-manhattan-increases
+sp {sliding-puzzle*snake2-length-increases
   :feature 2 fringe sliding-puzzle*general
   &sliding-puzzle*general
-  +{(<action> ^top-snake-manhattan <tsm>)
-    (<tsm> == 1)}
+  +{(<action> ^snake2-length <s2l>)
+    (<s2l> == 1)}
 -->
   = 0.0
 }
 
-sp {sliding-puzzle*top-snake-manhattan-decreases
+sp {sliding-puzzle*snake2-length-decreases
   :feature 2 fringe sliding-puzzle*general
   &sliding-puzzle*general
-  +{(<action> ^top-snake-manhattan <tsm>)
-    (<tsm> == 2)}
+  +{(<action> ^snake2-length <s2l>)
+    (<s2l> == 2)}
 -->
   = 0.0
 }
 
-sp {sliding-puzzle*top-snake-manhattan-unchanged
+sp {sliding-puzzle*snake2-length-unchanged
   :feature 2 fringe sliding-puzzle*general
   &sliding-puzzle*general
-  +{(<action> ^top-snake-manhattan <tsm>)
-    (<tsm> == 3)}
+  +{(<action> ^snake2-length <s2l>)
+    (<s2l> == 3)}
 -->
   = 0.0
 }
 
-#sp {sliding-puzzle*left-snake-manhattan-increases
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^left-snake-manhattan <lsm>)
-#    (<lsm> == 1)}
-#-->
-#  = 0.0
-#}
-
-#sp {sliding-puzzle*left-snake-manhattan-decreases
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^left-snake-manhattan <lsm>)
-#    (<lsm> == 2)}
-#-->
-#  = 0.0
-#}
-
-#sp {sliding-puzzle*left-snake-manhattan-unchanged
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^left-snake-manhattan <lsm>)
-#    (<lsm> == 3)}
-#-->
-#  = 0.0
-#}
-
-sp {sliding-puzzle*top-snake-dist-to-blank-increases
+sp {sliding-puzzle*snake1-dist-increases
   :feature 2 fringe sliding-puzzle*general
   &sliding-puzzle*general
-  +{(<action> ^top-snake-dist-to-blank <tsdtb>)
-    (<tsdtb> == 1)}
+  +{(<action> ^snake1-dist <s1d>)
+    (<s1d> == 1)}
 -->
   = 0.0
 }
 
-sp {sliding-puzzle*top-snake-dist-to-blank-decreases
+sp {sliding-puzzle*snake1-dist-decreases
   :feature 2 fringe sliding-puzzle*general
   &sliding-puzzle*general
-  +{(<action> ^top-snake-dist-to-blank <tsdtb>)
-    (<tsdtb> == 2)}
+  +{(<action> ^snake1-dist <s1d>)
+    (<s1d> == 2)}
 -->
   = 0.0
 }
 
-sp {sliding-puzzle*top-snake-dist-to-blank-unchanged
+sp {sliding-puzzle*snake1-dist-unchanged
   :feature 2 fringe sliding-puzzle*general
   &sliding-puzzle*general
-  +{(<action> ^top-snake-dist-to-blank <tsdtb>)
-    (<tsdtb> == 3)}
+  +{(<action> ^snake1-dist <s1d>)
+    (<s1d> == 3)}
 -->
   = 0.0
 }
 
-#sp {sliding-puzzle*left-snake-dist-to-blank-increases
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^left-snake-dist-to-blank <lsdtb>)
-#    (<lsdtb> == 1)}
-#-->
-#  = 0.0
-#}
-
-#sp {sliding-puzzle*left-snake-dist-to-blank-decreases
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^left-snake-dist-to-blank <lsdtb>)
-#    (<lsdtb> == 2)}
-#-->
-#  = 0.0
-#}
-
-#sp {sliding-puzzle*left-snake-dist-to-blank-unchanged
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^left-snake-dist-to-blank <lsdtb>)
-#    (<lsdtb> == 3)}
-#-->
-#  = 0.0
-#}
-
-sp {sliding-puzzle*top-left-ccw-dist-increases
+sp {sliding-puzzle*snake2-dist-increases
   :feature 2 fringe sliding-puzzle*general
   &sliding-puzzle*general
-  +{(<action> ^top-left-ccw-dist <tlccwd>)
-    (<tlccwd> == 1)}
+  +{(<action> ^snake2-dist <s2d>)
+    (<s2d> == 1)}
 -->
   = 0.0
 }
 
-sp {sliding-puzzle*top-left-ccw-dist-decreases
+sp {sliding-puzzle*snake2-dist-decreases
   :feature 2 fringe sliding-puzzle*general
   &sliding-puzzle*general
-  +{(<action> ^top-left-ccw-dist <tlccwd>)
-    (<tlccwd> == 2)}
+  +{(<action> ^snake2-dist <s2d>)
+    (<s2d> == 2)}
 -->
   = 0.0
 }
 
-sp {sliding-puzzle*top-left-ccw-dist-unchanged
+sp {sliding-puzzle*snake2-dist-unchanged
   :feature 2 fringe sliding-puzzle*general
   &sliding-puzzle*general
-  +{(<action> ^top-left-ccw-dist <tlccwd>)
-    (<tlccwd> == 3)}
+  +{(<action> ^snake2-dist <s2d>)
+    (<s2d> == 3)}
 -->
   = 0.0
 }
 
-#sp {sliding-puzzle*top-right-cw-dist-increases
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^top-right-cw-dist <trcwd>)
-#    (<trcwd> == 1)}
-#-->
-#  = 0.0
-#}
+sp {sliding-puzzle*snake1-blank-increases
+  :feature 2 fringe sliding-puzzle*general
+  &sliding-puzzle*general
+  +{(<action> ^snake1-blank <s1b>)
+    (<s1b> == 1)}
+-->
+  = 0.0
+}
 
-#sp {sliding-puzzle*top-right-cw-dist-decreases
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^top-right-cw-dist <trcwd>)
-#    (<trcwd> == 2)}
-#-->
-#  = 0.0
-#}
+sp {sliding-puzzle*snake1-blank-decreases
+  :feature 2 fringe sliding-puzzle*general
+  &sliding-puzzle*general
+  +{(<action> ^snake1-blank <s1b>)
+    (<s1b> == 2)}
+-->
+  = 0.0
+}
 
-#sp {sliding-puzzle*top-right-cw-dist-unchanged
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^top-right-cw-dist <trcwd>)
-#    (<trcwd> == 3)}
-#-->
-#  = 0.0
-#}
+sp {sliding-puzzle*snake1-blank-unchanged
+  :feature 2 fringe sliding-puzzle*general
+  &sliding-puzzle*general
+  +{(<action> ^snake1-blank <s1b>)
+    (<s1b> == 3)}
+-->
+  = 0.0
+}
 
-#sp {sliding-puzzle*left-top-cw-dist-increases
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^left-top-cw-dist <tlcwd>)
-#    (<tlcwd> == 1)}
-#-->
-#  = 0.0
-#}
+sp {sliding-puzzle*snake2-blank-increases
+  :feature 2 fringe sliding-puzzle*general
+  &sliding-puzzle*general
+  +{(<action> ^snake2-blank <s2b>)
+    (<s2b> == 1)}
+-->
+  = 0.0
+}
 
-#sp {sliding-puzzle*left-top-cw-dist-decreases
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^left-top-cw-dist <tlcwd>)
-#    (<tlcwd> == 2)}
-#-->
-#  = 0.0
-#}
+sp {sliding-puzzle*snake2-blank-decreases
+  :feature 2 fringe sliding-puzzle*general
+  &sliding-puzzle*general
+  +{(<action> ^snake2-blank <s2b>)
+    (<s2b> == 2)}
+-->
+  = 0.0
+}
 
-#sp {sliding-puzzle*left-top-cw-dist-unchanged
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^left-top-cw-dist <tlcwd>)
-#    (<tlcwd> == 3)}
-#-->
-#  = 0.0
-#}
-
-#sp {sliding-puzzle*left-bottom-ccw-dist-increases
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^left-bottom-ccw-dist <lbccwd>)
-#    (<lbccwd> == 1)}
-#-->
-#  = 0.0
-#}
-
-#sp {sliding-puzzle*left-bottom-ccw-dist-decreases
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^left-bottom-ccw-dist <lbccwd>)
-#    (<lbccwd> == 2)}
-#-->
-#  = 0.0
-#}
-
-#sp {sliding-puzzle*left-bottom-ccw-dist-unchanged
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^left-bottom-ccw-dist <lbccwd>)
-#    (<lbccwd> == 3)}
-#-->
-#  = 0.0
-#}
-
-#sp {sliding-puzzle*moves-to-blank-tl-ccw-increases
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^moves-to-blank-tl-ccw <mtbtlccw>)
-#    (<mtbtlccw> == 1)}
-#-->
-#  = 0.0
-#}
-
-#sp {sliding-puzzle*moves-to-blank-tl-ccw-decreases
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^moves-to-blank-tl-ccw <mtbtlccw>)
-#    (<mtbtlccw> == 2)}
-#-->
-#  = 0.0
-#}
-
-#sp {sliding-puzzle*moves-to-blank-tl-ccw-unchanged
-#  :feature 2 fringe sliding-puzzle*general
-#  &sliding-puzzle*general
-#  +{(<action> ^moves-to-blank-tl-ccw <mtbtlccw>)
-#    (<mtbtlccw> == 3)}
-#-->
-#  = 0.0
-#}
+sp {sliding-puzzle*snake2-blank-unchanged
+  :feature 2 fringe sliding-puzzle*general
+  &sliding-puzzle*general
+  +{(<action> ^snake2-blank <s2b>)
+    (<s2b> == 3)}
+-->
+  = 0.0
+}

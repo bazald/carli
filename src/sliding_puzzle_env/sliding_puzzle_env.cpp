@@ -121,6 +121,9 @@ namespace Sliding_Puzzle {
 
   bool Environment::success(const Environment::Grid &grid) const {
     for(int64_t i = 1; i <= m_grid_w; ++i) {
+      if(i == m_grid_w)
+        if(grid[2 * m_grid_w - 1] == i)
+          break;
       if(grid[i - 1] != i)
         return false;
     }
@@ -493,7 +496,7 @@ namespace Sliding_Puzzle {
       abort();
     }
 
-    return std::make_pair(-1.0, -1.0);
+    return std::make_pair(success() ? 100.0 : -1.0, -1.0);
   }
 
   void Environment::print_impl(ostream &os) const {
@@ -628,29 +631,29 @@ namespace Sliding_Puzzle {
     //int64_t moves_to_blank_ltcw = 0;
     //int64_t moves_to_blank_lbccw = 0;
 
-    const std::pair<int64_t, int64_t> lwccw_snake1_dist_len = top_left_ccw_snake_distlen(*env, grid, rps, fringe_top);
-    std::pair<int64_t, int64_t> lwccw_snake2_dist_len;
-    if(lwccw_snake1_dist_len.second < int64_t(fringe_top.size())) {
+    const std::tuple<int64_t, int64_t, int64_t> lwccw_snake1_lendistblank = top_left_ccw_snake_lendistblank(*env, grid, rps, fringe_top);
+    std::tuple<int64_t, int64_t, int64_t> lwccw_snake2_lendistblank;
+    if(std::get<0>(lwccw_snake1_lendistblank) < int64_t(fringe_top.size())) {
       const Environment::Grid distances = top_left_ccw_distances(*env, rps);
       Environment::Grid distances_rest = distances_rps_init(*env, rps);
       auto rest = fringe_top;
-      for(int64_t i = lwccw_snake1_dist_len.second; i; --i) {
+      for(int64_t i = std::get<0>(lwccw_snake1_lendistblank); i; --i) {
         const int64_t tile = *rest.begin();
         const int64_t index = env->grid_index(grid, tile);
         distances_rest[index] = -1;
 
         if(i == 1) {
           const int64_t target_dist = distances[index] + 1;
-          for(int64_t i = 0; i != grid_w * grid_h; ++i) {
-            if(distances[i] == target_dist)
-              distances_rest[i] = 0;
+          for(int64_t k = 0; k != grid_w * grid_h; ++k) {
+            if(distances[k] == target_dist)
+              distances_rest[k] = 0;
           }
         }
 
         rest.erase(tile);
       }
       transitive_closure_distances(distances_rest, *env);
-      lwccw_snake2_dist_len = snake_distlen(*env, grid, distances_rest, rest);
+      lwccw_snake2_lendistblank = snake_lendistblank(*env, grid, rps, distances_rest, rest);
     }
 
     for(int64_t tile = 0; tile != int64_t(env->get_grid().size()); ++tile) {
@@ -684,8 +687,9 @@ namespace Sliding_Puzzle {
        &top_left_ccw_dist, &top_right_cw_dist, &left_top_cw_dist, &left_bottom_ccw_dist,
        &top_snake_manhattan, &left_snake_manhattan,
        &top_snake_dtb, &left_snake_dtb,
-       &top_left_ccw, &top_right_cw, &left_top_cw, &left_bottom_ccw
+       &top_left_ccw, &top_right_cw, &left_top_cw, &left_bottom_ccw,
        //&moves_to_blank_tlccw,&moves_to_blank_trcc,&moves_to_blank_ltcw,&moves_to_blank_lbccw
+       &lwccw_snake1_lendistblank,&lwccw_snake2_lendistblank
       ]
       (const std::pair<int64_t,int64_t> &pos, const Rete::Symbol_Identifier_Ptr_C &move_id, const Rete::Symbol_Constant_Int_Ptr_C &move_name)
     {
@@ -695,26 +699,58 @@ namespace Sliding_Puzzle {
       insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, move_id));
       insert_new_wme(std::make_shared<Rete::WME>(move_id, m_move_direction_attr, move_name));
 
-      const auto rps_next = env->remaining_problem_size(grid_next);
-      if(rps_next.first > rps.first || rps_next.second > rps.second)
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_dimensionality_attr, m_increases));
-      else if(rps_next.first < rps.first || rps_next.second < rps.second)
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_dimensionality_attr, m_decreases));
-      else
-        insert_new_wme(std::make_shared<Rete::WME>(move_id, m_dimensionality_attr, m_unchanged));
+      //const auto rps_next = env->remaining_problem_size(grid_next);
+      //if(rps_next.first > rps.first || rps_next.second > rps.second)
+      //  insert_new_wme(std::make_shared<Rete::WME>(move_id, m_dimensionality_attr, m_increases));
+      //else if(rps_next.first < rps.first || rps_next.second < rps.second)
+      //  insert_new_wme(std::make_shared<Rete::WME>(move_id, m_dimensionality_attr, m_decreases));
+      //else
+      //  insert_new_wme(std::make_shared<Rete::WME>(move_id, m_dimensionality_attr, m_unchanged));
 
-      generate_relative_attribute(top_snake_manhattan, snake_manhattan(*env, grid_next, fringe_top), move_id, m_top_snake_manhattan_attr);
+      const std::tuple<int64_t, int64_t, int64_t> lwccw_snake1_lendistblank_next = top_left_ccw_snake_lendistblank(*env, grid_next, rps, fringe_top);
+      std::tuple<int64_t, int64_t, int64_t> lwccw_snake2_lendistblank_next;
+      if(std::get<0>(lwccw_snake1_lendistblank_next) < int64_t(fringe_top.size())) {
+        const Environment::Grid distances = top_left_ccw_distances(*env, rps);
+        Environment::Grid distances_rest = distances_rps_init(*env, rps);
+        auto rest = fringe_top;
+        for(int64_t i = std::get<0>(lwccw_snake1_lendistblank_next); i; --i) {
+          const int64_t tile = *rest.begin();
+          const int64_t index = env->grid_index(grid_next, tile);
+          distances_rest[index] = -1;
+
+          if(i == 1) {
+            const int64_t target_dist = distances[index] + 1;
+            for(int64_t k = 0; k != grid_w * grid_h; ++k) {
+              if(distances[k] == target_dist)
+                distances_rest[k] = 0;
+            }
+          }
+
+          rest.erase(tile);
+        }
+        transitive_closure_distances(distances_rest, *env);
+        lwccw_snake2_lendistblank_next = snake_lendistblank(*env, grid_next, rps, distances_rest, rest);
+      }
+
+      generate_relative_attribute(std::get<0>(lwccw_snake1_lendistblank), std::get<0>(lwccw_snake1_lendistblank_next), move_id, m_snake1_length_attr);
+      generate_relative_attribute(std::get<0>(lwccw_snake2_lendistblank), std::get<0>(lwccw_snake2_lendistblank_next), move_id, m_snake2_length_attr);
+      generate_relative_attribute(std::get<1>(lwccw_snake1_lendistblank), std::get<1>(lwccw_snake1_lendistblank_next), move_id, m_snake1_dist_attr);
+      generate_relative_attribute(std::get<1>(lwccw_snake2_lendistblank), std::get<1>(lwccw_snake2_lendistblank_next), move_id, m_snake2_dist_attr);
+      generate_relative_attribute(std::get<2>(lwccw_snake1_lendistblank), std::get<2>(lwccw_snake1_lendistblank_next), move_id, m_snake1_blank_attr);
+      generate_relative_attribute(std::get<2>(lwccw_snake2_lendistblank), std::get<2>(lwccw_snake2_lendistblank_next), move_id, m_snake2_blank_attr);
+
+      //generate_relative_attribute(top_snake_manhattan, snake_manhattan(*env, grid_next, fringe_top), move_id, m_top_snake_manhattan_attr);
       //generate_relative_attribute(left_snake_manhattan, snake_manhattan(*env, grid_next, fringe_left), move_id, m_left_snake_manhattan_attr);
 
-      generate_relative_attribute(top_snake_dtb, snake_dist_to_blank(*env, grid_next, fringe_top), move_id, m_top_snake_dist_to_blank_attr);
+      //generate_relative_attribute(top_snake_dtb, snake_dist_to_blank(*env, grid_next, fringe_top), move_id, m_top_snake_dist_to_blank_attr);
       //generate_relative_attribute(left_snake_dtb, snake_dist_to_blank(*env, grid_next, fringe_left), move_id, m_left_snake_dist_to_blank_attr);
 
-      const int64_t tlccwd_next = top_left_ccw_dist(grid_next, rps_next);
+      //const int64_t tlccwd_next = top_left_ccw_dist(grid_next, rps_next);
       //const int64_t trcwd_next = top_right_cw_dist(grid_next, rps_next);
       //const int64_t ltcwd_next = left_top_cw_dist(grid_next, rps_next);
       //const int64_t lbccwd_next = left_bottom_ccw_dist(grid_next, rps_next);
 
-      generate_relative_attribute(top_left_ccw, tlccwd_next, move_id, m_top_left_ccw_dist_attr);
+      //generate_relative_attribute(top_left_ccw, tlccwd_next, move_id, m_top_left_ccw_dist_attr);
       //generate_relative_attribute(top_right_cw, trcwd_next, move_id, m_top_right_cw_dist_attr);
       //generate_relative_attribute(left_top_cw, ltcwd_next, move_id, m_left_top_cw_dist_attr);
       //generate_relative_attribute(left_bottom_ccw, lbccwd_next, move_id, m_left_bottom_ccw_dist_attr);

@@ -145,16 +145,22 @@ namespace Sliding_Puzzle {
     Zeni::Random m_random;
 
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
-    const Rete::Symbol_Constant_String_Ptr_C m_dimensionality_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("dimensionality"));
-    const Rete::Symbol_Constant_String_Ptr_C m_top_snake_manhattan_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-snake-manhattan"));
-    const Rete::Symbol_Constant_String_Ptr_C m_left_snake_manhattan_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-snake-manhattan"));
-    const Rete::Symbol_Constant_String_Ptr_C m_top_snake_dist_to_blank_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-snake-dist-to-blank"));
-    const Rete::Symbol_Constant_String_Ptr_C m_left_snake_dist_to_blank_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-snake-dist-to-blank"));
-    const Rete::Symbol_Constant_String_Ptr_C m_top_left_ccw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-left-ccw-dist"));
-    const Rete::Symbol_Constant_String_Ptr_C m_top_right_cw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-right-cw-dist"));
-    const Rete::Symbol_Constant_String_Ptr_C m_left_top_cw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-top-cw-dist"));
-    const Rete::Symbol_Constant_String_Ptr_C m_left_bottom_ccw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-bottom-ccw-dist"));
-    const Rete::Symbol_Constant_String_Ptr_C m_moves_to_blank_tl_ccw_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("moves-to-blank-tl-ccw"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_dimensionality_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("dimensionality"));
+    const Rete::Symbol_Constant_String_Ptr_C m_snake1_length_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake1-length"));
+    const Rete::Symbol_Constant_String_Ptr_C m_snake2_length_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake2-length"));
+    const Rete::Symbol_Constant_String_Ptr_C m_snake1_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake1-dist"));
+    const Rete::Symbol_Constant_String_Ptr_C m_snake2_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake2-dist"));
+    const Rete::Symbol_Constant_String_Ptr_C m_snake1_blank_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake1-blank"));
+    const Rete::Symbol_Constant_String_Ptr_C m_snake2_blank_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake2-blank"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_top_snake_manhattan_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-snake-manhattan"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_left_snake_manhattan_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-snake-manhattan"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_top_snake_dist_to_blank_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-snake-dist-to-blank"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_left_snake_dist_to_blank_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-snake-dist-to-blank"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_top_left_ccw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-left-ccw-dist"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_top_right_cw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("top-right-cw-dist"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_left_top_cw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-top-cw-dist"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_left_bottom_ccw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-bottom-ccw-dist"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_moves_to_blank_tl_ccw_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("moves-to-blank-tl-ccw"));
     const Rete::Symbol_Constant_String_Ptr_C m_move_direction_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("move-direction"));
     const Rete::Symbol_Identifier_Ptr_C m_move_up_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-up"));
     const Rete::Symbol_Identifier_Ptr_C m_move_down_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-down"));
@@ -205,16 +211,35 @@ namespace Sliding_Puzzle {
     }
 
     template <typename TYPE>
-    std::pair<int64_t, int64_t> top_left_ccw_snake_distlen(const Environment &env, const Environment::Grid &grid, const std::pair<int64_t, int64_t> &rps, const TYPE &tiles) const {
-      return snake_distlen(env, grid, top_left_ccw_distances(env, rps), tiles);
+    std::tuple<int64_t, int64_t, int64_t> top_left_ccw_snake_lendistblank(const Environment &env, const Environment::Grid &grid, const std::pair<int64_t, int64_t> &rps, const TYPE &tiles) const {
+      return snake_lendistblank(env, grid, rps, top_left_ccw_distances(env, rps), tiles);
     }
 
     template <typename TYPE>
-    std::pair<int64_t, int64_t> snake_distlen(const Environment &env, const Environment::Grid &grid, const Environment::Grid &distances, const TYPE &tiles) const {
+    std::tuple<int64_t, int64_t, int64_t> snake_lendistblank(const Environment &env, const Environment::Grid &grid, const std::pair<int64_t, int64_t> &rps, const Environment::Grid &distances, const TYPE &tiles) const {
       int64_t index = env.grid_index(grid, *tiles.begin());
       int64_t dist = distances[index];
 
-      std::pair<int64_t, int64_t> distlen(dist, 1);
+      int64_t blank = 0;
+      Environment::Grid blank_distances = distances_rps_init(env, rps);
+      if(dist) {
+        blank_distances[index] = -1;
+        const std::pair<int64_t, int64_t> pos = env.grid_pos(grid, *tiles.begin());
+        if(pos.second && distances[(pos.second - 1) * env.get_grid_w() + pos.first] == dist - 1)
+          blank_distances[(pos.second - 1) * env.get_grid_w() + pos.first] = 0;
+        else if(pos.second + 1 != env.get_grid_h() && distances[(pos.second + 1) * env.get_grid_w() + pos.first] == dist - 1)
+          blank_distances[(pos.second + 1) * env.get_grid_w() + pos.first] = 0;
+        if(pos.first && distances[pos.second * env.get_grid_w() + pos.first - 1] == dist - 1)
+          blank_distances[pos.second * env.get_grid_w() + pos.first - 1] = 0;
+        else if(pos.first + 1 != env.get_grid_w() && distances[pos.second * env.get_grid_w() + pos.first + 1] == dist - 1)
+          blank_distances[pos.second * env.get_grid_w() + pos.first + 1] = 0;
+        transitive_closure_distances(blank_distances, env);
+        blank = blank_distances[env.grid_index(grid, 0)];
+        if(blank == std::numeric_limits<int64_t>::max())
+          blank = 0; /// Don't want to spike distance to blank when handling the worst case
+      }
+
+      std::tuple<int64_t, int64_t, int64_t> len_dist_blank(1, dist, blank);
 
       for(auto tt = ++tiles.begin(); tt != tiles.end(); ++tt) {
         const int64_t index_next = env.grid_index(grid, *tt);
@@ -223,10 +248,10 @@ namespace Sliding_Puzzle {
           break;
         index = index_next;
         dist = dist_next;
-        ++distlen.second;
+        ++std::get<0>(len_dist_blank);
       }
 
-      return distlen;
+      return len_dist_blank;
     }
 
     int64_t distances_to_moves(const Environment &env, const Environment::Grid &grid, const Environment::Grid &distances, const int64_t &tile) const {
