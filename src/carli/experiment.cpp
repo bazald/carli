@@ -89,6 +89,7 @@ namespace Carli {
     options.add(make_shared<Option_Ranged<int64_t>>("grid-height", 1, true, numeric_limits<int64_t>::max(), true, 4), "Grid height for Sliding Puzzle and Taxicab.");
     options.add(make_shared<Option_Ranged<int64_t>>("num-filling-stations", 1, true, numeric_limits<int64_t>::max(), true, 1), "Number of filling stations for Taxicab.");
     options.add(make_shared<Option_Ranged<int64_t>>("num-destinations", 1, true, numeric_limits<int64_t>::max(), true, 4), "Number of destinations for Taxicab.");
+    options.add(make_shared<Option_Ranged<int64_t>>("fuel-max", 2, true, numeric_limits<int64_t>::max(), true, 14), "Maximum amount of fuel for Taxicab.");
     options.add(     make_shared<Option_Ranged<bool>>("random-start", false, true, true, true, false), "Should starting positions be randomized in mountain-car and puddle-world.");
     options.add(     make_shared<Option_Ranged<bool>>("reward-negative", false, true, true, true, true), "Use negative rewards per step in mountain-car rather than positive terminal rewards.");
     options.add(     make_shared<Option_Ranged<bool>>("set-goal", false, true, true, true, false), "Convert Cart Pole from an equilibrium task to a \"minimum time maneuver to a small goal region\" task.");

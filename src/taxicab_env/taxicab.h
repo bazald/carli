@@ -24,124 +24,45 @@ namespace Taxicab {
   using std::endl;
   using std::ostream;
 
-  class TAXICAB_LINKAGE Move : public Carli::Action {
+  class TAXICAB_LINKAGE Action : public Carli::Action {
   public:
-    enum Direction { NORTH = 1, SOUTH = 2, EAST = 3, WEST = 4 };
+    enum Type { MOVE = 1, REFUEL = 2, PICKUP = 3, PUTDOWN = 4 };
+    enum Direction { NONE = 0, NORTH = 1, SOUTH = 2, EAST = 3, WEST = 4 };
 
-    Move()
-      : direction(Direction())
+    Action()
+      : type(Type()), direction(Direction())
     {
     }
 
-    Move(const Direction &direction_)
-      : direction(direction_)
+    Action(const Type &type_, const Direction &direction_)
+      : type(type_), direction(direction_)
     {
     }
 
-    Move(const Rete::Variable_Indices &variables, const Rete::WME_Token &token)
-      : direction(Direction(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("direction")->second]).value))
+    Action(const Rete::Variable_Indices &variables, const Rete::WME_Token &token)
+      : type(Type(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("type")->second]).value)),
+      direction(type == MOVE ? Direction(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("direction")->second]).value) : Direction())
     {
-      assert(direction >= NORTH && direction <= WEST);
     }
 
-    Move * clone() const {
-      return new Move(direction);
+    Action * clone() const {
+      return new Action(type, direction);
+    }
+
+    int64_t compare(const Carli::Action &rhs) const {
+      return compare(debuggable_cast<const Action &>(rhs));
     }
 
     int64_t compare(const Action &rhs) const {
-      return compare(debuggable_cast<const Move &>(rhs));
-    }
-
-    int64_t compare(const Move &rhs) const {
       return direction - rhs.direction;
     }
 
     void print_impl(ostream &os) const {
-      os << "move(" << direction << ')';
+      os << "action(" << type << ", " << direction << ')';
     }
 
+    Type type;
     Direction direction;
-  };
-
-  class TAXICAB_LINKAGE Dropoff : public Carli::Action {
-  public:
-    Dropoff()
-    {
-    }
-
-    Dropoff(const Rete::Variable_Indices &, const Rete::WME_Token &)
-    {
-    }
-
-    Dropoff * clone() const {
-      return new Dropoff();
-    }
-
-    int64_t compare(const Action &rhs) const {
-      return compare(debuggable_cast<const Dropoff &>(rhs));
-    }
-
-    int64_t compare(const Dropoff &) const {
-      return 0;
-    }
-
-    void print_impl(ostream &os) const {
-      os << "dropoff";
-    }
-  };
-
-  class TAXICAB_LINKAGE Pickup : public Carli::Action {
-  public:
-    Pickup()
-    {
-    }
-
-    Pickup(const Rete::Variable_Indices &, const Rete::WME_Token &)
-    {
-    }
-
-    Pickup * clone() const {
-      return new Pickup();
-    }
-
-    int64_t compare(const Action &rhs) const {
-      return compare(debuggable_cast<const Pickup &>(rhs));
-    }
-
-    int64_t compare(const Pickup &) const {
-      return 0;
-    }
-
-    void print_impl(ostream &os) const {
-      os << "pickup";
-    }
-  };
-
-  class TAXICAB_LINKAGE Refuel : public Carli::Action {
-  public:
-    Refuel()
-    {
-    }
-
-    Refuel(const Rete::Variable_Indices &, const Rete::WME_Token &)
-    {
-    }
-
-    Refuel * clone() const {
-      return new Refuel();
-    }
-
-    int64_t compare(const Action &rhs) const {
-      return compare(debuggable_cast<const Refuel &>(rhs));
-    }
-
-    int64_t compare(const Refuel &) const {
-      return 0;
-    }
-
-    void print_impl(ostream &os) const {
-      os << "refuel";
-    }
   };
 
   class TAXICAB_LINKAGE Environment : public Carli::Environment {
@@ -149,7 +70,7 @@ namespace Taxicab {
     Environment & operator=(const Environment &);
 
   public:
-    enum Passenger {ONBOARD = 1, AT_SOURCE = 2, AT_DESTINATION = 3};
+    enum Passenger { AT_SOURCE = 1, ONBOARD = 2, AT_DESTINATION = 3 };
 
     Environment();
 
@@ -157,25 +78,22 @@ namespace Taxicab {
 
     int64_t get_grid_w() const { return m_grid_w; }
     int64_t get_grid_h() const { return m_grid_h; }
+    const std::vector<std::pair<int64_t, int64_t>> & get_filling_stations() const { return m_filling_stations; }
+    const std::vector<std::pair<int64_t, int64_t>> & get_destinations() const { return m_destinations; }
+    const std::pair<int64_t, int64_t> & get_taxi_position() const { return m_taxi_position; }
+    int64_t get_fuel() const { return m_fuel; }
+    int64_t get_fuel_max() const { return m_fuel_max; }
+    Passenger get_passenger() const { return m_passenger; }
+    int64_t get_passenger_source() const { return m_passenger_source; }
+    int64_t get_passenger_destination() const { return m_passenger_destination; }
 
     bool success() const;
+    bool failure() const;
 
     bool supports_optimal() const { return true; }
     double optimal_reward() const { return double(-m_num_steps_to_goal); }
 
-    //std::pair<int64_t, int64_t> destination_pos(const int64_t &destination) const;
-    //std::pair<int64_t, int64_t> nearest_fuel_pos(const std::pair<int64_t, int64_t> &position) const;
-
-    template <typename TYPE>
-    int64_t manhattan_distance(const Grid &grid, const TYPE &numbers) const {
-      int64_t manhattan = 0;
-      for(int64_t i : numbers) {
-        const auto gp = grid_pos(grid, i);
-        const auto tp = target_pos(i);
-        manhattan += distance(gp, tp);
-      }
-      return manhattan;
-    }
+    int64_t optimal_from(const std::pair<int64_t, int64_t> &taxi_position, const int64_t &fuel, const Passenger &passenger) const;
 
     static int64_t distance(const std::pair<int64_t, int64_t> &lhs, const std::pair<int64_t, int64_t> &rhs) {
       return std::abs(lhs.first - rhs.first) + std::abs(lhs.second - rhs.second);
@@ -202,8 +120,8 @@ namespace Taxicab {
     std::vector<std::pair<int64_t, int64_t>> m_destinations;
 
     std::pair<int64_t, int64_t> m_taxi_position;
-    int64_t m_taxi_fuel;
-    const int64_t m_taxi_fuel_max = 14;
+    int64_t m_fuel;
+    const int64_t m_fuel_max = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["fuel-max"]).get_value();
 
     Passenger m_passenger;
     int64_t m_passenger_source;
@@ -231,7 +149,10 @@ namespace Taxicab {
     Zeni::Random m_random;
 
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
-    //const Rete::Symbol_Constant_String_Ptr_C m_dimensionality_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("dimensionality"));
+    const Rete::Symbol_Constant_String_Ptr_C m_type_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("type"));
+    const Rete::Symbol_Constant_String_Ptr_C m_direction_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("direction"));
+    const Rete::Symbol_Constant_String_Ptr_C m_moves_to_goal_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("moves-to-goal"));
+    const Rete::Symbol_Constant_String_Ptr_C m_fewest_moves_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("fewest-moves"));
     //const Rete::Symbol_Constant_String_Ptr_C m_snake1_length_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake1-length"));
     //const Rete::Symbol_Constant_String_Ptr_C m_snake2_length_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake2-length"));
     //const Rete::Symbol_Constant_String_Ptr_C m_snake1_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake1-dist"));
@@ -247,18 +168,25 @@ namespace Taxicab {
     //const Rete::Symbol_Constant_String_Ptr_C m_left_top_cw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-top-cw-dist"));
     //const Rete::Symbol_Constant_String_Ptr_C m_left_bottom_ccw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-bottom-ccw-dist"));
     //const Rete::Symbol_Constant_String_Ptr_C m_moves_to_blank_tl_ccw_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("moves-to-blank-tl-ccw"));
-    const Rete::Symbol_Constant_String_Ptr_C m_tile_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("tile"));
-    const Rete::Symbol_Identifier_Ptr_C m_move_up_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-up"));
-    const Rete::Symbol_Identifier_Ptr_C m_move_down_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-down"));
-    const Rete::Symbol_Identifier_Ptr_C m_move_left_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-left"));
-    const Rete::Symbol_Identifier_Ptr_C m_move_right_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-right"));
+    const Rete::Symbol_Identifier_Ptr_C m_move_north_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-north"));
+    const Rete::Symbol_Identifier_Ptr_C m_move_south_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-south"));
+    const Rete::Symbol_Identifier_Ptr_C m_move_east_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-east"));
+    const Rete::Symbol_Identifier_Ptr_C m_move_west_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-west"));
+    const Rete::Symbol_Identifier_Ptr_C m_refuel_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("refuel"));
+    const Rete::Symbol_Identifier_Ptr_C m_pickup_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("pickup"));
+    const Rete::Symbol_Identifier_Ptr_C m_dropoff_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("dropoff"));
     const Rete::Symbol_Constant_Int_Ptr_C m_increases = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
     const Rete::Symbol_Constant_Int_Ptr_C m_decreases = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
     const Rete::Symbol_Constant_Int_Ptr_C m_unchanged = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
-    const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_up = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
-    const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_down = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
-    const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_left = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
-    const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_right = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(4));
+    const Rete::Symbol_Constant_Int_Ptr_C m_type_move = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
+    const Rete::Symbol_Constant_Int_Ptr_C m_type_refuel = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
+    const Rete::Symbol_Constant_Int_Ptr_C m_type_pickup = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
+    const Rete::Symbol_Constant_Int_Ptr_C m_type_dropoff = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(4));
+    const Rete::Symbol_Constant_Int_Ptr_C m_direction_none = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(0));
+    const Rete::Symbol_Constant_Int_Ptr_C m_direction_north = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
+    const Rete::Symbol_Constant_Int_Ptr_C m_direction_south = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
+    const Rete::Symbol_Constant_Int_Ptr_C m_direction_east = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
+    const Rete::Symbol_Constant_Int_Ptr_C m_direction_west = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(4));
 
     std::map<int64_t, Rete::Symbol_Identifier_Ptr_C> m_move_ids;
     std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_tile_names;

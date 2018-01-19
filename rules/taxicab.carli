@@ -1,0 +1,98 @@
+# Taxicab
+
+sp {taxicab*general
+  :feature 1 split nil
+  (<s> ^action <action>)
+  (<action> ^type <type>)
+  (<action> ^direction <direction>)
+-->
+  = 0.0
+}
+
+#sp {taxicab*action-move
+#  :feature 2 fringe taxicab*general
+#  &taxicab*general
+#  (<type> == 1)
+#-->
+#  = 0.0
+#}
+#
+#sp {taxicab*action-refuel
+#  :feature 2 fringe taxicab*general
+#  &taxicab*general
+#  (<type> == 2)
+#-->
+#  = 0.0
+#}
+#
+#sp {taxicab*action-pickup
+#  :feature 2 fringe taxicab*general
+#  &taxicab*general
+#  (<type> == 3)
+#-->
+#  = 0.0
+#}
+#
+#sp {taxicab*action-dropoff
+#  :feature 2 fringe taxicab*general
+#  &taxicab*general
+#  (<type> == 4)
+#-->
+#  = 0.0
+#}
+#
+#sp {taxicab*direction-none
+#  :feature 2 fringe taxicab*general
+#  &taxicab*general
+#  (<direction> == 0)
+#-->
+#  = 0.0
+#}
+#
+#sp {taxicab*direction-north
+#  :feature 2 fringe taxicab*general
+#  &taxicab*general
+#  (<direction> == 1)
+#-->
+#  = 0.0
+#}
+#
+#sp {taxicab*direction-south
+#  :feature 2 fringe taxicab*general
+#  &taxicab*general
+#  (<direction> == 2)
+#-->
+#  = 0.0
+#}
+#
+#sp {taxicab*direction-east
+#  :feature 2 fringe taxicab*general
+#  &taxicab*general
+#  (<direction> == 3)
+#-->
+#  = 0.0
+#}
+#
+#sp {taxicab*direction-west
+#  :feature 2 fringe taxicab*general
+#  &taxicab*general
+#  (<direction> == 4)
+#-->
+#  = 0.0
+#}
+
+sp {taxicab*fewest-moves-true
+  :feature 2 split taxicab*general
+  &taxicab*general
+ +(<s> ^fewest-moves <action>)
+-->
+  = -1.0
+}
+
+sp {taxicab*fewest-moves-false
+  :feature 2 split taxicab*general
+  &taxicab*general
+ -(<s> ^fewest-moves <action>)
+-->
+  = -10.0
+}
