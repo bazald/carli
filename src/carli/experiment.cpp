@@ -84,8 +84,11 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<bool>>("ignore-x", false, true, true, true, false), "Simplify cart-pole from 4D to 2D, eliminating x and x-dot.");
     options.add(make_shared<Option_Ranged<int64_t>>("num-blocks-min", 2, true, 1000, true, 3), "Minimum number of blocks to use in Blocks World 2.");
     options.add(make_shared<Option_Ranged<int64_t>>("num-blocks-max", 2, true, 1000, true, 5), "Maximum number of blocks to use in Blocks World 2.");
-    options.add(make_shared<Option_Ranged<int64_t>>("grid-width", 1, true, 50, true, 4), "Grid width for Sliding Puzzle.");
-    options.add(make_shared<Option_Ranged<int64_t>>("grid-height", 1, true, 50, true, 4), "Grid height for Sliding Puzzle.");
+    options.add(make_shared<Option_Itemized>("tile-movement", set<string>({"individual", "batch"}), "batch"), "Sliding puzzle movement type.");
+    options.add(make_shared<Option_Ranged<int64_t>>("grid-width", 1, true, numeric_limits<int64_t>::max(), true, 4), "Grid width for Sliding Puzzle and Taxicab.");
+    options.add(make_shared<Option_Ranged<int64_t>>("grid-height", 1, true, numeric_limits<int64_t>::max(), true, 4), "Grid height for Sliding Puzzle and Taxicab.");
+    options.add(make_shared<Option_Ranged<int64_t>>("num-filling-stations", 1, true, numeric_limits<int64_t>::max(), true, 1), "Number of filling stations for Taxicab.");
+    options.add(make_shared<Option_Ranged<int64_t>>("num-destinations", 1, true, numeric_limits<int64_t>::max(), true, 4), "Number of destinations for Taxicab.");
     options.add(     make_shared<Option_Ranged<bool>>("random-start", false, true, true, true, false), "Should starting positions be randomized in mountain-car and puddle-world.");
     options.add(     make_shared<Option_Ranged<bool>>("reward-negative", false, true, true, true, true), "Use negative rewards per step in mountain-car rather than positive terminal rewards.");
     options.add(     make_shared<Option_Ranged<bool>>("set-goal", false, true, true, true, false), "Convert Cart Pole from an equilibrium task to a \"minimum time maneuver to a small goal region\" task.");
@@ -95,7 +98,7 @@ namespace Carli {
     options.add(     make_shared<Option_Ranged<double>>("eligibility-trace-decay-threshold", 0.0, true, 1.0, true, 0.0001), "Weights with credit below this threshold cease to receive updates.");
     options.add('g', make_shared<Option_Ranged<double>>("epsilon-greedy", 0.0, true, 1.0, true, 0.1), "Simple epsilon-greedy exploration rate to be used if epsilon-greedy exploration is selected.");
 #ifdef ENABLE_T_TEST
-    options.add(     make_shared<Option_Itemized>("exploration", set<string>({"epsilon-greedy", "t-test"}), "epsilon-greedy"), "Epsilon-greedy or t-test exploration policy.");
+    options.add(     make_shared<Option_Itemized>("exploration", set<string>({"boltzmann", "epsilon-greedy", "t-test"}), "epsilon-greedy"), "Boltzmann, epsilon-greedy, or t-test exploration policy.");
 #else
     options.add(make_shared<Option_Itemized>("exploration", set<string>({"boltzmann", "epsilon-greedy"}), "epsilon-greedy"), "Choose between Boltzmann and epsilon-greedy exploration.");
 #endif

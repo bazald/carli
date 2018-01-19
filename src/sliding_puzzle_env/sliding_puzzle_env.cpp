@@ -14,15 +14,6 @@ namespace Sliding_Puzzle {
   using Carli::Node_Unsplit;
   using Carli::Q_Value;
 
-  static const int32_t g_num_colors = 3;
-
-  static bool xor_string(const std::string &str) {
-    char x = '\0';
-    for(const char &c : str)
-      x ^= c;
-    return x & 1;
-  }
-
   Environment::Environment() {
     init_impl();
   }
@@ -288,123 +279,38 @@ namespace Sliding_Puzzle {
           continue;
       }
 
-      if(blank.second + 1 != m_grid_h) {
-        Grid next = grid;
-        std::swap(next[blank.second * m_grid_w + blank.first], next[(blank.second + 1) * m_grid_w + blank.first]);
-        bool ins = true;
-        if(approximate) {
-          const auto rps_next = remaining_problem_size(next);
-          if((rps_next.first <  rps_min.first && rps_next.second <= rps_min.second) ||
-             (rps_next.first <= rps_min.first && rps_next.second <  rps_min.second))
-          {
-            //std::cerr << "Shrink " << rps_next.first << 'x' << rps_next.second << ':' << std::endl;
-            //for(int64_t j = 0; j != m_grid_h; ++j) {
-            //  std::cerr << ' ';
-            //  for(int64_t i = 0; i != m_grid_w; ++i) {
-            //    std::cerr << ' ' << next[j * m_grid_w + i];
-            //  }
-            //  std::cerr << std::endl;
-            //}
-            rps_min = rps_next;
+      for(int j = 0; j != m_grid_h; ++j) {
+        for(int i = 0; i != m_grid_w; ++i) {
+          if(distance(std::make_pair(i, j), blank) != 1)
+            continue;
+
+          Grid next = grid;
+          std::swap(next[blank.second * m_grid_w + blank.first], next[j * m_grid_w + i]);
+          bool ins = true;
+          if(approximate) {
+            const auto rps_next = remaining_problem_size(next);
+            if((rps_next.first <  rps_min.first && rps_next.second <= rps_min.second) ||
+              (rps_next.first <= rps_min.first && rps_next.second <  rps_min.second))
+            {
+              //std::cerr << "Shrink " << rps_next.first << 'x' << rps_next.second << ':' << std::endl;
+              //for(int64_t j = 0; j != m_grid_h; ++j) {
+              //  std::cerr << ' ';
+              //  for(int64_t i = 0; i != m_grid_w; ++i) {
+              //    std::cerr << ' ' << next[j * m_grid_w + i];
+              //  }
+              //  std::cerr << std::endl;
+              //}
+              rps_min = rps_next;
+            }
+            else if(rps_next.first > rps_min.first || rps_next.second > rps_min.second)
+              ins = false;
           }
-          else if(rps_next.first > rps_min.first || rps_next.second > rps_min.second)
-            ins = false;
-        }
-        if(ins) {
-          auto next_ssl = Grid_to_Gridpart_SSL(next);
-          if(states_evaluated.find(next_ssl) == states_evaluated.end()) {
-            states_evaluated.insert(next_ssl);
-            astar.insert(std::make_shared<State>(next_ssl, state->num_steps + 1, heuristic(next), state));
-          }
-        }
-      }
-      if(blank.second + rps.second > m_grid_h) {
-        Grid next = grid;
-        std::swap(next[blank.second * m_grid_w + blank.first], next[(blank.second - 1) * m_grid_w + blank.first]);
-        bool ins = true;
-        if(approximate) {
-          const auto rps_next = remaining_problem_size(next);
-          if((rps_next.first <  rps_min.first && rps_next.second <= rps_min.second) ||
-             (rps_next.first <= rps_min.first && rps_next.second <  rps_min.second))
-          {
-            //std::cerr << "Shrink " << rps_next.first << 'x' << rps_next.second << ':' << std::endl;
-            //for(int64_t j = 0; j != m_grid_h; ++j) {
-            //  std::cerr << ' ';
-            //  for(int64_t i = 0; i != m_grid_w; ++i) {
-            //    std::cerr << ' ' << next[j * m_grid_w + i];
-            //  }
-            //  std::cerr << std::endl;
-            //}
-            rps_min = rps_next;
-          }
-          else if(rps_next.first > rps_min.first || rps_next.second > rps_min.second)
-            ins = false;
-        }
-        if(ins) {
-          auto next_ssl = Grid_to_Gridpart_SSL(next);
-          if(states_evaluated.find(next_ssl) == states_evaluated.end()) {
-            states_evaluated.insert(next_ssl);
-            astar.insert(std::make_shared<State>(next_ssl, state->num_steps + 1, heuristic(next), state));
-          }
-        }
-      }
-      if(blank.first + 1 != m_grid_w) {
-        Grid next = grid;
-        std::swap(next[blank.second * m_grid_w + blank.first], next[blank.second * m_grid_w + blank.first + 1]);
-        bool ins = true;
-        if(approximate) {
-          const auto rps_next = remaining_problem_size(next);
-          if((rps_next.first <  rps_min.first && rps_next.second <= rps_min.second) ||
-             (rps_next.first <= rps_min.first && rps_next.second <  rps_min.second))
-          {
-            //std::cerr << "Shrink " << rps_next.first << 'x' << rps_next.second << ':' << std::endl;
-            //for(int64_t j = 0; j != m_grid_h; ++j) {
-            //  std::cerr << ' ';
-            //  for(int64_t i = 0; i != m_grid_w; ++i) {
-            //    std::cerr << ' ' << next[j * m_grid_w + i];
-            //  }
-            //  std::cerr << std::endl;
-            //}
-            rps_min = rps_next;
-          }
-          else if(rps_next.first > rps_min.first || rps_next.second > rps_min.second)
-            ins = false;
-        }
-        if(ins) {
-          auto next_ssl = Grid_to_Gridpart_SSL(next);
-          if(states_evaluated.find(next_ssl) == states_evaluated.end()) {
-            states_evaluated.insert(next_ssl);
-            astar.insert(std::make_shared<State>(next_ssl, state->num_steps + 1, heuristic(next), state));
-          }
-        }
-      }
-      if(blank.first + rps.first > m_grid_w) {
-        Grid next = grid;
-        std::swap(next[blank.second * m_grid_w + blank.first], next[blank.second * m_grid_w + blank.first - 1]);
-        bool ins = true;
-        if(approximate) {
-          const auto rps_next = remaining_problem_size(next);
-          if((rps_next.first <  rps_min.first && rps_next.second <= rps_min.second) ||
-             (rps_next.first <= rps_min.first && rps_next.second <  rps_min.second))
-          {
-            //std::cerr << "Shrink " << rps_next.first << 'x' << rps_next.second << ':' << std::endl;
-            //for(int64_t j = 0; j != m_grid_h; ++j) {
-            //  std::cerr << ' ';
-            //  for(int64_t i = 0; i != m_grid_w; ++i) {
-            //    std::cerr << ' ' << next[j * m_grid_w + i];
-            //  }
-            //  std::cerr << std::endl;
-            //}
-            rps_min = rps_next;
-          }
-          else if(rps_next.first > rps_min.first || rps_next.second > rps_min.second)
-            ins = false;
-        }
-        if(ins) {
-          auto next_ssl = Grid_to_Gridpart_SSL(next);
-          if(states_evaluated.find(next_ssl) == states_evaluated.end()) {
-            states_evaluated.insert(next_ssl);
-            astar.insert(std::make_shared<State>(next_ssl, state->num_steps + 1, heuristic(next), state));
+          if(ins) {
+            auto next_ssl = Grid_to_Gridpart_SSL(next);
+            if(states_evaluated.find(next_ssl) == states_evaluated.end()) {
+              states_evaluated.insert(next_ssl);
+              astar.insert(std::make_shared<State>(next_ssl, state->num_steps + 1, heuristic(next), state));
+            }
           }
         }
       }
@@ -469,34 +375,18 @@ namespace Sliding_Puzzle {
   std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action) {
     const Move &move = debuggable_cast<const Move &>(action);
 
-    const auto blank = grid_pos(m_grid, 0);
+    const std::pair<int64_t, int64_t> move_pos = grid_pos(m_grid, move.tile);
+    std::pair<int64_t, int64_t> blank = grid_pos(m_grid, 0);
 
-    switch(move.direction) {
-    case Move::UP:
-      assert(blank.second + 1 != m_grid_h);
-      std::swap(m_grid[blank.second * m_grid_w + blank.first], m_grid[(blank.second + 1) * m_grid_w + blank.first]);
-      break;
-
-    case Move::DOWN:
-      assert(blank.second);
-      std::swap(m_grid[blank.second * m_grid_w + blank.first], m_grid[(blank.second - 1) * m_grid_w + blank.first]);
-      break;
-
-    case Move::LEFT:
-      assert(blank.first + 1 != m_grid_w);
-      std::swap(m_grid[blank.second * m_grid_w + blank.first], m_grid[blank.second * m_grid_w + blank.first + 1]);
-      break;
-
-    case Move::RIGHT:
-      assert(blank.first);
-      std::swap(m_grid[blank.second * m_grid_w + blank.first], m_grid[blank.second * m_grid_w + blank.first - 1]);
-      break;
-
-    default:
-      abort();
+    const int64_t x_inc = blank.first > move_pos.first ? -1 : move_pos.first > blank.first ? 1 : 0;
+    const int64_t y_inc = blank.second > move_pos.second ? -1 : move_pos.second > blank.second ? 1 : 0;
+    while(blank != move_pos) {
+      const std::pair<int64_t, int64_t> blank_next(blank.first + x_inc, blank.second + y_inc);
+      std::swap(m_grid[blank.second * m_grid_w + blank.first], m_grid[blank_next.second * m_grid_w + blank_next.first]);
+      blank = blank_next;
     }
 
-    return std::make_pair(success() ? 100.0 : -1.0, -1.0);
+    return std::make_pair(-1.0, -1.0);
   }
 
   void Environment::print_impl(ostream &os) const {
@@ -512,6 +402,15 @@ namespace Sliding_Puzzle {
   Agent::Agent(const std::shared_ptr<Carli::Environment> &env_)
     : Carli::Agent(env_, [this](const Rete::Variable_Indices &variables, const Rete::WME_Token &token)->Carli::Action_Ptr_C {return std::make_shared<Move>(variables, token); })
   {
+    auto env = dynamic_pointer_cast<const Environment>(get_env());
+
+    for(int64_t tile = 0; tile != int64_t(env->get_grid().size()); ++tile) {
+      std::ostringstream oss;
+      oss << "move-" << tile;
+      m_move_ids[tile] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(oss.str()));
+      m_tile_names[tile] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(tile));
+    }
+
     generate_rete();
     generate_features();
   }
@@ -656,11 +555,6 @@ namespace Sliding_Puzzle {
       lwccw_snake2_lendistblank = snake_lendistblank(*env, grid, rps, distances_rest, rest);
     }
 
-    for(int64_t tile = 0; tile != int64_t(env->get_grid().size()); ++tile) {
-      if(!m_tile_names[tile])
-        m_tile_names[tile] = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(tile));
-    }
-
     if(get_Option_Ranged<bool>(Options::get_global(), "rete-flush-wmes")) {
       Rete::Agenda::Locker locker(agenda);
       clear_old_wmes();
@@ -691,13 +585,13 @@ namespace Sliding_Puzzle {
        //&moves_to_blank_tlccw,&moves_to_blank_trcc,&moves_to_blank_ltcw,&moves_to_blank_lbccw
        &lwccw_snake1_lendistblank,&lwccw_snake2_lendistblank
       ]
-      (const std::pair<int64_t,int64_t> &pos, const Rete::Symbol_Identifier_Ptr_C &move_id, const Rete::Symbol_Constant_Int_Ptr_C &move_name)
+      (const std::pair<int64_t,int64_t> &pos, const Rete::Symbol_Identifier_Ptr_C &move_id, const Rete::Symbol_Constant_Int_Ptr_C &tile_name)
     {
       Environment::Grid grid_next = env->get_grid();
       std::swap(grid_next[blank.second * grid_w + blank.first], grid_next[pos.second * grid_w + pos.first]);
 
       insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, move_id));
-      insert_new_wme(std::make_shared<Rete::WME>(move_id, m_move_direction_attr, move_name));
+      insert_new_wme(std::make_shared<Rete::WME>(move_id, m_tile_attr, tile_name));
 
       //const auto rps_next = env->remaining_problem_size(grid_next);
       //if(rps_next.first > rps.first || rps_next.second > rps.second)
@@ -772,14 +666,13 @@ namespace Sliding_Puzzle {
       //generate_relative_attribute(moves_to_blank_lbccw, mtb_lb_ccw_next, move_id, m_moves_to_blank_lb_ccw_attr);
     };
 
-    if(blank.second + 1 != grid_h)
-      generate_action(std::make_pair(blank.first, blank.second + 1), m_move_up_id, m_move_direction_up);
-    if(blank.second)
-      generate_action(std::make_pair(blank.first, blank.second - 1), m_move_down_id, m_move_direction_down);
-    if(blank.first + 1 != grid_w)
-      generate_action(std::make_pair(blank.first + 1, blank.second), m_move_left_id, m_move_direction_left);
-    if(blank.first)
-      generate_action(std::make_pair(blank.first - 1, blank.second), m_move_right_id, m_move_direction_right);
+    for(int j = 0; j != grid_h; ++j) {
+      for(int i = 0; i != grid_w; ++i) {
+        if(env->distance(std::make_pair(i, j), blank) != 1)
+          continue;
+        generate_action(std::make_pair(i, j), m_move_ids[grid[j * grid_w + i]], m_tile_names[grid[j * grid_w + i]]);
+      }
+    }
 
     clear_old_wmes();
   }

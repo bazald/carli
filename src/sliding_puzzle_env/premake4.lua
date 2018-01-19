@@ -13,4 +13,4 @@ project "env_sliding_puzzle"
   configuration { "macosx", "Debug*" }
     linkoptions { "-install_name @rpath/libenv_sliding_puzzle_d.dylib" }
   configuration { "macosx", "Release*" }
-    linkoptions { "-install_name @rpath/libenv_sliding_puzzle_2.dylib" }
+    linkoptions { "-install_name @rpath/libenv_sliding_puzzle.dylib" }

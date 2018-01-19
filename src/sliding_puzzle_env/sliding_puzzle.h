@@ -26,26 +26,23 @@ namespace Sliding_Puzzle {
 
   class SLIDING_PUZZLE_LINKAGE Move : public Carli::Action {
   public:
-    enum Direction {UP = 1, DOWN = 2, LEFT = 3, RIGHT = 4};
-
     Move()
-     : direction(Direction())
+     : tile(0)
     {
     }
 
-    Move(const Direction &direction_)
-     : direction(direction_)
+    Move(const int64_t &tile_)
+     : tile(tile_)
     {
     }
 
     Move(const Rete::Variable_Indices &variables, const Rete::WME_Token &token)
-     : direction(Direction(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("move-direction")->second]).value))
+     : tile(debuggable_cast<const Rete::Symbol_Constant_Int &>(*token[variables.find("tile")->second]).value)
     {
-      assert(direction >= UP && direction <= RIGHT);
     }
 
     Move * clone() const {
-      return new Move(direction);
+      return new Move(tile);
     }
 
     int64_t compare(const Action &rhs) const {
@@ -53,14 +50,14 @@ namespace Sliding_Puzzle {
     }
 
     int64_t compare(const Move &rhs) const {
-      return direction - rhs.direction;
+      return tile - rhs.tile;
     }
 
     void print_impl(ostream &os) const {
-      os << "move(" << direction << ')';
+      os << "move(" << tile << ')';
     }
 
-    Direction direction;
+    int64_t tile;
   };
 
   class SLIDING_PUZZLE_LINKAGE Environment : public Carli::Environment {
@@ -97,8 +94,11 @@ namespace Sliding_Puzzle {
       return manhattan;
     }
 
-    static int64_t distance(const std::pair<int64_t, int64_t> &lhs, const std::pair<int64_t, int64_t> &rhs) {
-      return std::abs(lhs.first - rhs.first) + std::abs(lhs.second - rhs.second);
+    int64_t distance(const std::pair<int64_t, int64_t> &lhs, const std::pair<int64_t, int64_t> &rhs) const {
+      if(m_batch)
+        return (lhs.first - rhs.first != 0 ? 1 : 0) + (lhs.second - rhs.second != 0 ? 1 : 0);
+      else
+        return std::abs(lhs.first - rhs.first) + std::abs(lhs.second - rhs.second);
     }
 
     int64_t inversions_column(const Grid &grid, const int64_t &column, const int64_t &starting_row = 0) const;
@@ -122,6 +122,8 @@ namespace Sliding_Puzzle {
     Grid m_grid;
     const int64_t m_grid_w = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["grid-width"]).get_value();
     const int64_t m_grid_h = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["grid-height"]).get_value();
+
+    const bool m_batch = dynamic_cast<const Option_Itemized &>(Options::get_global()["tile-movement"]).get_value() == "batch";
 
     const bool m_evaluate_optimality = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["evaluate-optimality"]).get_value() && supports_optimal() && dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value() != "null";
     int64_t m_num_steps_to_goal = 0;
@@ -161,7 +163,7 @@ namespace Sliding_Puzzle {
     //const Rete::Symbol_Constant_String_Ptr_C m_left_top_cw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-top-cw-dist"));
     //const Rete::Symbol_Constant_String_Ptr_C m_left_bottom_ccw_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("left-bottom-ccw-dist"));
     //const Rete::Symbol_Constant_String_Ptr_C m_moves_to_blank_tl_ccw_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("moves-to-blank-tl-ccw"));
-    const Rete::Symbol_Constant_String_Ptr_C m_move_direction_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("move-direction"));
+    const Rete::Symbol_Constant_String_Ptr_C m_tile_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("tile"));
     const Rete::Symbol_Identifier_Ptr_C m_move_up_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-up"));
     const Rete::Symbol_Identifier_Ptr_C m_move_down_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-down"));
     const Rete::Symbol_Identifier_Ptr_C m_move_left_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("move-left"));
@@ -174,6 +176,7 @@ namespace Sliding_Puzzle {
     const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_left = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
     const Rete::Symbol_Constant_Int_Ptr_C m_move_direction_right = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(4));
 
+    std::map<int64_t, Rete::Symbol_Identifier_Ptr_C> m_move_ids;
     std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_tile_names;
 
     template <typename TYPE>
@@ -198,16 +201,16 @@ namespace Sliding_Puzzle {
     template <typename TYPE>
     int64_t snake_dist_to_blank(const Environment &env, const Environment::Grid &grid, const TYPE &tiles) const {
       int64_t manhattan = std::numeric_limits<int64_t>::max();
-      const auto blank = env.grid_pos(grid, 0);
-      for(auto tt = tiles.begin(), t2 = ++tiles.begin(); t2 != tiles.end(); tt = t2, ++t2) {
-        const auto ttpos = env.grid_pos(grid, *tt);
-        const auto t2pos = env.grid_pos(grid, *t2);
+const auto blank = env.grid_pos(grid, 0);
+for(auto tt = tiles.begin(), t2 = ++tiles.begin(); t2 != tiles.end(); tt = t2, ++t2) {
+  const auto ttpos = env.grid_pos(grid, *tt);
+  const auto t2pos = env.grid_pos(grid, *t2);
 
-        const int64_t dist_through_blank = env.distance(ttpos, blank) + env.distance(blank, t2pos);
-        const int64_t dist = env.distance(ttpos, t2pos);
-        manhattan = std::min(manhattan, (dist_through_blank - dist) / 2);
-      }
-      return manhattan;
+  const int64_t dist_through_blank = env.distance(ttpos, blank) + env.distance(blank, t2pos);
+  const int64_t dist = env.distance(ttpos, t2pos);
+  manhattan = std::min(manhattan, (dist_through_blank - dist) / 2);
+}
+return manhattan;
     }
 
     template <typename TYPE>
@@ -225,14 +228,14 @@ namespace Sliding_Puzzle {
       if(dist) {
         blank_distances[index] = -1;
         const std::pair<int64_t, int64_t> pos = env.grid_pos(grid, *tiles.begin());
-        if(pos.second && distances[(pos.second - 1) * env.get_grid_w() + pos.first] == dist - 1)
-          blank_distances[(pos.second - 1) * env.get_grid_w() + pos.first] = 0;
-        else if(pos.second + 1 != env.get_grid_h() && distances[(pos.second + 1) * env.get_grid_w() + pos.first] == dist - 1)
-          blank_distances[(pos.second + 1) * env.get_grid_w() + pos.first] = 0;
-        if(pos.first && distances[pos.second * env.get_grid_w() + pos.first - 1] == dist - 1)
-          blank_distances[pos.second * env.get_grid_w() + pos.first - 1] = 0;
-        else if(pos.first + 1 != env.get_grid_w() && distances[pos.second * env.get_grid_w() + pos.first + 1] == dist - 1)
-          blank_distances[pos.second * env.get_grid_w() + pos.first + 1] = 0;
+        for(int j = 0; j != env.get_grid_h(); ++j) {
+          for(int i = 0; i != env.get_grid_w(); ++i) {
+            if(env.distance(std::make_pair(i, j), pos) != 1)
+              continue;
+            if(distances[j * env.get_grid_w() + i] == dist - 1)
+              blank_distances[j * env.get_grid_w() + i] = 0;
+          }
+        }
         transitive_closure_distances(blank_distances, env);
         blank = blank_distances[env.grid_index(grid, 0)];
         if(blank == std::numeric_limits<int64_t>::max())
@@ -300,21 +303,15 @@ namespace Sliding_Puzzle {
         const int64_t x = dist_and_index.second % env.get_grid_w();
         const int64_t y = dist_and_index.second / env.get_grid_w();
 
-        if(y && distances[(y - 1) * env.get_grid_w() + x] == std::numeric_limits<int64_t>::max()) {
-          distances[(y - 1) * env.get_grid_w() + x] = dist_and_index.first + 1;
-          dist_to_indices.insert(std::make_pair(dist_and_index.first + 1, ((y - 1) * env.get_grid_w() + x)));
-        }
-        if(y + 1 != env.get_grid_h() && distances[(y + 1) * env.get_grid_w() + x] == std::numeric_limits<int64_t>::max()) {
-          distances[(y + 1) * env.get_grid_w() + x] = dist_and_index.first + 1;
-          dist_to_indices.insert(std::make_pair(dist_and_index.first + 1, ((y + 1) * env.get_grid_w() + x)));
-        }
-        if(x && distances[y * env.get_grid_w() + x - 1] == std::numeric_limits<int64_t>::max()) {
-          distances[y * env.get_grid_w() + x - 1] = dist_and_index.first + 1;
-          dist_to_indices.insert(std::make_pair(dist_and_index.first + 1, (y * env.get_grid_w() + x - 1)));
-        }
-        if(x + 1 != env.get_grid_w() && distances[y * env.get_grid_w() + x + 1] == std::numeric_limits<int64_t>::max()) {
-          distances[y * env.get_grid_w() + x + 1] = dist_and_index.first + 1;
-          dist_to_indices.insert(std::make_pair(dist_and_index.first + 1, (y * env.get_grid_w() + x + 1)));
+        for(int j = 0; j != env.get_grid_h(); ++j) {
+          for(int i = 0; i != env.get_grid_w(); ++i) {
+            if(env.distance(std::make_pair(i, j), std::make_pair(x, y)) != 1)
+              continue;
+            if(distances[j * env.get_grid_w() + i] == std::numeric_limits<int64_t>::max()) {
+              distances[j * env.get_grid_w() + i] = dist_and_index.first + 1;
+              dist_to_indices.insert(std::make_pair(dist_and_index.first + 1, j * env.get_grid_w() + i));
+            }
+          }
         }
       }
     }

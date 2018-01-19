@@ -84,6 +84,7 @@
 /puddle_world
 /sliding_puzzle
 /stats
+/taxicab
 /tetris
 .~lock.*
 .syncthing*

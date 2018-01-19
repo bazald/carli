@@ -1,7 +1,7 @@
 sp {sliding-puzzle*general
   :feature 1 unsplit nil
   (<s> ^action <action>)
-  (<action> ^move-direction <move-direction>)
+  (<action> ^tile <tile>)
 -->
   = 0.0
 }
