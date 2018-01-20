@@ -32,7 +32,7 @@ namespace Taxicab {
     //}
 
     return m_fuel == 0 && std::find(m_filling_stations.begin(), m_filling_stations.end(), m_taxi_position) == m_filling_stations.end() &&
-      (m_passenger != ONBOARD || m_taxi_position != m_destinations[m_passenger_destination]);
+      (m_passenger == AT_SOURCE || m_taxi_position != m_destinations[m_passenger_destination]);
   }
 
   std::pair<std::shared_ptr<const Environment::State>, int64_t> Environment::optimal_from(const std::pair<int64_t, int64_t> &taxi_position, const int64_t &fuel, const Passenger &passenger, const int64_t &source, const int64_t &destination) const {
@@ -167,8 +167,8 @@ namespace Taxicab {
     //if(m_evaluate_optimality)
     const auto optimal = optimal_from(m_taxi_position, m_fuel, m_passenger, m_passenger_source, m_passenger_destination);
     m_optimal_solution = optimal.first;
-    m_num_steps_to_goal = -optimal.second;
-    m_solution = std::make_shared<State>(m_taxi_position, m_fuel, m_passenger, 0, 0);
+    m_num_steps_to_goal = optimal.second;
+    //m_solution = std::make_shared<State>(m_taxi_position, m_fuel, m_passenger, 0, 0);
   }
 
   std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action_) {
@@ -218,7 +218,7 @@ namespace Taxicab {
       abort();
     }
 
-    m_solution = std::make_shared<State>(m_taxi_position, m_fuel, m_passenger, 0, 0, m_solution);
+    //m_solution = std::make_shared<State>(m_taxi_position, m_fuel, m_passenger, 0, 0, m_solution);
 
     if(failure())
       return std::make_pair(-50.0, -50.0);
@@ -393,7 +393,7 @@ namespace Taxicab {
 
     bool refuel_required = false;
     if(env->get_fuel() != env->get_fuel_max() && std::find(env->get_filling_stations().begin(), env->get_filling_stations().end(), env->get_taxi_position()) != env->get_filling_stations().end()) {
-      const auto moves_to_goal = env->optimal_from(env->get_taxi_position(), env->get_fuel_max(), env->get_passenger(), env->get_passenger_source(), env->get_passenger_destination());
+      const auto moves_to_goal = env->optimal_from(env->get_taxi_position(), env->get_fuel(), env->get_passenger(), env->get_passenger_source(), env->get_passenger_destination());
       auto state = moves_to_goal.first;
       if(state->passenger != Environment::AT_DESTINATION)
         refuel_required = true;

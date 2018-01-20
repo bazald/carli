@@ -174,7 +174,7 @@ namespace Taxicab {
     const bool m_evaluate_optimality = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["evaluate-optimality"]).get_value() && supports_optimal() && dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value() != "null";
     int64_t m_num_steps_to_goal = 0;
     std::shared_ptr<const State> m_optimal_solution;
-    std::shared_ptr<const State> m_solution;
+    //std::shared_ptr<const State> m_solution;
   };
 
   class TAXICAB_LINKAGE Agent : public Carli::Agent {

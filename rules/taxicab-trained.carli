@@ -1,0 +1,2805 @@
+# CPU time = 9.65242 seconds
+
+set-rule-name-index 763
+set-total-step-count 100000
+
+sp {taxicab*s1
+  :creation-time 0
+  :feature 1 split nil
+  (<s> ^action <action>)
+  (<s> ^passenger <passenger>)
+  (<action> ^type <type>)
+  (<action> ^direction <direction>)
+-->
+  = -6.83697737784297832064 124563.01627737951639574021 1.24564261919998719996 -0.35783475794115582325 100000
+}
+
+sp {taxicab*s2
+  :creation-time 97
+  :feature 2 split taxicab*s1
+  &taxicab*s1
+  (<type> == 1)
+-->
+  = -3.46761233843959271184 102005.16271881986176595092 1.4526718227092363378 -0.22284300588319924663 70220
+}
+
+sp {taxicab*s17
+  :creation-time 97
+  :feature 2 split taxicab*s1
+  &taxicab*s1
+  (<type> == 2)
+-->
+  = -0.59896314555074459118 1968.75689102045726031065 0.59335650723943855755 0.07540071880970995732 3319
+}
+
+sp {taxicab*s47
+  :creation-time 97
+  :feature 2 split taxicab*s1
+  &taxicab*s1
+  (<type> == 4)
+-->
+  = 3.02882716222283976393 2017.20571873825315378781 0.15321325525886778096 0.26274771397545798601 13167
+}
+
+sp {taxicab*s32
+  :creation-time 97
+  :feature 2 split taxicab*s1
+  &taxicab*s1
+  (<type> == 3)
+-->
+  = -1.77151950290851445402 2403.15909266635298990877 0.18211269268462815241 -0.07225656143033883094 13197
+}
+
+sp {taxicab*s12
+  :creation-time 191
+  :feature 3 split taxicab*s2
+  &taxicab*s2
+  -(<s> ^refuel-required true)
+-->
+  = 0.761933366121193556 87872.03135345164628233761 1.2545082640224376469 0.12526909722960258287 70046
+}
+
+sp {taxicab*u22
+  :creation-time 453
+  :feature 3 unsplit taxicab*s17
+  &taxicab*s17
+  (<direction> == 1)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*u23
+  :creation-time 453
+  :feature 3 unsplit taxicab*s17
+  &taxicab*s17
+  (<direction> == 2)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*u24
+  :creation-time 453
+  :feature 3 unsplit taxicab*s17
+  &taxicab*s17
+  (<direction> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*u25
+  :creation-time 453
+  :feature 3 unsplit taxicab*s17
+  &taxicab*s17
+  (<direction> == 4)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s21
+  :creation-time 453
+  :feature 3 split taxicab*s17
+  &taxicab*s17
+  (<direction> == 0)
+-->
+  = -0.10542551784226342204 1745.2750599160849560576 0.5306400303788644246 0.11371879071236712377 3290
+}
+
+sp {taxicab*s11
+  :creation-time 191
+  :feature 3 split taxicab*s2
+  &taxicab*s2
+  +(<s> ^refuel-required true)
+-->
+  = -2.74534810816451901871 8181.87648733640526188537 91.93119648692589862549 -0.22359320756549658227 90
+}
+
+sp {taxicab*u58
+  :creation-time 2176
+  :feature 3 unsplit taxicab*s47
+  &taxicab*s47
+  +(<action> ^toward-dropoff true)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*u358
+  :creation-time 3163
+  :feature 3 unsplit taxicab*s32
+  &taxicab*s32
+  +(<action> ^toward-dropoff true)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s59
+  :creation-time 2176
+  :feature 3 split taxicab*s47
+  &taxicab*s47
+  -(<action> ^toward-dropoff true)
+-->
+  = 2.36753010866374902221 1580.08050667502425312705 0.12019477458352534338 0.18996760040753996046 13147
+}
+
+sp {taxicab*s357
+  :creation-time 3163
+  :feature 3 split taxicab*s32
+  &taxicab*s32
+  -(<action> ^toward-dropoff true)
+-->
+  = -0.2306277220305921194 1475.45580845953577409091 0.11240711629281850692 0.04989060054662670246 13127
+}
+
+sp {taxicab*f169
+  :creation-time 453
+  :feature 4 fringe taxicab*u25
+  &taxicab*u25
+  (<passenger> == 3)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f155
+  :creation-time 453
+  :feature 4 fringe taxicab*u23
+  &taxicab*u23
+  -(<action> ^toward-dropoff true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f156
+  :creation-time 453
+  :feature 4 fringe taxicab*u23
+  &taxicab*u23
+  +(<action> ^toward-pickup true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f157
+  :creation-time 453
+  :feature 4 fringe taxicab*u23
+  &taxicab*u23
+  -(<action> ^toward-pickup true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f153
+  :creation-time 453
+  :feature 4 fringe taxicab*u23
+  &taxicab*u23
+  -(<s> ^refuel-required true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f154
+  :creation-time 453
+  :feature 4 fringe taxicab*u23
+  &taxicab*u23
+  +(<action> ^toward-dropoff true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f152
+  :creation-time 453
+  :feature 4 fringe taxicab*u23
+  &taxicab*u23
+  +(<s> ^refuel-required true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f150
+  :creation-time 453
+  :feature 4 fringe taxicab*u23
+  &taxicab*u23
+  (<passenger> == 2)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f151
+  :creation-time 453
+  :feature 4 fringe taxicab*u23
+  &taxicab*u23
+  (<passenger> == 3)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f172
+  :creation-time 453
+  :feature 4 fringe taxicab*u25
+  &taxicab*u25
+  +(<action> ^toward-dropoff true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f173
+  :creation-time 453
+  :feature 4 fringe taxicab*u25
+  &taxicab*u25
+  -(<action> ^toward-dropoff true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f168
+  :creation-time 453
+  :feature 4 fringe taxicab*u25
+  &taxicab*u25
+  (<passenger> == 2)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f166
+  :creation-time 453
+  :feature 4 fringe taxicab*u24
+  &taxicab*u24
+  -(<action> ^toward-pickup true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f167
+  :creation-time 453
+  :feature 4 fringe taxicab*u25
+  &taxicab*u25
+  (<passenger> == 1)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f283
+  :creation-time 2176
+  :feature 4 fringe taxicab*u58
+  &taxicab*u58
+  (<passenger> == 3)
+-->
+  = -8.76494735802997304575 32522.84999561796212219633 36.72502247950428255763 -0.373577759011239241 0
+}
+
+sp {taxicab*s84
+  :creation-time 275
+  :feature 4 split taxicab*s12
+  &taxicab*s12
+  +(<action> ^toward-pickup true)
+-->
+  = 3.07668821754682308978 22932.76318542981243808754 0.45806893547119309495 0.33468768022480405167 50065
+}
+
+sp {taxicab*f140
+  :creation-time 453
+  :feature 4 fringe taxicab*u22
+  &taxicab*u22
+  (<passenger> == 1)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f141
+  :creation-time 453
+  :feature 4 fringe taxicab*u22
+  &taxicab*u22
+  (<passenger> == 2)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f142
+  :creation-time 453
+  :feature 4 fringe taxicab*u22
+  &taxicab*u22
+  (<passenger> == 3)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f143
+  :creation-time 453
+  :feature 4 fringe taxicab*u22
+  &taxicab*u22
+  +(<s> ^refuel-required true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f144
+  :creation-time 453
+  :feature 4 fringe taxicab*u22
+  &taxicab*u22
+  -(<s> ^refuel-required true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f145
+  :creation-time 453
+  :feature 4 fringe taxicab*u22
+  &taxicab*u22
+  +(<action> ^toward-dropoff true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f146
+  :creation-time 453
+  :feature 4 fringe taxicab*u22
+  &taxicab*u22
+  -(<action> ^toward-dropoff true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f147
+  :creation-time 453
+  :feature 4 fringe taxicab*u22
+  &taxicab*u22
+  +(<action> ^toward-pickup true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f148
+  :creation-time 453
+  :feature 4 fringe taxicab*u22
+  &taxicab*u22
+  -(<action> ^toward-pickup true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f149
+  :creation-time 453
+  :feature 4 fringe taxicab*u23
+  &taxicab*u23
+  (<passenger> == 1)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f158
+  :creation-time 453
+  :feature 4 fringe taxicab*u24
+  &taxicab*u24
+  (<passenger> == 1)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f159
+  :creation-time 453
+  :feature 4 fringe taxicab*u24
+  &taxicab*u24
+  (<passenger> == 2)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f160
+  :creation-time 453
+  :feature 4 fringe taxicab*u24
+  &taxicab*u24
+  (<passenger> == 3)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f161
+  :creation-time 453
+  :feature 4 fringe taxicab*u24
+  &taxicab*u24
+  +(<s> ^refuel-required true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f162
+  :creation-time 453
+  :feature 4 fringe taxicab*u24
+  &taxicab*u24
+  -(<s> ^refuel-required true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f163
+  :creation-time 453
+  :feature 4 fringe taxicab*u24
+  &taxicab*u24
+  +(<action> ^toward-dropoff true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f164
+  :creation-time 453
+  :feature 4 fringe taxicab*u24
+  &taxicab*u24
+  -(<action> ^toward-dropoff true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f165
+  :creation-time 453
+  :feature 4 fringe taxicab*u24
+  &taxicab*u24
+  +(<action> ^toward-pickup true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f170
+  :creation-time 453
+  :feature 4 fringe taxicab*u25
+  &taxicab*u25
+  +(<s> ^refuel-required true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f171
+  :creation-time 453
+  :feature 4 fringe taxicab*u25
+  &taxicab*u25
+  -(<s> ^refuel-required true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f174
+  :creation-time 453
+  :feature 4 fringe taxicab*u25
+  &taxicab*u25
+  +(<action> ^toward-pickup true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*f175
+  :creation-time 453
+  :feature 4 fringe taxicab*u25
+  &taxicab*u25
+  -(<action> ^toward-pickup true)
+-->
+  = -7.73592625528331634399 28407.13063570026133675128 70.14329212065585750224 -0.60128252988682096003 0
+}
+
+sp {taxicab*u133
+  :creation-time 564
+  :feature 4 unsplit taxicab*s21
+  &taxicab*s21
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s132
+  :creation-time 564
+  :feature 4 split taxicab*s21
+  &taxicab*s21
+  (<passenger> == 2)
+-->
+  = 0.43924587244045737444 1168.64946811512368185504 1.47930312419635900945 0.09665331223190555543 791
+}
+
+sp {taxicab*f284
+  :creation-time 2176
+  :feature 4 fringe taxicab*u58
+  &taxicab*u58
+  (<direction> == 0)
+-->
+  = -8.76494735802997304575 32522.84999561796212219633 36.72502247950428255763 -0.373577759011239241 0
+}
+
+sp {taxicab*s85
+  :creation-time 275
+  :feature 4 split taxicab*s12
+  &taxicab*s12
+  -(<action> ^toward-pickup true)
+-->
+  = -1.64019163594634398429 61985.79979046869993908331 3.11392543908714447554 -0.17951524190692735861 19907
+}
+
+sp {taxicab*f281
+  :creation-time 2176
+  :feature 4 fringe taxicab*u58
+  &taxicab*u58
+  (<passenger> == 1)
+-->
+  = -8.76494735802997304575 32522.84999561796212219633 36.72502247950428255763 -0.373577759011239241 0
+}
+
+sp {taxicab*f282
+  :creation-time 2176
+  :feature 4 fringe taxicab*u58
+  &taxicab*u58
+  (<passenger> == 2)
+-->
+  = -8.76494735802997304575 32522.84999561796212219633 36.72502247950428255763 -0.373577759011239241 0
+}
+
+sp {taxicab*f285
+  :creation-time 2176
+  :feature 4 fringe taxicab*u58
+  &taxicab*u58
+  (<direction> == 1)
+-->
+  = -8.76494735802997304575 32522.84999561796212219633 36.72502247950428255763 -0.373577759011239241 0
+}
+
+sp {taxicab*f286
+  :creation-time 2176
+  :feature 4 fringe taxicab*u58
+  &taxicab*u58
+  (<direction> == 2)
+-->
+  = -8.76494735802997304575 32522.84999561796212219633 36.72502247950428255763 -0.373577759011239241 0
+}
+
+sp {taxicab*f287
+  :creation-time 2176
+  :feature 4 fringe taxicab*u58
+  &taxicab*u58
+  (<direction> == 3)
+-->
+  = -8.76494735802997304575 32522.84999561796212219633 36.72502247950428255763 -0.373577759011239241 0
+}
+
+sp {taxicab*f288
+  :creation-time 2176
+  :feature 4 fringe taxicab*u58
+  &taxicab*u58
+  (<direction> == 4)
+-->
+  = -8.76494735802997304575 32522.84999561796212219633 36.72502247950428255763 -0.373577759011239241 0
+}
+
+sp {taxicab*f289
+  :creation-time 2176
+  :feature 4 fringe taxicab*u58
+  &taxicab*u58
+  +(<s> ^refuel-required true)
+-->
+  = -8.76494735802997304575 32522.84999561796212219633 36.72502247950428255763 -0.373577759011239241 0
+}
+
+sp {taxicab*f290
+  :creation-time 2176
+  :feature 4 fringe taxicab*u58
+  &taxicab*u58
+  -(<s> ^refuel-required true)
+-->
+  = -8.76494735802997304575 32522.84999561796212219633 36.72502247950428255763 -0.373577759011239241 0
+}
+
+sp {taxicab*f291
+  :creation-time 2176
+  :feature 4 fringe taxicab*u58
+  &taxicab*u58
+  +(<action> ^toward-pickup true)
+-->
+  = -8.76494735802997304575 32522.84999561796212219633 36.72502247950428255763 -0.373577759011239241 0
+}
+
+sp {taxicab*f292
+  :creation-time 2176
+  :feature 4 fringe taxicab*u58
+  &taxicab*u58
+  -(<action> ^toward-pickup true)
+-->
+  = -8.76494735802997304575 32522.84999561796212219633 36.72502247950428255763 -0.373577759011239241 0
+}
+
+sp {taxicab*f394
+  :creation-time 3163
+  :feature 4 fringe taxicab*u358
+  &taxicab*u358
+  (<passenger> == 2)
+-->
+  = -11.76818593715316296766 35811.19088720251602353528 24.30873511003606424197 -0.52920324204146096392 0
+}
+
+sp {taxicab*f393
+  :creation-time 3163
+  :feature 4 fringe taxicab*u358
+  &taxicab*u358
+  (<passenger> == 1)
+-->
+  = -11.76818593715316296766 35811.19088720251602353528 24.30873511003606424197 -0.52920324204146096392 0
+}
+
+sp {taxicab*f395
+  :creation-time 3163
+  :feature 4 fringe taxicab*u358
+  &taxicab*u358
+  (<passenger> == 3)
+-->
+  = -11.76818593715316296766 35811.19088720251602353528 24.30873511003606424197 -0.52920324204146096392 0
+}
+
+sp {taxicab*f396
+  :creation-time 3163
+  :feature 4 fringe taxicab*u358
+  &taxicab*u358
+  (<direction> == 0)
+-->
+  = -11.76818593715316296766 35811.19088720251602353528 24.30873511003606424197 -0.52920324204146096392 0
+}
+
+sp {taxicab*f397
+  :creation-time 3163
+  :feature 4 fringe taxicab*u358
+  &taxicab*u358
+  (<direction> == 1)
+-->
+  = -11.76818593715316296766 35811.19088720251602353528 24.30873511003606424197 -0.52920324204146096392 0
+}
+
+sp {taxicab*f398
+  :creation-time 3163
+  :feature 4 fringe taxicab*u358
+  &taxicab*u358
+  (<direction> == 2)
+-->
+  = -11.76818593715316296766 35811.19088720251602353528 24.30873511003606424197 -0.52920324204146096392 0
+}
+
+sp {taxicab*f399
+  :creation-time 3163
+  :feature 4 fringe taxicab*u358
+  &taxicab*u358
+  (<direction> == 3)
+-->
+  = -11.76818593715316296766 35811.19088720251602353528 24.30873511003606424197 -0.52920324204146096392 0
+}
+
+sp {taxicab*f400
+  :creation-time 3163
+  :feature 4 fringe taxicab*u358
+  &taxicab*u358
+  (<direction> == 4)
+-->
+  = -11.76818593715316296766 35811.19088720251602353528 24.30873511003606424197 -0.52920324204146096392 0
+}
+
+sp {taxicab*f401
+  :creation-time 3163
+  :feature 4 fringe taxicab*u358
+  &taxicab*u358
+  -(<s> ^refuel-required true)
+-->
+  = -11.76818593715316296766 35811.19088720251602353528 24.30873511003606424197 -0.52920324204146096392 0
+}
+
+sp {taxicab*f402
+  :creation-time 3163
+  :feature 4 fringe taxicab*u358
+  &taxicab*u358
+  +(<s> ^refuel-required true)
+-->
+  = -11.76818593715316296766 35811.19088720251602353528 24.30873511003606424197 -0.52920324204146096392 0
+}
+
+sp {taxicab*f403
+  :creation-time 3163
+  :feature 4 fringe taxicab*u358
+  &taxicab*u358
+  -(<action> ^toward-pickup true)
+-->
+  = -11.76818593715316296766 35811.19088720251602353528 24.30873511003606424197 -0.52920324204146096392 0
+}
+
+sp {taxicab*f404
+  :creation-time 3163
+  :feature 4 fringe taxicab*u358
+  &taxicab*u358
+  +(<action> ^toward-pickup true)
+-->
+  = -11.76818593715316296766 35811.19088720251602353528 24.30873511003606424197 -0.52920324204146096392 0
+}
+
+sp {taxicab*u452
+  :creation-time 4066
+  :feature 4 unsplit taxicab*s59
+  &taxicab*s59
+  +(<action> ^toward-pickup true)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s451
+  :creation-time 4066
+  :feature 4 split taxicab*s59
+  &taxicab*s59
+  -(<action> ^toward-pickup true)
+-->
+  = 0.90007237560289199418 560.80783617417557707086 0.04288833253090972714 0.03353219049762166948 13077
+}
+
+sp {taxicab*s131
+  :creation-time 564
+  :feature 4 split taxicab*s21
+  &taxicab*s21
+  (<passenger> == 1)
+-->
+  = -0.29624560651426307123 473.54873360871630438851 0.19117833411736628868 0.03122063658329615743 2478
+}
+
+sp {taxicab*u507
+  :creation-time 4299
+  :feature 4 unsplit taxicab*s357
+  &taxicab*s357
+  +(<s> ^refuel-required true)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s506
+  :creation-time 4299
+  :feature 4 split taxicab*s357
+  &taxicab*s357
+  -(<s> ^refuel-required true)
+-->
+  = 0.80647316259093282387 947.68534446694047801429 0.07258619366321542032 0.1115650963404130197 13057
+}
+
+sp {taxicab*u62
+  :creation-time 9230
+  :feature 4 unsplit taxicab*s11
+  &taxicab*s11
+  (<passenger> == 1)
+-->
+  = -0.56852111765606239135 1803.07499239311732708302 66.78055527381916078866 -0.03762063051907149624 28
+}
+
+sp {taxicab*u63
+  :creation-time 9230
+  :feature 4 unsplit taxicab*s11
+  &taxicab*s11
+  (<passenger> == 2)
+-->
+  = -0.22072108841518239819 426.96770433840305258855 213.48385216920152629427 -0.01998295417664662857 3
+}
+
+sp {taxicab*u64
+  :creation-time 9230
+  :feature 4 unsplit taxicab*s11
+  &taxicab*s11
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s92
+  :creation-time 376
+  :feature 5 split taxicab*s84
+  &taxicab*s84
+  (<direction> == 3)
+-->
+  = 0.82777885597022071718 3832.57386117528221802786 0.34914583776763069567 0.06906976836523778807 10978
+}
+
+sp {taxicab*s91
+  :creation-time 376
+  :feature 5 split taxicab*s84
+  &taxicab*s84
+  (<direction> == 2)
+-->
+  = 0.98670692116671820937 6232.92222820095048518851 0.41854164841532032204 0.07934760185192807347 14893
+}
+
+sp {taxicab*s90
+  :creation-time 376
+  :feature 5 split taxicab*s84
+  &taxicab*s84
+  (<direction> == 1)
+-->
+  = 0.60559736512036621559 8889.61708357351562881377 0.63082721285647991305 0.07464756080353075751 14093
+}
+
+sp {taxicab*s93
+  :creation-time 376
+  :feature 5 split taxicab*s84
+  &taxicab*s84
+  (<direction> == 4)
+-->
+  = 0.57886931674332442466 3945.70583711961035078275 0.39311605431101032115 0.06892698864915722257 10038
+}
+
+sp {taxicab*s639
+  :creation-time 5119
+  :feature 5 split taxicab*s506
+  &taxicab*s506
+  (<passenger> == 1)
+-->
+  = 1.1947670625347885931 850.96221394698466156115 0.06552920175165444228 0.1080002079820476385 12987
+}
+
+sp {taxicab*u89
+  :creation-time 376
+  :feature 5 unsplit taxicab*s84
+  &taxicab*s84
+  (<direction> == 0)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f491
+  :creation-time 4066
+  :feature 5 fringe taxicab*u452
+  &taxicab*u452
+  (<direction> == 0)
+-->
+  = -7.1465918629322633393 40972.77321824384125648066 40.37184030522399069696 -0.00070363450264854244 0
+}
+
+sp {taxicab*s593
+  :creation-time 4857
+  :feature 5 split taxicab*s451
+  &taxicab*s451
+  (<direction> == 0)
+-->
+  = 0.16285393410283555138 215.55654615854379585471 0.01657362341677254963 -0.03042710468048731923 13007
+}
+
+sp {taxicab*u204
+  :creation-time 4276
+  :feature 5 unsplit taxicab*s131
+  &taxicab*s131
+  +(<action> ^toward-pickup true)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*u210
+  :creation-time 684
+  :feature 5 unsplit taxicab*s132
+  &taxicab*s132
+  +(<action> ^toward-pickup true)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f212
+  :creation-time 564
+  :feature 5 fringe taxicab*u133
+  &taxicab*u133
+  +(<s> ^refuel-required true)
+-->
+  = -8.40714336035801679259 28731.13224506160986493342 61.58052991544980159233 -0.60044389547560894638 0
+}
+
+sp {taxicab*f213
+  :creation-time 564
+  :feature 5 fringe taxicab*u133
+  &taxicab*u133
+  -(<s> ^refuel-required true)
+-->
+  = -8.40714336035801679259 28731.13224506160986493342 61.58052991544980159233 -0.60044389547560894638 0
+}
+
+sp {taxicab*f214
+  :creation-time 564
+  :feature 5 fringe taxicab*u133
+  &taxicab*u133
+  +(<action> ^toward-dropoff true)
+-->
+  = -8.40714336035801679259 28731.13224506160986493342 61.58052991544980159233 -0.60044389547560894638 0
+}
+
+sp {taxicab*f215
+  :creation-time 564
+  :feature 5 fringe taxicab*u133
+  &taxicab*u133
+  -(<action> ^toward-dropoff true)
+-->
+  = -8.40714336035801679259 28731.13224506160986493342 61.58052991544980159233 -0.60044389547560894638 0
+}
+
+sp {taxicab*f216
+  :creation-time 564
+  :feature 5 fringe taxicab*u133
+  &taxicab*u133
+  +(<action> ^toward-pickup true)
+-->
+  = -8.40714336035801679259 28731.13224506160986493342 61.58052991544980159233 -0.60044389547560894638 0
+}
+
+sp {taxicab*f217
+  :creation-time 564
+  :feature 5 fringe taxicab*u133
+  &taxicab*u133
+  -(<action> ^toward-pickup true)
+-->
+  = -8.40714336035801679259 28731.13224506160986493342 61.58052991544980159233 -0.60044389547560894638 0
+}
+
+sp {taxicab*f732
+  :creation-time 9230
+  :feature 5 fringe taxicab*u63
+  &taxicab*u63
+  (<direction> == 1)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f733
+  :creation-time 9230
+  :feature 5 fringe taxicab*u63
+  &taxicab*u63
+  (<direction> == 2)
+-->
+  = -19.00487619339934397544 109214.92455694681848399341 111.25580457079560403599 -0.62544443574029962019 1
+}
+
+sp {taxicab*f489
+  :creation-time 4066
+  :feature 5 fringe taxicab*u452
+  &taxicab*u452
+  (<passenger> == 2)
+-->
+  = -7.1465918629322633393 40972.77321824384125648066 40.37184030522399069696 -0.00070363450264854244 0
+}
+
+sp {taxicab*f488
+  :creation-time 4066
+  :feature 5 fringe taxicab*u452
+  &taxicab*u452
+  (<passenger> == 1)
+-->
+  = -7.1465918629322633393 40972.77321824384125648066 40.37184030522399069696 -0.00070363450264854244 0
+}
+
+sp {taxicab*s211
+  :creation-time 684
+  :feature 5 split taxicab*s132
+  &taxicab*s132
+  -(<action> ^toward-pickup true)
+-->
+  = 0.60487812983342104101 1113.25788870081191817007 1.44955454257918225913 0.10128613939211901507 769
+}
+
+sp {taxicab*f742
+  :creation-time 9230
+  :feature 5 fringe taxicab*u64
+  &taxicab*u64
+  (<direction> == 2)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f743
+  :creation-time 9230
+  :feature 5 fringe taxicab*u64
+  &taxicab*u64
+  (<direction> == 3)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f740
+  :creation-time 9230
+  :feature 5 fringe taxicab*u64
+  &taxicab*u64
+  (<direction> == 0)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*s104
+  :creation-time 1466
+  :feature 5 split taxicab*s85
+  &taxicab*s85
+  +(<action> ^toward-dropoff true)
+-->
+  = 3.79399704720968777849 45264.59518181960447691381 2.29106621358605089256 0.28516774762901814233 19758
+}
+
+sp {taxicab*f555
+  :creation-time 4299
+  :feature 5 fringe taxicab*u507
+  &taxicab*u507
+  (<passenger> == 3)
+-->
+  = -14.0553382688047712179 41184.34603157877427292988 27.173276750697464621 -0.59608963735546183216 0
+}
+
+sp {taxicab*f553
+  :creation-time 4299
+  :feature 5 fringe taxicab*u507
+  &taxicab*u507
+  (<passenger> == 1)
+-->
+  = -14.0553382688047712179 41184.34603157877427292988 27.173276750697464621 -0.59608963735546183216 0
+}
+
+sp {taxicab*f490
+  :creation-time 4066
+  :feature 5 fringe taxicab*u452
+  &taxicab*u452
+  (<passenger> == 3)
+-->
+  = -7.1465918629322633393 40972.77321824384125648066 40.37184030522399069696 -0.00070363450264854244 0
+}
+
+sp {taxicab*f492
+  :creation-time 4066
+  :feature 5 fringe taxicab*u452
+  &taxicab*u452
+  (<direction> == 1)
+-->
+  = -7.1465918629322633393 40972.77321824384125648066 40.37184030522399069696 -0.00070363450264854244 0
+}
+
+sp {taxicab*f493
+  :creation-time 4066
+  :feature 5 fringe taxicab*u452
+  &taxicab*u452
+  (<direction> == 2)
+-->
+  = -7.1465918629322633393 40972.77321824384125648066 40.37184030522399069696 -0.00070363450264854244 0
+}
+
+sp {taxicab*f494
+  :creation-time 4066
+  :feature 5 fringe taxicab*u452
+  &taxicab*u452
+  (<direction> == 3)
+-->
+  = -7.1465918629322633393 40972.77321824384125648066 40.37184030522399069696 -0.00070363450264854244 0
+}
+
+sp {taxicab*f495
+  :creation-time 4066
+  :feature 5 fringe taxicab*u452
+  &taxicab*u452
+  (<direction> == 4)
+-->
+  = -7.1465918629322633393 40972.77321824384125648066 40.37184030522399069696 -0.00070363450264854244 0
+}
+
+sp {taxicab*f496
+  :creation-time 4066
+  :feature 5 fringe taxicab*u452
+  &taxicab*u452
+  -(<s> ^refuel-required true)
+-->
+  = -7.1465918629322633393 40972.77321824384125648066 40.37184030522399069696 -0.00070363450264854244 0
+}
+
+sp {taxicab*f497
+  :creation-time 4066
+  :feature 5 fringe taxicab*u452
+  &taxicab*u452
+  +(<s> ^refuel-required true)
+-->
+  = -7.1465918629322633393 40972.77321824384125648066 40.37184030522399069696 -0.00070363450264854244 0
+}
+
+sp {taxicab*f554
+  :creation-time 4299
+  :feature 5 fringe taxicab*u507
+  &taxicab*u507
+  (<passenger> == 2)
+-->
+  = -14.0553382688047712179 41184.34603157877427292988 27.173276750697464621 -0.59608963735546183216 0
+}
+
+sp {taxicab*f556
+  :creation-time 4299
+  :feature 5 fringe taxicab*u507
+  &taxicab*u507
+  (<direction> == 0)
+-->
+  = -14.0553382688047712179 41184.34603157877427292988 27.173276750697464621 -0.59608963735546183216 0
+}
+
+sp {taxicab*f557
+  :creation-time 4299
+  :feature 5 fringe taxicab*u507
+  &taxicab*u507
+  (<direction> == 1)
+-->
+  = -14.0553382688047712179 41184.34603157877427292988 27.173276750697464621 -0.59608963735546183216 0
+}
+
+sp {taxicab*f558
+  :creation-time 4299
+  :feature 5 fringe taxicab*u507
+  &taxicab*u507
+  (<direction> == 2)
+-->
+  = -14.0553382688047712179 41184.34603157877427292988 27.173276750697464621 -0.59608963735546183216 0
+}
+
+sp {taxicab*f559
+  :creation-time 4299
+  :feature 5 fringe taxicab*u507
+  &taxicab*u507
+  (<direction> == 3)
+-->
+  = -14.0553382688047712179 41184.34603157877427292988 27.173276750697464621 -0.59608963735546183216 0
+}
+
+sp {taxicab*f560
+  :creation-time 4299
+  :feature 5 fringe taxicab*u507
+  &taxicab*u507
+  (<direction> == 4)
+-->
+  = -14.0553382688047712179 41184.34603157877427292988 27.173276750697464621 -0.59608963735546183216 0
+}
+
+sp {taxicab*f561
+  :creation-time 4299
+  :feature 5 fringe taxicab*u507
+  &taxicab*u507
+  -(<action> ^toward-pickup true)
+-->
+  = -14.0553382688047712179 41184.34603157877427292988 27.173276750697464621 -0.59608963735546183216 0
+}
+
+sp {taxicab*f562
+  :creation-time 4299
+  :feature 5 fringe taxicab*u507
+  &taxicab*u507
+  +(<action> ^toward-pickup true)
+-->
+  = -14.0553382688047712179 41184.34603157877427292988 27.173276750697464621 -0.59608963735546183216 0
+}
+
+sp {taxicab*u594
+  :creation-time 4857
+  :feature 5 unsplit taxicab*s451
+  &taxicab*s451
+  (<direction> == 1)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*u595
+  :creation-time 4857
+  :feature 5 unsplit taxicab*s451
+  &taxicab*s451
+  (<direction> == 2)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*u596
+  :creation-time 4857
+  :feature 5 unsplit taxicab*s451
+  &taxicab*s451
+  (<direction> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*u597
+  :creation-time 4857
+  :feature 5 unsplit taxicab*s451
+  &taxicab*s451
+  (<direction> == 4)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s205
+  :creation-time 4276
+  :feature 5 split taxicab*s131
+  &taxicab*s131
+  -(<action> ^toward-pickup true)
+-->
+  = 0.0445611658212112377 354.73351748163986485451 0.1455018529457095533 0.04774656617537770958 2439
+}
+
+sp {taxicab*u640
+  :creation-time 5119
+  :feature 5 unsplit taxicab*s506
+  &taxicab*s506
+  (<passenger> == 2)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*u641
+  :creation-time 5119
+  :feature 5 unsplit taxicab*s506
+  &taxicab*s506
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f722
+  :creation-time 9230
+  :feature 5 fringe taxicab*u62
+  &taxicab*u62
+  (<direction> == 0)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f723
+  :creation-time 9230
+  :feature 5 fringe taxicab*u62
+  &taxicab*u62
+  (<direction> == 1)
+-->
+  = -19.01609501532510648758 109477.9044041763263521716 36492.6348013921087840572 -0.6244553186785851695 4
+}
+
+sp {taxicab*f724
+  :creation-time 9230
+  :feature 5 fringe taxicab*u62
+  &taxicab*u62
+  (<direction> == 2)
+-->
+  = -19.10500130210460412172 109793.47034803676069714129 12199.27448311519583512563 -0.62948326314028490991 10
+}
+
+sp {taxicab*f725
+  :creation-time 9230
+  :feature 5 fringe taxicab*u62
+  &taxicab*u62
+  (<direction> == 3)
+-->
+  = -19.20385498630545129117 109740.62168122018920257688 13717.57771015252365032211 -0.63983799982203037882 9
+}
+
+sp {taxicab*f726
+  :creation-time 9230
+  :feature 5 fringe taxicab*u62
+  &taxicab*u62
+  (<direction> == 4)
+-->
+  = -19.10033611011073517716 109470.95480893472267780453 27367.73870223368066945113 -0.6320925840370476001 5
+}
+
+sp {taxicab*f727
+  :creation-time 9230
+  :feature 5 fringe taxicab*u62
+  &taxicab*u62
+  +(<action> ^toward-dropoff true)
+-->
+  = -19.30799317176509788396 110307.65427176169760059565 7353.84361811744656733936 -0.64562903007942740174 16
+}
+
+sp {taxicab*f728
+  :creation-time 9230
+  :feature 5 fringe taxicab*u62
+  &taxicab*u62
+  -(<action> ^toward-dropoff true)
+-->
+  = -19.28642385484611665447 110013.62285062353475950658 10001.23844096577522577718 -0.64586714410510615014 12
+}
+
+sp {taxicab*f729
+  :creation-time 9230
+  :feature 5 fringe taxicab*u62
+  &taxicab*u62
+  +(<action> ^toward-pickup true)
+-->
+  = -19.30554562497253101583 110288.87961983827699441463 6487.58115410813388734823 -0.64389384170514596395 18
+}
+
+sp {taxicab*f730
+  :creation-time 9230
+  :feature 5 fringe taxicab*u62
+  &taxicab*u62
+  -(<action> ^toward-pickup true)
+-->
+  = -19.29009955445152613152 110021.12143416526669170707 12224.56904824058437952772 -0.64772514776067091624 10
+}
+
+sp {taxicab*f731
+  :creation-time 9230
+  :feature 5 fringe taxicab*u63
+  &taxicab*u63
+  (<direction> == 0)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f734
+  :creation-time 9230
+  :feature 5 fringe taxicab*u63
+  &taxicab*u63
+  (<direction> == 3)
+-->
+  = -19.09830694741590662034 109472.2046193983405828476 109472.2046193983405828476 -0.63407067644630132897 2
+}
+
+sp {taxicab*f735
+  :creation-time 9230
+  :feature 5 fringe taxicab*u63
+  &taxicab*u63
+  (<direction> == 4)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f736
+  :creation-time 9230
+  :feature 5 fringe taxicab*u63
+  &taxicab*u63
+  +(<action> ^toward-dropoff true)
+-->
+  = -19.19111853598702666091 109727.28580215289548505098 54863.64290107644774252549 -0.64266567531880525177 3
+}
+
+sp {taxicab*f737
+  :creation-time 9230
+  :feature 5 fringe taxicab*u63
+  &taxicab*u63
+  -(<action> ^toward-dropoff true)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f738
+  :creation-time 9230
+  :feature 5 fringe taxicab*u63
+  &taxicab*u63
+  +(<action> ^toward-pickup true)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f739
+  :creation-time 9230
+  :feature 5 fringe taxicab*u63
+  &taxicab*u63
+  -(<action> ^toward-pickup true)
+-->
+  = -19.19111853598702666091 109727.28580215289548505098 54863.64290107644774252549 -0.64266567531880525177 3
+}
+
+sp {taxicab*f741
+  :creation-time 9230
+  :feature 5 fringe taxicab*u64
+  &taxicab*u64
+  (<direction> == 1)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f744
+  :creation-time 9230
+  :feature 5 fringe taxicab*u64
+  &taxicab*u64
+  (<direction> == 4)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f745
+  :creation-time 9230
+  :feature 5 fringe taxicab*u64
+  &taxicab*u64
+  +(<action> ^toward-dropoff true)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f746
+  :creation-time 9230
+  :feature 5 fringe taxicab*u64
+  &taxicab*u64
+  -(<action> ^toward-dropoff true)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f747
+  :creation-time 9230
+  :feature 5 fringe taxicab*u64
+  &taxicab*u64
+  +(<action> ^toward-pickup true)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*f748
+  :creation-time 9230
+  :feature 5 fringe taxicab*u64
+  &taxicab*u64
+  -(<action> ^toward-pickup true)
+-->
+  = -18.91150525053505759843 109214.92455694681848399341 111.25580457079560403599 -0.61679350143847921917 0
+}
+
+sp {taxicab*s105
+  :creation-time 1466
+  :feature 5 split taxicab*s85
+  &taxicab*s85
+  -(<action> ^toward-dropoff true)
+-->
+  = -4.37876396286019797799 12259.12820404743797553238 136.21253560052707598516 -0.38825543199438788955 91
+}
+
+sp {taxicab*u703
+  :creation-time 6081
+  :feature 6 unsplit taxicab*s639
+  &taxicab*s639
+  +(<action> ^toward-pickup true)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f631
+  :creation-time 4857
+  :feature 6 fringe taxicab*u597
+  &taxicab*u597
+  (<passenger> == 2)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f106
+  :creation-time 376
+  :feature 6 fringe taxicab*u89
+  &taxicab*u89
+  (<passenger> == 1)
+-->
+  = -10.72947131184410451965 44414.70278611069807084277 155.4623764449737564064 -0.72493109890528284467 0
+}
+
+sp {taxicab*f107
+  :creation-time 376
+  :feature 6 fringe taxicab*u89
+  &taxicab*u89
+  (<passenger> == 2)
+-->
+  = -10.72947131184410451965 44414.70278611069807084277 155.4623764449737564064 -0.72493109890528284467 0
+}
+
+sp {taxicab*f108
+  :creation-time 376
+  :feature 6 fringe taxicab*u89
+  &taxicab*u89
+  (<passenger> == 3)
+-->
+  = -10.72947131184410451965 44414.70278611069807084277 155.4623764449737564064 -0.72493109890528284467 0
+}
+
+sp {taxicab*f109
+  :creation-time 376
+  :feature 6 fringe taxicab*u89
+  &taxicab*u89
+  +(<action> ^toward-dropoff true)
+-->
+  = -10.72947131184410451965 44414.70278611069807084277 155.4623764449737564064 -0.72493109890528284467 0
+}
+
+sp {taxicab*f110
+  :creation-time 376
+  :feature 6 fringe taxicab*u89
+  &taxicab*u89
+  -(<action> ^toward-dropoff true)
+-->
+  = -10.72947131184410451965 44414.70278611069807084277 155.4623764449737564064 -0.72493109890528284467 0
+}
+
+sp {taxicab*f634
+  :creation-time 4857
+  :feature 6 fringe taxicab*u597
+  &taxicab*u597
+  +(<s> ^refuel-required true)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*s702
+  :creation-time 6081
+  :feature 6 split taxicab*s639
+  &taxicab*s639
+  -(<action> ^toward-pickup true)
+-->
+  = 1.3768234055119461523 824.54410732257110794308 0.06383896773943721625 0.0882375636924081358 12917
+}
+
+sp {taxicab*u118
+  :creation-time 519
+  :feature 6 unsplit taxicab*s91
+  &taxicab*s91
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*u123
+  :creation-time 524
+  :feature 6 unsplit taxicab*s92
+  &taxicab*s92
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s542
+  :creation-time 4880
+  :feature 6 split taxicab*s205
+  &taxicab*s205
+  -(<action> ^toward-dropoff true)
+-->
+  = 0.17044118167157096266 332.21021015985820667993 0.13813314351761254994 0.04680126418011170547 2406
+}
+
+sp {taxicab*u690
+  :creation-time 5729
+  :feature 6 unsplit taxicab*s593
+  &taxicab*s593
+  +(<s> ^refuel-required true)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s689
+  :creation-time 5729
+  :feature 6 split taxicab*s593
+  &taxicab*s593
+  -(<s> ^refuel-required true)
+-->
+  = -0.21163715437321944934 105.82021943055949009249 0.00818028907162642906 -0.04873707271744533165 12937
+}
+
+sp {taxicab*s117
+  :creation-time 519
+  :feature 6 split taxicab*s91
+  &taxicab*s91
+  (<passenger> == 2)
+-->
+  = 1.39221170776721270279 4186.52330655984042095952 0.68362562158064021922 0.03242805315009684303 6125
+}
+
+sp {taxicab*f632
+  :creation-time 4857
+  :feature 6 fringe taxicab*u597
+  &taxicab*u597
+  (<passenger> == 3)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f218
+  :creation-time 684
+  :feature 6 fringe taxicab*u210
+  &taxicab*u210
+  +(<s> ^refuel-required true)
+-->
+  = -9.05057957063239548745 28968.52166274465707829222 53.03469949821732143391 -0.58897531397864189007 0
+}
+
+sp {taxicab*f633
+  :creation-time 4857
+  :feature 6 fringe taxicab*u597
+  &taxicab*u597
+  -(<s> ^refuel-required true)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f219
+  :creation-time 684
+  :feature 6 fringe taxicab*u210
+  &taxicab*u210
+  -(<s> ^refuel-required true)
+-->
+  = -9.05057957063239548745 28968.52166274465707829222 53.03469949821732143391 -0.58897531397864189007 0
+}
+
+sp {taxicab*f220
+  :creation-time 684
+  :feature 6 fringe taxicab*u210
+  &taxicab*u210
+  +(<action> ^toward-dropoff true)
+-->
+  = -9.05057957063239548745 28968.52166274465707829222 53.03469949821732143391 -0.58897531397864189007 0
+}
+
+sp {taxicab*f221
+  :creation-time 684
+  :feature 6 fringe taxicab*u210
+  &taxicab*u210
+  -(<action> ^toward-dropoff true)
+-->
+  = -9.05057957063239548745 28968.52166274465707829222 53.03469949821732143391 -0.58897531397864189007 0
+}
+
+sp {taxicab*s122
+  :creation-time 524
+  :feature 6 split taxicab*s92
+  &taxicab*s92
+  (<passenger> == 2)
+-->
+  = 1.17712457365400480214 1900.33590882359089846432 0.76750238643925317028 0.02697956709566638051 2477
+}
+
+sp {taxicab*f535
+  :creation-time 4276
+  :feature 6 fringe taxicab*u204
+  &taxicab*u204
+  +(<s> ^refuel-required true)
+-->
+  = -15.01538972786627290645 40578.01089711597887799144 15.2975800184266006454 -0.40298122061006025341 0
+}
+
+sp {taxicab*s114
+  :creation-time 496
+  :feature 6 split taxicab*s90
+  &taxicab*s90
+  +(<action> ^toward-dropoff true)
+-->
+  = 0.7570714250899721609 7919.10956339878066501115 0.77806146231074679864 0.02543747007069475236 10179
+}
+
+sp {taxicab*s129
+  :creation-time 563
+  :feature 6 split taxicab*s93
+  &taxicab*s93
+  +(<action> ^toward-dropoff true)
+-->
+  = 0.80134358613232703483 3085.3563633985422711703 0.49844206193837514718 0.04129350043684477251 6191
+}
+
+sp {taxicab*s115
+  :creation-time 496
+  :feature 6 split taxicab*s90
+  &taxicab*s90
+  -(<action> ^toward-dropoff true)
+-->
+  = -0.22956544781588900106 949.75577615860322566732 0.2448455210514574043 0.02435364962628892849 3880
+}
+
+sp {taxicab*s116
+  :creation-time 519
+  :feature 6 split taxicab*s91
+  &taxicab*s91
+  (<passenger> == 1)
+-->
+  = -0.40382497583990834 2039.18360682349157286808 0.23363698519975842349 0.03044947586795287986 8729
+}
+
+sp {taxicab*s130
+  :creation-time 563
+  :feature 6 split taxicab*s93
+  &taxicab*s93
+  -(<action> ^toward-dropoff true)
+-->
+  = -0.20551553418427143116 855.95757903522951437481 0.22372127000398053798 0.01962327385895503568 3827
+}
+
+sp {taxicab*u236
+  :creation-time 1325
+  :feature 6 unsplit taxicab*s211
+  &taxicab*s211
+  +(<action> ^toward-dropoff true)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s235
+  :creation-time 1325
+  :feature 6 split taxicab*s211
+  &taxicab*s211
+  -(<action> ^toward-dropoff true)
+-->
+  = 0.91872358367307205285 1028.75520961430288480187 1.48022332318604732393 0.09440786065076979539 696
+}
+
+sp {taxicab*f666
+  :creation-time 5119
+  :feature 6 fringe taxicab*u640
+  &taxicab*u640
+  (<direction> == 4)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*f625
+  :creation-time 4857
+  :feature 6 fringe taxicab*u596
+  &taxicab*u596
+  (<passenger> == 1)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*u268
+  :creation-time 2515
+  :feature 6 unsplit taxicab*s104
+  &taxicab*s104
+  (<direction> == 0)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f536
+  :creation-time 4276
+  :feature 6 fringe taxicab*u204
+  &taxicab*u204
+  -(<s> ^refuel-required true)
+-->
+  = -15.01538972786627290645 40578.01089711597887799144 15.2975800184266006454 -0.40298122061006025341 0
+}
+
+sp {taxicab*s272
+  :creation-time 2515
+  :feature 6 split taxicab*s104
+  &taxicab*s104
+  (<direction> == 4)
+-->
+  = 0.86105403934932200904 10380.83864378001635486726 1.56502919399668560807 0.06923221291079115214 6634
+}
+
+sp {taxicab*f675
+  :creation-time 5119
+  :feature 6 fringe taxicab*u641
+  &taxicab*u641
+  +(<action> ^toward-pickup true)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*s269
+  :creation-time 2515
+  :feature 6 split taxicab*s104
+  &taxicab*s104
+  (<direction> == 1)
+-->
+  = 1.09403656873110666226 7422.32267279669576964807 1.76218487008468560617 0.08738265385868641821 4213
+}
+
+sp {taxicab*s121
+  :creation-time 524
+  :feature 6 split taxicab*s92
+  &taxicab*s92
+  (<passenger> == 1)
+-->
+  = -0.35206173762001863325 1926.61669401266999557265 0.22722215992601368928 0.03151020649569451215 8480
+}
+
+sp {taxicab*f615
+  :creation-time 4857
+  :feature 6 fringe taxicab*u594
+  &taxicab*u594
+  (<passenger> == 1)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f617
+  :creation-time 4857
+  :feature 6 fringe taxicab*u594
+  &taxicab*u594
+  (<passenger> == 3)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f616
+  :creation-time 4857
+  :feature 6 fringe taxicab*u594
+  &taxicab*u594
+  (<passenger> == 2)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f619
+  :creation-time 4857
+  :feature 6 fringe taxicab*u594
+  &taxicab*u594
+  +(<s> ^refuel-required true)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f618
+  :creation-time 4857
+  :feature 6 fringe taxicab*u594
+  &taxicab*u594
+  -(<s> ^refuel-required true)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*s270
+  :creation-time 2515
+  :feature 6 split taxicab*s104
+  &taxicab*s104
+  (<direction> == 2)
+-->
+  = 0.94258583719147726043 12821.9744290392682160018 3.8901621447327876524 0.05332885831225096795 3297
+}
+
+sp {taxicab*f538
+  :creation-time 4276
+  :feature 6 fringe taxicab*u204
+  &taxicab*u204
+  -(<action> ^toward-dropoff true)
+-->
+  = -15.01538972786627290645 40578.01089711597887799144 15.2975800184266006454 -0.40298122061006025341 0
+}
+
+sp {taxicab*s271
+  :creation-time 2515
+  :feature 6 split taxicab*s104
+  &taxicab*s104
+  (<direction> == 3)
+-->
+  = 0.7779057997834237792 14556.0937644115874718409 2.61236427932727721668 0.04663600004805282945 5573
+}
+
+sp {taxicab*f537
+  :creation-time 4276
+  :feature 6 fringe taxicab*u204
+  &taxicab*u204
+  +(<action> ^toward-dropoff true)
+-->
+  = -15.01538972786627290645 40578.01089711597887799144 15.2975800184266006454 -0.40298122061006025341 0
+}
+
+sp {taxicab*f628
+  :creation-time 4857
+  :feature 6 fringe taxicab*u596
+  &taxicab*u596
+  -(<s> ^refuel-required true)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f629
+  :creation-time 4857
+  :feature 6 fringe taxicab*u596
+  &taxicab*u596
+  +(<s> ^refuel-required true)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f620
+  :creation-time 4857
+  :feature 6 fringe taxicab*u595
+  &taxicab*u595
+  (<passenger> == 1)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f621
+  :creation-time 4857
+  :feature 6 fringe taxicab*u595
+  &taxicab*u595
+  (<passenger> == 2)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f622
+  :creation-time 4857
+  :feature 6 fringe taxicab*u595
+  &taxicab*u595
+  (<passenger> == 3)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f623
+  :creation-time 4857
+  :feature 6 fringe taxicab*u595
+  &taxicab*u595
+  -(<s> ^refuel-required true)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f624
+  :creation-time 4857
+  :feature 6 fringe taxicab*u595
+  &taxicab*u595
+  +(<s> ^refuel-required true)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f626
+  :creation-time 4857
+  :feature 6 fringe taxicab*u596
+  &taxicab*u596
+  (<passenger> == 2)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f627
+  :creation-time 4857
+  :feature 6 fringe taxicab*u596
+  &taxicab*u596
+  (<passenger> == 3)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*f630
+  :creation-time 4857
+  :feature 6 fringe taxicab*u597
+  &taxicab*u597
+  (<passenger> == 1)
+-->
+  = -4.62250339467934256987 45028.25992153220431646332 34.63055269783090039937 0.23917583348564408485 0
+}
+
+sp {taxicab*u541
+  :creation-time 4880
+  :feature 6 unsplit taxicab*s205
+  &taxicab*s205
+  +(<action> ^toward-dropoff true)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f662
+  :creation-time 5119
+  :feature 6 fringe taxicab*u640
+  &taxicab*u640
+  (<direction> == 0)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*f663
+  :creation-time 5119
+  :feature 6 fringe taxicab*u640
+  &taxicab*u640
+  (<direction> == 1)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*f664
+  :creation-time 5119
+  :feature 6 fringe taxicab*u640
+  &taxicab*u640
+  (<direction> == 2)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*f665
+  :creation-time 5119
+  :feature 6 fringe taxicab*u640
+  &taxicab*u640
+  (<direction> == 3)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*f667
+  :creation-time 5119
+  :feature 6 fringe taxicab*u640
+  &taxicab*u640
+  -(<action> ^toward-pickup true)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*f668
+  :creation-time 5119
+  :feature 6 fringe taxicab*u640
+  &taxicab*u640
+  +(<action> ^toward-pickup true)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*f669
+  :creation-time 5119
+  :feature 6 fringe taxicab*u641
+  &taxicab*u641
+  (<direction> == 0)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*f670
+  :creation-time 5119
+  :feature 6 fringe taxicab*u641
+  &taxicab*u641
+  (<direction> == 1)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*f671
+  :creation-time 5119
+  :feature 6 fringe taxicab*u641
+  &taxicab*u641
+  (<direction> == 2)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*f672
+  :creation-time 5119
+  :feature 6 fringe taxicab*u641
+  &taxicab*u641
+  (<direction> == 3)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*f673
+  :creation-time 5119
+  :feature 6 fringe taxicab*u641
+  &taxicab*u641
+  (<direction> == 4)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*f674
+  :creation-time 5119
+  :feature 6 fringe taxicab*u641
+  &taxicab*u641
+  -(<action> ^toward-pickup true)
+-->
+  = -15.20237774493159577105 45175.6808702449343400076 21.68631844576771783295 -0.57162175827194783295 0
+}
+
+sp {taxicab*u273
+  :creation-time 13707
+  :feature 6 unsplit taxicab*s105
+  &taxicab*s105
+  (<passenger> == 1)
+-->
+  = -1.59024538615489863247 3879.19252078567888020189 104.84304110231565232425 -0.13147429607130697859 38
+}
+
+sp {taxicab*u274
+  :creation-time 13707
+  :feature 6 unsplit taxicab*s105
+  &taxicab*s105
+  (<passenger> == 2)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*u275
+  :creation-time 13707
+  :feature 6 unsplit taxicab*s105
+  &taxicab*s105
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s718
+  :creation-time 6986
+  :feature 7 split taxicab*s702
+  &taxicab*s702
+  (<direction> == 1)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s719
+  :creation-time 6986
+  :feature 7 split taxicab*s702
+  &taxicab*s702
+  (<direction> == 2)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s335
+  :creation-time 2911
+  :feature 7 split taxicab*s269
+  &taxicab*s269
+  (<passenger> == 1)
+-->
+  = -2.57058338640360517502 2692.46130746268681832589 1.78663656765938072546 -0.1791035626374364309 1508
+}
+
+sp {taxicab*f763
+  :creation-time 13707
+  :feature 7 fringe taxicab*u275
+  &taxicab*u275
+  (<direction> == 4)
+-->
+  = -24.83822347929714879911 227774.60593479790259152651 185.21161316294907805968 -0.5720976874134771073 0
+}
+
+sp {taxicab*s337
+  :creation-time 2911
+  :feature 7 split taxicab*s269
+  &taxicab*s269
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f762
+  :creation-time 13707
+  :feature 7 fringe taxicab*u275
+  &taxicab*u275
+  (<direction> == 3)
+-->
+  = -24.83822347929714879911 227774.60593479790259152651 185.21161316294907805968 -0.5720976874134771073 0
+}
+
+sp {taxicab*s336
+  :creation-time 2911
+  :feature 7 split taxicab*s269
+  &taxicab*s269
+  (<passenger> == 2)
+-->
+  = 3.67598859437361014102 4718.03556618028051161673 1.7578373942549481157 0.26091463356122363004 2685
+}
+
+sp {taxicab*f756
+  :creation-time 13707
+  :feature 7 fringe taxicab*u274
+  &taxicab*u274
+  (<direction> == 2)
+-->
+  = -24.83822347929714879911 227774.60593479790259152651 185.21161316294907805968 -0.5720976874134771073 0
+}
+
+sp {taxicab*s637
+  :creation-time 5504
+  :feature 7 split taxicab*s542
+  &taxicab*s542
+  +(<s> ^refuel-required true)
+-->
+  = 0.56958133907592067846 285.72481216976609630365 0.13376629783228749515 0.02684448842361478876 2137
+}
+
+sp {taxicab*s638
+  :creation-time 5504
+  :feature 7 split taxicab*s542
+  &taxicab*s542
+  -(<s> ^refuel-required true)
+-->
+  = -0.3368118281874616371 38.74037235939690759778 0.16277467377897861245 0.0149439100302987439 239
+}
+
+sp {taxicab*f696
+  :creation-time 5729
+  :feature 7 fringe taxicab*u690
+  &taxicab*u690
+  (<passenger> == 3)
+-->
+  = -3.52400623726267614444 50415.85374039514863397926 28.34495783244024380565 0.29970688212641993786 0
+}
+
+sp {taxicab*f694
+  :creation-time 5729
+  :feature 7 fringe taxicab*u690
+  &taxicab*u690
+  (<passenger> == 1)
+-->
+  = -3.52400623726267614444 50415.85374039514863397926 28.34495783244024380565 0.29970688212641993786 0
+}
+
+sp {taxicab*f695
+  :creation-time 5729
+  :feature 7 fringe taxicab*u690
+  &taxicab*u690
+  (<passenger> == 2)
+-->
+  = -3.52400623726267614444 50415.85374039514863397926 28.34495783244024380565 0.29970688212641993786 0
+}
+
+sp {taxicab*f755
+  :creation-time 13707
+  :feature 7 fringe taxicab*u274
+  &taxicab*u274
+  (<direction> == 1)
+-->
+  = -24.83822347929714879911 227774.60593479790259152651 185.21161316294907805968 -0.5720976874134771073 0
+}
+
+sp {taxicab*s196
+  :creation-time 739
+  :feature 7 split taxicab*s129
+  &taxicab*s129
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f187
+  :creation-time 519
+  :feature 7 fringe taxicab*u118
+  &taxicab*u118
+  -(<action> ^toward-dropoff true)
+-->
+  = -11.01450508604060729567 45820.5590125974704278633 107.75319710576603426944 -0.49426472308483770934 0
+}
+
+sp {taxicab*s721
+  :creation-time 6986
+  :feature 7 split taxicab*s702
+  &taxicab*s702
+  (<direction> == 4)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s720
+  :creation-time 6986
+  :feature 7 split taxicab*s702
+  &taxicab*s702
+  (<direction> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s715
+  :creation-time 6636
+  :feature 7 split taxicab*s689
+  &taxicab*s689
+  (<passenger> == 2)
+-->
+  = -0.43269945820159694261 61.01710495196484629332 0.00474250776868994587 -0.04897739786666742423 12867
+}
+
+sp {taxicab*s714
+  :creation-time 6636
+  :feature 7 split taxicab*s689
+  &taxicab*s689
+  (<passenger> == 1)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f263
+  :creation-time 1325
+  :feature 7 fringe taxicab*u236
+  &taxicab*u236
+  -(<s> ^refuel-required true)
+-->
+  = -11.35246442383369469553 31474.32355652953992830589 30.96539438700424184958 -0.53134830135219346392 0
+}
+
+sp {taxicab*f186
+  :creation-time 519
+  :feature 7 fringe taxicab*u118
+  &taxicab*u118
+  +(<action> ^toward-dropoff true)
+-->
+  = -11.01450508604060729567 45820.5590125974704278633 107.75319710576603426944 -0.49426472308483770934 0
+}
+
+sp {taxicab*f192
+  :creation-time 524
+  :feature 7 fringe taxicab*u123
+  &taxicab*u123
+  +(<action> ^toward-dropoff true)
+-->
+  = -11.01052473660592312399 45826.4727701835727202706 106.61653435351803409503 -0.49370589046373491993 0
+}
+
+sp {taxicab*f193
+  :creation-time 524
+  :feature 7 fringe taxicab*u123
+  &taxicab*u123
+  -(<action> ^toward-dropoff true)
+-->
+  = -11.01052473660592312399 45826.4727701835727202706 106.61653435351803409503 -0.49370589046373491993 0
+}
+
+sp {taxicab*s184
+  :creation-time 602
+  :feature 7 split taxicab*s117
+  &taxicab*s117
+  +(<action> ^toward-dropoff true)
+-->
+  = 0.96225492352734742774 4061.27995419086664696806 0.90897044632740975345 0.0057859120007320514 4469
+}
+
+sp {taxicab*s185
+  :creation-time 602
+  :feature 7 split taxicab*s117
+  &taxicab*s117
+  -(<action> ^toward-dropoff true)
+-->
+  = 0.42516270048876697585 122.3513573068870670113 0.07501616021268367462 0.01946373388948383076 1632
+}
+
+sp {taxicab*s190
+  :creation-time 721
+  :feature 7 split taxicab*s122
+  &taxicab*s122
+  +(<action> ^toward-dropoff true)
+-->
+  = 1.3320198506864868726 1875.37916353860964591149 0.86943864790848846003 0.02461242898786861893 2158
+}
+
+sp {taxicab*s191
+  :creation-time 721
+  :feature 7 split taxicab*s122
+  &taxicab*s122
+  -(<action> ^toward-dropoff true)
+-->
+  = -0.15216880365084872739 22.69846021858400675342 0.07616932959256378366 -0.00346007022532521247 299
+}
+
+sp {taxicab*s176
+  :creation-time 736
+  :feature 7 split taxicab*s114
+  &taxicab*s114
+  (<passenger> == 1)
+-->
+  = -1.17195356205193923493 1287.93017534362638798484 0.27901433607964176709 0.01218850713754410231 4617
+}
+
+sp {taxicab*s177
+  :creation-time 736
+  :feature 7 split taxicab*s114
+  &taxicab*s114
+  (<passenger> == 2)
+-->
+  = 1.94900317512963727751 6627.73419246957018913236 1.19612600477703856505 0.00924607851474768504 5542
+}
+
+sp {taxicab*s178
+  :creation-time 736
+  :feature 7 split taxicab*s114
+  &taxicab*s114
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f333
+  :creation-time 2515
+  :feature 7 fringe taxicab*u268
+  &taxicab*u268
+  (<passenger> == 2)
+-->
+  = -17.2485411367330314647 62224.10415327911323402077 79.18470131128597699899 -0.40169565418902913878 0
+}
+
+sp {taxicab*s194
+  :creation-time 739
+  :feature 7 split taxicab*s129
+  &taxicab*s129
+  (<passenger> == 1)
+-->
+  = -1.13521909950102251052 1046.20132711097289757163 0.23094952033354809728 -0.02889541167963688428 4531
+}
+
+sp {taxicab*f332
+  :creation-time 2515
+  :feature 7 fringe taxicab*u268
+  &taxicab*u268
+  (<passenger> == 1)
+-->
+  = -17.2485411367330314647 62224.10415327911323402077 79.18470131128597699899 -0.40169565418902913878 0
+}
+
+sp {taxicab*s195
+  :creation-time 739
+  :feature 7 split taxicab*s129
+  &taxicab*s129
+  (<passenger> == 2)
+-->
+  = 1.95719447816128933049 2034.79099211162611027248 1.24148321666359118254 0.06599765664263654297 1640
+}
+
+sp {taxicab*s226
+  :creation-time 840
+  :feature 7 split taxicab*s115
+  &taxicab*s115
+  (<passenger> == 1)
+-->
+  = -0.09415647836635140933 896.0024172686720476122 0.25821395310336370255 0.01115675734585677183 3471
+}
+
+sp {taxicab*s227
+  :creation-time 840
+  :feature 7 split taxicab*s115
+  &taxicab*s115
+  (<passenger> == 2)
+-->
+  = -0.2675270531570655419 42.22867167336649885101 0.12493689844191271932 -0.01678699604850428587 339
+}
+
+sp {taxicab*s228
+  :creation-time 840
+  :feature 7 split taxicab*s115
+  &taxicab*s115
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f752
+  :creation-time 13707
+  :feature 7 fringe taxicab*u273
+  &taxicab*u273
+  (<direction> == 3)
+-->
+  = -25.21278625153273367232 228546.93770036040223203599 57136.734425090100558009 -0.60604765718382813677 5
+}
+
+sp {taxicab*s197
+  :creation-time 1141
+  :feature 7 split taxicab*s130
+  &taxicab*s130
+  (<passenger> == 1)
+-->
+  = -0.04820620994629727651 802.84439992178181455529 0.23176801383423262237 0.01810420828595239728 3465
+}
+
+sp {taxicab*s198
+  :creation-time 1141
+  :feature 7 split taxicab*s130
+  &taxicab*s130
+  (<passenger> == 2)
+-->
+  = -0.15457596697061010138 43.90126842284215769041 0.13065853697274451561 -0.00209671453441718581 337
+}
+
+sp {taxicab*s199
+  :creation-time 1141
+  :feature 7 split taxicab*s130
+  &taxicab*s130
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f264
+  :creation-time 1325
+  :feature 7 fringe taxicab*u236
+  &taxicab*u236
+  +(<s> ^refuel-required true)
+-->
+  = -11.35246442383369469553 31474.32355652953992830589 30.96539438700424184958 -0.53134830135219346392 0
+}
+
+sp {taxicab*f760
+  :creation-time 13707
+  :feature 7 fringe taxicab*u275
+  &taxicab*u275
+  (<direction> == 1)
+-->
+  = -24.83822347929714879911 227774.60593479790259152651 185.21161316294907805968 -0.5720976874134771073 0
+}
+
+sp {taxicab*f761
+  :creation-time 13707
+  :feature 7 fringe taxicab*u275
+  &taxicab*u275
+  (<direction> == 2)
+-->
+  = -24.83822347929714879911 227774.60593479790259152651 185.21161316294907805968 -0.5720976874134771073 0
+}
+
+sp {taxicab*s261
+  :creation-time 1617
+  :feature 7 split taxicab*s235
+  &taxicab*s235
+  -(<s> ^refuel-required true)
+-->
+  = -0.47794850261469379316 109.80784115684402024726 0.66149301901713264407 0.02073871245287175341 167
+}
+
+sp {taxicab*s262
+  :creation-time 1617
+  :feature 7 split taxicab*s235
+  &taxicab*s235
+  +(<s> ^refuel-required true)
+-->
+  = 1.54332148617514963718 872.60008590369477587956 1.75220900783874444784 0.07343888067532779174 499
+}
+
+sp {taxicab*f757
+  :creation-time 13707
+  :feature 7 fringe taxicab*u274
+  &taxicab*u274
+  (<direction> == 3)
+-->
+  = -24.83822347929714879911 227774.60593479790259152651 185.21161316294907805968 -0.5720976874134771073 0
+}
+
+sp {taxicab*f754
+  :creation-time 13707
+  :feature 7 fringe taxicab*u274
+  &taxicab*u274
+  (<direction> == 0)
+-->
+  = -24.83822347929714879911 227774.60593479790259152651 185.21161316294907805968 -0.5720976874134771073 0
+}
+
+sp {taxicab*f753
+  :creation-time 13707
+  :feature 7 fringe taxicab*u273
+  &taxicab*u273
+  (<direction> == 4)
+-->
+  = -25.65449871198499209868 229706.32979191208141855896 22970.63297919120668666437 -0.64542639817903779687 11
+}
+
+sp {taxicab*f750
+  :creation-time 13707
+  :feature 7 fringe taxicab*u273
+  &taxicab*u273
+  (<direction> == 1)
+-->
+  = -25.43490201635428604732 229061.2015500475827138871 32723.02879286394090740941 -0.62619880513166359393 8
+}
+
+sp {taxicab*f751
+  :creation-time 13707
+  :feature 7 fringe taxicab*u273
+  &taxicab*u273
+  (<direction> == 2)
+-->
+  = -25.87256485317541887525 230203.5992473020451143384 17707.96917286938696634024 -0.66535343820108006074 14
+}
+
+sp {taxicab*s189
+  :creation-time 2966
+  :feature 7 split taxicab*s121
+  &taxicab*s121
+  -(<action> ^toward-dropoff true)
+-->
+  = -0.21501321398021522313 829.25187795430372261762 0.2194368557698607447 0.0055593604972024183 3780
+}
+
+sp {taxicab*s188
+  :creation-time 2966
+  :feature 7 split taxicab*s121
+  &taxicab*s121
+  +(<action> ^toward-dropoff true)
+-->
+  = -0.22405991197433375306 1051.219575320274771002 0.22485980220754539505 0.01479860743106663386 4676
+}
+
+sp {taxicab*f334
+  :creation-time 2515
+  :feature 7 fringe taxicab*u268
+  &taxicab*u268
+  (<passenger> == 3)
+-->
+  = -17.2485411367330314647 62224.10415327911323402077 79.18470131128597699899 -0.40169565418902913878 0
+}
+
+sp {taxicab*s344
+  :creation-time 2870
+  :feature 7 split taxicab*s272
+  &taxicab*s272
+  (<passenger> == 1)
+-->
+  = -3.06229827255935838082 3900.31396929819447905174 2.70479470825117518373 -0.21938491925085437662 1443
+}
+
+sp {taxicab*s345
+  :creation-time 2870
+  :feature 7 split taxicab*s272
+  &taxicab*s272
+  (<passenger> == 2)
+-->
+  = 3.90792018184109890555 6469.25219625731369887944 1.25130603409232366019 0.27998453267409878498 5171
+}
+
+sp {taxicab*s346
+  :creation-time 2870
+  :feature 7 split taxicab*s272
+  &taxicab*s272
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f758
+  :creation-time 13707
+  :feature 7 fringe taxicab*u274
+  &taxicab*u274
+  (<direction> == 4)
+-->
+  = -24.83822347929714879911 227774.60593479790259152651 185.21161316294907805968 -0.5720976874134771073 0
+}
+
+sp {taxicab*f759
+  :creation-time 13707
+  :feature 7 fringe taxicab*u275
+  &taxicab*u275
+  (<direction> == 0)
+-->
+  = -24.83822347929714879911 227774.60593479790259152651 185.21161316294907805968 -0.5720976874134771073 0
+}
+
+sp {taxicab*s338
+  :creation-time 3412
+  :feature 7 split taxicab*s270
+  &taxicab*s270
+  (<passenger> == 1)
+-->
+  = -2.90541316984318376271 7598.24365853363906353479 11.04395880600819701556 -0.24916351575796247264 689
+}
+
+sp {taxicab*s339
+  :creation-time 3412
+  :feature 7 split taxicab*s270
+  &taxicab*s270
+  (<passenger> == 2)
+-->
+  = 3.81984353238892815341 5186.51428608072001225082 2.00483737382323923271 0.2938687695696863833 2588
+}
+
+sp {taxicab*s340
+  :creation-time 3412
+  :feature 7 split taxicab*s270
+  &taxicab*s270
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*f710
+  :creation-time 6081
+  :feature 7 fringe taxicab*u703
+  &taxicab*u703
+  (<direction> == 1)
+-->
+  = -16.43445422602292183001 50291.37612915201316354796 17.91037251979924249667 -0.50128672359190928898 0
+}
+
+sp {taxicab*s182
+  :creation-time 3618
+  :feature 7 split taxicab*s116
+  &taxicab*s116
+  +(<action> ^toward-dropoff true)
+-->
+  = -0.30705795911510386231 1116.2165609196945297299 0.23519101578586062984 0.00759115835234502011 4747
+}
+
+sp {taxicab*f711
+  :creation-time 6081
+  :feature 7 fringe taxicab*u703
+  &taxicab*u703
+  (<direction> == 2)
+-->
+  = -16.43445422602292183001 50291.37612915201316354796 17.91037251979924249667 -0.50128672359190928898 0
+}
+
+sp {taxicab*s183
+  :creation-time 3618
+  :feature 7 split taxicab*s116
+  &taxicab*s116
+  -(<action> ^toward-dropoff true)
+-->
+  = -0.19897068957140406908 872.40972343760722651496 0.22119921993854138598 0.01084237458745650022 3945
+}
+
+sp {taxicab*s343
+  :creation-time 4080
+  :feature 7 split taxicab*s271
+  &taxicab*s271
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s341
+  :creation-time 4080
+  :feature 7 split taxicab*s271
+  &taxicab*s271
+  (<passenger> == 1)
+-->
+  = -3.25987794262201235895 7583.00221173486806947039 9.93840394722787401349 -0.2615082667044675846 764
+}
+
+sp {taxicab*s342
+  :creation-time 4080
+  :feature 7 split taxicab*s271
+  &taxicab*s271
+  (<passenger> == 2)
+-->
+  = 3.989326948547847973 6702.30424908818167750724 1.40010533718157126337 0.29863745723840579016 4788
+}
+
+sp {taxicab*f636
+  :creation-time 4880
+  :feature 7 fringe taxicab*u541
+  &taxicab*u541
+  -(<s> ^refuel-required true)
+-->
+  = -15.41918500660517210576 43110.93271863523114006966 14.10726748539971175944 -0.37636296427654553076 0
+}
+
+sp {taxicab*f635
+  :creation-time 4880
+  :feature 7 fringe taxicab*u541
+  &taxicab*u541
+  +(<s> ^refuel-required true)
+-->
+  = -15.41918500660517210576 43110.93271863523114006966 14.10726748539971175944 -0.37636296427654553076 0
+}
+
+sp {taxicab*f709
+  :creation-time 6081
+  :feature 7 fringe taxicab*u703
+  &taxicab*u703
+  (<direction> == 0)
+-->
+  = -16.43445422602292183001 50291.37612915201316354796 17.91037251979924249667 -0.50128672359190928898 0
+}
+
+sp {taxicab*f712
+  :creation-time 6081
+  :feature 7 fringe taxicab*u703
+  &taxicab*u703
+  (<direction> == 3)
+-->
+  = -16.43445422602292183001 50291.37612915201316354796 17.91037251979924249667 -0.50128672359190928898 0
+}
+
+sp {taxicab*f713
+  :creation-time 6081
+  :feature 7 fringe taxicab*u703
+  &taxicab*u703
+  (<direction> == 4)
+-->
+  = -16.43445422602292183001 50291.37612915201316354796 17.91037251979924249667 -0.50128672359190928898 0
+}
+
+sp {taxicab*s716
+  :creation-time 6636
+  :feature 7 split taxicab*s689
+  &taxicab*s689
+  (<passenger> == 3)
+-->
+  = 0.0 0.0 0.0 0.0 0
+}
+
+sp {taxicab*s717
+  :creation-time 6986
+  :feature 7 split taxicab*s702
+  &taxicab*s702
+  (<direction> == 0)
+-->
+  = 1.47501730732340252672 814.48997423804848949658 0.06340417049961455387 0.0673883428513892685 12847
+}
+
+sp {taxicab*f749
+  :creation-time 13707
+  :feature 7 fringe taxicab*u273
+  &taxicab*u273
+  (<direction> == 0)
+-->
+  = -24.83822347929714879911 227774.60593479790259152651 185.21161316294907805968 -0.5720976874134771073 0
+}
