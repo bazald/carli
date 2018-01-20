@@ -72,6 +72,50 @@ namespace Taxicab {
   public:
     enum Passenger { AT_SOURCE = 1, ONBOARD = 2, AT_DESTINATION = 3 };
 
+    struct State : public std::enable_shared_from_this<State> {
+      State(const std::pair<int64_t, int64_t> &taxi_position_, const int64_t &fuel_, const Passenger &passenger_,
+        const int64_t &num_steps_, const int64_t &heuristic_, const std::shared_ptr<const State> &prev_state_ = nullptr)
+        : prev_state(prev_state_), taxi_position(taxi_position_), fuel(fuel_), passenger(passenger_), num_steps(num_steps_), heuristic(heuristic_)
+      {
+      }
+
+      bool operator<(const State &rhs) const {
+        return num_steps + heuristic < rhs.num_steps + rhs.heuristic ||
+          (num_steps + heuristic == rhs.num_steps + rhs.heuristic &&
+          (num_steps < rhs.num_steps ||
+            (num_steps == rhs.num_steps &&
+            (heuristic < rhs.heuristic ||
+              (heuristic == rhs.heuristic &&
+              (taxi_position < rhs.taxi_position ||
+                (taxi_position == rhs.taxi_position &&
+                (fuel < rhs.fuel ||
+                  (fuel == rhs.fuel &&
+                    passenger < rhs.passenger)))))))));
+      }
+
+      void print_solution(std::ostream &os) const {
+        std::stack<std::shared_ptr<const State>> states;
+        for(auto ss = shared_from_this(); ss; ss = ss->prev_state)
+          states.push(ss);
+        int64_t step = 0;
+        while(!states.empty()) {
+          auto ss = states.top();
+          states.pop();
+
+          os << "Step " << step++ << " -- " << ss->num_steps << "+" << ss->heuristic << " -- " << std::endl;
+          os << "  (" << ss->taxi_position.first << ',' << ss->taxi_position.second << "), fuel=" << ss->fuel << ", passenger=" << ss->passenger << std::endl;
+        }
+        os << "Num steps = " << num_steps << std::endl;
+      }
+
+      std::shared_ptr<const State> prev_state;
+      std::pair<int64_t, int64_t> taxi_position;
+      int64_t fuel;
+      Passenger passenger;
+      int64_t num_steps;
+      int64_t heuristic;
+    };
+
     Environment();
 
     typedef std::vector<int64_t> Grid;
@@ -93,7 +137,7 @@ namespace Taxicab {
     bool supports_optimal() const { return true; }
     double optimal_reward() const { return double(-m_num_steps_to_goal); }
 
-    int64_t optimal_from(const std::pair<int64_t, int64_t> &taxi_position, const int64_t &fuel, const Passenger &passenger) const;
+    std::pair<std::shared_ptr<const State>, int64_t> optimal_from(const std::pair<int64_t, int64_t> &taxi_position, const int64_t &fuel, const Passenger &passenger, const int64_t &source, const int64_t &destination) const;
 
     static int64_t distance(const std::pair<int64_t, int64_t> &lhs, const std::pair<int64_t, int64_t> &rhs) {
       return std::abs(lhs.first - rhs.first) + std::abs(lhs.second - rhs.second);
@@ -129,6 +173,8 @@ namespace Taxicab {
 
     const bool m_evaluate_optimality = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["evaluate-optimality"]).get_value() && supports_optimal() && dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value() != "null";
     int64_t m_num_steps_to_goal = 0;
+    std::shared_ptr<const State> m_optimal_solution;
+    std::shared_ptr<const State> m_solution;
   };
 
   class TAXICAB_LINKAGE Agent : public Carli::Agent {
@@ -151,8 +197,12 @@ namespace Taxicab {
     const Rete::Symbol_Constant_String_Ptr_C m_action_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("action"));
     const Rete::Symbol_Constant_String_Ptr_C m_type_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("type"));
     const Rete::Symbol_Constant_String_Ptr_C m_direction_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("direction"));
-    const Rete::Symbol_Constant_String_Ptr_C m_moves_to_goal_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("moves-to-goal"));
-    const Rete::Symbol_Constant_String_Ptr_C m_fewest_moves_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("fewest-moves"));
+    const Rete::Symbol_Constant_String_Ptr_C m_passenger_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("passenger"));
+    const Rete::Symbol_Constant_String_Ptr_C m_passenger_source_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("passenger-source"));
+    const Rete::Symbol_Constant_String_Ptr_C m_passenger_destination_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("passenger-destination"));
+    const Rete::Symbol_Constant_String_Ptr_C m_toward_pickup_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("toward-pickup"));
+    const Rete::Symbol_Constant_String_Ptr_C m_toward_dropoff_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("toward-dropoff"));
+    const Rete::Symbol_Constant_String_Ptr_C m_refuel_required_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("refuel-required"));
     //const Rete::Symbol_Constant_String_Ptr_C m_snake1_length_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake1-length"));
     //const Rete::Symbol_Constant_String_Ptr_C m_snake2_length_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake2-length"));
     //const Rete::Symbol_Constant_String_Ptr_C m_snake1_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake1-dist"));
@@ -175,9 +225,6 @@ namespace Taxicab {
     const Rete::Symbol_Identifier_Ptr_C m_refuel_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("refuel"));
     const Rete::Symbol_Identifier_Ptr_C m_pickup_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("pickup"));
     const Rete::Symbol_Identifier_Ptr_C m_dropoff_id = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier("dropoff"));
-    const Rete::Symbol_Constant_Int_Ptr_C m_increases = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
-    const Rete::Symbol_Constant_Int_Ptr_C m_decreases = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
-    const Rete::Symbol_Constant_Int_Ptr_C m_unchanged = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
     const Rete::Symbol_Constant_Int_Ptr_C m_type_move = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
     const Rete::Symbol_Constant_Int_Ptr_C m_type_refuel = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
     const Rete::Symbol_Constant_Int_Ptr_C m_type_pickup = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
@@ -187,6 +234,11 @@ namespace Taxicab {
     const Rete::Symbol_Constant_Int_Ptr_C m_direction_south = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
     const Rete::Symbol_Constant_Int_Ptr_C m_direction_east = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
     const Rete::Symbol_Constant_Int_Ptr_C m_direction_west = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(4));
+    const Rete::Symbol_Constant_Int_Ptr_C m_passenger_at_source = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
+    const Rete::Symbol_Constant_Int_Ptr_C m_passenger_onboard = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
+    const Rete::Symbol_Constant_Int_Ptr_C m_passenger_at_destination = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
+    const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
+    const Rete::Symbol_Constant_String_Ptr_C m_false_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("false"));
 
     std::map<int64_t, Rete::Symbol_Identifier_Ptr_C> m_move_ids;
     std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_tile_names;
