@@ -36,6 +36,9 @@ namespace Taxicab {
   }
 
   std::pair<std::shared_ptr<const Environment::State>, int64_t> Environment::optimal_from(const std::pair<int64_t, int64_t> &taxi_position, const int64_t &fuel, const Passenger &passenger, const int64_t &source, const int64_t &destination) const {
+    if(m_optimals.find(std::make_tuple(taxi_position, fuel, passenger, source, destination)) != m_optimals.end())
+      return m_optimals[std::make_tuple(taxi_position, fuel, passenger, source, destination)];
+
     std::set<std::shared_ptr<State>, Rete::compare_deref_lt> astar;
 
     const std::function<int64_t (const std::pair<int64_t, int64_t> &taxi_position, const int64_t &fuel, const Passenger &passenger)> heuristic =
@@ -70,6 +73,11 @@ namespace Taxicab {
 
       if(state->passenger == AT_DESTINATION) {
         //state->print_solution(std::cerr);
+
+        for(std::shared_ptr<const State> ss = state; ss; ss = ss->prev_state) {
+          auto summary = std::make_shared<State>(ss->taxi_position, ss->fuel, ss->passenger, state->num_steps - ss->num_steps, 0);
+          m_optimals[std::make_tuple(ss->taxi_position, ss->fuel, ss->passenger, source, destination)] = std::make_pair(summary, summary->num_steps);
+        }
 
         optimal_solution = state;
         num_steps = state->num_steps;
@@ -125,6 +133,8 @@ namespace Taxicab {
   }
 
   void Environment::init_impl() {
+    m_optimals.clear();
+
     std::set<int64_t> indices;
     Grid distances;
     do {
@@ -221,7 +231,7 @@ namespace Taxicab {
     //m_solution = std::make_shared<State>(m_taxi_position, m_fuel, m_passenger, 0, 0, m_solution);
 
     if(failure())
-      return std::make_pair(-50.0, -50.0);
+      return std::make_pair(-100.0, -100.0);
     else
       return std::make_pair(-1.0, -1.0);
   }

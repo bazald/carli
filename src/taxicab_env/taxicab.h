@@ -175,6 +175,9 @@ namespace Taxicab {
     int64_t m_num_steps_to_goal = 0;
     std::shared_ptr<const State> m_optimal_solution;
     //std::shared_ptr<const State> m_solution;
+
+    typedef std::tuple<std::pair<int64_t, int64_t>, int64_t, Passenger, int64_t, int64_t> Optimal_Index;
+    mutable std::map<Optimal_Index, std::pair<std::shared_ptr<const Environment::State>, int64_t>> m_optimals;
   };
 
   class TAXICAB_LINKAGE Agent : public Carli::Agent {
