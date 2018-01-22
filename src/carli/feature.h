@@ -203,7 +203,7 @@ namespace Carli {
 
     double midpt() const {
       const double mpt = (bound_lower + bound_upper) / 2.0;
-      return integer_locked ? floor(mpt) : mpt;
+      return integer_locked ? std::floor(mpt) : mpt;
     }
 
     int64_t compare_value(const Feature_Ranged_Data &rhs) const {
