@@ -23,13 +23,16 @@ namespace Taxicab {
   }
 
   bool Environment::failure() const {
-    //if(m_fuel == 0 && std::find(m_filling_stations.begin(), m_filling_stations.end(), m_taxi_position) == m_filling_stations.end() &&
-    //   (m_passenger != ONBOARD || m_taxi_position != m_destinations[m_passenger_destination]))
-    //{
-    //  m_optimal_solution->print_solution(std::cerr);
-    //  m_solution->print_solution(std::cerr);
-    //  assert(false);
-    //}
+#ifndef NDEBUG
+    if(m_evaluate_optimality &&
+       m_fuel == 0 && std::find(m_filling_stations.begin(), m_filling_stations.end(), m_taxi_position) == m_filling_stations.end() &&
+       (m_passenger == AT_SOURCE || m_taxi_position != m_destinations[m_passenger_destination]))
+    {
+      m_optimal_solution->print_solution(std::cerr);
+      m_solution->print_solution(std::cerr);
+      assert(false);
+    }
+#endif
 
     return m_fuel == 0 && std::find(m_filling_stations.begin(), m_filling_stations.end(), m_taxi_position) == m_filling_stations.end() &&
       (m_passenger == AT_SOURCE || m_taxi_position != m_destinations[m_passenger_destination]);
@@ -150,7 +153,16 @@ namespace Taxicab {
       }
     } while(!solveable_fuel(distances));
 
+    m_distance_from_fs.clear();
+    for(int i = 0; i != m_filling_stations.size(); ++i) {
+      Grid grid(m_grid_w * m_grid_h, std::numeric_limits<int64_t>::max());
+      grid[m_filling_stations[i].second * m_grid_w + m_filling_stations[i].first] = 0;
+      transitive_closure_distances(grid);
+      m_distance_from_fs.push_back(grid);
+    }
+
     m_destinations.clear();
+    m_distance_from_dest.clear();
     for(int i = 0; i != m_num_destinations; ++i) {
       int64_t index;
       do {
@@ -158,6 +170,11 @@ namespace Taxicab {
         indices.erase(index);
       } while(distances[index] > m_fuel_max / 2);
       m_destinations.push_back(std::make_pair(index % m_grid_w, index / m_grid_w));
+
+      Grid grid(m_grid_w * m_grid_h, std::numeric_limits<int64_t>::max());
+      grid[index] = 0;
+      transitive_closure_distances(grid);
+      m_distance_from_dest.push_back(grid);
     }
 
     int64_t index;
@@ -174,11 +191,14 @@ namespace Taxicab {
     if(m_passenger_destination >= m_passenger_source)
       ++m_passenger_destination;
 
-    //if(m_evaluate_optimality)
-    const auto optimal = optimal_from(m_taxi_position, m_fuel, m_passenger, m_passenger_source, m_passenger_destination);
-    m_optimal_solution = optimal.first;
-    m_num_steps_to_goal = optimal.second;
-    //m_solution = std::make_shared<State>(m_taxi_position, m_fuel, m_passenger, 0, 0);
+    if(m_evaluate_optimality) {
+      const auto optimal = optimal_from(m_taxi_position, m_fuel, m_passenger, m_passenger_source, m_passenger_destination);
+      m_optimal_solution = optimal.first;
+      m_num_steps_to_goal = optimal.second;
+#ifndef NDEBUG
+      m_solution = std::make_shared<State>(m_taxi_position, m_fuel, m_passenger, 0, 0);
+#endif
+    }
   }
 
   std::pair<Agent::reward_type, Agent::reward_type> Environment::transition_impl(const Carli::Action &action_) {
@@ -228,7 +248,9 @@ namespace Taxicab {
       abort();
     }
 
-    //m_solution = std::make_shared<State>(m_taxi_position, m_fuel, m_passenger, 0, 0, m_solution);
+#ifndef NDEBUG
+    m_solution = std::make_shared<State>(m_taxi_position, m_fuel, m_passenger, 0, 0, m_solution);
+#endif
 
     if(failure())
       return std::make_pair(-100.0, -100.0);
@@ -365,25 +387,30 @@ namespace Taxicab {
 
     Rete::Agenda::Locker locker(agenda);
 
+    std::map<Rete::Symbol_Identifier_Ptr_C, std::pair<int64_t, int64_t>> next_positions;
     if(env->get_fuel() && env->get_taxi_position().second) {
       insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_north_id));
       insert_new_wme(std::make_shared<Rete::WME>(m_move_north_id, m_type_attr, m_type_move));
       insert_new_wme(std::make_shared<Rete::WME>(m_move_north_id, m_direction_attr, m_direction_north));
+      next_positions[m_move_north_id] = std::make_pair(env->get_taxi_position().first, env->get_taxi_position().second - 1);
     }
     if(env->get_fuel() && env->get_taxi_position().second + 1 != env->get_grid_h()) {
       insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_south_id));
       insert_new_wme(std::make_shared<Rete::WME>(m_move_south_id, m_type_attr, m_type_move));
       insert_new_wme(std::make_shared<Rete::WME>(m_move_south_id, m_direction_attr, m_direction_south));
+      next_positions[m_move_south_id] = std::make_pair(env->get_taxi_position().first, env->get_taxi_position().second + 1);
     }
     if(env->get_fuel() && env->get_taxi_position().first + 1 != env->get_grid_w()) {
       insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_east_id));
       insert_new_wme(std::make_shared<Rete::WME>(m_move_east_id, m_type_attr, m_type_move));
       insert_new_wme(std::make_shared<Rete::WME>(m_move_east_id, m_direction_attr, m_direction_east));
+      next_positions[m_move_east_id] = std::make_pair(env->get_taxi_position().first + 1, env->get_taxi_position().second);
     }
     if(env->get_fuel() && env->get_taxi_position().first) {
       insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_move_west_id));
       insert_new_wme(std::make_shared<Rete::WME>(m_move_west_id, m_type_attr, m_type_move));
       insert_new_wme(std::make_shared<Rete::WME>(m_move_west_id, m_direction_attr, m_direction_west));
+      next_positions[m_move_west_id] = std::make_pair(env->get_taxi_position().first - 1, env->get_taxi_position().second);
     }
     if(env->get_fuel() != env->get_fuel_max() && std::find(env->get_filling_stations().begin(), env->get_filling_stations().end(), env->get_taxi_position()) != env->get_filling_stations().end()) {
       insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_action_attr, m_refuel_id));
@@ -401,64 +428,96 @@ namespace Taxicab {
       insert_new_wme(std::make_shared<Rete::WME>(m_dropoff_id, m_direction_attr, m_direction_none));
     }
 
-    bool refuel_required = false;
-    if(env->get_fuel() != env->get_fuel_max() && std::find(env->get_filling_stations().begin(), env->get_filling_stations().end(), env->get_taxi_position()) != env->get_filling_stations().end()) {
-      const auto moves_to_goal = env->optimal_from(env->get_taxi_position(), env->get_fuel(), env->get_passenger(), env->get_passenger_source(), env->get_passenger_destination());
-      auto state = moves_to_goal.first;
-      if(state->passenger != Environment::AT_DESTINATION)
-        refuel_required = true;
-      else {
-        auto state_next = state;
-        while(state->prev_state) {
-          state_next = state;
-          state = state->prev_state;
+    std::vector<int64_t> reachable_filling_stations;
+    for(int64_t filling_station = 0; filling_station != int64_t(env->get_filling_stations().size()); ++filling_station) {
+      const auto filling_station_id = get_filling_station_id(filling_station);
+      insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_filling_station_attr, filling_station_id));
+
+      const int64_t dist = env->get_distance_from_fs(filling_station)[env->get_taxi_position().second * env->get_grid_w() + env->get_taxi_position().first];
+      if(dist <= env->get_fuel())
+        reachable_filling_stations.push_back(filling_station);
+      insert_new_wme(std::make_shared<Rete::WME>(filling_station_id, m_fuel_attr, dist <= env->get_fuel() ? m_fuel_roundtrip : m_fuel_insufficient));
+    }
+
+    for(int64_t destination = 0; destination != int64_t(env->get_destinations().size()); ++destination) {
+      const auto destination_id = get_destination_id(destination);
+      insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_destination_attr, destination_id));
+
+      int64_t dist_min = std::numeric_limits<int64_t>::max();
+      for(const int64_t filling_station : reachable_filling_stations) {
+        const int64_t dist = env->get_distance_from_dest(destination)[env->get_filling_stations()[filling_station].second * env->get_grid_w() + env->get_filling_stations()[filling_station].first];
+        dist_min = std::min(dist_min, dist);
+      }
+      if(dist_min != std::numeric_limits<int64_t>::max()) {
+        for(const int64_t filling_station : reachable_filling_stations) {
+          if(env->get_distance_from_dest(destination)[env->get_filling_stations()[filling_station].second * env->get_grid_w() + env->get_filling_stations()[filling_station].first] == dist_min)
+            insert_new_wme(std::make_shared<Rete::WME>(get_filling_station_id(filling_station), m_toward_attr, destination_id));
         }
-        if(state_next->fuel == env->get_fuel_max())
-          refuel_required = true;
       }
-    }
-    insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_refuel_required_attr, refuel_required ? m_true_value : m_false_value));
 
-    std::pair<std::set<Rete::Symbol_Identifier_Ptr_C>, int64_t> min_through_source;
-    std::pair<std::set<Rete::Symbol_Identifier_Ptr_C>, int64_t> min_to_dest;
-    std::map<Rete::Symbol_Identifier_Ptr_C, std::pair<int64_t, int64_t>> next_positions;
-    if(env->get_fuel()) {
-      if(env->get_taxi_position().second)
-        next_positions[m_move_north_id] = std::make_pair(env->get_taxi_position().first, env->get_taxi_position().second - 1);
-      if(env->get_taxi_position().second + 1 != env->get_grid_h())
-        next_positions[m_move_south_id] = std::make_pair(env->get_taxi_position().first, env->get_taxi_position().second + 1);
-      if(env->get_taxi_position().first + 1 != env->get_grid_w())
-        next_positions[m_move_east_id] = std::make_pair(env->get_taxi_position().first + 1, env->get_taxi_position().second);
-      if(env->get_taxi_position().first)
-        next_positions[m_move_west_id] = std::make_pair(env->get_taxi_position().first - 1, env->get_taxi_position().second);
-    }
-    for(const auto next_position : next_positions) {
-      const auto through_source = env->optimal_from(next_position.second, refuel_required ? env->get_fuel_max() : env->get_fuel() - 1, Environment::AT_SOURCE, env->get_passenger_source(), env->get_passenger_destination());
-      if(min_through_source.first.empty() || through_source.second < min_through_source.second) {
-        min_through_source.first.clear();
-        min_through_source.second = through_source.second;
+      dist_min = std::numeric_limits<int64_t>::max();
+      for(auto next_position : next_positions) {
+        const int64_t dist = env->get_distance_from_dest(destination)[next_position.second.second * env->get_grid_w() + next_position.second.first];
+        dist_min = std::min(dist_min, dist);
       }
-      if(through_source.second <= min_through_source.second)
-        min_through_source.first.insert(next_position.first);
-
-      const auto to_dest = env->optimal_from(next_position.second, refuel_required ? env->get_fuel_max() : env->get_fuel() - 1, Environment::ONBOARD, env->get_passenger_source(), env->get_passenger_destination());
-      if(min_to_dest.first.empty() || to_dest.second < min_to_dest.second) {
-        min_to_dest.first.clear();
-        min_to_dest.second = to_dest.second;
+      if(dist_min != std::numeric_limits<int64_t>::max()) {
+        for(auto next_position : next_positions) {
+          if(env->get_distance_from_dest(destination)[next_position.second.second * env->get_grid_w() + next_position.second.first] == dist_min)
+            insert_new_wme(std::make_shared<Rete::WME>(next_position.first, m_toward_attr, destination_id));
+        }
       }
-      if(to_dest.second <= min_to_dest.second)
-        min_to_dest.first.insert(next_position.first);
+
+      const int64_t dist = env->get_distance_from_dest(destination)[env->get_taxi_position().second * env->get_grid_w() + env->get_taxi_position().first];
+      insert_new_wme(std::make_shared<Rete::WME>(destination_id, m_fuel_attr, dist + env->get_fuel_max() / 2 <= env->get_fuel() ? m_fuel_roundtrip : dist <= env->get_fuel() ? m_fuel_oneway : m_fuel_insufficient));
     }
 
-    for(auto id : {m_move_north_id, m_move_south_id, m_move_east_id, m_move_west_id}) {
-      const bool is_min = min_through_source.second != std::numeric_limits<int64_t>::max() && min_through_source.first.find(id) != min_through_source.first.end();
-      insert_new_wme(std::make_shared<Rete::WME>(id, m_toward_pickup_attr, is_min ? m_true_value : m_false_value));
-    }
+    //bool refuel_required = false;
+    //if(env->get_fuel() != env->get_fuel_max() && std::find(env->get_filling_stations().begin(), env->get_filling_stations().end(), env->get_taxi_position()) != env->get_filling_stations().end()) {
+    //  const auto moves_to_goal = env->optimal_from(env->get_taxi_position(), env->get_fuel(), env->get_passenger(), env->get_passenger_source(), env->get_passenger_destination());
+    //  auto state = moves_to_goal.first;
+    //  if(state->passenger != Environment::AT_DESTINATION)
+    //    refuel_required = true;
+    //  else {
+    //    auto state_next = state;
+    //    while(state->prev_state) {
+    //      state_next = state;
+    //      state = state->prev_state;
+    //    }
+    //    if(state_next->fuel == env->get_fuel_max())
+    //      refuel_required = true;
+    //  }
+    //}
+    //insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_refuel_required_attr, refuel_required ? m_true_value : m_false_value));
 
-    for(auto id : {m_move_north_id, m_move_south_id, m_move_east_id, m_move_west_id}) {
-      const bool is_min = min_to_dest.second != std::numeric_limits<int64_t>::max() && min_to_dest.first.find(id) != min_to_dest.first.end();
-      insert_new_wme(std::make_shared<Rete::WME>(id, m_toward_dropoff_attr, is_min ? m_true_value : m_false_value));
-    }
+    //std::pair<std::set<Rete::Symbol_Identifier_Ptr_C>, int64_t> min_through_source;
+    //std::pair<std::set<Rete::Symbol_Identifier_Ptr_C>, int64_t> min_to_dest;
+    //for(const auto next_position : next_positions) {
+    //  const auto through_source = env->optimal_from(next_position.second, refuel_required ? env->get_fuel_max() : env->get_fuel() - 1, Environment::AT_SOURCE, env->get_passenger_source(), env->get_passenger_destination());
+    //  if(min_through_source.first.empty() || through_source.second < min_through_source.second) {
+    //    min_through_source.first.clear();
+    //    min_through_source.second = through_source.second;
+    //  }
+    //  if(through_source.second <= min_through_source.second)
+    //    min_through_source.first.insert(next_position.first);
+
+    //  const auto to_dest = env->optimal_from(next_position.second, refuel_required ? env->get_fuel_max() : env->get_fuel() - 1, Environment::ONBOARD, env->get_passenger_source(), env->get_passenger_destination());
+    //  if(min_to_dest.first.empty() || to_dest.second < min_to_dest.second) {
+    //    min_to_dest.first.clear();
+    //    min_to_dest.second = to_dest.second;
+    //  }
+    //  if(to_dest.second <= min_to_dest.second)
+    //    min_to_dest.first.insert(next_position.first);
+    //}
+
+    //for(auto id : {m_move_north_id, m_move_south_id, m_move_east_id, m_move_west_id}) {
+    //  const bool is_min = min_through_source.second != std::numeric_limits<int64_t>::max() && min_through_source.first.find(id) != min_through_source.first.end();
+    //  insert_new_wme(std::make_shared<Rete::WME>(id, m_toward_pickup_attr, is_min ? m_true_value : m_false_value));
+    //}
+
+    //for(auto id : {m_move_north_id, m_move_south_id, m_move_east_id, m_move_west_id}) {
+    //  const bool is_min = min_to_dest.second != std::numeric_limits<int64_t>::max() && min_to_dest.first.find(id) != min_to_dest.first.end();
+    //  insert_new_wme(std::make_shared<Rete::WME>(id, m_toward_dropoff_attr, is_min ? m_true_value : m_false_value));
+    //}
 
     if(env->get_passenger() == Environment::AT_SOURCE)
       insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_passenger_attr, m_passenger_at_source));
@@ -467,8 +526,8 @@ namespace Taxicab {
     else
       insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_passenger_attr, m_passenger_at_destination));
 
-    insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_passenger_source_attr, Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(env->get_passenger_source()))));
-    insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_passenger_destination_attr, Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(env->get_passenger_destination()))));
+    insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_passenger_source_attr, get_destination_id(env->get_passenger_source())));
+    insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_passenger_destination_attr, get_destination_id(env->get_passenger_destination())));
 
     clear_old_wmes();
   }
@@ -480,6 +539,24 @@ namespace Taxicab {
       m_metastate = Metastate::SUCCESS;
     else if(env->failure())
       m_metastate = Metastate::FAILURE;
+  }
+
+  Rete::Symbol_Identifier_Ptr_C Agent::get_filling_station_id(const int64_t &filling_station) {
+    if(!m_filling_station_ids[filling_station]) {
+      std::ostringstream oss;
+      oss << "filling-station-" << filling_station;
+      m_filling_station_ids[filling_station] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(oss.str()));
+    }
+    return m_filling_station_ids[filling_station];
+  }
+
+  Rete::Symbol_Identifier_Ptr_C Agent::get_destination_id(const int64_t &destination) {
+    if(!m_destination_ids[destination]) {
+      std::ostringstream oss;
+      oss << "destination-" << destination;
+      m_destination_ids[destination] = Rete::Symbol_Identifier_Ptr_C(new Rete::Symbol_Identifier(oss.str()));
+    }
+    return m_destination_ids[destination];
   }
 
 }
