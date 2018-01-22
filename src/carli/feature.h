@@ -6,6 +6,7 @@
 
 #include "rete/rete.h"
 
+#include <cmath>
 #include <iostream>
 #include <memory>
 #include <sstream>
