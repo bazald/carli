@@ -4,6 +4,8 @@ sp {taxicab*general
   :feature 1 unsplit nil
   (<s> ^action <action>)
   (<s> ^passenger <passenger>)
+  (<s> ^passenger-source <source>)
+  (<s> ^passenger-destination <destination>)
   (<action> ^type <type>)
   (<action> ^direction <direction>)
 -->
@@ -106,50 +108,128 @@ sp {taxicab*passenger-at-destination
   = 0.0
 }
 
-sp {taxicab*refuel-required
+sp {taxicab*fuel-insufficient-for-source
   :feature 2 fringe taxicab*general
   &taxicab*general
-  +(<s> ^refuel-required true)
+  +{(<source> ^fuel <src-fuel>)
+  (<src-fuel> == 1)}
 -->
   = 0.0
 }
 
-sp {taxicab*refuel-not-required
+sp {taxicab*fuel-oneway-for-source
   :feature 2 fringe taxicab*general
   &taxicab*general
-  -(<s> ^refuel-required true)
+  +{(<source> ^fuel <src-fuel>)
+  (<src-fuel> == 2)}
 -->
   = 0.0
 }
 
-sp {taxicab*action-toward-pickup
+sp {taxicab*fuel-roundtrip-for-source
   :feature 2 fringe taxicab*general
   &taxicab*general
-  +(<action> ^toward-pickup true)
+  +{(<source> ^fuel <src-fuel>)
+  (<src-fuel> == 3)}
 -->
   = 0.0
 }
 
-sp {taxicab*action-not-toward-pickup
+sp {taxicab*fuel-insufficient-for-destination
   :feature 2 fringe taxicab*general
   &taxicab*general
-  -(<action> ^toward-pickup true)
+  +{(<destination> ^fuel <dest-fuel>)
+  (<dest-fuel> == 1)}
 -->
   = 0.0
 }
 
-sp {taxicab*action-toward-dropoff
+sp {taxicab*fuel-oneway-for-destination
   :feature 2 fringe taxicab*general
   &taxicab*general
-  +(<action> ^toward-dropoff true)
+  +{(<destination> ^fuel <dest-fuel>)
+  (<dest-fuel> == 2)}
 -->
   = 0.0
 }
 
-sp {taxicab*action-not-toward-dropoff
+sp {taxicab*fuel-roundtrip-for-destination
   :feature 2 fringe taxicab*general
   &taxicab*general
-  -(<action> ^toward-dropoff true)
+  +{(<destination> ^fuel <dest-fuel>)
+  (<dest-fuel> == 3)}
+-->
+  = 0.0
+}
+
+sp {taxicab*action-toward-source
+  :feature 2 fringe taxicab*general
+  &taxicab*general
+  +(<action> ^toward <source>)
+-->
+  = 0.0
+}
+
+sp {taxicab*action-not-toward-source
+  :feature 2 fringe taxicab*general
+  &taxicab*general
+  -(<action> ^toward <source>)
+-->
+  = 0.0
+}
+
+sp {taxicab*action-toward-destination
+  :feature 2 fringe taxicab*general
+  &taxicab*general
+  +(<action> ^toward <destination>)
+-->
+  = 0.0
+}
+
+sp {taxicab*action-not-toward-destination
+  :feature 2 fringe taxicab*general
+  &taxicab*general
+  -(<action> ^toward <destination>)
+-->
+  = 0.0
+}
+
+sp {taxicab*action-toward-fuel-source
+  :feature 2 fringe taxicab*general
+  &taxicab*general
+  +{(<action> ^toward <fuel>)
+  (<s> ^action <type>) # For debugging distinguishability
+  (<fuel> ^toward <source>)}
+-->
+  = 0.0
+}
+
+sp {taxicab*action-not-toward-fuel-source
+  :feature 2 fringe taxicab*general
+  &taxicab*general
+  -{(<action> ^toward <fuel>)
+  (<s> ^action <type>) # For debugging distinguishability
+  (<fuel> ^toward <source>)}
+-->
+  = 0.0
+}
+
+sp {taxicab*action-toward-fuel-destination
+  :feature 2 fringe taxicab*general
+  &taxicab*general
+  +{(<action> ^toward <fuel>)
+  (<s> ^action <type>) # For debugging distinguishability
+  (<fuel> ^toward <destination>)}
+-->
+  = 0.0
+}
+
+sp {taxicab*action-not-toward-fuel-destination
+  :feature 2 fringe taxicab*general
+  &taxicab*general
+  -{(<action> ^toward <fuel>)
+  (<s> ^action <type>) # For debugging distinguishability
+  (<fuel> ^toward <destination>)}
 -->
   = 0.0
 }

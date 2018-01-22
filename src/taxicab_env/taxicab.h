@@ -123,7 +123,9 @@ namespace Taxicab {
     int64_t get_grid_w() const { return m_grid_w; }
     int64_t get_grid_h() const { return m_grid_h; }
     const std::vector<std::pair<int64_t, int64_t>> & get_filling_stations() const { return m_filling_stations; }
+    const Grid & get_distance_from_fs(const int64_t &filling_station) const { return m_distance_from_fs[filling_station]; }
     const std::vector<std::pair<int64_t, int64_t>> & get_destinations() const { return m_destinations; }
+    const Grid & get_distance_from_dest(const int64_t &destination) const { return m_distance_from_dest[destination]; }
     const std::pair<int64_t, int64_t> & get_taxi_position() const { return m_taxi_position; }
     int64_t get_fuel() const { return m_fuel; }
     int64_t get_fuel_max() const { return m_fuel_max; }
@@ -163,6 +165,9 @@ namespace Taxicab {
     std::vector<std::pair<int64_t, int64_t>> m_filling_stations;
     std::vector<std::pair<int64_t, int64_t>> m_destinations;
 
+    std::vector<Grid> m_distance_from_fs;
+    std::vector<Grid> m_distance_from_dest;
+
     std::pair<int64_t, int64_t> m_taxi_position;
     int64_t m_fuel;
     const int64_t m_fuel_max = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["fuel-max"]).get_value();
@@ -174,7 +179,12 @@ namespace Taxicab {
     const bool m_evaluate_optimality = dynamic_cast<const Option_Ranged<bool> &>(Options::get_global()["evaluate-optimality"]).get_value() && supports_optimal() && dynamic_cast<const Option_Itemized &>(Options::get_global()["output"]).get_value() != "null";
     int64_t m_num_steps_to_goal = 0;
     std::shared_ptr<const State> m_optimal_solution;
-    //std::shared_ptr<const State> m_solution;
+#ifndef NDEBUG
+    std::shared_ptr<const State> m_solution;
+#endif
+
+    typedef std::tuple<std::pair<int64_t, int64_t>, int64_t, Passenger, int64_t, int64_t> Optimal_Index;
+    mutable std::map<Optimal_Index, std::pair<std::shared_ptr<const Environment::State>, int64_t>> m_optimals;
   };
 
   class TAXICAB_LINKAGE Agent : public Carli::Agent {
@@ -200,9 +210,13 @@ namespace Taxicab {
     const Rete::Symbol_Constant_String_Ptr_C m_passenger_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("passenger"));
     const Rete::Symbol_Constant_String_Ptr_C m_passenger_source_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("passenger-source"));
     const Rete::Symbol_Constant_String_Ptr_C m_passenger_destination_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("passenger-destination"));
-    const Rete::Symbol_Constant_String_Ptr_C m_toward_pickup_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("toward-pickup"));
-    const Rete::Symbol_Constant_String_Ptr_C m_toward_dropoff_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("toward-dropoff"));
-    const Rete::Symbol_Constant_String_Ptr_C m_refuel_required_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("refuel-required"));
+    const Rete::Symbol_Constant_String_Ptr_C m_filling_station_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("filling-station"));
+    const Rete::Symbol_Constant_String_Ptr_C m_destination_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("destination"));
+    const Rete::Symbol_Constant_String_Ptr_C m_toward_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("toward"));
+    const Rete::Symbol_Constant_String_Ptr_C m_fuel_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("fuel"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_toward_pickup_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("toward-pickup"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_toward_dropoff_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("toward-dropoff"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_refuel_required_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("refuel-required"));
     //const Rete::Symbol_Constant_String_Ptr_C m_snake1_length_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake1-length"));
     //const Rete::Symbol_Constant_String_Ptr_C m_snake2_length_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake2-length"));
     //const Rete::Symbol_Constant_String_Ptr_C m_snake1_dist_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("snake1-dist"));
@@ -237,11 +251,17 @@ namespace Taxicab {
     const Rete::Symbol_Constant_Int_Ptr_C m_passenger_at_source = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
     const Rete::Symbol_Constant_Int_Ptr_C m_passenger_onboard = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
     const Rete::Symbol_Constant_Int_Ptr_C m_passenger_at_destination = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
+    const Rete::Symbol_Constant_Int_Ptr_C m_fuel_insufficient = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(1));
+    const Rete::Symbol_Constant_Int_Ptr_C m_fuel_oneway = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(2));
+    const Rete::Symbol_Constant_Int_Ptr_C m_fuel_roundtrip = Rete::Symbol_Constant_Int_Ptr_C(new Rete::Symbol_Constant_Int(3));
     const Rete::Symbol_Constant_String_Ptr_C m_true_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("true"));
     const Rete::Symbol_Constant_String_Ptr_C m_false_value = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("false"));
 
-    std::map<int64_t, Rete::Symbol_Identifier_Ptr_C> m_move_ids;
-    std::map<int64_t, Rete::Symbol_Constant_Int_Ptr_C> m_tile_names;
+    Rete::Symbol_Identifier_Ptr_C get_filling_station_id(const int64_t &filling_station);
+    Rete::Symbol_Identifier_Ptr_C get_destination_id(const int64_t &destination);
+
+    std::map<int64_t, Rete::Symbol_Identifier_Ptr_C> m_filling_station_ids;
+    std::map<int64_t, Rete::Symbol_Identifier_Ptr_C> m_destination_ids;
 
     std::unordered_map<Rete::WME_Ptr_C, bool, Rete::hash_deref<Rete::WME>, Rete::compare_deref_eq> m_wmes;
 
