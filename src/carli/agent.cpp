@@ -647,8 +647,10 @@ namespace Carli {
               leaves.push_back(null_hog);
               break;
             }
-            else
-              std::cerr << "Mismatch: " << feature_n->value << " " << old_new_var_name << std::endl;
+            else {
+              //std::cerr << "Mismatch: " << feature_n->value << " " << old_new_var_name << std::endl;
+              continue; /// A different HOG variable, perhaps?
+            }
           }
         }
       }

@@ -129,6 +129,7 @@ namespace Taxicab {
     const std::pair<int64_t, int64_t> & get_taxi_position() const { return m_taxi_position; }
     int64_t get_fuel() const { return m_fuel; }
     int64_t get_fuel_max() const { return m_fuel_max; }
+    Grid get_fuel_distances() const { return m_fuel_distances; }
     Passenger get_passenger() const { return m_passenger; }
     int64_t get_passenger_source() const { return m_passenger_source; }
     int64_t get_passenger_destination() const { return m_passenger_destination; }
@@ -171,6 +172,7 @@ namespace Taxicab {
     std::pair<int64_t, int64_t> m_taxi_position;
     int64_t m_fuel;
     const int64_t m_fuel_max = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["fuel-max"]).get_value();
+    Grid m_fuel_distances;
 
     Passenger m_passenger;
     int64_t m_passenger_source;
@@ -208,8 +210,9 @@ namespace Taxicab {
     const Rete::Symbol_Constant_String_Ptr_C m_type_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("type"));
     const Rete::Symbol_Constant_String_Ptr_C m_direction_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("direction"));
     const Rete::Symbol_Constant_String_Ptr_C m_passenger_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("passenger"));
-    const Rete::Symbol_Constant_String_Ptr_C m_passenger_source_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("passenger-source"));
-    const Rete::Symbol_Constant_String_Ptr_C m_passenger_destination_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("passenger-destination"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_passenger_source_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("passenger-source"));
+    //const Rete::Symbol_Constant_String_Ptr_C m_passenger_destination_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("passenger-destination"));
+    const Rete::Symbol_Constant_String_Ptr_C m_next_stop_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("next-stop"));
     const Rete::Symbol_Constant_String_Ptr_C m_filling_station_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("filling-station"));
     const Rete::Symbol_Constant_String_Ptr_C m_destination_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("destination"));
     const Rete::Symbol_Constant_String_Ptr_C m_toward_attr = Rete::Symbol_Constant_String_Ptr_C(new Rete::Symbol_Constant_String("toward"));

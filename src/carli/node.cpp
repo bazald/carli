@@ -482,12 +482,15 @@ namespace Carli {
             }
           }
 
-          bool tests_rv = q_value_fringe->feature->axis == rv_first->second;
-          if(!tests_rv) {
-            for(auto binding : q_value_fringe->feature->bindings) {
-              if(binding.first == rv_first->second) {
-                tests_rv = true;
-                break;
+          bool tests_rv = false;
+          if(rv_first != ra_variables->end()) {
+            tests_rv = q_value_fringe->feature->axis == rv_first->second;
+            if(!tests_rv) {
+              for(auto binding : q_value_fringe->feature->bindings) {
+                if(binding.first == rv_first->second) {
+                  tests_rv = true;
+                  break;
+                }
               }
             }
           }
@@ -618,8 +621,14 @@ namespace Carli {
         indices->insert(std::make_pair(new_new_var_name, new_new_var_index));
         for(auto rt = reindex.begin(), rend = reindex.end(); rt != rend; ++rt) {
           auto name = rt->first;
+
 //          std::cerr << name << " at " << rt->second << std::endl;
-          assert(!strcmp(name.c_str() + (name.size() - old_suffix.size()), old_suffix.c_str()));
+          //assert(!strcmp(name.c_str() + (name.size() - old_suffix.size()), old_suffix.c_str())); /// Other variables actually okay
+          if(name.size() < old_suffix.size())
+            continue;
+          if(name.substr(0, name.size() - old_suffix.size()) != name)
+            continue;
+
           name = name.substr(0, name.size() - old_suffix.size()) + new_suffix;
 
           auto index = rt->second;
@@ -727,9 +736,9 @@ namespace Carli {
       if(grammar == GRAMMAR_NULL_HOG) {
         new_test = ancestor_right->parent_right();
 
-//#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
         std::cerr << "Originals: " << old_new_var_index << " " << new_new_var_index << std::endl;
-//#endif
+#endif
         auto gp = ancestor_right->parent_left();
         null_hog_offset = gp->get_size();
         null_hog_token_offset = gp->get_token_size();
@@ -739,9 +748,9 @@ namespace Carli {
         new_new_var_index.rete_row = old_new_var_index.rete_row + rebase_right.size() - 1;
         new_new_var_index.token_row = rebase_right.size() - 1;
         new_new_var_index.existential = false;
-//#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT
         std::cerr << "Replacements: " << old_new_var_index << " " << new_new_var_index << std::endl;
-//#endif
+#endif
       }
 
       assert(!rebase_right.empty());
