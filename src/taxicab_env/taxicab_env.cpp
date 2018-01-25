@@ -150,30 +150,47 @@ namespace Taxicab {
         indices.erase(index);
         m_filling_stations.push_back(std::make_pair(index % m_grid_w, index / m_grid_w));
       }
-    } while(!solveable_fuel(m_fuel_distances));
+    } while(!solveable_fuel());
 
-    m_distance_from_fs.clear();
+    m_distance_from_fuel.clear();
     for(int i = 0; i != m_filling_stations.size(); ++i) {
       Grid grid(m_grid_w * m_grid_h, std::numeric_limits<int64_t>::max());
       grid[m_filling_stations[i].second * m_grid_w + m_filling_stations[i].first] = 0;
       transitive_closure_distances(grid);
-      m_distance_from_fs.push_back(grid);
+      m_distance_from_fuel.push_back(grid);
     }
 
     m_destinations.clear();
     m_distance_from_dest.clear();
-    for(int i = 0; i != m_num_destinations; ++i) {
+    m_fuel2dest_hops.clear();
+    m_fuel2dest_hops.resize(m_num_filling_stations * m_num_destinations, std::numeric_limits<int64_t>::max());
+    for(int j = 0; j != m_num_destinations; ++j) {
       int64_t index;
       do {
         index = *std::next(indices.begin(), m_random.rand_lt(int32_t(indices.size())));
         indices.erase(index);
       } while(m_fuel_distances[index] > m_fuel_max / 2);
-      m_destinations.push_back(std::make_pair(index % m_grid_w, index / m_grid_w));
+      const auto dest_pos = std::make_pair(index % m_grid_w, index / m_grid_w);
+      m_destinations.push_back(dest_pos);
 
       Grid grid(m_grid_w * m_grid_h, std::numeric_limits<int64_t>::max());
       grid[index] = 0;
       transitive_closure_distances(grid);
       m_distance_from_dest.push_back(grid);
+
+      for(int64_t i = 0; i != m_num_filling_stations; ++i) {
+        if(distance(m_filling_stations[i], dest_pos) <= m_fuel_max / 2)
+          set_fuel2dest_hops(i, j, 0);
+      }
+
+      for(int64_t k = 0; k != m_num_filling_stations; ++k) {
+        for(int64_t i = 0; i != m_num_filling_stations; ++i) {
+          const int64_t ik = get_fuel2fuel_hops(i, k);
+          const int64_t kj = get_fuel2dest_hops(k, j);
+          if(ik != std::numeric_limits<int64_t>::max() && kj != std::numeric_limits<int64_t>::max())
+            set_fuel2dest_hops(i, j, std::min(get_fuel2dest_hops(i, j), ik + kj));
+        }
+      }
     }
 
     int64_t index;
@@ -258,7 +275,7 @@ namespace Taxicab {
   }
 
   void Environment::print_impl(ostream &os) const {
-    os << "Taxicab " << m_fuel << '/' << m_fuel_max << ' ' << char('a' + (m_passenger_source % 25)) << "->" << char('a' + (m_passenger_destination % 25)) << ':' << endl;
+    os << "Taxicab(" << m_passenger << ") " << m_fuel << '/' << m_fuel_max << ' ' << char('a' + (m_passenger_source % 25) + ('a' + (m_passenger_source % 25) >= 'f' ? 1 : 0)) << "->" << char('a' + (m_passenger_destination % 25) + ('a' + (m_passenger_destination % 25) >= 'f' ? 1 : 0)) << ':' << endl;
     for(int64_t j = 0; j != m_grid_h; ++j) {
       for(int64_t i = 0; i != m_grid_w; ++i) {
         char c = ' ';
@@ -281,16 +298,16 @@ namespace Taxicab {
     }
   }
 
-  bool Environment::solveable_fuel(Grid &distances_out) const {
-    distances_out.clear();
-    distances_out.resize(m_grid_w * m_grid_h, std::numeric_limits<int64_t>::max());
+  bool Environment::solveable_fuel() {
+    m_fuel_distances.clear();
+    m_fuel_distances.resize(m_grid_w * m_grid_h, std::numeric_limits<int64_t>::max());
 
     for(auto filling_station : m_filling_stations)
-      distances_out[filling_station.second * m_grid_w + filling_station.first] = 0;
-    transitive_closure_distances(distances_out);
+      m_fuel_distances[filling_station.second * m_grid_w + filling_station.first] = 0;
+    transitive_closure_distances(m_fuel_distances);
 
     int64_t spots_available = 0;
-    for(auto spot : distances_out) {
+    for(auto spot : m_fuel_distances) {
       if(spot >= 0 && spot != std::numeric_limits<int64_t>::max())
         ++spots_available;
     }
@@ -298,20 +315,33 @@ namespace Taxicab {
     if(spots_available < m_num_filling_stations + m_num_destinations)
       return false; /// Insufficient space for all filling stations and destinations
 
-    std::unordered_set<std::pair<int64_t, int64_t>> reachable;
-    std::queue<std::pair<int64_t, int64_t>> reachable_queue;
-    reachable_queue.push(*m_filling_stations.begin());
-    while(!reachable_queue.empty()) {
-      const auto filling_station = reachable_queue.front();
-      reachable_queue.pop();
-      reachable.insert(filling_station);
-      for(auto fs2 : m_filling_stations) {
-        if(fs2 != filling_station && reachable.find(fs2) == reachable.end() && distance(filling_station, fs2) <= m_fuel_max)
-          reachable_queue.push(fs2);
+    m_fuel2fuel_hops.clear();
+    m_fuel2fuel_hops.resize(m_num_filling_stations * m_num_filling_stations, std::numeric_limits<int64_t>::max());
+    for(int64_t i = 0; i != m_num_filling_stations; ++i) {
+      set_fuel2fuel_hops(i, i, 0);
+      for(int64_t j = 0; j != m_num_filling_stations; ++j) {
+        if(i != j && distance(m_filling_stations[i], m_filling_stations[j]) <= m_fuel_max)
+          set_fuel2fuel_hops(i, j, 1);
       }
     }
-    if(reachable.size() != m_filling_stations.size())
-      return false;
+
+    for(int64_t k = 0; k != m_num_filling_stations; ++k) {
+      for(int64_t i = 0; i != m_num_filling_stations; ++i) {
+        for(int64_t j = 0; j != m_num_filling_stations; ++j) {
+          if(i == j)
+            continue;
+          const int64_t ik = get_fuel2fuel_hops(i, k);
+          const int64_t kj = get_fuel2fuel_hops(k, j);
+          if(ik != std::numeric_limits<int64_t>::max() && kj != std::numeric_limits<int64_t>::max())
+            set_fuel2fuel_hops(i, j, std::min(get_fuel2fuel_hops(i, j), ik + kj));
+        }
+      }
+    }
+
+    for(int64_t j = 1; j < m_num_filling_stations; ++j) {
+      if(get_fuel2fuel_hops(0, j) == std::numeric_limits<int64_t>::max())
+        return false; /// Filling station 0 is infinite hops away from another fuel source
+    }
 
     return true;
   }
@@ -434,17 +464,17 @@ namespace Taxicab {
 
       int64_t dist_min = std::numeric_limits<int64_t>::max();
       for(auto next_position : next_positions) {
-        const int64_t dist = env->get_distance_from_fs(filling_station)[next_position.second.second * env->get_grid_w() + next_position.second.first];
+        const int64_t dist = env->get_distance_from_fuel(filling_station)[next_position.second.second * env->get_grid_w() + next_position.second.first];
         dist_min = std::min(dist_min, dist);
       }
       if(dist_min != std::numeric_limits<int64_t>::max()) {
         for(auto next_position : next_positions) {
-          if(env->get_distance_from_fs(filling_station)[next_position.second.second * env->get_grid_w() + next_position.second.first] == dist_min)
+          if(env->get_distance_from_fuel(filling_station)[next_position.second.second * env->get_grid_w() + next_position.second.first] == dist_min)
             insert_new_wme(std::make_shared<Rete::WME>(next_position.first, m_toward_attr, filling_station_id));
         }
       }
 
-      const int64_t dist = env->get_distance_from_fs(filling_station)[env->get_taxi_position().second * env->get_grid_w() + env->get_taxi_position().first];
+      const int64_t dist = env->get_distance_from_fuel(filling_station)[env->get_taxi_position().second * env->get_grid_w() + env->get_taxi_position().first];
       if(dist <= env->get_fuel())
         reachable_filling_stations.push_back(filling_station);
       //insert_new_wme(std::make_shared<Rete::WME>(filling_station_id, m_fuel_attr, dist <= env->get_fuel() ? m_fuel_roundtrip : m_fuel_insufficient));
@@ -454,33 +484,44 @@ namespace Taxicab {
       const auto destination_id = get_destination_id(destination);
       insert_new_wme(std::make_shared<Rete::WME>(m_s_id, m_destination_attr, destination_id));
 
+      int64_t hops_min = std::numeric_limits<int64_t>::max();
       int64_t dist_min = std::numeric_limits<int64_t>::max();
       for(const int64_t filling_station : reachable_filling_stations) {
+        const int64_t hops = env->get_fuel2dest_hops(filling_station, destination);
         const int64_t dist = env->get_distance_from_dest(destination)[env->get_filling_stations()[filling_station].second * env->get_grid_w() + env->get_filling_stations()[filling_station].first];
-        dist_min = std::min(dist_min, dist);
+        if(hops < hops_min || hops == hops_min && dist < dist_min) {
+          hops_min = hops;
+          dist_min = dist;
+        }
       }
-      if(dist_min != std::numeric_limits<int64_t>::max()) {
+      if(hops_min != std::numeric_limits<int64_t>::max() && dist_min != std::numeric_limits<int64_t>::max()) {
         for(const int64_t filling_station : reachable_filling_stations) {
-          if(env->get_distance_from_dest(destination)[env->get_filling_stations()[filling_station].second * env->get_grid_w() + env->get_filling_stations()[filling_station].first] == dist_min)
+          const int64_t hops = env->get_fuel2dest_hops(filling_station, destination);
+          const int64_t dist = env->get_distance_from_dest(destination)[env->get_filling_stations()[filling_station].second * env->get_grid_w() + env->get_filling_stations()[filling_station].first];
+          if(hops == hops_min && dist == dist_min)
             insert_new_wme(std::make_shared<Rete::WME>(get_filling_station_id(filling_station), m_toward_attr, destination_id));
         }
       }
 
-      dist_min = std::numeric_limits<int64_t>::max();
-      for(auto next_position : next_positions) {
-        const int64_t dist = env->get_distance_from_dest(destination)[next_position.second.second * env->get_grid_w() + next_position.second.first];
-        dist_min = std::min(dist_min, dist);
-      }
-      if(dist_min != std::numeric_limits<int64_t>::max()) {
+      const int64_t fuel = env->get_fuel();
+      const int64_t taxi_to_dest = env->get_distance_from_dest(destination)[env->get_taxi_position().second * env->get_grid_w() + env->get_taxi_position().first];
+      const int64_t dest_to_fuel = env->get_fuel_distances()[env->get_destinations()[destination].second * env->get_grid_w() + env->get_destinations()[destination].first];
+
+      if(fuel >= taxi_to_dest) {
+        dist_min = std::numeric_limits<int64_t>::max();
         for(auto next_position : next_positions) {
-          if(env->get_distance_from_dest(destination)[next_position.second.second * env->get_grid_w() + next_position.second.first] == dist_min)
-            insert_new_wme(std::make_shared<Rete::WME>(next_position.first, m_toward_attr, destination_id));
+          const int64_t dist = env->get_distance_from_dest(destination)[next_position.second.second * env->get_grid_w() + next_position.second.first];
+          dist_min = std::min(dist_min, dist);
+        }
+        if(dist_min != std::numeric_limits<int64_t>::max()) {
+          for(auto next_position : next_positions) {
+            if(env->get_distance_from_dest(destination)[next_position.second.second * env->get_grid_w() + next_position.second.first] == dist_min)
+              insert_new_wme(std::make_shared<Rete::WME>(next_position.first, m_toward_attr, destination_id));
+          }
         }
       }
 
-      const int64_t taxi_to_dest = env->get_distance_from_dest(destination)[env->get_taxi_position().second * env->get_grid_w() + env->get_taxi_position().first];
-      const int64_t dest_to_fuel = env->get_fuel_distances()[env->get_destinations()[destination].second * env->get_grid_w() + env->get_destinations()[destination].first];
-      insert_new_wme(std::make_shared<Rete::WME>(destination_id, m_fuel_attr, taxi_to_dest + dest_to_fuel <= env->get_fuel() ? m_fuel_roundtrip : taxi_to_dest <= env->get_fuel() ? m_fuel_oneway : m_fuel_insufficient));
+      insert_new_wme(std::make_shared<Rete::WME>(destination_id, m_fuel_attr, fuel >= taxi_to_dest + dest_to_fuel ? m_fuel_roundtrip : fuel >= taxi_to_dest ? m_fuel_oneway : m_fuel_insufficient));
     }
 
     //bool refuel_required = false;

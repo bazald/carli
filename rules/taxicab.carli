@@ -150,6 +150,24 @@ sp {taxicab*action-not-toward-next-stop
   = 0.0
 }
 
+sp {taxicab*action-toward-fuel
+  :feature 2 fringe taxicab*general
+  &taxicab*general
+  +{(<action> ^toward <fuel>)
+  (<fuel> ^toward <next-stop>)}
+-->
+  = 0.0
+}
+
+sp {taxicab*action-not-toward-fuel
+  :feature 2 fringe taxicab*general
+  &taxicab*general
+  -{(<action> ^toward <fuel>)
+  (<fuel> ^toward <next-stop>)}
+-->
+  = 0.0
+}
+
 sp {taxicab*action-toward-fuel-next-stop
   :feature 2 fringe taxicab*general
   &taxicab*general

@@ -123,13 +123,15 @@ namespace Taxicab {
     int64_t get_grid_w() const { return m_grid_w; }
     int64_t get_grid_h() const { return m_grid_h; }
     const std::vector<std::pair<int64_t, int64_t>> & get_filling_stations() const { return m_filling_stations; }
-    const Grid & get_distance_from_fs(const int64_t &filling_station) const { return m_distance_from_fs[filling_station]; }
     const std::vector<std::pair<int64_t, int64_t>> & get_destinations() const { return m_destinations; }
+    int64_t get_fuel2fuel_hops(const int64_t &filling_station_1, const int64_t &filling_station_2) const { return m_fuel2fuel_hops[filling_station_1 * m_num_filling_stations + filling_station_2]; }
+    int64_t get_fuel2dest_hops(const int64_t &filling_station, const int64_t &destination) const { return m_fuel2dest_hops[filling_station * m_num_destinations + destination]; }
+    const Grid & get_distance_from_fuel(const int64_t &filling_station) const { return m_distance_from_fuel[filling_station]; }
+    Grid get_fuel_distances() const { return m_fuel_distances; }
     const Grid & get_distance_from_dest(const int64_t &destination) const { return m_distance_from_dest[destination]; }
     const std::pair<int64_t, int64_t> & get_taxi_position() const { return m_taxi_position; }
     int64_t get_fuel() const { return m_fuel; }
     int64_t get_fuel_max() const { return m_fuel_max; }
-    Grid get_fuel_distances() const { return m_fuel_distances; }
     Passenger get_passenger() const { return m_passenger; }
     int64_t get_passenger_source() const { return m_passenger_source; }
     int64_t get_passenger_destination() const { return m_passenger_destination; }
@@ -147,13 +149,16 @@ namespace Taxicab {
     }
 
   private:
+    void set_fuel2fuel_hops(const int64_t &filling_station_1, const int64_t &filling_station_2, const int64_t &hops) { m_fuel2fuel_hops[filling_station_1 * m_num_filling_stations + filling_station_2] = m_fuel2fuel_hops[filling_station_2 * m_num_filling_stations + filling_station_1] = hops; }
+    void set_fuel2dest_hops(const int64_t &filling_station, const int64_t &destination, const int64_t &hops) { m_fuel2dest_hops[filling_station * m_num_destinations + destination] = hops; }
+
     void init_impl();
 
     std::pair<reward_type, reward_type> transition_impl(const Carli::Action &action);
 
     void print_impl(ostream &os) const;
 
-    bool solveable_fuel(Grid &distances_out) const;
+    bool solveable_fuel();
     void transitive_closure_distances(Grid &distances) const;
 
     Zeni::Random m_random;
@@ -166,13 +171,15 @@ namespace Taxicab {
     std::vector<std::pair<int64_t, int64_t>> m_filling_stations;
     std::vector<std::pair<int64_t, int64_t>> m_destinations;
 
-    std::vector<Grid> m_distance_from_fs;
+    Grid m_fuel_distances;
+    std::vector<int64_t> m_fuel2fuel_hops;
+    std::vector<int64_t> m_fuel2dest_hops;
+    std::vector<Grid> m_distance_from_fuel;
     std::vector<Grid> m_distance_from_dest;
 
     std::pair<int64_t, int64_t> m_taxi_position;
     int64_t m_fuel;
     const int64_t m_fuel_max = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["fuel-max"]).get_value();
-    Grid m_fuel_distances;
 
     Passenger m_passenger;
     int64_t m_passenger_source;
