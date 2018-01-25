@@ -145,7 +145,7 @@ namespace Taxicab {
         indices.insert(i);
 
       m_filling_stations.clear();
-      for(int i = 0; i != m_num_filling_stations; ++i) {
+      for(int64_t i = 0; i != m_num_filling_stations; ++i) {
         const int64_t index = *std::next(indices.begin(), m_random.rand_lt(int32_t(indices.size())));
         indices.erase(index);
         m_filling_stations.push_back(std::make_pair(index % m_grid_w, index / m_grid_w));
@@ -153,7 +153,7 @@ namespace Taxicab {
     } while(!solveable_fuel());
 
     m_distance_from_fuel.clear();
-    for(int i = 0; i != m_filling_stations.size(); ++i) {
+    for(int64_t i = 0; i != m_num_filling_stations; ++i) {
       Grid grid(m_grid_w * m_grid_h, std::numeric_limits<int64_t>::max());
       grid[m_filling_stations[i].second * m_grid_w + m_filling_stations[i].first] = 0;
       transitive_closure_distances(grid);
@@ -489,7 +489,7 @@ namespace Taxicab {
       for(const int64_t filling_station : reachable_filling_stations) {
         const int64_t hops = env->get_fuel2dest_hops(filling_station, destination);
         const int64_t dist = env->get_distance_from_dest(destination)[env->get_filling_stations()[filling_station].second * env->get_grid_w() + env->get_filling_stations()[filling_station].first];
-        if(hops < hops_min || hops == hops_min && dist < dist_min) {
+        if(hops < hops_min || (hops == hops_min && dist < dist_min)) {
           hops_min = hops;
           dist_min = dist;
         }
