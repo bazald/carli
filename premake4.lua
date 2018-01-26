@@ -12,6 +12,7 @@ solution "carli"
     }
   }
 
+  arch = "not-sparc64"
   if os.get() == "windows" then
     defines { "_WINDOWS", "WIN32", "_CRT_SECURE_NO_DEPRECATE" }
     platforms { "x32", "x64" }
@@ -23,6 +24,8 @@ solution "carli"
   else
     defines { "_LINUX" }
     platforms { "native" }
+
+    arch = os.outputof("arch")
 
     newoption {
       trigger     = "clang",
@@ -45,9 +48,11 @@ solution "carli"
     configuration "x32"
       flags { "EnableSSE2" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
   else
-    configuration "Profiling or Release"
-      flags { "EnableSSE" }
-      buildoptions { "-mfpmath=sse -mmmx -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
+    if arch ~= "sparc64" then
+      configuration "Profiling or Release"
+        flags { "EnableSSE" }
+        buildoptions { "-mfpmath=sse -mmmx -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
+    end
     configuration "*"
       buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++17", "-pedantic" }
     configuration "macosx"
@@ -74,7 +79,11 @@ solution "carli"
     targetsuffix(TARGETSUFFIX)
   configuration "Release"
     defines { "NDEBUG", "debuggable_cast=static_cast", "debuggable_pointer_cast=std::static_pointer_cast" }
-    flags { "Optimize", "Symbols" } -- Errors compiling without Symbols on Mac OS X
+    if arch == "sparc64" then
+      buildoptions { "-Os" }
+    else
+      flags { "Optimize", "Symbols" } -- Errors compiling without Symbols on Mac OS X
+    end
     targetsuffix "_r"
 --    buildoptions { "-flto" }
 --    linkoptions { "-flto" }
@@ -98,15 +107,20 @@ solution "carli"
     includedirs { "src" }
 
   if _ACTION == "gmake" then
-    configuration { "linux" }
-      linkoptions { "-Wl,-rpath,/home/bazald/Software/gperftools/lib",
-                    "-Wl,-rpath-link,/home/bazald/Software/gperftools/lib" }
-    configuration { "linux", "Debug" }
-      links { "tcmalloc" }
-    configuration { "linux", "Profiling" }
-      links { "tcmalloc_and_profiler" }
-    configuration { "linux", "Release" }
-      links { "tcmalloc" }
+    if arch == "sparc64" then
+      linkoptions { "-Wl,-rpath,/usr/local/lib64",
+                    "-Wl,-rpath-link,/usr/local/lib64" }
+    else
+      configuration { "linux" }
+        linkoptions { "-Wl,-rpath,/home/bazald/Software/gperftools/lib",
+                      "-Wl,-rpath-link,/home/bazald/Software/gperftools/lib" }
+      configuration { "linux", "Debug" }
+        links { "tcmalloc" }
+      configuration { "linux", "Profiling" }
+        links { "tcmalloc_and_profiler" }
+      configuration { "linux", "Release" }
+        links { "tcmalloc" }
+    end
     if _OPTIONS["clang"] == "true" then
       configuration "linux"
         buildoptions { "-Qunused-arguments" }
