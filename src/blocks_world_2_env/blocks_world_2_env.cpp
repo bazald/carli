@@ -441,6 +441,8 @@ namespace Blocks_World_2 {
   }
 
   void Environment::init_impl() {
+    int64_t num_blocks = 0;
+    
     /// Begin scenario shenanigans
 
     switch(get_scenario()) {
@@ -523,6 +525,37 @@ namespace Blocks_World_2 {
           }
         }
         break;
+        
+      case 45:
+        if(get_episode_count() <= 5)
+          num_blocks = 3;
+        else if(get_episode_count() <= 20)
+          num_blocks = 4;
+        else
+          num_blocks = 5;
+        break;
+        
+      case 100:
+        if(get_episode_count() <= 15)
+          num_blocks = 3;
+        else if(get_episode_count() <= 40)
+          num_blocks = 4;
+        else
+          num_blocks = 5;
+        break;
+        
+      case 1500:
+        if(get_episode_count() <= 15)
+          num_blocks = 3;
+        else if(get_episode_count() <= 40)
+          num_blocks = 4;
+        else if(get_episode_count() <= 200)
+          num_blocks = 5;
+        else if(get_episode_count() <= 400)
+          num_blocks = 6;
+        else
+          num_blocks = 7;
+        break;
 
       default:
         break;
@@ -533,7 +566,6 @@ namespace Blocks_World_2 {
     assert(m_num_blocks_min > 2);
     assert(m_num_blocks_max >= m_num_blocks_min);
 
-    int64_t num_blocks = 0;
 //    if(get_Option_Ranged<int64_t>(Options::get_global(), "num-episodes") == 156) {
 //      int64_t eps = 0;
 //      for(num_blocks = 3; num_blocks != 10; ++num_blocks) {
@@ -563,7 +595,7 @@ namespace Blocks_World_2 {
 //        num_blocks = 3 + m_random.rand_lte(int32_t(2));
 //    }
 //    else
-    {
+    if(!num_blocks) {
       num_blocks = m_num_blocks_min + (m_num_blocks_min != m_num_blocks_max ? m_random.rand_lte(int32_t(m_num_blocks_max - m_num_blocks_min)) : 0);
     }
 
