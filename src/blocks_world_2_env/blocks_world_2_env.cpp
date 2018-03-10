@@ -526,6 +526,10 @@ namespace Blocks_World_2 {
         }
         break;
         
+      case 35:
+        num_blocks = 5;
+        break;
+        
       case 45:
         if(get_episode_count() <= 5)
           num_blocks = 3;
@@ -555,6 +559,22 @@ namespace Blocks_World_2 {
           num_blocks = 6;
         else
           num_blocks = 7;
+        break;
+        
+      case 31000:
+        if(get_total_step_count() < 0)
+          num_blocks = 3;
+        else
+          num_blocks = 5;
+        break;
+        
+      case 343000:
+        if(get_total_step_count() < -2000)
+          num_blocks = 3;
+        else if(get_total_step_count() < 0)
+          num_blocks = 4;
+        else
+          num_blocks = 5;
         break;
 
       default:

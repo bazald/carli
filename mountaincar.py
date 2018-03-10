@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import argparse
 import hashlib, os, re
 import pylab
 from matplotlib import rc
@@ -91,22 +92,29 @@ def write_to_csv(filename, x_label, xs, y_labels, yss):
     f.write('\n')
 
 def main():
-  reward_label = 'Cumulative Reward / \# Episodes'
+  parser = argparse.ArgumentParser("./blocksworld2.py")
+  parser.add_argument("--scenario", help="Which graph should be generated?")
+  args, filenames = parser.parse_known_args()
+
+  scenario = 0
+  if args.scenario:
+    scenario = int(args.scenario)
+
+  reward_label = 'Average Return Per Episode'
   val0 = 1
   #reward_label = 'Reward Within an Episode'
   #val0 = 4
   
-  # 1: ./mountaincar.py experiment-mc/*_0/*.out
-  # 2: ./mountaincar.py experiment-mc/*_0/*.out
-  # 3: ./mountaincar.py experiment-mc/*_0/*.out experiment-mc/*_1/*.out experiment-mc/cmac_*/*.out
-  # 4: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out experiment-mc/even_*_4/*.out
-  # 5: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out experiment-mc/inv-log-update-count_*_3/*.out
-  # 6: ./mountaincar.py experiment-mc/*_1/*.out experiment-mc/*_3/*.out
-  scenario = 0
+  # 1: ./mountaincar.py --scenario 1 experiment-mc/*_0/*.out
+  # 2: ./mountaincar.py --scenario 2 experiment-mc/*_0/*.out
+  # 3: ./mountaincar.py --scenario 3 experiment-mc/*_0/*.out experiment-mc/*_1/*.out experiment-mc/cmac_*/*.out
+  # 4: ./mountaincar.py --scenario 4 experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out experiment-mc/even_*_4/*.out
+  # 5: ./mountaincar.py --scenario 5 experiment-mc/*_1/*.out experiment-mc/even_*_3/*.out experiment-mc/inv-log-update-count_*_3/*.out
+  # 6: ./mountaincar.py --scenario 6 experiment-mc/*_1/*.out experiment-mc/*_3/*.out
 
   two_sided_plot = scenario > 3 and scenario < 6
 
-  if len(sys.argv) == 1:
+  if len(filenames) == 1:
     f = open('stdout.txt', 'r')
     seed = int(f.readline().split(' ', 1)[1])
     x = []
@@ -129,7 +137,7 @@ def main():
     title='Mountain Car (seed ' + str(seed) + ')'
   else:
     files = {}
-    for filename in sys.argv[1:]:
+    for filename in filenames[1:]:
       f = open(filename, 'r')
       seed = int(f.readline().split(' ', 1)[1])
       
@@ -204,9 +212,9 @@ def main():
   fig.canvas.set_window_title('Mountain Car')
   
   if two_sided_plot:
-    rect = [0.17,0.15,0.6725,0.83]
+    rect = [0.19,0.17,0.65,0.80]
   else:
-    rect = [0.17,0.15,0.7925,0.83]
+    rect = [0.19,0.17,0.80,0.80]
   pylab.axes(rect)
   
   labels = []

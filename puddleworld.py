@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import argparse
 import hashlib, os, re
 import pylab
 from matplotlib import rc
@@ -91,21 +92,28 @@ def write_to_csv(filename, x_label, xs, y_labels, yss):
     f.write('\n')
 
 def main():
-  reward_label = 'Cumulative Reward / \# Episodes'
+  parser = argparse.ArgumentParser("./blocksworld2.py")
+  parser.add_argument("--scenario", help="Which graph should be generated?")
+  args, filenames = parser.parse_known_args()
+
+  scenario = 0
+  if args.scenario:
+    scenario = int(args.scenario)
+
+  reward_label = 'Average Return Per Episode'
   val0 = 1
   #reward_label = 'Reward Within an Episode'
   #val0 = 4
   
-  # 1: ./puddleworld.py experiment-pw/*_0/*.out
-  # 2: ./puddleworld.py experiment-pw/*_0/*.out
-  # 3: ./puddleworld.py experiment-pw/*_0/*.out experiment-pw/*_1/*.out experiment-pw/cmac_*/*.out
-  # 4: ./puddleworld.py experiment-pw/*_1/*.out experiment-pw/even_*_3/*.out experiment-pw/even_*_4/*.out
-  # 5: ./puddleworld.py experiment-pw/*_3/*.out
-  scenario = 0
+  # 1: ./puddleworld.py --scenario 1 experiment-pw/*_0/*.out
+  # 2: ./puddleworld.py --scenario 2 experiment-pw/*_0/*.out
+  # 3: ./puddleworld.py --scenario 3 experiment-pw/*_0/*.out experiment-pw/*_1/*.out experiment-pw/cmac_*/*.out
+  # 4: ./puddleworld.py --scenario 4 experiment-pw/*_1/*.out experiment-pw/even_*_3/*.out experiment-pw/even_*_4/*.out
+  # 5: ./puddleworld.py --scenario 5 experiment-pw/*_3/*.out
 
   two_sided_plot = scenario == 4
 
-  if len(sys.argv) == 1:
+  if len(filenames) == 1:
     f = open('stdout.txt', 'r')
     seed = int(f.readline().split(' ', 1)[1])
     x = []
@@ -128,7 +136,7 @@ def main():
     title='Puddle World (seed ' + str(seed) + ')'
   else:
     files = {}
-    for filename in sys.argv[1:]:
+    for filename in filenames[1:]:
       f = open(filename, 'r')
       seed = int(f.readline().split(' ', 1)[1])
       
@@ -203,9 +211,9 @@ def main():
   fig.canvas.set_window_title('Puddle World')
   
   if two_sided_plot:
-    rect = [0.19,0.15,0.6525,0.82]
+    rect = [0.19,0.17,0.65,0.80]
   else:
-    rect = [0.19,0.15,0.7725,0.82]
+    rect = [0.17,0.17,0.80,0.80]
   pylab.axes(rect)
   
   labels = []

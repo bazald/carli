@@ -66,7 +66,7 @@ namespace Carli {
 
     int64_t m_episode_count = -1;
     int64_t m_step_count = 0;
-    int64_t m_total_step_count = 0;
+    int64_t m_total_step_count = -dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["skip-steps"]).get_value();
   };
 
 }

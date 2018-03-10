@@ -137,6 +137,58 @@ namespace Taxicab {
 
   void Environment::init_impl() {
     m_optimals.clear();
+    
+    /// Begin scenario shenanigans
+
+    switch(get_scenario()) {
+      case 35:
+        m_grid_w = 12;
+        m_grid_h = 12;
+        m_num_filling_stations = 6;
+        m_num_destinations = 12;
+        break;
+      
+      case 31000:
+        if(get_total_step_count() < 0) {
+          m_grid_w = 4;
+          m_grid_h = 4;
+          m_num_filling_stations = 2;
+          m_num_destinations = 4;
+        }
+        else {
+          m_grid_w = 12;
+          m_grid_h = 12;
+          m_num_filling_stations = 6;
+          m_num_destinations = 12;
+        }
+        break;
+        
+      case 343000:
+        if(get_total_step_count() < -2000) {
+          m_grid_w = 4;
+          m_grid_h = 4;
+          m_num_filling_stations = 2;
+          m_num_destinations = 4;
+        }
+        else if(get_total_step_count() < 0) {
+          m_grid_w = 8;
+          m_grid_h = 8;
+          m_num_filling_stations = 4;
+          m_num_destinations = 8;
+        }
+        else {
+          m_grid_w = 12;
+          m_grid_h = 12;
+          m_num_filling_stations = 6;
+          m_num_destinations = 12;
+        }
+        break;
+
+      default:
+        break;
+    }
+    
+    /// Begin normal init
 
     std::set<int64_t> indices;
     do {

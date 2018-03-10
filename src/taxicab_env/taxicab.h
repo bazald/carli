@@ -163,10 +163,10 @@ namespace Taxicab {
 
     Zeni::Random m_random;
 
-    const int64_t m_grid_w = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["grid-width"]).get_value();
-    const int64_t m_grid_h = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["grid-height"]).get_value();
-    const int64_t m_num_filling_stations = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["num-filling-stations"]).get_value();
-    const int64_t m_num_destinations = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["num-destinations"]).get_value();
+    int64_t m_grid_w = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["grid-width"]).get_value();
+    int64_t m_grid_h = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["grid-height"]).get_value();
+    int64_t m_num_filling_stations = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["num-filling-stations"]).get_value();
+    int64_t m_num_destinations = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["num-destinations"]).get_value();
 
     std::vector<std::pair<int64_t, int64_t>> m_filling_stations;
     std::vector<std::pair<int64_t, int64_t>> m_destinations;

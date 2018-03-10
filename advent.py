@@ -100,11 +100,11 @@ def main():
   if args.scenario:
     scenario = int(args.scenario)
 
-  # 1: ./advent.py experiment-adv/catde-none/*.out experiment-adv/policy-none/*.out experiment-adv/value-none/*.out
-  # 2: ./advent.py experiment-adv/catde-catde-none/*.out experiment-adv/policy-policy-none/*.out experiment-adv/value-value-none/*.out
-  # 3: ./advent.py experiment-adv/catde-catde-bkls/*.out experiment-adv/policy-policy-bkls/*.out experiment-adv/value-value-bkls/*.out
-  # 4: ./advent.py experiment-adv/catde-catde-bst/*.out experiment-adv/policy-policy-bst/*.out experiment-adv/value-value-bst/*.out
-  # 5: ./advent.py experiment-adv/catde-catde-c500/*.out experiment-adv/policy-policy-c500/*.out experiment-adv/value-value-c500/*.out
+  # 1: ./advent.py --scenario 1 experiment-adv/catde-none/*.out experiment-adv/policy-none/*.out experiment-adv/value-none/*.out
+  # 2: ./advent.py --scenario 2 experiment-adv/catde-catde-none/*.out experiment-adv/policy-policy-none/*.out experiment-adv/value-value-none/*.out
+  # 3: ./advent.py --scenario 3 experiment-adv/catde-catde-bkls/*.out experiment-adv/policy-policy-bkls/*.out experiment-adv/value-value-bkls/*.out
+  # 4: ./advent.py --scenario 4 experiment-adv/catde-catde-bst/*.out experiment-adv/policy-policy-bst/*.out experiment-adv/value-value-bst/*.out
+  # 5: ./advent.py --scenario 5 experiment-adv/catde-catde-c500/*.out experiment-adv/policy-policy-c500/*.out experiment-adv/value-value-c500/*.out
 
   memory_plot = False # scenario is not 0
   unrefinement_plot = False # not memory_plot
@@ -112,7 +112,7 @@ def main():
   cumulative = True
 
   if cumulative:
-    reward_label = 'Cumulative Reward / \# Episodes'
+    reward_label = 'Average Return Per Episode'
     val0 = 1
   else:
     reward_label = 'Reward Within an Episode'
