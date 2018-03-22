@@ -8,13 +8,14 @@ g_dir = 'experiment-taxi-transfer'
 g_plotters = ['./taxicab.py']
 g_error = False
 
-g_base_command = "./taxicab --output experiment --evaluate-optimality true --epsilon-greedy 0.1 --learning-rate 0.01 --secondary-learning-rate 0.1 --discount-rate 0.99 --eligibility-trace-decay-rate 0.3 --policy on-policy --split-update-count 20 --split-test value --unsplit-test value --unsplit-update-count 50 --resplit-bias boost --concrete-update-count 100"
+g_base_command = "./taxicab --output experiment --evaluate-optimality true --learning-rate 0.01 --secondary-learning-rate 0.1 --discount-rate 0.99 --eligibility-trace-decay-rate 0.3 --policy on-policy --split-update-count 20 --split-test value --unsplit-test value --unsplit-update-count 50 --resplit-bias boost --concrete-update-count 100 --exploration boltzmann --inverse-temperature 10 --inverse-temperature-episodic-increment 0.1 --step-cutoff 100"
 
 g_ep_tuples = []
 
 g_ep_tuples.append(("taxicab-35",     "--scenario 35     --skip-steps 0   "))
-g_ep_tuples.append(("taxicab-31000",  "--scenario 31000  --skip-steps 1000"))
-g_ep_tuples.append(("taxicab-343000", "--scenario 343000 --skip-steps 3000"))
+g_ep_tuples.append(("taxicab-351000", "--scenario 35     --skip-steps 20000"))
+g_ep_tuples.append(("taxicab-31000",  "--scenario 31000  --skip-steps 10000"))
+g_ep_tuples.append(("taxicab-343000", "--scenario 343000 --skip-steps 20000"))
 
 parser = argparse.ArgumentParser(description='Run Taxicab experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,
@@ -24,7 +25,7 @@ parser.add_argument('-r', '--runs', metavar='N', type=int,
                    action='store', default=1,
                    help='number of runs per experiment')
 parser.add_argument('-n', '--num-steps', metavar='N', type=int,
-                   action='store', default=10000,
+                   action='store', default=30000,
                    help='number of steps per run')
 
 args = parser.parse_args()

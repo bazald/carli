@@ -112,6 +112,7 @@ def main():
   # 10: ./blocksworld2.py --scenario 10 experiment-bw2/catde-catde-c900-d/*.out experiment-bw2/policy-policy-c900-d/*.out experiment-bw2/value-value-c900-d/*.out
   # 11: ./blocksworld2.py --scenario 11 experiment-bw2/value-none/*.out experiment-bw2/value-value-none/*.out experiment-bw2/value-value-bkls/*.out experiment-bw2/value-value-bst/*.out experiment-bw2/value-value-c500/*.out
   # 12: ./blocksworld2.py --scenario 12 experiment-bw2/value-none-d/*.out experiment-bw2/value-value-none-d/*.out experiment-bw2/value-value-bkls-d/*.out experiment-bw2/value-value-bst-d/*.out experiment-bw2/value-value-c900-d/*.out
+  # 15: ./taxicab.py --scenario 15 experiment-taxi-transfer/taxicab-3*/*.out
 
   memory_plot = False # scenario is not 0
   unrefinement_plot = False # not memory_plot
@@ -397,6 +398,10 @@ def main():
       #remap_names['value-value-c50-d'] = 'Value RCD B'
       remap_names['value-value-c900-d'] = 'Value RCD'
       #remap_names['value-value-c900-d'] = 'Value RCD $\\epsilon$'
+      remap_names['taxicab-35'] = '0'
+      remap_names['taxicab-31000'] = '10000/2'
+      remap_names['taxicab-343000'] = '10000/2 + 10000/3'
+      remap_names['taxicab-351000'] = '20000/4'
       
       if scenario == 1:
         agent_list = ['catde-none', 'policy-none', 'value-none']
@@ -449,6 +454,15 @@ def main():
               color = 'orange'
             elif agent.find('-c') != -1:
               color = 'blue'
+          elif scenario == 15:
+            if agent.find('351000') != -1:
+              color = 'orange'
+            elif agent.find('343000') != -1:
+              color = 'blue'
+            elif agent.find('31000') != -1:
+              color = 'green'
+            else:
+              color = 'red'
           #else:
             #color = None
 

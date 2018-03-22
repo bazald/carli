@@ -15,22 +15,6 @@ sp {blocks-world*general
   = 0.0
 }
 
-sp {blocks-world*block-nullary-1higherthan2-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  +(<block-1> ^higher-than <block-2>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nullary-1higherthan2-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  -(<block-1> ^higher-than <block-2>)
--->
-  = 0.0
-}
-
 sp {blocks-world*block-nonhog-2higherthan3-t
   :feature 2 fringe blocks-world*general
   &blocks-world*general
@@ -49,28 +33,6 @@ sp {blocks-world*block-nonhog-2higherthan3-f
   (<block-3> != <block-1>)
   (<block-3> != <block-2>)
   -(<block-2> ^higher-than <block-3>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nonhog-3higherthan2-t
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  (<blocks> ^block <block-3>)
-  (<block-3> != <block-1>)
-  (<block-3> != <block-2>)
-  +(<block-3> ^higher-than <block-2>)
--->
-  = 0.0
-}
-
-sp {blocks-world*block-nonhog-3higherthan2-f
-  :feature 2 fringe blocks-world*general
-  &blocks-world*general
-  (<blocks> ^block <block-3>)
-  (<block-3> != <block-1>)
-  (<block-3> != <block-2>)
-  -(<block-3> ^higher-than <block-2>)
 -->
   = 0.0
 }

@@ -112,6 +112,10 @@ def main():
   # 10: ./blocksworld2.py --scenario 10 experiment-bw2/catde-catde-c900-d/*.out experiment-bw2/policy-policy-c900-d/*.out experiment-bw2/value-value-c900-d/*.out
   # 11: ./blocksworld2.py --scenario 11 experiment-bw2/value-none/*.out experiment-bw2/value-value-none/*.out experiment-bw2/value-value-bkls/*.out experiment-bw2/value-value-bst/*.out experiment-bw2/value-value-c500/*.out
   # 12: ./blocksworld2.py --scenario 12 experiment-bw2/value-none-d/*.out experiment-bw2/value-value-none-d/*.out experiment-bw2/value-value-bkls-d/*.out experiment-bw2/value-value-bst-d/*.out experiment-bw2/value-value-c900-d/*.out
+  # 15: ./blocksworld2.py --scenario 15 experiment-bw2-transfer/stack-*/*.out
+  # 16: ./blocksworld2.py --scenario 16 experiment-bw2-transfer/unstack-*/*.out
+  # 17: ./blocksworld2.py --scenario 17 experiment-bw2-transfer/onab-*/*.out
+  # 18: ./blocksworld2.py --scenario 18 experiment-bw2-transfer/exact-*/*.out
 
   memory_plot = False # scenario is not 0
   unrefinement_plot = False # not memory_plot
@@ -397,6 +401,22 @@ def main():
       #remap_names['value-value-c50-d'] = 'Value RCD B'
       remap_names['value-value-c900-d'] = 'Value RCD'
       #remap_names['value-value-c900-d'] = 'Value RCD $\\epsilon$'
+      remap_names['stack-value-value-c50-d-35'] = '0'
+      remap_names['unstack-value-value-c50-d-35'] = '0'
+      remap_names['onab-value-value-c50-d-35'] = '0'
+      remap_names['exact-value-value-c50-d-35'] = '0'
+      remap_names['stack-value-value-c50-d-31000'] = '1000/3'
+      remap_names['unstack-value-value-c50-d-31000'] = '1000/3'
+      remap_names['onab-value-value-c50-d-31000'] = '1000/3'
+      remap_names['exact-value-value-c50-d-31000'] = '1000/3'
+      remap_names['stack-value-value-c50-d-343000'] = '1000/3 + 2000/4'
+      remap_names['unstack-value-value-c50-d-343000'] = '1000/3 + 2000/4'
+      remap_names['onab-value-value-c50-d-343000'] = '1000/3 + 2000/4'
+      remap_names['exact-value-value-c50-d-343000'] = '1000/3 + 2000/4'
+      remap_names['stack-value-value-c50-d-353000'] = '3000/5'
+      remap_names['unstack-value-value-c50-d-353000'] = '3000/5'
+      remap_names['onab-value-value-c50-d-353000'] = '3000/5'
+      remap_names['exact-value-value-c50-d-353000'] = '3000/5'
       
       if scenario == 1:
         agent_list = ['catde-none', 'policy-none', 'value-none']
@@ -426,6 +446,14 @@ def main():
         agent_list = ['mt4']
       elif scenario == 14:
         agent_list = ['mt5']
+      elif scenario == 15:
+        agent_list = ['stack-value-value-c50-d-35', 'stack-value-value-c50-d-31000', 'stack-value-value-c50-d-343000', 'stack-value-value-c50-d-353000']
+      elif scenario == 16:
+        agent_list = ['unstack-value-value-c50-d-35', 'unstack-value-value-c50-d-31000', 'unstack-value-value-c50-d-343000', 'unstack-value-value-c50-d-353000']
+      elif scenario == 17:
+        agent_list = ['onab-value-value-c50-d-35', 'onab-value-value-c50-d-31000', 'onab-value-value-c50-d-343000', 'onab-value-value-c50-d-353000']
+      elif scenario == 18:
+        agent_list = ['exact-value-value-c50-d-35', 'exact-value-value-c50-d-31000', 'exact-value-value-c50-d-343000', 'exact-value-value-c50-d-353000']
       if scenario > 0 and scenario < 100:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
@@ -449,6 +477,15 @@ def main():
               color = 'orange'
             elif agent.find('-c') != -1:
               color = 'blue'
+          elif scenario >= 15 and scenario < 19:
+            if agent.find('353000') != -1:
+              color = 'orange'
+            elif agent.find('343000') != -1:
+              color = 'blue'
+            elif agent.find('31000') != -1:
+              color = 'green'
+            else:
+              color = 'red'
           #else:
             #color = None
 

@@ -142,45 +142,45 @@ namespace Taxicab {
 
     switch(get_scenario()) {
       case 35:
-        m_grid_w = 12;
-        m_grid_h = 12;
-        m_num_filling_stations = 6;
-        m_num_destinations = 12;
+        m_grid_w = 20;
+        m_grid_h = 20;
+        m_num_filling_stations = 4;
+        m_num_destinations = 10;
         break;
       
       case 31000:
         if(get_total_step_count() < 0) {
-          m_grid_w = 4;
-          m_grid_h = 4;
+          m_grid_w = 20;
+          m_grid_h = 20;
           m_num_filling_stations = 2;
-          m_num_destinations = 4;
+          m_num_destinations = 6;
         }
         else {
-          m_grid_w = 12;
-          m_grid_h = 12;
-          m_num_filling_stations = 6;
-          m_num_destinations = 12;
+          m_grid_w = 20;
+          m_grid_h = 20;
+          m_num_filling_stations = 4;
+          m_num_destinations = 10;
         }
         break;
         
       case 343000:
-        if(get_total_step_count() < -2000) {
-          m_grid_w = 4;
-          m_grid_h = 4;
+        if(get_total_step_count() < -10000) {
+          m_grid_w = 20;
+          m_grid_h = 20;
           m_num_filling_stations = 2;
-          m_num_destinations = 4;
+          m_num_destinations = 6;
         }
         else if(get_total_step_count() < 0) {
-          m_grid_w = 8;
-          m_grid_h = 8;
-          m_num_filling_stations = 4;
+          m_grid_w = 20;
+          m_grid_h = 20;
+          m_num_filling_stations = 3;
           m_num_destinations = 8;
         }
         else {
-          m_grid_w = 12;
-          m_grid_h = 12;
-          m_num_filling_stations = 6;
-          m_num_destinations = 12;
+          m_grid_w = 20;
+          m_grid_h = 20;
+          m_num_filling_stations = 4;
+          m_num_destinations = 10;
         }
         break;
 

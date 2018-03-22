@@ -1,3 +1,4 @@
+# ./taxicab --num-steps 100000 --grid-width 4 --grid-height 4 --num-filling-stations 2 --num-destinations 4 --evaluate-optimality true --rules-out rules.carli --learning-rate 0.01 --secondary-learning-rate 0.1 --discount-rate 0.99 --eligibility-trace-decay-rate 0.3 --policy on-policy --split-update-count 20 --split-test value --unsplit-test value --unsplit-update-count 50 --resplit-bias boost --concrete-update-count 100 --exploration boltzmann --inverse-temperature 10 --inverse-temperature-episodic-increment 0.1
 # CPU time = 45.2024 seconds
 
 set-rule-name-index 1726
