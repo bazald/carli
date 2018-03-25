@@ -8,9 +8,9 @@ TRAINING_RULES=rules.carli
 TRAINING_OUTPUT=training.out
 TEST_SEED=21791
 TEST_OUTPUT=test.out
-OUTPUT_DIR=experiment-bw2-comparison-100
+OUTPUT_DIR=experiment-bw2-comparison-45
 
-TRAINING_CMD="./blocks_world_2 --discount-rate 0.9 --eligibility-trace-decay-rate 0.1 --learning-rate 0.05 --secondary-learning-rate 0.03 --policy off-policy --split-update-count 10 --split-test value --unsplit-test value --unsplit-update-count 20 --resplit-bias boost --concrete-update-count 30 --scenario 100 --num-steps 0 --exploration boltzmann --inverse-temperature 25 --inverse-temperature-episodic-increment 5 --output null --rules-out $TRAINING_RULES"
+TRAINING_CMD="./blocks_world_2 --discount-rate 0.8 --eligibility-trace-decay-rate 0.1 --learning-rate 0.05 --secondary-learning-rate 0.03 --policy off-policy --split-update-count 10 --split-test value --unsplit-test value --unsplit-update-count 20 --resplit-bias boost --concrete-update-count 40 --scenario 45 --num-steps 0 --exploration boltzmann --inverse-temperature 25 --inverse-temperature-episodic-increment 5 --output null --rules-out $TRAINING_RULES"
 TEST_CMD="./blocks_world_2 --epsilon-greedy 0 --learning-rate 0 --num-episodes 156 --num-steps 0 --num-blocks-min 3 --num-blocks-max 10 --seed $TEST_SEED --rules $TRAINING_RULES"
 
 for VARIANT in "${VARIANTS[@]}"
@@ -27,7 +27,7 @@ do
     do
       echo $GOAL$VARIANT for $SEED:
 
-      for NUM_EPISODES in $(seq 0 100)
+      for NUM_EPISODES in $(seq 0 45)
       do
         if [ $NUM_EPISODES -eq 0 ]
         then

@@ -6,6 +6,7 @@ import hashlib, os, re
 import pylab
 from matplotlib import rc
 from pylab import arange,pi,sin,cos,sqrt
+from scipy import stats
 
 if os.name is 'posix':
   golden_mean = (sqrt(5)-1.0)/2.0     # Aesthetic ratio
@@ -66,13 +67,6 @@ class CommaFormatter(ScalarFormatter):
     s = len(arg) - 3
     return self.recurse(arg[:s]) + ',' + arg[s:]
 
-class PercentFormatter(ScalarFormatter):
-  def pprint_val(self, x):
-    px = ScalarFormatter.pprint_val(self, x)
-    if os.name is 'posix':
-      px = px[1:len(px)-1]
-    return str(int(float(px) * 100))
-
 class Handle:
   def __init__(self, f, filename, seed):
     self.f = f
@@ -132,7 +126,7 @@ def main():
   if cumulative:
     reward_label = 'Cumulative Reward / \# Episodes'
   else:
-    reward_label = 'Percent Optimality'
+    reward_label = 'Number of Steps'
 
   if len(filenames) == 1:
     f = open('stdout.txt', 'r')
@@ -183,7 +177,7 @@ def main():
       files[group].smith['cpu'] = []
       files[group].smith['unr'] = []
       done = False
-      xval = -1
+      xval = 2
       while not done:
         xval = xval + 1
         first_handle = True
@@ -199,9 +193,9 @@ def main():
               if first_group:
                 x.append(xval)#/ 10000.0)
                 xs.append(xval)
-              y_min = float(split[1])
-              y_avg = float(split[1])
-              y_max = float(split[1])
+              y_min = -float(split[11])
+              y_avg = float(split[2]) / float(split[11]) - 1.0
+              y_max = -float(split[2])
               y_mem = 0.0
               y_cpu = 0.0
               y_unr = map(float, [0])
@@ -209,9 +203,9 @@ def main():
             else:
               mul1 = 1.0 / (y_count + 1.0)
               mul0 = y_count * mul1
-              y_min = min(y_min, float(split[1]))
-              y_avg = y_avg * mul0 + float(split[1]) * mul1
-              y_max = max(y_max, float(split[1]))
+              y_min = min(y_min, -float(split[11]))
+              y_avg = y_avg * mul0 + (float(split[2]) / float(split[11]) - 1.0) * mul1
+              y_max = max(y_max, -float(split[2]))
               unr = map(float, [0])
               for i in range(0, min(len(y_unr), len(unr))):
                 y_unr[i] = y_unr[i] * mul0 + unr[i] * mul1
@@ -293,16 +287,21 @@ def main():
           #smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
     
     if mode == 'single experiment evaluation':
-      y_labels = ['Maximum', 'Average', 'Minimum']
-      yss = [smith['max'], smith['avg'], smith['min']]
+      y_labels = ['Carli-RRL', 'Optimal']
+      yss = [smith['max'], smith['min']]
       
-      labels += pylab.plot(x, smith['max'], label="Maximum", color='black', linestyle='dotted')
-      labels += pylab.plot(x, smith['avg'], label="Average", color='black', linestyle='solid')
-      labels += pylab.plot(x, smith['min'], label="Minimum", color='black', linestyle='dashed')
+      labels += pylab.plot(x, smith['max'], label="Carli-RRL", color='blue', linestyle='solid')
+      #labels += pylab.plot(x, smith['avg'], label="Average", color='black', linestyle='solid')
+      labels += pylab.plot(x, smith['min'], label="Optimal", color='red', linestyle='dashed')
       #labels += pylab.plot(x, smith['max'], label="Maximum", color='green', linestyle='solid')
       ##labels += pylab.plot(x, smith['med'], label="Median", color='brown', linestyle='solid')
       #labels += pylab.plot(x, smith['min'], label="Minimum", color='teal', linestyle='solid')
       #labels += pylab.plot(x, smith['avg'], label="Average", color='blue', linestyle='solid')
+      
+      my_slope, my_intercept, my_r_value, my_p_value, my_std_err = stats.linregress(x, smith['max'])
+      opt_slope, opt_intercept, opt_r_value, opt_p_value, opt_std_err = stats.linregress(x, smith['min'])
+      print "Mine:    steps = " + str(my_slope) + " * n + " + str(my_intercept) + " with stderr=" + str(my_std_err)
+      print "Optimal: steps = " + str(opt_slope) + " * n + " + str(opt_intercept) + " with stderr=" + str(opt_std_err)
     else:
       y_labels = []
       yss = []
@@ -446,10 +445,10 @@ def main():
   
   pylab.grid(False)
   
-  pylab.xlabel('Episode Number', fontsize=8)
+  pylab.xlabel('Number of Blocks', fontsize=8)
   pylab.ylabel(reward_label, fontsize=8)
   
-  #pylab.xlim(xmax=45)
+  pylab.xlim(xmax=75)
   #if len(filenames) > 1:
     #if cumulative:
       ##pylab.ylim(ymin=-250, ymax=0)
@@ -457,10 +456,10 @@ def main():
       #pylab.ylim(ymin=-50, ymax=0)
     #else:
       #pylab.ylim(ymin=-40, ymax=0)
-  pylab.ylim(ymin=0.0, ymax=1.0)
+  pylab.ylim(ymin=0.0)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
-  fig.axes[0].yaxis.set_major_formatter(PercentFormatter())
+  #fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
   
   xlabels = fig.axes[0].xaxis.get_ticklabels()
   last_xlabel = xlabels[len(xlabels) - 1]
