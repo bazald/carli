@@ -194,8 +194,8 @@ def main():
                 x.append(xval)#/ 10000.0)
                 xs.append(xval)
               y_min = -float(split[11])
-              y_avg = float(split[2]) / float(split[11]) - 1.0
-              y_max = -float(split[2])
+              y_avg = -float(split[2]) # float(split[2]) / float(split[11]) - 1.0
+              y_max = float(split[3])
               y_mem = 0.0
               y_cpu = 0.0
               y_unr = map(float, [0])
@@ -204,8 +204,8 @@ def main():
               mul1 = 1.0 / (y_count + 1.0)
               mul0 = y_count * mul1
               y_min = min(y_min, -float(split[11]))
-              y_avg = y_avg * mul0 + (float(split[2]) / float(split[11]) - 1.0) * mul1
-              y_max = max(y_max, -float(split[2]))
+              y_avg = max(y_avg, -float(split[2])) # y_avg * mul0 + (float(split[2]) / float(split[11]) - 1.0) * mul1
+              y_max = max(y_max, float(split[3]))
               unr = map(float, [0])
               for i in range(0, min(len(y_unr), len(unr))):
                 y_unr[i] = y_unr[i] * mul0 + unr[i] * mul1
@@ -287,19 +287,21 @@ def main():
           #smith[a][i] = 0.95 * smith[a][i - 1] + 0.05 * smith[a][i];
     
     if mode == 'single experiment evaluation':
-      y_labels = ['Carli-RRL', 'Optimal']
-      yss = [smith['max'], smith['min']]
+      y_labels = ['Table', 'Carli-RRL', 'Optimal']
+      yss = [smith['max'], smith['avg'], smith['min']]
       
-      labels += pylab.plot(x, smith['max'], label="Carli-RRL", color='blue', linestyle='solid')
-      #labels += pylab.plot(x, smith['avg'], label="Average", color='black', linestyle='solid')
-      labels += pylab.plot(x, smith['min'], label="Optimal", color='red', linestyle='dashed')
+      labels += pylab.plot(x, smith['max'], label="Table", color='green', linestyle='solid')
+      labels += pylab.plot(x, smith['avg'], label="Carli-RRL", color='blue', linestyle='solid')
+      labels += pylab.plot(x, smith['min'], label="Optimal", color='red', linestyle='solid')
       #labels += pylab.plot(x, smith['max'], label="Maximum", color='green', linestyle='solid')
       ##labels += pylab.plot(x, smith['med'], label="Median", color='brown', linestyle='solid')
       #labels += pylab.plot(x, smith['min'], label="Minimum", color='teal', linestyle='solid')
       #labels += pylab.plot(x, smith['avg'], label="Average", color='blue', linestyle='solid')
       
-      my_slope, my_intercept, my_r_value, my_p_value, my_std_err = stats.linregress(x, smith['max'])
+      table_slope, table_intercept, table_r_value, table_p_value, table_std_err = stats.linregress(x, smith['max'])
+      my_slope, my_intercept, my_r_value, my_p_value, my_std_err = stats.linregress(x, smith['avg'])
       opt_slope, opt_intercept, opt_r_value, opt_p_value, opt_std_err = stats.linregress(x, smith['min'])
+      print "Table:   steps = " + str(table_slope) + " * n + " + str(table_intercept) + " with stderr=" + str(table_std_err)
       print "Mine:    steps = " + str(my_slope) + " * n + " + str(my_intercept) + " with stderr=" + str(my_std_err)
       print "Optimal: steps = " + str(opt_slope) + " * n + " + str(opt_intercept) + " with stderr=" + str(opt_std_err)
     else:

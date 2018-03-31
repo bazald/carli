@@ -37,6 +37,8 @@ from matplotlib.ticker import ScalarFormatter
 
 print 'matplotlib.__version__ is ' + matplotlib.__version__
 
+#global_fix = 0;
+
 class CommaFormatter(ScalarFormatter):
   def pprint_val(self, x):
     px = ScalarFormatter.pprint_val(self, x)
@@ -48,6 +50,13 @@ class CommaFormatter(ScalarFormatter):
     return px
   
   def add_commas(self, arg):
+    #global global_fix;
+    #if arg == "0":
+      #global_fix = (global_fix + 1) % 4;
+      #if global_fix == 3:
+        #return "0.01"
+      #elif global_fix == 0:
+        #return "0.1"
     s = arg.split('.')
     #if len(s) is 2 and s[1][0] is not '0':
       #return ""
@@ -169,9 +178,9 @@ def main():
   pylab.ylabel(reward_label, fontsize=8)
   
   if scenario == 1:
-    pylab.ylim(ymax=60)
+    pylab.ylim(ymax=1000)
   elif scenario == 2:
-    pylab.ylim(ymax=2)
+    pylab.ylim(ymax=10)
   
   fig.axes[0].xaxis.set_major_formatter(CommaFormatter())
   fig.axes[0].yaxis.set_major_formatter(CommaFormatter())
@@ -193,7 +202,7 @@ def main():
   pylab.savefig('blocksworld2-performance.eps')
   pylab.savefig('blocksworld2-performance.png', dpi=1200)
   pylab.savefig('blocksworld2-performance.svg')
-  plt.show()
+  #plt.show()
 
 if __name__ == "__main__":
   main()
