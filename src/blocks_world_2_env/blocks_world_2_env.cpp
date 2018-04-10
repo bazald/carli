@@ -548,6 +548,15 @@ namespace Blocks_World_2 {
           num_blocks = 5;
         break;
         
+      case 345:
+        if(get_total_step_count() < 5000)
+          num_blocks = 3;
+        else if(get_total_step_count() < 15000)
+          num_blocks = 3 + m_random.rand_lte(int32_t(1));
+        else
+          num_blocks = 3 + m_random.rand_lte(int32_t(2));
+        break;
+        
       case 1500:
         if(get_episode_count() <= 15)
           num_blocks = 3;
@@ -559,6 +568,13 @@ namespace Blocks_World_2 {
           num_blocks = 6;
         else
           num_blocks = 7;
+        break;
+        
+      case 3435:
+        if(get_total_step_count() < 50000)
+          num_blocks = 3 + m_random.rand_lte(int32_t(1));
+        else
+          num_blocks = 3 + m_random.rand_lte(int32_t(2));
         break;
         
       case 31000:

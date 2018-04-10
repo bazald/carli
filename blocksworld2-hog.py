@@ -12,8 +12,8 @@ g_base_command = "./blocks_world_2 --output experiment --discount-rate 0.9 --eli
 
 g_ep_tuples = []
 
-#g_ep_tuples.append(("value-345", "--num-blocks-min 3 --num-blocks-max 5"))
-g_ep_tuples.append(("value-45", "--num-blocks-min 3 --num-blocks-max 5"))
+g_ep_tuples.append(("value-45",  "--scenario 3435 --num-blocks-min 3 --num-blocks-max 5"))
+g_ep_tuples.append(("value-345", "--scenario 345  --num-blocks-min 3 --num-blocks-max 5"))
 
 parser = argparse.ArgumentParser(description='Run Blocks World 2 experiments.')
 parser.add_argument('-j', '--jobs', metavar='N', type=int,

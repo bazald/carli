@@ -431,6 +431,8 @@ def main():
         agent_list = ['mt4']
       elif scenario == 14:
         agent_list = ['mt5']
+      elif scenario == 15:
+        agent_list = ['taxicab-35', 'taxicab-31000', 'taxicab-343000', 'taxicab-351000']
       if scenario > 0 and scenario < 100:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
