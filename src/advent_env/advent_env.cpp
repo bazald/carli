@@ -71,6 +71,8 @@ namespace Advent {
         default:
           abort();
       }
+      
+      room = m_rooms[m_player_pos.first][m_player_pos.second];
 
 //       if(move->direction != Direction::DIR_NONE) {
 //         room = m_rooms[m_player_pos.first][m_player_pos.second];
@@ -126,6 +128,7 @@ namespace Advent {
       }
       else if(room->enemy->creature == CREATURE_TROLL) {
         room->enemy->health = std::min(std::max(room->enemy->health, int64_t()) + 1, room->enemy->health_max);
+        m_player.health -= 2;
       }
       else if(room->enemy->health <= 0) {
         room->enemy->health = 0;
@@ -134,7 +137,7 @@ namespace Advent {
         room->enemy->items.clear();
       }
       else
-        m_player.health -= 2;
+        m_player.health -= 3;
     }
 
     if(m_player.health <= 0) {

@@ -157,7 +157,7 @@ namespace Advent {
     int64_t compare(const Cast &) const override {return -1;}
 
     void print_impl(ostream &os) const {
-      os << "equip(" << int(item) << ')';
+      os << "take(" << int(item) << ')';
     }
 
     Item item;
@@ -194,7 +194,7 @@ namespace Advent {
     int64_t compare(const Cast &) const override {return -1;}
 
     void print_impl(ostream &os) const {
-      os << "equip(" << int(item) << ')';
+      os << "drop(" << int(item) << ')';
     }
 
     Item item;

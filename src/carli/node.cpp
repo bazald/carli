@@ -560,7 +560,20 @@ namespace Carli {
       })->first;
 
 #ifdef DEBUG_OUTPUT
-      std::cerr << "Old variable: " << old_new_var_name << " at " << old_new_var_index << std::endl;
+      std::map<std::pair<std::string, Rete::WME_Token_Index>, std::pair<std::string, Rete::WME_Token_Index>> old_var_to_new_var;
+      for(auto si : *new_feature->indices) {
+        if(si.second.rete_row >= old_new_var_index.rete_row)
+          old_var_to_new_var[si];
+      }
+
+//       std::cerr << "Old variable: " << old_new_var_name << " at " << old_new_var_index << std::endl;
+      
+      if(!old_var_to_new_var.empty()) {
+        std::cerr << "Old variables";
+        for(auto oov : old_var_to_new_var)
+          std::cerr << " : " << oov.first.first << " at " << oov.first.second;
+        std::cerr << std::endl;
+      }
 #endif
 
       std::string old_suffix, new_suffix;
@@ -580,7 +593,21 @@ namespace Carli {
       }
 
 #ifdef DEBUG_OUTPUT
-      std::cerr << "New variable: " << new_new_var_name << " at " << new_new_var_index << std::endl;
+//       std::cerr << "New variable: " << new_new_var_name << " at " << new_new_var_index << std::endl;
+
+      for(auto &oov : old_var_to_new_var) {
+        oov.second.first = oov.first.first.substr(0, oov.first.first.length() - old_suffix.length()) + new_suffix;
+        oov.second.second = Rete::WME_Token_Index(oov.first.second.rete_row + new_new_var_index.rete_row - old_new_var_index.rete_row + (rebase_right.size() - 1), oov.first.second.token_row + new_new_var_index.token_row - old_new_var_index.token_row, oov.first.second.column);
+        oov.second.second.existential = oov.first.second.existential;
+//         std::cerr << oov.first.first << " -> " << oov.second.first << " and " << oov.first.second << " -> " << oov.second.second << std::endl;
+      }
+
+      if(!old_var_to_new_var.empty()) {
+        std::cerr << "New variables";
+        for(auto oov : old_var_to_new_var)
+          std::cerr << " : " << oov.second.first << " at " << oov.second.second;
+        std::cerr << std::endl;
+      }
 #endif
 
       Rete::WME_Bindings bindings;
@@ -622,11 +649,13 @@ namespace Carli {
         for(auto rt = reindex.begin(), rend = reindex.end(); rt != rend; ++rt) {
           auto name = rt->first;
 
-//          std::cerr << name << " at " << rt->second << std::endl;
+#ifdef DEBUG_OUTPUT
+         std::cerr << "Reindexing " << name << " at " << rt->second << std::endl;
+#endif
           //assert(!strcmp(name.c_str() + (name.size() - old_suffix.size()), old_suffix.c_str())); /// Other variables actually okay
           if(name.size() < old_suffix.size())
             continue;
-          if(name.substr(0, name.size() - old_suffix.size()) != name)
+          if(name.substr(name.size() - old_suffix.size()) != old_suffix)
             continue;
 
           name = name.substr(0, name.size() - old_suffix.size()) + new_suffix;
@@ -635,6 +664,9 @@ namespace Carli {
           index.rete_row += new_new_var_index.rete_row - old_new_var_index.rete_row + (rebase_right.size() - 1);
           index.token_row += new_new_var_index.token_row - old_new_var_index.token_row;
 
+#ifdef DEBUG_OUTPUT
+          std::cerr << "Reindexed " << name << " is " << index << std::endl;
+#endif
           indices->insert(std::make_pair(name, index));
         }
 

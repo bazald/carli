@@ -12,17 +12,17 @@ g_base_command = "./advent --output experiment --print-every 1000 --discount-rat
 
 g_ep_tuples = []
 
-g_ep_tuples.append(("catde-none",          "--split-test catde  --unsplit-test none                                                         --rules rules/advent.carli"))
-##g_ep_tuples.append(("catde-catde-none",    "--split-test catde  --unsplit-test catde  --resplit-bias none                                   --rules rules/advent.carli"))
-##g_ep_tuples.append(("catde-catde-bkls",    "--split-test catde  --unsplit-test catde  --resplit-bias blacklist                              --rules rules/advent.carli"))
-##g_ep_tuples.append(("catde-catde-bst",     "--split-test catde  --unsplit-test catde  --resplit-bias boost                                  --rules rules/advent.carli"))
-g_ep_tuples.append(("catde-catde-c200",   "--split-test catde  --unsplit-test catde  --resplit-bias boost     --concrete-update-count 200 --rules rules/advent.carli"))
-
 g_ep_tuples.append(("value-none",          "--split-test value  --unsplit-test none                                                         --rules rules/advent.carli"))
 ##g_ep_tuples.append(("value-value-none",    "--split-test value  --unsplit-test value  --resplit-bias none                                   --rules rules/advent.carli"))
 ##g_ep_tuples.append(("value-value-bkls",    "--split-test value  --unsplit-test value  --resplit-bias blacklist                              --rules rules/advent.carli"))
 ##g_ep_tuples.append(("value-value-bst",     "--split-test value  --unsplit-test value  --resplit-bias boost                                  --rules rules/advent.carli"))
 g_ep_tuples.append(("value-value-c200",   "--split-test value  --unsplit-test value  --resplit-bias boost     --concrete-update-count 200 --rules rules/advent.carli"))
+
+g_ep_tuples.append(("catde-none",          "--split-test catde  --unsplit-test none                                                         --rules rules/advent.carli"))
+##g_ep_tuples.append(("catde-catde-none",    "--split-test catde  --unsplit-test catde  --resplit-bias none                                   --rules rules/advent.carli"))
+##g_ep_tuples.append(("catde-catde-bkls",    "--split-test catde  --unsplit-test catde  --resplit-bias blacklist                              --rules rules/advent.carli"))
+##g_ep_tuples.append(("catde-catde-bst",     "--split-test catde  --unsplit-test catde  --resplit-bias boost                                  --rules rules/advent.carli"))
+g_ep_tuples.append(("catde-catde-c200",   "--split-test catde  --unsplit-test catde  --resplit-bias boost     --concrete-update-count 200 --rules rules/advent.carli"))
 
 g_ep_tuples.append(("policy-none",         "--split-test policy --unsplit-test none                                                         --rules rules/advent.carli"))
 ##g_ep_tuples.append(("policy-policy-none",  "--split-test policy --unsplit-test policy --resplit-bias none                                   --rules rules/advent.carli"))
