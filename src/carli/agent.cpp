@@ -1326,7 +1326,7 @@ namespace Carli {
     m_epsilon = 1.0 / ((1.0 / m_epsilon_initial) + m_inverse_epsilon_episodic_increment * m_episode_number);
     m_inverse_temperature = std::log(m_inverse_temperature_initial + m_inverse_temperature_episodic_increment * m_episode_number);
 
-    if(m_metastate != Metastate::NON_TERMINAL)
+    if(m_metastate != Metastate::NON_TERMINAL || m_step_count == m_step_cutoff)
       ++m_episode_number;
     m_metastate = Metastate::NON_TERMINAL;
     m_step_count = 0;

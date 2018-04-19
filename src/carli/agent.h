@@ -219,6 +219,7 @@ namespace Carli {
     int64_t m_step_count = 0;
     int64_t m_total_step_count = 0;
     reward_type m_total_reward = 0.0;
+    const int64_t m_step_cutoff = dynamic_cast<const Option_Ranged<int64_t> &>(Options::get_global()["step-cutoff"]).get_value();
 
     const int64_t m_value_function_cap = get_Option_Ranged<int64_t>(Options::get_global(), "value-function-cap"); ///< at this threshold, no more entries will be added to the value functions through refinement
 
