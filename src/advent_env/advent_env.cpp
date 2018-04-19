@@ -120,9 +120,9 @@ namespace Advent {
     else
       abort();
 
-    if(room->enemy) {
+    if(!dynamic_cast<const Move *>(&action) && room->enemy) {
       if(room->enemy->is_dead) {
-        room->enemy->health = 0;
+        room->enemy->is_dead = true;
         room->items += room->enemy->items;
         room->enemy->items.clear();
       }
@@ -130,24 +130,19 @@ namespace Advent {
         room->enemy->health = std::min(std::max(room->enemy->health, int64_t()) + 1, room->enemy->health_max);
         m_player.health -= 2;
       }
-      else if(room->enemy->health <= 0) {
-        room->enemy->health = 0;
-        room->enemy->is_dead = true;
-        room->items += room->enemy->items;
-        room->enemy->items.clear();
-      }
       else
         m_player.health -= 3;
     }
 
     if(m_player.health <= 0) {
-      m_player.health = 0;
       m_player.is_dead = true;
+      m_player.health = 0;
     }
 
     killed_troll ^= m_troll->is_dead;
 
-    return std::make_pair(success() ? 100.0 : failure() ? -100.0 : killed_troll ? 50.0 : -1.0, -1.0);
+    return std::make_pair(failure() ? -100.0 : -1.0, failure() ? -100.0 : -1.0);
+//     return std::make_pair(success() ? 100.0 : failure() ? -100.0 : killed_troll ? 50.0 : -1.0, -1.0);
   }
 
   void Environment::print_impl(ostream &os) const {

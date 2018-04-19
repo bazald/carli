@@ -8,7 +8,7 @@ g_dir = 'experiment-adv'
 g_plotters = ['./advent.py']
 g_error = False
 
-g_base_command = "./advent --output experiment --print-every 1000 --discount-rate 0.99 --eligibility-trace-decay-rate 0.3 --learning-rate 0.03 --secondary-learning-rate 0.01 --policy on-policy --split-update-count 50 --unsplit-update-count 100 --exploration boltzmann --inverse-temperature 5 --inverse-temperature-episodic-increment 0.01"
+g_base_command = "./advent --output experiment --print-every 1000 --discount-rate 0.99 --eligibility-trace-decay-rate 0.3 --learning-rate 0.03 --secondary-learning-rate 0.01 --policy on-policy --split-update-count 50 --unsplit-update-count 100 --exploration boltzmann --inverse-temperature 5 --inverse-temperature-episodic-increment 0.01 --step-cutoff 200"
 
 g_ep_tuples = []
 
@@ -38,7 +38,7 @@ parser.add_argument('-r', '--runs', metavar='N', type=int,
                    action='store', default=1,
                    help='number of runs per experiment')
 parser.add_argument('-n', '--num-steps', metavar='N', type=int,
-                   action='store', default=500000,
+                   action='store', default=1000000,
                    help='number of steps per run')
 
 args = parser.parse_args()

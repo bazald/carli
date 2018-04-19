@@ -358,7 +358,7 @@ namespace Advent {
           else if(creature == CREATURE_SKELETAL)
             health -= 1;
           else if(creature == CREATURE_TROLL)
-            health -= 5;
+            health = std::max(int64_t(1), health - 5);
           break;
           
         case WEAPON_MACE:
@@ -367,7 +367,7 @@ namespace Advent {
           else if(creature == CREATURE_SKELETAL)
             health -= 5;
           else if(creature == CREATURE_TROLL)
-            health -= 3;
+            health = std::max(int64_t(1), health - 3);
           break;
           
         case WEAPON_SWORD:
@@ -376,7 +376,7 @@ namespace Advent {
           else if(creature == CREATURE_SKELETAL)
             health -= 2;
           else if(creature == CREATURE_TROLL)
-            health -= 4;
+            health = std::max(int64_t(1), health - 4);
           break;
           
         case WEAPON_MAGIC_SWORD:
@@ -384,8 +384,6 @@ namespace Advent {
             health -= 3;
           else if(creature == CREATURE_TROLL) {
             health -= 6;
-            if(health <= 0)
-              is_dead = true;
           }
           else
             health -= 10;
@@ -393,6 +391,11 @@ namespace Advent {
           
         default:
           abort();
+      }
+      
+      if(health <= 0) {
+        is_dead = true;
+        health = 0;
       }
     }
     
@@ -407,19 +410,24 @@ namespace Advent {
             health -= 5;
           else if(creature != CREATURE_SKELETAL)
             health -= 2;
-          if(creature == CREATURE_TROLL && health <= 0)
-            is_dead = true;
           break;
           
         case SPELL_ICEBOLT:
-          if(creature == CREATURE_WATER)
-            creature = CREATURE_SOLID;
-          else if(creature != CREATURE_SKELETAL)
+          if(creature == CREATURE_SOLID)
             health -= 5;
+          else if(creature == CREATURE_TROLL)
+            health = std::max(int64_t(1), health - 5);
+          else if(creature == CREATURE_WATER)
+            creature = CREATURE_SOLID;
           break;
           
         default:
           abort();
+      }
+      
+      if(health <= 0) {
+        is_dead = true;
+        health = 0;
       }
     }
   };

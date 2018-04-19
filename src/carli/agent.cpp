@@ -1378,7 +1378,7 @@ namespace Carli {
 #ifdef DEBUG_OUTPUT
   //      for(auto &next_q : m_next_q_values)
   //        std::cerr << "   " << *next_q.first << " is an option." << std::endl;
-      std::cerr << "   " << *m_next << " is next." << std::endl;
+//       std::cerr << "   " << *m_next << " is next." << std::endl;
 #endif
       auto &value_best = m_next_q_values[m_next];
       td_update(m_current_q_value, reward.first, value_best, rho, 1.0);
@@ -1394,10 +1394,14 @@ namespace Carli {
 
         m_next = next;
 
-#ifdef DEBUG_OUTPUT
-        std::cerr << "   " << *m_next << " is next." << std::endl;
-#endif
+// #ifdef DEBUG_OUTPUT
+//         std::cerr << "   " << *m_next << " is next." << std::endl;
+// #endif
       }
+
+#ifdef DEBUG_OUTPUT
+      std::cerr << "   " << *m_next << " is next." << std::endl;
+#endif
     }
     else {
       td_update(m_current_q_value, reward.first, Q_Value_List(), rho, 1.0);
