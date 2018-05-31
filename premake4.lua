@@ -54,7 +54,7 @@ solution "carli"
         buildoptions { "-mfpmath=sse -mmmx -ffp-contract=off" } -- Essential to guarantee idential execution of x32 Release to x32 Debug and x64 Debug/Release
     end
     configuration "*"
-      buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++17", "-pedantic" }
+      buildoptions { "-Wextra", "-Wnon-virtual-dtor", "-std=c++17", "-pedantic", "-fno-delete-null-pointer-checks" }
     configuration "macosx"
       linkoptions { "-Wl,-rpath,'@loader_path/'" }
     configuration "linux"

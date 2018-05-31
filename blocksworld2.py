@@ -117,11 +117,11 @@ def main():
   # 17: ./blocksworld2.py --scenario 17 experiment-bw2-transfer/onab-*/*.out
   # 18: ./blocksworld2.py --scenario 18 experiment-bw2-transfer/exact-*/*.out
 
-  memory_plot = True # scenario is not 0
+  memory_plot = False # scenario is not 0
   unrefinement_plot = False # not memory_plot
   two_sided_plot = memory_plot or unrefinement_plot
   cumulative = True
-  regret = False
+  regret = True
 
   if regret:
     reward_label = 'Average Regret Per Episode'
