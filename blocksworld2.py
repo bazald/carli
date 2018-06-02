@@ -116,12 +116,14 @@ def main():
   # 16: ./blocksworld2.py --scenario 16 experiment-bw2-transfer/unstack-*/*.out
   # 17: ./blocksworld2.py --scenario 17 experiment-bw2-transfer/onab-*/*.out
   # 18: ./blocksworld2.py --scenario 18 experiment-bw2-transfer/exact-*/*.out
+  # 19: ./blocksworld2.py --scenario 19 experiment-bw2-hog/value-45/*.out
+  # 20: ./blocksworld2.py --scenario 20 experiment-bw2-hog/value-345/*.out
 
-  memory_plot = False # scenario is not 0
+  memory_plot = scenario == 19 or scenario == 20
   unrefinement_plot = False # not memory_plot
   two_sided_plot = memory_plot or unrefinement_plot
   cumulative = True
-  regret = True
+  regret = scenario == 15 or scenario == 16 or scenario == 17 or scenario == 18
 
   if regret:
     reward_label = 'Average Regret Per Episode'
@@ -345,7 +347,7 @@ def main():
       y_labels = []
       yss = []
       
-      if scenario == 0:
+      if scenario == 0 or scenario == 19 or scenario == 20:
         for agent in smith:
           y_labels.append(agent)
           yss.append(smith[agent])
@@ -454,7 +456,7 @@ def main():
         agent_list = ['onab-value-value-c50-d-35', 'onab-value-value-c50-d-31000', 'onab-value-value-c50-d-343000', 'onab-value-value-c50-d-353000']
       elif scenario == 18:
         agent_list = ['exact-value-value-c50-d-35', 'exact-value-value-c50-d-31000', 'exact-value-value-c50-d-343000', 'exact-value-value-c50-d-353000']
-      if scenario > 0 and scenario < 100:
+      if scenario > 0 and scenario < 19:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
           yss.append(smith[agent])
@@ -567,12 +569,14 @@ def main():
     #ax2.set_ylabel(r"Temperature ($^\circ$C)")
     #ax2.set_ylabel('CPU Time / Step (Milliseconds)')
     ax2.set_ylabel('Number of Tiles or Weights')
-    #fig.axes[0].spines['left'].set_color('red')
-    fig.axes[0].tick_params(axis='y', colors='blue')
     #fig.axes[0].yaxis.label.set_color('blue')
+    fig.axes[0].spines['left'].set_color('blue')
+    fig.axes[0].tick_params(axis='y', colors='blue')
+    fig.axes[0].yaxis.label.set_color('blue')
+    ax2.set_ylabel('Unrefinements')
     ax2.spines['right'].set_color('red')
     ax2.tick_params(axis='y', colors='red')
-    #ax2.yaxis.label.set_color('red')
+    ax2.yaxis.label.set_color('red')
 
     # Fix right axis tick labels
     al=ax2.get_yticks().tolist()
@@ -580,7 +584,7 @@ def main():
     for a in al:
       al2.append(CommaFormatter().add_commas(str(a)))
     ax2.set_yticklabels(al2)
-
+    
     #if scenario is 5:
       #pylab.legend(labels, [l.get_label() for l in labels], loc=4, handlelength=4.2, numpoints=2, bbox_to_anchor=(-0.05,0.25,1,1))
   elif unrefinement_plot:
@@ -613,10 +617,13 @@ def main():
     ax2.set_xlim(0)
     ax2.set_ylim(0)
     
-    ax2.set_ylabel('Unrefinements')
+    fig.axes[0].spines['left'].set_color('blue')
     fig.axes[0].tick_params(axis='y', colors='blue')
+    fig.axes[0].yaxis.label.set_color('blue')
+    ax2.set_ylabel('Unrefinements')
     ax2.spines['right'].set_color('red')
     ax2.tick_params(axis='y', colors='red')
+    ax2.yaxis.label.set_color('red')
 
     # Fix right axis tick labels
     al=ax2.get_yticks().tolist()
@@ -658,34 +665,35 @@ def main():
         print 'Final CPU Average for ' + agent + ': ' + str(cpu[agent][-1])
         print 'Final Memory Average for ' + agent + ': ' + str(memory[agent][-1])
   
-  #xposition = [5000, 15000]
-  #for xc in xposition:
-    #plt.axvline(x=xc, color='green', linestyle=':')
-  #for x in range(1,13):
-    ##print [4000 * x]
-    ##print [smith[agent][40 * x]]
-    ##print [smith[agent][40 * x] - smith_min[agent][40 * x], smith_max[agent][40 * x] - smith[agent][40 * x]]
-    #fig.axes[0].errorbar([4000 * x], [smith[agent][40 * x]], yerr=[[smith[agent][40 * x] - smith_min[agent][40 * x]], [smith_max[agent][40 * x] - smith[agent][40 * x]]], ecolor='blue')
-  #for x in range(1,13):
-    ##print [4000 * x - 2000]
-    ##print [memory[agent][int(40 * x - 20)]]
-    ##print [memory[agent][int(40 * x - 20)] - mem_min[agent][int(40 * x - 20)], mem_max[agent][int(40 * x - 20)] - memory[agent][int(40 * x - 20)]]
-    #ax2.errorbar([4000 * x - 2000], [memory[agent][int(40 * x - 20)]], yerr=[[memory[agent][int(40 * x - 20)] - mem_min[agent][int(40 * x - 20)]], [mem_max[agent][int(40 * x - 20)] - memory[agent][int(40 * x - 20)]]], ecolor='red')
+  if scenario == 19:
+    xposition = [50000]
+    for xc in xposition:
+      plt.axvline(x=xc, color='green', linestyle=':')
+    for x in range(1,13):
+      #print [8000 * x]
+      #print [smith[agent][80 * x]]
+      #print [smith[agent][80 * x] - smith_min[agent][80 * x], smith_max[agent][80 * x] - smith[agent][80 * x]]
+      fig.axes[0].errorbar([8000 * x], [smith[agent][80 * x]], yerr=[[smith[agent][80 * x] - smith_min[agent][80 * x]], [smith_max[agent][80 * x] - smith[agent][80 * x]]], ecolor='blue')
+    for x in range(1,13):
+      #print [8000 * x - 4000]
+      #print [memory[agent][int(80 * x - 40)]]
+      #print [memory[agent][int(80 * x - 40)] - mem_min[agent][int(80 * x - 40)], mem_max[agent][int(80 * x - 40)] - memory[agent][int(80 * x - 40)]]
+      ax2.errorbar([8000 * x - 4000], [memory[agent][int(80 * x - 40)]], yerr=[[memory[agent][int(80 * x - 40)] - mem_min[agent][int(80 * x - 40)]], [mem_max[agent][int(80 * x - 40)] - memory[agent][int(80 * x - 40)]]], ecolor='red')
+  elif scenario == 20:
+    xposition = [5000, 15000]
+    for xc in xposition:
+      plt.axvline(x=xc, color='green', linestyle=':')
+    for x in range(1,13):
+      #print [4000 * x]
+      #print [smith[agent][40 * x]]
+      #print [smith[agent][40 * x] - smith_min[agent][40 * x], smith_max[agent][40 * x] - smith[agent][40 * x]]
+      fig.axes[0].errorbar([4000 * x], [smith[agent][40 * x]], yerr=[[smith[agent][40 * x] - smith_min[agent][40 * x]], [smith_max[agent][40 * x] - smith[agent][40 * x]]], ecolor='blue')
+    for x in range(1,13):
+      #print [4000 * x - 2000]
+      #print [memory[agent][int(40 * x - 20)]]
+      #print [memory[agent][int(40 * x - 20)] - mem_min[agent][int(40 * x - 20)], mem_max[agent][int(40 * x - 20)] - memory[agent][int(40 * x - 20)]]
+      ax2.errorbar([4000 * x - 2000], [memory[agent][int(40 * x - 20)]], yerr=[[memory[agent][int(40 * x - 20)] - mem_min[agent][int(40 * x - 20)]], [mem_max[agent][int(40 * x - 20)] - memory[agent][int(40 * x - 20)]]], ecolor='red')
 
-  #xposition = [50000]
-  #for xc in xposition:
-    #plt.axvline(x=xc, color='green', linestyle=':')
-  #for x in range(1,13):
-    #print [8000 * x]
-    #print [smith[agent][80 * x]]
-    #print [smith[agent][80 * x] - smith_min[agent][80 * x], smith_max[agent][80 * x] - smith[agent][80 * x]]
-    #fig.axes[0].errorbar([8000 * x], [smith[agent][80 * x]], yerr=[[smith[agent][80 * x] - smith_min[agent][80 * x]], [smith_max[agent][80 * x] - smith[agent][80 * x]]], ecolor='blue')
-  #for x in range(1,13):
-    #print [8000 * x - 4000]
-    #print [memory[agent][int(80 * x - 40)]]
-    #print [memory[agent][int(80 * x - 40)] - mem_min[agent][int(80 * x - 40)], mem_max[agent][int(80 * x - 40)] - memory[agent][int(80 * x - 40)]]
-    #ax2.errorbar([8000 * x - 4000], [memory[agent][int(80 * x - 40)]], yerr=[[memory[agent][int(80 * x - 40)] - mem_min[agent][int(80 * x - 40)]], [mem_max[agent][int(80 * x - 40)] - memory[agent][int(80 * x - 40)]]], ecolor='red')
-  
   if len(filenames) == 1:
     write_to_csv('blocksworld2.csv', 'Step Number', xs, y_labels, yss)
     pylab.savefig('blocksworld2.eps')
