@@ -573,7 +573,6 @@ def main():
     fig.axes[0].spines['left'].set_color('blue')
     fig.axes[0].tick_params(axis='y', colors='blue')
     fig.axes[0].yaxis.label.set_color('blue')
-    ax2.set_ylabel('Unrefinements')
     ax2.spines['right'].set_color('red')
     ax2.tick_params(axis='y', colors='red')
     ax2.yaxis.label.set_color('red')
