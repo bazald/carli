@@ -118,6 +118,8 @@ def main():
   # 18: ./blocksworld2.py --scenario 18 experiment-bw2-transfer/exact-*/*.out
   # 19: ./blocksworld2.py --scenario 19 experiment-bw2-hog/value-45/*.out
   # 20: ./blocksworld2.py --scenario 20 experiment-bw2-hog/value-345/*.out
+  # 21: ./blocksworld2.py --scenario 21 experiment-bw2-artpe/catde-none/*.out experiment-bw2-artpe/policy-none/*.out experiment-bw2-artpe/value-none/*.out
+  # 22: ./blocksworld2.py --scenario 22 experiment-bw2-artpe/catde-none-episodic/*.out experiment-bw2-artpe/policy-none-episodic/*.out experiment-bw2-artpe/value-none-episodic/*.out
 
   memory_plot = scenario == 19 or scenario == 20
   unrefinement_plot = False # not memory_plot
@@ -456,12 +458,22 @@ def main():
         agent_list = ['onab-value-value-c50-d-35', 'onab-value-value-c50-d-31000', 'onab-value-value-c50-d-343000', 'onab-value-value-c50-d-353000']
       elif scenario == 18:
         agent_list = ['exact-value-value-c50-d-35', 'exact-value-value-c50-d-31000', 'exact-value-value-c50-d-343000', 'exact-value-value-c50-d-353000']
-      if scenario > 0 and scenario < 19:
+      elif scenario == 21:
+        agent_list = ['catde-none', 'policy-none', 'value-none']
+        remap_names['catde-none'] = 'CATDE'
+        remap_names['policy-none'] = 'Policy'
+        remap_names['value-none'] = 'Value'
+      elif scenario == 22:
+        agent_list = ['catde-none-episodic', 'policy-none-episodic', 'value-none-episodic']
+        remap_names['catde-none-episodic'] = 'CATDE'
+        remap_names['policy-none-episodic'] = 'Policy'
+        remap_names['value-none-episodic'] = 'Value'
+      if scenario > 0 and scenario < 19 or scenario > 20:
         for agent in agent_list:
           y_labels.append(remap_names[agent])
           yss.append(smith[agent])
           
-          if scenario < 11:
+          if scenario < 11 or scenario > 20:
             if agent.find('catde') != -1:
               color = 'red'
             elif agent.find('policy') != -1:
@@ -507,7 +519,10 @@ def main():
   
   pylab.grid(False)
   
-  pylab.xlabel('Step Number', fontsize=8)
+  if scenario == 22:
+    pylab.xlabel('Episode Number', fontsize=8)
+  else:
+    pylab.xlabel('Step Number', fontsize=8)
   pylab.ylabel(reward_label, fontsize=8)
   
   if regret:
@@ -517,7 +532,7 @@ def main():
     #pylab.xlim(xmax=10000)
     if len(filenames) > 1:
       if cumulative:
-        pylab.ylim(ymin=-250, ymax=0)
+        pylab.ylim(ymin=-50, ymax=0)
         #pylab.xlim(xmin=0, xmax=10000)
         #pylab.ylim(ymin=-50, ymax=0)
       #else:

@@ -1,5 +1,7 @@
 #include "experimental_output.h"
 
+#include "utility/getopt.h"
+
 #include <algorithm>
 #include <cfloat>
 #include <iostream>
@@ -21,57 +23,94 @@ namespace Carli {
     m_simple_optimal_reward += optimal_reward;
 
     if(done) {
+      const std::string evaluate = dynamic_cast<const Option_Itemized &>(Options::get_global()["evaluate"]).get_value();
+      
       const double cumulative_reward_per_episode = m_cumulative_reward / episode_number;
       const double cumulative_optimal_per_episode = m_cumulative_optimal_reward / episode_number;
-
+        
       using dseconds = std::chrono::duration<double, std::ratio<1,1>>;
       dseconds prev_total = std::chrono::duration_cast<dseconds>(m_current - m_start);
       m_current = std::chrono::high_resolution_clock::now();
       dseconds current_total = std::chrono::duration_cast<dseconds>(m_current - m_start);
       const auto time_step = (current_total - prev_total).count() / step_count;
+        
+      m_cumulative_min = std::min(m_cumulative_min, cumulative_reward_per_episode);
+      m_cumulative_max = std::max(m_cumulative_max, cumulative_reward_per_episode);
+      m_simple_min = std::min(m_simple_min, m_simple_reward);
+      m_simple_max = std::max(m_simple_max, m_simple_reward);
+      
+      if(evaluate == "stepwise") {
+        int64_t steps = total_steps - step_count;
+        while(steps != total_steps) {
+          const int64_t s2 = std::min(m_print_every - m_print_count, total_steps - steps);
+          steps += s2;
 
-      int64_t steps = total_steps - step_count;
-      while(steps != total_steps) {
-        const int64_t s2 = std::min(m_print_every - m_print_count, total_steps - steps);
-        steps += s2;
+          m_cumulative_mean += s2 * cumulative_reward_per_episode / m_print_every;
+          m_cumulative_optimal += s2 * cumulative_optimal_per_episode / m_print_every;
+          m_simple_mean += s2 * m_simple_reward / m_print_every;
+          m_simple_optimal += s2 * m_simple_optimal_reward / m_print_every;
 
-        m_cumulative_min = std::min(m_cumulative_min, cumulative_reward_per_episode);
-        m_cumulative_mean += s2 * cumulative_reward_per_episode / m_print_every;
-        m_cumulative_max = std::max(m_cumulative_max, cumulative_reward_per_episode);
-        m_cumulative_optimal += s2 * cumulative_optimal_per_episode / m_print_every;
-        m_simple_min = std::min(m_simple_min, m_simple_reward);
-        m_simple_mean += s2 * m_simple_reward / m_print_every;
-        m_simple_max = std::max(m_simple_max, m_simple_reward);
-        m_simple_optimal += s2 * m_simple_optimal_reward / m_print_every;
+          const auto time_passed = prev_total.count() + (current_total.count() - prev_total.count()) * (steps - total_steps + step_count) / step_count;
 
-        const auto time_passed = prev_total.count() + (current_total.count() - prev_total.count()) * (steps - total_steps + step_count) / step_count;
+          m_print_count += s2;
+          if(m_print_count == m_print_every) {
+            std::cout << steps << ' '
+                      << m_cumulative_min << ' ' << m_cumulative_mean << ' ' << m_cumulative_max << ' '
+                      << m_simple_min << ' ' << m_simple_mean << ' ' << m_simple_max << ' '
+                      << q_value_count << ' ' << time_passed << ' ' << time_step << ' ';
 
-        m_print_count += s2;
-        if(m_print_count == m_print_every) {
-          std::cout << steps << ' '
-                    << m_cumulative_min << ' ' << m_cumulative_mean << ' ' << m_cumulative_max << ' '
-                    << m_simple_min << ' ' << m_simple_mean << ' ' << m_simple_max << ' '
-                    << q_value_count << ' ' << time_passed << ' ' << time_step << ' ';
+            for(int64_t i = 1, iend = unrefinements.rbegin()->first; i <= iend; ++i) {
+              const auto found = unrefinements.find(i);
+              if(i != 1)
+                std::cout << ':';
+              if(found == unrefinements.end())
+                std::cout << 0;
+              else
+                std::cout << found->second;
+            }
 
-          for(int64_t i = 1, iend = unrefinements.rbegin()->first; i <= iend; ++i) {
-            const auto found = unrefinements.find(i);
-            if(i != 1)
-              std::cout << ':';
-            if(found == unrefinements.end())
-              std::cout << 0;
-            else
-              std::cout << found->second;
+            if(evaluate_optimality)
+              std::cout << ' ' << m_cumulative_optimal << ' ' << m_simple_optimal;
+
+            std::cout << std::endl;
+
+            reset_stats();
           }
-
-          if(evaluate_optimality)
-            std::cout << ' ' << m_cumulative_optimal << ' ' << m_simple_optimal;
-
-          std::cout << std::endl;
-
-          reset_stats();
         }
       }
+      else if(evaluate == "episodic") {
+        m_cumulative_mean = cumulative_reward_per_episode;
+        m_cumulative_optimal = cumulative_optimal_per_episode;
+        m_simple_mean = m_simple_reward;
+        m_simple_optimal = m_simple_optimal_reward;
 
+        const auto time_passed = prev_total.count() + (current_total.count() - prev_total.count());
+
+        std::cout << episode_number << ' '
+                  << m_cumulative_min << ' ' << m_cumulative_mean << ' ' << m_cumulative_max << ' '
+                  << m_simple_min << ' ' << m_simple_mean << ' ' << m_simple_max << ' '
+                  << q_value_count << ' ' << time_passed << ' ' << time_step << ' ';
+
+        for(int64_t i = 1, iend = unrefinements.rbegin()->first; i <= iend; ++i) {
+          const auto found = unrefinements.find(i);
+          if(i != 1)
+            std::cout << ':';
+          if(found == unrefinements.end())
+            std::cout << 0;
+          else
+            std::cout << found->second;
+        }
+
+        if(evaluate_optimality)
+          std::cout << ' ' << m_cumulative_optimal << ' ' << m_simple_optimal;
+
+        std::cout << std::endl;
+
+        reset_stats();
+      }
+      else
+        abort();
+      
       m_simple_reward = 0.0;
       m_simple_optimal_reward = 0.0;
     }

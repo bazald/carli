@@ -63,6 +63,7 @@ namespace Carli {
     options.add('n', make_shared<Option_Ranged<int64_t>>("num-steps", 0, true, numeric_limits<int64_t>::max(), true, 50000), "Maximum number of steps; 0 disables.");
     options.add(     make_shared<Option_Ranged<int64_t>>("step-cutoff", 0, true, numeric_limits<int64_t>::max(), true, 0), "Maximum number of steps per episode before failure; 0 disables.");
     options.add('o', make_shared<Option_Itemized>("output", set<string>({"null", "simple", "experiment"}), "simple"), "What kind of output should be generated.");
+    options.add(     make_shared<Option_Itemized>("evaluate", set<string>({"episodic", "stepwise"}), "stepwise"), "Plot should be generated per episode or per step.");
     options.add('p', make_shared<Option_Ranged<int64_t>>("print-every", 1, true, numeric_limits<int64_t>::max(), true, 100), "How many steps per line of output.");
     options.add(     make_shared<Option_Ranged<bool>>("evaluate-optimality", false, true, true, true, false), "Evaluate optimality if supported.");
     options.add('r', make_shared<Option_String>("rules", "default"), "Which .carli rules should the agent load?");
@@ -250,7 +251,7 @@ namespace Carli {
           || (step_cutoff != 0 && steps >= step_cutoff);
 
         if(output == "experiment" && total_steps > -1)
-          experimental_output.print(size_t(total_steps), agent->get_episode_number(), agent->get_step_count(), reward, done, agent->q_value_count, agent->get_unrefinements(), evaluate_optimality, evaluate_optimality && done ? env->optimal_reward() : 0.0);
+          experimental_output.print(size_t(total_steps), agent->get_episode_number() - 1, agent->get_step_count(), reward, done, agent->q_value_count, agent->get_unrefinements(), evaluate_optimality, evaluate_optimality && done ? env->optimal_reward() : 0.0);
       } while(!done);
 
       if(agent->get_metastate() == Metastate::SUCCESS) {
