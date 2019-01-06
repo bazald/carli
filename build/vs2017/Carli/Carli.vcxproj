@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{36A7E797-3ABB-48AC-AEF4-57D26CECF0ED}</ProjectGuid>
+    <RootNamespace>Carli</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)..\..\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)..\..\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)..\..\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)..\..\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>CARLI_INTERNAL;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;debuggable_cast=static_cast;debuggable_pointer_cast=std::static_pointer_cast;_CRT_SECURE_NO_WARNINGS;_WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4251</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\ConcRete\build\vs2017\jemalloc\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)$(Platform)\$(Configuration)\Concurrency.dll $(SolutionDir)..\.. &amp;&amp; copy $(SolutionDir)$(Platform)\$(Configuration)\Rete.dll $(SolutionDir)..\.. &amp;&amp; copy $(SolutionDir)\..\..\ConcRete\build\vs2017\jemalloc\x64\jemalloc.dll $(SolutionDir)..\..</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\..\ConcRete\build\vs2017\jemalloc\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>jemalloc.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>CARLI_INTERNAL;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;debuggable_cast=static_cast;debuggable_pointer_cast=std::static_pointer_cast;_CRT_SECURE_NO_WARNINGS;_WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4251</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\ConcRete\build\vs2017\jemalloc\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)$(Platform)\$(Configuration)\Concurrency.dll $(SolutionDir)..\.. &amp;&amp; copy $(SolutionDir)$(Platform)\$(Configuration)\Rete.dll $(SolutionDir)..\.. &amp;&amp; copy $(SolutionDir)\..\..\ConcRete\build\vs2017\jemalloc\Win32\jemalloc.dll $(SolutionDir)..\..</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\..\ConcRete\build\vs2017\jemalloc\Win32</AdditionalLibraryDirectories>
+      <AdditionalDependencies>jemalloc.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>CARLI_INTERNAL;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;debuggable_cast=static_cast;debuggable_pointer_cast=std::static_pointer_cast;_CRT_SECURE_NO_WARNINGS;_WINDOWS;NDEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4251</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\ConcRete\build\vs2017\jemalloc\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\..\ConcRete\build\vs2017\jemalloc\Win32</AdditionalLibraryDirectories>
+      <AdditionalDependencies>jemalloc.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)$(Platform)\$(Configuration)\Concurrency.dll $(SolutionDir)..\.. &amp;&amp; copy $(SolutionDir)$(Platform)\$(Configuration)\Rete.dll $(SolutionDir)..\.. &amp;&amp; copy $(SolutionDir)\..\..\ConcRete\build\vs2017\jemalloc\Win32\jemalloc.dll $(SolutionDir)..\..</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>CARLI_INTERNAL;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;debuggable_cast=static_cast;debuggable_pointer_cast=std::static_pointer_cast;_CRT_SECURE_NO_WARNINGS;_WINDOWS;NDEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4251</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\ConcRete\build\vs2017\jemalloc\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\..\ConcRete\build\vs2017\jemalloc\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>jemalloc.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)$(Platform)\$(Configuration)\Concurrency.dll $(SolutionDir)..\.. &amp;&amp; copy $(SolutionDir)$(Platform)\$(Configuration)\Rete.dll $(SolutionDir)..\.. &amp;&amp; copy $(SolutionDir)\..\..\ConcRete\build\vs2017\jemalloc\x64\jemalloc.dll $(SolutionDir)..\..</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\ConcRete\src\Zeni\New_and_Delete.cpp" />
+    <ClCompile Include="..\..\..\src\carli\agent.cpp" />
+    <ClCompile Include="..\..\..\src\carli\experiment.cpp" />
+    <ClCompile Include="..\..\..\src\carli\experimental_output.cpp" />
+    <ClCompile Include="..\..\..\src\carli\node.cpp" />
+    <ClCompile Include="..\..\..\src\carli\parser\lex.rete.cpp" />
+    <ClCompile Include="..\..\..\src\carli\parser\rules.tab.cpp" />
+    <ClCompile Include="..\..\..\src\carli\rete\agenda.cpp" />
+    <ClCompile Include="..\..\..\src\carli\rete\rete_action.cpp" />
+    <ClCompile Include="..\..\..\src\carli\rete\rete_agent.cpp" />
+    <ClCompile Include="..\..\..\src\carli\rete\rete_existential.cpp" />
+    <ClCompile Include="..\..\..\src\carli\rete\rete_existential_join.cpp" />
+    <ClCompile Include="..\..\..\src\carli\rete\rete_filter.cpp" />
+    <ClCompile Include="..\..\..\src\carli\rete\rete_join.cpp" />
+    <ClCompile Include="..\..\..\src\carli\rete\rete_negation.cpp" />
+    <ClCompile Include="..\..\..\src\carli\rete\rete_negation_join.cpp" />
+    <ClCompile Include="..\..\..\src\carli\rete\rete_predicate.cpp" />
+    <ClCompile Include="..\..\..\src\carli\rete\wme.cpp" />
+    <ClCompile Include="..\..\..\src\carli\rete\wme_token.cpp" />
+    <ClCompile Include="..\..\..\src\carli\t_test.cpp" />
+    <ClCompile Include="..\..\..\src\carli\utility\getopt.cpp" />
+    <ClCompile Include="..\..\..\src\carli\utility\memory_pool.cpp" />
+    <ClCompile Include="..\..\..\src\carli\utility\random.cpp" />
+    <ClCompile Include="..\..\..\src\carli\utility\tracked_ptr.cpp" />
+    <ClCompile Include="..\..\..\src\carli\value.cpp" />
+    <ClCompile Include="..\..\..\src\carli\value_queue.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\carli\action.h" />
+    <ClInclude Include="..\..\..\src\carli\agent.h" />
+    <ClInclude Include="..\..\..\src\carli\environment.h" />
+    <ClInclude Include="..\..\..\src\carli\experiment.h" />
+    <ClInclude Include="..\..\..\src\carli\experimental_output.h" />
+    <ClInclude Include="..\..\..\src\carli\feature.h" />
+    <ClInclude Include="..\..\..\src\carli\linkage.h" />
+    <ClInclude Include="..\..\..\src\carli\node.h" />
+    <ClInclude Include="..\..\..\src\carli\parser\lex.rete.hh" />
+    <ClInclude Include="..\..\..\src\carli\parser\rete_parser.h" />
+    <ClInclude Include="..\..\..\src\carli\parser\rules.tab.hh" />
+    <ClInclude Include="..\..\..\src\carli\q_value.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\agenda.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\rete.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\rete_action.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\rete_agent.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\rete_existential.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\rete_existential_join.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\rete_filter.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\rete_join.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\rete_negation.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\rete_negation_join.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\rete_node.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\rete_predicate.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\symbol.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\utility.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\wme.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\wme_set.h" />
+    <ClInclude Include="..\..\..\src\carli\rete\wme_token.h" />
+    <ClInclude Include="..\..\..\src\carli\t_test.h" />
+    <ClInclude Include="..\..\..\src\carli\utility\getopt.h" />
+    <ClInclude Include="..\..\..\src\carli\utility\linked_list.h" />
+    <ClInclude Include="..\..\..\src\carli\utility\map.h" />
+    <ClInclude Include="..\..\..\src\carli\utility\memory_pool.h" />
+    <ClInclude Include="..\..\..\src\carli\utility\random.h" />
+    <ClInclude Include="..\..\..\src\carli\utility\rb_tree.h" />
+    <ClInclude Include="..\..\..\src\carli\utility\set.h" />
+    <ClInclude Include="..\..\..\src\carli\utility\shared_suffix_list.h" />
+    <ClInclude Include="..\..\..\src\carli\utility\tracked_ptr.h" />
+    <ClInclude Include="..\..\..\src\carli\utility\trie.h" />
+    <ClInclude Include="..\..\..\src\carli\value.h" />
+    <ClInclude Include="..\..\..\src\carli\value_queue.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

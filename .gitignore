@@ -100,3 +100,7 @@ Makefile
 rules-out.txt
 seed.txt
 stderr.txt
+*.db-shm
+*.db-wal
+*.iobj
+*.ipdb

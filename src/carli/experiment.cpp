@@ -1,7 +1,6 @@
 #include "experiment.h"
 
 #include "experimental_output.h"
-#include "git.h"
 #include "utility/getopt.h"
 #include "utility/memory_pool.h"
 
@@ -38,15 +37,15 @@ namespace Carli {
 
     Zeni::register_new_handler();
 
-    string version_str;
-    if(git_modified())
-      version_str = string("Built from revision ") + git_revision_string() + " (" + git_modified_string() + " modified files) on " __DATE__ " at " __TIME__ ".";
-    else
-      version_str = string("Built from revision ") + git_revision_string() + " (clean) on " __DATE__ " at " __TIME__ ".";
+    //string version_str;
+    //if(git_modified())
+    //  version_str = string("Built from revision ") + git_revision_string() + " (" + git_modified_string() + " modified files) on " __DATE__ " at " __TIME__ ".";
+    //else
+    //  version_str = string("Built from revision ") + git_revision_string() + " (clean) on " __DATE__ " at " __TIME__ ".";
 
     Options &options = Options::get_global();
 
-    options.add_line("\n  " + version_str);
+    //options.add_line("\n  " + version_str);
     options.add_line("\n  Print Information:");
     options.add('h', make_shared<Option_Function>("help", 0, [&options](const Option::Arguments &){
       options.print_help(cout);
@@ -54,10 +53,10 @@ namespace Carli {
       options.print(cout);
       exit(0);
     }), "");
-    options.add('v', make_shared<Option_Function>("version", 0, [&version_str](const Option::Arguments &){
-      cout << version_str << endl;
-      exit(0);
-    }), "");
+    //options.add('v', make_shared<Option_Function>("version", 0, [&version_str](const Option::Arguments &){
+    //  cout << version_str << endl;
+    //  exit(0);
+    //}), "");
     options.add_line("\n  Experiment Options:");
     options.add(     make_shared<Option_Ranged<int64_t>>("num-episodes", 0, true, numeric_limits<int64_t>::max(), true, 0), "Maximum number of episodes; 0 disables.");
     options.add('n', make_shared<Option_Ranged<int64_t>>("num-steps", 0, true, numeric_limits<int64_t>::max(), true, 50000), "Maximum number of steps; 0 disables.");

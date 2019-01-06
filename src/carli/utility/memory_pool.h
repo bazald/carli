@@ -1,6 +1,19 @@
 #ifndef ZENI_MEMORY_POOL_H
 #define ZENI_MEMORY_POOL_H
 
+//#define DISABLE_JEMALLOC
+
+#if defined(DISABLE_JEMALLOC)
+#if defined(_MSC_VER)
+#include <crtdbg.h>
+#endif
+#include <cstddef>
+#include <cstdlib>
+#else
+#define JEMALLOC_NO_DEMANGLE
+#include "jemalloc/jemalloc.h"
+#endif
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
@@ -33,7 +46,11 @@ namespace Zeni {
       while(available) {
         void * const ptr = available;
         available = *reinterpret_cast<void **>(reinterpret_cast<size_t *>(available) + 1);
+#if defined(DISABLE_JEMALLOC)
         free(ptr);
+#else
+        je_free(ptr);
+#endif
         ++count;
       }
       return count;
@@ -50,7 +67,12 @@ namespace Zeni {
         return reinterpret_cast<size_t *>(ptr) + 1;
       }
       else {
-        void * ptr = malloc(sizeof(size_t) + size);
+        void * ptr =
+#if defined(DISABLE_JEMALLOC)
+          malloc(sizeof(size_t) + size);
+#else
+          je_malloc(sizeof(size_t) + size);
+#endif
 
         if(ptr) {
           *reinterpret_cast<size_t *>(ptr) = size;
